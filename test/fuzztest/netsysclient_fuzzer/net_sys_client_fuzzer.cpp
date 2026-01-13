@@ -227,6 +227,27 @@ void NetworkAddRouteFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_ADD_ROUTE), dataParcel);
 }
 
+void NetworkAddRoutesFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    std::vector<nmd::NetworkRouteInfo> infos;
+    nmd::NetworkRouteInfo info;
+    int32_t rangesSize = NetSysGetData<int32_t>() % VECTOR_MAX_SIZE;
+    for (int i = 0; i < rangesSize; i++) {
+        infos.emplace_back(info);
+    }
+
+    int32_t netId = NetSysGetData<int32_t>();
+    dataParcel.WriteInt32(netId);
+    for (auto iter : infos) {
+        iter.Marshalling(dataParcel);
+    }
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_ADD_ROUTES), dataParcel);
+}
+
 void NetworkRemoveRouteFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
@@ -1845,6 +1866,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::NetworkAddInterfaceFuzzTest(data, size);
     OHOS::NetManagerStandard::NetworkRemoveInterfaceFuzzTest(data, size);
     OHOS::NetManagerStandard::NetworkAddRouteFuzzTest(data, size);
+    OHOS::NetManagerStandard::NetworkAddRoutesFuzzTest(data, size);
     OHOS::NetManagerStandard::NetworkRemoveRouteFuzzTest(data, size);
     OHOS::NetManagerStandard::GetInterfaceConfigFuzzTest(data, size);
     OHOS::NetManagerStandard::GetInterfaceMtuFuzzTest(data, size);

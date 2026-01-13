@@ -83,6 +83,15 @@ public:
     static int32_t AddRoute(TableType tableType, NetworkRouteInfo networkRouteInfo, bool& routeRepeat);
 
     /**
+ 	 * The interface is to add multiple routes to route table in batch
+ 	 *
+ 	 * @param tableType Route table type.Must be one of INTERFACE/VPN_NETWORK/LOCAL_NETWORK.
+ 	 * @param networkRouteInfos List of route info to be added
+ 	 * @return Returns 0, add multiple route tables successfully, otherwise it will fail
+ 	 */
+    static int32_t AddRoutes(TableType tableType, std::vector<NetworkRouteInfo> networkRouteInfos);
+
+    /**
      * The interface is remove route table
      *
      * @param tableType Route table type.Must be one of INTERFACE/VPN_NETWORK/LOCAL_NETWORK.
@@ -435,6 +444,12 @@ private:
     static int32_t SetRuleMsgIp(NetlinkMsg &nlmsg, std::string &ip, uint16_t type);
     static int32_t SendSharingForbidIpRuleToKernel(
         uint32_t action, uint8_t family, uint8_t ruleType, RuleInfo &ruleInfo);
+    static int32_t PrepareRouteMessage(
+        const RouteInfo &routeInfo, RouteInfo &routeInfoModify, struct rtmsg &msg, uint32_t &index);
+    static int32_t ProcessAddressInfo(
+        const RouteInfo &routeInfoModify, InetAddr &dst, InetAddr &gw, struct rtmsg &msg);
+    static int32_t AddRouteAttributes(NetlinkMsg &nl, const RouteInfo &routeInfoModify, InetAddr &dst, InetAddr &gw,
+        struct rtmsg msg, uint32_t index);
 };
 } // namespace nmd
 } // namespace OHOS

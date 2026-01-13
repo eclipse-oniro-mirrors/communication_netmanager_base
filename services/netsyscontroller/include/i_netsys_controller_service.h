@@ -123,6 +123,15 @@ public:
                                     const std::string &nextHop, bool isExcludedRoute = false) = 0;
 
     /**
+ 	 * Add routes
+ 	 *
+ 	 * @param netId Net Id
+ 	 * @param sysRoute Route list to be added, each SysRoute describes a route entry
+ 	 * @return Return the return value of the netsys interface call
+ 	 */
+    virtual int32_t NetworkAddRoutes(int32_t netId, const std::vector<nmd::NetworkRouteInfo> &infos) = 0;
+
+    /**
      * Remove route
      *
      * @param netId Net Id

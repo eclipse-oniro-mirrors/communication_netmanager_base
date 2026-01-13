@@ -55,6 +55,7 @@ const std::string HTML_TITLE_HTTP_EN = "http://";
 const std::string HTML_TITLE_HTTPS_EN = "https://";
 constexpr int32_t VALID_NETID_START = 100;
 constexpr int32_t PAC_URL_MAX_LEN = 1024;
+constexpr int32_t BATCH_ROUTE_THRESHOLD = 1024;
 constexpr int32_t DNS_NUM_TEST = 5;
 } // namespace
 
@@ -1886,6 +1887,81 @@ HWTEST_F(NetworkTest, ResumeNetworkInfo001, TestSize.Level1)
     EXPECT_TRUE(network->isSupportInternet_);
     EXPECT_FALSE(network->isInternalDefault_);
     EXPECT_TRUE(network->isNeedResume_);
+}
+ 
+HWTEST_F(NetworkTest, UpdateRoutesTest012, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
+    EXPECT_NE(network, nullptr);
+    NetLinkInfo newNetLinkInfo;
+    for (int i = 0; i < BATCH_ROUTE_THRESHOLD + 1; i++) {
+        Route route;
+        route.iface_ = "test" + std::to_string(i);
+        route.destination_.address_ = "192.168." + std::to_string(i/256) + "." + std::to_string(i%256);
+        route.destination_.prefixlen_ = 24;
+        route.gateway_.address_ = "192.168." + std::to_string(i/256) + ".1";
+        newNetLinkInfo.routeList_.push_back(route);
+    }
+    network->UpdateRoutes(newNetLinkInfo);
+    EXPECT_EQ(network->netLinkInfo_.routeList_.size(), 0);
+}
+
+HWTEST_F(NetworkTest, BatchUpdateRoutesTest001, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
+    EXPECT_NE(network, nullptr);
+    NetLinkInfo netLinkInfoBck;
+    NetLinkInfo newNetLinkInfo;
+    for (int i = 0; i < 5; i++) {
+        Route route;
+        route.iface_ = "eth" + std::to_string(i);
+        route.destination_.address_ = "192.168." + std::to_string(i) + ".0";
+        route.destination_.prefixlen_ = 24;
+        route.gateway_.address_ = "192.168." + std::to_string(i) + ".1";
+        route.isExcludedRoute_ = (i % 2 == 0);
+        newNetLinkInfo.routeList_.push_back(route);
+    }
+    network->BatchUpdateRoutes(netLinkInfoBck, newNetLinkInfo);
+    EXPECT_EQ(network->netLinkInfo_.routeList_.size(), 0);
+}
+
+HWTEST_F(NetworkTest, BatchUpdateRoutesTest002, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
+    EXPECT_NE(network, nullptr);
+    NetLinkInfo netLinkInfoBck;
+    NetLinkInfo newNetLinkInfo;
+    for (int i = 0; i < 3; i++) {
+        Route route;
+        route.iface_ = "tun0";
+        route.destination_.address_ = "10.0." + std::to_string(i) + ".0";
+        route.destination_.prefixlen_ = 24;
+        route.gateway_.address_ = "10.0." + std::to_string(i) + ".1";
+        newNetLinkInfo.routeList_.push_back(route);
+    }
+    network->BatchUpdateRoutes(netLinkInfoBck, newNetLinkInfo);
+    EXPECT_EQ(network->netLinkInfo_.routeList_.size(), 0);
+}
+
+HWTEST_F(NetworkTest, BatchUpdateRoutesTest003, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
+    EXPECT_NE(network, nullptr);
+    NetLinkInfo netLinkInfoBck;
+    NetLinkInfo newNetLinkInfo;
+    Route route;
+    route.iface_ = "eth0";
+    route.destination_.address_ = "192.168.1.0";
+    route.destination_.prefixlen_ = 24;
+    route.gateway_.address_ = "192.168.1.1";
+    netLinkInfoBck.routeList_.push_back(route);
+    newNetLinkInfo.routeList_.push_back(route);
+    network->BatchUpdateRoutes(netLinkInfoBck, newNetLinkInfo);
+    EXPECT_EQ(network->netLinkInfo_.routeList_.size(), 0);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

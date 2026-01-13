@@ -482,6 +482,17 @@ int32_t NetsysNativeClient::NetworkAddRoute(int32_t netId, const std::string &if
     return proxy->NetworkAddRoute(netId, ifName, destination, nextHop, isExcludedRoute);
 }
 
+int32_t NetsysNativeClient::NetworkAddRoutes(int32_t netId, const std::vector<nmd::NetworkRouteInfo> &infos)
+{
+    NETMGR_LOG_I("Add Routes: netId[%{public}d], infos[%{public}zu]", netId, infos.size());
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->NetworkAddRoutes(netId, infos);
+}
+
 int32_t NetsysNativeClient::NetworkRemoveRoute(int32_t netId, const std::string &ifName, const std::string &destination,
     const std::string &nextHop, bool isExcludedRoute)
 {

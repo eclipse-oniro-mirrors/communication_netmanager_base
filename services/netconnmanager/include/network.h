@@ -106,6 +106,7 @@ private:
     bool IsAddressValid(const Route &route);
     void ReleaseRouteList(NetLinkInfo &netLinkInfoBck);
     void UpdateNewRoutes(const NetLinkInfo &netLinkInfoBck, const NetLinkInfo &newNetLinkInfo);
+    void BatchUpdateRoutes(const NetLinkInfo &netLinkInfoBck, const NetLinkInfo &newNetLinkInfo);
 
 private:
     int32_t netId_ = 0;

@@ -25,7 +25,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 static constexpr uint32_t MAX_ADDR_SIZE = 16;
-static constexpr uint32_t MAX_ROUTE_SIZE = 1024;
+static constexpr uint32_t MAX_ROUTE_SIZE = 10000;
 
 NetLinkInfo::NetLinkInfo(const NetLinkInfo &linkInfo)
 {

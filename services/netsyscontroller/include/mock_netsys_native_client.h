@@ -26,6 +26,7 @@
 #include "netsys_controller_callback.h"
 #include "netsys_controller_define.h"
 #include "net_all_capabilities.h"
+#include "route_type.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -34,6 +35,7 @@ constexpr const char *MOCK_NETWORKDESTROY_API = "NetworkDestroy";
 constexpr const char *MOCK_NETWORKADDINTERFACE_API = "NetworkAddInterface";
 constexpr const char *MOCK_NETWORKREMOVEINTERFACE_API = "NetworkRemoveInterface";
 constexpr const char *MOCK_NETWORKADDROUTE_API = "NetworkAddRoute";
+constexpr const char *MOCK_NETWORKADDROUTES_API = "NetworkAddRoutes";
 constexpr const char *MOCK_NETWORKREMOVEROUTE_API = "NetworkRemoveRoute";
 constexpr const char *MOCK_SETINTERFACEDOWN_API = "SetInterfaceDown";
 constexpr const char *MOCK_SETINTERFACEUP_API = "SetInterfaceUp";
@@ -131,6 +133,15 @@ public:
      */
     int32_t NetworkAddRoute(int32_t netId, const std::string &ifName, const std::string &destination,
         const std::string &nextHop);
+
+    /**
+ 	 * @brief Add routes
+ 	 *
+ 	 * @param netId Net Id
+ 	 * @param infos Route list to be added, each element of type NetworkRouteInfo describes a route entry
+ 	 * @return Return the return value of the netsys interface call
+ 	 */
+    int32_t NetworkAddRoutes(int32_t netId, const std::vector<nmd::NetworkRouteInfo> &infos);
 
     /**
      * @brief Remove route

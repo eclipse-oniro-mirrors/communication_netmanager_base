@@ -23,6 +23,7 @@
 #include <netinet/in.h>
 #include <sys/epoll.h>
 #include "net_ip_mac_info.h"
+#include "netlink_msg.h"
 
 namespace OHOS {
 namespace nmd {
@@ -154,6 +155,14 @@ void DealNeighInfo(nlmsghdr *nlmsgHeader, uint16_t msgType, uint32_t table,
  * @param kernelSocket socket to kernel
  */
 static ssize_t SendMsgToKernel(struct nlmsghdr *msg, int32_t &kernelSocket);
+
+/**
+ * Send netlink messages to kernel
+ *
+ * @param msgs Vector of netlink message to send
+ * @return Returns number of bytes sent if successful, otherwise returns -1
+ */
+int32_t SendNetlinkMsgsToKernel(std::vector<NetlinkMsg> &msgs);
 } // namespace nmd
 } // namespace OHOS
 #endif // !INCLUDE_NETLINK_SOCKET_H

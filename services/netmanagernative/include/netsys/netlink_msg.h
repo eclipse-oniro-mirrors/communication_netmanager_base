@@ -46,6 +46,11 @@ class NetlinkMsg {
 public:
     NetlinkMsg(uint16_t flags, size_t maxBufLen, int32_t pid);
     ~NetlinkMsg();
+    NetlinkMsg(NetlinkMsg&&) = default;
+    NetlinkMsg& operator=(NetlinkMsg&&) = default;
+    NetlinkMsg(const NetlinkMsg&) = delete;
+    NetlinkMsg& operator=(const NetlinkMsg&) = delete;
+
     /**
      * Add route message to nlmsghdr
      *

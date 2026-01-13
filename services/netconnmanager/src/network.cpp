@@ -52,6 +52,7 @@ constexpr const char *ERROR_MSG_SET_DEFAULT_NETWORK_FAILED = "Set default networ
 constexpr const char *ERROR_MSG_CLEAR_DEFAULT_NETWORK_FAILED = "Clear default network failed";
 constexpr const char *LOCAL_ROUTE_NEXT_HOP = "0.0.0.0";
 constexpr const char *LOCAL_ROUTE_IPV6_DESTINATION = "::";
+constexpr int32_t BATCH_ROUTE_THRESHOLD = 1024;
 constexpr int32_t DETECTION_RESULT_WAIT_MS = 3 * 1000;
 constexpr int32_t LAST_DETECTION_LAPSE_MS = 200;
 constexpr int32_t ERRNO_EADDRNOTAVAIL = -99;
@@ -513,7 +514,11 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_REMOVE_NET_ROUTES_FAILED);
         }
     }
-    UpdateNewRoutes(netLinkInfoBck, newNetLinkInfo);
+    if (newNetLinkInfo.routeList_.size() > BATCH_ROUTE_THRESHOLD) {
+        BatchUpdateRoutes(netLinkInfoBck, newNetLinkInfo);
+    } else {
+        UpdateNewRoutes(netLinkInfoBck, newNetLinkInfo);
+    }
     HandleDeleteIpv6Route(netLinkInfoBck, newNetLinkInfo, netId_);
 }
 
@@ -541,6 +546,56 @@ void Network::UpdateNewRoutes(const NetLinkInfo &netLinkInfoBck, const NetLinkIn
         if (ret != NETMANAGER_SUCCESS || res != NETMANAGER_SUCCESS) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_ADD_NET_ROUTES_FAILED);
         }
+    }
+    if (newNetLinkInfo.routeList_.empty()) {
+        SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_UPDATE_NET_ROUTES_FAILED);
+    }
+}
+
+void Network::BatchUpdateRoutes(const NetLinkInfo &netLinkInfoBck, const NetLinkInfo &newNetLinkInfo)
+{
+    NETMGR_LOG_D("Add Routes, new routes: [%{public}s]", newNetLinkInfo.ToStringRoute("").c_str());
+    std::vector<nmd::NetworkRouteInfo> batchRoutes;
+    std::vector<nmd::NetworkRouteInfo> batchLocalRoutes;
+    batchRoutes.reserve(newNetLinkInfo.routeList_.size());
+    batchLocalRoutes.reserve(newNetLinkInfo.routeList_.size());
+    for (const auto &route : newNetLinkInfo.routeList_) {
+        if (netLinkInfoBck.HasRoute(route)) {
+            NETMGR_LOG_W("Same route:[%{public}s]", CommonUtils::ToAnonymousIp(route.destination_.address_).c_str());
+            continue;
+        }
+        if (!IsAddressValid(route)) {
+            continue;
+        }
+        std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
+        nmd::NetworkRouteInfo infos;
+        infos.ifName = route.iface_;
+        infos.destination = destAddress;
+        infos.nextHop = route.gateway_.address_;
+        infos.isExcludedRoute = route.isExcludedRoute_;
+        batchRoutes.emplace_back(std::move(infos));
+        if (netSupplierType_ != BEARER_VPN && route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP &&
+            route.destination_.address_ != LOCAL_ROUTE_IPV6_DESTINATION) {
+            auto family = GetAddrFamily(route.destination_.address_);
+            std::string nextHop = (family == AF_INET6) ? "" : LOCAL_ROUTE_NEXT_HOP;
+            nmd::NetworkRouteInfo localInfo;
+            localInfo.ifName = route.iface_;
+            localInfo.destination = destAddress;
+            localInfo.nextHop = nextHop;
+            batchLocalRoutes.emplace_back(std::move(localInfo));
+        }
+    }
+    int32_t ret = NETMANAGER_SUCCESS;
+    if (!batchRoutes.empty()) {
+        ret = NetsysController::GetInstance().NetworkAddRoutes(netId_, batchRoutes);
+    }
+    int32_t res = NETMANAGER_SUCCESS;
+    if (!batchLocalRoutes.empty()) {
+        res = NetsysController::GetInstance().NetworkAddRoutes(LOCAL_NET_ID, batchLocalRoutes);
+    }
+    if (ret != NETMANAGER_SUCCESS || res != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Add Routes failed. ret=%{public}d, res=%{public}d", ret, res);
+        SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_ADD_NET_ROUTES_FAILED);
     }
     if (newNetLinkInfo.routeList_.empty()) {
         SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_UPDATE_NET_ROUTES_FAILED);

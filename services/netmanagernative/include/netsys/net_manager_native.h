@@ -71,6 +71,8 @@ public:
     MarkMaskParcel GetFwmarkForNetwork(int32_t netId);
     int32_t NetworkAddRoute(int32_t netId, std::string ifName, std::string destination, std::string nextHop,
         bool isExcludedRoute = false);
+    int32_t NetworkAddRoutes(int32_t netId, const std::vector<nmd::NetworkRouteInfo> &infos);
+
     int32_t NetworkRemoveRoute(int32_t netId, std::string ifName, std::string destination, std::string nextHop,
         bool isExcludedRoute = false);
     int32_t NetworkGetDefault();

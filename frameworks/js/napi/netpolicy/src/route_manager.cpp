@@ -170,6 +170,50 @@ int32_t RouteManager::AddRoute(TableType tableType, NetworkRouteInfo networkRout
     return ret;
 }
 
+int32_t RouteManager::AddRoutes(TableType tableType, std::vector<NetworkRouteInfo> networkRouteInfos)
+{
+    NETNATIVE_LOGI("Add Routes, number of routes to add: %{public}zu", networkRouteInfos.size());
+    if (networkRouteInfos.empty()) {
+        return -1;
+    }
+    const pid_t pid = getpid();
+    std::vector<NetlinkMsg> msgs;
+    msgs.reserve(networkRouteInfos.size());
+    for (const auto &info : networkRouteInfos) {
+        RouteInfo routeInfo;
+        if (SetRouteInfo(tableType, info, routeInfo) != 0) {
+            return -1;
+        }
+
+        struct rtmsg msg;
+        uint32_t index = 0;
+        RouteInfo routeInfoModify = routeInfo;
+        if (PrepareRouteMessage(routeInfo, routeInfoModify, msg, index) != 0) {
+            return -1;
+        }
+
+        InetAddr dst;
+        InetAddr gw = {0};
+        if (ProcessAddressInfo(routeInfoModify, dst, gw, msg) != 0) {
+            return -1;
+        }
+
+        NetlinkMsg nl(NLM_F_REQUEST | NLM_F_CREATE | NLM_F_EXCL, NETLINK_MAX_LEN, pid);
+        if (int32_t ret = AddRouteAttributes(nl, routeInfoModify, dst, gw, msg, index)) {
+            return ret;
+        }
+        msgs.push_back(std::move(nl));
+    }
+
+    int32_t ret = SendNetlinkMsgsToKernel(msgs);
+    if (ret < 0) {
+        NETNATIVE_LOGE("Add Routes Error ret = %{public}d", ret);
+        return ret;
+    }
+    NETNATIVE_LOGI("Add Routes Success");
+    return 0;
+}
+
 int32_t RouteManager::RemoveRoute(TableType tableType, const std::string &interfaceName,
     const std::string &destinationName, const std::string &nextHop, bool isExcludedRoute)
 {
@@ -1768,5 +1812,91 @@ int32_t RouteManager::UpdateEnterpriseRoute(const std::string &interfaceName, ui
     return UpdateRuleInfo(action, FR_ACT_TO_TBL, ruleInfo);
 }
 #endif
+
+int32_t RouteManager::PrepareRouteMessage(const RouteInfo &routeInfo, RouteInfo &routeInfoModify, struct rtmsg &msg,
+                                          uint32_t &index)
+{
+    (void)memset_s(&msg, sizeof(msg), 0, sizeof(msg));
+    msg.rtm_family = AF_INET;
+    msg.rtm_dst_len = BIT_32_LEN;
+    msg.rtm_protocol = RTPROT_STATIC;
+    msg.rtm_scope = RT_SCOPE_UNIVERSE;
+    msg.rtm_type = RTN_UNICAST;
+    msg.rtm_table = RT_TABLE_UNSPEC;
+
+    if (!routeInfo.routeNextHop.empty() && !strcmp(routeInfo.routeNextHop.c_str(), "unreachable")) {
+        msg.rtm_type = RTN_UNREACHABLE;
+        routeInfoModify.routeInterfaceName = "";
+        routeInfoModify.routeNextHop = "";
+    } else if ((!routeInfo.routeNextHop.empty() && !strcmp(routeInfo.routeNextHop.c_str(), "throw")) ||
+               routeInfo.isExcludedRoute == true) {
+        msg.rtm_type = RTN_THROW;
+        routeInfoModify.routeInterfaceName = "";
+        routeInfoModify.routeNextHop = "";
+    } else {
+        index = if_nametoindex(routeInfo.routeInterfaceName.c_str());
+    }
+
+    return 0;
+}
+
+int32_t RouteManager::ProcessAddressInfo(const RouteInfo &routeInfoModify, InetAddr &dst, InetAddr &gw,
+                                         struct rtmsg &msg)
+{
+    if (ReadAddr(routeInfoModify.routeDestinationName, &dst) != 1) {
+        NETNATIVE_LOGE("ReadAddr failed");
+        return -1;
+    }
+
+    msg.rtm_family = (uint8_t)dst.family;
+    msg.rtm_dst_len = (uint8_t)dst.prefixlen;
+
+    if (dst.family == AF_INET) {
+        msg.rtm_scope = RT_SCOPE_LINK;
+    } else {
+        msg.rtm_scope = RT_SCOPE_UNIVERSE;
+    }
+
+    if (!routeInfoModify.routeNextHop.empty() && ReadAddrGw(routeInfoModify.routeNextHop, &gw) <= 0) {
+        NETNATIVE_LOGE("ReadAddrGw failed");
+        return -1;
+    }
+
+    if (gw.bitlen != 0) {
+        msg.rtm_scope = RT_SCOPE_UNIVERSE;
+        msg.rtm_family = (uint8_t)gw.family;
+    }
+
+    return 0;
+}
+
+int32_t RouteManager::AddRouteAttributes(NetlinkMsg &nl, const RouteInfo &routeInfoModify, InetAddr &dst, InetAddr &gw,
+                                         struct rtmsg msg, uint32_t index)
+{
+    nl.AddRoute(RTM_NEWROUTE, msg);
+
+    if (int32_t ret = nl.AddAttr32(RTA_TABLE, routeInfoModify.routeTable)) {
+        return ret;
+    }
+
+    if (int32_t ret = nl.AddAttr(RTA_DST, dst.data, dst.bitlen / 8)) {
+        return ret;
+    }
+
+    if (!routeInfoModify.routeNextHop.empty()) {
+        if (int32_t ret = nl.AddAttr(RTA_GATEWAY, gw.data, gw.bitlen / 8)) {
+            return ret;
+        }
+    }
+
+    if (!routeInfoModify.routeInterfaceName.empty()) {
+        NETNATIVE_LOGI("index is :%{public}d", index);
+        if (int32_t ret = nl.AddAttr32(RTA_OIF, index)) {
+            return ret;
+        }
+    }
+
+    return 0;
+}
 } // namespace nmd
 } // namespace OHOS

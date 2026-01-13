@@ -25,6 +25,7 @@ using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetManagerStandard {
 static constexpr uint32_t IPV4_MAX_LENGTH = 32;
+static constexpr int32_t MAX_ROUTES_PER_SLICE_COUNT = 1024;
 
 NetsysController::NetsysController()
 {
@@ -223,6 +224,32 @@ int32_t NetsysController::NetworkAddRoute(int32_t netId, const std::string &ifNa
     return netsysService_->NetworkAddRoute(netId, ifName, destination, nextHop, isExcludedRoute);
 }
 
+int32_t NetsysController::NetworkAddRoutes(int32_t netId, const std::vector<nmd::NetworkRouteInfo> &infos)
+{
+    NETMGR_LOG_D("Add Routes: netId[%{public}d], routeCount[%{public}zu]", netId, infos.size());
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    if (infos.empty()) {
+        return NETMANAGER_SUCCESS;
+    }
+    size_t totalRoutes = infos.size();
+    int32_t finalResult = NETMANAGER_SUCCESS;
+
+    for (size_t i = 0; i < totalRoutes; i += MAX_ROUTES_PER_SLICE_COUNT) {
+        size_t end = std::min(i + MAX_ROUTES_PER_SLICE_COUNT, totalRoutes);
+        std::vector<nmd::NetworkRouteInfo> currentSlice(infos.begin() + i, infos.begin() + end);
+        int32_t ret = netsysService_->NetworkAddRoutes(netId, currentSlice);
+        if (ret != NETMANAGER_SUCCESS) {
+            finalResult = ret;
+            break;
+        }
+    }
+    return finalResult;
+}
 int32_t NetsysController::NetworkRemoveRoute(int32_t netId, const std::string &ifName, const std::string &destination,
     const std::string &nextHop, bool isExcludedRoute)
 {
