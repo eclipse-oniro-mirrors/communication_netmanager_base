@@ -1297,7 +1297,6 @@ void NetStatsService::StartNetObserver()
         NETMGR_LOG_E("StartNetObserver fail, ret = %{public}d", ret);
         return;
     }
-    NETMGR_LOG_I("StartNetObserver end");
 }
  
 void NetStatsService::ProcessDefaultSimIdChanged(std::string simId)
