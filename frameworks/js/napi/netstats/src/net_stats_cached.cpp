@@ -349,8 +349,7 @@ std::string NetStatsCached::GetDefaultSimId()
 
 void NetStatsCached::CacheUidSimStats()
 {
-    NETMGR_LOG_I("wmy UpdateSimStats");
-    NETMGR_LOG_I("wmy into CacheUidSimStats curDefaultSimId_ is %{public}s", curDefaultSimId_.c_str());
+    NETMGR_LOG_I("UpdateSimStats");
     std::vector<NetStatsInfo> statsInfos;
     NetsysController::GetInstance().GetAllSimStatsInfo(statsInfos);
     if (statsInfos.empty()) {
@@ -396,7 +395,6 @@ void NetStatsCached::CacheUidSimStats()
     });
     lastUidSimStatsInfo_.swap(statsInfos);
     UpdateHistoryData(uidStatscache);
-    NETMGR_LOG_I("wmy end CacheUidSimStats curDefaultSimId_ is %{public}s", curDefaultSimId_.c_str());
 }
 
 void NetStatsCached::CacheIfaceStats()
