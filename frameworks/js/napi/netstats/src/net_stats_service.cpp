@@ -1283,10 +1283,7 @@ void NetStatsService::StartNetObserver()
 {
     NETMGR_LOG_I("StartNetObserver start");
     if (netconnCallback_ == nullptr) {
-        netconnCallback_ = std::make_unique<NetInfoObserver>().release();
-    }
-    if (netconnCallback_ == nullptr) {
-        return;
+        netconnCallback_ = sptr<NetInfoObserver>::MakeSptr();
     }
     NetManagerStandard::NetSpecifier netSpecifier;
     NetManagerStandard::NetAllCapabilities netAllCapabilities;
@@ -1294,7 +1291,7 @@ void NetStatsService::StartNetObserver()
     netSpecifier.ident_ = "";
     netSpecifier.netCapabilities_ = netAllCapabilities;
     sptr<NetManagerStandard::NetSpecifier> specifier =
-        new (std::nothrow) NetManagerStandard::NetSpecifier(netSpecifier);
+        sptr<NetManagerStandard::NetSpecifier>::MakeSptr(netSpecifier);
     int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(specifier, netconnCallback_, 0);
     if (ret != 0) {
         NETMGR_LOG_E("StartNetObserver fail, ret = %{public}d", ret);
