@@ -387,7 +387,7 @@ void NetsysNativeServiceStub::InitNetStatsInterfaceMap()
         &NetsysNativeServiceStub::CmdClearIncreaseTrafficMap;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DELETE_INCRE_TRAFFIC_MAP)] =
         &NetsysNativeServiceStub::CmdDeleteIncreaseTrafficMap;
-    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_INCRE_TRAFFIC_MAP)] =
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_SIM_STATS_MAP)] =
         &NetsysNativeServiceStub::CmdClearSimStatsBpfMap;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_IFINDEX_MAP)] =
         &NetsysNativeServiceStub::CmdUpdateIfIndexMap;
