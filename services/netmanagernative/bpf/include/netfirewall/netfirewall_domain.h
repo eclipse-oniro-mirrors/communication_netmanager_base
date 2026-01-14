@@ -175,17 +175,30 @@ static __always_inline __u8 parse_dns_query(struct __sk_buff *skb, __u16 dns_qry
         if (res == 0) {
             return 0;
         }
-        key.prefixlen = (__u32)(key_len * BITS_PER_BYTE);
+        key.prefixlen = (__u32)((key_len + sizeof(key.uid) + sizeof(key.appuid)) * BITS_PER_BYTE);
+        key.uid = get_current_uid(skb);
+        key.appuid = bpf_get_socket_uid(skb);
 
         __u16 denyrst = 0;
         __u16 allowrst = 0;
-        struct domain_value *allowValue = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
-        if (allowValue != NULL && match_domain_value(skb, allowValue)) {
+        __u8 *allow_value_exact = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
+        if ((allow_value_exact != NULL) && (*allow_value_exact == 1)) {
             allowrst = 1;
         }
-
-        struct domain_value *denyValue = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
-        if (denyValue != NULL && match_domain_value(skb, denyValue)) {
+        __u8 *deny_value_exact  = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
+        if ((deny_value_exact != NULL) && (*deny_value_exact == 1)) {
+            __u64 skbAddr = (__u64)(unsigned long)skb;
+            bpf_map_update_elem(&DOMAIN_DATA_KEY_MAP, &skbAddr, &key, BPF_ANY);
+            denyrst = 1;
+        }
+ 
+        key.appuid = 0;
+        __u8 *allow_value_wild = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
+        if ((allow_value_wild != NULL) && (*allow_value_wild == 1)) {
+            allowrst = 1;
+        }
+        __u8 *deny_value_wild = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
+        if ((deny_value_wild != NULL) && (*deny_value_wild == 1)) {
             __u64 skbAddr = (__u64)(unsigned long)skb;
             bpf_map_update_elem(&DOMAIN_DATA_KEY_MAP, &skbAddr, &key, BPF_ANY);
             denyrst = 1;
@@ -217,17 +230,30 @@ static __always_inline __u16 parse_dns_response(struct __sk_buff *skb, __u16 dns
         if (offset == 0) {
             return 0;
         }
-        key.prefixlen = (__u32)(key_len * BITS_PER_BYTE);
+        key.prefixlen = (__u32)((key_len + sizeof(key.uid) + sizeof(key.appuid)) * BITS_PER_BYTE);
+        key.uid = get_current_uid(skb);
+        __u32 appuid_tmp = bpf_get_socket_uid(skb);
+        key.appuid = appuid_tmp;
 
         __u16 denyrst = 0;
         __u16 allowrst = 0;
-        struct domain_value *allowValue = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
-        if (allowValue != NULL && match_domain_value(skb, allowValue)) {
+        __u8 *allow_value_exact = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
+        if ((allow_value_exact != NULL) && (*allow_value_exact == 1)) {
             allowrst = 1;
         }
-
-        struct domain_value *denyValue = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
-        if (denyValue != NULL && match_domain_value(skb, denyValue)) {
+        __u8 *deny_value_exact = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
+        if ((deny_value_exact != NULL) && (*deny_value_exact == 1)) {
+            __u64 skbAddr = (__u64)(unsigned long)skb;
+            bpf_map_update_elem(&DOMAIN_DATA_KEY_MAP, &skbAddr, &key, BPF_ANY);
+            denyrst = 1;
+        }
+        key.appuid = 0;
+        __u8 *allow_value_wild = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
+        if ((allow_value_wild != NULL) && (*allow_value_wild == 1)) {
+            allowrst = 1;
+        }
+        __u8 *deny_value_wild = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
+        if ((deny_value_wild != NULL) && (*deny_value_wild == 1)) {
             __u64 skbAddr = (__u64)(unsigned long)skb;
             bpf_map_update_elem(&DOMAIN_DATA_KEY_MAP, &skbAddr, &key, BPF_ANY);
             denyrst = 1;
@@ -245,7 +271,7 @@ static __always_inline __u16 parse_dns_response(struct __sk_buff *skb, __u16 dns
             return 0;
         } else {
             is_in_pass = 1;
-            appuid = allowValue->appuid;
+            appuid = (allow_value_exact != NULL && *allow_value_exact == 1) ? appuid_tmp : 0;
             log_dbg(DBG_MATCH_DOMAIN_ACTION, EGRESS, SK_PASS);
         }
     } else {
