@@ -408,8 +408,6 @@ int32_t NetsysBpfStats::ClearSimStatsBpfMap()
         NETNATIVE_LOGE("ClearSimStatsBpfMap Write simStatsMap err");
         return NETMANAGER_ERROR;
     }
- 
-    NETNATIVE_LOGI("NetsysBpfStats::ClearSimStatsBpfMap end");
     return NETMANAGER_SUCCESS;
 }
 
