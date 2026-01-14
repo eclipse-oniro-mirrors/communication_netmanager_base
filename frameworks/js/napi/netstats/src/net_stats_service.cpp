@@ -66,6 +66,7 @@
 #include "system_timer.h"
 #include "net_stats_subscriber.h"
 #include "ipc_skeleton.h"
+#include "net_conn_client.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -138,6 +139,7 @@ void NetStatsService::OnStart()
     AddSystemAbilityListener(TELEPHONY_STATE_REGISTRY_SYS_ABILITY_ID);
 #endif // SUPPORT_TRAFFIC_STATISTIC
     AddSystemAbilityListener(SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN);
+    AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     state_ = STATE_RUNNING;
     sptr<NetStatsBaseService> baseService = new (std::nothrow) NetStatsServiceCommon();
     if (baseService == nullptr) {
@@ -239,6 +241,10 @@ void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
     if (systemAbilityId == SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN) {
         InitPrivateUserId();
         StartAccountObserver();
+        return;
+    }
+    if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
+        StartNetObserver();
         return;
     }
     RegisterCommonEvent();
@@ -1271,6 +1277,37 @@ bool NetStatsService::CommonEventPackageAdded(uint32_t uid)
         netStatsCached_->SetUidStatsFlag(tmp);
     }
     return true;
+}
+
+void NetStatsService::StartNetObserver()
+{
+    NETMGR_LOG_I("StartNetObserver start");
+    if (netconnCallback_ == nullptr) {
+        netconnCallback_ = std::make_unique<NetInfoObserver>().release();
+    }
+    if (netconnCallback_ == nullptr) {
+        return;
+    }
+    NetManagerStandard::NetSpecifier netSpecifier;
+    NetManagerStandard::NetAllCapabilities netAllCapabilities;
+    netAllCapabilities.netCaps_.insert(NetManagerStandard::NetCap::NET_CAPABILITY_INTERNET);
+    netSpecifier.ident_ = "";
+    netSpecifier.netCapabilities_ = netAllCapabilities;
+    sptr<NetManagerStandard::NetSpecifier> specifier =
+        new (std::nothrow) NetManagerStandard::NetSpecifier(netSpecifier);
+    int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(specifier, netconnCallback_, 0);
+    if (ret != 0) {
+        NETMGR_LOG_E("StartNetObserver fail, ret = %{public}d", ret);
+        return;
+    }
+    NETMGR_LOG_I("StartNetObserver end");
+}
+ 
+void NetStatsService::ProcessDefaultSimIdChanged(std::string simId)
+{
+    netStatsCached_->CacheUidSimStats();
+    NetsysController::GetInstance().ClearSimStatsBpfMap();
+    netStatsCached_->UpdateDefaultSimId(simId);
 }
 
 bool NetStatsService::CommonEventPackageRemoved(uint32_t uid)

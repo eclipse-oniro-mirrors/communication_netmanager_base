@@ -759,6 +759,7 @@ public:
     int32_t SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic);
     int32_t GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic);
     int32_t ClearIncreaseTrafficMap();
+    int32_t ClearSimStatsBpfMap();
     int32_t DeleteIncreaseTrafficMap(uint64_t ifIndex);
     int32_t UpdateIfIndexMap(int8_t key, uint64_t index);
 

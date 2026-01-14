@@ -1563,6 +1563,16 @@ int32_t NetsysNativeClient::ClearIncreaseTrafficMap()
     return proxy->ClearIncreaseTrafficMap();
 }
 
+int32_t NetsysNativeClient::ClearSimStatsBpfMap()
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->ClearSimStatsBpfMap();
+}
+
 int32_t NetsysNativeClient::DeleteIncreaseTrafficMap(uint64_t ifIndex)
 {
     auto proxy = GetProxy();

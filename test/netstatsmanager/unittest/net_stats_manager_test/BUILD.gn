@@ -117,6 +117,7 @@ ohos_unittest("net_stats_manager_test") {
     "net_stats_service_proxy_test.cpp",
     "net_stats_service_stub_test.cpp",
     "net_stats_sqlite_statement_test.cpp",
+    "net_info_observer_test.cpp",
   ]
 
   include_dirs = [

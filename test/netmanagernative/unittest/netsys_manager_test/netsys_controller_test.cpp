@@ -1674,6 +1674,13 @@ HWTEST_F(NetsysControllerTest, SetGetClearNetStateTrafficMap001, TestSize.Level1
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysControllerTest, ClearSimStatsBpfMap001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    int32_t ret = netsysController->ClearSimStatsBpfMap();
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
 HWTEST_F(NetsysControllerTest, SetGetClearNetStateTrafficMap002, TestSize.Level1)
 {
     auto netsysController = std::make_shared<NetsysController>();

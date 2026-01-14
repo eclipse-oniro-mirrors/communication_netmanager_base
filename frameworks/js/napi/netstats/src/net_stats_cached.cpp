@@ -333,8 +333,24 @@ void NetStatsCached::UpdateNetStatsUserIdSim(NetStatsInfo &info)
     }
 }
 
+void NetStatsCached::UpdateDefaultSimId(const std::string &simId)
+{
+    std::lock_guard<std::mutex> lock(simIdMutex_);
+    NETMGR_LOG_I("wmy before UpdateDefaultSimId simId is %{public}s", simId.c_str());
+    curDefaultSimId_ = simId;
+    NETMGR_LOG_I("wmy curDefaultSimId_ is %{public}s", curDefaultSimId_.c_str());
+}
+ 
+std::string NetStatsCached::GetDefaultSimId()
+{
+    std::lock_guard<std::mutex> lock(simIdMutex_);
+    return curDefaultSimId_;
+}
+
 void NetStatsCached::CacheUidSimStats()
 {
+    NETMGR_LOG_I("wmy UpdateSimStats");
+    NETMGR_LOG_I("wmy into CacheUidSimStats curDefaultSimId_ is %{public}s", curDefaultSimId_.c_str());
     std::vector<NetStatsInfo> statsInfos;
     NetsysController::GetInstance().GetAllSimStatsInfo(statsInfos);
     if (statsInfos.empty()) {
@@ -342,15 +358,8 @@ void NetStatsCached::CacheUidSimStats()
         return;
     }
     std::map<std::string, uint64_t> uidStatscache;
-    ifaceNameIdentMap_.Iterate([&statsInfos, &uidStatscache](const std::string &k, const std::string &v) {
-        std::for_each(statsInfos.begin(), statsInfos.end(), [&k, &v, &uidStatscache](NetStatsInfo &item) {
-            if (item.iface_ == k) {
-                item.ident_ = v;
-            }
-            if (uidStatscache.find(item.ident_) == uidStatscache.end()) {
-                uidStatscache[item.ident_] = 0;
-            }
-        });
+    ifaceNameIdentMap_.Iterate([&uidStatscache](const std::string &k, const std::string &v) {
+        uidStatscache[v] = 0;
     });
     uidStatsFlagMap_.Iterate([&statsInfos](const uint32_t &k, const NetStatsDataFlag &v) {
         std::for_each(statsInfos.begin(), statsInfos.end(), [&k, &v](NetStatsInfo &item) {
@@ -362,9 +371,13 @@ void NetStatsCached::CacheUidSimStats()
 
     uint64_t curSecond = CommonUtils::GetCurrentSecond();
     JudgeAndUpdateHistoryData(curSecond);
+    std::lock_guard<std::mutex> lock(simIdMutex_);
     std::for_each(statsInfos.begin(), statsInfos.end(), [this, &uidStatscache, curSecond](NetStatsInfo &info) {
         if (info.iface_ == IFACE_LO) {
             return;
+        }
+        if (info.iface_ == "rmnet0") {
+            info.ident_ = curDefaultSimId_;
         }
         UpdateNetStatsFlag(info);
         UpdateNetStatsUserIdSim(info);
@@ -383,6 +396,7 @@ void NetStatsCached::CacheUidSimStats()
     });
     lastUidSimStatsInfo_.swap(statsInfos);
     UpdateHistoryData(uidStatscache);
+    NETMGR_LOG_I("wmy end CacheUidSimStats curDefaultSimId_ is %{public}s", curDefaultSimId_.c_str());
 }
 
 void NetStatsCached::CacheIfaceStats()
@@ -874,13 +888,6 @@ void NetStatsCached::GetKernelUidSimStats(std::vector<NetStatsInfo> &statsInfo)
 {
     std::vector<NetStatsInfo> SimInfos;
     NetsysController::GetInstance().GetAllSimStatsInfo(SimInfos);
-    ifaceNameIdentMap_.Iterate([&SimInfos](const std::string &k, const std::string &v) {
-        std::for_each(SimInfos.begin(), SimInfos.end(), [&k, &v](NetStatsInfo &item) {
-            if (item.iface_ == k) {
-                item.ident_ = v;
-            }
-        });
-    });
     uidStatsFlagMap_.Iterate([&SimInfos](const uint32_t &k, const NetStatsDataFlag &v) {
         std::for_each(SimInfos.begin(), SimInfos.end(), [&k, &v](NetStatsInfo &item) {
             if (item.uid_ == k) {
@@ -888,9 +895,14 @@ void NetStatsCached::GetKernelUidSimStats(std::vector<NetStatsInfo> &statsInfo)
             }
         });
     });
+    std::lock_guard<std::mutex> lock(simIdMutex_);
     std::for_each(SimInfos.begin(), SimInfos.end(), [this, &statsInfo](NetStatsInfo &info) {
         if (info.iface_ == IFACE_LO) {
             return;
+        }
+        if (info.iface_ == "rmnet0") {
+            info.ident_ = curDefaultSimId_;
+            NETMGR_LOG_I("wmy into GetKernel curDefaultSimId_ is %{public}s", curDefaultSimId_.c_str());
         }
         NetStatsInfo tmp = GetIncreasedSimStats(info);
         if (tmp.HasNoData()) {

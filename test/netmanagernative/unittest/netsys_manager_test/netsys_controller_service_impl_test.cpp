@@ -875,6 +875,13 @@ HWTEST_F(NetsysControllerServiceImplTest, DeleteIncreaseTrafficMapTest002, TestS
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysControllerServiceImplTest, ClearSimStatsBpfMap001, TestSize.Level1)
+{
+    auto netsysControllerServiceImpl = std::make_shared<NetsysControllerServiceImpl>();
+    int32_t ret = netsysControllerServiceImpl->ClearSimStatsBpfMap();
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
 HWTEST_F(NetsysControllerServiceImplTest, DisableWearableDistributedNetForward, TestSize.Level1)
 {

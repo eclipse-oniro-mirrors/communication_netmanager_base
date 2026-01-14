@@ -206,6 +206,15 @@ HWTEST_F(NetsysNativeServiceTest, DeleteIncreaseTrafficMap001, TestSize.Level1)
     instance_->DeleteIncreaseTrafficMap(ifIndex);
 }
 
+HWTEST_F(NetsysNativeServiceTest, ClearSimStatsBpfMap001, TestSize.Level1)
+{
+    instance_->bpfStats_ = nullptr;
+    int32_t ret = instance_->ClearSimStatsBpfMap();
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+    instance_->bpfStats_ = std::make_unique<OHOS::NetManagerStandard::NetsysBpfStats>();
+    instance_->ClearSimStatsBpfMap();
+}
+
 HWTEST_F(NetsysNativeServiceTest, GetAllSimStatsInfo001, TestSize.Level1)
 {
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;

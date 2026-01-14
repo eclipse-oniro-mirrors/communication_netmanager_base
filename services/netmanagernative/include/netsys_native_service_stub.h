@@ -146,6 +146,7 @@ private:
     int32_t CmdSetNetStateTrafficMap(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetNetStateTrafficMap(MessageParcel &data, MessageParcel &reply);
     int32_t CmdClearIncreaseTrafficMap(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdClearSimStatsBpfMap(MessageParcel &data, MessageParcel &reply);
     int32_t CmdDeleteIncreaseTrafficMap(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUpdateIfIndexMap(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetIptablesCommandForRes(MessageParcel &data, MessageParcel &reply);

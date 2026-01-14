@@ -2277,6 +2277,37 @@ int32_t NetsysNativeServiceProxy::ClearIncreaseTrafficMap()
     return ERR_NONE;
 }
 
+int32_t NetsysNativeServiceProxy::ClearSimStatsBpfMap()
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+ 
+    MessageParcel reply;
+    MessageOption option;
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("SetIptablesCommandForRes Remote pointer is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_SIM_STATS_MAP),
+                                        data, reply, option);
+    if (result != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("fail to ClearIncreaseTrafficMap ret= %{public}d", ret);
+        return ret;
+    }
+    return ERR_NONE;
+}
+
 int32_t NetsysNativeServiceProxy::DeleteIncreaseTrafficMap(uint64_t ifIndex)
 {
     MessageParcel data;

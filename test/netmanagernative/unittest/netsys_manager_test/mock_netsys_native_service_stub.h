@@ -401,6 +401,11 @@ public:
     {
         return 0;
     }
+    
+    int32_t ClearSimStatsBpfMap() override
+    {
+        return 0;
+    }
 
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override
     {
