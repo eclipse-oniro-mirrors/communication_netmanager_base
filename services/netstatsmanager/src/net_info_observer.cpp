@@ -46,11 +46,11 @@ int32_t NetInfoObserver::NetConnectionPropertiesChange(sptr<NetHandle> &netHandl
     if (info == nullptr) {
         return -1;
     }
-    NETMGR_LOG_I("NetInfoObserver NetConnectionPropertiesChange ifName: %{public}s, idnet: %{public}s",
+    NETMGR_LOG_D("NetInfoObserver NetConnectionPropertiesChange ifName: %{public}s, idnet: %{public}s",
         info->ifaceName_.c_str(), info->ident_.c_str());
     
     if (info->ident_ == ident_) {
-        NETMGR_LOG_I("ident no changed");
+        NETMGR_LOG_D("ident no changed");
         return 0;
     }
     ident_ = info->ident_;
