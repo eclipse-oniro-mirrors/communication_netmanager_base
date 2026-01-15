@@ -144,6 +144,17 @@ int32_t MockNetsysNativeClient::NetworkAddRoute(int32_t netId, const std::string
     return AddRoute(destination, mask, nextHop, ifName);
 }
 
+int32_t MockNetsysNativeClient::NetworkAddRoutes(int32_t netId, const std::vector<nmd::NetworkRouteInfo> &infos)
+{
+    NETMGR_LOG_I("Add Routes: netId[%{public}d], infos[%{public}zu]", netId, infos.size());
+    for (const auto &item : infos) {
+        if (NetworkAddRoute(netId, item.ifName, item.destination, item.nextHop) != 0) {
+            return -1;
+        }
+    }
+    return 0;
+}
+
 int32_t MockNetsysNativeClient::NetworkRemoveRoute(int32_t netId, const std::string &ifName,
     const std::string &destination, const std::string &nextHop)
 {

@@ -414,6 +414,43 @@ int32_t NetsysNativeServiceProxy::NetworkAddRoute(int32_t netId, const std::stri
     return reply.ReadInt32();
 }
 
+int32_t NetsysNativeServiceProxy::NetworkAddRoutes(int32_t netId, const std::vector<nmd::NetworkRouteInfo> &infos)
+{
+    NETNATIVE_LOGI("Begin to NetworkAddRoutes");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data) || !data.WriteInt32(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteInt32(infos.size())) {
+        return IPC_PROXY_TRANSACTION_ERR;
+    }
+    for (auto iter : infos) {
+        if (!iter.Marshalling(data)) {
+            return IPC_PROXY_TRANSACTION_ERR;
+        }
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ADD_ROUTES), data,
+                                      reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("NetworkAddRoutes proxy SendRequest failed, error code: [%{public}d]", ret);
+        return IPC_INVOKER_ERR;
+    }
+
+    int32_t result = ERR_INVALID_DATA;
+    if (!reply.ReadInt32(result)) {
+        return IPC_PROXY_TRANSACTION_ERR;
+    }
+    return result;
+}
+
 int32_t NetsysNativeServiceProxy::NetworkRemoveRoute(int32_t netId, const std::string &interfaceName,
     const std::string &destination, const std::string &nextHop, bool isExcludedRoute)
 {

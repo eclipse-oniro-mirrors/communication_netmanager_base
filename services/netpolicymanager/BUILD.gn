@@ -84,6 +84,7 @@ ohos_shared_library("net_policy_manager") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
@@ -165,6 +166,7 @@ ohos_static_library("net_policy_manager_static") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:app_manager",
@@ -242,6 +244,7 @@ ohos_static_library("net_policy_manager_static_no_cfi") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:app_manager",

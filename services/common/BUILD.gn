@@ -258,6 +258,7 @@ ohos_shared_library("net_service_common") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "bounds_checking_function:libsec_shared",

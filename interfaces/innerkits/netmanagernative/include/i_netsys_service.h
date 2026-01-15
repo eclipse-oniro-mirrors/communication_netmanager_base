@@ -241,6 +241,7 @@ public:
                                        int32_t &ownerUid) = 0;
     virtual int32_t GetSystemNetPortStates(NetManagerStandard::NetPortStatesInfo &netPortStatesInfo) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
+    virtual int32_t NetworkAddRoutes(int32_t netId, const std::vector<nmd::NetworkRouteInfo> &infos) = 0;
 };
 } // namespace NetsysNative
 } // namespace OHOS

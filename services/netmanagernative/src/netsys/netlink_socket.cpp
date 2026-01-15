@@ -105,6 +105,56 @@ int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg, uint32_t table)
     return msgState;
 }
 
+int32_t SendNetlinkMsgsToKernel(std::vector<NetlinkMsg> &msgs)
+{
+    if (msgs.empty()) {
+        NETNATIVE_LOGE("[SendNetlinkMsgsToKernel] buffer is empty");
+        return -1;
+    }
+    int32_t kernelSocket = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+    if (kernelSocket == -1) {
+        NETNATIVE_LOGE("[SendNetlinkMsgsToKernel] create socket failed: %{public}d", errno);
+        return -1;
+    }
+    std::vector<struct iovec> ioVector;
+    ioVector.reserve(msgs.size());
+    for (auto &nl : msgs) {
+        struct nlmsghdr* hdr = nl.GetNetLinkMessage();
+        ioVector.emplace_back(iovec{
+            .iov_base = hdr,
+            .iov_len = hdr->nlmsg_len
+        });
+    }
+
+    struct msghdr msgHeader;
+    (void)memset_s(&msgHeader, sizeof(msgHeader), 0, sizeof(msgHeader));
+
+    struct sockaddr_nl kernel;
+    (void)memset_s(&kernel, sizeof(kernel), 0, sizeof(kernel));
+    kernel.nl_family = AF_NETLINK;
+    kernel.nl_groups = 0;
+
+    msgHeader.msg_name = &kernel;
+    msgHeader.msg_namelen = sizeof(kernel);
+    msgHeader.msg_iov = ioVector.data();
+    msgHeader.msg_iovlen = ioVector.size();
+
+    ssize_t msgState = sendmsg(kernelSocket, &msgHeader, 0);
+    NETNATIVE_LOG_D("[NetlinkSocket] msgState is %{public}zd", msgState);
+    if (msgState == -1) {
+        NETNATIVE_LOGE("[NetlinkSocket] msg can not be null ");
+        close(kernelSocket);
+        return -1;
+    } else if (msgState == 0) {
+        NETNATIVE_LOGE("[NetlinkSocket] 0 bytes send.");
+        close(kernelSocket);
+        return -1;
+    }
+
+    close(kernelSocket);
+    return msgState;
+}
+
 #ifdef SUPPORT_SYSVPN
 static void AddAttribute(struct nlmsghdr *msghdr, int type, const void *data, size_t len)
 {

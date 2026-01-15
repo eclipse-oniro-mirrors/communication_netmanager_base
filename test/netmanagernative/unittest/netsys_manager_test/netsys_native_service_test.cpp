@@ -17,16 +17,16 @@
 #include <gtest/gtest.h>
 #include <string>
 
+#ifdef GTEST_API_
+#define private public
+#define protected public
+#endif
+
 #include "interface_manager.h"
 #include "netlink_socket_diag.cpp"
 #include "netlink_socket_diag.h"
 #include "netsys_controller.h"
 #include "system_ability_definition.h"
-
-#ifdef GTEST_API_
-#define private public
-#define protected public
-#endif
 
 #include "common_notify_callback_test.h"
 #include "dns_config_client.h"
@@ -1147,6 +1147,18 @@ HWTEST_F(NetsysNativeServiceTest, GetTcpNetPortStatesInfo002, TestSize.Level1)
     bool result2 = diag.ProcessGetNetPortStatesInfo(IPPROTO_TCP, &msg, netPortStatesInfo);
     EXPECT_EQ(result1, true);
     EXPECT_EQ(result2, true);
+}
+
+HWTEST_F(NetsysNativeServiceTest, IsMatchNetwork001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    inet_diag_msg msg;
+    msg.idiag_family = AF_INET6;
+    msg.id.idiag_src[0] = 0;
+    msg.id.idiag_src[1] = 0;
+    msg.id.idiag_src[2] = htonl(0xffff);
+    msg.id.idiag_src[3] = inet_addr("192.168.1.10");
+    EXPECT_TRUE(netLinkSocketDiag.IsMatchNetwork(&msg, "192.168.1.10"));
 }
 } // namespace NetsysNative
 } // namespace OHOS

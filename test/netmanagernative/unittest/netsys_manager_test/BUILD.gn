@@ -50,6 +50,7 @@ ohos_unittest("netsys_native_manager_test") {
     "netsys_udp_transfer_test.cpp",
     "physical_network_test.cpp",
     "route_manager_test.cpp",
+    "route_type_test.cpp",
     "sharing_manager_test.cpp",
     "traffic_manager_test.cpp",
     "virtual_network_test.cpp",

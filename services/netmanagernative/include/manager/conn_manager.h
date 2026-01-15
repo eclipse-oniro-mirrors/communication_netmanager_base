@@ -156,6 +156,17 @@ public:
     int32_t AddRoute(int32_t netId, NetworkRouteInfo networkRouteInfo, bool& routeRepeat);
 
     /**
+     * Add multiple routes for specific network in batch
+     *
+     * @param netId The network to add the routes
+     * @param infos List of route info (each element contains interface/destination/nextHop etc.)
+     *              Each interface in route info should be assigned to the netID
+     *
+     * @return Returns 0, successfully add routes for specific network, otherwise it will fail
+     */
+    int32_t AddRoutes(int32_t netId, const std::vector<NetworkRouteInfo> &infos);
+
+    /**
      * Remove a route for specific network
      *
      * @param netId The network to remove the route

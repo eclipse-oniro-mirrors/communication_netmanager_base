@@ -104,6 +104,11 @@ public:
         return 0;
     }
 
+    int32_t NetworkAddRoutes(int32_t netId, const std::vector<nmd::NetworkRouteInfo> &infos) override
+    {
+        return 0;
+    }
+
     int32_t NetworkRemoveRoute(int32_t netId, const std::string &interfaceName, const std::string &destination,
                             const std::string &nextHop, bool isExcludedRoute) override
     {

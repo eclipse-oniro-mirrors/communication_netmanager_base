@@ -81,6 +81,7 @@ private:
     int32_t CmdUnRegisterNotifyCallback(MessageParcel &data, MessageParcel &reply);
 
     int32_t CmdNetworkAddRoute(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNetworkAddRoutes(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkRemoveRoute(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkAddRouteParcel(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkRemoveRouteParcel(MessageParcel &data, MessageParcel &reply);

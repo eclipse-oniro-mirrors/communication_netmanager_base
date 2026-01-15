@@ -136,6 +136,15 @@ int32_t NetsysControllerServiceImpl::NetworkAddRoute(int32_t netId, const std::s
     return netsysClient_->NetworkAddRoute(netId, ifName, destination, nextHop, isExcludedRoute);
 }
 
+int32_t NetsysControllerServiceImpl::NetworkAddRoutes(int32_t netId, const std::vector<nmd::NetworkRouteInfo> &infos)
+{
+    NETMGR_LOG_I("Add Routes: netId[%{public}d], sysRoute[%{public}zu]", netId, infos.size());
+    if (mockNetsysClient_.CheckMockApi(MOCK_NETWORKADDROUTES_API)) {
+        return mockNetsysClient_.NetworkAddRoutes(netId, infos);
+    }
+    return netsysClient_->NetworkAddRoutes(netId, infos);
+}
+
 int32_t NetsysControllerServiceImpl::NetworkRemoveRoute(int32_t netId, const std::string &ifName,
     const std::string &destination, const std::string &nextHop, bool isExcludedRoute)
 {

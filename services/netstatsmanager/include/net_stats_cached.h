@@ -335,7 +335,7 @@ private:
     int32_t curDefaultUserId_ = -1;
     std::map<uint32_t, HistoryData> cellularHistoryData_;
     std::shared_mutex cellularHistoryDataMutex_;
-    bool isPrivateSpaceExist_;
+    bool isPrivateSpaceExist_ = false;
 #ifdef SUPPORT_NETWORK_SHARE
     std::vector<NetStatsInfo> lastIptablesStatsInfo_;
     uint64_t writeDate_ = 0;
