@@ -131,6 +131,10 @@ int32_t NetSupplier::UpdateNetLinkInfo(NetLinkInfo &netLinkInfo)
         NETMGR_LOG_E("network_ is nullptr!");
         return NET_CONN_ERR_INVALID_NETWORK;
     }
+    if (!netSupplierInfo_.isAvailable_) {
+        NETMGR_LOG_E("supplier not ava!");
+        return NET_CONN_ERR_INVALID_NETWORK;
+    }
 
     if (GetNetSupplierIdent().substr(0, strlen(SIMID_IDENT_PREFIX)) == SIMID_IDENT_PREFIX) {
         netLinkInfo.ident_ = GetNetSupplierIdent().substr(strlen(SIMID_IDENT_PREFIX));
