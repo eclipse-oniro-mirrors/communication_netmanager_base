@@ -75,7 +75,7 @@ ohos_static_library("net_conn_parcel") {
   external_deps = [ "c_utils:utils" ]
   external_deps += [
     "hilog:libhilog",
-    "ffrt::libffrt",
+    "ffrt:libffrt",
   ]
 
   part_name = "netmanager_base"
