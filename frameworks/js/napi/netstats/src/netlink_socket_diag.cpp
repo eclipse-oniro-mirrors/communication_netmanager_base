@@ -41,6 +41,7 @@ constexpr uint32_t LOCKBACK_DEFINE = 0x7f000000;
 constexpr uid_t PUSH_UID = 7023;
 constexpr uint32_t INET_DIAG_REQ_V2_STATES_ALL = 0xffffffff;
 constexpr int32_t INVALID_OWNER_UID = -1;
+constexpr int32_t IDIAG_ARRAY_LEN = 4;
 constexpr int32_t TCP_STATES = (1 << TCP_ESTABLISHED) | (1 << TCP_SYN_SENT) | (1 << TCP_SYN_RECV) |
     (1 << TCP_FIN_WAIT1) | (1 << TCP_FIN_WAIT2) | (1 << TCP_TIME_WAIT) | (1 << TCP_CLOSE) | (1 << TCP_CLOSE_WAIT) |
     (1 << TCP_LAST_ACK) | (1 << TCP_LISTEN) | (1 << TCP_CLOSING);
@@ -125,6 +126,8 @@ int32_t NetLinkSocketDiag::ExecuteDestroySocket(uint8_t proto, const inet_diag_m
 
     int32_t ret = GetErrorFromKernel(destroySock_);
     if (ret == NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGI("destroy socket, sport: %{public}d, uid: %{public}u",
+            msg->id.idiag_sport, msg->idiag_uid);
         socketsDestroyed_++;
     }
     return ret;
@@ -182,6 +185,21 @@ bool NetLinkSocketDiag::IsMatchNetwork(const inet_diag_msg *msg, const std::stri
     }
 
     if (msg->idiag_family == AF_INET6) {
+        // deal with V4-mapped V6 address, such as "::ffff:192.168.1.1"
+        if (CommonUtils::GetAddrFamily(ipAddr) == AF_INET) {
+            in_addr_t addr = inet_addr(ipAddr.c_str());
+            uint32_t mapped[4] = { 0, 0, htonl(0xffff), addr };
+            bool isV4MappedAddr = true;
+            for (int32_t i = 0; i < IDIAG_ARRAY_LEN; i++) {
+                isV4MappedAddr = isV4MappedAddr & (mapped[i] == msg->id.idiag_src[i]);
+            }
+            if (isV4MappedAddr) {
+                NETNATIVE_LOGI("destroy socket on V4-mapped V6address, sport: %{public}d, uid: %{public}u",
+                    msg->id.idiag_sport, msg->idiag_uid);
+                return true;
+            }
+        }
+
         if (CommonUtils::GetAddrFamily(ipAddr) != AF_INET6) {
             return false;
         }

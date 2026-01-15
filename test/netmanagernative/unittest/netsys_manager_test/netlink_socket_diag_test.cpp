@@ -180,6 +180,19 @@ HWTEST_F(NetlinkSocketDiagTest, IsMatchNetwork005, TestSize.Level1)
     EXPECT_FALSE(netLinkSocketDiag.IsMatchNetwork(&msg, "2001:db8::1"));
 }
 
+HWTEST_F(NetlinkSocketDiagTest, IsMatchNetwork006, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    inet_diag_msg msg;
+    msg.idiag_family = AF_INET6;
+    msg.id.idiag_src[0] = 0;
+    msg.id.idiag_src[1] = 0;
+    msg.id.idiag_src[2] = htonl(0xffff);
+    msg.id.idiag_src[3] = inet_addr("192.168.1.10");
+ 
+    EXPECT_TRUE(netLinkSocketDiag.IsMatchNetwork(&msg, "192.168.1.10"));
+}
+
 HWTEST_F(NetlinkSocketDiagTest, SetSocketDestroyType001, TestSize.Level1)
 {
     NetLinkSocketDiag netLinkSocketDiag;
