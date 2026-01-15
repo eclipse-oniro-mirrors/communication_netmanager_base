@@ -137,7 +137,7 @@ int32_t SendNetlinkMsgsToKernel(std::vector<NetlinkMsg> &msgs)
     msgHeader.msg_name = &kernel;
     msgHeader.msg_namelen = sizeof(kernel);
     msgHeader.msg_iov = ioVector.data();
-    msgHeader.msg_iovlen = ioVector.size();
+    msgHeader.msg_iovlen = static_cast<int>(ioVector.size());
 
     ssize_t msgState = sendmsg(kernelSocket, &msgHeader, 0);
     NETNATIVE_LOG_D("[NetlinkSocket] msgState is %{public}zd", msgState);
