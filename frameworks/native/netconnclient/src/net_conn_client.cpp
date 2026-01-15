@@ -76,7 +76,7 @@ NetConnClient &NetConnClient::GetInstance()
 void NetConnClient::SubscribeSystemAbility()
 {
     if (saStatusListener_ == nullptr) {
-        saStatusListener_ = sptr<NetConnAbilityListener>(new NetConnAbilityListener());
+        saStatusListener_ = sptr<NetConnAbilityListener>::MakeSptr();
     }
     if (saStatusListener_ == nullptr) {
         NETMGR_LOG_E("NetConnAbilityListener create failed.");
