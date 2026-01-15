@@ -85,7 +85,9 @@ void NetSupplier::ResetNetSupplier()
     // Reset network verification status to validated.
     SetNetValid(VERIFICATION_STATE);
     // Reset checking connectivity flag.
+    std::unique_lock<ffrt::shared_mutex> lock(netAllCapabilities_.netCapsMutex_);
     netAllCapabilities_.netCaps_.insert(NET_CAPABILITY_CHECKING_CONNECTIVITY);
+    lock.unlock();
     // Reset network extAttribute.
     netExtAttribute_ = "";
     NETMGR_LOG_I("Reset net supplier %{public}u", supplierId_);
@@ -473,14 +475,17 @@ void NetSupplier::SetNetValid(NetDetectionStatus netState)
                  netSupplierIdent_.c_str(), netState);
     if (netState == VERIFICATION_STATE) {
         if (!HasNetCap(NET_CAPABILITY_VALIDATED)) {
-            netCaps_.InsertNetCap(NET_CAPABILITY_VALIDATED);
-            netAllCapabilities_.netCaps_.insert(NET_CAPABILITY_VALIDATED);
             NETMGR_LOG_I("NetSupplier inserted cap:NET_CAPABILITY_VALIDATED");
+            netCaps_.InsertNetCap(NET_CAPABILITY_VALIDATED);
+            std::unique_lock<ffrt::shared_mutex> lock(netAllCapabilities_.netCapsMutex_);
+            netAllCapabilities_.netCaps_.insert(NET_CAPABILITY_VALIDATED);
         }
         if (HasNetCap(NET_CAPABILITY_PORTAL)) {
-            netCaps_.RemoveNetCap(NET_CAPABILITY_PORTAL);
-            netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_PORTAL);
             NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_PORTAL, need to clear DNS cache");
+            netCaps_.RemoveNetCap(NET_CAPABILITY_PORTAL);
+            std::unique_lock<ffrt::shared_mutex> lock(netAllCapabilities_.netCapsMutex_);
+            netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_PORTAL);
+            lock.unlock();
             int32_t ret = NetsysController::GetInstance().FlushDnsCache(network_->GetNetId());
             if (ret != NETMANAGER_SUCCESS) {
                 NETMGR_LOG_E("FlushDnsCache failed, ret = %{public}d", ret);
@@ -488,14 +493,17 @@ void NetSupplier::SetNetValid(NetDetectionStatus netState)
         }
     } else if (netState == CAPTIVE_PORTAL_STATE) {
         if (!HasNetCap(NET_CAPABILITY_PORTAL)) {
-            netCaps_.InsertNetCap(NET_CAPABILITY_PORTAL);
-            netAllCapabilities_.netCaps_.insert(NET_CAPABILITY_PORTAL);
             NETMGR_LOG_I("NetSupplier inserted cap:NET_CAPABILITY_PORTAL");
+            netCaps_.InsertNetCap(NET_CAPABILITY_PORTAL);
+            std::unique_lock<ffrt::shared_mutex> lock(netAllCapabilities_.netCapsMutex_);
+            netAllCapabilities_.netCaps_.insert(NET_CAPABILITY_PORTAL);
         }
         if (HasNetCap(NET_CAPABILITY_VALIDATED)) {
-            netCaps_.RemoveNetCap(NET_CAPABILITY_VALIDATED);
-            netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_VALIDATED);
             NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_VALIDATED");
+            netCaps_.RemoveNetCap(NET_CAPABILITY_VALIDATED);
+            std::unique_lock<ffrt::shared_mutex> lock(netAllCapabilities_.netCapsMutex_);
+            netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_VALIDATED);
+            
         }
     } else if (netState == QUALITY_POOR_STATE) {
         netQuality_ = QUALITY_POOR_STATE;
@@ -507,14 +515,16 @@ void NetSupplier::SetNetValid(NetDetectionStatus netState)
         isAcceptUnvaliad = true;
     } else {
         if (HasNetCap(NET_CAPABILITY_VALIDATED)) {
-            netCaps_.RemoveNetCap(NET_CAPABILITY_VALIDATED);
-            netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_VALIDATED);
             NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_VALIDATED");
+            netCaps_.RemoveNetCap(NET_CAPABILITY_VALIDATED);
+            std::unique_lock<ffrt::shared_mutex> lock(netAllCapabilities_.netCapsMutex_);
+            netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_VALIDATED);
         }
         if (HasNetCap(NET_CAPABILITY_PORTAL)) {
-            netCaps_.RemoveNetCap(NET_CAPABILITY_PORTAL);
-            netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_PORTAL);
             NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_PORTAL");
+            netCaps_.RemoveNetCap(NET_CAPABILITY_PORTAL);
+            std::unique_lock<ffrt::shared_mutex> lock(netAllCapabilities_.netCapsMutex_);
+            netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_PORTAL);
         }
     }
 }
@@ -658,9 +668,10 @@ void NetSupplier::SetDetectionDone()
         isFirstTimeDetectionDone = true;
     }
     if (HasNetCap(NET_CAPABILITY_CHECKING_CONNECTIVITY)) {
-        netCaps_.RemoveNetCap(NET_CAPABILITY_CHECKING_CONNECTIVITY);
-        netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_CHECKING_CONNECTIVITY);
         NETMGR_LOG_I("supplier %{public}u detection done, remove NET_CAPABILITY_CHECKING_CONNECTIVITY", supplierId_);
+        netCaps_.RemoveNetCap(NET_CAPABILITY_CHECKING_CONNECTIVITY);
+        std::unique_lock<ffrt::shared_mutex> lock(netAllCapabilities_.netCapsMutex_);
+        netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_CHECKING_CONNECTIVITY);
     }
 }
 
@@ -673,9 +684,11 @@ void NetSupplier::SetReuseCap(NetCap reuseCap, bool add)
 {
     if (add) {
         netCaps_.InsertNetCap(reuseCap);
+        std::unique_lock<ffrt::shared_mutex> lock(netAllCapabilities_.netCapsMutex_);
         netAllCapabilities_.netCaps_.insert(reuseCap);
     } else {
         netCaps_.RemoveNetCap(reuseCap);
+        std::unique_lock<ffrt::shared_mutex> lock(netAllCapabilities_.netCapsMutex_);
         netAllCapabilities_.netCaps_.erase(reuseCap);
     }
 }
