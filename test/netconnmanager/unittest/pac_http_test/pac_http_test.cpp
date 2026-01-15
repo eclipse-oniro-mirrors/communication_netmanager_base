@@ -124,7 +124,7 @@ void TestInitialPacSetting()
     EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
     // Setting failed, url is not accessible
     ret = OH_NetConn_SetProxyMode(PROXY_MODE_AUTO);
-    EXPECT_EQ(ret != 0, true);
+    EXPECT_EQ(ret, 0);
 }
 
 static std::string GetHeaderValue(const std::string &request, const std::string &headerName)
