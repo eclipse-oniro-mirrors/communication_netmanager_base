@@ -75,11 +75,9 @@ NetConnClient &NetConnClient::GetInstance()
 
 void NetConnClient::SubscribeSystemAbility()
 {
-    if (saStatusListener_ != nullptr) {
-        NETMGR_LOG_D("No duplicate subscribe.");
-        return;
+    if (saStatusListener_ == nullptr) {
+        saStatusListener_ = sptr<NetConnAbilityListener>::MakeSptr();
     }
-    saStatusListener_ = sptr<NetConnAbilityListener>(new NetConnAbilityListener());
     if (saStatusListener_ == nullptr) {
         NETMGR_LOG_E("NetConnAbilityListener create failed.");
         return;
@@ -120,6 +118,7 @@ void NetConnAbilityListener::OnAddSystemAbility(int32_t systemAbilityId, const s
     if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
         NETMGR_LOG_I("net conn manager sa is added.");
         NetConnClient::GetInstance().RecoverCallbackAndGlobalProxy();
+        NetConnClient::GetInstance().UnsubscribeSystemAbility();
     }
 }
 

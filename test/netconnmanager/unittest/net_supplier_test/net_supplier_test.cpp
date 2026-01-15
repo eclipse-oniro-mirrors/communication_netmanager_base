@@ -236,8 +236,11 @@ HWTEST_F(NetSupplierTest, NetExtAttributeTest001, TestSize.Level1)
 HWTEST_F(NetSupplierTest, UpdateNetLinkInfo, TestSize.Level1) {
     NetLinkInfo netLinkInfo1;
     EXPECT_EQ(supplier->UpdateNetLinkInfo(netLinkInfo1), NET_CONN_ERR_INVALID_NETWORK);
+    supplier->netSupplierInfo_.isAvailable_ = true;
     supplier->network_ = std::make_shared<Network>(0, 0, BEARER_CELLULAR, nullptr);
     EXPECT_EQ(supplier->UpdateNetLinkInfo(netLinkInfo1), NETMANAGER_SUCCESS);
+    supplier->netSupplierInfo_.isAvailable_ = false;
+    EXPECT_EQ(supplier->UpdateNetLinkInfo(netLinkInfo1), NET_CONN_ERR_INVALID_NETWORK);
 }
 
 HWTEST_F(NetSupplierTest, SetOnceSuppress001, TestSize.Level1)
