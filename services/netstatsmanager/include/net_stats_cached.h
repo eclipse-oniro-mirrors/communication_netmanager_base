@@ -76,6 +76,12 @@ public:
 
     void GetKernelStats(std::vector<NetStatsInfo> &statsInfo);
 
+    void UpdateDefaultSimId(const std::string &simId);
+ 
+    std::string GetDefaultSimId();
+ 
+    void CacheUidSimStats();
+
 #ifdef SUPPORT_NETWORK_SHARE
     void GetIptablesStatsCached(std::vector<NetStatsInfo> &iptablesStatsInfo);
 
@@ -336,6 +342,8 @@ private:
     std::map<uint32_t, HistoryData> cellularHistoryData_;
     std::shared_mutex cellularHistoryDataMutex_;
     bool isPrivateSpaceExist_ = false;
+    std::mutex simIdMutex_;
+    std::string curDefaultSimId_;
 #ifdef SUPPORT_NETWORK_SHARE
     std::vector<NetStatsInfo> lastIptablesStatsInfo_;
     uint64_t writeDate_ = 0;
@@ -348,7 +356,6 @@ private:
 
     void CacheStats();
     void CacheUidStats();
-    void CacheUidSimStats();
     void CacheIfaceStats();
     void CacheAppStats();
     void GetKernelUidStats(std::vector<NetStatsInfo> &statsInfo);

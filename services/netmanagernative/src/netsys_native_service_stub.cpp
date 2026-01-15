@@ -387,6 +387,8 @@ void NetsysNativeServiceStub::InitNetStatsInterfaceMap()
         &NetsysNativeServiceStub::CmdClearIncreaseTrafficMap;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DELETE_INCRE_TRAFFIC_MAP)] =
         &NetsysNativeServiceStub::CmdDeleteIncreaseTrafficMap;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_SIM_STATS_MAP)] =
+        &NetsysNativeServiceStub::CmdClearSimStatsBpfMap;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_IFINDEX_MAP)] =
         &NetsysNativeServiceStub::CmdUpdateIfIndexMap;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NET_STATUS_MAP)] =
@@ -1672,6 +1674,16 @@ int32_t NetsysNativeServiceStub::CmdGetNetStateTrafficMap(MessageParcel &data, M
 int32_t NetsysNativeServiceStub::CmdClearIncreaseTrafficMap(MessageParcel &data, MessageParcel &reply)
 {
     int32_t result = ClearIncreaseTrafficMap();
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdClearSimStatsBpfMap(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t result = ClearSimStatsBpfMap();
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write parcel failed");
         return ERR_FLATTEN_OBJECT;

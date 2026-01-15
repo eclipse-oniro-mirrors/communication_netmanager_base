@@ -1362,6 +1362,16 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteIncreaseTrafficMap001, TestSize.L
     EXPECT_EQ(ret, ERR_NONE);
 }
 
+HWTEST_F(NetsysNativeServiceStubTest, CmdClearSimStatsBpfMap001, TestSize.Level1)
+{
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint64(0));
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdClearSimStatsBpfMap(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
 HWTEST_F(NetsysNativeServiceStubTest, SetDnsCache001, TestSize.Level1)
 {
     uint16_t netId = 101;

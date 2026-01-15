@@ -40,6 +40,7 @@
 #include "net_stats_subscriber.h"
 #include "safe_map.h"
 #include "net_manager_constants.h"
+#include "net_info_observer.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -61,6 +62,7 @@ class NetStatsService : public SystemAbility,
 public:
     void OnStart() override;
     void OnStop() override;
+    void StartNetObserver();
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override;
     int32_t GetIfaceRxBytes(uint64_t &stats, const std::string &interfaceName) override;
@@ -95,6 +97,7 @@ public:
     int32_t GetCookieTxBytes(uint64_t &stats, uint64_t cookie) override;
     int32_t SaveSharingTraffic(const NetStatsInfo &infos) override;
     void AddUidStatsFlag(uint64_t delay);
+    void ProcessDefaultSimIdChanged(std::string simId);
 
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     void UpdateSettingsdata(int32_t simId, uint8_t flag, uint64_t value);
@@ -199,6 +202,7 @@ private:
     std::shared_ptr<NetStatsAccountSubscriber> accountSubscriber_ = nullptr;
     int32_t defaultUserId_ = 0;
     std::atomic_bool isUpdate_ = false;
+    sptr<NetInfoObserver> netconnCallback_ = nullptr;
 
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     uint64_t curIfIndex_ = UINT64_MAX;

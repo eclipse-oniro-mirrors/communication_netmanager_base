@@ -1226,6 +1226,17 @@ int32_t NetsysController::ClearIncreaseTrafficMap()
     return netsysService_->ClearIncreaseTrafficMap();
 }
 
+int32_t NetsysController::ClearSimStatsBpfMap()
+{
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->ClearSimStatsBpfMap();
+}
+
 int32_t NetsysController::DeleteIncreaseTrafficMap(uint64_t ifIndex)
 {
     if (netsysService_ == nullptr) {

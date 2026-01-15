@@ -146,6 +146,7 @@ public:
     int32_t SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic) override;
     int32_t GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic) override;
     int32_t ClearIncreaseTrafficMap() override;
+    int32_t ClearSimStatsBpfMap() override;
     int32_t DeleteIncreaseTrafficMap(uint64_t ifIndex) override;
     int32_t UpdateIfIndexMap(int8_t key, uint64_t index) override;
     int32_t SetNetStatusMap(uint8_t type, uint8_t value) override;

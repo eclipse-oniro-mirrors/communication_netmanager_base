@@ -741,6 +741,12 @@ int32_t NetsysControllerServiceImpl::ClearIncreaseTrafficMap()
     return netsysClient_->ClearIncreaseTrafficMap();
 }
 
+int32_t NetsysControllerServiceImpl::ClearSimStatsBpfMap()
+{
+    NETMGR_LOG_D("ClearSimStatsBpfMap");
+    return netsysClient_->ClearSimStatsBpfMap();
+}
+
 int32_t NetsysControllerServiceImpl::DeleteIncreaseTrafficMap(uint64_t ifIndex)
 {
     NETMGR_LOG_D("DeleteIncreaseTrafficMap");

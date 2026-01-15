@@ -448,6 +448,11 @@ public:
         return 0;
     }
 
+    int32_t ClearSimStatsBpfMap() override
+    {
+        return 0;
+    }
+
     int32_t UpdateIfIndexMap(int8_t key, uint64_t index) override
     {
         return 0;

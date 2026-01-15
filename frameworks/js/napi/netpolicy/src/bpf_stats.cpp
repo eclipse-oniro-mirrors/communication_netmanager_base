@@ -395,6 +395,22 @@ int32_t NetsysBpfStats::DeleteIncreaseTrafficMap(uint64_t ifIndex)
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetsysBpfStats::ClearSimStatsBpfMap()
+{
+    NETNATIVE_LOGI("NetsysBpfStats::ClearSimStatsBpfMap start");
+    BpfMapper<uint64_t, traffic_value> simStatsMap(APP_UID_SIM_STATS_MAP_PATH, BPF_F_WRONLY);
+    if (!simStatsMap.IsValid()) {
+        NETNATIVE_LOGE("ClearSimStatsBpfMap simStatsMap not exist.");
+        return NETMANAGER_ERROR;
+    }
+    std::vector<uint64_t> keys = simStatsMap.GetAllKeys();
+    if (simStatsMap.Clear(keys) != 0) {
+        NETNATIVE_LOGE("ClearSimStatsBpfMap Write simStatsMap err");
+        return NETMANAGER_ERROR;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetsysBpfStats::UpdateIfIndexMap(int8_t key, uint64_t index)
 {
     NETNATIVE_LOGI("UpdateIfIndexMap start. key:%{public}d, index:%{public}" PRIu64, key, index);

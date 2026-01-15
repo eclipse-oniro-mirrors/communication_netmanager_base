@@ -97,6 +97,7 @@ public:
 
     int32_t GetNetStateIncreTrafficMap(std::vector<uint64_t> &keys);
     int32_t ClearIncreaseTrafficMap();
+    int32_t ClearSimStatsBpfMap();
     int32_t DeleteIncreaseTrafficMap(uint64_t ifIndex);
 
     int32_t UpdateIfIndexMap(int8_t key, uint64_t index);

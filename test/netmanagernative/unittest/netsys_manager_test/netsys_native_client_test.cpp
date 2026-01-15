@@ -620,6 +620,13 @@ HWTEST_F(NetsysNativeClientTest, SetGetClearNetStateTrafficMap001, TestSize.Leve
     EXPECT_TRUE(ret == NetManagerStandard::NETMANAGER_SUCCESS || ret == NETMANAGER_ERROR);
 }
 
+HWTEST_F(NetsysNativeClientTest, ClearSimStatsBpfMap001, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    int32_t ret = nativeClient->ClearSimStatsBpfMap();
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysNativeClientTest, UpdateIfIndexMap001, TestSize.Level1)
 {
     auto nativeClient = std::make_shared<NetsysNativeClient>();

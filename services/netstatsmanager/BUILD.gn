@@ -55,6 +55,7 @@ ohos_shared_library("net_stats_manager") {
     "src/net_stats_subscriber.cpp",
     "src/stub/net_stats_callback_proxy.cpp",
     "src/net_stats_utils.cpp",
+    "src/net_info_observer.cpp",
   ]
 
   configs = [ ":net_stats_manager_config" ]
@@ -167,6 +168,7 @@ ohos_static_library("net_stats_manager_static") {
     "src/net_stats_sqlite_statement.cpp",
     "src/stub/net_stats_callback_proxy.cpp",
     "src/net_stats_utils.cpp",
+    "src/net_info_observer.cpp",
   ]
 
   configs = [ ":net_stats_manager_config" ]
