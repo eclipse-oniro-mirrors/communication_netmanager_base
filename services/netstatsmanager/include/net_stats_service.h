@@ -182,7 +182,7 @@ private:
     void UpdateNetStatusMapCellular(int32_t dataState);
     void InsertHistoryData(int32_t simId);
     void InitHistoryData();
-    void EraseNetStatsInfoByUserId(std::vector<NetStatsInfoSequence> &infos, uint32_t userId);
+    void EraseNetStatsInfoByUserId(std::vector<NetStatsInfoSequence> &infos, int32_t userId);
 
 private:
     enum ServiceRunningState {

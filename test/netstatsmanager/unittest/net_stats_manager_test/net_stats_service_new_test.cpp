@@ -410,7 +410,7 @@ HWTEST_F(NetStatsServiceTest, CommonEventPackageRemovedTest003, TestSize.Level1)
 HWTEST_F(NetStatsServiceTest, CommonEventPackageRemovedTest004, TestSize.Level1)
 {
     NetStatsService netStatsService;
-    bool ret = netStatsService.CommonEventPackageRemoved(SIM_PRIVATE_USERID * 1000 + 1);
+    bool ret = netStatsService.CommonEventPackageRemoved(SIM_PRIVATE_USERID * 1000 + 2);
     EXPECT_EQ(ret, false);
 }
 
