@@ -505,7 +505,6 @@ void NetSupplier::SetNetValid(NetDetectionStatus netState)
         if (HasNetCap(NET_CAPABILITY_VALIDATED)) {
             NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_VALIDATED");
             RemoveNetCap(NET_CAPABILITY_VALIDATED);
-            
         }
     } else if (netState == QUALITY_POOR_STATE) {
         netQuality_ = QUALITY_POOR_STATE;
