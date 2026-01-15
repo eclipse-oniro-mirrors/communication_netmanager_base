@@ -65,7 +65,7 @@ enum NetBearType {
 struct NetAllCapabilities final : public Parcelable {
     uint32_t linkUpBandwidthKbps_ = 0;
     uint32_t linkDownBandwidthKbps_ = 0;
-    std::shared_mutex netCapsMutex_;
+    mutable std::shared_mutex netCapsMutex_;
     std::set<NetCap> netCaps_;
     std::set<NetBearType> bearerTypes_;
 
