@@ -73,10 +73,7 @@ ohos_static_library("net_conn_parcel") {
   deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
 
   external_deps = [ "c_utils:utils" ]
-  external_deps += [
-    "hilog:libhilog",
-    "ffrt:libffrt",
-  ]
+  external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
   subsystem_name = "communication"
