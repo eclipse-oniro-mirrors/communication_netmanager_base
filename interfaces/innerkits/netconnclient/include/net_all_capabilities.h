@@ -19,6 +19,7 @@
 #include <set>
 
 #include "parcel.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
