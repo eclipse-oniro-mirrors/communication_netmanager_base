@@ -36,13 +36,16 @@ NetAllCapabilities &NetAllCapabilities::operator=(const NetAllCapabilities &cap)
 {
     linkUpBandwidthKbps_ = cap.linkUpBandwidthKbps_;
     linkDownBandwidthKbps_ = cap.linkDownBandwidthKbps_;
+    std::shared_lock<ffrt::shared_mutex> lock(netCapsMutex_);
     netCaps_ = cap.netCaps_;
+    lock.unlock();
     bearerTypes_ = cap.bearerTypes_;
     return *this;
 }
 
 bool NetAllCapabilities::CapsIsValid() const
 {
+    std::shared_lock<ffrt::shared_mutex> lock(netCapsMutex_);
     for (auto it = netCaps_.begin(); it != netCaps_.end(); it++) {
         if (*it < NET_CAPABILITY_MMS || *it >= NET_CAPABILITY_END) {
             return false;
@@ -58,6 +61,7 @@ bool NetAllCapabilities::CapsIsValid() const
 
 bool NetAllCapabilities::CapsIsNull() const
 {
+    std::shared_lock<ffrt::shared_mutex> lock(netCapsMutex_);
     if ((linkUpBandwidthKbps_ == 0) && (linkDownBandwidthKbps_ == 0) && (netCaps_.size() == 0) &&
         (bearerTypes_.size() == 0)) {
         return true;
@@ -70,6 +74,7 @@ bool NetAllCapabilities::Marshalling(Parcel &parcel) const
     if (!parcel.WriteUint32(linkUpBandwidthKbps_) || !parcel.WriteUint32(linkDownBandwidthKbps_)) {
         return false;
     }
+    std::shared_lock<ffrt::shared_mutex> lock(netCapsMutex_);
     uint32_t capSize = netCaps_.size();
     capSize = capSize > MAX_NET_CAP_NUM ? MAX_NET_CAP_NUM : capSize;
     if (!parcel.WriteUint32(capSize)) {
@@ -84,6 +89,7 @@ bool NetAllCapabilities::Marshalling(Parcel &parcel) const
             return false;
         }
     }
+    lock.unlock();
     uint32_t typeSize = bearerTypes_.size();
     typeSize = typeSize > MAX_NET_CAP_NUM ? MAX_NET_CAP_NUM : typeSize;
     if (!parcel.WriteUint32(typeSize)) {
@@ -122,6 +128,7 @@ bool NetAllCapabilities::Unmarshalling(Parcel &parcel)
         if (cap >= NET_CAPABILITY_END) {
             continue;
         }
+        std::unique_lock<ffrt::shared_mutex> lock(netCapsMutex_);
         netCaps_.insert(static_cast<NetCap>(cap));
     }
     if (!parcel.ReadUint32(size)) {
@@ -156,7 +163,9 @@ std::string NetAllCapabilities::ToString(const std::string &tab) const
     str.append(std::to_string(linkDownBandwidthKbps_));
 
     str.append(tab);
+    std::shared_lock<ffrt::shared_mutex> lock(netCapsMutex_);
     ToStrNetCaps(netCaps_, str);
+    lock.unlock();
 
     str.append(tab);
     ToStrNetBearTypes(bearerTypes_, str);
