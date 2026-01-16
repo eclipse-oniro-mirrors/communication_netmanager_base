@@ -41,8 +41,6 @@ NetAllCapabilities &NetAllCapabilities::operator=(const NetAllCapabilities &cap)
         std::unique_lock<std::shared_mutex> lock2(cap.netCapsMutex_);
         netCaps_ = cap.netCaps_;
     }
-    
-    lock.unlock();
     bearerTypes_ = cap.bearerTypes_;
     return *this;
 }
