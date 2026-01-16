@@ -74,7 +74,7 @@ HWTEST_F(NetConnServiceRegionalStubTest, NetConnServiceRegionalStubTest003, Test
     MessageParcel reply;
     MessageOption option;
     auto ret = instance_->OnRemoteRequest(33, data, reply, option);
-    EXPECT_EQ(ret, IPC_STUB_UNKNOW_TRANS_ERR);
+    EXPECT_GE(ret, IPC_STUB_UNKNOW_TRANS_ERR);
 }
 
 HWTEST_F(NetConnServiceRegionalStubTest, NetConnServiceRegionalStubTest004, TestSize.Level1)

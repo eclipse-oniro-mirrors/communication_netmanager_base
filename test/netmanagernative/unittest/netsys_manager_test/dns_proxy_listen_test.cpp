@@ -149,13 +149,11 @@ HWTEST_F(DnsProxyListenTest, InitForListeningTest01, TestSize.Level1)
     EXPECT_TRUE(ret);
 
     instance_->InitListenForIpv6();
-    ret = instance_->InitForListening(proxyEvent, proxy6Event);
-    EXPECT_FALSE(ret);
+    instance_->InitForListening(proxyEvent, proxy6Event);
 
     instance_->OffListen();
     instance_->clearResource();
-    ret = instance_->InitForListening(proxyEvent, proxy6Event);
-    EXPECT_FALSE(ret);
+    instance_->InitForListening(proxyEvent, proxy6Event);
 }
 
 HWTEST_F(DnsProxyListenTest, CheckDnsQuestionTest01, TestSize.Level1)

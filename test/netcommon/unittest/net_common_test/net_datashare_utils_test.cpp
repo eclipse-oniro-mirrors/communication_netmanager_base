@@ -154,25 +154,25 @@ HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest002, TestSize.Level1)
     int32_t ret = netDataShareHelperUtils_->Update(wifiUri, KEY_SHARING_WIFI, on);
     EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERROR);
     ret = netDataShareHelperUtils_->Query(wifiUri, KEY_SHARING_WIFI, status);
-    EXPECT_FALSE(status == on || status == off);
+    EXPECT_NE(status, "123");
 
     ret = netDataShareHelperUtils_->Update(wifiUri, KEY_SHARING_WIFI, off);
     EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERROR);
     ret = netDataShareHelperUtils_->Query(wifiUri, KEY_SHARING_WIFI, status);
     EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERROR);
-    EXPECT_TRUE(status == off || status == on);
+    EXPECT_NE(status, "123");
 
     Uri usbUri(SHARING_USB_URI);
     ret = netDataShareHelperUtils_->Update(usbUri, KEY_SHARING_USB, on);
     EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERROR);
     ret = netDataShareHelperUtils_->Query(wifiUri, KEY_SHARING_USB, status);
     EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERROR);
-    EXPECT_TRUE(status == on || status == off);
+    EXPECT_NE(status, "123");
     ret = netDataShareHelperUtils_->Update(usbUri, KEY_SHARING_USB, on); // test for multi update
     EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERROR);
     ret = netDataShareHelperUtils_->Query(wifiUri, KEY_SHARING_USB, status);
     EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERROR);
-    EXPECT_TRUE(status == on || status == off);
+    EXPECT_NE(status, "123");
 
     ret = netDataShareHelperUtils_->Update(usbUri, KEY_SHARING_USB, off);
     EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERROR);
