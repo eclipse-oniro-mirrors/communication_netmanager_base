@@ -1058,7 +1058,7 @@ void NetStatsService::DeleteTrafficStatsByAccount(std::vector<NetStatsInfoSequen
     }
 }
 
-void NetStatsService::EraseNetStatsInfoByUserId(std::vector<NetStatsInfoSequence> &infos, uint32_t userId)
+void NetStatsService::EraseNetStatsInfoByUserId(std::vector<NetStatsInfoSequence> &infos, int32_t userId)
 {
     for (auto it = infos.begin(); it != infos.end();) {
         if (it->info_.userId_ != userId) {
@@ -1309,7 +1309,7 @@ void NetStatsService::ProcessDefaultSimIdChanged(std::string simId)
 bool NetStatsService::CommonEventPackageRemoved(uint32_t uid)
 {
     if (static_cast<int32_t>(uid / USER_ID_DIVIDOR) != netStatsCached_->GetCurDefaultUserId() &&
-        uid / USER_ID_DIVIDOR != SYSTEM_DEFAULT_USERID &&
+        static_cast<int32_t>(uid / USER_ID_DIVIDOR) != SYSTEM_DEFAULT_USERID &&
         static_cast<int32_t>(uid / USER_ID_DIVIDOR) != netStatsCached_->GetCurPrivateUserId() &&
         static_cast<int32_t>(uid / USER_ID_DIVIDOR_SIM) != SIM_PRIVATE_USERID) {
         NETMGR_LOG_E("CommonEventPackageRemoved uid:%{public}d", uid);
