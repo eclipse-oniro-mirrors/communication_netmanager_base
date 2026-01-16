@@ -79,6 +79,8 @@ enum debug_type {
 
 struct domain_hash_key {
     __u32 prefixlen;
+    __u32 uid;
+    __u32 appuid;
     __u8 data[DNS_DOMAIN_LEN];
 };
 

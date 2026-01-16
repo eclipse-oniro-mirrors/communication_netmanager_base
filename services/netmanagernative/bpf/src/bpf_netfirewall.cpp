@@ -396,7 +396,7 @@ void NetsysBpfNetFirewall::GetDomainHashKey(const std::string &domain, DomainHas
         i += strLen;
         out.data[i++] = static_cast<uint8_t>(strLen);
     }
-    out.prefixlen = static_cast<uint32_t>(i * BIT_PER_BYTE);
+    out.prefixlen = static_cast<uint32_t>((sizeof(out.uid) + sizeof(out.appuid) + i) * BIT_PER_BYTE);
 }
 
 int32_t NetsysBpfNetFirewall::SetBpfFirewallDomainRules(FirewallRuleAction action, DomainHashKey &key,
@@ -405,10 +405,13 @@ int32_t NetsysBpfNetFirewall::SetBpfFirewallDomainRules(FirewallRuleAction actio
     NETNATIVE_LOG_D("SetBpfFirewallDomainRules: action=%{public}d, userid=%{public}d appuid=%{public}d",
         (action == FirewallRuleAction::RULE_ALLOW), value.uid, value.appuid);
     int32_t ret = 0;
+    key.uid = value.uid;
+    key.appuid = value.appuid;
+    __u8 v = 1;
     if (action == FirewallRuleAction::RULE_ALLOW) {
-        ret = WriteBpfMap(MAP_PATH(DOMAIN_PASS_MAP), key, value);
+        ret = WriteBpfMap(MAP_PATH(DOMAIN_PASS_MAP), key, v);
     } else if (action == FirewallRuleAction::RULE_DENY) {
-        ret = WriteBpfMap(MAP_PATH(DOMAIN_DENY_MAP), key, value);
+        ret = WriteBpfMap(MAP_PATH(DOMAIN_DENY_MAP), key, v);
     }
     return ret;
 }
@@ -419,8 +422,9 @@ void NetsysBpfNetFirewall::ClearDomainRules()
     ClearDomainCache();
     DomainHashKey key = { 0 };
     DomainValue value = { 0 };
-    ClearBpfMap(MAP_PATH(DOMAIN_PASS_MAP), key, value);
-    ClearBpfMap(MAP_PATH(DOMAIN_DENY_MAP), key, value);
+    __u8 v = 1;
+    ClearBpfMap(MAP_PATH(DOMAIN_PASS_MAP), key, v);
+    ClearBpfMap(MAP_PATH(DOMAIN_DENY_MAP), key, v);
 }
 
 int32_t NetsysBpfNetFirewall::SetFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList)
@@ -772,7 +776,14 @@ std::string NetsysBpfNetFirewall::DecodeDomainFromKey(const DomainHashKey &key)
     if (key.prefixlen == 0) {
         return "";
     }
-    size_t domainLenBytes = static_cast<size_t>(key.prefixlen / BIT_PER_BYTE);
+    if (key.prefixlen < sizeof(key.uid) + sizeof(key.appuid)) {
+        return "";
+    }
+    unsigned int domainPrefixlen = key.prefixlen - sizeof(key.uid) - sizeof(key.appuid);
+    if (domainPrefixlen <= 0) {
+        return "";
+    }
+    size_t domainLenBytes = static_cast<size_t>(domainPrefixlen / BIT_PER_BYTE);
     if (domainLenBytes < DNS_DOMAIN_LEN_MIN) {
         return "";
     }
