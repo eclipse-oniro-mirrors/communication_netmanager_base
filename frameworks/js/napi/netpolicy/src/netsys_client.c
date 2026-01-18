@@ -438,7 +438,7 @@ static int32_t FillQueryParam(struct queryparam *orig, struct QueryParam *dest)
 }
 
 static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, const struct ParamWrapper param,
-                                            struct addrinfo *res)
+                                            struct addrinfo *res, uint32_t *ttl)
 {
     struct RequestInfo info = {
         .uid = getuid(),
@@ -473,41 +473,14 @@ static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, const st
         return CloseSocketReturn(sockFd, -errno);
     }
 
-    return CloseSocketReturn(sockFd, 0);
-}
-
-static int32_t NetSysSetResolvCacheInternalExt(int sockFd, uint16_t netId, const struct ParamWrapper param,
-                                               struct addrinfo *res, uint32_t *ttl)
-{
-    struct RequestInfo info = {
-        .uid = getuid(),
-        .command = SET_CACHE_EXT,
-        .netId = netId,
-    };
-    if (netId == 0 && GetNetForApp() > 0) {
-        info.netId = (uint32_t)GetNetForApp();
+    if (ttl == NULL) {
+        uint32_t defaultTtl[MAX_RESULTS] = {};
+        for (int i = 0; i < MAX_RESULTS; i++) {
+            defaultTtl[i] = DEFAULT_DELAYED_COUNT;
+        }
+        ttl = defaultTtl;
     }
-    int32_t result = NetsysSendKeyForCache(sockFd, param, info);
-    if (result < 0) {
-        return result;
-    }
-
-    struct AddrInfo addrInfo[MAX_RESULTS] = {};
-    int32_t resNum = FillAddrInfo(addrInfo, res);
-    if (resNum <= 0) {
-        return CloseSocketReturn(sockFd, -1);
-    }
-
-    if (!PollSendData(sockFd, (char *)&resNum, sizeof(resNum))) {
-        DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -errno);
-    }
-
-    if (!PollSendData(sockFd, (char *)addrInfo, sizeof(struct AddrInfo) * resNum)) {
-        DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -errno);
-    }
-
+    
     if (!PollSendData(sockFd, (char *)ttl, sizeof(uint32_t) * resNum)) {
         DNS_CONFIG_PRINT("send failed %d", errno);
         return CloseSocketReturn(sockFd, -errno);
@@ -516,7 +489,7 @@ static int32_t NetSysSetResolvCacheInternalExt(int sockFd, uint16_t netId, const
     return CloseSocketReturn(sockFd, 0);
 }
 
-int32_t NetSysSetResolvCache(uint16_t netId, const struct ParamWrapper param, struct addrinfo *res)
+int32_t NetSysSetResolvCache(uint16_t netId, const struct ParamWrapper param, struct addrinfo *res, uint32_t *ttl)
 {
     char *hostName = param.host;
     if (hostName == NULL || strlen(hostName) == 0 || res == NULL) {
@@ -530,32 +503,9 @@ int32_t NetSysSetResolvCache(uint16_t netId, const struct ParamWrapper param, st
         return sockFd;
     }
 
-    int err = NetSysSetResolvCacheInternal(sockFd, netId, param, res);
+    int err = NetSysSetResolvCacheInternal(sockFd, netId, param, res, ttl);
     if (err < 0) {
         DNS_CONFIG_PRINT("NetSysSetResolvCache NetSysSetResolvCacheInternal err: %d", errno);
-        return err;
-    }
-
-    return 0;
-}
-
-int32_t NetSysSetResolvCacheExt(uint16_t netId, const struct ParamWrapper param, struct addrinfo *res, uint32_t *ttl)
-{
-    char *hostName = param.host;
-    if (hostName == NULL || strlen(hostName) == 0 || res == NULL || ttl == NULL) {
-        DNS_CONFIG_PRINT("Invalid Param");
-        return -EINVAL;
-    }
-
-    int sockFd = CreateConnectionToNetSys();
-    if (sockFd < 0) {
-        DNS_CONFIG_PRINT("NetSysSetResolvCache CreateConnectionToNetSys connect to netsys err: %d", errno);
-        return sockFd;
-    }
-
-    int err = NetSysSetResolvCacheInternalExt(sockFd, netId, param, res, ttl);
-    if (err < 0) {
-        DNS_CONFIG_PRINT("NetSysSetResolvCacheExt NetSysSetResolvCacheInternalExt err: %d", errno);
         return err;
     }
 
