@@ -52,6 +52,8 @@ constexpr const char *ERROR_MSG_SET_DEFAULT_NETWORK_FAILED = "Set default networ
 constexpr const char *ERROR_MSG_CLEAR_DEFAULT_NETWORK_FAILED = "Clear default network failed";
 constexpr const char *LOCAL_ROUTE_NEXT_HOP = "0.0.0.0";
 constexpr const char *LOCAL_ROUTE_IPV6_DESTINATION = "::";
+constexpr const char *INVALID_IPV4 = "0.0.0.0";
+constexpr const char *INVALID_IPV6 = "::";
 constexpr int32_t BATCH_ROUTE_THRESHOLD = 1024;
 constexpr int32_t DETECTION_RESULT_WAIT_MS = 3 * 1000;
 constexpr int32_t LAST_DETECTION_LAPSE_MS = 200;
@@ -617,11 +619,17 @@ void Network::UpdateDns(const NetLinkInfo &netLinkInfo)
         domains.emplace_back(dns.hostName_);
         auto dnsFamily = GetAddrFamily(dns.address_);
         if (dns.type_ == NetManagerStandard::INetAddr::IPV4 || dnsFamily == AF_INET) {
+            if (dns.address_ == INVALID_IPV4) {
+                continue;
+            }
             if (ipv4DnsCnt++ < MAX_IPV4_DNS_NUM) {
                 servers.emplace_back(dns.address_);
                 ss << '[' << CommonUtils::ToAnonymousIp(dns.address_).c_str() << ']';
             }
         } else if (dns.type_ == NetManagerStandard::INetAddr::IPV6 || dnsFamily == AF_INET6) {
+            if (dns.address_ == INVALID_IPV6) {
+                continue;
+            }
             if (ipv6DnsCnt++ < MAX_IPV6_DNS_NUM) {
                 servers.emplace_back(dns.address_);
                 ss << '[' << CommonUtils::ToAnonymousIp(dns.address_).c_str() << ']';
@@ -644,7 +652,6 @@ void Network::UpdateDns(const NetLinkInfo &netLinkInfo)
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("SetUserDefinedServerFlag failed");
     }
-    NETMGR_LOG_D("Network UpdateDns out.");
     if (netLinkInfo.dnsList_.empty()) {
         SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_UPDATE_NET_DNSES_FAILED);
     }
