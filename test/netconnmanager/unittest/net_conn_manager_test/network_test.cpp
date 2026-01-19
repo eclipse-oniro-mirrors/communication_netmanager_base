@@ -403,6 +403,11 @@ HWTEST_F(NetworkTest, UpdateDnsTest001, TestSize.Level1)
     dns.type_ = NetManagerStandard::INetAddr::UNKNOWN;
     netLinkInfo.dnsList_.push_back(dns);
     network->UpdateDns(netLinkInfo);
+    dns.address_ = "0.0.0.0";
+    ipv6Dns.address_ = "::";
+    netLinkInfo.dnsList_.push_back(dns);
+    netLinkInfo.dnsList_.push_back(ipv6Dns);
+    network->UpdateDns(netLinkInfo);
 }
 
 HWTEST_F(NetworkTest, UpdateTcpBufferSizeTest001, TestSize.Level1)
