@@ -33,8 +33,7 @@ void MakeDefaultDnsServer(char *server, size_t length);
 int32_t NetSysGetResolvConf(uint16_t netId, struct ResolvConfig *config);
 int32_t NetSysGetResolvCache(uint16_t netId, const struct ParamWrapper param,
     struct AddrInfo addrInfo[], uint32_t *num);
-int32_t NetSysSetResolvCache(uint16_t netId, const struct ParamWrapper param, struct addrinfo *res);
-int32_t NetSysSetResolvCacheExt(uint16_t netId, const struct ParamWrapper param, struct addrinfo *res, uint32_t *ttl);
+int32_t NetSysSetResolvCache(uint16_t netId, const struct ParamWrapper param, struct addrinfo *res, uint32_t *ttl);
 int32_t NetSysGetDefaultNetwork(uint16_t netId, int32_t* currentNetId);
 int32_t NetSysBindSocket(int32_t fd, uint32_t netId);
 char *addr_to_string(const AlignedSockAddr *addr, char *buf, size_t len);
@@ -131,47 +130,24 @@ HWTEST_F(NetsysClientTest, NetSysSetResolvCacheTest001, TestSize.Level1)
     SetNetForApp(1);
     struct ParamWrapper param;
     param.host = nullptr;
-    auto ret = NetSysSetResolvCache(netId, param, nullptr);
+    auto ret = NetSysSetResolvCache(netId, param, nullptr, nullptr);
     EXPECT_EQ(ret, -EINVAL);
 
     char host[MAX_RESULTS] = {0};
     param.host = host;
-    ret = NetSysSetResolvCache(netId, param, nullptr);
+    ret = NetSysSetResolvCache(netId, param, nullptr, nullptr);
     EXPECT_EQ(ret, -EINVAL);
 
     strcpy_s(host, MAX_RESULTS, "test");
-    ret = NetSysSetResolvCache(netId, param, nullptr);
+    ret = NetSysSetResolvCache(netId, param, nullptr, nullptr);
     EXPECT_EQ(ret, -EINVAL);
 
     struct addrinfo addrInfo;
-    ret = NetSysSetResolvCache(netId, param, &addrInfo);
+    ret = NetSysSetResolvCache(netId, param, &addrInfo, nullptr);
     EXPECT_NE(ret, 0);
-}
-
-HWTEST_F(NetsysClientTest, NetSysSetResolvCacheExtTest001, TestSize.Level1)
-{
-    uint16_t netId = 0;
-    SetNetForApp(1);
-    struct ParamWrapper param;
-    param.host = nullptr;
-    auto ret = NetSysSetResolvCacheExt(netId, param, nullptr, nullptr);
-    EXPECT_EQ(ret, -EINVAL);
-
-    char host[MAX_RESULTS] = {0};
-    param.host = host;
-    ret = NetSysSetResolvCacheExt(netId, param, nullptr, nullptr);
-    EXPECT_EQ(ret, -EINVAL);
-
-    strcpy_s(host, MAX_RESULTS, "test");
-    ret = NetSysSetResolvCacheExt(netId, param, nullptr, nullptr);
-    EXPECT_EQ(ret, -EINVAL);
-
-    struct addrinfo addrInfo;
-    ret = NetSysSetResolvCacheExt(netId, param, &addrInfo, nullptr);
-    EXPECT_EQ(ret, -EINVAL);
     
     uint32_t ttl[MAX_RESULTS] = {0};
-    ret = NetSysSetResolvCacheExt(netId, param, &addrInfo, ttl);
+    ret = NetSysSetResolvCache(netId, param, &addrInfo, ttl);
     EXPECT_NE(ret, 0);
 }
 
