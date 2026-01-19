@@ -39,8 +39,10 @@ NetAllCapabilities &NetAllCapabilities::operator=(const NetAllCapabilities &cap)
     linkUpBandwidthKbps_ = cap.linkUpBandwidthKbps_;
     linkDownBandwidthKbps_ = cap.linkDownBandwidthKbps_;
     {
-        std::shared_lock<std::shared_mutex> lock(netCapsMutex_);
-        std::unique_lock<std::shared_mutex> lock2(cap.netCapsMutex_);
+        std::shared_lock<std::shared_mutex> lock(cap.netCapsMutex_);
+        std::set<NetCap> netCapsCopy = cap.netCaps_;
+        lock.unlock();
+        std::unique_lock<std::shared_mutex> lock2(netCapsMutex_);
         netCaps_ = cap.netCaps_;
     }
     bearerTypes_ = cap.bearerTypes_;
