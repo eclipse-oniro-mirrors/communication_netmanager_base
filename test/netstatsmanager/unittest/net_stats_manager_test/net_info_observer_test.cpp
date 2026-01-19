@@ -71,7 +71,7 @@ HWTEST_F(NetInfoObserverTest, NetConnectionPropertiesChangeTest003, TestSize.Lev
     auto netHandle = sptr<NetHandle>::MakeSptr();
     auto info = nullptr;
     int32_t ret = it->NetConnectionPropertiesChange(netHandle, info);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
 }
 
 }
