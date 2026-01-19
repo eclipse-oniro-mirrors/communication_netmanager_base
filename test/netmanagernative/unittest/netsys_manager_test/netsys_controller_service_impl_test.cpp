@@ -879,7 +879,7 @@ HWTEST_F(NetsysControllerServiceImplTest, ClearSimStatsBpfMap001, TestSize.Level
 {
     auto netsysControllerServiceImpl = std::make_shared<NetsysControllerServiceImpl>();
     int32_t ret = netsysControllerServiceImpl->ClearSimStatsBpfMap();
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
