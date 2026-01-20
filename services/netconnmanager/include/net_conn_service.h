@@ -89,7 +89,7 @@ public:
     }
 #ifdef NETMANAGER_ENABLE_PAC_PROXY
     std::shared_ptr<NetPACManager> GetNetPacManager();
-    int StartPacLocalProxyServer();
+    bool StartPacLocalProxyServer();
     int StopPacLocalProxyServer();
     uint32_t SetProxyOff();
     uint32_t SetProxyAuto();

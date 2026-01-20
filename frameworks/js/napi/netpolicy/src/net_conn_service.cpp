@@ -2776,7 +2776,7 @@ int NetConnService::StopPacLocalProxyServer()
     return 0;
 }
 
-int NetConnService::StartPacLocalProxyServer()
+bool NetConnService::StartPacLocalProxyServer()
 {
     std::lock_guard<std::mutex> guard{netPacProxyServerMutex_};
     if (netPACProxyServer_ && netPACProxyServer_->IsRunning()) {
