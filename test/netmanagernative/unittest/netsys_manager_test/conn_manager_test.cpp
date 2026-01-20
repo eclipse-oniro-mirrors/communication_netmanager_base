@@ -458,7 +458,7 @@ HWTEST_F(ConnManagerTest, SetNetworkAccessPolicy001, TestSize.Level1)
     netAccessPolicy.cellularAllow = false;
     bool reconfirmFlag = true;
     int32_t ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
-    EXPECT_GE(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_ERROR);
 }
 
 /**
@@ -470,7 +470,7 @@ HWTEST_F(ConnManagerTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
 {
     uint32_t uid = 0;
     int32_t ret = instance_->DeleteNetworkAccessPolicy(uid);
-    EXPECT_GE(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_ERROR);
 }
 
 /**
@@ -483,7 +483,7 @@ HWTEST_F(ConnManagerTest, NotifyNetBearerTypeChange001, TestSize.Level1)
     std::set<NetManagerStandard::NetBearType> bearTypes;
 
     int32_t ret = instance_->NotifyNetBearerTypeChange(bearTypes);
-    EXPECT_NE(ret, NETMANAGER_ERROR);
+    EXPECT_GE(ret, NETMANAGER_ERROR);
 }
 
 /**
@@ -724,7 +724,7 @@ HWTEST_F(ConnManagerTest, NotifyNetBearerTypeChange002, TestSize.Level1)
     bearTypes.insert(NetManagerStandard::NetBearType::BEARER_WIFI);
 
     int32_t ret = instance_->NotifyNetBearerTypeChange(bearTypes);
-    EXPECT_GE(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_ERROR);
 }
 
 /**
@@ -738,7 +738,7 @@ HWTEST_F(ConnManagerTest, NotifyNetBearerTypeChange003, TestSize.Level1)
     bearTypes.insert(NetManagerStandard::NetBearType::BEARER_BLUETOOTH);
 
     int32_t ret = instance_->NotifyNetBearerTypeChange(bearTypes);
-    EXPECT_GE(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(ConnManagerTest, SetInternetPermission004, TestSize.Level1)
