@@ -289,7 +289,7 @@ static __always_inline __u16 parse_dns_response(struct __sk_buff *skb, __u16 dns
     return 0;
 }
 
-static __always_inline __u16 MatchDefaultActionMap(const struct __sk_buff *skb)
+static __always_inline __u16 MatchDefaultActionMap(struct __sk_buff *skb)
 {
     __u32 currentUid = get_current_uid(skb);
     struct defalut_action_value *defaultValue = bpf_map_lookup_elem(&DEFAULT_ACTION_MAP, &currentUid);
