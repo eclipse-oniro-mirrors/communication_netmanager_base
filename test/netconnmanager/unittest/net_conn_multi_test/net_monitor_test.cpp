@@ -202,7 +202,7 @@ HWTEST_F(NetMonitorTest, GetXReqIDFromConfig001, TestSize.Level1)
 {
     instance_->GetXReqIDFromConfig();
     EXPECT_FALSE(instance_->xReqId_.empty());
-    EXPECT_FALSE(instance_->xReqIdLen_.empty());
+    EXPECT_FALSE(instance_->xReqIdLen_ == 0);
 }
 
 HWTEST_F(NetMonitorTest, StartTest001, TestSize.Level1)
