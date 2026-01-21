@@ -1051,4 +1051,24 @@ bool IsValidAddress(const std::string &ipStrAddr)
     }
     return false;
 }
+
+bool IsIPv6LinkLocal(const std::string& ipv6Addr)
+{
+    if (ipv6Addr.empty()) {
+        return false;
+    }
+    
+    std::string pureAddr = ipv6Addr;
+    size_t percentPos = pureAddr.find('%');
+    if (percentPos != std::string::npos) {
+        pureAddr = pureAddr.substr(0, percentPos);
+    }
+    
+    struct in6_addr addr;
+    if (inet_pton(AF_INET6, pureAddr.c_str(), &addr) != 1) {
+        return false;
+    }
+    
+    return (addr.s6_addr[0] == 0xfe) && ((addr.s6_addr[1] & 0xc0) == 0x80);
+}
 } // namespace OHOS::NetManagerStandard::CommonUtils
