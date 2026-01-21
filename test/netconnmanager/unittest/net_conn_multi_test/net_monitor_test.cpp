@@ -200,7 +200,7 @@ HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromDataShare005, TestSize.Level1)
 
 HWTEST_F(NetMonitorTest, GetXReqIDFromConfig001, TestSize.Level1)
 {
-    instance_->GetHttpProbeUrlFromConfig();
+    instance_->GetXReqIDFromConfig();
     EXPECT_FALSE(instance_->xReqId_.empty());
     EXPECT_FALSE(instance_->xReqIdLen_.empty());
 }
