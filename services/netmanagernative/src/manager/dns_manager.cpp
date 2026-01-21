@@ -95,6 +95,11 @@ void DnsManager::EnableIpv4(uint16_t netId, const std::string &destination, cons
     }
 }
 
+void DnsManager::SetClatDnsEnableIpv4(int32_t netId, bool enable)
+{
+    DnsParamCache::GetInstance().SetClatDnsEnableIpv4(netId, enable);
+}
+
 int32_t DnsManager::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMillis, uint8_t retryCount,
                                       const std::vector<std::string> &servers, const std::vector<std::string> &domains)
 {

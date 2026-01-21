@@ -770,5 +770,10 @@ int32_t NetManagerNative::SetDnsCache(uint16_t netId, const std::string &hostNam
 {
     return dnsManager_->SetDnsCache(netId, hostName, addrInfo);
 }
+
+void NetManagerNative::SetClatDnsEnableIpv4(int32_t netId, bool enable)
+{
+    dnsManager_->SetClatDnsEnableIpv4(netId, enable);
+}
 } // namespace nmd
 } // namespace OHOS

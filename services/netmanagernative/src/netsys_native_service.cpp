@@ -1188,7 +1188,7 @@ int32_t NetsysNativeService::StartClat(const std::string &interfaceName, int32_t
 
 int32_t NetsysNativeService::StopClat(const std::string &interfaceName)
 {
-    int32_t result = clatManager_->ClatStop(interfaceName);
+    int32_t result = clatManager_->ClatStop(interfaceName, netsysService_.get());
     NETNATIVE_LOG_D("StartClat");
     return result;
 }

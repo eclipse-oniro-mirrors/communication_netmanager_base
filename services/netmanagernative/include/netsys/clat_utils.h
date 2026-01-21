@@ -37,6 +37,7 @@ typedef struct {
     int tunFd;
     int readSock6;
     int writeSock6;
+    int netId;
 } ClatdTracker;
 
 typedef struct {
