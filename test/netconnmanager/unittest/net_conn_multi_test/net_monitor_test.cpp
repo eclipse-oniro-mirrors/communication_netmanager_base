@@ -200,11 +200,9 @@ HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromDataShare005, TestSize.Level1)
 
 HWTEST_F(NetMonitorTest, GetXReqIDFromConfig001, TestSize.Level1)
 {
-    std::string content = "";
-    instance_->xReqId_ = "";
-    instance_->GetXReqIDFromConfig(content);
-    EXPECT_TRUE(instance_->xReqId_.empty());
-    EXPECT_EQ(instance_->xReqIdLen_, -1);
+    instance_->GetHttpProbeUrlFromConfig();
+    EXPECT_FALSE(instance_->xReqId_.empty());
+    EXPECT_FALSE(instance_->xReqIdLen_.empty());
 }
 
 HWTEST_F(NetMonitorTest, StartTest001, TestSize.Level1)
