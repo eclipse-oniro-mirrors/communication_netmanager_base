@@ -414,7 +414,7 @@ void NetMonitor::GetXReqIDFromConfig()
     if (!file.is_open()) {
         NETMGR_LOG_E("Open file failed (%{public}s)", strerror(errno));
         return;
-    } 
+    }
     std::ostringstream oss;
     oss << file.rdbuf();
     std::string content = oss.str();
