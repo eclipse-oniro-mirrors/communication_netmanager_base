@@ -92,6 +92,7 @@ NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &
     lastDetectTimestamp_ = netMonitorInfo.lastDetectTime;
     LoadGlobalHttpProxy();
     GetDetectUrlConfig();
+    GetXReqIDFromConfig();
     // LCOV_EXCL_START
     if (!GetHttpProbeUrlFromDataShare()) {
         GetHttpProbeUrlFromConfig();
@@ -403,8 +404,23 @@ void NetMonitor::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
     globalHttpProxy_ = httpProxy;
 }
 
-void NetMonitor::GetXReqIDFromConfig(std::string &content)
+void NetMonitor::GetXReqIDFromConfig()
 {
+    // LCOV_EXCL_START
+    if (!std::filesystem::exists(URL_CFG_FILE)) {
+        NETMGR_LOG_E("File not exist (%{public}s)", URL_CFG_FILE);
+        return;
+    }
+    std::ifstream file(URL_CFG_FILE);
+    if (!file.is_open()) {
+        NETMGR_LOG_E("Open file failed (%{public}s)", strerror(errno));
+        return;
+    }
+    // LCOV_EXCL_STOP
+    std::ostringstream oss;
+    oss << file.rdbuf();
+    std::string content = oss.str();
+
     auto pos = content.find(XREQ_HEADER);
     if (pos != std::string::npos) {
         pos += strlen(XREQ_HEADER);
@@ -416,6 +432,7 @@ void NetMonitor::GetXReqIDFromConfig(std::string &content)
         pos += strlen(XREQ_LEN_HEADER);
         xReqIdLen_ = std::atoi(content.substr(pos, content.find(NEW_LINE_STR, pos) - pos).c_str());
     }
+    NETMGR_LOG_D("GetXReqIDFromConfig %{public}d %{public}s", xReqIdLen_, xReqId_.c_str());
 }
 
 void NetMonitor::GetHttpProbeUrlFromConfig()
@@ -461,7 +478,6 @@ void NetMonitor::GetHttpProbeUrlFromConfig()
         pos += strlen(FALLBACK_HTTPS_URL_HEADER);
         fallbackHttpsUrl_ = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
     }
-    GetXReqIDFromConfig(content);
     NETMGR_LOG_D("Get net detection http url:[%{public}s], https url:[%{public}s], fallback http url:[%{public}s],"
         " fallback https url:[%{public}s]", httpUrl_.c_str(), httpsUrl_.c_str(), fallbackHttpUrl_.c_str(),
         fallbackHttpsUrl_.c_str());

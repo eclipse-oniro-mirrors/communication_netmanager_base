@@ -116,7 +116,7 @@ private:
     void StartProbe(std::shared_ptr<ProbeThread>& httpProbeThread, std::shared_ptr<ProbeThread>& httpsProbeThread,
         std::shared_ptr<ProbeThread>& backHttpThread, std::shared_ptr<ProbeThread>& backHttpsThread, bool needProxy);
     NetHttpProbeResult GetThreadDetectResult(std::shared_ptr<ProbeThread>& probeThread, ProbeType probeType);
-    void GetXReqIDFromConfig(std::string &content);
+    void GetXReqIDFromConfig();
     void GetHttpProbeUrlFromConfig();
     void GetDetectUrlConfig();
     bool CheckIfSettingsDataReady();
