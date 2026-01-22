@@ -296,11 +296,30 @@ int32_t DnsParamCache::GetDefaultNetwork() const
     return defaultNetId_;
 }
 
-void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo, uint32_t ttl)
+void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo)
 {
     if (netId == 0) {
         netId = defaultNetId_;
     }
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
+    auto it = serverConfigMap_.find(netId);
+    if (it == serverConfigMap_.end()) {
+        DNS_CONFIG_PRINT("SetDnsCache failed: netid is not have netid:%{public}d,", netId);
+        return;
+    }
+
+    AddrInfoWithTtl addrInfo;
+    addrInfo.addrInfo = addrInfo;
+    addrInfo.ttl = DEFAULT_DELAYED_COUNT;
+    it->second.GetCache().Put(hostName, addrInfoWithTtl);
+}
+
+void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfoWithTtl &addrInfo)
+{
+    if (netId == 0) {
+        netId = defaultNetId_;
+    }
+    uint32_t ttl = addrInfo.ttl;
     if (ttl == 0) {
         return;
     }
@@ -311,9 +330,7 @@ void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, con
         return;
     }
 
-    AddrInfoWithTtl addrInfoWithTtl;
-    addrInfoWithTtl.addrInfo = addrInfo;
-    addrInfoWithTtl.ttl = ttl > DEFAULT_DELAYED_COUNT ? ttl : DEFAULT_DELAYED_COUNT;
+    addrInfo.ttl = ttl > DEFAULT_DELAYED_COUNT ? ttl : DEFAULT_DELAYED_COUNT;
     it->second.GetCache().Put(hostName, addrInfoWithTtl);
 }
 
