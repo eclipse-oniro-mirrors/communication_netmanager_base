@@ -360,11 +360,15 @@ HWTEST_F(NetManagerNativeTest, GetConnectOwnerUidTest001, TestSize.Level1)
 HWTEST_F(NetManagerNativeTest, GetSystemNetPortStatesTest001, TestSize.Level1)
 {
     NetPortStatesInfo netPortStatesInfo;
+    int32_t netId = 12235;
+    instance_->SetClatDnsEnableIpv4(netId, true);
+    instance_->SetClatDnsEnableIpv4(netId, false);
     auto ret = instance_->GetSystemNetPortStates(netPortStatesInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     instance_->connManager_ = nullptr;
     ret = instance_->GetSystemNetPortStates(netPortStatesInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
+
 } // namespace nmd
 } // namespace OHOS

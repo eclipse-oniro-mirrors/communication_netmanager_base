@@ -35,7 +35,7 @@ public:
     int32_t ClatStart(const std::string &v6Iface, int32_t netId, const std::string &nat64PrefixStr,
                       NetManagerNative *netsysService);
 
-    int32_t ClatStop(const std::string &v6Iface);
+    int32_t ClatStop(const std::string &v6Iface, NetManagerNative *netsysService);
 
 private:
     uint32_t GetFwmark(int32_t netId);

@@ -59,7 +59,8 @@ public:
     void SetUserDefinedServerFlag(bool flag);
 
     bool IsUserDefinedServer();
-
+    void SetClatDnsEnableIpv4(bool enable);
+    bool IsClatIpv4Enable();
 private:
     class DelayedTaskWrapper {
     public:
@@ -93,6 +94,7 @@ private:
     bool isIpv6Enable_;
     bool isIpv4Enable_;
     bool isUserDefinedDnsServer_;
+    bool isClatIpv4Enable_;
 };
 } // namespace OHOS::nmd
 #endif // INCLUDE_DNSRESOLV_CONFIG_H

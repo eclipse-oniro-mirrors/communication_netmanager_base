@@ -75,6 +75,7 @@ public:
     bool IsIpv4Enable(uint16_t netId);
 
     void EnableIpv4(uint16_t netId);
+    void SetClatDnsEnableIpv4(int32_t netId, bool enable);
 
     int32_t AddUidRange(uint32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges);
 

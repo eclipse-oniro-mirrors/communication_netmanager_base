@@ -184,6 +184,7 @@ public:
     int32_t SetUserDefinedServerFlag(uint16_t netId, bool flag);
     int32_t FlushDnsCache(uint16_t netId);
     int32_t SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo);
+    void SetClatDnsEnableIpv4(int32_t netId, bool enable);
 private:
     std::shared_ptr<DnsProxyListen> dnsProxyListen_;
     int32_t FillAddrInfo(std::vector<AddrInfo> &addrInfo, addrinfo *res);

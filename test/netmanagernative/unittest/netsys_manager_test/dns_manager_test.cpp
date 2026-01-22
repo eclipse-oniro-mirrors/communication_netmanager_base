@@ -123,6 +123,7 @@ HWTEST_F(DnsManagerTest, EnableIpv4Test001, TestSize.Level1)
     destination = "0.0.0.0";
     dnsManager.EnableIpv4(netId, destination, nextHop);
     EXPECT_TRUE(DnsParamCache::GetInstance().IsIpv4Enable(netId));
+    dnsManager.SetClatDnsEnableIpv4(netId, true);
     dnsManager.DestroyNetworkCache(netId);
 }
 
