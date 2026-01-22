@@ -307,8 +307,6 @@ void DnsResolvListenInternal::ProcGetCacheCommand(const std::string &name, int c
     DNS_CONFIG_PRINT("ProcGetCacheCommand end");
 }
 
-static bool CmpAddrInfoTtl(const )
-
 void DnsResolvListenInternal::ProcSetCacheCommand(const std::string &name, uint16_t netId,
                                                   AddrInfoWithTtl addrInfo[MAX_RESULTS], uint32_t resNum)
 {

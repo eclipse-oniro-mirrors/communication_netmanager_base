@@ -451,7 +451,7 @@ static int32_t FillDnsAns(struct AddrInfoWithTtl addrInfo[static MAX_RESULTS], s
         if (FillBasicAddrInfo(&addrInfo[resNum].addrInfo, res[resNum].ai) != 0) {
             return -1;
         }
-        addrInfo[resNum].ttl = tmp->ttl;
+        addrInfo[resNum].ttl = res[resNum].ttl;
     }
 
     return resNum;

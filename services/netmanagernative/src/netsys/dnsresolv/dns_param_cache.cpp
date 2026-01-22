@@ -308,9 +308,9 @@ void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, con
         return;
     }
 
-    AddrInfoWithTtl addrInfo;
-    addrInfo.addrInfo = addrInfo;
-    addrInfo.ttl = DEFAULT_DELAYED_COUNT;
+    AddrInfoWithTtl addrInfoWithTtl;
+    addrInfoWithTtl.addrInfo = addrInfo;
+    addrInfoWithTtl.ttl = DEFAULT_DELAYED_COUNT;
     it->second.GetCache().Put(hostName, addrInfoWithTtl);
 }
 
@@ -330,7 +330,9 @@ void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, con
         return;
     }
 
-    addrInfo.ttl = ttl > DEFAULT_DELAYED_COUNT ? ttl : DEFAULT_DELAYED_COUNT;
+    AddrInfoWithTtl addrInfoWithTtl;
+    addrInfoWithTtl.addrInfo = addrInfo.addrInfo;
+    addrInfoWithTtl.ttl = ttl > DEFAULT_DELAYED_COUNT ? ttl : DEFAULT_DELAYED_COUNT;
     it->second.GetCache().Put(hostName, addrInfoWithTtl);
 }
 
