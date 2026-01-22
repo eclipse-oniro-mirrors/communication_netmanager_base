@@ -133,10 +133,10 @@ void NetlinkMsg::AddNeighbor(uint16_t action, const struct ndmsg& msg)
 #ifdef FEATURE_NET_FIREWALL_ENABLE
 bool NetlinkMsg::InitNflogConfig(uint16_t groupId)
 {
-    if (netlinkMessage_ == nullptr || maxBufLen_ < NLMSG_SPACE(sizeof(nfgenmsg))) {
+    if (netlinkMessage_ == nullptr || maxBufLen_ < static_cast<size_t>(NLMSG_SPACE(sizeof(nfgenmsg)))) {
         return false;
     }
-    netlinkMessage_->nlmsg_len = NLMSG_LENGTH(sizeof(nfgenmsg));
+    netlinkMessage_->nlmsg_len = static_cast<uint32_t>(NLMSG_LENGTH(sizeof(nfgenmsg)));
     netlinkMessage_->nlmsg_type = LOCAL_NFLOG_CONFIG;
     netlinkMessage_->nlmsg_flags = NLM_F_REQUEST;
     netlinkMessage_->nlmsg_seq = static_cast<uint32_t>(time(nullptr));
@@ -154,7 +154,10 @@ bool NetlinkMsg::AddNlattr(uint16_t type, const void *data, size_t dataSize)
     if (netlinkMessage_ == nullptr || data == nullptr || dataSize == 0) {
         return false;
     }
-    size_t need = NLA_HDRLEN + dataSize;
+    if (dataSize > SIZE_MAX - static_cast<size_t>(NLA_HDRLEN)) {
+        return false;
+    }
+    size_t need = static_cast<size_t>(NLA_HDRLEN) + dataSize;
     size_t end = NLMSG_ALIGN(netlinkMessage_->nlmsg_len) + NLA_ALIGN(need);
     if (end > maxBufLen_) {
         return false;
@@ -166,7 +169,7 @@ bool NetlinkMsg::AddNlattr(uint16_t type, const void *data, size_t dataSize)
     attr->nla_len = static_cast<uint16_t>(need);
 
     void *dest = reinterpret_cast<char *>(attr) + NLA_HDRLEN;
-    size_t dstLen = need - NLA_HDRLEN;
+    size_t dstLen = need - static_cast<size_t>(NLA_HDRLEN);
     if (memcpy_s(dest, dstLen, data, dataSize) != EOK) {
         return false;
     }
