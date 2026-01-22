@@ -3565,6 +3565,7 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
         // executed in the SA process, so load http proxy from current active user.
         LoadGlobalHttpProxy(ACTIVE, httpProxy);
         UpdateGlobalHttpProxy(httpProxy);
+        HandleDataShareMessage();
         RegisterNetDataShareObserver();
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
         NETMGR_LOG_I("on receive user_switched");
