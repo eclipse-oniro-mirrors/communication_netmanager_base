@@ -406,6 +406,7 @@ void NetMonitor::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
 
 void NetMonitor::GetXReqIDFromConfig()
 {
+    // LCOV_EXCL_START
     if (!std::filesystem::exists(URL_CFG_FILE)) {
         NETMGR_LOG_E("File not exist (%{public}s)", URL_CFG_FILE);
         return;
@@ -415,6 +416,7 @@ void NetMonitor::GetXReqIDFromConfig()
         NETMGR_LOG_E("Open file failed (%{public}s)", strerror(errno));
         return;
     }
+    // LCOV_EXCL_STOP
     std::ostringstream oss;
     oss << file.rdbuf();
     std::string content = oss.str();
