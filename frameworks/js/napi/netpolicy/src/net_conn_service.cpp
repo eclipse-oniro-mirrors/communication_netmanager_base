@@ -3485,7 +3485,7 @@ void NetConnService::RegisterNetDataShareObserver()
     }
     NETMGR_LOG_I("start registered");
     auto helper = std::make_unique<NetDataShareHelperUtilsIface>();
-    onChange_ = std::bind(&NetConnService::HandleDataShareMessage, this);
+    onChange_ = std::bind(&NetConnService::HandleDataShareMessage, shared_from_this());
     if (helper->RegisterSettingsObserver(SETTINGS_DATASHARE_URI_HTTP, onChange_) != NETSYS_SUCCESS) {
         NETMGR_LOG_E("RegisterNetDataShareObserver failed");
         return;
