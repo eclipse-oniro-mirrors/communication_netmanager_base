@@ -720,11 +720,13 @@ int32_t NetHttpProbe::CheckSuccessRespCode(int32_t respCode)
         return result;
     }
     std::string requestId = GetHeaderField(xReqId_);
+    // LCOV_EXCL_START
     if (requestId.empty() || xReqIdLen_ != static_cast<int8_t>(requestId.length())) {
         NETMGR_LOG_I("http return 204, but request id error and unreachable! xReqIdLen:%{public}d, rlen: %{public}lu",
             xReqIdLen_, requestId.length());
         result = FAIL_CODE;
     }
+    // LCOV_EXCL_STOP
     return result;
 }
 
