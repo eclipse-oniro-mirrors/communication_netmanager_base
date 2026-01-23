@@ -25,7 +25,6 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetAccessPolicyConfigUtils NetAccessPolicyConfigUtils::instance_;
 namespace {
 constexpr const char *PATH = "etc/netmanager/net_access_policy_config.json";
 constexpr const char *ARRAY_NAME = "configs";
@@ -35,19 +34,37 @@ constexpr const char *ITEM_DISABLE_CELLULAR_SWITCH = "disableCellularSwitch";
 } // namespace
 NetAccessPolicyConfigUtils &NetAccessPolicyConfigUtils::GetInstance()
 {
-    return instance_;
+    static NetAccessPolicyConfigUtils instance;
+    return instance;
 }
+
 std::vector<NetAccessPolicyConfig> NetAccessPolicyConfigUtils::GetNetAccessPolicyConfig()
 {
-    if (!isInit_) {
-        Init();
+    std::lock_guard<ffrt::mutex> lock(lock_);
+    Init();
+    std::vector<NetAccessPolicyConfig> result;
+    result.reserve(netAccessPolicyConfigs_.size() + dynamicNetAccessPolicyConfigs_.size());
+    
+    result.insert(result.end(), netAccessPolicyConfigs_.begin(), netAccessPolicyConfigs_.end());
+    result.insert(result.end(), dynamicNetAccessPolicyConfigs_.begin(), dynamicNetAccessPolicyConfigs_.end());
+    return result;
+}
+
+void NetAccessPolicyConfigUtils::UpdateNetAccessPolicyConfig(const std::vector<std::string> &bundleNames)
+{
+    std::lock_guard<ffrt::mutex> lock(lock_);
+    dynamicNetAccessPolicyConfigs_.clear();
+    for (const auto &bundleName : bundleNames) {
+        NetAccessPolicyConfig config;
+        config.bundleName = bundleName;
+        config.disableWlanSwitch = true;
+        config.disableCellularSwitch = true;
+        dynamicNetAccessPolicyConfigs_.push_back(config);
     }
-    return netAccessPolicyConfigs_;
 }
 
 void NetAccessPolicyConfigUtils::Init()
 {
-    std::lock_guard<ffrt::mutex> lock(lock_);
     if (isInit_) {
         return;
     }
@@ -55,6 +72,7 @@ void NetAccessPolicyConfigUtils::Init()
     ParseNetAccessPolicyConfigs();
     isInit_ = true;
 }
+
 void NetAccessPolicyConfigUtils::ParseNetAccessPolicyConfigs()
 {
     std::string content;

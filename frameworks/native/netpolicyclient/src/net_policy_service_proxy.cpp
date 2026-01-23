@@ -738,6 +738,37 @@ int32_t NetPolicyServiceProxy::SetNetworkAccessPolicy(uint32_t uid, NetworkAcces
     return reply.ReadInt32();
 }
 
+int32_t NetPolicyServiceProxy::UpdateNetworkAccessPolicy(const std::vector<std::string> &bundleNames)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteStringVector(bundleNames)) {
+        NETMGR_LOG_E("WriteStringVector failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t retCode = SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_ADD_NETWORK_ACCESS_POLICY),
+                                  data, reply, option);
+    if (retCode != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
+        return retCode;
+    }
+
+    return retCode;
+}
+
 int32_t NetPolicyServiceProxy::GetNetworkAccessPolicy(AccessPolicyParameter parameter, AccessPolicySave &policy)
 {
     MessageParcel data;

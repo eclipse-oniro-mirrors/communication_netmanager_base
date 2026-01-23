@@ -19,6 +19,7 @@
 #include "cJSON.h"
 #include "ffrt.h"
 #include "string"
+#include <shared_mutex>
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -31,6 +32,7 @@ class NetAccessPolicyConfigUtils {
 public:
     static NetAccessPolicyConfigUtils &GetInstance();
     std::vector<NetAccessPolicyConfig> GetNetAccessPolicyConfig();
+    void UpdateNetAccessPolicyConfig(const std::vector<std::string> &bundleNames);
 
 private:
     NetAccessPolicyConfigUtils() = default;
@@ -43,10 +45,9 @@ private:
     int32_t ParseInt32(cJSON *value);
 
 private:
-    static NetAccessPolicyConfigUtils instance_;
-
     std::vector<NetAccessPolicyConfig> netAccessPolicyConfigs_;
-    std::atomic<bool> isInit_ = false;
+    std::vector<NetAccessPolicyConfig> dynamicNetAccessPolicyConfigs_;
+    bool isInit_ = false;
     ffrt::mutex lock_;
 };
 } // namespace NetManagerStandard

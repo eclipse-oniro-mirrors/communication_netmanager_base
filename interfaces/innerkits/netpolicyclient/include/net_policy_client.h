@@ -373,6 +373,14 @@ public:
      */
     int32_t SetUidsDeniedListChain(const std::vector<uint32_t> &uids, bool isAdd);
 
+    /**
+     * Sets MDM applications' network access to be undisablable.
+     *
+     * @param bundleNames  List of MDM application bundle names.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t UpdateNetworkAccessPolicy(const std::vector<std::string> &bundleNames);
+
 private:
     class NetPolicyDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

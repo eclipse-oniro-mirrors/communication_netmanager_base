@@ -282,6 +282,14 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t SetUidsDeniedListChain(const std::vector<uint32_t> &uids, bool isAdd) = 0;
+
+    /**
+     * Sets MDM applications' network access to be undisablable.
+     *
+     * @param bundleNames  List of MDM application bundle names.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    virtual int32_t UpdateNetworkAccessPolicy(const std::vector<std::string> &bundleNames) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -245,6 +245,14 @@ public:
      */
     int32_t GetNetworkAccessPolicy(AccessPolicyParameter parameter, AccessPolicySave& policy) override;
 
+    /**
+     * Sets MDM applications' network access to be undisablable.
+     *
+     * @param bundleNames  List of MDM application bundle names.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t UpdateNetworkAccessPolicy(const std::vector<std::string> &bundleNames) override;
+
     NetAccessPolicyRDB GetNetAccessPolicyDBHandler()
     {
         static NetAccessPolicyRDB netAccessPolicy;

@@ -431,6 +431,16 @@ int32_t NetPolicyClient::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolic
     return proxy->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
 }
 
+int32_t NetPolicyClient::UpdateNetworkAccessPolicy(const std::vector<std::string> &bundleNames)
+{
+    sptr<INetPolicyService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->UpdateNetworkAccessPolicy(bundleNames);
+}
+
 int32_t NetPolicyClient::GetNetworkAccessPolicy(AccessPolicyParameter parameter, AccessPolicySave& policy)
 {
     sptr<INetPolicyService> proxy = GetProxy();
