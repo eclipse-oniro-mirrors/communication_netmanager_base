@@ -654,7 +654,6 @@ void ProxyServer::HandleConnectRequest(int clientSocket, const std::string &requ
     }
     TunnelData(clientSocket, serverSocket);
     close(serverSocket);
-    close(clientSocket);
 }
 
 void ProxyServer::ForwardData(int fromSocket, int toSocket)
