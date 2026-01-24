@@ -322,7 +322,7 @@ void DnsResolvListenInternal::ProcSetCacheCommand(const std::string &name, uint1
     DnsParamCache::GetInstance().SetCallingUid(callingUid);
 #endif
 
-    std::sort(&addrInfo[0], &addrInfo[resNum - 1], [](const AddrInfoWithTtl &a, const AddrInfoWithTtl &b) {
+    std::sort(addrInfo, addrInfo + resNum, [](const AddrInfoWithTtl &a, const AddrInfoWithTtl &b) {
         return a.ttl > b.ttl;
     });
     for (size_t i = 0; i < resNum; ++i) {
