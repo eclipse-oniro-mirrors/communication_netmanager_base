@@ -459,7 +459,7 @@ HWTEST_F(DNSParamCacheTest, SetDnsCacheTest003, TestSize.Level1)
     dnsParCache.SetDnsCache(0, hostName, addrInfo);
 
     addrInfo.ttl = 50;
-    dnsParCache.SetDnsCache(1, hostName, addrInfoV6);
+    dnsParCache.SetDnsCache(1, hostName, addrInfo);
 
     auto res = dnsParCache.GetDnsCache(1, hostName);
     EXPECT_NE(res.size(), 0);
