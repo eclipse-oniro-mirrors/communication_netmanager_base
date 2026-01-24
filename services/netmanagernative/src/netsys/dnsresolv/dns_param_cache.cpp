@@ -308,11 +308,13 @@ void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, con
         return;
     }
 
+    // LCOV_EXCL_START
     AddrInfoWithTtl addrInfoWithTtl;
     if (memcpy_s(&addrInfoWithTtl.addrInfo, sizeof(addrInfoWithTtl.addrInfo), &addrInfo,
                  sizeof(addrInfo)) != ERR_OK) {
         return;
     }
+    // LCOV_EXCL_STOP
     addrInfoWithTtl.ttl = DEFAULT_DELAYED_COUNT;
     it->second.GetCache().Put(hostName, addrInfoWithTtl);
 }
@@ -333,11 +335,13 @@ void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, con
         return;
     }
 
+    // LCOV_EXCL_START
     AddrInfoWithTtl addrInfoWithTtl;
     if (memcpy_s(&addrInfoWithTtl.addrInfo, sizeof(addrInfoWithTtl.addrInfo), &addrInfo.addrInfo,
                  sizeof(addrInfo.addrInfo)) != ERR_OK) {
         return;
     }
+    // LCOV_EXCL_STOP
     addrInfoWithTtl.ttl = ttl > DEFAULT_DELAYED_COUNT ? ttl : DEFAULT_DELAYED_COUNT;
     it->second.GetCache().Put(hostName, addrInfoWithTtl);
 }

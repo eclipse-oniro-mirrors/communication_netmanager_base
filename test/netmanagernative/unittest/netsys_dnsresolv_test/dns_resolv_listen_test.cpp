@@ -46,15 +46,11 @@ public:
     static void ProcGetConfigCommandExt(int clientSockFd, uint16_t netId, uint32_t uid);
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     static void ProcSetCacheCommand(const std::string &name, uint16_t netId, uint32_t callingUid,
-                                    AddrInfo addrInfo[MAX_RESULTS], uint32_t resNum);
-    static void ProcSetCacheCommandExt(const std::string &name, uint16_t netId, uint32_t callingUid,
-                                       AddrInfo addrInfo[MAX_RESULTS], uint32_t resNum, uint32_t ttl[MAX_RESULTS]);
+                                    AddrInfoWithTtl addrInfo[MAX_RESULTS], uint32_t resNum);
     static void ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId, uint32_t callingUid);
 #endif
-    static void ProcSetCacheCommand(const std::string &name, uint16_t netId, AddrInfo addrInfo[MAX_RESULTS],
+    static void ProcSetCacheCommand(const std::string &name, uint16_t netId, AddrInfoWithTtl addrInfo[MAX_RESULTS],
                                     uint32_t resNum);
-    static void ProcSetCacheCommandExt(const std::string &name, uint16_t netId, AddrInfo addrInfo[MAX_RESULTS],
-                                       uint32_t resNum, uint32_t ttl[MAX_RESULTS]);
     static void ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId);
     static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId);
     static void ProcJudgeIpv4Command(int clientSockFd, uint16_t netId);

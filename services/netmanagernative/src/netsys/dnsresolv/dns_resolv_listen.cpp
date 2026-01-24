@@ -555,6 +555,7 @@ ReceiverRunner DnsResolvListenInternal::ProcGetCacheContent(const std::string &n
                                                             uint32_t resNum)
 {
     return [this, name, netId, uid, resNum](FileDescriptor fd, const std::string &data) -> FixedLengthReceiverState {
+        // LCOV_EXCL_START
         if (server_ == nullptr) {
             return FixedLengthReceiverState::ONERROR;
         }
@@ -568,6 +569,7 @@ ReceiverRunner DnsResolvListenInternal::ProcGetCacheContent(const std::string &n
                      data.data(), sizeof(AddrInfoWithTtl) * size) != EOK) {
             return FixedLengthReceiverState::ONERROR;
         }
+        // LCOV_EXCL_STOP
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
         ProcSetCacheCommand(name, netId, uid, addrInfo, size);

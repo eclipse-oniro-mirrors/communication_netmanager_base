@@ -49,6 +49,7 @@ void HandleQueryAbnormalReport(struct DnsProcessInfoExt dnsProcessInfo,
     struct AddrInfo addrInfo[], int32_t addrSize);
 int32_t NetSysPostDnsQueryResult(int netid, struct addrinfo *addr, char *srcAddr,
     struct DnsProcessInfo *processInfo);
+int32_t FillBasicAddrInfo(struct AddrInfo *addrInfo, struct addrinfo *info);
 
 #ifdef __cplusplus
 }
@@ -146,6 +147,9 @@ HWTEST_F(NetsysClientTest, NetSysSetResolvCacheTest001, TestSize.Level1)
     struct DnsAns ans;
     ans.ai = &addrInfo;
     ans.ttl = 10;
+    ret = NetSysSetResolvCache(netId, param, &ans, -1);
+    EXPECT_EQ(ret, -EINVAL);
+    
     ret = NetSysSetResolvCache(netId, param, &ans, 1);
     EXPECT_NE(ret, 0);
 }
@@ -360,6 +364,34 @@ HWTEST_F(NetsysClientTest, NetSysPostDnsQueryResultTest001, TestSize.Level1)
     processInfo.retCode = 1;
     ret = NetSysPostDnsQueryResult(netId, &addr, nullptr, &processInfo);
     EXPECT_TRUE(ret == -1 || ret == 0);
+}
+
+HWTEST_F(NetsysClientTest, FillBasicAddrInfoTest001, TestSize.Level1)
+{
+    auto ret = FillBasicAddrInfo(NULL, NULL);
+    EXPECT_EQ(ret, -1);
+    
+    struct AddrInfo addr;
+    ret = FillBasicAddrInfo(&addr, NULL);
+    EXPECT_EQ(ret, -1);
+
+    struct addrinfo ai;
+    ai.ai_addr = NULL;
+    ai.ai_canonname = NULL;
+
+    ai.ai_family = AF_INET6;
+    ret = FillBasicAddrInfo(&addr, &ai);
+    EXPECT_EQ(ret, 0);
+    
+    ai.ai_family = AF_INET;
+    addr.aiAddr.sin.sin_addr.s_addr = 0;
+    ret = FillBasicAddrInfo(&addr, &ai);
+    EXPECT_EQ(ret, 0);
+    
+    ai.ai_family = AF_INET;
+    addr.aiAddr.sin.sin_addr.s_addr = 1;
+    ret = FillBasicAddrInfo(&addr, &ai);
+    EXPECT_EQ(ret, 0);
 }
 
 } // namespace nmd

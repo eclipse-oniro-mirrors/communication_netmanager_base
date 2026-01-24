@@ -411,10 +411,12 @@ HWTEST_F(DNSParamCacheTest, RemoveDuplicateNameserversTest001, TestSize.Level1)
 HWTEST_F(DNSParamCacheTest, SetDnsCacheTest001, TestSize.Level1)
 {
     DnsParamCache dnsParCache;
-    dnsParCache.CreateCacheForNet(1);
+    dnsParCache.defaultNetId_ = 1;
     std::string hostName = "test";
     AddrInfo addrInfo;
-    addrInfo.aiFamily = 2;
+    dnsParCache.SetDnsCache(0, hostName, addrInfo);
+
+    dnsParCache.CreateCacheForNet(1);
     dnsParCache.SetDnsCache(1, hostName, addrInfo);
 
     AddrInfo addrInfoV6;
@@ -447,9 +449,11 @@ HWTEST_F(DNSParamCacheTest, SetDnsCacheTest003, TestSize.Level1)
 {
     DnsParamCache dnsParCache;
     dnsParCache.defaultNetId_ = 1;
-    dnsParCache.CreateCacheForNet(1);
     std::string hostName = "test";
     AddrInfoWithTtl addrInfo;
+    dnsParCache.SetDnsCache(0, hostName, addrInfo);
+
+    dnsParCache.CreateCacheForNet(1);
     addrInfo.addrInfo.aiFamily = 2;
     addrInfo.ttl = 0;
     dnsParCache.SetDnsCache(0, hostName, addrInfo);

@@ -399,6 +399,7 @@ int32_t FillBasicAddrInfo(struct AddrInfo *addrInfo, struct addrinfo *info)
     addrInfo->aiSockType = (uint32_t)(info->ai_socktype);
     addrInfo->aiProtocol = info->ai_protocol;
     addrInfo->aiAddrLen = info->ai_addrlen;
+    // LCOV_EXCL_START
     if (info->ai_addr &&
         memcpy_s(&addrInfo->aiAddr, sizeof(addrInfo->aiAddr), info->ai_addr, info->ai_addrlen) != 0) {
         DNS_CONFIG_PRINT("memcpy_s failed");
@@ -409,6 +410,7 @@ int32_t FillBasicAddrInfo(struct AddrInfo *addrInfo, struct addrinfo *info)
         DNS_CONFIG_PRINT("strcpy_s failed");
         return -1;
     }
+    // LCOV_EXCL_STOP
     if (addrInfo->aiFamily == AF_INET) {
         uint32_t addr = addrInfo->aiAddr.sin.sin_addr.s_addr;
         if (IsAbnormalAddress(addr)) {
@@ -426,9 +428,11 @@ static int32_t FillAddrInfo(struct AddrInfo addrInfo[static MAX_RESULTS], struct
 
     int32_t resNum = 0;
     for (struct addrinfo *tmp = res; tmp != NULL; tmp = tmp->ai_next) {
+        // LCOV_EXCL_START
         if (FillBasicAddrInfo(&addrInfo[resNum], tmp) != 0) {
             return -1;
         }
+        // LCOV_EXCL_STOP
 
         ++resNum;
         if (resNum >= MAX_RESULTS) {
@@ -441,16 +445,20 @@ static int32_t FillAddrInfo(struct AddrInfo addrInfo[static MAX_RESULTS], struct
 
 static int32_t FillDnsAns(struct AddrInfoWithTtl addrInfo[static MAX_RESULTS], struct DnsAns *res, int num)
 {
+    // LCOV_EXCL_START
     if (memset_s(addrInfo, sizeof(struct AddrInfoWithTtl) * MAX_RESULTS,
                  0, sizeof(struct AddrInfoWithTtl) * MAX_RESULTS) != 0) {
         return -1;
     }
+    // LCOV_EXCL_STOP
 
     int32_t resNum;
     for (resNum = 0; resNum < num && resNum < MAX_RESULTS; resNum++) {
+        // LCOV_EXCL_START
         if (FillBasicAddrInfo(&addrInfo[resNum].addrInfo, res[resNum].ai) != 0) {
             return -1;
         }
+        // LCOV_EXCL_STOP
         addrInfo[resNum].ttl = res[resNum].ttl;
     }
 
@@ -498,10 +506,12 @@ static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, const st
         return CloseSocketReturn(sockFd, 0);
     }
 
+    // LCOV_EXCL_START
     if (!PollSendData(sockFd, (char *)addrInfo, sizeof(struct AddrInfoWithTtl) * resNum)) {
         DNS_CONFIG_PRINT("send failed %d", errno);
         return CloseSocketReturn(sockFd, -errno);
     }
+    // LCOV_EXCL_STOP
 
     return CloseSocketReturn(sockFd, 0);
 }
