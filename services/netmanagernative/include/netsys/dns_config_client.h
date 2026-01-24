@@ -113,7 +113,6 @@ struct AddrInfo {
     uint32_t aiAddrLen;
     AlignedSockAddr aiAddr;
     char aiCanonName[MAX_CANON_NAME + 1];
-    uint32_t ttl;
 };
 
 struct DnsAns {

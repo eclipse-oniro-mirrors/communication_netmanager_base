@@ -546,7 +546,7 @@ ReceiverRunner DnsResolvListenInternal::ProcGetCacheSize(CommandType command,
         if (resNum == 0) {
             return FixedLengthReceiverState::ONERROR;
         }
-        server_->AddReceiver(fd, sizeof(AddrInfo) * resNum, ProcGetCacheContent(name, netId, uid, resNum));
+        server_->AddReceiver(fd, sizeof(AddrInfoWithTtl) * resNum, ProcGetCacheContent(name, netId, uid, resNum));
         return FixedLengthReceiverState::CONTINUE;
     };
 }
@@ -558,7 +558,7 @@ ReceiverRunner DnsResolvListenInternal::ProcGetCacheContent(const std::string &n
         if (server_ == nullptr) {
             return FixedLengthReceiverState::ONERROR;
         }
-        if (data.size() < sizeof(AddrInfo) * resNum) {
+        if (data.size() < sizeof(AddrInfoWithTtl) * resNum) {
             return FixedLengthReceiverState::ONERROR;
         }
 
