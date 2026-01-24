@@ -311,7 +311,7 @@ void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, con
     // LCOV_EXCL_START
     AddrInfoWithTtl addrInfoWithTtl;
     if (memcpy_s(&addrInfoWithTtl.addrInfo, sizeof(addrInfoWithTtl.addrInfo), &addrInfo,
-                 sizeof(addrInfo)) != ERR_OK) {
+                 sizeof(addrInfo)) != 0) {
         return;
     }
     // LCOV_EXCL_STOP
@@ -338,7 +338,7 @@ void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, con
     // LCOV_EXCL_START
     AddrInfoWithTtl addrInfoWithTtl;
     if (memcpy_s(&addrInfoWithTtl.addrInfo, sizeof(addrInfoWithTtl.addrInfo), &addrInfo.addrInfo,
-                 sizeof(addrInfo.addrInfo)) != ERR_OK) {
+                 sizeof(addrInfo.addrInfo)) != 0) {
         return;
     }
     // LCOV_EXCL_STOP
