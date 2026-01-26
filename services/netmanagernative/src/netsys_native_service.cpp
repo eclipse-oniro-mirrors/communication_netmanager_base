@@ -31,7 +31,7 @@
 #include "system_vpn_wrapper.h"
 #endif // SUPPORT_SYSVPN
 #include "bpf_ring_buffer.h"
-#inlcude "ipc_skeleton.h"
+#include "ipc_skeleton.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
