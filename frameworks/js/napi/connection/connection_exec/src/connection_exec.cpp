@@ -44,6 +44,8 @@ constexpr int32_t NO_PERMISSION_CODE = 1;
 constexpr int32_t PERMISSION_DENIED_CODE = 13;
 constexpr int32_t NET_UNREACHABLE_CODE = 101;
 constexpr int32_t INVALID_UID = -1;
+static int64_t g_limitSdkReport = 0;
+static int64_t g_limitSdkReports = 0;
 } // namespace
 
 napi_value ConnectionExec::CreateNetHandle(napi_env env, NetHandle *handle)
@@ -1289,7 +1291,6 @@ bool ConnectionExec::NetConnectionExec::ExecRegister(RegisterContext *context)
         int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(specifier, callback, conn.timeout_);
         NETMANAGER_BASE_LOGI("Register result hasNetSpecifier_ and hasTimeout_ %{public}d", ret);
         context->SetErrorCode(ret);
-        hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, ret);
         return ret == NETMANAGER_SUCCESS;
     }
 
@@ -1298,14 +1299,16 @@ bool ConnectionExec::NetConnectionExec::ExecRegister(RegisterContext *context)
         int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(specifier, callback, 0);
         NETMANAGER_BASE_LOGD("Register result hasNetSpecifier_ %{public}d", ret);
         context->SetErrorCode(ret);
-        hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, ret);
         return ret == NETMANAGER_SUCCESS;
     }
 
     int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(callback);
     NETMANAGER_BASE_LOGI("Register result %{public}d", ret);
     context->SetErrorCode(ret);
-    hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, ret);
+    if (g_limitSdkReport == 0) {
+        hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, ret);
+        g_limitSdkReport = 1;
+    }
     return ret == NETMANAGER_SUCCESS;
 }
 
@@ -1327,10 +1330,12 @@ bool ConnectionExec::NetConnectionExec::ExecUnregister(UnregisterContext *contex
     int32_t ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
     if (ret != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGD("Unregister result %{public}d", ret);
-        hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, ret);
         context->SetErrorCode(ret);
     }
-    hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, ret);
+    if (g_limitSdkReports == 0) {
+        hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, ret);
+        g_limitSdkReports = 1;
+    }
     return ret == NETMANAGER_SUCCESS;
 }
 
