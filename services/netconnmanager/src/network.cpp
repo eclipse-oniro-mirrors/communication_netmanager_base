@@ -613,23 +613,17 @@ void Network::UpdateDns(const NetLinkInfo &netLinkInfo)
     int32_t ipv4DnsCnt = 0;
     int32_t ipv6DnsCnt = 0;
     for (const auto &dns : netLinkInfo.dnsList_) {
-        if (dns.address_ == "") {
+        if (dns.address_ == "" || dns.address_ == INVALID_IPV4 || dns.address_ == INVALID_IPV6) {
             continue;
         }
         domains.emplace_back(dns.hostName_);
         auto dnsFamily = GetAddrFamily(dns.address_);
         if (dns.type_ == NetManagerStandard::INetAddr::IPV4 || dnsFamily == AF_INET) {
-            if (dns.address_ == INVALID_IPV4) {
-                continue;
-            }
             if (ipv4DnsCnt++ < MAX_IPV4_DNS_NUM) {
                 servers.emplace_back(dns.address_);
                 ss << '[' << CommonUtils::ToAnonymousIp(dns.address_).c_str() << ']';
             }
         } else if (dns.type_ == NetManagerStandard::INetAddr::IPV6 || dnsFamily == AF_INET6) {
-            if (dns.address_ == INVALID_IPV6) {
-                continue;
-            }
             if (ipv6DnsCnt++ < MAX_IPV6_DNS_NUM) {
                 servers.emplace_back(dns.address_);
                 ss << '[' << CommonUtils::ToAnonymousIp(dns.address_).c_str() << ']';
