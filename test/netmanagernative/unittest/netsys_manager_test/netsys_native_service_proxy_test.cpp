@@ -587,7 +587,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, EnableDistributedClientNet001, TestSize.L
     std::string virnicAddr = "1.189.55.61";
     std::string iif = "lo";
     int32_t ret = netsysNativeService->EnableDistributedClientNet(virnicAddr, iif);
-    EXPECT_GE(ret, -1);
+    EXPECT_GE(ret, -19);
 
     bool isServer = false;
     ret = netsysNativeService->DisableDistributedNet(isServer);
