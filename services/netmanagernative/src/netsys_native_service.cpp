@@ -710,7 +710,7 @@ void NetsysNativeService::OnRemoveSystemAbility(int32_t systemAbilityId, const s
 
 int32_t NetsysNativeService::GetTotalStats(uint64_t &stats, uint32_t type)
 {
-    int32_t callingUid = IPCSkeletion::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
     NETNATIVE_LOGI("GetTotalStats callingUid:%{public}d", callingUid);
     if (bpfStats_ == nullptr) {
         NETNATIVE_LOGE("bpfStats is null.");
