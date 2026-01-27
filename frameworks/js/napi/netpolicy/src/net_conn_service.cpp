@@ -3478,24 +3478,26 @@ void NetConnService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::s
 // LCOV_EXCL_START
 void NetConnService::RegisterNetDataShareObserver()
 {
-    if (isObserverRegistered_.load()) {
+    std::lock_guard<std::mutex> lock(dataShareMutex_);
+    if (isObserverRegistered_) {
         NETMGR_LOG_E("NetDataShareObserver already registered, skip");
         return;
     }
     NETMGR_LOG_I("start registered");
     auto helper = std::make_unique<NetDataShareHelperUtilsIface>();
-    onChange_ = std::bind(&NetConnService::HandleDataShareMessage, this);
+    onChange_ = std::bind(&NetConnService::HandleDataShareMessage, shared_from_this());
     if (helper->RegisterSettingsObserver(SETTINGS_DATASHARE_URI_HTTP, onChange_) != NETSYS_SUCCESS) {
         NETMGR_LOG_E("RegisterNetDataShareObserver failed");
         return;
     }
     NETMGR_LOG_I("RegisterNetDataShareObserver success");
-    isObserverRegistered_.store(true);
+    isObserverRegistered_ = true;
 }
 
 void NetConnService::UnregisterNetDataShareObserver()
 {
-    if (!isObserverRegistered_.load()) {
+    std::lock_guard<std::mutex> lock(dataShareMutex_);
+    if (!isObserverRegistered_) {
         NETMGR_LOG_E("NetDataShareObserver not registered, skip");
         return;
     }
@@ -3504,7 +3506,7 @@ void NetConnService::UnregisterNetDataShareObserver()
         NETMGR_LOG_E("unRegisterNetDataShareObserver failed");
         return;
     }
-    isObserverRegistered_.store(false);
+    isObserverRegistered_ = false;
 }
  
 void NetConnService::HandleDataShareMessage()
