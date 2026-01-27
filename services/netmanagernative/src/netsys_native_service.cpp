@@ -31,6 +31,7 @@
 #include "system_vpn_wrapper.h"
 #endif // SUPPORT_SYSVPN
 #include "bpf_ring_buffer.h"
+#include "ipc_skeleton.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
@@ -709,6 +710,8 @@ void NetsysNativeService::OnRemoveSystemAbility(int32_t systemAbilityId, const s
 
 int32_t NetsysNativeService::GetTotalStats(uint64_t &stats, uint32_t type)
 {
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    NETNATIVE_LOGI("GetTotalStats callingUid:%{public}d", callingUid);
     if (bpfStats_ == nullptr) {
         NETNATIVE_LOGE("bpfStats is null.");
         return NetManagerStandard::NETMANAGER_ERROR;
