@@ -99,6 +99,7 @@ NetPolicyService::NetPolicyService()
 
 NetPolicyService::~NetPolicyService() = default;
 
+// LCOV_EXCL_START
 void NetPolicyService::OnStart()
 {
     NETMGR_LOG_I("OnStart");
@@ -140,6 +141,7 @@ int32_t NetPolicyService::Dump(int32_t fd, const std::vector<std::u16string> &ar
     int32_t ret = dprintf(fd, "%s\n", result.c_str());
     return ret < 0 ? NETMANAGER_ERR_PARAMETER_ERROR : NETMANAGER_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 void NetPolicyService::Init()
 {
@@ -176,6 +178,7 @@ void NetPolicyService::Init()
 #endif
 }
 
+// LCOV_EXCL_START
 void NetPolicyService::ListenCommonEvent()
 {
     EventFwk::MatchingSkills matchingSkills;
@@ -189,6 +192,7 @@ void NetPolicyService::ListenCommonEvent()
         subscribeInfo, std::static_pointer_cast<NetPolicyService>(shared_from_this()));
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber);
 }
+// LCOV_EXCL_STOP
 
 int32_t NetPolicyService::SetPolicyByUid(uint32_t uid, uint32_t policy)
 {

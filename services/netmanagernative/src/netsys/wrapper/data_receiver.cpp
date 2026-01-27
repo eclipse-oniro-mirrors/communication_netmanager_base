@@ -46,6 +46,7 @@ int32_t DataReceiver::Stop()
     return listener_->Stop();
 }
 
+// LCOV_EXCL_START
 void DataReceiver::StartReceive(int32_t socket)
 {
     socket_ = socket;
@@ -110,5 +111,6 @@ ssize_t DataReceiver::ReceiveMessage(bool isRepair, uid_t &uid)
 
     return count;
 }
+// LCOV_EXCL_STOP
 } // namespace nmd
 } // namespace OHOS

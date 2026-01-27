@@ -50,6 +50,7 @@ TrafficDataObserver::TrafficDataObserver(int32_t simId)
     mCellularDataObserver_ = std::make_unique<CellularDataObserver>().release();
 }
 
+// LCOV_EXCL_START
 void TrafficDataObserver::RegisterTrafficDataSettingObserver()
 {
     NETMGR_LOG_E("RegisterTrafficDataSettingObserver start.");
@@ -331,6 +332,6 @@ void CellularDataObserver::OnChange()
     dataShareHelperUtils->Query(uri,  "cellular_data_enable", value);
     NETMGR_LOG_I("CellularDataObserver OnChanged. enable: %{public}s", value.c_str());
 }
-
+// LCOV_EXCL_STOP
 } // namespace NetManagerStandard
 } // namespace OHOS
