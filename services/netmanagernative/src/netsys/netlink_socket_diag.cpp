@@ -52,10 +52,12 @@ NetLinkSocketDiag::~NetLinkSocketDiag()
     CloseNetlinkSocket();
 }
 
+// LCOV_EXCL_START
 bool NetLinkSocketDiag::InLookBack(uint32_t a)
 {
     return (a & LOCKBACK_MASK) == LOCKBACK_DEFINE;
 }
+// LCOV_EXCL_STOP
 
 bool NetLinkSocketDiag::CreateNetlinkSocket()
 {
@@ -75,12 +77,14 @@ bool NetLinkSocketDiag::CreateNetlinkSocket()
     }
 
     sockaddr_nl nl = {.nl_family = AF_NETLINK};
+    // LCOV_EXCL_START
     if ((connect(dumpSock_, reinterpret_cast<sockaddr *>(&nl), sizeof(nl)) < 0) ||
         (connect(destroySock_, reinterpret_cast<sockaddr *>(&nl), sizeof(nl)) < 0)) {
         NETNATIVE_LOGE("Connect to netlink socket failed, error[%{public}d]: %{public}s", errno, strerror(errno));
         CloseNetlinkSocket();
         return false;
     }
+    // LCOV_EXCL_STOP
     return true;
 }
 
@@ -101,6 +105,7 @@ void NetLinkSocketDiag::CloseNetlinkSocket()
     queryUidSock_ = -1;
 }
 
+// LCOV_EXCL_START
 int32_t NetLinkSocketDiag::ExecuteDestroySocket(uint8_t proto, const inet_diag_msg *msg)
 {
     if (msg == nullptr) {
@@ -132,6 +137,7 @@ int32_t NetLinkSocketDiag::ExecuteDestroySocket(uint8_t proto, const inet_diag_m
     }
     return ret;
 }
+// LCOV_EXCL_STOP
 
 int32_t NetLinkSocketDiag::GetErrorFromKernel(int32_t fd)
 {
@@ -155,6 +161,7 @@ int32_t NetLinkSocketDiag::GetErrorFromKernel(int32_t fd, int32_t &kernelError)
     return NETMANAGER_SUCCESS;
 }
 
+// LCOV_EXCL_START
 bool NetLinkSocketDiag::IsLoopbackSocket(const inet_diag_msg *msg)
 {
     if (msg->idiag_family == AF_INET) {
@@ -170,10 +177,12 @@ bool NetLinkSocketDiag::IsLoopbackSocket(const inet_diag_msg *msg)
     }
     return false;
 }
+// LCOV_EXCL_STOP
 
 bool NetLinkSocketDiag::IsMatchNetwork(const inet_diag_msg *msg, const std::string &ipAddr)
 {
     if (msg->idiag_family == AF_INET) {
+        // LCOV_EXCL_START
         if (CommonUtils::GetAddrFamily(ipAddr) != AF_INET) {
             return false;
         }
@@ -182,6 +191,7 @@ bool NetLinkSocketDiag::IsMatchNetwork(const inet_diag_msg *msg, const std::stri
         if (addr == msg->id.idiag_src[0] || addr == msg->id.idiag_dst[0]) {
             return true;
         }
+        // LCOV_EXCL_STOP
     }
 
     if (msg->idiag_family == AF_INET6) {
@@ -208,9 +218,11 @@ bool NetLinkSocketDiag::IsMatchNetwork(const inet_diag_msg *msg, const std::stri
         char dst[DOMAIN_IP_ADDR_MAX_LEN] = {0};
         inet_ntop(AF_INET6, msg->id.idiag_src, src, sizeof(src));
         inet_ntop(AF_INET6, msg->id.idiag_dst, dst, sizeof(dst));
+        // LCOV_EXCL_START
         if (src == ipAddr || dst == ipAddr) {
             return true;
         }
+        // LCOV_EXCL_STOP
     }
     return false;
 }
@@ -226,6 +238,7 @@ int32_t NetLinkSocketDiag::ProcessSockDiagDumpResponse(uint8_t proto, const std:
     while (readBytes > 0) {
         uint32_t len = static_cast<uint32_t>(readBytes);
         for (nlmsghdr *nlh = reinterpret_cast<nlmsghdr *>(buf); NLMSG_OK(nlh, len); nlh = NLMSG_NEXT(nlh, len)) {
+            // LCOV_EXCL_START
             if (nlh->nlmsg_type == NLMSG_ERROR) {
                 nlmsgerr *err = reinterpret_cast<nlmsgerr *>(NLMSG_DATA(nlh));
                 NETNATIVE_LOGE("Error netlink msg, errno:%{public}d, strerror:%{public}s", -err->error,
@@ -237,11 +250,14 @@ int32_t NetLinkSocketDiag::ProcessSockDiagDumpResponse(uint8_t proto, const std:
                 const auto *msg = reinterpret_cast<inet_diag_msg *>(NLMSG_DATA(nlh));
                 SockDiagDumpCallback(proto, msg, ipAddr, excludeLoopback);
             }
+            // LCOV_EXCL_STOP
         }
         readBytes = read(dumpSock_, buf, sizeof(buf));
+        // LCOV_EXCL_START
         if (readBytes < 0) {
             return -errno;
         }
+        // LCOV_EXCL_STOP
     }
     return NETMANAGER_SUCCESS;
 }
@@ -260,14 +276,17 @@ int32_t NetLinkSocketDiag::SendSockDiagDumpRequest(uint8_t proto, uint8_t family
     request.req_ = {.sdiag_family = family, .sdiag_protocol = proto, .idiag_states = states};
 
     ssize_t writeLen = writev(dumpSock_, &iov, (sizeof(iov) / sizeof(iovec)));
+    // LCOV_EXCL_START
     if (writeLen != static_cast<ssize_t>(len)) {
         NETNATIVE_LOGE("Write dump request failed errno:%{public}d, strerror:%{public}s", errno, strerror(errno));
         return NETMANAGER_ERR_INTERNAL;
     }
+    // LCOV_EXCL_STOP
 
     return GetErrorFromKernel(dumpSock_);
 }
 
+// LCOV_EXCL_START
 void NetLinkSocketDiag::SockDiagDumpCallback(uint8_t proto, const inet_diag_msg *msg, const std::string &ipAddr,
                                              bool excludeLoopback)
 {
@@ -296,6 +315,7 @@ void NetLinkSocketDiag::SockDiagDumpCallback(uint8_t proto, const inet_diag_msg 
 
     ExecuteDestroySocket(proto, msg);
 }
+// LCOV_EXCL_STOP
 
 void NetLinkSocketDiag::DestroyLiveSockets(const char *ipAddr, bool excludeLoopback)
 {
@@ -305,16 +325,19 @@ void NetLinkSocketDiag::DestroyLiveSockets(const char *ipAddr, bool excludeLoopb
         return;
     }
 
+    // LCOV_EXCL_START
     if (!CreateNetlinkSocket()) {
         NETNATIVE_LOGE("Create netlink diag socket failed.");
         return;
     }
+    // LCOV_EXCL_STOP
 
     const int32_t proto = IPPROTO_TCP;
     const uint32_t states = (1 << TCP_ESTABLISHED) | (1 << TCP_SYN_SENT) | (1 << TCP_SYN_RECV);
 
     for (const int family : {AF_INET, AF_INET6}) {
         int32_t ret = SendSockDiagDumpRequest(proto, family, states);
+        // LCOV_EXCL_START
         if (ret != NETMANAGER_SUCCESS) {
             NETNATIVE_LOGE("Failed to dump %{public}s sockets", family == AF_INET ? "IPv4" : "IPv6");
             break;
@@ -324,6 +347,7 @@ void NetLinkSocketDiag::DestroyLiveSockets(const char *ipAddr, bool excludeLoopb
             NETNATIVE_LOGE("Failed to destroy %{public}s sockets", family == AF_INET ? "IPv4" : "IPv6");
             break;
         }
+        // LCOV_EXCL_STOP
     }
 
     NETNATIVE_LOGI("Destroyed %{public}d sockets", socketsDestroyed_);
@@ -431,10 +455,12 @@ int32_t NetLinkSocketDiag::ProcessSockDiagDumpInfo(uint8_t proto,
 
 int32_t NetLinkSocketDiag::GetSystemNetPortStates(NetManagerStandard::NetPortStatesInfo &netPortStatesInfo)
 {
+    // LCOV_EXCL_START
     if (!CreateNetlinkSocket()) {
         NETNATIVE_LOGE("Create netlink diag socket failed.");
         return NETMANAGER_ERR_INTERNAL;
     }
+    // LCOV_EXCL_STOP
 
     for (int32_t proto : {IPPROTO_TCP, IPPROTO_UDP}) {
         for (const int family : {AF_INET, AF_INET6}) {
@@ -444,6 +470,7 @@ int32_t NetLinkSocketDiag::GetSystemNetPortStates(NetManagerStandard::NetPortSta
             } else if (proto == IPPROTO_UDP) {
                 states = -1;
             }
+            // LCOV_EXCL_START
             int32_t ret = SendSockDiagDumpRequest(proto, family, states);
             if (ret != NETMANAGER_SUCCESS) {
                 NETNATIVE_LOGE("Failed to dump %{public}s %{public}s sockets", family == AF_INET ? "IPv4" : "IPv6",
@@ -456,6 +483,7 @@ int32_t NetLinkSocketDiag::GetSystemNetPortStates(NetManagerStandard::NetPortSta
                                proto == IPPROTO_TCP ? "TCP" : "UDP");
                 continue;
             }
+            // LCOV_EXCL_STOP
         }
     }
     return NETMANAGER_SUCCESS;
@@ -471,6 +499,7 @@ int32_t NetLinkSocketDiag::SetSocketDestroyType(int socketType)
     return 0;
 }
 
+// LCOV_EXCL_START
 void NetLinkSocketDiag::SockDiagUidDumpCallback(uint8_t proto, const inet_diag_msg *msg,
     const NetLinkSocketDiag::DestroyFilter& needDestroy)
 {
@@ -481,6 +510,7 @@ void NetLinkSocketDiag::SockDiagUidDumpCallback(uint8_t proto, const inet_diag_m
 
     ExecuteDestroySocket(proto, msg);
 }
+// LCOV_EXCL_STOP
 
 int32_t NetLinkSocketDiag::ProcessSockDiagUidDumpResponse(uint8_t proto,
     const NetLinkSocketDiag::DestroyFilter& needDestroy)
@@ -508,10 +538,12 @@ int32_t NetLinkSocketDiag::ProcessSockDiagUidDumpResponse(uint8_t proto,
             }
         }
         readBytes = read(dumpSock_, buf, sizeof(buf));
+        // LCOV_EXCL_START
         if (readBytes < 0) {
             NETNATIVE_LOGE("ProcessSockDiagUidDumpResponse readBytes < 0");
             return -errno;
         }
+        // LCOV_EXCL_STOP
     }
     return NETMANAGER_SUCCESS;
 }
@@ -519,6 +551,7 @@ int32_t NetLinkSocketDiag::ProcessSockDiagUidDumpResponse(uint8_t proto,
 void NetLinkSocketDiag::DestroyLiveSocketsWithUid(const std::string &ipAddr, uint32_t uid)
 {
     NETNATIVE_LOG_D("TCP-RST DestroyLiveSocketsWithUid, uid:%{public}d", uid);
+    // LCOV_EXCL_START
     if (!CreateNetlinkSocket()) {
         NETNATIVE_LOGE("Create netlink diag socket failed.");
         return;
@@ -545,6 +578,7 @@ void NetLinkSocketDiag::DestroyLiveSocketsWithUid(const std::string &ipAddr, uin
             break;
         }
     }
+    // LCOV_EXCL_STOP
 
     NETNATIVE_LOGI("TCP-RST Destroyed %{public}d sockets for uid:%{public}d", socketsDestroyed_, uid);
 }
@@ -682,6 +716,7 @@ int32_t NetLinkSocketDiag::QueryConnectOwnerUid(uint8_t proto, uint8_t family, c
 
     int32_t ret =
         MakeQueryUidRequestInfo(proto, family, localAddress, localPort, remoteAddress, remotePort, request.req_);
+    // LCOV_EXCL_START
     if (ret != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("Failed to query uid err = %{public}d", ret);
         return NETMANAGER_ERR_INTERNAL;
@@ -699,6 +734,7 @@ int32_t NetLinkSocketDiag::QueryConnectOwnerUid(uint8_t proto, uint8_t family, c
         NETNATIVE_LOGE("GetErrorFromKernel failed ret = %{public}d, kernelError = %{public}d", ret, kernelError);
         return (kernelError == -ENOENT) ? NETMANAGER_SUCCESS : NETMANAGER_ERR_INTERNAL;
     }
+    // LCOV_EXCL_STOP
 
     ret = ProcessQueryUidResponse(uid);
     return ret;

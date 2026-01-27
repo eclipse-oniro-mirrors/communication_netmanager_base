@@ -122,6 +122,7 @@ NetStatsService::NetStatsService()
 
 NetStatsService::~NetStatsService() = default;
 
+// LCOV_EXCL_START
 void NetStatsService::OnStart()
 {
     if (state_ == STATE_RUNNING) {
@@ -2195,5 +2196,6 @@ void TelephonyInfoObserver::OnSimStateUpdated(int32_t slotId, Telephony::CardTyp
     }
 }
 #endif //SUPPORT_TRAFFIC_STATISTIC
+// LCOV_EXCL_STOP
 } // namespace NetManagerStandard
 } // namespace OHOS

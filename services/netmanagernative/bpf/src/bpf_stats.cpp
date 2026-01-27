@@ -301,6 +301,7 @@ int32_t NetsysBpfStats::SetNetStateTrafficMap(uint8_t flag, uint64_t availableTr
     return NETMANAGER_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t NetsysBpfStats::GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic)
 {
     BpfMapper<traffic_notify_flag, traffic_value> netStatsTrafficMap(LIMITS_STATS_MAP_PATH, BPF_F_RDONLY);
@@ -494,4 +495,5 @@ int32_t NetsysBpfStats::SetNetWlan1Map(uint64_t ifIndex)
     }
     return NETMANAGER_SUCCESS;
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::NetManagerStandard

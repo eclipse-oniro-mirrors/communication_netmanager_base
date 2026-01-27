@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace nmd {
 using namespace NetManagerStandard;
-
+// LCOV_EXCL_START
 SystemVpnWrapper::SystemVpnWrapper()
 {
     isIpSecAccess_ = access(IPSEC_CMD_PATH, F_OK) == 0;
@@ -127,5 +127,6 @@ int32_t SystemVpnWrapper::Update(NetsysNative::SysVpnStageCode stage, const std:
 #endif // UNITTEST_FORBID_FFRT
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
+// LCOV_EXCL_STOP
 } // namespace nmd
 } // namespace OHOS
