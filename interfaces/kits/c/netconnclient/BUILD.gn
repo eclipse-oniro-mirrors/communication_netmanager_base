@@ -35,8 +35,8 @@ ohos_shared_library("net_connection") {
 
   sources = [
     "$NETMANAGER_BASE_ROOT/interfaces/kits/c/netconnclient/src/net_probe.cpp",
-    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_connection_adapter.cpp",
     "$NETMANAGER_BASE_ROOT/interfaces/kits/c/netconnclient/src/net_connection.cpp",
+    "$NETMANAGER_BASE_ROOT/interfaces/kits/c/netconnclient/src/net_connection_adapter.cpp",
   ]
 
   cflags = [

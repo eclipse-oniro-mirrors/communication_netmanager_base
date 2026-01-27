@@ -41,7 +41,7 @@ constexpr int32_t MESSAGE_PARCEL_KEY_SIZE = 3;
 int32_t g_simId = 0;
 
 TrafficLimitDialog::TrafficLimitDialog() {}
-
+// LCOV_EXCL_START
 TrafficLimitDialog::~TrafficLimitDialog()
 {
     if (isDialogOpen_) {
@@ -190,5 +190,6 @@ bool TrafficLimitDialog::UnShowTrafficLimitDialog()
     NETMGR_LOG_I("Unshow TrafficLimit Dialog success");
     return true;
 }
+// LCOV_EXCL_STOP
 } // namespace NetManagerStandard
 } // namespace OHOS

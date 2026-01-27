@@ -149,7 +149,7 @@ private:
     }
 
     ffrt::thread pthread_;
-    int index_;
+    uint32_t index_;
     ffrt::mutex mutex_;
     std::atomic_bool needRun_;
     ffrt::condition_variable needRunCondition_;

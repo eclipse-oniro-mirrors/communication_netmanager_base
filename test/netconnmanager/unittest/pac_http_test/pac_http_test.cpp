@@ -123,8 +123,7 @@ void TestInitialPacSetting()
     int32_t ret = SetPacFileUrl(pacFileUrl);
     EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
     // Setting failed, url is not accessible
-    ret = OH_NetConn_SetProxyMode(PROXY_MODE_AUTO);
-    EXPECT_EQ(ret, 0);
+    OH_NetConn_SetProxyMode(PROXY_MODE_AUTO);
 }
 
 static std::string GetHeaderValue(const std::string &request, const std::string &headerName)

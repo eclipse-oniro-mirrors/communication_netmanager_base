@@ -16,7 +16,7 @@
         },
         {
             "name":"netstats_excess_monthmark_notofication_title",
-            "value":"Aviso de límite mensual",
+            "value":"Uso máximo mensual",
             "attr":{
                 "priority":"LT"
             }

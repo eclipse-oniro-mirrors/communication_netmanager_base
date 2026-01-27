@@ -43,14 +43,14 @@ ohos_shared_library("net_stats_manager") {
   branch_protector_ret = "pac_ret"
 
   sources = [
-    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_stats_cached.cpp",
-    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_stats_service.cpp",
     "src/common/net_stats_service_common.cpp",
+    "src/net_stats_cached.cpp",
     "src/net_stats_callback.cpp",
     "src/net_stats_data_handler.cpp",
     "src/net_stats_database_helper.cpp",
     "src/net_stats_history.cpp",
     "src/net_stats_listener.cpp",
+    "src/net_stats_service.cpp",
     "src/net_stats_sqlite_statement.cpp",
     "src/net_stats_subscriber.cpp",
     "src/stub/net_stats_callback_proxy.cpp",
@@ -123,10 +123,10 @@ ohos_shared_library("net_stats_manager") {
     ]
     defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
     sources += [
-      "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_stats_settings_observer.cpp",
-      "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_stats_trafficLimit_dialog.cpp",
       "src/net_stats_base.cpp",
       "src/net_stats_notification.cpp",
+      "src/net_stats_settings_observer.cpp",
+      "src/net_stats_trafficLimit_dialog.cpp",
     ]
   }
 
@@ -156,14 +156,14 @@ ohos_static_library("net_stats_manager_static") {
   branch_protector_ret = "pac_ret"
 
   sources = [
-    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_stats_cached.cpp",
-    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_stats_service.cpp",
     "src/common/net_stats_service_common.cpp",
+    "src/net_stats_cached.cpp",
     "src/net_stats_callback.cpp",
     "src/net_stats_data_handler.cpp",
     "src/net_stats_database_helper.cpp",
     "src/net_stats_history.cpp",
     "src/net_stats_listener.cpp",
+    "src/net_stats_service.cpp",
     "src/net_stats_subscriber.cpp",
     "src/net_stats_sqlite_statement.cpp",
     "src/stub/net_stats_callback_proxy.cpp",
@@ -222,10 +222,10 @@ ohos_static_library("net_stats_manager_static") {
     ]
     defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
     sources += [
-      "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_stats_settings_observer.cpp",
-      "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_stats_trafficLimit_dialog.cpp",
       "src/net_stats_base.cpp",
       "src/net_stats_notification.cpp",
+      "src/net_stats_settings_observer.cpp",
+      "src/net_stats_trafficLimit_dialog.cpp",
     ]
   }
 

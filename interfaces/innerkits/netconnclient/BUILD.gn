@@ -188,7 +188,7 @@ ohos_shared_library("net_security_config_if") {
   }
 
   sources = [
-    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netpolicy/src/network_security_config.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/network_security_config.cpp",
   ]
 
   public_configs = [

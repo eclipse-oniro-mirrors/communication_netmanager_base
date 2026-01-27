@@ -88,21 +88,26 @@ int32_t ClatManager::ClatStart(const std::string &v6Iface, int32_t netId, const 
         NETNATIVE_LOGW("Add route on %{public}s failed", tunIface.c_str());
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
-
-    clatdTrackers_[v6Iface] = {v6Iface, tunIface, v4Addr, v6Addr, nat64PrefixStr, tunFd, readSock6, writeSock6};
+    netsysService->SetClatDnsEnableIpv4(netId, true);
+    clatdTrackers_[v6Iface] = {v6Iface, tunIface, v4Addr, v6Addr, nat64PrefixStr, tunFd, readSock6, writeSock6, netId};
 
     return NETMANAGER_SUCCESS;
 }
 
-int32_t ClatManager::ClatStop(const std::string &v6Iface)
+int32_t ClatManager::ClatStop(const std::string &v6Iface, NetManagerNative *netsysService)
 {
     NETNATIVE_LOGI("Stop Clatd on %{public}s", v6Iface.c_str());
     if (clatdTrackers_.find(v6Iface) == clatdTrackers_.end()) {
         NETNATIVE_LOGW("Clatd has not started on %{public}s", v6Iface.c_str());
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
-    NETNATIVE_LOGI("Stopping clatd on %{public}s", v6Iface.c_str());
 
+    if (netsysService == nullptr) {
+        NETNATIVE_LOGW("NetManagerNative pointer is null");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    NETNATIVE_LOGI("Stopping clatd on %{public}s", v6Iface.c_str());
+    netsysService->SetClatDnsEnableIpv4(clatdTrackers_[v6Iface].netId, false);
     RouteManager::RemoveClatTunInterface(clatdTrackers_[v6Iface].tunIface);
 
     clatds_[v6Iface].Stop();

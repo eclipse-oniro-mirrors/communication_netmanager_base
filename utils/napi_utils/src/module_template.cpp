@@ -26,6 +26,9 @@ namespace NetManagerStandard {
 namespace ModuleTemplate {
 namespace {
 static constexpr const int EVENT_PARAM_NUM = 2;
+#ifndef CROSS_PLATFORM
+static int64_t g_limitSdkReport = 0;
+#endif
 } // namespace
 
 napi_value On(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events,
@@ -57,7 +60,10 @@ napi_value On(napi_env env, napi_callback_info info, const std::initializer_list
         manager->AddListener(env, event, params[1], false, asyncCallback);
     }
 #ifndef CROSS_PLATFORM
-    hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, ERR_NONE);
+    if (g_limitSdkReport == 0) {
+        hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, ERR_NONE);
+        g_limitSdkReport = 1;
+    }
 #endif
     return NapiUtils::GetUndefined(env);
 }

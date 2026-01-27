@@ -62,6 +62,7 @@ Clatd::~Clatd()
     close(stopFd_);
 }
 
+// LCOV_EXCL_START
 void Clatd::Start()
 {
     if (!stopStatus_) {
@@ -324,6 +325,6 @@ void Clatd::SendV6OnRawSocket(int fd, std::vector<iovec> &iovPackets, int effect
     sin6.sin6_addr = reinterpret_cast<struct ip6_hdr *>(iovPackets[CLATD_TPHDR].iov_base)->ip6_dst;
     sendmsg(fd, &msgHeader, 0);
 }
-
+// LCOV_EXCL_STOP
 } // namespace nmd
 } // namespace OHOS

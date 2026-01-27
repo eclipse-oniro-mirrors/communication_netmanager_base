@@ -84,7 +84,12 @@ public:
      */
     static int32_t BpfSyscall(int32_t cmd, const bpf_attr &attr)
     {
-        return static_cast<int32_t>(syscall(__NR_bpf, cmd, &attr, sizeof(attr)));
+        int32_t ret = static_cast<int32_t>(syscall(__NR_bpf, cmd, &attr, sizeof(attr)));
+        if (ret < 0) {
+            NETNATIVE_LOGE("syscall failed, ret:%{public}d, cmd:%{public}d, errno: %{public}u",
+                ret, cmd, errno);
+        }
+        return ret;
     }
 
     /**
@@ -120,7 +125,9 @@ public:
     static int32_t LookUpElem(const int32_t mapFd, const Key &key, const Value &value)
     {
         bpf_attr bpfAttr{};
-        if (memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr)) != EOK) {
+        errno_t result = memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr));
+        if (result != EOK) {
+            NETNATIVE_LOGE("memset_s failed, result:%{public}d", result);
             return NETMANAGER_ERROR;
         }
         bpfAttr.map_fd = BpfFdToU32(mapFd);

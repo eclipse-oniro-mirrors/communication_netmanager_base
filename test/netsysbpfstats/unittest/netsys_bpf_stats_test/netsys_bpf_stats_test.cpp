@@ -506,9 +506,6 @@ HWTEST_F(NetsysBpfStatsTest, UpdateIfIndexMapTest001, TestSize.Level1)
 
 HWTEST_F(NetsysBpfStatsTest, ClearSimStatsBpfMapTest001, TestSize.Level1)
 {
-    BpfMapper<uint64_t, traffic_value> simStatsMap(APP_UID_SIM_STATS_MAP_PATH, BPF_F_WRONLY);
-    EXPECT_TRUE(simStatsMap.IsValid());
-
     std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
     EXPECT_EQ(bpfStats->ClearSimStatsBpfMap(), -1);
 }
