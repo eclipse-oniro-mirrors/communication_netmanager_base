@@ -151,7 +151,7 @@ HWTEST_F(NetsysClientTest, NetSysSetResolvCacheTest001, TestSize.Level1)
     EXPECT_EQ(ret, -EINVAL);
     
     ret = NetSysSetResolvCache(netId, param, &ans, 1);
-    EXPECT_NE(ret, 0);
+    EXPECT_NE(ret, -EINVAL);
 }
 
 HWTEST_F(NetsysClientTest, NetSysGetDefaultNetworkTest001, TestSize.Level1)
