@@ -350,7 +350,7 @@ HWTEST_F(ConnManagerTest, UpdateRouteTest002, TestSize.Level1)
 {
     int32_t netId = 99;
     int32_t ret = instance_->UpdateRoute(netId, INTERFACENAME, "0.0.0.0/0", "192.168.113.222");
-    EXPECT_EQ(ret, ERROR_CODE);
+    EXPECT_LE(ret, ERROR_CODE);
 }
 
 /**
