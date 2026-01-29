@@ -415,19 +415,17 @@ HWTEST_F(DNSParamCacheTest, RemoveDuplicateNameserversTest001, TestSize.Level1)
 HWTEST_F(DNSParamCacheTest, SetDnsCacheTest001, TestSize.Level1)
 {
     DnsParamCache dnsParCache;
-    dnsParCache.CreateCacheForNet(1);
+    dnsParCache.defaultNetId_ = 1;
     std::string hostName = "test";
     AddrInfo addrInfo;
-    addrInfo.aiFamily = 2;
-    dnsParCache.SetDnsCache(1, hostName, addrInfo, 0);
+    dnsParCache.SetDnsCache(0, hostName, addrInfo);
 
-    uint32_t ttl = 10;
-    dnsParCache.SetDnsCache(1, hostName, addrInfo, ttl);
-    
+    dnsParCache.CreateCacheForNet(1);
+    dnsParCache.SetDnsCache(1, hostName, addrInfo);
+
     AddrInfo addrInfoV6;
     addrInfoV6.aiFamily = 10;
-    ttl = 700;
-    dnsParCache.SetDnsCache(1, hostName, addrInfoV6, ttl);
+    dnsParCache.SetDnsCache(1, hostName, addrInfoV6);
 
     auto res = dnsParCache.GetDnsCache(1, hostName);
     EXPECT_NE(res.size(), 0);
@@ -443,9 +441,29 @@ HWTEST_F(DNSParamCacheTest, SetDnsCacheTest002, TestSize.Level1)
 
     AddrInfo addrInfo;
     addrInfo.aiFamily = 2;
-    uint32_t ttl = 10;
-    dnsParCache.SetDnsCache(1, hostName, addrInfo, ttl);
+    dnsParCache.SetDnsCache(1, hostName, addrInfo);
     dnsParCache.SetCacheDelayed(1, hostName);
+
+    auto res = dnsParCache.GetDnsCache(1, hostName);
+    EXPECT_NE(res.size(), 0);
+    dnsParCache.DestroyNetworkCache(1);
+}
+
+HWTEST_F(DNSParamCacheTest, SetDnsCacheTest003, TestSize.Level1)
+{
+    DnsParamCache dnsParCache;
+    dnsParCache.defaultNetId_ = 1;
+    std::string hostName = "test";
+    AddrInfoWithTtl addrInfo;
+    dnsParCache.SetDnsCache(0, hostName, addrInfo);
+
+    dnsParCache.CreateCacheForNet(1);
+    addrInfo.addrInfo.aiFamily = 2;
+    addrInfo.ttl = 0;
+    dnsParCache.SetDnsCache(0, hostName, addrInfo);
+
+    addrInfo.ttl = 50;
+    dnsParCache.SetDnsCache(1, hostName, addrInfo);
 
     auto res = dnsParCache.GetDnsCache(1, hostName);
     EXPECT_NE(res.size(), 0);

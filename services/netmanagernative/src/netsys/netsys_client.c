@@ -411,6 +411,37 @@ int32_t NetSysGetResolvCache(uint16_t netId, const struct ParamWrapper param,
     return 0;
 }
 
+int32_t FillBasicAddrInfo(struct AddrInfo *addrInfo, struct addrinfo *info)
+{
+    if (addrInfo == NULL || info == NULL) {
+        return -1;
+    }
+    addrInfo->aiFlags = info->ai_flags;
+    addrInfo->aiFamily = info->ai_family;
+    addrInfo->aiSockType = (uint32_t)(info->ai_socktype);
+    addrInfo->aiProtocol = info->ai_protocol;
+    addrInfo->aiAddrLen = info->ai_addrlen;
+    // LCOV_EXCL_START
+    if (info->ai_addr &&
+        memcpy_s(&addrInfo->aiAddr, sizeof(addrInfo->aiAddr), info->ai_addr, info->ai_addrlen) != 0) {
+        DNS_CONFIG_PRINT("memcpy_s failed");
+        return -1;
+    }
+    if (info->ai_canonname &&
+        strcpy_s(addrInfo->aiCanonName, sizeof(addrInfo->aiCanonName), info->ai_canonname) != 0) {
+        DNS_CONFIG_PRINT("strcpy_s failed");
+        return -1;
+    }
+    // LCOV_EXCL_STOP
+    if (addrInfo->aiFamily == AF_INET) {
+        uint32_t addr = addrInfo->aiAddr.sin.sin_addr.s_addr;
+        if (IsAbnormalAddress(addr)) {
+            HILOG_ERROR(LOG_CORE, "SetDnsCache set abnormal zero[%{public}d]", (addr == 0));
+        }
+    }
+    return 0;
+}
+
 static int32_t FillAddrInfo(struct AddrInfo addrInfo[static MAX_RESULTS], struct addrinfo *res)
 {
     if (memset_s(addrInfo, sizeof(struct AddrInfo) * MAX_RESULTS, 0, sizeof(struct AddrInfo) * MAX_RESULTS) != 0) {
@@ -419,31 +450,38 @@ static int32_t FillAddrInfo(struct AddrInfo addrInfo[static MAX_RESULTS], struct
 
     int32_t resNum = 0;
     for (struct addrinfo *tmp = res; tmp != NULL; tmp = tmp->ai_next) {
-        addrInfo[resNum].aiFlags = tmp->ai_flags;
-        addrInfo[resNum].aiFamily = tmp->ai_family;
-        addrInfo[resNum].aiSockType = (uint32_t)(tmp->ai_socktype);
-        addrInfo[resNum].aiProtocol = tmp->ai_protocol;
-        addrInfo[resNum].aiAddrLen = tmp->ai_addrlen;
-        if (memcpy_s(&addrInfo[resNum].aiAddr, sizeof(addrInfo[resNum].aiAddr), tmp->ai_addr, tmp->ai_addrlen) != 0) {
-            DNS_CONFIG_PRINT("memcpy_s failed");
+        // LCOV_EXCL_START
+        if (FillBasicAddrInfo(&addrInfo[resNum], tmp) != 0) {
             return -1;
         }
-        if (tmp->ai_canonname &&
-            strcpy_s(addrInfo[resNum].aiCanonName, sizeof(addrInfo[resNum].aiCanonName), tmp->ai_canonname) != 0) {
-            DNS_CONFIG_PRINT("strcpy_s failed");
-            return -1;
-        }
-        if (addrInfo[resNum].aiFamily == AF_INET) {
-            uint32_t addr = addrInfo[resNum].aiAddr.sin.sin_addr.s_addr;
-            if (IsAbnormalAddress(addr)) {
-                HILOG_ERROR(LOG_CORE, "SetDnsCache set abnormal zero[%{public}d]", (addr == 0));
-            }
-        }
+        // LCOV_EXCL_STOP
 
         ++resNum;
         if (resNum >= MAX_RESULTS) {
             break;
         }
+    }
+
+    return resNum;
+}
+
+static int32_t FillDnsAns(struct AddrInfoWithTtl addrInfo[static MAX_RESULTS], struct DnsAns *res, int num)
+{
+    // LCOV_EXCL_START
+    if (memset_s(addrInfo, sizeof(struct AddrInfoWithTtl) * MAX_RESULTS,
+                 0, sizeof(struct AddrInfoWithTtl) * MAX_RESULTS) != 0) {
+        return -1;
+    }
+    // LCOV_EXCL_STOP
+
+    int32_t resNum;
+    for (resNum = 0; resNum < num && resNum < MAX_RESULTS; resNum++) {
+        // LCOV_EXCL_START
+        if (FillBasicAddrInfo(&addrInfo[resNum].addrInfo, res[resNum].ai) != 0) {
+            return -1;
+        }
+        // LCOV_EXCL_STOP
+        addrInfo[resNum].ttl = res[resNum].ttl;
     }
 
     return resNum;
@@ -460,7 +498,7 @@ static int32_t FillQueryParam(struct queryparam *orig, struct QueryParam *dest)
 }
 
 static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, const struct ParamWrapper param,
-                                            struct addrinfo *res)
+                                            struct DnsAns *res, int32_t num)
 {
     struct RequestInfo info = {
         .uid = getuid(),
@@ -475,8 +513,8 @@ static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, const st
         return result;
     }
 
-    struct AddrInfo addrInfo[MAX_RESULTS] = {};
-    int32_t resNum = FillAddrInfo(addrInfo, res);
+    struct AddrInfoWithTtl addrInfo[MAX_RESULTS] = {};
+    int32_t resNum = FillDnsAns(addrInfo, res, num);
     if (resNum < 0) {
         return CloseSocketReturn(sockFd, -1);
     }
@@ -491,49 +529,8 @@ static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, const st
         return CloseSocketReturn(sockFd, 0);
     }
 
-    if (!PollSendData(sockFd, (char *)addrInfo, sizeof(struct AddrInfo) * resNum)) {
-        DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -errno);
-    }
-    // LCOV_EXCL_STOP
-
-    return CloseSocketReturn(sockFd, 0);
-}
-
-static int32_t NetSysSetResolvCacheInternalExt(int sockFd, uint16_t netId, const struct ParamWrapper param,
-                                               struct addrinfo *res, uint32_t *ttl)
-{
-    struct RequestInfo info = {
-        .uid = getuid(),
-        .command = SET_CACHE_EXT,
-        .netId = netId,
-    };
-    if (netId == 0 && GetNetForApp() > 0) {
-        info.netId = (uint32_t)GetNetForApp();
-    }
-    int32_t result = NetsysSendKeyForCache(sockFd, param, info);
-    if (result < 0) {
-        return result;
-    }
-
-    struct AddrInfo addrInfo[MAX_RESULTS] = {};
-    int32_t resNum = FillAddrInfo(addrInfo, res);
-    if (resNum <= 0) {
-        return CloseSocketReturn(sockFd, -1);
-    }
-
     // LCOV_EXCL_START
-    if (!PollSendData(sockFd, (char *)&resNum, sizeof(resNum))) {
-        DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -errno);
-    }
-
-    if (!PollSendData(sockFd, (char *)addrInfo, sizeof(struct AddrInfo) * resNum)) {
-        DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -errno);
-    }
-
-    if (!PollSendData(sockFd, (char *)ttl, sizeof(uint32_t) * resNum)) {
+    if (!PollSendData(sockFd, (char *)addrInfo, sizeof(struct AddrInfoWithTtl) * resNum)) {
         DNS_CONFIG_PRINT("send failed %d", errno);
         return CloseSocketReturn(sockFd, -errno);
     }
@@ -542,10 +539,10 @@ static int32_t NetSysSetResolvCacheInternalExt(int sockFd, uint16_t netId, const
     return CloseSocketReturn(sockFd, 0);
 }
 
-int32_t NetSysSetResolvCache(uint16_t netId, const struct ParamWrapper param, struct addrinfo *res)
+int32_t NetSysSetResolvCache(uint16_t netId, const struct ParamWrapper param, struct DnsAns *res, int32_t num)
 {
     char *hostName = param.host;
-    if (hostName == NULL || strlen(hostName) == 0 || res == NULL) {
+    if (hostName == NULL || strlen(hostName) == 0 || res == NULL || num <= 0) {
         DNS_CONFIG_PRINT("Invalid Param");
         return -EINVAL;
     }
@@ -557,34 +554,9 @@ int32_t NetSysSetResolvCache(uint16_t netId, const struct ParamWrapper param, st
         return sockFd;
     }
 
-    int err = NetSysSetResolvCacheInternal(sockFd, netId, param, res);
+    int err = NetSysSetResolvCacheInternal(sockFd, netId, param, res, num);
     if (err < 0) {
         DNS_CONFIG_PRINT("NetSysSetResolvCache NetSysSetResolvCacheInternal err: %d", errno);
-        return err;
-    }
-    // LCOV_EXCL_STOP
-
-    return 0;
-}
-
-int32_t NetSysSetResolvCacheExt(uint16_t netId, const struct ParamWrapper param, struct addrinfo *res, uint32_t *ttl)
-{
-    char *hostName = param.host;
-    if (hostName == NULL || strlen(hostName) == 0 || res == NULL || ttl == NULL) {
-        DNS_CONFIG_PRINT("Invalid Param");
-        return -EINVAL;
-    }
-
-    int sockFd = CreateConnectionToNetSys();
-    // LCOV_EXCL_START
-    if (sockFd < 0) {
-        DNS_CONFIG_PRINT("NetSysSetResolvCache CreateConnectionToNetSys connect to netsys err: %d", errno);
-        return sockFd;
-    }
-
-    int err = NetSysSetResolvCacheInternalExt(sockFd, netId, param, res, ttl);
-    if (err < 0) {
-        DNS_CONFIG_PRINT("NetSysSetResolvCacheExt NetSysSetResolvCacheInternalExt err: %d", errno);
         return err;
     }
     // LCOV_EXCL_STOP

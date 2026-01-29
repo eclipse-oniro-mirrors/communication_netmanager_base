@@ -49,8 +49,9 @@ public:
     void SetDefaultNetwork(uint16_t netId);
 
     // for client
-    void SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo,
-        uint32_t ttl = DEFAULT_DELAYED_COUNT);
+    void SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo);
+
+    void SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfoWithTtl &addrInfo);
 
     void SetCacheDelayed(uint16_t netId, const std::string &hostName);
 
