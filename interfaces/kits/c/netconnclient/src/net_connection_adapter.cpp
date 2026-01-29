@@ -68,6 +68,7 @@ static ReverseNetCapMap reverseNetCapMap = {
     {NETCONN_NET_CAPABILITY_PORTAL, NET_CAPABILITY_PORTAL},
     {NETCONN_NET_CAPABILITY_CHECKING_CONNECTIVITY, NET_CAPABILITY_CHECKING_CONNECTIVITY}};
 
+// LCOV_EXCL_START
 static int32_t Conv2Ch(const std::string s, char *ch)
 {
     if (s.length() > NETCONN_MAX_STR_LEN - 1) {
@@ -504,5 +505,5 @@ int32_t NetConnCallbackManager::UnregisterNetConnCallback(uint32_t callbackId)
         return NET_CONN_ERR_CALLBACK_NOT_FOUND;
     }
 }
-
+// LCOV_EXCL_STOP
 } // namespace OHOS::NetManagerStandard

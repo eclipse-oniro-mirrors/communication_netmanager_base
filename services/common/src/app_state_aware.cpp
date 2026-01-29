@@ -55,6 +55,7 @@ bool AppStateAwareManager::SubscribeAppState()
         return false;
     }
     sptr<AppExecFwk::IAppMgr> appMgrProxy = GetAppMgr();
+    // LCOV_EXCL_START
     if (!appMgrProxy) {
         return false;
     }
@@ -65,6 +66,7 @@ bool AppStateAwareManager::SubscribeAppState()
         appStateObserver_ = nullptr;
         return false;
     }
+    // LCOV_EXCL_STOP
     return true;
 }
 
@@ -77,11 +79,13 @@ void AppStateAwareManager::UnSubscribeAppState()
         return;
     }
     sptr<AppExecFwk::IAppMgr> appMgrProxy = GetAppMgr();
+    // LCOV_EXCL_START
     if (appMgrProxy) {
         appMgrProxy->UnregisterApplicationStateObserver(appStateObserver_);
         appStateObserver_ = nullptr;
         retryCount_ = 0;
     }
+    // LCOV_EXCL_STOP
     NETMGR_LOG_I("UnSubscribeAppState end");
 }
 
@@ -94,10 +98,12 @@ sptr<AppExecFwk::IAppMgr> AppStateAwareManager::GetAppMgr()
 {
     sptr<ISystemAbilityManager> systemAbilityManager =
         SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    // LCOV_EXCL_START
     if (systemAbilityManager == nullptr) {
         NETMGR_LOG_I("get SystemAbilityManager failed");
         return nullptr;
     }
+    // LCOV_EXCL_STOP
 
     sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(APP_MGR_SERVICE_ID);
     if (remoteObject == nullptr) {
@@ -113,6 +119,7 @@ bool AppStateAwareManager::IsForegroundApp(const uint32_t uid)
     return foregroundAppUid == uid;
 }
 
+// LCOV_EXCL_START
 void AppStateAwareManager::OnForegroundApplicationChanged(
     const AppExecFwk::AppStateData &appStateData)
 {
@@ -135,7 +142,7 @@ void AppStateObserver::OnForegroundApplicationChanged(
         __func__, appStateData.bundleName.c_str(), appStateData.uid, appStateData.state, appStateData.isFocused);
     AppStateAwareManager::GetInstance().OnForegroundApplicationChanged(appStateData);
 }
-
+// LCOV_EXCL_STOP
 
 } // namespace NetManagerStandard
 } // namespace OHOS

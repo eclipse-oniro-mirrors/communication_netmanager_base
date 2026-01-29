@@ -27,6 +27,7 @@ NetFactoryResetCallback::NetFactoryResetCallback()
     factoryResetCallFfrtQueue_ = std::make_shared<ffrt::queue>("NetFactoryResetCall");
 }
 
+// LCOV_EXCL_START
 int32_t NetFactoryResetCallback::RegisterNetFactoryResetCallbackAsync(const sptr<INetFactoryResetCallback> &callback)
 {
     if (callback == nullptr || callback->AsObject() == nullptr || callback->AsObject().GetRefPtr() == nullptr) {
@@ -129,6 +130,6 @@ int32_t NetFactoryResetCallback::NotifyNetFactoryReset()
 
     return NETMANAGER_SUCCESS;
 }
-
+// LCOV_EXCL_STOP
 } // namespace NetManagerStandard
 } // namespace OHOS

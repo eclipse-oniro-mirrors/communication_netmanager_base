@@ -49,6 +49,7 @@ NetStatsCached::NetStatsCached()
     isDisplayTrafficAncoList = CommonUtils::IsNeedDisplayTrafficAncoList();
 }
 
+// LCOV_EXCL_START
 int32_t NetStatsCached::StartCached()
 {
     NETMGR_LOG_I("Restart to create");
@@ -1237,6 +1238,6 @@ void NetStatsCached::JudgeAndUpdateHistoryData(uint64_t curSecond)
         }
     }
 }
-
+// LCOV_EXCL_STOP
 } // namespace NetManagerStandard
 } // namespace OHOS

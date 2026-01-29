@@ -202,7 +202,7 @@ ohos_shared_library("net_service_common") {
   cflags_cc = common_cflags
 
   sources = [
-    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/app_state_aware.cpp",
+    "src/app_state_aware.cpp",
     "src/broadcast_manager.cpp",
     "src/net_manager_center.cpp",
     "src/net_settings.cpp",

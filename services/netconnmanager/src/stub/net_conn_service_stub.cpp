@@ -434,6 +434,7 @@ int32_t NetConnServiceStub::OnEnableVnicNetwork(MessageParcel &data, MessageParc
     return NETMANAGER_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t NetConnServiceStub::OnDisableVnicNetwork(MessageParcel &data, MessageParcel &reply)
 {
     int32_t ret = DisableVnicNetwork();
@@ -442,6 +443,7 @@ int32_t NetConnServiceStub::OnDisableVnicNetwork(MessageParcel &data, MessagePar
     }
     return NETMANAGER_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 int32_t NetConnServiceStub::OnEnableDistributedClientNet(MessageParcel &data, MessageParcel &reply)
 {

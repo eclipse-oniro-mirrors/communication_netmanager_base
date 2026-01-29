@@ -1160,5 +1160,12 @@ HWTEST_F(NetsysNativeServiceTest, IsMatchNetwork001, TestSize.Level1)
     msg.id.idiag_src[3] = inet_addr("192.168.1.10");
     EXPECT_TRUE(netLinkSocketDiag.IsMatchNetwork(&msg, "192.168.1.10"));
 }
+
+HWTEST_F(NetsysNativeServiceTest, StopClat001, TestSize.Level1)
+{
+    std::string ifname = "testifname";
+    auto ret = instance_->StopClat(ifname);
+    EXPECT_GE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

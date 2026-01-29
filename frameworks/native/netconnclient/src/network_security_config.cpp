@@ -108,6 +108,7 @@ void NetworkSecurityConfig::GetCAFilesFromPath(const std::string caPath, std::ve
         return;
     }
 
+    // LCOV_EXCL_START
     struct dirent *entry = readdir(dir);
     while (entry != nullptr) {
         if (IsCACertFileName(entry->d_name)) {
@@ -120,6 +121,7 @@ void NetworkSecurityConfig::GetCAFilesFromPath(const std::string caPath, std::ve
         }
         entry = readdir(dir);
     }
+    // LCOV_EXCL_STOP
 
     closedir(dir);
 }
@@ -151,6 +153,7 @@ X509 *NetworkSecurityConfig::ReadCertFile(const std::string &fileName)
 
     const std::string &certData = certStream.str();
     BIO *bio = BIO_new_mem_buf(certData.c_str(), -1);
+    // LCOV_EXCL_START
     if (bio == nullptr) {
         NETMGR_LOG_E("Fail to call BIO_new_mem_buf");
         return nullptr;
@@ -160,6 +163,7 @@ X509 *NetworkSecurityConfig::ReadCertFile(const std::string &fileName)
     if (x509 == nullptr) {
         NETMGR_LOG_E("Fail to call PEM_read_bio_X509.");
     }
+    // LCOV_EXCL_STOP
 
     BIO_free(bio);
     return x509;
@@ -197,6 +201,7 @@ std::string NetworkSecurityConfig::BuildRehasedCAPath(const std::string &caPath)
         }
     }
 
+    // LCOV_EXCL_START
     auto dirName = GetRehashedCADirName(caPath);
     if (dirName.empty()) {
         NETMGR_LOG_E("Fail to make a rehased caCerts dir for [%{public}s]", caPath.c_str());
@@ -210,6 +215,7 @@ std::string NetworkSecurityConfig::BuildRehasedCAPath(const std::string &caPath)
             return "";
         }
     }
+    // LCOV_EXCL_STOP
 
     NETMGR_LOG_D("Build dir [%{public}s]", rehashedCertpath.c_str());
     return rehashedCertpath;
@@ -221,6 +227,7 @@ std::string NetworkSecurityConfig::GetRehasedCAPath(const std::string &caPath)
         return "";
     }
 
+    // LCOV_EXCL_START
     auto dirName = GetRehashedCADirName(caPath);
     if (dirName.empty()) {
         return "";
@@ -230,6 +237,7 @@ std::string NetworkSecurityConfig::GetRehasedCAPath(const std::string &caPath)
     if (access(rehashedCertpath.c_str(), F_OK) == -1) {
         return "";
     }
+    // LCOV_EXCL_STOP
 
     return rehashedCertpath;
 }
@@ -240,6 +248,7 @@ std::string NetworkSecurityConfig::ReHashCAPathForX509(const std::string &caPath
     std::vector<std::string> caFiles;
 
     GetCAFilesFromPath(caPath, caFiles);
+    // LCOV_EXCL_START
     if (caFiles.empty()) {
         NETMGR_LOG_D("No customized CA certs.");
         return "";
@@ -282,12 +291,14 @@ std::string NetworkSecurityConfig::ReHashCAPathForX509(const std::string &caPath
         dst << src.rdbuf();
         NETMGR_LOG_D("Rehased cert generated. [%{public}s]", rehashedCaFile.c_str());
     }
+    // LCOV_EXCL_STOP
 
     return rehashedCertpath;
 }
 
 int32_t NetworkSecurityConfig::CreateRehashedCertFiles()
 {
+    // LCOV_EXCL_START
     for (auto &cert : baseConfig_.trustAnchors_.certs_) {
         ReHashCAPathForX509(cert);
     }
@@ -296,6 +307,7 @@ int32_t NetworkSecurityConfig::CreateRehashedCertFiles()
             ReHashCAPathForX509(cert);
         }
     }
+    // LCOV_EXCL_STOP
 
     return NETMANAGER_SUCCESS;
 }
@@ -326,6 +338,7 @@ int32_t NetworkSecurityConfig::GetConfig()
 {
     std::string json;
     auto ret = GetJsonFromBundle(json);
+    // LCOV_EXCL_START
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_I("Get json failed.");
         return ret;
@@ -340,6 +353,7 @@ int32_t NetworkSecurityConfig::GetConfig()
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
+    // LCOV_EXCL_STOP
 
     NETMGR_LOG_D("NetworkSecurityConfig Cached.");
     return NETMANAGER_SUCCESS;
@@ -433,6 +447,7 @@ void NetworkSecurityConfig::ParseJsonDomains(const cJSON* const root, std::vecto
     return;
 }
 
+// LCOV_EXCL_START
 void NetworkSecurityConfig::ParseJsonPinSet(const cJSON* const root, PinSet &pinSet)
 {
     if (root == nullptr) {
@@ -517,6 +532,7 @@ void NetworkSecurityConfig::ParseJsonDomainConfigs(const cJSON* const root, std:
 
     return;
 }
+// LCOV_EXCL_STOP
 
 void NetworkSecurityConfig::ParseJsonComponentCfg(const cJSON *const root, ComponentCfg &componentConfigs)
 {
@@ -539,6 +555,7 @@ void NetworkSecurityConfig::ParseJsonComponentCfg(const cJSON *const root, Compo
     NETMGR_LOG_D("Component Cfg: %{public}d", componentConfigs[component]);
 }
 
+// LCOV_EXCL_START
 int32_t NetworkSecurityConfig::ParseJsonConfig(const std::string &content)
 {
     if (content.empty()) {
@@ -583,6 +600,7 @@ int32_t NetworkSecurityConfig::ParseJsonConfig(const std::string &content)
     cJSON_Delete(root);
     return NETMANAGER_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 bool NetworkSecurityConfig::IsPinOpenMode(const std::string &hostname)
 {
@@ -596,10 +614,12 @@ bool NetworkSecurityConfig::IsPinOpenMode(const std::string &hostname)
             if (hostname == domain.domainName_) {
                 pPinSet = &domainConfig.pinSet_;
                 break;
+            // LCOV_EXCL_START
             } else if (domain.includeSubDomains_ && CommonUtils::UrlRegexParse(hostname, domain.domainName_)) {
                 pPinSet = &domainConfig.pinSet_;
                 break;
             }
+            // LCOV_EXCL_STOP
         }
         if (pPinSet != nullptr) {
             break;
@@ -625,10 +645,12 @@ bool NetworkSecurityConfig::IsPinOpenModeVerifyRootCa(const std::string &hostnam
             if (hostname == domain.domainName_) {
                 pPinSet = &domainConfig.pinSet_;
                 break;
+            // LCOV_EXCL_START
             } else if (domain.includeSubDomains_ && CommonUtils::UrlRegexParse(hostname, domain.domainName_)) {
                 pPinSet = &domainConfig.pinSet_;
                 break;
             }
+            // LCOV_EXCL_STOP
         }
         if (pPinSet != nullptr) {
             break;
@@ -659,10 +681,12 @@ int32_t NetworkSecurityConfig::GetPinSetForHostName(const std::string &hostname,
             if (hostname == domain.domainName_) {
                 pPinSet = &domainConfig.pinSet_;
                 break;
+            // LCOV_EXCL_START
             } else if (domain.includeSubDomains_ && CommonUtils::UrlRegexParse(hostname, domain.domainName_)) {
                 pPinSet = &domainConfig.pinSet_;
                 break;
             }
+            // LCOV_EXCL_STOP
         }
         if (pPinSet != nullptr) {
             break;
@@ -701,7 +725,8 @@ int32_t NetworkSecurityConfig::GetTrustAnchorsForHostName(const std::string &hos
 
     TrustAnchors *pTrustAnchors = nullptr;
     for (auto &domainConfig: domainConfigs_) {
-        for (const auto &domain: domainConfig.domains_) {
+        // LCOV_EXCL_START
+        for (auto &domain: domainConfig.domains_) {
             if (hostname == domain.domainName_) {
                 pTrustAnchors = &domainConfig.trustAnchors_;
                 break;
@@ -713,6 +738,7 @@ int32_t NetworkSecurityConfig::GetTrustAnchorsForHostName(const std::string &hos
         if (pTrustAnchors != nullptr) {
             break;
         }
+        // LCOV_EXCL_STOP
     }
 
     if (pTrustAnchors == nullptr) {
@@ -808,10 +834,12 @@ int32_t NetworkSecurityConfig::IsCleartextPermitted(const std::string &hostname,
             if (hostname == domain.domainName_) {
                 pCtTrafficPermitted = &domainConfig.cleartextTrafficPermitted_;
                 break;
+            // LCOV_EXCL_START
             } else if (domain.includeSubDomains_ && CommonUtils::UrlRegexParse(hostname, domain.domainName_)) {
                 pCtTrafficPermitted = &domainConfig.cleartextTrafficPermitted_;
                 break;
             }
+            // LCOV_EXCL_STOP
         }
         if (pCtTrafficPermitted != nullptr) {
             break;

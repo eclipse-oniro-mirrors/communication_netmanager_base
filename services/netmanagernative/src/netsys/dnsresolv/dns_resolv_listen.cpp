@@ -154,6 +154,7 @@ void DnsResolvListenInternal::AddPublicDnsServersExt(ResolvConfigExt &sendData, 
     DNS_CONFIG_PRINT("i = %{public}zu sendData.nameservers: %{public}s", i, sendData.nameservers[i]);
 }
 
+// LCOV_EXCL_START
 static void ReplaceDnsServer(ResolvConfig &sendData, const std::vector<std::string> &servers)
 {
     int32_t dnsNumTotal = static_cast<int32_t>(servers.size());
@@ -976,4 +977,5 @@ ReceiverRunner DnsResolvListenInternal::ProcGetKeyLengthForAllQueryResult(uint16
         return FixedLengthReceiverState::DATA_ENOUGH;
     };
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::nmd

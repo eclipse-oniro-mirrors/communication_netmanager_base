@@ -164,6 +164,10 @@ HWTEST_F(DNSParamCacheTest, EnableIpv4Test01, TestSize.Level1)
     DnsParamCache dnsParCache;
     uint16_t netId = 1;
     dnsParCache.CreateCacheForNet(netId);
+    dnsParCache.SetClatDnsEnableIpv4(netId, true);
+    EXPECT_TRUE(dnsParCache.IsIpv4Enable(netId));
+    dnsParCache.SetClatDnsEnableIpv4(netId, false);
+    EXPECT_FALSE(dnsParCache.IsIpv4Enable(netId));
     dnsParCache.EnableIpv4(netId);
     EXPECT_TRUE(dnsParCache.IsIpv4Enable(netId));
     dnsParCache.defaultNetId_ = netId;

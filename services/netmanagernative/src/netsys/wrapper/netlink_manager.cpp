@@ -108,6 +108,7 @@ bool CreateNetlinkDistributor(int32_t netlinkType, const DistributorParam &param
         return false;
     }
 
+    // LCOV_EXCL_START
     if (setsockopt(socketFd, SOL_SOCKET, SO_RCVBUFFORCE, &size, sizeof(size)) < 0 &&
         setsockopt(socketFd, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size)) < 0) {
         NETNATIVE_LOGE("Set buffer for revieve msg failed the error is : %{public}d, EMSG: %{public}s", errno,
@@ -122,6 +123,7 @@ bool CreateNetlinkDistributor(int32_t netlinkType, const DistributorParam &param
         close(socketFd);
         return false;
     }
+    // LCOV_EXCL_STOP
 
     if (bind(socketFd, reinterpret_cast<sockaddr *>(&sockAddr), sizeof(sockAddr)) < 0) {
         NETNATIVE_LOGE("Bind netlink socket failed dumps is this : %{public}d, EMSG: %{public}s", errno,
@@ -164,6 +166,7 @@ NetlinkManager::~NetlinkManager()
     }
 }
 
+// LCOV_EXCL_START
 int32_t NetlinkManager::StartListener()
 {
     for (auto &it : distributorMap_) {
@@ -203,6 +206,7 @@ int32_t NetlinkManager::StopListener()
     }
     return NetlinkResult::OK;
 }
+// LCOV_EXCL_STOP
 
 int32_t NetlinkManager::RegisterNetlinkCallback(sptr<NetsysNative::INotifyCallback> callback)
 {

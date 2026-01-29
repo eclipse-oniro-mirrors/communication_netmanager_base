@@ -194,6 +194,18 @@ void DnsParamCache::EnableIpv4(uint16_t netId)
     it->second.EnableIpv4();
 }
 
+void DnsParamCache::SetClatDnsEnableIpv4(int32_t netId, bool enable)
+{
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
+    auto it = serverConfigMap_.find(netId);
+    if (it == serverConfigMap_.end()) {
+        DNS_CONFIG_PRINT("SetClatDnsEnableIpv4 netid:%{public}d,", netId);
+        return;
+    }
+    NETNATIVE_LOGI("DnsParamCache SetClatDnsEnableIpv4, enable =%{public}d", enable);
+    it->second.SetClatDnsEnableIpv4(enable);
+}
+
 bool DnsParamCache::IsIpv4Enable(uint16_t netId)
 {
     if (netId == 0) {
@@ -206,8 +218,7 @@ bool DnsParamCache::IsIpv4Enable(uint16_t netId)
         DNS_CONFIG_PRINT("IsIpv4Enable netid:%{public}d,", netId);
         return false;
     }
-
-    return it->second.IsIpv4Enable();
+    return it->second.IsIpv4Enable() || it->second.IsClatIpv4Enable();
 }
 
 int32_t DnsParamCache::GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,

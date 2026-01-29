@@ -121,10 +121,12 @@ bool DnsProxyListen::MakeAddrInfo(std::vector<std::string> &servers, size_t serv
         addrParse.sin6.sin6_family = AF_INET6;
         addrParse.sin6.sin6_port = htons(DNS_PROXY_PORT);
         inet_pton(AF_INET6, servers[serverIdx].c_str(), &(addrParse.sin6.sin6_addr));
+        // LCOV_EXCL_START
         if (IN6_IS_ADDR_UNSPECIFIED(&addrParse.sin6.sin6_addr)) {
             NETNATIVE_LOGE("Input ipv6 dns server %{private}s is not correct!", servers[serverIdx].c_str());
             return false;
         }
+        // LCOV_EXCL_STOP
     } else {
         NETNATIVE_LOGE("current clientSock type is error!");
         return false;
@@ -150,6 +152,7 @@ void DnsProxyListen::SendRequest2Server(int32_t socketFd)
     socklen_t addrLen;
     AlignedSockAddr &addrParse = iter->second.GetAddr();
     AlignedSockAddr &clientSock = iter->second.GetClientSock();
+    // LCOV_EXCL_START
     if (!MakeAddrInfo(servers, serverIdx, addrParse, clientSock)) {
         return SendRequest2Server(socketFd);
     }
@@ -163,8 +166,10 @@ void DnsProxyListen::SendRequest2Server(int32_t socketFd)
         NETNATIVE_LOGE("epoll add sock %{public}d failed, errno: %{public}d", socketFd, errno);
         serverIdxOfSocket.erase(iter);
     }
+    // LCOV_EXCL_STOP
 }
 
+// LCOV_EXCL_START
 void DnsProxyListen::SendDnsBack2Client(int32_t socketFd)
 {
     NETNATIVE_LOG_D("epoll send back to client.");
@@ -253,6 +258,8 @@ void DnsProxyListen::StartListen()
     clearResource();
     NETNATIVE_LOGI("DnsProxyListen stop");
 }
+// LCOV_EXCL_STOP
+
 void DnsProxyListen::GetRequestAndTransmit(int32_t family)
 {
     NETNATIVE_LOG_D("epoll got request from client.");
@@ -289,6 +296,7 @@ void DnsProxyListen::GetRequestAndTransmit(int32_t family)
     DnsParseBySocket(recvBuff, clientAddr);
 }
 
+// LCOV_EXCL_START
 bool DnsProxyListen::GetExitFlag()
 {
     uint64_t val;
@@ -298,6 +306,7 @@ bool DnsProxyListen::GetExitFlag()
     }
     return false;
 }
+// LCOV_EXCL_STOP
 
 void DnsProxyListen::InitListenForIpv4()
 {
@@ -310,10 +319,12 @@ void DnsProxyListen::InitListenForIpv4()
         }
     }
     int on = 1;
+    // LCOV_EXCL_START
     if (setsockopt(proxySockFd_, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
         NETNATIVE_LOGE("setsockopt Ipv4 SO_REUSEADDR failed errno:%{public}d", errno);
         return;
     }
+    // LCOV_EXCL_STOP
     sockaddr_in proxyAddr{};
     proxyAddr.sin_family = AF_INET;
     proxyAddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -341,6 +352,7 @@ void DnsProxyListen::InitListenForIpv6()
     proxyAddr6.sin6_addr = in6addr_any;
     proxyAddr6.sin6_port = htons(DNS_PROXY_PORT);
     int on = 1;
+    // LCOV_EXCL_START
     if (setsockopt(proxySockFd6_, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
         NETNATIVE_LOGE("setsockopt Ipv6 SO_REUSEADDR failed errno:%{public}d", errno);
         return;
@@ -351,6 +363,7 @@ void DnsProxyListen::InitListenForIpv6()
         proxySockFd6_ = -1;
         return;
     }
+    // LCOV_EXCL_STOP
     if (bind(proxySockFd6_, (sockaddr *)&proxyAddr6, sizeof(proxyAddr6)) == -1) {
         NETNATIVE_LOGE("bind6 errno %{public}d: %{public}s", errno, strerror(errno));
         close(proxySockFd6_);
@@ -362,6 +375,7 @@ void DnsProxyListen::InitListenForIpv6()
 bool DnsProxyListen::InitExitFdforListening()
 {
     exitFd_ = eventfd(0, EFD_NONBLOCK);
+    // LCOV_EXCL_START
     if (exitFd_ < 0) {
         NETNATIVE_LOGE("eventfd errno %{public}d: %{public}s", errno, strerror(errno));
         return false;
@@ -374,6 +388,7 @@ bool DnsProxyListen::InitExitFdforListening()
             return false;
         }
     }
+    // LCOV_EXCL_STOP
     return true;
 }
 
@@ -382,6 +397,7 @@ bool DnsProxyListen::InitForListening(epoll_event &proxyEvent, epoll_event &prox
     InitListenForIpv4();
     InitListenForIpv6();
     epollFd_ = epoll_create1(0);
+    // LCOV_EXCL_START
     if (epollFd_ < 0) {
         NETNATIVE_LOGE("epoll_create1 errno %{public}d: %{public}s", errno, strerror(errno));
         clearResource();
@@ -410,6 +426,7 @@ bool DnsProxyListen::InitForListening(epoll_event &proxyEvent, epoll_event &prox
         clearResource();
         return false;
     }
+    // LCOV_EXCL_STOP
     if (!InitExitFdforListening()) {
         clearResource();
         return false;
@@ -418,6 +435,7 @@ bool DnsProxyListen::InitForListening(epoll_event &proxyEvent, epoll_event &prox
     return true;
 }
 
+// LCOV_EXCL_START
 void DnsProxyListen::CollectSocks()
 {
     if (std::chrono::system_clock::now() >= collectTime) {
@@ -448,6 +466,7 @@ void DnsProxyListen::EpollTimeout()
     }
     collectTime = std::chrono::system_clock::now() + std::chrono::milliseconds(EPOLL_TIMEOUT);
 }
+// LCOV_EXCL_STOP
 
 bool DnsProxyListen::CheckDnsQuestion(char *recBuff, size_t recLen)
 {

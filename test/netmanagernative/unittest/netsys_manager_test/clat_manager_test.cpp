@@ -88,8 +88,9 @@ HWTEST_F(ClatManagerTest, ClatStartTest001, TestSize.Level1)
 HWTEST_F(ClatManagerTest, ClatStopTest001, TestSize.Level1)
 {
     const std::string v6Iface = "";
-
-    int32_t ret = instance_->ClatStop(v6Iface);
+    NetManagerNative *netsysService = nullptr;
+    netsysService = new NetManagerNative();
+    int32_t ret = instance_->ClatStop(v6Iface, netsysService);
     EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
 }
 

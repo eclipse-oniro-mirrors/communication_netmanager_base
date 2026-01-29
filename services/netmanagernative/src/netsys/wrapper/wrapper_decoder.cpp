@@ -687,9 +687,9 @@ bool WrapperDecoder::InterpretNflogPacket(const nlmsghdr *hdrMsg)
                 break;
         }
     }
-    uint64_t time =
+    uint64_t time = static_cast<uint64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
-            .count();
+            .count());
     FiveTuple fiveTuple;
     const uint8_t family = nfg->nfgen_family;
     SaveFiveTupleMsg(payload, payloadLen, family, fiveTuple);

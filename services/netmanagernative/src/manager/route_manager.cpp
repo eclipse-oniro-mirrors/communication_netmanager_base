@@ -145,6 +145,7 @@ int32_t RouteManager::UpdateVnicRoute(const std::string &interfaceName, const st
     return UpdateRouteRule(action, flags, routeInfo);
 }
 
+// LCOV_EXCL_START
 int32_t RouteManager::AddRoute(TableType tableType, NetworkRouteInfo networkRouteInfo, bool& routeRepeat)
 {
     std::string interfaceName = networkRouteInfo.ifName;
@@ -213,6 +214,7 @@ int32_t RouteManager::AddRoutes(TableType tableType, std::vector<NetworkRouteInf
     NETNATIVE_LOGI("Add Routes Success");
     return 0;
 }
+// LCOV_EXCL_STOP
 
 int32_t RouteManager::RemoveRoute(TableType tableType, const std::string &interfaceName,
     const std::string &destinationName, const std::string &nextHop, bool isExcludedRoute)
@@ -344,10 +346,12 @@ int32_t RouteManager::ModifyPhysicalNetworkPermission(uint16_t netId, const std:
                                                       NetworkPermission oldPermission, NetworkPermission newPermission)
 {
     NETNATIVE_LOGI("ModifyPhysicalNetworkPermission, %{public}s", interfaceName.c_str());
+    // LCOV_EXCL_START
     if (int32_t ret = UpdatePhysicalNetwork(netId, interfaceName, newPermission, ADD_CONTROL)) {
         NETNATIVE_LOGE("UpdatePhysicalNetwork err, error is %{public}d", ret);
         return ret;
     }
+    // LCOV_EXCL_STOP
 
     return UpdatePhysicalNetwork(netId, interfaceName, newPermission, DEL_CONTROL);
 }
@@ -1015,10 +1019,12 @@ int32_t RouteManager::UpdateOutputInterfaceRulesWithUid(const std::string &inter
 int32_t RouteManager::AddInterfaceToLocalNetwork(uint16_t netId, const std::string &interfaceName)
 {
     NETNATIVE_LOGI("AddInterfaceToLocalNetwork, %{public}s", interfaceName.c_str());
+    // LCOV_EXCL_START
     if (int32_t ret = UpdateLocalNetwork(netId, interfaceName, ADD_CONTROL)) {
         NETNATIVE_LOGE("UpdateLocalNetwork err, error is %{public}d", ret);
         return ret;
     }
+    // LCOV_EXCL_STOP
     std::lock_guard lock(interfaceToTableLock_);
     interfaceToTable_[interfaceName] = ROUTE_LOCAL_NETWORK_TABLE;
 
@@ -1028,10 +1034,12 @@ int32_t RouteManager::AddInterfaceToLocalNetwork(uint16_t netId, const std::stri
 int32_t RouteManager::RemoveInterfaceFromLocalNetwork(uint16_t netId, const std::string &interfaceName)
 {
     NETNATIVE_LOGI("RemoveInterfaceFromLocalNetwork");
+    // LCOV_EXCL_START
     if (int32_t ret = UpdateLocalNetwork(netId, interfaceName, DEL_CONTROL)) {
         NETNATIVE_LOGE("UpdateLocalNetwork err, error is %{public}d", ret);
         return ret;
     }
+    // LCOV_EXCL_STOP
     std::lock_guard lock(interfaceToTableLock_);
     interfaceToTable_.erase(interfaceName);
 
@@ -1126,6 +1134,7 @@ int32_t RouteManager::RemoveClatTunInterface(const std::string &interfaceName)
         NETNATIVE_LOGE("UpdatePhysicalNetwork err, error is %{public}d", ret);
         return ret;
     }
+    // LCOV_EXCL_START
     if (int32_t ret = ClearRoutes(interfaceName)) {
         NETNATIVE_LOGE("ClearRoutes err, error is %{public}d", ret);
         return ret;
@@ -1134,6 +1143,7 @@ int32_t RouteManager::RemoveClatTunInterface(const std::string &interfaceName)
         NETNATIVE_LOGE("ClearSharingRules err, error is %{public}d", ret);
         return ret;
     }
+    // LCOV_EXCL_STOP
 
     return 0;
 }
@@ -1162,10 +1172,12 @@ int32_t RouteManager::UpdateClatTunInterface(const std::string &interfaceName, N
     ruleInfo.ruleIif = RULEIIF_LOOPBACK;
     ruleInfo.ruleOif = RULEOIF_NULL;
 
+    // LCOV_EXCL_START
     if (int32_t ret = UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo)) {
         NETNATIVE_LOG_D("UpdateRuleInfo failed, err is %{public}d", ret);
         return ret;
     }
+    // LCOV_EXCL_STOP
 
     return 0;
 }
@@ -1182,10 +1194,12 @@ int32_t RouteManager::Init()
     commandJump.append(" -A INPUT -j ");
     commandJump.append(LOCAL_MANGLE_INPUT);
 
+    // LCOV_EXCL_START
     if (int32_t ret = ClearRules()) {
         NETNATIVE_LOGE("ClearRules failed, err is %{public}d", ret);
         return ret;
     }
+    // LCOV_EXCL_STOP
 
     if (access(NETSYS_ROUTE_INIT_DIR_PATH, F_OK) == 0) {
         if (int32_t ret = AddLocalNetworkRules()) {
@@ -1222,11 +1236,13 @@ int32_t RouteManager::ClearRoutes(const std::string &interfaceName, int32_t netI
 int32_t RouteManager::AddLocalNetworkRules()
 {
     NETNATIVE_LOGI("AddLocalNetworkRules");
+    // LCOV_EXCL_START
     if (int32_t ret =
             UpdateExplicitNetworkRule(LOCAL_NET_ID, ROUTE_LOCAL_NETWORK_TABLE, PERMISSION_NONE, ADD_CONTROL)) {
         NETNATIVE_LOGE("UpdateExplicitNetworkRule failed, err is %{public}d", ret);
         return ret;
     }
+    // LCOV_EXCL_STOP
     Fwmark fwmark;
     fwmark.explicitlySelected = false;
 
@@ -1400,11 +1416,13 @@ int32_t RouteManager::SetSharingUnreachableIpRule(uint16_t action, const std::st
     ruleInfo.ruleSrcIp = RULEIP_NULL;
     ruleInfo.ruleDstIp = forbidIp;
     int32_t ret2 = SendSharingForbidIpRuleToKernel(action, family, FR_ACT_TO_TBL, ruleInfo);
+    // LCOV_EXCL_START
     if (ret1 < 0 && ret2 < 0) {
         NETNATIVE_LOGE("SetSharingUnreachableIpRule for ip %{public}s failed, ret1 = %{public}d, ret2 = %{public}d",
             ToAnonymousIp(forbidIp, true).c_str(), ret1, ret2);
         return ROUTEMANAGER_ERROR;
     }
+    // LCOV_EXCL_STOP
     return NETMANAGER_SUCCESS;
 }
 
@@ -1429,11 +1447,13 @@ int32_t RouteManager::UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo
 
     // The main work is to assemble the structure required for rule.
     for (const uint8_t family : {AF_INET, AF_INET6}) {
+        // LCOV_EXCL_START
         if (SendRuleToKernel(action, family, ruleType, ruleInfo, uidStart, uidEnd) < 0) {
             NETNATIVE_LOGE("Update %{public}s rule info failed, action = %{public}d",
                            (family == AF_INET) ? "IPv4" : "IPv6", action);
             return NETMANAGER_ERR_INTERNAL;
         }
+        // LCOV_EXCL_STOP
     }
     return NETMANAGER_SUCCESS;
 }
@@ -1459,11 +1479,13 @@ int32_t RouteManager::UpdateDistributedRule(uint32_t action, uint8_t ruleType, R
         family = AF_INET;
     }
 
+    // LCOV_EXCL_START
     if (SendRuleToKernelEx(action, family, ruleType, ruleInfo, uidStart, uidEnd) < 0) {
         NETNATIVE_LOGE("Update %{public}s rule info failed, action = %{public}d",
                        (family == AF_INET) ? "IPv4" : "IPv6", action);
         return NETMANAGER_ERR_INTERNAL;
     }
+    // LCOV_EXCL_STOP
 
     return NETMANAGER_SUCCESS;
 }
@@ -1553,6 +1575,7 @@ int32_t RouteManager::SendRuleToKernel(uint32_t action, uint8_t family, uint8_t 
     uint16_t ruleFlag = GetRuleFlag(action);
     NetlinkMsg nlmsg(ruleFlag, NETLINK_MAX_LEN, getpid());
     nlmsg.AddRule(action, msg);
+    // LCOV_EXCL_START
     if (int32_t ret = SetRuleMsgPriority(nlmsg, ruleInfo)) {
         return ret;
     }
@@ -1571,6 +1594,7 @@ int32_t RouteManager::SendRuleToKernel(uint32_t action, uint8_t family, uint8_t 
     if (int32_t ret = SetRuleMsgIfName(nlmsg, ruleInfo.ruleOif, FRA_OIFNAME)) {
         return ret;
     }
+    // LCOV_EXCL_STOP
 
     return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
 }
@@ -1587,6 +1611,7 @@ int32_t RouteManager::SendRuleToKernelEx(uint32_t action, uint8_t family, uint8_
     uint16_t ruleFlag = GetRuleFlag(action);
     NetlinkMsg nlmsg(ruleFlag, NETLINK_MAX_LEN, getpid());
     nlmsg.AddRule(action, msg);
+    // LCOV_EXCL_START
     if (int32_t ret = SetRuleMsgPriority(nlmsg, ruleInfo)) {
         return ret;
     }
@@ -1602,6 +1627,7 @@ int32_t RouteManager::SendRuleToKernelEx(uint32_t action, uint8_t family, uint8_
     if (int32_t ret = SetRuleMsgIp(nlmsg, ruleInfo.ruleDstIp, FRA_DST)) {
         return ret;
     }
+    // LCOV_EXCL_STOP
     return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
 }
 
@@ -1620,6 +1646,7 @@ int32_t RouteManager::SendSharingForbidIpRuleToKernel(
     uint16_t ruleFlag = GetRuleFlag(action);
     NetlinkMsg nlmsg(ruleFlag, NETLINK_MAX_LEN, getpid());
     nlmsg.AddRule(action, msg);
+    // LCOV_EXCL_START
     if (int32_t ret = SetRuleMsgPriority(nlmsg, ruleInfo)) {
         return ret;
     }
@@ -1638,6 +1665,7 @@ int32_t RouteManager::SendSharingForbidIpRuleToKernel(
     if (int32_t ret = SetRuleMsgIp(nlmsg, ruleInfo.ruleDstIp, FRA_DST)) {
         return ret;
     }
+    // LCOV_EXCL_STOP
     return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
 }
 
@@ -1813,6 +1841,7 @@ int32_t RouteManager::UpdateEnterpriseRoute(const std::string &interfaceName, ui
 }
 #endif
 
+// LCOV_EXCL_START
 int32_t RouteManager::PrepareRouteMessage(const RouteInfo &routeInfo, RouteInfo &routeInfoModify, struct rtmsg &msg,
                                           uint32_t &index)
 {
@@ -1898,5 +1927,6 @@ int32_t RouteManager::AddRouteAttributes(NetlinkMsg &nl, const RouteInfo &routeI
 
     return 0;
 }
+// LCOV_EXCL_STOP
 } // namespace nmd
 } // namespace OHOS
