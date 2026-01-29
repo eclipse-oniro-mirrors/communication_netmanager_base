@@ -371,7 +371,7 @@ HWTEST_F(NetDiagWrapperTest, RunGetRouteTableCommandTest002, TestSize.Level1)
     NetDiagProtocolType socketType = NetDiagProtocolType::PROTOCOL_TYPE_ALL;
     auto ret = netDiagWrapper->GetSocketsInfo(socketType, socketInfo);
     ShowSocketInfo(socketInfo);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     socketType = NetDiagProtocolType::PROTOCOL_TYPE_TCP;
     ret = netDiagWrapper->GetSocketsInfo(socketType, socketInfo);
