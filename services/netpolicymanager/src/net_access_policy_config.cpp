@@ -31,6 +31,7 @@ constexpr const char *ARRAY_NAME = "configs";
 constexpr const char *ITEM_BUNDLE_NAME = "bundleName";
 constexpr const char *ITEM_DISABLE_WLAN_SWITCH = "disableWlanSwitch";
 constexpr const char *ITEM_DISABLE_CELLULAR_SWITCH = "disableCellularSwitch";
+constexpr size_t MAX_NET_ACCESS_COUNT = 1000;
 } // namespace
 NetAccessPolicyConfigUtils &NetAccessPolicyConfigUtils::GetInstance()
 {
@@ -42,24 +43,56 @@ std::vector<NetAccessPolicyConfig> NetAccessPolicyConfigUtils::GetNetAccessPolic
 {
     std::lock_guard<ffrt::mutex> lock(lock_);
     Init();
+    size_t totalSize = netAccessPolicyConfigs_.size() + dynamicNetAccessPolicyConfigs_.size();
+    // LCOV_EXCL_START
+    if (totalSize > MAX_NET_ACCESS_COUNT) {
+        NETMGR_LOG_W("Total configs exceed limit(%{public}zu)", totalSize);
+        return netAccessPolicyConfigs_;
+    }
+    // LCOV_EXCL_STOP
+
     std::vector<NetAccessPolicyConfig> result;
-    result.reserve(netAccessPolicyConfigs_.size() + dynamicNetAccessPolicyConfigs_.size());
+    result.reserve(totalSize);
     
     result.insert(result.end(), netAccessPolicyConfigs_.begin(), netAccessPolicyConfigs_.end());
-    result.insert(result.end(), dynamicNetAccessPolicyConfigs_.begin(), dynamicNetAccessPolicyConfigs_.end());
+    
+    for (const auto &config : dynamicNetAccessPolicyConfigs_) {
+        result.push_back(config.second);
+    }
     return result;
 }
 
-void NetAccessPolicyConfigUtils::UpdateNetAccessPolicyConfig(const std::vector<std::string> &bundleNames)
+void NetAccessPolicyConfigUtils::AddNetAccessPolicyConfig(const std::vector<std::string> &bundleNames)
 {
+    if (bundleNames.empty()) {
+        NETMGR_LOG_W("bundle names is empty.");
+        return;
+    }
     std::lock_guard<ffrt::mutex> lock(lock_);
-    dynamicNetAccessPolicyConfigs_.clear();
     for (const auto &bundleName : bundleNames) {
+        if (dynamicNetAccessPolicyConfigs_.find(bundleName) != dynamicNetAccessPolicyConfigs_.end()) {
+            NETMGR_LOG_W("Bundle: %{public}s has already been added.", bundleName.c_str());
+            continue;
+        }
         NetAccessPolicyConfig config;
         config.bundleName = bundleName;
         config.disableWlanSwitch = true;
         config.disableCellularSwitch = true;
-        dynamicNetAccessPolicyConfigs_.push_back(config);
+        dynamicNetAccessPolicyConfigs_.emplace(bundleName, config);
+    }
+}
+
+void NetAccessPolicyConfigUtils::RemoveNetAccessPolicyConfig(const std::vector<std::string> &bundleNames)
+{
+    if (bundleNames.empty()) {
+        NETMGR_LOG_W("bundle names is empty.");
+        return;
+    }
+    std::lock_guard<ffrt::mutex> lock(lock_);
+    for (const auto &bundleName : bundleNames) {
+        if (dynamicNetAccessPolicyConfigs_.erase(bundleName) == 0) {
+            NETMGR_LOG_W("Bundle: %{public}s not found.", bundleName.c_str());
+        }
     }
 }
 

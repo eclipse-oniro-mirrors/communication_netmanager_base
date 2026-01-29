@@ -52,5 +52,52 @@ HWTEST_F(NetAccessPolicyConfigUtilsTest, ReadFileTest001, TestSize.Level1)
     
     std::string path2 = "etc/netmanager/net_access_policy_config.json";
 }
+
+HWTEST_F(NetAccessPolicyConfigUtilsTest, AddAndRemoveNetAccessPolicyConfigTest001, TestSize.Level1)
+{
+    std::vector<std::string> bundleNames = {"com.example.test01"};
+    auto configs = NetAccessPolicyConfigUtils::GetInstance().GetNetAccessPolicyConfig();
+    int32_t num = configs.size();
+    NetAccessPolicyConfigUtils::GetInstance().AddNetAccessPolicyConfig(bundleNames);
+    configs = NetAccessPolicyConfigUtils::GetInstance().GetNetAccessPolicyConfig();
+    EXPECT_EQ(configs.size(), num + 1);
+
+    NetAccessPolicyConfigUtils::GetInstance().RemoveNetAccessPolicyConfig(bundleNames);
+    configs = NetAccessPolicyConfigUtils::GetInstance().GetNetAccessPolicyConfig();
+    EXPECT_EQ(configs.size(), num);
+}
+
+HWTEST_F(NetAccessPolicyConfigUtilsTest, AddAndRemoveNetAccessPolicyConfigTest002, TestSize.Level1)
+{
+    std::vector<std::string> bundleNames = {};
+    auto configs = NetAccessPolicyConfigUtils::GetInstance().GetNetAccessPolicyConfig();
+    int32_t num = configs.size();
+    NetAccessPolicyConfigUtils::GetInstance().AddNetAccessPolicyConfig(bundleNames);
+    configs = NetAccessPolicyConfigUtils::GetInstance().GetNetAccessPolicyConfig();
+    EXPECT_EQ(configs.size(), num);
+
+    NetAccessPolicyConfigUtils::GetInstance().RemoveNetAccessPolicyConfig(bundleNames);
+    configs = NetAccessPolicyConfigUtils::GetInstance().GetNetAccessPolicyConfig();
+    EXPECT_EQ(configs.size(), num);
+}
+
+HWTEST_F(NetAccessPolicyConfigUtilsTest, AddAndRemoveNetAccessPolicyConfigTest003, TestSize.Level1)
+{
+    std::vector<std::string> existBundles = {"com.example.exist"};
+    std::vector<std::string> notExistBundles = {"com.example.notexist"};
+    auto configs = NetAccessPolicyConfigUtils::GetInstance().GetNetAccessPolicyConfig();
+    int32_t num = configs.size();
+    NetAccessPolicyConfigUtils::GetInstance().AddNetAccessPolicyConfig(existBundles);
+    configs = NetAccessPolicyConfigUtils::GetInstance().GetNetAccessPolicyConfig();
+    EXPECT_EQ(configs.size(), num + 1);
+
+    NetAccessPolicyConfigUtils::GetInstance().AddNetAccessPolicyConfig(existBundles);
+    configs = NetAccessPolicyConfigUtils::GetInstance().GetNetAccessPolicyConfig();
+    EXPECT_EQ(configs.size(), num + 1);
+
+    NetAccessPolicyConfigUtils::GetInstance().RemoveNetAccessPolicyConfig(notExistBundles);
+    configs = NetAccessPolicyConfigUtils::GetInstance().GetNetAccessPolicyConfig();
+    EXPECT_EQ(configs.size(), num + 1);
+}
 }
 }

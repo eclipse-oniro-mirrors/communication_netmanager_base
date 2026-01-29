@@ -721,6 +721,34 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager030, TestSize.Level1)
     ASSERT_EQ(result2, NETMANAGER_SUCCESS);
 }
 
+/**
+ * @tc.name: NetPolicyManager031
+ * @tc.desc: Test NetPolicyManager AddNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyManagerTest, NetPolicyManager031, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::vector<std::string> bundleNames = {"com.example.test"};
+
+    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->AddNetworkAccessPolicy(bundleNames);
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: NetPolicyManager032
+ * @tc.desc: Test NetPolicyManager RemoveNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyManagerTest, NetPolicyManager032, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::vector<std::string> bundleNames = {"com.example.test"};
+
+    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->RemoveNetworkAccessPolicy(bundleNames);
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetPolicyManagerTest, IsUidNetAccess001, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;

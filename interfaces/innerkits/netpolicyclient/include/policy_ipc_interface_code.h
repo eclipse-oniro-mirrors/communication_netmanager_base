@@ -51,6 +51,7 @@ enum class PolicyInterfaceCode {
     CMD_NPS_SET_IDLE_DENY_POLICY,
     CMD_NPS_SET_IDLE_DENYLIST,
     CMD_NPS_ADD_NETWORK_ACCESS_POLICY,
+    CMD_NPS_REMOVE_NETWORK_ACCESS_POLICY,
     CMD_NPS_END = 100,
 };
 enum class PolicyCallbackInterfaceCode {

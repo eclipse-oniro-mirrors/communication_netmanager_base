@@ -725,9 +725,16 @@ int32_t NetPolicyService::GetNetworkAccessPolicy(AccessPolicyParameter parameter
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetPolicyService::UpdateNetworkAccessPolicy(const std::vector<std::string> &bundleNames)
+int32_t NetPolicyService::AddNetworkAccessPolicy(const std::vector<std::string> &bundleNames)
 {
-    NetAccessPolicyConfigUtils::GetInstance().UpdateNetAccessPolicyConfig(bundleNames);
+    NetAccessPolicyConfigUtils::GetInstance().AddNetAccessPolicyConfig(bundleNames);
+    RefreshNetworkAccessPolicyFromConfig();
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyService::RemoveNetworkAccessPolicy(const std::vector<std::string> &bundleNames)
+{
+    NetAccessPolicyConfigUtils::GetInstance().RemoveNetAccessPolicyConfig(bundleNames);
     RefreshNetworkAccessPolicyFromConfig();
     return NETMANAGER_SUCCESS;
 }

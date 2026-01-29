@@ -16,10 +16,11 @@
 #ifndef NET_ACCESS_POLICY_CONFIG_H
 #define NET_ACCESS_POLICY_CONFIG_H
 
+#include <map>
+
 #include "cJSON.h"
 #include "ffrt.h"
 #include "string"
-#include <shared_mutex>
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -32,7 +33,8 @@ class NetAccessPolicyConfigUtils {
 public:
     static NetAccessPolicyConfigUtils &GetInstance();
     std::vector<NetAccessPolicyConfig> GetNetAccessPolicyConfig();
-    void UpdateNetAccessPolicyConfig(const std::vector<std::string> &bundleNames);
+    void AddNetAccessPolicyConfig(const std::vector<std::string> &bundleNames);
+    void RemoveNetAccessPolicyConfig(const std::vector<std::string> &bundleNames);
 
 private:
     NetAccessPolicyConfigUtils() = default;
@@ -46,7 +48,7 @@ private:
 
 private:
     std::vector<NetAccessPolicyConfig> netAccessPolicyConfigs_;
-    std::vector<NetAccessPolicyConfig> dynamicNetAccessPolicyConfigs_;
+    std::map<std::string, NetAccessPolicyConfig> dynamicNetAccessPolicyConfigs_;
     bool isInit_ = false;
     ffrt::mutex lock_;
 };

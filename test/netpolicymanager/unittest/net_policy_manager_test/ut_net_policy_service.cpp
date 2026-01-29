@@ -391,6 +391,30 @@ HWTEST_F(UtNetPolicyService, GetNetworkAccessPolicy01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AddNetworkAccessPolicy01
+ * @tc.desc: Test NetPolicyService AddNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyService, AddNetworkAccessPolicy01, TestSize.Level1)
+{
+    std::vector<std::string> bundleNames = {"com.example.test"};
+    auto ret = instance_->AddNetworkAccessPolicy(bundleNames);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: RemoveNetworkAccessPolicy01
+ * @tc.desc: Test NetPolicyService RemoveNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyService, RemoveNetworkAccessPolicy01, TestSize.Level1)
+{
+    std::vector<std::string> bundleNames = {"com.example.test"};
+    auto ret = instance_->RemoveNetworkAccessPolicy(bundleNames);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: DeleteNetworkAccessPolicy01
  * @tc.desc: Test NetPolicyService DeleteNetworkAccessPolicy.
  * @tc.type: FUNC

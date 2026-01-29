@@ -539,6 +539,58 @@ void GetNetworkAccessPolicyFuzzTest(const uint8_t *data, size_t size)
 }
 
 /**
+ * @tc.name: AddNetworkAccessPolicy001
+ * @tc.desc: Test NetPolicyClient AddNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+void AddNetworkAccessPolicyFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    uint32_t vectorSize = NetPolicyGetData<uint32_t>() % 10;
+    std::vector<std::string> bundleNames;
+    for (uint32_t i = 0; i < vectorSize; i++) {
+        bundleNames.push_back(NetPolicyGetString(STR_LEN));
+    }
+    dataParcel.WriteStringVector(bundleNames);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_ADD_NETWORK_ACCESS_POLICY), dataParcel);
+}
+
+/**
+ * @tc.name: RemoveNetworkAccessPolicy001
+ * @tc.desc: Test NetPolicyClient RemoveNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+void RemoveNetworkAccessPolicyFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    uint32_t vectorSize = NetPolicyGetData<uint32_t>() % 10;
+    std::vector<std::string> bundleNames;
+    for (uint32_t i = 0; i < vectorSize; i++) {
+        bundleNames.push_back(NetPolicyGetString(STR_LEN));
+    }
+    dataParcel.WriteStringVector(bundleNames);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_REMOVE_NETWORK_ACCESS_POLICY), dataParcel);
+}
+
+/**
  * @tc.name: NotifyNetAccessPolicyDiagFuzzTest
  * @tc.desc: Test NetPolicyClient NotifyNetAccessPolicyDiag.
  * @tc.type: FUNC
@@ -785,5 +837,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::SetInternetAccessByIpForWifiShareFuzzTest(data, size);
     OHOS::NetManagerStandard::SetIdleDenyPolicyFuzzTest(data, size);
     OHOS::NetManagerStandard::SetUidsDeniedListChainFuzzTest(data, size);
+    OHOS::NetManagerStandard::AddNetworkAccessPolicyFuzzTest(data, size);
+    OHOS::NetManagerStandard::RemoveNetworkAccessPolicyFuzzTest(data, size);
     return 0;
 }

@@ -84,7 +84,8 @@ private:
     int32_t OnSetInternetAccessByIpForWifiShare(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetIdleDenyPolicy(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetUidsDeniedListChain(MessageParcel &data, MessageParcel &reply);
-    int32_t OnUpdateNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);
+    int32_t OnAddNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);
+    int32_t OnRemoveNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);
 
 private:
     void HandleStoreNetworkPolicy(uint32_t uid, NetworkAccessPolicy &policy,

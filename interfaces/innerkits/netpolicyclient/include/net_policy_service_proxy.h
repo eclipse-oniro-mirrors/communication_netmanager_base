@@ -58,7 +58,8 @@ public:
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName) override;
     int32_t SetIdleDenyPolicy(bool enable) override;
     int32_t SetUidsDeniedListChain(const std::vector<uint32_t> &uids, bool isAdd) override;
-    int32_t UpdateNetworkAccessPolicy(const std::vector<std::string> &bundleNames) override;
+    int32_t AddNetworkAccessPolicy(const std::vector<std::string> &bundleNames) override;
+    int32_t RemoveNetworkAccessPolicy(const std::vector<std::string> &bundleNames) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

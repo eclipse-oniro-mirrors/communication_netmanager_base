@@ -153,6 +153,16 @@ public:
         return 0;
     }
 
+    int32_t AddNetworkAccessPolicy(const std::vector<std::string> &bundleNames) override
+    {
+        return 0;
+    }
+
+    int32_t RemoveNetworkAccessPolicy(const std::vector<std::string> &bundleNames) override
+    {
+        return 0;
+    }
+
     int32_t NotifyNetAccessPolicyDiag(uint32_t uid) override
     {
         return 0;
@@ -646,6 +656,42 @@ HWTEST_F(NetPolicyServiceStubTest, OnGetNetworkAccessPolicy001, TestSize.Level1)
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(
         static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NETWORK_ACCESS_POLICY), data, reply, option);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnAddNetworkAccessPolicy001
+ * @tc.desc: Test NetPolicyServiceStub OnAddNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyServiceStubTest, OnAddNetworkAccessPolicy001, TestSize.Level1)
+{
+    MessageParcel data;
+    data.WriteBool(true);
+    std::vector<std::string> bundleNames = {"com.example.test"};
+    data.WriteStringVector(bundleNames);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_ADD_NETWORK_ACCESS_POLICY), data, reply, option);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnRemoveNetworkAccessPolicy001
+ * @tc.desc: Test NetPolicyServiceStub OnRemoveNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyServiceStubTest, OnRemoveNetworkAccessPolicy001, TestSize.Level1)
+{
+    MessageParcel data;
+    data.WriteBool(true);
+    std::vector<std::string> bundleNames = {"com.example.test"};
+    data.WriteStringVector(bundleNames);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_REMOVE_NETWORK_ACCESS_POLICY), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
