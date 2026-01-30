@@ -59,10 +59,12 @@ public:
     int32_t GetConnectOwnerUid(uint8_t proto, uint8_t family, const std::string &localAddress, uint32_t localPort,
                                const std::string &remoteAddress, uint32_t remotePort, int32_t &uid);
     int32_t GetSystemNetPortStates(NetManagerStandard::NetPortStatesInfo &netPortStatesInfo);
-    bool GetTcpNetPortStatesInfo(const inet_diag_msg* msg, NetManagerStandard::NetPortStatesInfo& netPortStatesInfo);
-    bool GetUdpNetPortStatesInfo(const inet_diag_msg* msg, NetManagerStandard::NetPortStatesInfo& netPortStatesInfo);
-    bool ProcessGetNetPortStatesInfo(const uint8_t proto, const inet_diag_msg* msg,
-        NetManagerStandard::NetPortStatesInfo& netPortStatesInfo);
+    bool GetTcpNetPortStatesInfo(const inet_diag_msg* msg, NetManagerStandard::NetPortStatesInfo& netPortStatesInfo,
+        const uint32_t pid);
+    bool GetUdpNetPortStatesInfo(const inet_diag_msg* msg, NetManagerStandard::NetPortStatesInfo& netPortStatesInfo,
+        const uint32_t pid);
+    bool ProcessGetNetPortStatesInfo(const uint8_t proto, NetManagerStandard::NetPortStatesInfo& netPortStatesInfo,
+        const nlmsghdr *nlh);
 
 private:
     static bool InLookBack(uint32_t a);

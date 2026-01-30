@@ -1106,7 +1106,7 @@ HWTEST_F(NetsysNativeServiceTest, GetUdpNetPortStatesInfo001, TestSize.Level1)
     memset_s(&msg, sizeof(msg), 0, sizeof(msg));
     msg.idiag_family = AF_INET;
     NetLinkSocketDiag diag;
-    bool result = diag.GetUdpNetPortStatesInfo(&msg, netPortStatesInfo);
+    bool result = diag.GetUdpNetPortStatesInfo(&msg, netPortStatesInfo, 0);
     
     EXPECT_EQ(result, true);
 }
@@ -1115,11 +1115,13 @@ HWTEST_F(NetsysNativeServiceTest, GetUdpNetPortStatesInfo002, TestSize.Level1)
 {
     NetPortStatesInfo netPortStatesInfo;
     inet_diag_msg msg;
+    nlmsghdr nlh;
     memset_s(&msg, sizeof(msg), 0, sizeof(msg));
+    memset_s(&nlh, sizeof(nlh), 0, sizeof(nlh));
     msg.idiag_family = AF_INET6;
     NetLinkSocketDiag diag;
-    bool result1 = diag.GetUdpNetPortStatesInfo(&msg, netPortStatesInfo);
-    bool result2 = diag.ProcessGetNetPortStatesInfo(IPPROTO_TCP, &msg, netPortStatesInfo);
+    bool result1 = diag.GetUdpNetPortStatesInfo(&msg, netPortStatesInfo, 0);
+    bool result2 = diag.ProcessGetNetPortStatesInfo(IPPROTO_TCP, netPortStatesInfo, &nlh);
     EXPECT_EQ(result1, true);
     EXPECT_EQ(result2, true);
 }
@@ -1131,7 +1133,7 @@ HWTEST_F(NetsysNativeServiceTest, GetTcpNetPortStatesInfo001, TestSize.Level1)
     memset_s(&msg, sizeof(msg), 0, sizeof(msg));
     msg.idiag_family = AF_INET;
     NetLinkSocketDiag diag;
-    bool result = diag.GetTcpNetPortStatesInfo(&msg, netPortStatesInfo);
+    bool result = diag.GetTcpNetPortStatesInfo(&msg, netPortStatesInfo, 0);
     
     EXPECT_EQ(result, true);
 }
@@ -1140,11 +1142,13 @@ HWTEST_F(NetsysNativeServiceTest, GetTcpNetPortStatesInfo002, TestSize.Level1)
 {
     NetPortStatesInfo netPortStatesInfo;
     inet_diag_msg msg;
+    nlmsghdr nlh;
     memset_s(&msg, sizeof(msg), 0, sizeof(msg));
+    memset_s(&nlh, sizeof(nlh), 0, sizeof(nlh));
     msg.idiag_family = AF_INET6;
     NetLinkSocketDiag diag;
-    bool result1 = diag.GetTcpNetPortStatesInfo(&msg, netPortStatesInfo);
-    bool result2 = diag.ProcessGetNetPortStatesInfo(IPPROTO_TCP, &msg, netPortStatesInfo);
+    bool result1 = diag.GetTcpNetPortStatesInfo(&msg, netPortStatesInfo, 0);
+    bool result2 = diag.ProcessGetNetPortStatesInfo(IPPROTO_TCP, netPortStatesInfo, &nlh);
     EXPECT_EQ(result1, true);
     EXPECT_EQ(result2, true);
 }

@@ -57,8 +57,6 @@ void NetConnServiceStub::InitNetSupplierFuncToInterfaceMap()
         &NetConnServiceStub::OnUpdateNetSupplierInfo, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_LINK_INFO)] = {
         &NetConnServiceStub::OnUpdateNetLinkInfo, {Permission::CONNECTIVITY_INTERNAL}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SYSTEM_NET_PORT_STATES)] = {
-        &NetConnServiceStub::OnGetSystemNetPortStates, {Permission::GET_IP_MAC_INFO}};
 }
 
 NetConnServiceStub::NetConnServiceStub()
@@ -227,6 +225,8 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
         &NetConnServiceStub::OnRegisterSlotType, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SLOT_TYPE)] = {
         &NetConnServiceStub::OnGetSlotType, {Permission::GET_NETWORK_INFO}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SYSTEM_NET_PORT_STATES)] = {
+        &NetConnServiceStub::OnGetSystemNetPortStates, {Permission::GET_IP_MAC_INFO}};
     InitProxyFuncToInterfaceMap();
 }
 
