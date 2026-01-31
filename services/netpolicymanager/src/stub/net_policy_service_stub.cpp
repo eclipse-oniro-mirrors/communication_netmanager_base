@@ -58,6 +58,10 @@ std::map<uint32_t, const char *> g_codeNPS = {
      Permission::MANAGE_NET_STRATEGY},
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENY_POLICY), Permission::MANAGE_NET_STRATEGY},
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYLIST), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_ADD_NETWORK_ACCESS_POLICY),
+     Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_REMOVE_NETWORK_ACCESS_POLICY),
+     Permission::MANAGE_NET_STRATEGY},
 };
 constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
 constexpr int32_t MAX_LIST_SIZE = 1000;
@@ -134,6 +138,10 @@ void NetPolicyServiceStub::ExtraNetPolicyServiceStub()
         &NetPolicyServiceStub::OnSetIdleDenyPolicy;
     memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYLIST)] =
         &NetPolicyServiceStub::OnSetUidsDeniedListChain;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_ADD_NETWORK_ACCESS_POLICY)] =
+        &NetPolicyServiceStub::OnAddNetworkAccessPolicy;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_REMOVE_NETWORK_ACCESS_POLICY)] =
+        &NetPolicyServiceStub::OnRemoveNetworkAccessPolicy;
     return;
 }
 
@@ -773,6 +781,50 @@ void NetPolicyServiceStub::HandleStoreNetworkPolicy(uint32_t uid, NetworkAccessP
             }, ffrt::task_attr().name("HandleReportNetworkPolicy").delay(NETWORK_POLICY_REPORT_DELAY));
 #endif
     }
+}
+
+int32_t NetPolicyServiceStub::OnAddNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_I("OnAddNetworkAccessPolicy callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
+    std::vector<std::string> bundleNames;
+
+    // LCOV_EXCL_START
+    if (!data.ReadStringVector(&bundleNames)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    // LCOV_EXCL_STOP
+
+    int32_t ret = AddNetworkAccessPolicy(bundleNames);
+    // LCOV_EXCL_START
+    if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyServiceStub::OnRemoveNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_I("OnRemoveNetworkAccessPolicy callingUid/callingPid: %{public}d/%{public}d",
+                 IPCSkeleton::GetCallingUid(), IPCSkeleton::GetCallingPid());
+    std::vector<std::string> bundleNames;
+
+    // LCOV_EXCL_START
+    if (!data.ReadStringVector(&bundleNames)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    // LCOV_EXCL_STOP
+
+    int32_t ret = RemoveNetworkAccessPolicy(bundleNames);
+    // LCOV_EXCL_START
+    if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyServiceStub::OnSetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply)

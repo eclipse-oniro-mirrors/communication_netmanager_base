@@ -550,6 +550,34 @@ HWTEST_F(UtNetPolicyClient, GetNetworkAccessPolicy001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AddNetworkAccessPolicy001
+ * @tc.desc: Test NetPolicyClient AddNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, AddNetworkAccessPolicy001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::string bundleName = "com.example.test";
+    int32_t result = g_netPolicyClient->AddNetworkAccessPolicy({bundleName});
+    std::cout << "NetPolicyClient026 AddNetworkAccessPolicy ret:" << result << std::endl;
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: RemoveNetworkAccessPolicy001
+ * @tc.desc: Test NetPolicyClient RemoveNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, RemoveNetworkAccessPolicy001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::string bundleName = "com.example.test";
+    int32_t result = g_netPolicyClient->RemoveNetworkAccessPolicy({bundleName});
+    std::cout << "NetPolicyClient026 RemoveNetworkAccessPolicy ret:" << result << std::endl;
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: NotifyNetAccessPolicyDiag001
  * @tc.desc: Test NetPolicyClient NotifyNetAccessPolicyDiag.
  * @tc.type: FUNC

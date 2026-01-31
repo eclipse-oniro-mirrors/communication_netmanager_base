@@ -245,6 +245,22 @@ public:
      */
     int32_t GetNetworkAccessPolicy(AccessPolicyParameter parameter, AccessPolicySave& policy) override;
 
+    /**
+     * Add applications' network access to be undisablable.
+     *
+     * @param bundleNames The bundle names of the applications to be added to the policy.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t AddNetworkAccessPolicy(const std::vector<std::string> &bundleNames) override;
+    
+    /**
+     * Remove applications' network access to be undisablable.
+     *
+     * @param bundleNames The bundle names of the applications to be removed from the policy.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t RemoveNetworkAccessPolicy(const std::vector<std::string> &bundleNames) override;
+
     NetAccessPolicyRDB GetNetAccessPolicyDBHandler()
     {
         static NetAccessPolicyRDB netAccessPolicy;
