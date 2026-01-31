@@ -624,8 +624,13 @@ void Network::UpdateDns(const NetLinkInfo &netLinkInfo)
                 ss << '[' << CommonUtils::ToAnonymousIp(dns.address_).c_str() << ']';
             }
         } else if (dns.type_ == NetManagerStandard::INetAddr::IPV6 || dnsFamily == AF_INET6) {
+            std::string finalAddress = dns.address_;
+            if (CommonUtils::IsIPv6LinkLocal(finalAddress) && finalAddress.find('%') == std::string::npos &&
+                !netLinkInfo.ifaceName_.empty()) {
+                finalAddress += "%" + netLinkInfo.ifaceName_;
+            }
             if (ipv6DnsCnt++ < MAX_IPV6_DNS_NUM) {
-                servers.emplace_back(dns.address_);
+                servers.emplace_back(finalAddress);
                 ss << '[' << CommonUtils::ToAnonymousIp(dns.address_).c_str() << ']';
             }
         } else {

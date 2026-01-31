@@ -1338,5 +1338,34 @@ HWTEST_F(UtNetmanagerBaseCommon, IsValidAddressTest001, TestSize.Level2)
     EXPECT_FALSE(CommonUtils::IsValidAddress("0.0.0.0"));
     EXPECT_FALSE(CommonUtils::IsValidAddress("::"));
 }
+HWTEST_F(UtNetmanagerBaseCommon, IsIPv6LinkLocal001, TestSize.Level0)
+{
+    std::string emptyAddr = "";
+    EXPECT_FALSE(CommonUtils::IsIPv6LinkLocal(emptyAddr));
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsIPv6LinkLocal002, TestSize.Level0)
+{
+    std::string invalidAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334"; // 无效的IPv6地址
+    EXPECT_FALSE(CommonUtils::IsIPv6LinkLocal(invalidAddr));
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsIPv6LinkLocal003, TestSize.Level0)
+{
+    std::string linkLocalAddr = "fe80::1%eth0"; // 链路本地IPv6地址
+    EXPECT_TRUE(CommonUtils::IsIPv6LinkLocal(linkLocalAddr));
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsIPv6LinkLocal004, TestSize.Level0)
+{
+    std::string nonLinkLocalAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7335"; // 非链路本地IPv6地址
+    EXPECT_FALSE(CommonUtils::IsIPv6LinkLocal(nonLinkLocalAddr));
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsIPv6LinkLocal005, TestSize.Level0)
+{
+    std::string addrWithoutPercent = "fe80::1"; // 没有百分号部分的IPv6地址
+    EXPECT_TRUE(CommonUtils::IsIPv6LinkLocal(addrWithoutPercent));
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -117,6 +117,7 @@ int32_t GetTodayMidnightTimestamp(int hour, int min, int sec);
 void DeleteFile(const std::string &filePath);
 std::string ExtractDomainFormUrl(const std::string &url);
 bool IsValidAddress(const std::string &ipStrAddr);
+bool IsIPv6LinkLocal(const std::string& ipv6Addr);
 } // namespace OHOS::NetManagerStandard::CommonUtils
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H */
