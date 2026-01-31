@@ -486,7 +486,7 @@ std::string IpParamParser::Addr6ToStr(const in6_addr &v6Addr)
 uint32_t IpParamParser::GetIp6Prefixlen(const in6_addr &start, const in6_addr &end)
 {
     uint32_t prefixlen = IPV6_MAX_PREFIXLEN;
-    for (uint32_t i = 0; i < IPV6_BIT_COUNT; i++) {
+    for (uint32_t i = 0; i < IPV6_BYTE_COUNT; i++) {
         if (start.s6_addr[i] == end.s6_addr[i]) {
             continue;
         }
