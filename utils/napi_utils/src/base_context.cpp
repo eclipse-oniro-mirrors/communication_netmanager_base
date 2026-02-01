@@ -32,7 +32,8 @@ BaseContext::BaseContext(napi_env env, std::shared_ptr<EventManager>& manager)
       asyncWork_(nullptr),
       deferred_(nullptr),
       needPromise_(true),
-      needThrowException_(false)
+      needThrowException_(false),
+      releaseVersion_(0)
 {
 }
 
@@ -186,6 +187,16 @@ void BaseContext::SetNeedThrowException(bool needThrowException)
 bool BaseContext::IsNeedThrowException() const
 {
     return needThrowException_;
+}
+
+void BaseContext::SetReleaseVersion(uint32_t releaseVersion)
+{
+    releaseVersion_ = releaseVersion;
+}
+
+uint32_t BaseContext::GetReleaseVersion() const
+{
+    return releaseVersion_;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
