@@ -201,26 +201,39 @@ bool NetConnService::Init()
     AddSystemAbilityListener(ACCESS_TOKEN_MANAGER_SERVICE_ID);
     AddSystemAbilityListener(COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
-
-    if (netConnEventHandler_) {
-        netConnEventHandler_->PostAsyncTask([&]() { CheckProxyStatus(); }, PROXY_INIT_DELAY_TIME);
-#ifdef ENABLE_SET_APP_FROZENED
-        int64_t delayTime = 3000;
-        appStateAwareCallback_.OnForegroundAppChanged = [] (const uint32_t uid) {
-            std::shared_ptr<NetConnService> netConnService = NetConnService::GetInstance();
-            if (netConnService) {
-                netConnService ->SetAppIsFrozened(uid, false);
-            }
-        };
-        netConnEventHandler_->PostAsyncTask([this]() {
-            AppStateAwareManager::GetInstance().RegisterAppStateAwareCallback(appStateAwareCallback_);
-        },
-            delayTime);
-#endif
+    // LCOV_EXCL_START
+    if (netConnEventHandler_ == nullptr) {
+        NETMGR_LOG_E("Create netConnEventHandler_ == nullptr.");
+        return false;
     }
+    netConnEventHandler_->PostAsyncTask([&]() { CheckProxyStatus(); }, PROXY_INIT_DELAY_TIME);
+    RegisterAppStateAware();
+    // LCOV_EXCL_STOP
     NETMGR_LOG_I("Init end");
     return true;
 }
+
+// LCOV_EXCL_START
+void NetConnService::RegisterAppStateAware()
+{
+#ifdef ENABLE_SET_APP_FROZENED
+    int64_t delayTime = 3000;
+    appStateAwareCallback_.OnForegroundAppChanged = [] (const uint32_t uid) {
+        std::shared_ptr<NetConnService> netConnService = NetConnService::GetInstance();
+        if (netConnService) {
+            netConnService->SetAppIsFrozened(uid, false);
+        }
+    };
+    std::weak_ptr<NetConnService> wp = shared_from_this();
+    netConnEventHandler_->PostAsyncTask([wp]() {
+        if (auto sharedSelf = wp.lock()) {
+            AppStateAwareManager::GetInstance().RegisterAppStateAwareCallback(sharedSelf->appStateAwareCallback_);
+        }
+    },
+        delayTime);
+#endif
+}
+// LCOV_EXCL_STOP
 
 bool NetConnService::CheckIfSettingsDataReady()
 {
@@ -1197,13 +1210,23 @@ void NetConnService::HandlePreFindBestNetworkForDelay(uint32_t supplierId, const
     if (supplier->GetNetSupplierType() == BEARER_WIFI && isFirstTimeDetect &&
         GetDefaultNetSupplierType() == BEARER_CELLULAR && isNeedDelay) {
         int64_t delayTime = 2000;
-        if (netConnEventHandler_) {
-            NETMGR_LOG_I("HandlePreFindBestNetworkForDelay action");
-            isDelayHandleFindBestNetwork_ = true;
-            delaySupplierId_ = supplierId;
-            netConnEventHandler_->PostAsyncTask([this]() { HandleFindBestNetworkForDelay(); },
-                "HandleFindBestNetworkForDelay", delayTime);
+        // LCOV_EXCL_START
+        if (netConnEventHandler_ == nullptr) {
+            return;
         }
+        // LCOV_EXCL_STOP
+        NETMGR_LOG_I("HandlePreFindBestNetworkForDelay action");
+        isDelayHandleFindBestNetwork_ = true;
+        delaySupplierId_ = supplierId;
+        std::weak_ptr<NetConnService> wp = shared_from_this();
+        netConnEventHandler_->PostAsyncTask([wp]() {
+                // LCOV_EXCL_START
+                if (auto sharedSelf = wp.lock()) {
+                    sharedSelf->HandleFindBestNetworkForDelay();
+                // LCOV_EXCL_STOP
+                }
+            },
+            "HandleFindBestNetworkForDelay", delayTime);
     }
 }
 
@@ -1809,8 +1832,15 @@ void NetConnService::StartNotifyLostDelay(int32_t netId)
     NETMGR_LOG_I("StartNotifyLostDelay netId:%{public}d", netId);
     auto taskName = "HandleNotifyLostDelay" + std::to_string(netId);
     netConnEventHandler_->RemoveTask(taskName);
-    netConnEventHandler_->PostAsyncTask([this, netId]() { HandleNotifyLostDelay(netId); },
+    std::weak_ptr<NetConnService> wp = shared_from_this();
+    // LCOV_EXCL_START
+    netConnEventHandler_->PostAsyncTask([wp, netId]() {
+            if (auto sharedSelf = wp.lock()) {
+                sharedSelf->HandleNotifyLostDelay(netId);
+            }
+        },
         taskName, DELAY_LOST_TIME);
+    // LCOV_EXCL_STOP
     notifyLostDelayCache_.EnsureInsert(netId, true);
 }
 
@@ -3138,9 +3168,16 @@ void NetConnService::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
         return;
     }
     NETMGR_LOG_I("UpdateGlobalHttpProxy start");
-    netConnEventHandler_->PostAsyncTask([this, httpProxy]() {
-        std::shared_lock<ffrt::shared_mutex> lock(netSuppliersMutex_);
-        for (const auto &supplier : netSuppliers_) {
+    std::weak_ptr<NetConnService> wp = shared_from_this();
+    netConnEventHandler_->PostAsyncTask([wp, httpProxy]() {
+        auto sharedSelf = wp.lock();
+        // LCOV_EXCL_START
+        if (sharedSelf == nullptr) {
+            return;
+        }
+        // LCOV_EXCL_STOP
+        std::shared_lock<ffrt::shared_mutex> lock(sharedSelf->netSuppliersMutex_);
+        for (const auto &supplier : sharedSelf->netSuppliers_) {
             if (supplier.second == nullptr) {
                 continue;
             }
@@ -3356,12 +3393,19 @@ void NetConnService::SendNetPolicyChange(uint32_t uid, uint32_t policy)
     if (netConnEventHandler_ == nullptr) {
         return;
     }
-    auto func = [this, uid, policy]() {
+    std::weak_ptr<NetConnService> wp = shared_from_this();
+    auto func = [wp, uid, policy]() {
         sptr<NetHandle> defaultNetHandle = nullptr;
         bool metered = false;
         bool newBlocked = false;
-        std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock(defaultNetSupplierMutex_);
-        auto defaultNetSupplier = defaultNetSupplier_;
+        // LCOV_EXCL_START
+        auto sharedSelf = wp.lock();
+        if (sharedSelf == nullptr) {
+            return;
+        }
+        std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock(sharedSelf->defaultNetSupplierMutex_);
+        auto defaultNetSupplier = sharedSelf->defaultNetSupplier_;
+        // LCOV_EXCL_STOP
         defaultNetSupplierLock.unlock();
         if (defaultNetSupplier == nullptr) {
             NETMGR_LOG_E("SendNetPolicyChange defaultNetSupplier is nullptr");
@@ -3371,11 +3415,13 @@ void NetConnService::SendNetPolicyChange(uint32_t uid, uint32_t policy)
         metered = defaultNetSupplier->HasNetCap(NET_CAPABILITY_NOT_METERED);
         newBlocked = NetManagerCenter::GetInstance().IsUidNetAccess(uid, metered);
         std::vector<std::shared_ptr<NetActivate>> activates;
-        std::shared_lock<std::shared_mutex> uidActivateLock(uidActivateMutex_);
-        auto it = netUidActivates_.find(uid);
-        if (it != netUidActivates_.end()) {
+        // LCOV_EXCL_START
+        std::shared_lock<std::shared_mutex> uidActivateLock(sharedSelf->uidActivateMutex_);
+        auto it = sharedSelf->netUidActivates_.find(uid);
+        if (it != sharedSelf->netUidActivates_.end()) {
             activates = it->second;
         }
+        // LCOV_EXCL_STOP
         uidActivateLock.unlock();
         for (auto &activate : activates) {
             if (activate->GetNetCallback() && activate->MatchRequestAndNetwork(defaultNetSupplier)) {

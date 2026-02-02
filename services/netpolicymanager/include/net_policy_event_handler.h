@@ -27,7 +27,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 class NetPolicyCore;
-class NetPolicyEventHandler {
+class NetPolicyEventHandler : public std::enable_shared_from_this<NetPolicyEventHandler> {
 public:
     static constexpr int32_t MSG_DEVICE_IDLE_LIST_UPDATED = 1;
     static constexpr int32_t MSG_DEVICE_IDLE_MODE_CHANGED = 2;

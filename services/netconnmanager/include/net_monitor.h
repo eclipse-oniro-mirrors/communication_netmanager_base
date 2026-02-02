@@ -133,7 +133,7 @@ private:
     std::condition_variable detectionCond_;
     std::mutex primaryDetectMutex_;
     std::condition_variable primaryDetectionCond_;
-    uint32_t detectionDelay_ = 0;
+    std::atomic<uint32_t> detectionDelay_ = 0;
     std::weak_ptr<INetMonitorCallback> netMonitorCallback_;
     bool needDetectionWithoutProxy_ = true;
     HttpProxy globalHttpProxy_;

@@ -205,6 +205,18 @@ HWTEST_F(DnsManagerTest, SetFirewallRules003, TestSize.Level1)
     EXPECT_EQ(ret, 0);
     EXPECT_TRUE(dnsManager.firewallDomainRules_.empty());
 }
+
+HWTEST_F(DnsManagerTest, EeffectDomainRules001, TestSize.Level1)
+{
+    DnsManager dnsManager;
+    std::vector<sptr<NetFirewallBaseRule>> ruleList;
+    auto domainRule = sptr<NetFirewallDomainRule>::MakeSptr();
+    domainRule->ruleAction = FirewallRuleAction::RULE_ALLOW;
+    ruleList.emplace_back(domainRule);
+    dnsManager.EeffectDomainRules(NetFirewallRuleType::RULE_DOMAIN, ruleList, false);
+    EXPECT_FALSE(dnsManager.firewallDomainRules_.empty());
+}
+
 #endif
 } // namespace nmd
 } // namespace OHOS

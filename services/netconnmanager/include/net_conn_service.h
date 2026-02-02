@@ -630,6 +630,7 @@ private:
     void UnregisterNetDataShareObserver();
     NetBearType GetDefaultNetSupplierType();
     uint32_t GetDefaultNetSupplierId();
+    void RegisterAppStateAware();
 
 private:
     enum ServiceRunningState {

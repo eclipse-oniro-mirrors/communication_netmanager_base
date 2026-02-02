@@ -49,6 +49,7 @@ void UtNetPolicyService::TearDownTestCase() {}
 void UtNetPolicyService::SetUp()
 {
     instance_ = DelayedSingleton<NetPolicyService>::GetInstance();
+    instance_->Init();
     instance_->netPolicyRule_ = std::make_shared<NetPolicyRule>();
     instance_->netPolicyFirewall_ = std::make_shared<NetPolicyFirewall>();
     instance_->netPolicyTraffic_ = std::make_shared<NetPolicyTraffic>();

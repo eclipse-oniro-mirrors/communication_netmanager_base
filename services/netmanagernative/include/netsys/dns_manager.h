@@ -28,7 +28,7 @@
 
 namespace OHOS {
 namespace nmd {
-class DnsManager {
+class DnsManager : public std::enable_shared_from_this<DnsManager> {
 public:
     DnsManager();
     ~DnsManager() = default;

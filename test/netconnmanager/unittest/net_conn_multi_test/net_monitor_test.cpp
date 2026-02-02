@@ -243,6 +243,7 @@ HWTEST_F(NetMonitorTest, ProcessDetectionTest001, TestSize.Level1)
     instance_->ProcessDetection(probeResult, result);
     EXPECT_EQ(result, CAPTIVE_PORTAL_STATE);
     instance_->isDetecting_ = false;
+    probeResult.responseCode_ = 0;
     instance_->ProcessDetection(probeResult, result);
     EXPECT_EQ(result, CAPTIVE_PORTAL_STATE);
 }
