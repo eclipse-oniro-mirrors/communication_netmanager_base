@@ -21,6 +21,7 @@
 #include <netinet/tcp.h>
 #include <sys/uio.h>
 #include <unistd.h>
+#include <linux/rtnetlink.h>
 
 #include "fwmark.h"
 #include "net_manager_constants.h"
@@ -45,6 +46,7 @@ constexpr int32_t IDIAG_ARRAY_LEN = 4;
 constexpr int32_t TCP_STATES = (1 << TCP_ESTABLISHED) | (1 << TCP_SYN_SENT) | (1 << TCP_SYN_RECV) |
     (1 << TCP_FIN_WAIT1) | (1 << TCP_FIN_WAIT2) | (1 << TCP_TIME_WAIT) | (1 << TCP_CLOSE) | (1 << TCP_CLOSE_WAIT) |
     (1 << TCP_LAST_ACK) | (1 << TCP_LISTEN) | (1 << TCP_CLOSING);
+constexpr int32_t INET_DIAG_SK_PID = 23;
 } // namespace
 
 NetLinkSocketDiag::~NetLinkSocketDiag()
@@ -354,7 +356,7 @@ void NetLinkSocketDiag::DestroyLiveSockets(const char *ipAddr, bool excludeLoopb
 }
 
 bool NetLinkSocketDiag::GetTcpNetPortStatesInfo(const inet_diag_msg* msg,
-    NetPortStatesInfo& netPortStatesInfo)
+    NetPortStatesInfo& netPortStatesInfo, const uint32_t pid)
 {
     if (msg == nullptr) {
         return false;
@@ -376,14 +378,14 @@ bool NetLinkSocketDiag::GetTcpNetPortStatesInfo(const inet_diag_msg* msg,
     tcpInfo.tcpRemoteIp_ = remoteAddr;
     tcpInfo.tcpRemotePort_ = ntohs(msg->id.idiag_dport);
     tcpInfo.tcpUid_ = msg->idiag_uid;
-    tcpInfo.tcpPid_ = 0;
+    tcpInfo.tcpPid_ = pid;
     tcpInfo.tcpState_ = msg->idiag_state;
     netPortStatesInfo.tcpNetPortStatesInfo_.push_back(tcpInfo);
     return true;
 }
 
 bool NetLinkSocketDiag::GetUdpNetPortStatesInfo(const inet_diag_msg* msg,
-    NetPortStatesInfo& netPortStatesInfo)
+    NetPortStatesInfo& netPortStatesInfo, const uint32_t pid)
 {
     if (msg == nullptr) {
         return false;
@@ -399,20 +401,35 @@ bool NetLinkSocketDiag::GetUdpNetPortStatesInfo(const inet_diag_msg* msg,
     udpInfo.udpLocalIp_ = localAddr;
     udpInfo.udpLocalPort_ = ntohs(msg->id.idiag_sport);
     udpInfo.udpUid_ = msg->idiag_uid;
-    udpInfo.udpPid_ = 0;
+    udpInfo.udpPid_ = pid;
     netPortStatesInfo.udpNetPortStatesInfo_.push_back(udpInfo);
     return true;
 }
 
-bool NetLinkSocketDiag::ProcessGetNetPortStatesInfo(const uint8_t proto, const inet_diag_msg* msg,
-    NetPortStatesInfo& netPortStatesInfo)
+bool NetLinkSocketDiag::ProcessGetNetPortStatesInfo(const uint8_t proto, NetPortStatesInfo& netPortStatesInfo,
+    const nlmsghdr *nlh)
 {
+    inet_diag_msg *msg = reinterpret_cast<inet_diag_msg *>(NLMSG_DATA(nlh));
+    uint32_t skPid = 0;
+    uint32_t attrLen = nlh->nlmsg_len - static_cast<u_int32_t>(NLMSG_LENGTH(sizeof(*msg)));
+    struct rtattr *attr = reinterpret_cast<struct rtattr*>(msg + 1);
+    auto rtaret = RTA_OK(attr, attrLen);
+    while (rtaret) {
+        // LCOV_EXCL_START
+        if (attr->rta_type == INET_DIAG_SK_PID) {
+            skPid = *reinterpret_cast<uint32_t*>(RTA_DATA(attr));
+            break;
+        }
+        // LCOV_EXCL_STOP
+        attr = RTA_NEXT(attr, attrLen);
+        rtaret = RTA_OK(attr, attrLen);
+    }
     if (proto == IPPROTO_TCP) {
-        if (!GetTcpNetPortStatesInfo(msg, netPortStatesInfo)) {
+        if (!GetTcpNetPortStatesInfo(msg, netPortStatesInfo, skPid)) {
             return false;
         }
     } else if (proto == IPPROTO_UDP) {
-        if (!GetUdpNetPortStatesInfo(msg, netPortStatesInfo)) {
+        if (!GetUdpNetPortStatesInfo(msg, netPortStatesInfo, skPid)) {
             return false;
         }
     }
@@ -429,7 +446,7 @@ int32_t NetLinkSocketDiag::ProcessSockDiagDumpInfo(uint8_t proto,
         return NETMANAGER_ERR_INTERNAL;
     }
     while (readBytes > 0) {
-        uint32_t len = static_cast<uint32_t>(readBytes);
+        int len = readBytes;
         for (nlmsghdr *nlh = reinterpret_cast<nlmsghdr *>(buf); NLMSG_OK(nlh, len); nlh = NLMSG_NEXT(nlh, len)) {
             if (nlh->nlmsg_type == NLMSG_ERROR) {
                 return NETMANAGER_ERR_INTERNAL;
@@ -439,8 +456,7 @@ int32_t NetLinkSocketDiag::ProcessSockDiagDumpInfo(uint8_t proto,
             if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(inet_diag_msg))) {
                 continue;
             }
-            const auto *msg = reinterpret_cast<const inet_diag_msg *>(NLMSG_DATA(nlh));
-            if (!ProcessGetNetPortStatesInfo(proto, msg, netPortStatesInfo)) {
+            if (!ProcessGetNetPortStatesInfo(proto, netPortStatesInfo, nlh)) {
                 continue;
             }
         }
@@ -455,12 +471,10 @@ int32_t NetLinkSocketDiag::ProcessSockDiagDumpInfo(uint8_t proto,
 
 int32_t NetLinkSocketDiag::GetSystemNetPortStates(NetManagerStandard::NetPortStatesInfo &netPortStatesInfo)
 {
-    // LCOV_EXCL_START
     if (!CreateNetlinkSocket()) {
         NETNATIVE_LOGE("Create netlink diag socket failed.");
         return NETMANAGER_ERR_INTERNAL;
     }
-    // LCOV_EXCL_STOP
 
     for (int32_t proto : {IPPROTO_TCP, IPPROTO_UDP}) {
         for (const int family : {AF_INET, AF_INET6}) {
@@ -470,7 +484,6 @@ int32_t NetLinkSocketDiag::GetSystemNetPortStates(NetManagerStandard::NetPortSta
             } else if (proto == IPPROTO_UDP) {
                 states = -1;
             }
-            // LCOV_EXCL_START
             int32_t ret = SendSockDiagDumpRequest(proto, family, states);
             if (ret != NETMANAGER_SUCCESS) {
                 NETNATIVE_LOGE("Failed to dump %{public}s %{public}s sockets", family == AF_INET ? "IPv4" : "IPv6",
@@ -483,7 +496,6 @@ int32_t NetLinkSocketDiag::GetSystemNetPortStates(NetManagerStandard::NetPortSta
                                proto == IPPROTO_TCP ? "TCP" : "UDP");
                 continue;
             }
-            // LCOV_EXCL_STOP
         }
     }
     return NETMANAGER_SUCCESS;
