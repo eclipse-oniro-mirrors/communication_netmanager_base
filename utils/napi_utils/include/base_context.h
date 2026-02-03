@@ -50,6 +50,7 @@ public:
     void Emit(const std::string &type, const std::pair<napi_value, napi_value> &argv);
     void SetNeedPromise(bool needPromise);
     void SetNeedThrowException(bool needThrowException);
+    void SetReleaseVersion(uint32_t releaseVersion);
     napi_status SetCallback(napi_value callback);
     napi_value CreatePromise();
     [[nodiscard]] bool IsParseOK() const;
@@ -63,6 +64,7 @@ public:
     [[nodiscard]] std::shared_ptr<EventManager> GetManager() const;
     [[nodiscard]] bool IsNeedPromise() const;
     [[nodiscard]] bool IsNeedThrowException() const;
+    [[nodiscard]] uint32_t GetReleaseVersion() const;
 
     napi_deferred deferredBack1_ = nullptr;
     napi_deferred deferredBack2_ = nullptr;
@@ -87,6 +89,7 @@ private:
     bool needPromise_;
     bool needThrowException_;
     NetBaseErrorCodeConvertor convertor_;
+    uint32_t releaseVersion_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

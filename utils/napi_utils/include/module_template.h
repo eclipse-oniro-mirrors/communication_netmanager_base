@@ -26,6 +26,7 @@
 #include "netmanager_base_log.h"
 
 #define MAX_PARAM_NUM 64
+#define API_VERSION_THROW_BUSINESS_EXCEPTION 24
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -48,7 +49,11 @@ napi_value InterfaceWithoutManager(napi_env env, napi_callback_info info, const 
     auto context = new Context(env, manager);
     context->ParseParams(params, paramsCount);
     if (context->IsNeedThrowException()) { // only api9 or later need throw exception.
-        napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
+        if (context->GetReleaseVersion() >= API_VERSION_THROW_BUSINESS_EXCEPTION) {
+            napi_throw_business_error(env, context->GetErrorCode(), context->GetErrorMessage().c_str());
+        } else {
+            napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
+        }
         delete context;
         context = nullptr;
         return NapiUtils::GetUndefined(env);
@@ -88,7 +93,11 @@ napi_value Interface(napi_env env, napi_callback_info info, const std::string &a
     auto context = new Context(env, manager);
     context->ParseParams(params, paramsCount);
     if (context->IsNeedThrowException()) { // only api9 or later need throw exception.
-        napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
+        if (context->GetReleaseVersion() >= API_VERSION_THROW_BUSINESS_EXCEPTION) {
+            napi_throw_business_error(env, context->GetErrorCode(), context->GetErrorMessage().c_str());
+        } else {
+            napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
+        }
         delete context;
         context = nullptr;
         return NapiUtils::GetUndefined(env);
@@ -133,7 +142,11 @@ napi_value InterfaceSync(napi_env env, napi_callback_info info, const std::strin
 
     context->ParseParams(params, paramsCount);
     if (!context->IsParseOK()) {
-        napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
+        if (context->GetReleaseVersion() >= API_VERSION_THROW_BUSINESS_EXCEPTION) {
+            napi_throw_business_error(env, context->GetErrorCode(), context->GetErrorMessage().c_str());
+        } else {
+            napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
+        }
         return NapiUtils::GetUndefined(env);
     }
     if (Work != nullptr) {
@@ -149,7 +162,11 @@ napi_value InterfaceSync(napi_env env, napi_callback_info info, const std::strin
 
     if (!executor(context.get())) {
         NETMANAGER_BASE_LOGE("executor is fail, errorcode= %{public}d", context->GetErrorCode());
-        napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
+        if (context->GetReleaseVersion() >= API_VERSION_THROW_BUSINESS_EXCEPTION) {
+            napi_throw_business_error(env, context->GetErrorCode(), context->GetErrorMessage().c_str());
+        } else {
+            napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
+        }
         return NapiUtils::GetUndefined(env);
     }
     return callback(context.get());
