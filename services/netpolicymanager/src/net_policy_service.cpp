@@ -150,29 +150,44 @@ void NetPolicyService::Init()
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
     AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+    std::weak_ptr<NetPolicyService> wp = shared_from_this();
 #ifndef UNITTEST_FORBID_FFRT
-    ffrtQueue_.submit([this]() {
+    ffrtQueue_.submit([wp]() {
 #endif
-        serviceComm_ = (std::make_unique<NetPolicyServiceCommon>()).release();
-        NetManagerCenter::GetInstance().RegisterPolicyService(serviceComm_);
-        netPolicyCore_ = DelayedSingleton<NetPolicyCore>::GetInstance();
-        netPolicyCallback_ = DelayedSingleton<NetPolicyCallback>::GetInstance();
-        netPolicyTraffic_ = netPolicyCore_->CreateCore<NetPolicyTraffic>();
-        netPolicyFirewall_ = netPolicyCore_->CreateCore<NetPolicyFirewall>();
-        netPolicyRule_ = netPolicyCore_->CreateCore<NetPolicyRule>();
+        auto sharedSelf = wp.lock();
+        // LCOV_EXCL_START
+        if (sharedSelf == nullptr) {
+            NETMGR_LOG_E("NetPolicyService::Init sharedSelf = nullptr");
+            return;
+        }
+        // LCOV_EXCL_STOP
+        sharedSelf->serviceComm_ = (std::make_unique<NetPolicyServiceCommon>()).release();
+        NetManagerCenter::GetInstance().RegisterPolicyService(sharedSelf->serviceComm_);
+        sharedSelf->netPolicyCore_ = DelayedSingleton<NetPolicyCore>::GetInstance();
+        sharedSelf->netPolicyCallback_ = DelayedSingleton<NetPolicyCallback>::GetInstance();
+        sharedSelf->netPolicyTraffic_ = sharedSelf->netPolicyCore_->CreateCore<NetPolicyTraffic>();
+        sharedSelf->netPolicyFirewall_ = sharedSelf->netPolicyCore_->CreateCore<NetPolicyFirewall>();
+        sharedSelf->netPolicyRule_ = sharedSelf->netPolicyCore_->CreateCore<NetPolicyRule>();
         NetAccessPolicyRDB netAccessPolicy;
         netAccessPolicy.InitRdbStore();
-        UpdateNetAccessPolicyToMapFromDB();
+        sharedSelf->UpdateNetAccessPolicyToMapFromDB();
 #ifndef NETMANAGER_TEST
-        if (!Publish(DelayedSingleton<NetPolicyService>::GetInstance().get())) {
+        if (!sharedSelf->Publish(DelayedSingleton<NetPolicyService>::GetInstance().get())) {
             NETMGR_LOG_E("Register to sa manager failed");
         }
 #endif
 #ifndef UNITTEST_FORBID_FFRT
     }, ffrt::task_attr().name("FfrtNetPolicyServiceInit"));
-    ffrtQueue_.submit([this]() {
+    ffrtQueue_.submit([wp]() {
 #endif
-        SetBrokerUidAccessPolicyMap(std::nullopt);
+        auto sharedPtr = wp.lock();
+        // LCOV_EXCL_START
+        if (sharedPtr == nullptr) {
+            NETMGR_LOG_E("NetPolicyService::Init sharedSelf = nullptr");
+            return;
+        }
+        // LCOV_EXCL_STOP
+        sharedPtr->SetBrokerUidAccessPolicyMap(std::nullopt);
 #ifndef UNITTEST_FORBID_FFRT
     }, ffrt::task_attr().name("InitSetBrokerUidAccessPolicyMapFunc").delay(DELAY_US));
 #endif
@@ -459,18 +474,31 @@ void NetPolicyService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
         ListenCommonEvent();
     }
     if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
+        std::weak_ptr<NetPolicyService> wp = shared_from_this();
 #ifndef UNITTEST_FORBID_FFRT
-        ffrtQueue_.submit([this]() {
+        ffrtQueue_.submit([wp]() {
 #endif
-            SetBrokerUidAccessPolicyMap(std::nullopt);
+        auto sharedSelf = wp.lock();
+        // LCOV_EXCL_START
+        if (sharedSelf == nullptr) {
+            return;
+        }
+        // LCOV_EXCL_STOP
+        sharedSelf->SetBrokerUidAccessPolicyMap(std::nullopt);
 #ifndef UNITTEST_FORBID_FFRT
         }, ffrt::task_attr().name("SetBrokerUidAccessPolicyMapFunc").delay(DELAY_US));
 #endif
 #ifndef UNITTEST_FORBID_FFRT
-        ffrtQueue_.submit([this]() {
+        ffrtQueue_.submit([wp]() {
 #endif
-            OverwriteNetAccessPolicyToDBFromConfig();
-            UpdateNetAccessPolicyToMapFromDB();
+        auto sharedPtr = wp.lock();
+        // LCOV_EXCL_START
+        if (sharedPtr == nullptr) {
+            return;
+        }
+        // LCOV_EXCL_STOP
+        sharedPtr->OverwriteNetAccessPolicyToDBFromConfig();
+        sharedPtr->UpdateNetAccessPolicyToMapFromDB();
 #ifndef UNITTEST_FORBID_FFRT
         }, ffrt::task_attr().name("NetworkAccessPolicyConfigFlush"));
 #endif

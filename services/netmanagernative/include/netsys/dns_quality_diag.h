@@ -72,6 +72,7 @@ private:
 
     std::mutex dnsAbnormalTimeMutex_;
 
+    std::mutex dnsReportResultMutex_;
     std::atomic_uint defaultNetId_;
 
     uint32_t monitor_loop_delay;

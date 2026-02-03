@@ -97,8 +97,9 @@ int32_t DnsQualityDiag::ParseReportAddr(uint32_t size, AddrInfo* addrinfo, Netsy
 int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t pid, int32_t usedtime,
     char* name, uint32_t size, int32_t failreason, QueryParam queryParam, AddrInfo* addrinfo)
 {
+    std::unique_lock<std::mutex> locker(dnsReportResultMutex_);
     bool reportSizeReachLimit = (report_.size() >= MAX_RESULT_SIZE);
-
+    locker.unlock();
     NETNATIVE_LOG_D("ReportDnsResult: %{public}d, %{public}d, %{public}d, %{public}d, %{public}d, %{public}d",
                     netId, uid, pid, usedtime, size, failreason);
 
@@ -123,7 +124,6 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
         auto event = AppExecFwk::InnerEvent::Get(DnsQualityEventHandler::MSG_DNS_NEW_REPORT, rpt);
         handler_->SendEvent(event);
     }
-
     return 0;
 }
 
@@ -247,13 +247,13 @@ int32_t DnsQualityDiag::ReportDnsQueryAbnormal(uint32_t eventfailcause, PostDnsQ
 
 int32_t DnsQualityDiag::RegisterResultListener(const sptr<INetDnsResultCallback> &callback, uint32_t timeStep)
 {
-    report_delay = std::max(report_delay, timeStep);
     if (callback == nullptr) {
         NETNATIVE_LOGE("callback is nullptr");
         return 0;
     }
 
     std::unique_lock<std::mutex> locker(resultListenersMutex_);
+    report_delay = std::max(report_delay, timeStep);
     std::list<sptr<NetsysNative::INetDnsResultCallback>>::iterator iter;
     for (iter = resultListeners_.begin(); iter != resultListeners_.end(); ++iter) {
         if ((*iter)->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
@@ -334,9 +334,11 @@ int32_t DnsQualityDiag::query_default_host()
 int32_t DnsQualityDiag::handle_dns_loop()
 {
     if (handler_started) {
+        std::unique_lock<std::mutex> locker(dnsReportResultMutex_);
         if (report_.size() == 0) {
             query_default_host();
         }
+        locker.unlock();
         handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_MONITOR_LOOP, monitor_loop_delay);
     }
     return 0;
@@ -352,16 +354,17 @@ int32_t DnsQualityDiag::handle_dns_fail()
 
 int32_t DnsQualityDiag::send_dns_report()
 {
+    std::unique_lock<std::mutex> locker(dnsReportResultMutex_);
     if (!handler_started) {
         report_.clear();
         return 0;
     }
 
-    std::unique_lock<std::mutex> locker(resultListenersMutex_);
     if (report_.size() > 0) {
         std::list<NetsysNative::NetDnsResultReport> reportSend(report_);
         report_.clear();
         NETNATIVE_LOG_D("send_dns_report (%{public}zu)", reportSend.size());
+        locker.unlock();
         for (auto cb: resultListeners_) {
             NETNATIVE_LOG_D("send_dns_report cb)");
             cb->OnDnsResultReport(reportSend.size(), reportSend);
@@ -371,13 +374,12 @@ int32_t DnsQualityDiag::send_dns_report()
     std::unique_lock<std::shared_mutex> lock(dnsQueryReportMutex_);
     std::list<NetsysNative::NetDnsQueryResultReport> reportSend(dnsQueryReport_);
     dnsQueryReport_.clear();
-    lock.unlock();
+
     if (reportSend.size() > 0) {
         for (auto cb: resultListeners_) {
             cb->OnDnsQueryResultReport(reportSend.size(), reportSend);
         }
     }
-    locker.unlock();
     handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_REPORT_LOOP, report_delay);
     return 0;
 }
@@ -399,6 +401,7 @@ int32_t DnsQualityDiag::handle_dns_abnormal(std::shared_ptr<DnsAbnormalInfo> abn
     if (!abnormalInfo) {
         return 0;
     }
+    std::unique_lock<std::mutex> locker(resultListenersMutex_);
     for (auto cb: resultListeners_) {
         cb->OnDnsQueryAbnormalReport(abnormalInfo->eventfailcause, abnormalInfo->report);
     }
@@ -411,6 +414,7 @@ int32_t DnsQualityDiag::add_dns_report(std::shared_ptr<NetsysNative::NetDnsResul
         NETNATIVE_LOGE("report is nullptr");
         return 0;
     }
+    std::unique_lock<std::mutex> locker(dnsReportResultMutex_);
     if (report_.size() < MAX_RESULT_SIZE) {
         report_.push_back(*report);
     }

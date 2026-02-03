@@ -275,28 +275,33 @@ void DnsManager::EeffectDomainRules(NetFirewallRuleType type, const std::vector<
     if (type != NetFirewallRuleType::RULE_DOMAIN || firewallDomainRulesQueue_ == nullptr) {
         return;
     }
-    firewallDomainRulesQueue_->submit([this, ruleList, isFinish]() {
+    std::weak_ptr<DnsManager> wp = shared_from_this();
+    firewallDomainRulesQueue_->submit([wp, ruleList, isFinish]() {
+        auto sharedSelf = wp.lock();
+        if (sharedSelf == nullptr) {
+            return;
+        }
         for (auto &rule : ruleList) {
             auto domainRule = firewall_rule_cast<NetFirewallDomainRule>(rule);
             if (domainRule == nullptr || domainRule->ruleAction != FirewallRuleAction::RULE_ALLOW) {
                 continue;
             }
-            firewallDomainRules_.emplace_back(domainRule);
+            sharedSelf->firewallDomainRules_.emplace_back(domainRule);
         }
         if (!isFinish) {
             return;
         }
-        for (auto &rule : firewallDomainRules_) {
+        for (auto &rule : sharedSelf->firewallDomainRules_) {
             for (auto &domain : rule->domains) {
                 AddrInfo addrInfo = {};
                 addrInfo.aiFamily = AF_UNSPEC;
                 addrInfo.aiSockType = SOCK_STREAM;
                 addrInfo.aiProtocol = IPPROTO_TCP;
                 std::vector<AddrInfo> res;
-                GetAddrInfo(domain.domain, "", addrInfo, 0, res);
+                sharedSelf->GetAddrInfo(domain.domain, "", addrInfo, 0, res);
             }
         }
-        firewallDomainRules_.clear();
+        sharedSelf->firewallDomainRules_.clear();
     });
 }
 

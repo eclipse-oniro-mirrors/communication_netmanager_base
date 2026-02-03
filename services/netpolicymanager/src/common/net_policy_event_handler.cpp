@@ -38,10 +38,17 @@ void NetPolicyEventHandler::SendEvent(const AppExecFwk::InnerEvent::Pointer &eve
 {
     auto eventId = static_cast<int32_t>(event->GetInnerEventId());
     auto eventData = event->GetSharedObject<PolicyEvent>();
+    std::weak_ptr<NetPolicyEventHandler> wp = shared_from_this();
 #ifndef UNITTEST_FORBID_FFRT
-    ffrtQueue_.submit([this, eventId, eventData] {
+    ffrtQueue_.submit([wp, eventId, eventData] {
 #endif
-        ProcessEvent(eventId, eventData);
+        auto sharedSelf = wp.lock();
+        // LCOV_EXCL_START
+        if (sharedSelf == nullptr) {
+            return;
+        }
+        // LCOV_EXCL_STOP
+        sharedSelf->ProcessEvent(eventId, eventData);
 #ifndef UNITTEST_FORBID_FFRT
     }, ffrt::task_attr().delay(static_cast<uint64_t>(delayTime)).name("FfrtSendEvent"));
 #endif

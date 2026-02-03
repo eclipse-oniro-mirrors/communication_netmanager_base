@@ -156,13 +156,13 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
         SendPortalInfo(portalDetectInfo_);
     } else {
         NETMGR_LOG_E("Net[%{public}d] probe failed", netId_);
-        detectionDelay_ *= DOUBLE;
+        detectionDelay_ = detectionDelay_ * DOUBLE;
         if (detectionDelay_ == 0) {
             detectionDelay_ = INIT_DETECTION_DELAY_MS;
         } else if (detectionDelay_ >= MAX_FAILED_DETECTION_DELAY_MS) {
             detectionDelay_ = MAX_FAILED_DETECTION_DELAY_MS;
         }
-        NETMGR_LOG_I("Net probe failed detectionDelay time [%{public}d]", detectionDelay_);
+        NETMGR_LOG_I("Net probe failed detectionDelay time [%{public}d]", detectionDelay_.load());
         result = INVALID_DETECTION_STATE;
     }
     auto monitorCallback = netMonitorCallback_.lock();
