@@ -50,10 +50,10 @@ napi_value InterfaceWithoutManager(napi_env env, napi_callback_info info, const 
     context->ParseParams(params, paramsCount);
     if (context->IsNeedThrowException()) { // only api9 or later need throw exception.
         if (context->GetReleaseVersion() >= API_VERSION_THROW_BUSINESS_EXCEPTION) {
- 	        napi_throw_business_error(env, context->GetErrorCode(), context->GetErrorMessage().c_str());
- 	    } else {
- 	        napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
- 	    }
+            napi_throw_business_error(env, context->GetErrorCode(), context->GetErrorMessage().c_str());
+        } else {
+            napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
+        }
         delete context;
         context = nullptr;
         return NapiUtils::GetUndefined(env);
