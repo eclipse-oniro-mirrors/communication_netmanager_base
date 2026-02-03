@@ -98,6 +98,9 @@ napi_value Interface(napi_env env, napi_callback_info info, const std::string &a
         } else {
             napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
         }
+        delete context;
+        context = nullptr;
+        return NapiUtils::GetUndefined(env);
     }
     if (Work != nullptr) {
         if (!Work(env, thisVal, context)) {
@@ -144,8 +147,6 @@ napi_value InterfaceSync(napi_env env, napi_callback_info info, const std::strin
         } else {
             napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
         }
-        delete context;
-        context = nullptr;
         return NapiUtils::GetUndefined(env);
     }
     if (Work != nullptr) {
