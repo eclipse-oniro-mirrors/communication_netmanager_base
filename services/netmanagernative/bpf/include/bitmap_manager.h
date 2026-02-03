@@ -21,6 +21,9 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <arpa/inet.h>
+#include <cstdio>
+#include <cstring>
 
 #include "netfirewall/netfirewall_def.h"
 #include "netfirewall_parcel.h"
@@ -323,23 +326,42 @@ public:
      */
     void OrInsert(uint32_t addr, uint32_t mask, Bitmap &bitmap)
     {
-        std::vector<Ip4RuleBitmapVector::iterator> matches;
+        uint32_t netOrderAddr = htonl(addr);
         uint32_t networkAddr = GetNetworkAddress(addr, mask);
+        bool shouldInsert = true;
+        Bitmap bitmapCopy(bitmap);
+
         for (auto it = ruleBitmapVec_.begin(); it != ruleBitmapVec_.end(); ++it) {
-            if (it->data == htonl(addr) || GetNetworkAddress(ntohl(it->data), it->mask) == networkAddr) {
-                matches.emplace_back(it);
+            uint32_t existingIp = ntohl(it->data);
+            uint32_t existingNetworkAddr = GetNetworkAddress(existingIp, it->mask);
+
+            // 情况1：完全相同的规则
+            if (it->data == netOrderAddr && it->mask == mask) {
+                it->bitmap.Or(bitmapCopy);  // 老bitmap 或上 新bitmap副本
+                shouldInsert = false;
+            }
+            
+            // 情况2：新规则掩码更小
+            if (mask < it->mask) {
+                if (GetNetworkAddress(existingIp, mask) == networkAddr) {
+                    it->bitmap.Or(bitmapCopy);  // 老规则bitmap 或上 新规则bitmap副本
+                }
+            }
+            
+            // 情况3：新规则掩码更大
+            if (mask > it->mask) {
+                if (GetNetworkAddress(addr, it->mask) == existingNetworkAddr) {
+                    bitmapCopy.Or(it->bitmap);  // 新规则bitmap副本 或上 老规则bitmap
+                }
             }
         }
-        if (matches.empty()) {
+        // 如果需要插入新规则
+        if (shouldInsert) {
             Ip4RuleBitmap ruleBitmap;
-            ruleBitmap.data = htonl(addr);
+            ruleBitmap.data = netOrderAddr;
             ruleBitmap.mask = mask;
-            ruleBitmap.bitmap = bitmap;
+            ruleBitmap.bitmap = std::move(bitmapCopy);
             ruleBitmapVec_.emplace_back(std::move(ruleBitmap));
-        } else {
-            for (const auto &it : matches) {
-                it->bitmap.Or(bitmap);
-            }
         }
     }
 
