@@ -34,7 +34,7 @@
 namespace OHOS::NetManagerStandard {
 
 typedef struct {
-    int index;
+    uint32_t index;
     uint32_t delayTime;
 } elemParam;
 
@@ -92,8 +92,8 @@ public:
     {
         std::lock_guard<ffrt::mutex> guard(mutex_);
         if (indexMap_.find(elem) != indexMap_.end()) {
-            int oldIndex = indexMap_[elem].index;
-            if (oldIndex >= 0 && oldIndex < static_cast<int>(elems_.size()) &&
+            uint32_t oldIndex = indexMap_[elem].index;
+            if (oldIndex < elems_.size() &&
                 (elems_[oldIndex].find(elem) != elems_[oldIndex].end())) {
                 elems_[oldIndex].erase(elem);
             }
@@ -108,8 +108,8 @@ public:
             return;
         }
         if (indexMap_.find(elem) != indexMap_.end()) {
-            int oldIndex = indexMap_[elem].index;
-            if (oldIndex >= 0 && oldIndex < static_cast<int>(elems_.size()) &&
+            uint32_t oldIndex = indexMap_[elem].index;
+            if (oldIndex < elems_.size() &&
                 (elems_[oldIndex].find(elem) != elems_[oldIndex].end())) {
                 elems_[oldIndex].erase(elem);
             }
