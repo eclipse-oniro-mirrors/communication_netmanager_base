@@ -452,12 +452,12 @@ static __always_inline enum sk_action match_action(struct match_tuple *tuple, st
     if (action_bitmap && bitmap_positive(key->val)) {
         if (sk_act == SK_DROP) {
             bitmap_and(key->val, action_bitmap->val);
-            if (!bitmap_positive(key->val)) {
+            if (!bitmap_positive(key->val) || MatchDomain(tuple)) {
                 sk_act = SK_PASS;
             }
         } else {
             bitmap_and_inv(key->val, action_bitmap->val);
-            if (!bitmap_positive(key->val)) {
+            if (!bitmap_positive(key->val) && !MatchDomain(tuple)) {
                 sk_act = SK_DROP;
             }
         }
