@@ -53,6 +53,16 @@ bool WriteNatDataToMessage(MessageParcel &data, const std::string &downstreamIfa
 }
 } // namespace
 
+int32_t NetsysNativeServiceProxy::SendRequest(uint32_t code,
+    MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    auto remote = Remote();
+    if (remote == nullptr) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return remote->SendRequest(code, data, reply, option);
+}
+
 bool NetsysNativeServiceProxy::WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(NetsysNativeServiceProxy::GetDescriptor())) {
@@ -108,7 +118,7 @@ int32_t NetsysNativeServiceProxy::SetResolverConfig(uint16_t netId, uint16_t bas
 
     MessageParcel reply;
     MessageOption option;
-    int ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_RESOLVER_CONFIG),
+    int ret = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_RESOLVER_CONFIG),
         data, reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, ret code: [%{public}d]", ret);
@@ -130,7 +140,7 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(uint16_t netId, std::vector<
     }
     MessageParcel reply;
     MessageOption option;
-    int ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_RESOLVER_CONFIG), data,
+    int ret = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_RESOLVER_CONFIG), data,
         reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, ret code: [%{public}d]", ret);
@@ -182,7 +192,7 @@ int32_t NetsysNativeServiceProxy::CreateNetworkCache(uint16_t netId, bool isVpnN
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CREATE_NETWORK_CACHE), data,
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CREATE_NETWORK_CACHE), data,
         reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, result code: [%{public}d]", result);
@@ -207,7 +217,7 @@ int32_t NetsysNativeServiceProxy::DestroyNetworkCache(uint16_t netId, bool isVpn
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DESTROY_NETWORK_CACHE), data,
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DESTROY_NETWORK_CACHE), data,
         reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, result code: [%{public}d]", result);
@@ -227,7 +237,7 @@ int32_t NetsysNativeServiceProxy::GetAddrInfo(const std::string &hostName, const
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ADDR_INFO), data,
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ADDR_INFO), data,
         reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, result code: [%{public}d]", result);
@@ -274,7 +284,7 @@ int32_t NetsysNativeServiceProxy::SetInterfaceMtu(const std::string &interfaceNa
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_SET_MTU), data,
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_SET_MTU), data,
         reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -296,7 +306,7 @@ int32_t NetsysNativeServiceProxy::SetTcpBufferSizes(const std::string &tcpBuffer
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_TCP_BUFFER_SIZES), data,
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_TCP_BUFFER_SIZES), data,
         reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, result code: [%{public}d]", result);
@@ -318,7 +328,7 @@ int32_t NetsysNativeServiceProxy::GetInterfaceMtu(const std::string &interfaceNa
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_GET_MTU), data,
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_GET_MTU), data,
         reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -343,7 +353,7 @@ int32_t NetsysNativeServiceProxy::RegisterNotifyCallback(sptr<INotifyCallback> &
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_REGISTER_NOTIFY_CALLBACK),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_REGISTER_NOTIFY_CALLBACK),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -370,7 +380,7 @@ int32_t NetsysNativeServiceProxy::UnRegisterNotifyCallback(sptr<INotifyCallback>
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UNREGISTER_NOTIFY_CALLBACK),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UNREGISTER_NOTIFY_CALLBACK),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -405,7 +415,7 @@ int32_t NetsysNativeServiceProxy::NetworkAddRoute(int32_t netId, const std::stri
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ADD_ROUTE),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ADD_ROUTE),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -438,7 +448,7 @@ int32_t NetsysNativeServiceProxy::NetworkAddRoutes(int32_t netId, const std::vec
         return IPC_PROXY_NULL_INVOKER_ERR;
     }
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ADD_ROUTES), data,
-                                      reply, option);
+        reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("NetworkAddRoutes proxy SendRequest failed, error code: [%{public}d]", ret);
         return IPC_INVOKER_ERR;
@@ -477,7 +487,7 @@ int32_t NetsysNativeServiceProxy::NetworkRemoveRoute(int32_t netId, const std::s
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_REMOVE_ROUTE),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_REMOVE_ROUTE),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -508,7 +518,7 @@ int32_t NetsysNativeServiceProxy::NetworkAddRouteParcel(int32_t netId, const Rou
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ADD_ROUTE_PARCEL),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ADD_ROUTE_PARCEL),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -539,7 +549,7 @@ int32_t NetsysNativeServiceProxy::NetworkRemoveRouteParcel(int32_t netId, const 
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_REMOVE_ROUTE_PARCEL),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_REMOVE_ROUTE_PARCEL),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -561,7 +571,7 @@ int32_t NetsysNativeServiceProxy::NetworkSetDefault(int32_t netId)
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_DEFAULT),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_DEFAULT),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -580,7 +590,7 @@ int32_t NetsysNativeServiceProxy::NetworkGetDefault()
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_GET_DEFAULT),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_GET_DEFAULT),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -599,7 +609,7 @@ int32_t NetsysNativeServiceProxy::NetworkClearDefault()
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_CLEAR_DEFAULT),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_CLEAR_DEFAULT),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -631,7 +641,7 @@ int32_t NetsysNativeServiceProxy::GetProcSysNet(int32_t family, int32_t which, c
     }
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_PROC_SYS_NET),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_PROC_SYS_NET),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -673,7 +683,7 @@ int32_t NetsysNativeServiceProxy::SetProcSysNet(int32_t family, int32_t which, c
     }
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_PROC_SYS_NET),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_PROC_SYS_NET),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -703,7 +713,7 @@ int32_t NetsysNativeServiceProxy::SetInternetPermission(uint32_t uid, uint8_t al
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_INTERNET_PERMISSION),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_INTERNET_PERMISSION),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -728,7 +738,7 @@ int32_t NetsysNativeServiceProxy::NetworkCreatePhysical(int32_t netId, int32_t p
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_CREATE_PHYSICAL),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_CREATE_PHYSICAL),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -751,7 +761,7 @@ int32_t NetsysNativeServiceProxy::NetworkCreateVirtual(int32_t netId, bool hasDn
         return IPC_PROXY_NULL_INVOKER_ERR;
     }
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_CREATE_VIRTUAL), data,
-                                      reply, option);
+        reply, option);
     if (ERR_NONE != ret) {
         NETNATIVE_LOGE("NetworkCreateVirtual proxy SendRequest failed, error code: [%{public}d]", ret);
         return IPC_INVOKER_ERR;
@@ -847,8 +857,8 @@ int32_t NetsysNativeServiceProxy::AddInterfaceAddress(const std::string &interfa
 
     MessageParcel reply;
     MessageOption option;
-    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_ADD_ADDRESS), data, reply,
-                          option);
+    SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_ADD_ADDRESS), data, reply,
+        option);
 
     return reply.ReadInt32();
 }
@@ -865,7 +875,7 @@ int32_t NetsysNativeServiceProxy::DelInterfaceAddress(const std::string &interfa
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_DEL_ADDRESS),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_DEL_ADDRESS),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -886,7 +896,7 @@ int32_t NetsysNativeServiceProxy::DelInterfaceAddress(const std::string &interfa
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_DEL_ADDRESS),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_DEL_ADDRESS),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -907,7 +917,7 @@ int32_t NetsysNativeServiceProxy::InterfaceSetIpAddress(const std::string &iface
     }
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_SET_IP_ADDRESS),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_SET_IP_ADDRESS),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -928,7 +938,7 @@ int32_t NetsysNativeServiceProxy::InterfaceSetIffUp(const std::string &ifaceName
     }
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_SET_IFF_UP),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_SET_IFF_UP),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -957,7 +967,7 @@ int32_t NetsysNativeServiceProxy::NetworkAddInterface(int32_t netId, const std::
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ADD_INTERFACE),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ADD_INTERFACE),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -982,7 +992,7 @@ int32_t NetsysNativeServiceProxy::NetworkRemoveInterface(int32_t netId, const st
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_REMOVE_INTERFACE),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_REMOVE_INTERFACE),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -1007,7 +1017,7 @@ int32_t NetsysNativeServiceProxy::NetworkDestroy(int32_t netId, bool isVpnNet)
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_DESTROY),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_DESTROY),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -1050,7 +1060,7 @@ int32_t NetsysNativeServiceProxy::CreateVnic(uint16_t mtu, const std::string &tu
     MessageParcel reply;
     MessageOption option;
     int32_t error =
-        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_VNIC_CREATE), data, reply, option);
+        SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_VNIC_CREATE), data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
         return IPC_INVOKER_ERR;
@@ -1069,7 +1079,7 @@ int32_t NetsysNativeServiceProxy::DestroyVnic()
     MessageParcel reply;
     MessageOption option;
     int32_t error =
-        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_VNIC_DESTROY), data, reply, option);
+        SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_VNIC_DESTROY), data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
         return IPC_INVOKER_ERR;
@@ -1096,8 +1106,8 @@ int32_t NetsysNativeServiceProxy::EnableDistributedClientNet(const std::string &
     MessageParcel reply;
     MessageOption option;
     int32_t ret =
-        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ENABLE_DISTRIBUTE_CLIENT_NET), data,
-                              reply, option);
+        SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ENABLE_DISTRIBUTE_CLIENT_NET), data,
+            reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", ret);
         return IPC_INVOKER_ERR;
@@ -1138,8 +1148,8 @@ int32_t NetsysNativeServiceProxy::EnableDistributedServerNet(const std::string &
     MessageParcel reply;
     MessageOption option;
     int32_t ret =
-        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ENABLE_DISTRIBUTE_SERVER_NET), data,
-                              reply, option);
+        SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ENABLE_DISTRIBUTE_SERVER_NET), data,
+            reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", ret);
         return IPC_INVOKER_ERR;
@@ -1165,8 +1175,8 @@ int32_t NetsysNativeServiceProxy::DisableDistributedNet(bool isServer)
     MessageParcel reply;
     MessageOption option;
     int32_t ret =
-        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DISABLE_DISTRIBUTE_NET), data,
-                              reply, option);
+        SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DISABLE_DISTRIBUTE_NET), data,
+            reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", ret);
         return IPC_INVOKER_ERR;
@@ -1196,7 +1206,7 @@ int32_t NetsysNativeServiceProxy::GetFwmarkForNetwork(int32_t netId, MarkMaskPar
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_FWMARK_FOR_NETWORK),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_FWMARK_FOR_NETWORK),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -1237,7 +1247,7 @@ int32_t NetsysNativeServiceProxy::SetInterfaceConfig(const InterfaceConfiguratio
     }
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_SET_CONFIG),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_SET_CONFIG),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -1261,7 +1271,7 @@ int32_t NetsysNativeServiceProxy::GetInterfaceConfig(InterfaceConfigurationParce
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_GET_CONFIG),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_GET_CONFIG),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -1300,7 +1310,7 @@ int32_t NetsysNativeServiceProxy::InterfaceGetList(std::vector<std::string> &ifa
     }
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_GET_LIST),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_GET_LIST),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -1341,7 +1351,7 @@ int32_t NetsysNativeServiceProxy::StartDhcpClient(const std::string &iface, bool
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_START_DHCP_CLIENT),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_START_DHCP_CLIENT),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -1370,7 +1380,7 @@ int32_t NetsysNativeServiceProxy::StopDhcpClient(const std::string &iface, bool 
     MessageParcel reply;
     MessageOption option;
     ret =
-        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_STOP_DHCP_CLIENT), data, reply, option);
+        SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_STOP_DHCP_CLIENT), data, reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", ret);
         return IPC_INVOKER_ERR;
@@ -1398,7 +1408,7 @@ int32_t NetsysNativeServiceProxy::StartDhcpService(const std::string &iface, con
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_START_DHCP_SERVICE),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_START_DHCP_SERVICE),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -1422,7 +1432,7 @@ int32_t NetsysNativeServiceProxy::StopDhcpService(const std::string &iface)
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_STOP_DHCP_SERVICE),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_STOP_DHCP_SERVICE),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -1442,7 +1452,7 @@ int32_t NetsysNativeServiceProxy::IpEnableForwarding(const std::string &requesto
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_IPENABLE_FORWARDING),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_IPENABLE_FORWARDING),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -1462,7 +1472,7 @@ int32_t NetsysNativeServiceProxy::IpDisableForwarding(const std::string &request
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_IPDISABLE_FORWARDING),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_IPDISABLE_FORWARDING),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -1482,7 +1492,7 @@ int32_t NetsysNativeServiceProxy::EnableNat(const std::string &downstreamIface, 
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ENABLE_NAT),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ENABLE_NAT),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -1502,7 +1512,7 @@ int32_t NetsysNativeServiceProxy::DisableNat(const std::string &downstreamIface,
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DISABLE_NAT),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DISABLE_NAT),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -1522,7 +1532,7 @@ int32_t NetsysNativeServiceProxy::IpfwdAddInterfaceForward(const std::string &fr
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_IPFWD_ADD_INTERFACE_FORWARD),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_IPFWD_ADD_INTERFACE_FORWARD),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -1543,7 +1553,7 @@ int32_t NetsysNativeServiceProxy::IpfwdRemoveInterfaceForward(const std::string 
     MessageParcel reply;
     MessageOption option;
     int result =
-        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD),
+        SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD),
             data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -1573,7 +1583,7 @@ int32_t NetsysNativeServiceProxy::BandwidthEnableDataSaver(bool enable)
         return IPC_PROXY_NULL_INVOKER_ERR;
     }
     int32_t error = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_ENABLE_DATA_SAVER),
-                                        data, reply, option);
+        data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -1605,7 +1615,7 @@ int32_t NetsysNativeServiceProxy::BandwidthSetIfaceQuota(const std::string &ifNa
         return IPC_PROXY_NULL_INVOKER_ERR;
     }
     int32_t error = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_SET_IFACE_QUOTA),
-                                        data, reply, option);
+        data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -1769,7 +1779,7 @@ int32_t NetsysNativeServiceProxy::FirewallEnableChain(uint32_t chain, bool enabl
         return IPC_PROXY_NULL_INVOKER_ERR;
     }
     int32_t error = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FIREWALL_ENABLE_CHAIN), data,
-                                        reply, option);
+        reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -1806,7 +1816,7 @@ int32_t NetsysNativeServiceProxy::FirewallSetUidRule(uint32_t chain, const std::
         return IPC_PROXY_NULL_INVOKER_ERR;
     }
     int32_t error = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_RULE), data,
-                                        reply, option);
+        reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -1828,7 +1838,7 @@ int32_t NetsysNativeServiceProxy::ShareDnsSet(uint16_t netId)
     MessageParcel reply;
     MessageOption option;
     int32_t error =
-        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_TETHER_DNS_SET), data, reply, option);
+        SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_TETHER_DNS_SET), data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
@@ -1845,8 +1855,8 @@ int32_t NetsysNativeServiceProxy::StartDnsProxyListen()
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_START_DNS_PROXY_LISTEN),
-                                          data, reply, option);
+    int32_t error = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_START_DNS_PROXY_LISTEN),
+        data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
@@ -1863,8 +1873,8 @@ int32_t NetsysNativeServiceProxy::StopDnsProxyListen()
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_STOP_DNS_PROXY_LISTEN),
-                                          data, reply, option);
+    int32_t error = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_STOP_DNS_PROXY_LISTEN),
+        data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
@@ -1888,7 +1898,7 @@ int32_t NetsysNativeServiceProxy::GetNetworkSharingTraffic(const std::string &do
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_SHARING_NETWORK_TRAFFIC),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_SHARING_NETWORK_TRAFFIC),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -1917,7 +1927,7 @@ int32_t NetsysNativeServiceProxy::GetNetworkCellularSharingTraffic(NetworkSharin
 
     MessageParcel reply;
     MessageOption option;
-    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_CELLULAR_SHARING_NETWORK_TRAFFIC),
+    SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_CELLULAR_SHARING_NETWORK_TRAFFIC),
         data, reply, option);
 
     int32_t ret = reply.ReadInt32();
@@ -1946,8 +1956,8 @@ int32_t NetsysNativeServiceProxy::GetTotalStats(uint64_t &stats, uint32_t type)
     }
     MessageParcel reply;
     MessageOption option;
-    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_TOTAL_STATS), data,
-                                          reply, option)) {
+    if (ERR_NONE != SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_TOTAL_STATS), data,
+        reply, option)) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -1984,7 +1994,7 @@ int32_t NetsysNativeServiceProxy::GetUidStats(uint64_t &stats, uint32_t type, ui
     MessageParcel reply;
     MessageOption option;
     if (ERR_NONE !=
-        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_UID_STATS), data, reply, option)) {
+        SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_UID_STATS), data, reply, option)) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -2021,8 +2031,8 @@ int32_t NetsysNativeServiceProxy::GetIfaceStats(uint64_t &stats, uint32_t type, 
     }
     MessageParcel reply;
     MessageOption option;
-    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_IFACE_STATS), data,
-                                          reply, option)) {
+    if (ERR_NONE != SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_IFACE_STATS), data,
+        reply, option)) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -2053,10 +2063,8 @@ int32_t NetsysNativeServiceProxy::GetAllSimStatsInfo(std::vector<OHOS::NetManage
     }
     MessageParcel reply;
     MessageOption option;
-    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_SIM_STATS_INFO),
-                                        data,
-                                        reply,
-                                        option);
+    auto result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_SIM_STATS_INFO),
+        data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -2090,8 +2098,8 @@ int32_t NetsysNativeServiceProxy::DeleteSimStatsInfo(uint32_t uid)
     }
     MessageParcel reply;
     MessageOption option;
-    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DELETE_SIM_STATS_INFO),
-                                        data, reply, option);
+    auto result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DELETE_SIM_STATS_INFO),
+        data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -2116,8 +2124,8 @@ int32_t NetsysNativeServiceProxy::GetAllStatsInfo(std::vector<OHOS::NetManagerSt
     }
     MessageParcel reply;
     MessageOption option;
-    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_STATS_INFO), data,
-                                          reply, option)) {
+    if (ERR_NONE != SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_STATS_INFO), data,
+        reply, option)) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -2150,8 +2158,8 @@ int32_t NetsysNativeServiceProxy::DeleteStatsInfo(uint32_t uid)
     }
     MessageParcel reply;
     MessageOption option;
-    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DELETE_STATS_INFO), data,
-                                        reply, option);
+    auto result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DELETE_STATS_INFO), data,
+        reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -2186,8 +2194,8 @@ int32_t NetsysNativeServiceProxy::SetNetStateTrafficMap(uint8_t flag, uint64_t a
         NETNATIVE_LOGE("SetIptablesCommandForRes Remote pointer is null");
         return ERR_FLATTEN_OBJECT;
     }
-    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_TRAFFIC_AVAILABLE_MAP),
-                                        data, reply, option);
+    auto result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_TRAFFIC_AVAILABLE_MAP),
+        data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -2222,8 +2230,8 @@ int32_t NetsysNativeServiceProxy::GetNetStateTrafficMap(uint8_t flag, uint64_t &
         NETNATIVE_LOGE("SetIptablesCommandForRes Remote pointer is null");
         return ERR_FLATTEN_OBJECT;
     }
-    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_TRAFFIC_AVAILABLE_MAP),
-                                          data, reply, option)) {
+    if (ERR_NONE != SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_TRAFFIC_AVAILABLE_MAP),
+        data, reply, option)) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -2259,8 +2267,8 @@ int32_t NetsysNativeServiceProxy::ClearIncreaseTrafficMap()
         NETNATIVE_LOGE("SetIptablesCommandForRes Remote pointer is null");
         return ERR_FLATTEN_OBJECT;
     }
-    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_INCRE_TRAFFIC_MAP),
-                                        data, reply, option);
+    auto result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_INCRE_TRAFFIC_MAP),
+        data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -2290,8 +2298,8 @@ int32_t NetsysNativeServiceProxy::ClearSimStatsBpfMap()
         NETNATIVE_LOGE("SetIptablesCommandForRes Remote pointer is null");
         return ERR_FLATTEN_OBJECT;
     }
-    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_SIM_STATS_MAP),
-                                        data, reply, option);
+    auto result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_SIM_STATS_MAP),
+        data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -2324,8 +2332,8 @@ int32_t NetsysNativeServiceProxy::DeleteIncreaseTrafficMap(uint64_t ifIndex)
         NETNATIVE_LOGE("DeleteIncreaseTrafficMap Remote pointer is null");
         return ERR_FLATTEN_OBJECT;
     }
-    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DELETE_INCRE_TRAFFIC_MAP),
-                                        data, reply, option);
+    auto result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DELETE_INCRE_TRAFFIC_MAP),
+        data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -2360,8 +2368,8 @@ int32_t NetsysNativeServiceProxy::UpdateIfIndexMap(int8_t key, uint64_t index)
         NETNATIVE_LOGE("SetIptablesCommandForRes Remote pointer is null");
         return ERR_FLATTEN_OBJECT;
     }
-    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_IFINDEX_MAP), data,
-                                        reply, option);
+    auto result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_IFINDEX_MAP), data,
+        reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -2396,8 +2404,8 @@ int32_t NetsysNativeServiceProxy::SetNetStatusMap(uint8_t type, uint8_t value)
         NETNATIVE_LOGE("SetNetStatusMap Remote pointer is null");
         return ERR_FLATTEN_OBJECT;
     }
-    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NET_STATUS_MAP),
-                                          data, reply, option)) {
+    if (ERR_NONE != SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NET_STATUS_MAP),
+        data, reply, option)) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -2435,8 +2443,8 @@ int32_t NetsysNativeServiceProxy::SetIptablesCommandForRes(const std::string &cm
         NETNATIVE_LOGE("SetIptablesCommandForRes Remote pointer is null");
         return ERR_FLATTEN_OBJECT;
     }
-    int32_t error = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_IPTABLES_CMD_FOR_RES),
-                                          data, reply, option);
+    int32_t error = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_IPTABLES_CMD_FOR_RES),
+        data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("SetIptablesCommandForRes proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -2470,8 +2478,8 @@ int32_t NetsysNativeServiceProxy::SetIpCommandForRes(const std::string &cmd, std
         NETNATIVE_LOGE("SetIpCommandForRes Remote pointer is null");
         return ERR_FLATTEN_OBJECT;
     }
-    int32_t error = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_IPCMD_FOR_RES),
-                                          data, reply, option);
+    int32_t error = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_IPCMD_FOR_RES),
+        data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("SetIpCommandForRes proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -2784,7 +2792,7 @@ int32_t NetsysNativeServiceProxy::AddStaticArp(const std::string &ipAddr, const 
         return ERR_FLATTEN_OBJECT;
     }
     int32_t error = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ADD_STATIC_ARP),
-                                        data, reply, option);
+        data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("AddStaticArp proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -2814,7 +2822,7 @@ int32_t NetsysNativeServiceProxy::DelStaticArp(const std::string &ipAddr, const 
         return ERR_FLATTEN_OBJECT;
     }
     int32_t error = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DEL_STATIC_ARP),
-                                        data, reply, option);
+        data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("DelStaticArp proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -2895,7 +2903,7 @@ int32_t NetsysNativeServiceProxy::GetIpNeighTable(std::vector<NetManagerStandard
     }
     MessageParcel reply;
     MessageOption option;
-    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_IP_NEIGH_TABLE), data,
+    if (ERR_NONE != SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_IP_NEIGH_TABLE), data,
         reply, option)) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -3086,8 +3094,8 @@ int32_t NetsysNativeServiceProxy::GetCookieStats(uint64_t &stats, uint32_t type,
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t res = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_COOKIE_STATS),
-                                        data, reply, option);
+    int32_t res = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_COOKIE_STATS),
+        data, reply, option);
     if (res != ERR_NONE) {
         NETNATIVE_LOGE("GetCookieStats SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -3115,8 +3123,8 @@ int32_t NetsysNativeServiceProxy::GetNetworkSharingType(std::set<uint32_t>& shar
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_NETWORK_SHARING_TYPE),
-                                        data, reply, option);
+    int32_t ret = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_NETWORK_SHARING_TYPE),
+        data, reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("GetNetworkSharingType SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -3161,8 +3169,8 @@ int32_t NetsysNativeServiceProxy::UpdateNetworkSharingType(uint32_t type, bool i
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_NETWORK_SHARING_TYPE),
-                                        data, reply, option);
+    int32_t ret = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_NETWORK_SHARING_TYPE),
+        data, reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("UpdateNetworkSharingType SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -3211,8 +3219,8 @@ int32_t NetsysNativeServiceProxy::SetFirewallRules(NetFirewallRuleType type,
         }
         MessageParcel reply;
         MessageOption option;
-        int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_SET_RULES),
-                                            data, reply, option);
+        int32_t ret = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_SET_RULES),
+            data, reply, option);
         if (ret != ERR_NONE) {
             NETNATIVE_LOGE("SetFirewallRules SendRequest failed");
             return ret;
@@ -3242,7 +3250,7 @@ int32_t NetsysNativeServiceProxy::SetFirewallDefaultAction(int32_t userId, Firew
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = Remote()->SendRequest(
+    int32_t ret = SendRequest(
         static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_SET_DEFAULT_ACTION), data, reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("SetFirewallDefaultAction SendRequest failed");
@@ -3264,7 +3272,7 @@ int32_t NetsysNativeServiceProxy::SetFirewallCurrentUserId(int32_t userId)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = Remote()->SendRequest(
+    int32_t ret = SendRequest(
         static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_SET_USER_ID), data, reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("SetFirewallCurrentUserId SendRequest failed");
@@ -3286,7 +3294,7 @@ int32_t NetsysNativeServiceProxy::ClearFirewallRules(NetFirewallRuleType type)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_CLEAR_RULES),
+    int32_t ret = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_CLEAR_RULES),
         data, reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("ClearFirewallRules SendRequest failed");
@@ -3312,7 +3320,7 @@ int32_t NetsysNativeServiceProxy::RegisterNetFirewallCallback(const sptr<INetFir
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_REGISTER), data,
+    int32_t ret = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_REGISTER), data,
         reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("RegisterFirewallCallback SendRequest failed");
@@ -3338,7 +3346,7 @@ int32_t NetsysNativeServiceProxy::UnRegisterNetFirewallCallback(const sptr<INetF
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_UNREGISTER),
+    int32_t ret = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_UNREGISTER),
         data, reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("UnRegisterNetFirewallCallback SendRequest failed");
@@ -3485,7 +3493,7 @@ int32_t NetsysNativeServiceProxy::SetIpv6PrivacyExtensions(const std::string &in
     MessageParcel reply;
     MessageOption option;
     int result =
-        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_PRIVCAY_EXTENSION),
+        SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_PRIVCAY_EXTENSION),
             data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -3513,7 +3521,7 @@ int32_t NetsysNativeServiceProxy::SetEnableIpv6(const std::string &interfaceName
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ENABLE_IPV6),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ENABLE_IPV6),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -3538,8 +3546,8 @@ int32_t NetsysNativeServiceProxy::SetIpv6AutoConf(const std::string &interfaceNa
 
     MessageParcel reply;
     MessageOption option;
-    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_AUTO_CONF),
-                          data, reply, option);
+    SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_AUTO_CONF),
+        data, reply, option);
 
     return reply.ReadInt32();
 }
@@ -3570,7 +3578,7 @@ int32_t NetsysNativeServiceProxy::SetNetworkAccessPolicy(uint32_t uid, NetworkAc
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NETWORK_ACCESS_POLICY),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NETWORK_ACCESS_POLICY),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -3593,7 +3601,7 @@ int32_t NetsysNativeServiceProxy::DeleteNetworkAccessPolicy(uint32_t uid)
     }
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DEL_NETWORK_ACCESS_POLICY),
+    int result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DEL_NETWORK_ACCESS_POLICY),
         data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -3612,8 +3620,8 @@ int32_t NetsysNativeServiceProxy::ClearFirewallAllRules()
 
     MessageParcel reply;
     MessageOption option;
-    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_FIREWALL_RULE), data, reply,
-                          option);
+    SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_FIREWALL_RULE), data, reply,
+        option);
 
     return reply.ReadInt32();
 }
@@ -3641,7 +3649,7 @@ int32_t NetsysNativeServiceProxy::NotifyNetBearerTypeChange(std::set<NetBearType
     MessageParcel reply;
     MessageOption option;
     int result =
-        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NOTIFY_NETWORK_BEARER_TYPE_CHANGE),
+        SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NOTIFY_NETWORK_BEARER_TYPE_CHANGE),
             data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -3744,7 +3752,7 @@ int32_t NetsysNativeServiceProxy::SetNicTrafficAllowed(const std::vector<std::st
         NETNATIVE_LOGE("SetNicTrafficAllowed remote pointer is null");
         return ERR_FLATTEN_OBJECT;
     }
-    int32_t error = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NIC_TRAFFIC_ALLOWED),
+    int32_t error = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NIC_TRAFFIC_ALLOWED),
         data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("SetNicTrafficAllowed proxy sendRequest failed");
@@ -3906,7 +3914,7 @@ int32_t NetsysNativeServiceProxy::SetBrokerUidAccessPolicyMap(const std::unorder
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = Remote()->SendRequest(
+    int32_t ret = SendRequest(
         static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_BROKER_UID_NETWORK_POLICY), data, reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("SetBrokerUidAccessPolicyMap proxy sendRequest failed. code: [%{public}d]", ret);
@@ -3935,7 +3943,7 @@ int32_t NetsysNativeServiceProxy::DelBrokerUidAccessPolicyMap(uint32_t uid)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = Remote()->SendRequest(
+    int32_t ret = SendRequest(
         static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DEL_BROKER_UID_NETWORK_POLICY), data, reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("DelBrokerUidAccessPolicyMap proxy SendRequest failed, error code: [%{public}d]", ret);
@@ -3971,7 +3979,7 @@ int32_t NetsysNativeServiceProxy::SetUserDefinedServerFlag(uint16_t netId, bool 
     MessageParcel reply;
     MessageOption option;
     int32_t error =
-        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_USER_DEFINED_SERVER_FLAG),
+        SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_USER_DEFINED_SERVER_FLAG),
         data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("SetUserDefinedServerFlag proxy sendRequest failed");
@@ -4005,7 +4013,7 @@ int32_t NetsysNativeServiceProxy::FlushDnsCache(uint16_t netId)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t err = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FLUSH_DNS_CACHE),
+    int32_t err = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FLUSH_DNS_CACHE),
         data, reply, option);
     if (err != ERR_NONE) {
         NETNATIVE_LOGE("FlushDnsCache SendRequest failed, error code: [%{public}d]", err);
@@ -4046,7 +4054,7 @@ int32_t NetsysNativeServiceProxy::SetDnsCache(uint16_t netId, const std::string 
 
     MessageParcel reply;
     MessageOption option;
-    int32_t err = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_DNS_CACHE),
+    int32_t err = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_DNS_CACHE),
         data, reply, option);
     if (err != ERR_NONE) {
         NETNATIVE_LOGE("SetDnsCache SendRequest failed, error code: [%{public}d]", err);
@@ -4092,7 +4100,7 @@ int32_t NetsysNativeServiceProxy::UpdateEnterpriseRoute(const std::string &inter
  
     MessageParcel reply;
     MessageOption option;
-    int32_t err = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_ENTERPRISE_ROUTE),
+    int32_t err = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_ENTERPRISE_ROUTE),
         data, reply, option);
     if (err != ERR_NONE) {
         NETNATIVE_LOGE("UpdateEnterpriseRoute SendRequest failed, error code: [%{public}d]", err);
@@ -4120,8 +4128,8 @@ int32_t NetsysNativeServiceProxy::CreateVlan(const std::string &ifName, uint32_t
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t res = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CREATE_VLAN),
-                                        data, reply, option);
+    int32_t res = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CREATE_VLAN),
+        data, reply, option);
     if (res != ERR_NONE) {
         NETNATIVE_LOGE("GetCookieStats SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -4146,8 +4154,8 @@ int32_t NetsysNativeServiceProxy::DestroyVlan(const std::string &ifName, uint32_
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t res = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DESTROY_VLAN),
-                                        data, reply, option);
+    int32_t res = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DESTROY_VLAN),
+        data, reply, option);
     if (res != ERR_NONE) {
         NETNATIVE_LOGE("GetCookieStats SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -4174,8 +4182,8 @@ int32_t NetsysNativeServiceProxy::AddVlanIp(const std::string &ifName, uint32_t 
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t res = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ADD_VLAN_IP),
-                                        data, reply, option);
+    int32_t res = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ADD_VLAN_IP),
+        data, reply, option);
     if (res != ERR_NONE) {
         NETNATIVE_LOGE("GetCookieStats SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -4227,7 +4235,7 @@ int32_t NetsysNativeServiceProxy::SetInternetAccessByIpForWifiShare(
 
     MessageParcel reply;
     MessageOption option;
-    int32_t err = Remote()->SendRequest(
+    int32_t err = SendRequest(
         static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_INTERNET_ACCESS_BY_IP_FOR_NET_SHARE),
         data, reply, option);
     if (err != ERR_NONE) {
