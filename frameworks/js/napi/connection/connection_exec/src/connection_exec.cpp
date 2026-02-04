@@ -107,6 +107,8 @@ napi_value ConnectionExec::CreateConnectionProperties(napi_env env, NetLinkInfo 
     NapiUtils::SetStringPropertyUtf8(env, connectionProperties, KEY_INTERFACE_NAME, linkInfo->ifaceName_);
     NapiUtils::SetStringPropertyUtf8(env, connectionProperties, KEY_DOMAINS, linkInfo->domain_);
     NapiUtils::SetUint32Property(env, connectionProperties, KEY_MTU, linkInfo->mtu_);
+    NapiUtils::SetBooleanProperty(env, connectionProperties, KEY_IS_IPV4_LINK_VALID, linkInfo->isIpv4LinkValid_);
+    NapiUtils::SetBooleanProperty(env, connectionProperties, KEY_IS_IPV6_LINK_VALID, linkInfo->isIpv6LinkValid_);
     FillLinkAddress(env, connectionProperties, linkInfo);
     FillRouoteList(env, connectionProperties, linkInfo);
     FillDns(env, connectionProperties, linkInfo);

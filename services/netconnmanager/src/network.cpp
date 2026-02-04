@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <charconv>
 #include "common_event_support.h"
 
 #include "broadcast_manager.h"
@@ -58,6 +59,7 @@ constexpr int32_t ERRNO_EADDRNOTAVAIL = -99;
 constexpr int32_t MAX_IPV4_DNS_NUM = 5;
 constexpr int32_t MAX_IPV6_DNS_NUM = 2;
 constexpr int32_t MAX_ROUTE_ADDRESS_LENGTH = 4096;
+constexpr int32_t MAX_IPV6_PREFIX_LENGTH = 128;
 enum SocketDestroyType {
     DESTROY_DEFAULT_CELLULAR,
     DESTROY_SPECIAL_CELLULAR,
@@ -243,6 +245,75 @@ bool Network::ReleaseVirtualNetwork()
     return true;
 }
 
+bool Network::IsValidIpRoute(const INetAddr &destination, const std::string &nextHop)
+{
+    std::string ip;
+    auto pos = destination.address_.find("/");
+    if (pos != std::string::npos) {
+        ip = destination.address_.substr(0, pos);
+    } else {
+        ip = destination.address_;
+    }
+    auto family = GetAddrFamily(ip);
+    if (family == AF_INET) {
+        return IsValidIPV4(ip) && (IsValidIPV4(nextHop) || nextHop.empty());
+    } else if (family == AF_INET6) {
+        if (pos != std::string::npos) {
+            std::string prefixStr = destination.address_.substr(pos + 1);
+            int prefix = -1;
+            auto result = std::from_chars(prefixStr.data(), prefixStr.data() + prefixStr.size(), prefix);
+            if (result.ec != std::errc()) {
+                return false;
+            }
+            return (IsValidIPV6(ip) && prefix > 0 && prefix <= MAX_IPV6_PREFIX_LENGTH &&
+                    (IsValidIPV6(nextHop) || nextHop.empty()));
+        } else {
+            return IsValidIPV6(ip) && (IsValidIPV6(nextHop) || nextHop.empty());
+        }
+    } else {
+        return false;
+    }
+}
+
+void Network::UpdateNetLinkInfoLinkType(const NetLinkInfo &netLinkInfo)
+{
+    NetLinkInfo tmpNetLinkInfo = netLinkInfo;
+    bool hasIpv4 = false;
+    bool hasIpv6 = false;
+    bool validIpv4Route = false;
+    bool validIpv6Route = false;
+    for (const auto &route : tmpNetLinkInfo.routeList_) {
+        auto family = GetAddrFamily(route.destination_.address_);
+        if (IsValidIpRoute(route.destination_, route.gateway_.address_)) {
+            if (family == AF_INET) {
+                validIpv4Route = true;
+            }
+            if (family == AF_INET6) {
+                validIpv6Route = true;
+            }
+        }
+        if (validIpv4Route && validIpv6Route) {
+            break;
+        }
+    }
+    for (const auto &addr : tmpNetLinkInfo.netAddrList_) {
+        auto family = GetAddrFamily(addr.address_);
+        if (family == AF_INET && validIpv4Route) {
+            hasIpv4 = true;
+        }
+        if (family == AF_INET6 && validIpv6Route && CommonUtils::IsUsableGlobalIpv6Addr(addr.address_)) {
+            hasIpv6 = true;
+        }
+        if (hasIpv4 && hasIpv6) {
+            break;
+        }
+    }
+    tmpNetLinkInfo.isIpv4LinkValid_ = hasIpv4;
+    tmpNetLinkInfo.isIpv6LinkValid_ = hasIpv6;
+    std::unique_lock<std::shared_mutex> wlock(netLinkInfoMutex_);
+    netLinkInfo_ = tmpNetLinkInfo;
+}
+
 bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
 {
     NETMGR_LOG_D("update net link information process");
@@ -257,9 +328,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateDns(netLinkInfo);
     UpdateMtu(netLinkInfo);
     UpdateTcpBufferSize(netLinkInfo);
-    std::unique_lock<std::shared_mutex> wlock(netLinkInfoMutex_);
-    netLinkInfo_ = netLinkInfo;
-    wlock.unlock();
+    UpdateNetLinkInfoLinkType(netLinkInfo);
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     NetLinkInfo netLinkInfoBck = netLinkInfo_;
     lock.unlock();

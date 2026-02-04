@@ -39,6 +39,8 @@ NetLinkInfo::NetLinkInfo(const NetLinkInfo &linkInfo)
     ident_ = linkInfo.ident_;
     httpProxy_ = linkInfo.httpProxy_;
     isUserDefinedDnsServer_ = linkInfo.isUserDefinedDnsServer_;
+    isIpv4LinkValid_ = linkInfo.isIpv4LinkValid_;
+    isIpv6LinkValid_ = linkInfo.isIpv6LinkValid_;
 }
 
 NetLinkInfo &NetLinkInfo::operator=(const NetLinkInfo &linkInfo)
@@ -53,6 +55,8 @@ NetLinkInfo &NetLinkInfo::operator=(const NetLinkInfo &linkInfo)
     ident_ = linkInfo.ident_;
     httpProxy_ = linkInfo.httpProxy_;
     isUserDefinedDnsServer_ = linkInfo.isUserDefinedDnsServer_;
+    isIpv4LinkValid_ = linkInfo.isIpv4LinkValid_;
+    isIpv6LinkValid_ = linkInfo.isIpv6LinkValid_;
     return *this;
 }
 
@@ -116,6 +120,12 @@ bool NetLinkInfo::Marshalling(Parcel &parcel) const
         return false;
     }
     if (!parcel.WriteBool(isUserDefinedDnsServer_)) {
+        return false;
+    }
+    if (!parcel.WriteBool(isIpv4LinkValid_)) {
+        return false;
+    }
+    if (!parcel.WriteBool(isIpv6LinkValid_)) {
         return false;
     }
     if (!httpProxy_.Marshalling(parcel)) {
@@ -184,6 +194,12 @@ bool NetLinkInfo::ReadInfoFromParcel(Parcel &parcel, sptr<NetLinkInfo> &ptr)
     if (!parcel.ReadBool(ptr->isUserDefinedDnsServer_)) {
         return false;
     }
+    if (!parcel.ReadBool(ptr->isIpv4LinkValid_)) {
+        return false;
+    }
+    if (!parcel.ReadBool(ptr->isIpv6LinkValid_)) {
+        return false;
+    }
     if (!HttpProxy::Unmarshalling(parcel, ptr->httpProxy_)) {
         return false;
     }
@@ -212,7 +228,8 @@ bool NetLinkInfo::Marshalling(Parcel &parcel, const sptr<NetLinkInfo> &object)
         return false;
     }
     if (!parcel.WriteUint16(object->mtu_) || !parcel.WriteString(object->tcpBufferSizes_) ||
-        !parcel.WriteString(object->ident_)|| !parcel.WriteBool(object->isUserDefinedDnsServer_)) {
+        !parcel.WriteString(object->ident_)|| !parcel.WriteBool(object->isUserDefinedDnsServer_) ||
+        !parcel.WriteBool(object->isIpv4LinkValid_) || !parcel.WriteBool(object->isIpv6LinkValid_)) {
         return false;
     }
     if (!object->httpProxy_.Marshalling(parcel)) {
@@ -354,6 +371,9 @@ std::string NetLinkInfo::ToString(const std::string &tab) const
     }
 
     str.append(tab);
+    str.append(ToStringLinkValid(tab));
+
+    str.append(tab);
     str.append("httpProxy = ");
     str.append(httpProxy_.ToString());
     return str;
@@ -403,6 +423,27 @@ std::string NetLinkInfo::ToStringRoute(const std::string &tab) const
         for (const auto &it : routeList_) {
             str.append(it.ToString(tab));
         }
+    }
+    return str;
+}
+
+std::string NetLinkInfo::ToStringLinkValid(const std::string &tab) const
+{
+    std::string str;
+    str.append(tab);
+    str.append("isIpv4LinkValid_ = ");
+    if (isIpv4LinkValid_) {
+        str.append("true");
+    } else {
+        str.append("false");
+    }
+
+    str.append(tab);
+    str.append("isIpv6LinkValid_ = ");
+    if (isIpv6LinkValid_) {
+        str.append("true");
+    } else {
+        str.append("false");
     }
     return str;
 }
