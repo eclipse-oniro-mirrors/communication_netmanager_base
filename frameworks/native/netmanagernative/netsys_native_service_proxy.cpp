@@ -858,7 +858,7 @@ int32_t NetsysNativeServiceProxy::AddInterfaceAddress(const std::string &interfa
     MessageParcel reply;
     MessageOption option;
     SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_ADD_ADDRESS), data, reply,
-                          option);
+        option);
 
     return reply.ReadInt32();
 }
@@ -1176,7 +1176,7 @@ int32_t NetsysNativeServiceProxy::DisableDistributedNet(bool isServer)
     MessageOption option;
     int32_t ret =
         SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DISABLE_DISTRIBUTE_NET), data,
-                              reply, option);
+            reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", ret);
         return IPC_INVOKER_ERR;
@@ -1957,7 +1957,7 @@ int32_t NetsysNativeServiceProxy::GetTotalStats(uint64_t &stats, uint32_t type)
     MessageParcel reply;
     MessageOption option;
     if (ERR_NONE != SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_TOTAL_STATS), data,
-                                          reply, option)) {
+        reply, option)) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -2032,7 +2032,7 @@ int32_t NetsysNativeServiceProxy::GetIfaceStats(uint64_t &stats, uint32_t type, 
     MessageParcel reply;
     MessageOption option;
     if (ERR_NONE != SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_IFACE_STATS), data,
-                                          reply, option)) {
+        reply, option)) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -2064,9 +2064,7 @@ int32_t NetsysNativeServiceProxy::GetAllSimStatsInfo(std::vector<OHOS::NetManage
     MessageParcel reply;
     MessageOption option;
     auto result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_SIM_STATS_INFO),
-                                        data,
-                                        reply,
-                                        option);
+        data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
@@ -2127,7 +2125,7 @@ int32_t NetsysNativeServiceProxy::GetAllStatsInfo(std::vector<OHOS::NetManagerSt
     MessageParcel reply;
     MessageOption option;
     if (ERR_NONE != SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_STATS_INFO), data,
-                                          reply, option)) {
+        reply, option)) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -2233,7 +2231,7 @@ int32_t NetsysNativeServiceProxy::GetNetStateTrafficMap(uint8_t flag, uint64_t &
         return ERR_FLATTEN_OBJECT;
     }
     if (ERR_NONE != SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_TRAFFIC_AVAILABLE_MAP),
-                                          data, reply, option)) {
+        data, reply, option)) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -2407,7 +2405,7 @@ int32_t NetsysNativeServiceProxy::SetNetStatusMap(uint8_t type, uint8_t value)
         return ERR_FLATTEN_OBJECT;
     }
     if (ERR_NONE != SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NET_STATUS_MAP),
-                                          data, reply, option)) {
+        data, reply, option)) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -3549,7 +3547,7 @@ int32_t NetsysNativeServiceProxy::SetIpv6AutoConf(const std::string &interfaceNa
     MessageParcel reply;
     MessageOption option;
     SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_AUTO_CONF),
-                          data, reply, option);
+        data, reply, option);
 
     return reply.ReadInt32();
 }
@@ -3623,7 +3621,7 @@ int32_t NetsysNativeServiceProxy::ClearFirewallAllRules()
     MessageParcel reply;
     MessageOption option;
     SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_FIREWALL_RULE), data, reply,
-                          option);
+        option);
 
     return reply.ReadInt32();
 }
@@ -4185,7 +4183,7 @@ int32_t NetsysNativeServiceProxy::AddVlanIp(const std::string &ifName, uint32_t 
     MessageParcel reply;
     MessageOption option;
     int32_t res = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ADD_VLAN_IP),
-                                        data, reply, option);
+        data, reply, option);
     if (res != ERR_NONE) {
         NETNATIVE_LOGE("GetCookieStats SendRequest failed");
         return ERR_FLATTEN_OBJECT;
