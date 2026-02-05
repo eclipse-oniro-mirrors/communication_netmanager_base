@@ -93,7 +93,7 @@ int32_t NetsysBpfStats::GetTotalStats(uint64_t &stats, StatsType statsType)
             continue;
         }
         iface_stats_value v = {0};
-        if (ifaceStatsMap.Read(k, v) < NETSYS_SUCCESS) {
+        if (ifaceStatsMap.ReadAndLog(k, v) < NETSYS_SUCCESS) {
             NETNATIVE_LOGE("Read ifaceStatsMap err");
             return STATS_ERR_READ_BPF_FAIL;
         }
