@@ -685,6 +685,7 @@ int32_t DnsParamCache::GetUserDefinedServerFlag(uint16_t netId, bool &flag, uint
 
 bool DnsParamCache::IsUseVpnDns(uint32_t uid)
 {
+    std::lock_guard<ffrt::mutex> uidLock(uidRangeMutex_);
     for (auto mem : vpnUidRanges_) {
         if (static_cast<int32_t>(uid) >= mem.begin_ && static_cast<int32_t>(uid) <= mem.end_) {
             auto it = serverConfigMap_.find(mem.netId_);
