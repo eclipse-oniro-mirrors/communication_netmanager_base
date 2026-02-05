@@ -402,6 +402,8 @@ int32_t DnsQualityDiag::handle_dns_abnormal(std::shared_ptr<DnsAbnormalInfo> abn
         return 0;
     }
     std::unique_lock<std::mutex> locker(resultListenersMutex_);
+    std::list<sptr<NetsysNative::INetDnsResultCallback>> tempListener = resultListeners_;
+    locker.unlock();
     for (auto cb: resultListeners_) {
         cb->OnDnsQueryAbnormalReport(abnormalInfo->eventfailcause, abnormalInfo->report);
     }
