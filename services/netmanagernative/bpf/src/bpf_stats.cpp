@@ -93,10 +93,12 @@ int32_t NetsysBpfStats::GetTotalStats(uint64_t &stats, StatsType statsType)
             continue;
         }
         iface_stats_value v = {0};
-        if (ifaceStatsMap.Read(k, v) < NETSYS_SUCCESS) {
+        // LCOV_EXCL_START
+        if (ifaceStatsMap.ReadAndLog(k, v) < NETSYS_SUCCESS) {
             NETNATIVE_LOGE("Read ifaceStatsMap err");
             return STATS_ERR_READ_BPF_FAIL;
         }
+        // LCOV_EXCL_STOP
         totalStats.rxPackets += v.rxPackets;
         totalStats.rxBytes += v.rxBytes;
         totalStats.txPackets += v.txPackets;

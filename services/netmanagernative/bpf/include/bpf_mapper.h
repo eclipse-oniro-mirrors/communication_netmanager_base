@@ -84,11 +84,18 @@ public:
      */
     static int32_t BpfSyscall(int32_t cmd, const bpf_attr &attr)
     {
+        return static_cast<int32_t>(syscall(__NR_bpf, cmd, &attr, sizeof(attr)));
+    }
+
+    static int32_t BpfSyscallAndLog(int32_t cmd, const bpf_attr &attr)
+    {
         int32_t ret = static_cast<int32_t>(syscall(__NR_bpf, cmd, &attr, sizeof(attr)));
+        // LCOV_EXCL_START
         if (ret < 0) {
             NETNATIVE_LOGE("syscall failed, ret:%{public}d, cmd:%{public}d, errno: %{public}u",
                 ret, cmd, errno);
         }
+        // LCOV_EXCL_STOP
         return ret;
     }
 
@@ -134,6 +141,22 @@ public:
         bpfAttr.key = BpfMapKeyToU64(key);
         bpfAttr.value = BpfMapValueToU64(value);
         return BpfSyscall(BPF_MAP_LOOKUP_ELEM, bpfAttr);
+    }
+
+    static int32_t LookUpElemAndLog(const int32_t mapFd, const Key &key, const Value &value)
+    {
+        bpf_attr bpfAttr{};
+        errno_t result = memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr));
+        // LCOV_EXCL_START
+        if (result != EOK) {
+            NETNATIVE_LOGE("memset_s failed, result:%{public}d", result);
+            return NETMANAGER_ERROR;
+        }
+        // LCOV_EXCL_STOP
+        bpfAttr.map_fd = BpfFdToU32(mapFd);
+        bpfAttr.key = BpfMapKeyToU64(key);
+        bpfAttr.value = BpfMapValueToU64(value);
+        return BpfSyscallAndLog(BPF_MAP_LOOKUP_ELEM, bpfAttr);
     }
 
     /**
@@ -247,6 +270,18 @@ public:
         if (BpfMapperImplement<Key, Value>::LookUpElem(mapFd_, key, value) < 0) {
             return NETMANAGER_ERROR;
         }
+        val = value;
+        return 0;
+    }
+
+    [[nodiscard]] int32_t ReadAndLog(const Key &key, Value &val) const
+    {
+        Value value{};
+        // LCOV_EXCL_START
+        if (BpfMapperImplement<Key, Value>::LookUpElemAndLog(mapFd_, key, value) < 0) {
+            return NETMANAGER_ERROR;
+        }
+        // LCOV_EXCL_STOP
         val = value;
         return 0;
     }
