@@ -84,9 +84,7 @@ HWTEST_F(NetStatsCallbackStubTest, OnRemoteRequestTest003, TestSize.Level1)
 {
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor()), false);
-    if (!data.WriteString("test")) {
-        return;
-    }
+    ASSERT_NE(data.WriteString("test"), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_IFACE_CHANGED),
@@ -119,9 +117,7 @@ HWTEST_F(NetStatsCallbackStubTest, OnNetIfaceStatsChangedTest002, TestSize.Level
 {
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor()), false);
-    if (!data.WriteString("test")) {
-        return;
-    }
+    ASSERT_NE(data.WriteString("test"), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_IFACE_CHANGED),

@@ -80,9 +80,7 @@ HWTEST_F(NetworkShareServiceStubTest, ReplyStartNetworkSharingTest001, TestSize.
     NetManagerExtAccessToken token;
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NetworkShareServiceStub::GetDescriptor()), false);
-    if (!data.WriteInt32(TEST_INT32_NUMBER)) {
-        return;
-    }
+    ASSERT_NE(data.WriteInt32(TEST_INT32_NUMBER), false);
     int32_t ret = SendRemoteRequest(data, TetheringInterfaceCode::CMD_START_NETWORKSHARE);
     EXPECT_EQ(ret, NETMANAGER_EXT_SUCCESS);
 }
@@ -92,9 +90,7 @@ HWTEST_F(NetworkShareServiceStubTest, ReplyStopNetworkSharingTest001, TestSize.L
     NetManagerExtAccessToken token;
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NetworkShareServiceStub::GetDescriptor()), false);
-    if (!data.WriteInt32(TEST_INT32_NUMBER)) {
-        return;
-    }
+    ASSERT_NE(data.WriteInt32(TEST_INT32_NUMBER), false);
     int32_t ret = SendRemoteRequest(data, TetheringInterfaceCode::CMD_STOP_NETWORKSHARE);
     EXPECT_EQ(ret, NETMANAGER_EXT_SUCCESS);
 }
@@ -104,9 +100,7 @@ HWTEST_F(NetworkShareServiceStubTest, ReplyGetSharableRegexsTest001, TestSize.Le
     NetManagerExtAccessToken token;
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NetworkShareServiceStub::GetDescriptor()), false);
-    if (!data.WriteInt32(TEST_INT32_NUMBER)) {
-        return;
-    }
+    ASSERT_NE(data.WriteInt32(TEST_INT32_NUMBER), false);
     int32_t ret = SendRemoteRequest(data, TetheringInterfaceCode::CMD_GET_SHARABLE_REGEXS);
     EXPECT_EQ(ret, NETMANAGER_EXT_SUCCESS);
 }
@@ -116,9 +110,7 @@ HWTEST_F(NetworkShareServiceStubTest, ReplyGetSharingStateTest001, TestSize.Leve
     NetManagerExtAccessToken token;
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NetworkShareServiceStub::GetDescriptor()), false);
-    if (!data.WriteInt32(TEST_INT32_NUMBER)) {
-        return;
-    }
+    ASSERT_NE(data.WriteInt32(TEST_INT32_NUMBER), false);
     int32_t ret = SendRemoteRequest(data, TetheringInterfaceCode::CMD_GET_SHARING_STATE);
     EXPECT_EQ(ret, NETMANAGER_EXT_SUCCESS);
 }
@@ -128,9 +120,7 @@ HWTEST_F(NetworkShareServiceStubTest, ReplyGetNetSharingIfacesTest001, TestSize.
     NetManagerExtAccessToken token;
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NetworkShareServiceStub::GetDescriptor()), false);
-    if (!data.WriteInt32(TEST_INT32_NUMBER)) {
-        return;
-    }
+    ASSERT_NE(data.WriteInt32(TEST_INT32_NUMBER), false);
     int32_t ret = SendRemoteRequest(data, TetheringInterfaceCode::CMD_GET_SHARING_IFACES);
     EXPECT_EQ(ret, NETMANAGER_EXT_SUCCESS);
 }

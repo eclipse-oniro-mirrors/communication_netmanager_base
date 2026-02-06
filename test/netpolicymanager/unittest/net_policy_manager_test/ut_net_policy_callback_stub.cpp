@@ -87,12 +87,8 @@ HWTEST_F(UtNetPolicyCallbackStubTest, OnNetUidPolicyChangeTest001, TestSize.Leve
     uint32_t policy = TEST_POLICY;
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NetPolicyCallbackStub::GetDescriptor()), false);
-    if (!data.WriteUint32(uid)) {
-        return;
-    }
-    if (!data.WriteUint32(policy)) {
-        return;
-    }
+    ASSERT_NE(data.WriteUint32(uid), false);
+    ASSERT_NE(data.WriteUint32(policy), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(100, data, reply, option);
@@ -103,15 +99,9 @@ HWTEST_F(UtNetPolicyCallbackStubTest, OnNetUidPolicyChangeTest001, TestSize.Leve
     EXPECT_NE(ret, 0);
 
     MessageParcel dataOk;
-    if (!dataOk.WriteInterfaceToken(NetPolicyCallbackStub::GetDescriptor())) {
-        return;
-    }
-    if (!dataOk.WriteUint32(uid)) {
-        return;
-    }
-    if (!dataOk.WriteUint32(policy)) {
-        return;
-    }
+    ASSERT_NE(dataOk.WriteInterfaceToken(NetPolicyCallbackStub::GetDescriptor()), false);
+    ASSERT_NE(dataOk.WriteUint32(uid), false);
+    ASSERT_NE(dataOk.WriteUint32(policy), false);
     ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_POLICY_CHANGE),
                                      dataOk, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -123,12 +113,8 @@ HWTEST_F(UtNetPolicyCallbackStubTest, OnNetUidRuleChangeTest001, TestSize.Level1
     uint32_t rule = TEST_RULE;
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NetPolicyCallbackStub::GetDescriptor()), false);
-    if (!data.WriteUint32(uid)) {
-        return;
-    }
-    if (!data.WriteUint32(rule)) {
-        return;
-    }
+    ASSERT_NE(data.WriteUint32(uid), false);
+    ASSERT_NE(data.WriteUint32(rule), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(
