@@ -296,6 +296,17 @@ struct Ip6RuleBitmap {
     Bitmap bitmap;
 };
 
+struct portRuleBitmap {
+    uint32_t prefixlen;
+    uint16_t data;
+    Bitmap bitmap;
+};
+
+struct portRule {
+    uint32_t prefixlen;
+    uint16_t data;
+};
+
 using Ip4RuleBitmapVector = std::vector<Ip4RuleBitmap>;
 using Ip6RuleBitmapVector = std::vector<Ip6RuleBitmap>;
 
@@ -445,6 +456,51 @@ private:
     std::vector<Ip6RuleBitmap> ruleBitmapVec_;
 };
 
+class BpfPortMap {
+public:
+    /**
+     * set all bitmap of vector or with input bitmap
+     *
+     * @param bitmap rule bitmap
+     */
+    void OrForEach(const Bitmap &bitmap)
+    {
+        auto it = ruleBitmapVec_.begin();
+        for (; it != ruleBitmapVec_.end(); ++it) {
+            it->bitmap.Or(bitmap);
+        }
+    }
+
+    /**
+     * if addr and mask not exist in vector, save value to vector, otherwise or bitmap
+     *
+     * @param addr port
+     * @param mask port mask
+     * @param bitmap rule bitmap
+     */
+    void OrInsert(uint16_t start, uint32_t mask, Bitmap &bitmap)
+    {
+        portRuleBitmap tmp;
+        tmp.prefixlen = mask;
+        tmp.data = start;
+        tmp.bitmap = bitmap;
+        ruleBitmapVec_.push_back(tmp);
+    }
+
+    void Clear()
+    {
+        ruleBitmapVec_.clear();
+    }
+
+    std::vector<portRuleBitmap> &Get()
+    {
+        return ruleBitmapVec_;
+    }
+
+private:
+    std::vector<portRuleBitmap> ruleBitmapVec_;
+};
+
 struct SegmentBitmap {
     uint16_t start;
     uint16_t end;
@@ -588,7 +644,6 @@ using UidKey = uid_key;
 using ActionValue = action_val;
 
 using BpfStrMap = BpfUnorderedMap<std::string>;
-using BpfPortMap = BpfUnorderedMap<PortKey>;
 using BpfProtoMap = BpfUnorderedMap<ProtoKey>;
 using BpfAppUidMap = BpfUnorderedMap<AppUidKey>;
 using BpfUidMap = BpfUnorderedMap<UidKey>;
@@ -699,7 +754,17 @@ private:
      * @param portMap output single port and rule bitmap map
      * @return success: return NETFIREWALL_SUCCESS, otherwise return error code
      */
-    void OrInsertPortBitmap(SegmentBitmapMap &portSegMap, BpfUnorderedMap<PortKey> &portMap);
+    void OrInsertPortBitmap(SegmentBitmapMap &portSegMap, BpfPortMap &portMap);
+    
+    /**
+     * convect port segement map to port and mask
+     *
+     * @param startPort start port of segement map
+     * @param endPort end port of segement map
+     * @param list output port and mask
+     * @return success: 0, otherwise -1
+     */
+    int32_t GetPortRangeAndMask(uint16_t startPort, uint16_t endPort, std::vector<portRule> &list);
 
     /**
      * judge protocols if need port map

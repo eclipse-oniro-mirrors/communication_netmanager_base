@@ -101,6 +101,20 @@ HWTEST_F(NetsysBpfNetFirewallTest, WriteSrcPortBpfMap001, TestSize.Level0)
     EXPECT_EQ(ret, -1);
     ret = bpfNet->WriteSrcPortBpfMap(manager, NetFirewallRuleDirection::RULE_OUT);
     EXPECT_EQ(ret, -1);
+
+    Bitmap bitmap(1);
+    uint32_t mask = 16;
+    uint16_t port = 6000;
+    portRuleBitmap tmp;
+    tmp.prefixlen = mask;
+    tmp.data = port;
+    tmp.bitmap = bitmap;
+    manager.srcPortMap_.ruleBitmapVec_.emplace_back(tmp);
+    manager.dstPortMap_.ruleBitmapVec_.emplace_back(tmp);
+    ret = bpfNet->WriteSrcPortBpfMap(manager, NetFirewallRuleDirection::RULE_IN);
+    EXPECT_EQ(ret, 0);
+    ret = bpfNet->WriteSrcPortBpfMap(manager, NetFirewallRuleDirection::RULE_OUT);
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(NetsysBpfNetFirewallTest, WriteDstPortBpfMap001, TestSize.Level0)
@@ -113,6 +127,20 @@ HWTEST_F(NetsysBpfNetFirewallTest, WriteDstPortBpfMap001, TestSize.Level0)
     EXPECT_EQ(ret, -1);
     ret = bpfNet->WriteDstPortBpfMap(manager, NetFirewallRuleDirection::RULE_OUT);
     EXPECT_EQ(ret, -1);
+
+    Bitmap bitmap(1);
+    uint32_t mask = 16;
+    uint16_t port = 6000;
+    portRuleBitmap tmp;
+    tmp.prefixlen = mask;
+    tmp.data = port;
+    tmp.bitmap = bitmap;
+    manager.srcPortMap_.ruleBitmapVec_.emplace_back(tmp);
+    manager.dstPortMap_.ruleBitmapVec_.emplace_back(tmp);
+    ret = bpfNet->WriteDstPortBpfMap(manager, NetFirewallRuleDirection::RULE_IN);
+    EXPECT_EQ(ret, 0);
+    ret = bpfNet->WriteDstPortBpfMap(manager, NetFirewallRuleDirection::RULE_OUT);
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(NetsysBpfNetFirewallTest, WritePortBpfMap001, TestSize.Level0)
@@ -124,10 +152,10 @@ HWTEST_F(NetsysBpfNetFirewallTest, WritePortBpfMap001, TestSize.Level0)
     int ret = bpfNet->WritePortBpfMap(portMap, path);
     EXPECT_EQ(ret, -1);
 
-    uint32_t start = 1;
-    PortKey key = (PortKey)BitmapManager::Hltons(start);
+    uint16_t start = 1;
+    uint32_t mask = 16;
     Bitmap bitmap(1);
-    portMap.OrInsert(key, bitmap);
+    portMap.OrInsert(start, mask, bitmap);
     ret = bpfNet->WritePortBpfMap(portMap, path);
     EXPECT_EQ(ret, -1);
 }
@@ -154,7 +182,9 @@ HWTEST_F(NetsysBpfNetFirewallTest, DecodeDomainFromKey001, TestSize.Level0)
     EXPECT_TRUE(result.empty());
 
     DomainHashKey normalKey = {};
-    normalKey.prefixlen = static_cast<uint32_t>(TWO_LABEL_TOTAL * BIT_PER_BYTE);
+    normalKey.prefixlen = static_cast<uint32_t>((TWO_LABEL_TOTAL + 8) * BIT_PER_BYTE);
+    normalKey.uid = 100;
+    normalKey.appuid = 0;
     EXPECT_EQ(memset_s(normalKey.data, sizeof(normalKey.data), 0, sizeof(normalKey.data)), EOK);
     {
         const char label1[] = "moc";

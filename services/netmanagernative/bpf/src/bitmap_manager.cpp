@@ -161,8 +161,8 @@ void BitmapManager::Insert()
     memset_s(&otherIp6Key, sizeof(in6_addr), 0xff, sizeof(in6_addr));
     srcIp6Map_.OrInsert(otherIp6Key, IPV6_MAX_PREFIXLEN, bitmap);
     dstIp6Map_.OrInsert(otherIp6Key, IPV6_MAX_PREFIXLEN, bitmap);
-    srcPortMap_.OrInsert(OTHER_PORT_KEY, Bitmap());
-    dstPortMap_.OrInsert(OTHER_PORT_KEY, Bitmap());
+    srcPortMap_.OrInsert(OTHER_PORT_KEY, PORT_MAX_MASK, bitmap);
+    dstPortMap_.OrInsert(OTHER_PORT_KEY, PORT_MAX_MASK, bitmap);
     protoMap_.OrInsert(OTHER_PROTO_KEY, Bitmap());
     appUidMap_.OrInsert(OTHER_APPUID_KEY, Bitmap());
     uidMap_.OrInsert(OTHER_UID_KEY, Bitmap());
@@ -269,21 +269,71 @@ int32_t BitmapManager::InsertIpBitmap(const std::vector<NetFirewallIpParam> &ipI
     return NETFIREWALL_SUCCESS;
 }
 
-void BitmapManager::OrInsertPortBitmap(SegmentBitmapMap &portSegMap, BpfUnorderedMap<PortKey> &portMap)
+void BitmapManager::OrInsertPortBitmap(SegmentBitmapMap &portSegMap, BpfPortMap &portMap)
 {
     auto &segMap = portSegMap.GetMap();
     for (auto &item : segMap) {
-        uint32_t start = item.start;
-        while (start <= item.end) {
-            if (start == 0) {
-                start++;
+        uint16_t keyStart = item.start;
+        uint16_t keyEnd = item.end;
+        NETNATIVE_LOG_D("Segment: start=%{public}u(0x%{public}04X), end=%{public}u(0x%{public}04X)",
+            keyStart, keyStart, keyEnd, keyEnd);
+        std::vector<portRule> portRules;
+        int32_t ret = GetPortRangeAndMask(keyStart, keyEnd, portRules);
+        if (ret != 0) {
+            continue;
+        }
+
+        for (auto &rule : portRules) {
+            if (rule.prefixlen > PORT_MAX_MASK) {
                 continue;
             }
-            PortKey key = (PortKey)Hltons(start);
-            portMap.OrInsert(key, item.bitmap);
-            start++;
+            uint16_t netOrderPort = htons(rule.data);
+            NETNATIVE_LOG_D("OrInsert: port=0x%{public}04X(%{public}u)/%{public}u",
+                            netOrderPort, ntohs(netOrderPort), rule.prefixlen);
+            portMap.OrInsert(netOrderPort, static_cast<uint32_t>(rule.prefixlen), item.bitmap);
         }
     }
+}
+
+int32_t BitmapManager::GetPortRangeAndMask(uint16_t startPort, uint16_t endPort, std::vector<portRule> &list)
+{
+    if (startPort > endPort) {
+        return -1;
+    }
+    uint32_t start = static_cast<uint32_t>(startPort);
+    uint32_t end = static_cast<uint32_t>(endPort);
+    while (start <= end) {
+        uint32_t suffixZeros = 0;
+        uint32_t temp = start;
+        while (temp > 0 && (temp & 1) == 0) {
+            suffixZeros++;
+            temp >>= 1;
+        }
+
+        uint32_t maxBlock = 1U << suffixZeros;
+        uint32_t remaining = end - start + 1;
+        uint32_t blockSize = maxBlock;
+        while (blockSize > remaining) {
+            blockSize >>= 1;
+        }
+
+        uint32_t mask = PORT_MAX_MASK;
+        uint32_t tempSize = blockSize;
+        while (tempSize > 1) {
+            mask--;
+            tempSize >>= 1;
+        }
+
+        portRule rule;
+        rule.data = static_cast<uint16_t>(start);
+        rule.prefixlen = static_cast<uint16_t>(mask);
+        list.push_back(rule);
+
+        uint16_t blockEnd = rule.data + blockSize - 1;
+
+        start += blockSize;
+    }
+    return 0;
 }
 
 void BitmapManager::AddPortBitmap(const std::vector<NetFirewallPortParam> &port, Bitmap &bitmap,
