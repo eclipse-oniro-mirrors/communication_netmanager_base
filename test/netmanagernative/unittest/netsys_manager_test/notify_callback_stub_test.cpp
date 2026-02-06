@@ -53,18 +53,10 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceAddressUpdated001, TestSize.Level1)
     int32_t scope = 0;
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
-    if (!data.WriteString(addr)) {
-        return;
-    }
-    if (!data.WriteString(ifName)) {
-        return;
-    }
-    if (!data.WriteUint32(flags)) {
-        return;
-    }
-    if (!data.WriteUint32(scope)) {
-        return;
-    }
+    ASSERT_NE(data.WriteString(addr), false);
+    ASSERT_NE(data.WriteString(ifName), false);
+    ASSERT_NE(data.WriteUint32(flags), false);
+    ASSERT_NE(data.WriteUint32(scope), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = notifyStub_->OnRemoteRequest(100, data, reply, option);
@@ -75,21 +67,11 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceAddressUpdated001, TestSize.Level1)
     EXPECT_NE(ret, 0);
 
     MessageParcel dataOk;
-    if (!dataOk.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
-        return;
-    }
-    if (!dataOk.WriteString(addr)) {
-        return;
-    }
-    if (!dataOk.WriteString(ifName)) {
-        return;
-    }
-    if (!dataOk.WriteUint32(flags)) {
-        return;
-    }
-    if (!dataOk.WriteUint32(scope)) {
-        return;
-    }
+    ASSERT_NE(dataOk.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
+    ASSERT_NE(dataOk.WriteString(addr), false);
+    ASSERT_NE(dataOk.WriteString(ifName), false);
+    ASSERT_NE(dataOk.WriteUint32(flags), false);
+    ASSERT_NE(dataOk.WriteUint32(scope), false);
     ret = notifyStub_->OnRemoteRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDRESS_UPDATED),
                                        dataOk, reply, option);
     EXPECT_EQ(ret, 0);
@@ -103,18 +85,10 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceAddressRemoved001, TestSize.Level1)
     int32_t scope = 0;
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
-    if (!data.WriteString(addr)) {
-        return;
-    }
-    if (!data.WriteString(ifName)) {
-        return;
-    }
-    if (!data.WriteUint32(flags)) {
-        return;
-    }
-    if (!data.WriteUint32(scope)) {
-        return;
-    }
+    ASSERT_NE(data.WriteString(addr), false);
+    ASSERT_NE(data.WriteString(ifName), false);
+    ASSERT_NE(data.WriteUint32(flags), false);
+    ASSERT_NE(data.WriteUint32(scope), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = notifyStub_->OnRemoteRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDRESS_REMOVED),

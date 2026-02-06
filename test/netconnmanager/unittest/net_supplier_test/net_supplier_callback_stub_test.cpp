@@ -58,13 +58,9 @@ HWTEST_F(NetSupplierCallbackStubTest, RequestNetwork001, TestSize.Level1)
     netCaps.insert(NetCap::NET_CAPABILITY_NOT_METERED);
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NetSupplierCallbackStub::GetDescriptor()), false);
-    if (!data.WriteString(ident)) {
-        return;
-    }
+    ASSERT_NE(data.WriteString(ident), false);
     uint32_t size = static_cast<uint32_t>(netCaps.size());
-    if (!data.WriteUint32(size)) {
-        return;
-    }
+    ASSERT_NE(data.WriteUint32(size), false);
     for (auto netCap : netCaps) {
         data.WriteInt32(static_cast<uint32_t>(netCap));
     }
@@ -79,16 +75,10 @@ HWTEST_F(NetSupplierCallbackStubTest, RequestNetwork001, TestSize.Level1)
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 
     MessageParcel dataOk;
-    if (!dataOk.WriteInterfaceToken(NetSupplierCallbackStub::GetDescriptor())) {
-        return;
-    }
-    if (!dataOk.WriteString(ident)) {
-        return;
-    }
+    ASSERT_NE(dataOk.WriteInterfaceToken(NetSupplierCallbackStub::GetDescriptor()), false);
+    ASSERT_NE(dataOk.WriteString(ident), false);
     size = static_cast<uint32_t>(netCaps.size());
-    if (!dataOk.WriteUint32(size)) {
-        return;
-    }
+    ASSERT_NE(dataOk.WriteUint32(size), false);
     for (auto netCap : netCaps) {
         dataOk.WriteInt32(static_cast<uint32_t>(netCap));
     }
@@ -107,24 +97,16 @@ HWTEST_F(NetSupplierCallbackStubTest, ReleaseNetwork001, TestSize.Level1)
     ASSERT_NE(data.WriteInterfaceToken(NetSupplierCallbackStub::GetDescriptor()), false);
     bool result = data.WriteUint32(netrequest.uid) && data.WriteUint32(netrequest.requestId) &&
                   data.WriteUint32(netrequest.registerType) && data.WriteString(netrequest.ident);
-    if (!result) {
-        return;
-    }
+    ASSERT_NE(result, false);
 
     uint32_t size = static_cast<uint32_t>(netrequest.bearTypes.size());
-    if (!data.WriteUint32(size)) {
-        return;
-    }
+    ASSERT_NE(data.WriteUint32(size), false);
     for (auto netBearType : netrequest.bearTypes) {
-        if (!data.WriteInt32(netBearType)) {
-            return;
-        }
+        ASSERT_NE(data.WriteInt32(netBearType), false);
     }
 
     size = static_cast<uint32_t>(netrequest.netCaps.size());
-    if (!data.WriteUint32(size)) {
-        return;
-    }
+    ASSERT_NE(data.WriteUint32(size), false);
     for (auto netCap : netrequest.netCaps) {
         data.WriteInt32(static_cast<uint32_t>(netCap));
     }

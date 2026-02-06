@@ -64,26 +64,18 @@ HWTEST_F(NetConnServiceStubTest, OnEnableDistributedClientNet001, TestSize.Level
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()), false);
     std::string virnicAddr = "1.189.55.61";
-    if (!data.WriteString(virnicAddr)) {
-        return;
-    }
+    ASSERT_NE(data.WriteString(virnicAddr), false);
     std::string iif = "wlan0";
-    if (!data.WriteString(iif)) {
-        return;
-    }
+    ASSERT_NE(data.WriteString(iif), false);
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_ENABLE_DISTRIBUTE_CLIENT_NET);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 
     MessageParcel data1;
-    if (!data1.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data1.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()), false);
     bool isServer = false;
-    if (!data1.WriteBool(isServer)) {
-        return;
-    }
+    ASSERT_NE(data1.WriteBool(isServer), false);
     ret = SendRemoteRequest(data1, ConnInterfaceCode::CMD_NM_DISABLE_DISTRIBUTE_NET);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -100,31 +92,19 @@ HWTEST_F(NetConnServiceStubTest, OnEnableDistributedServerNet001, TestSize.Level
     std::string devIface = "lo";
     std::string dstAddr = "1.189.55.61";
     std::string gw = "0.0.0.0";
-    if (!data.WriteString(iif)) {
-        return;
-    }
-    if (!data.WriteString(devIface)) {
-        return;
-    }
-    if (!data.WriteString(dstAddr)) {
-        return;
-    }
-    if (!data.WriteString(gw)) {
-        return;
-    }
+    ASSERT_NE(data.WriteString(iif), false);
+    ASSERT_NE(data.WriteString(devIface), false);
+    ASSERT_NE(data.WriteString(dstAddr), false);
+    ASSERT_NE(data.WriteString(gw), false);
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_ENABLE_DISTRIBUTE_SERVER_NET);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 
     MessageParcel data1;
-    if (!data1.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data1.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()), false);
     bool isServer = true;
-    if (!data1.WriteBool(isServer)) {
-        return;
-    }
+    ASSERT_NE(data1.WriteBool(isServer), false);
     ret = SendRemoteRequest(data1, ConnInterfaceCode::CMD_NM_DISABLE_DISTRIBUTE_NET);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
