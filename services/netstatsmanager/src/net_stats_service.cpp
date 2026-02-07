@@ -1284,6 +1284,7 @@ void NetStatsService::StartNetObserver()
 {
     NETMGR_LOG_I("StartNetObserver start");
     if (netconnCallback_ == nullptr) {
+        std::unique_lock<ffrt::shared_mutex> lock(netconnCallbackMutex_);
         netconnCallback_ = sptr<NetInfoObserver>::MakeSptr();
     }
     NetManagerStandard::NetSpecifier netSpecifier;
