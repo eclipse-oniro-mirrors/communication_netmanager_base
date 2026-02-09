@@ -21,7 +21,7 @@
 #include "netfirewall_ct_def.h"
 
 static const ip4_key OTHER_IP4_KEY = (ip4_key)0xffffffff;
-static const port_key OTHER_PORT_KEY = (port_key)0xffffffff;
+static const port_key_val OTHER_PORT_KEY = (port_key_val)0xffffffff;
 static const proto_key OTHER_PROTO_KEY = (proto_key)0xffffffff;
 static const appuid_key OTHER_APPUID_KEY = (appuid_key)0xffffffff;
 static const appuid_key OTHER_UID_KEY = (uid_key)0xffffffff;

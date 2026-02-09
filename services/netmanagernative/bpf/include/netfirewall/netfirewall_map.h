@@ -61,8 +61,8 @@ bpf_map_def SEC("maps") INGRESS_DADDR6_MAP = {
 };
 
 bpf_map_def SEC("maps") INGRESS_SPORT_MAP = {
-    .type = BPF_MAP_TYPE_HASH,
-    .key_size = sizeof(port_key),
+    .type = BPF_MAP_TYPE_LPM_TRIE,
+    .key_size = sizeof(struct port_key),
     .value_size = sizeof(struct bitmap),
     .max_entries = MAP_MAX_PORT_ENTRIES,
     .map_flags = BPF_F_NO_PREALLOC,
@@ -71,8 +71,8 @@ bpf_map_def SEC("maps") INGRESS_SPORT_MAP = {
 };
 
 bpf_map_def SEC("maps") INGRESS_DPORT_MAP = {
-    .type = BPF_MAP_TYPE_HASH,
-    .key_size = sizeof(port_key),
+    .type = BPF_MAP_TYPE_LPM_TRIE,
+    .key_size = sizeof(struct port_key),
     .value_size = sizeof(struct bitmap),
     .max_entries = MAP_MAX_PORT_ENTRIES,
     .map_flags = BPF_F_NO_PREALLOC,
@@ -155,8 +155,8 @@ bpf_map_def SEC("maps") EGRESS_DADDR6_MAP = {
     .numa_node = 0,
 };
 bpf_map_def SEC("maps") EGRESS_SPORT_MAP = {
-    .type = BPF_MAP_TYPE_HASH,
-    .key_size = sizeof(port_key),
+    .type = BPF_MAP_TYPE_LPM_TRIE,
+    .key_size = sizeof(struct port_key),
     .value_size = sizeof(struct bitmap),
     .max_entries = MAP_MAX_PORT_ENTRIES,
     .map_flags = BPF_F_NO_PREALLOC,
@@ -164,8 +164,8 @@ bpf_map_def SEC("maps") EGRESS_SPORT_MAP = {
     .numa_node = 0,
 };
 bpf_map_def SEC("maps") EGRESS_DPORT_MAP = {
-    .type = BPF_MAP_TYPE_HASH,
-    .key_size = sizeof(port_key),
+    .type = BPF_MAP_TYPE_LPM_TRIE,
+    .key_size = sizeof(struct port_key),
     .value_size = sizeof(struct bitmap),
     .max_entries = MAP_MAX_PORT_ENTRIES,
     .map_flags = BPF_F_NO_PREALLOC,

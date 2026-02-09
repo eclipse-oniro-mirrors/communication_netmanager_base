@@ -36,7 +36,8 @@ using namespace testing::ext;
 using namespace OHOS;
 using namespace OHOS::NetManagerStandard;
 
-static sptr<NetFirewallIpRule> GeIpFirewallRule(NetFirewallRuleDirection dir, string addr)
+static sptr<NetFirewallIpRule> GeIpFirewallRule(NetFirewallRuleDirection dir, string addr,
+    int32_t start = 80, int32_t end = 80)
 {
     sptr<NetFirewallIpRule> rule = (std::make_unique<NetFirewallIpRule>()).release();
     if (!rule) {
@@ -58,9 +59,8 @@ static sptr<NetFirewallIpRule> GeIpFirewallRule(NetFirewallRuleDirection dir, st
 
     std::vector<NetFirewallPortParam> ports;
     NetFirewallPortParam remotePort;
-    const int32_t defaultPort = 80;
-    remotePort.startPort = defaultPort;
-    remotePort.endPort = defaultPort;
+    remotePort.startPort = start;
+    remotePort.endPort = end;
     ports.emplace_back(remotePort);
     rule->localPorts = ports;
     rule->remotePorts = ports;
@@ -204,6 +204,8 @@ HWTEST_F(NetsysNetFirewallTest, NetsysNetFirewallTest004, TestSize.Level0)
     ruleList.push_back(rule);
     sptr<NetFirewallIpRule> rule2 = GeIpFirewallRule(NetFirewallRuleDirection::RULE_IN, "153.3.238.102");
     ruleList.push_back(rule2);
+    sptr<NetFirewallIpRule> rule3 = GeIpFirewallRule(NetFirewallRuleDirection::RULE_IN, "153.3.238.102", 80, 443);
+    ruleList.push_back(rule3);
 
     BitmapManager manager;
     int ret = manager.BuildBitmapMap(ruleList);
@@ -213,8 +215,8 @@ HWTEST_F(NetsysNetFirewallTest, NetsysNetFirewallTest004, TestSize.Level0)
     EXPECT_FALSE(manager.GetSrcIp6Map().empty());
     EXPECT_FALSE(manager.GetDstIp4Map().empty());
     EXPECT_FALSE(manager.GetDstIp6Map().empty());
-    EXPECT_FALSE(manager.GetSrcPortMap().Empty());
-    EXPECT_FALSE(manager.GetDstPortMap().Empty());
+    EXPECT_FALSE(manager.GetSrcPortMap().Get().empty());
+    EXPECT_FALSE(manager.GetDstPortMap().Get().empty());
     EXPECT_FALSE(manager.GetProtoMap().Empty());
     EXPECT_FALSE(manager.GetActionMap().Empty());
     EXPECT_FALSE(manager.GetAppIdMap().Empty());
@@ -233,6 +235,27 @@ HWTEST_F(NetsysNetFirewallTest, NetsysNetFirewallTest005, TestSize.Level0)
     EXPECT_EQ(ret, 0);
 }
 
+HWTEST_F(NetsysNetFirewallTest, NetsysNetFirewallTest006, TestSize.Level0)
+{
+    std::vector<sptr<NetFirewallIpRule>> ruleList;
+    sptr<NetFirewallIpRule> rule = GeIpFirewallRule(NetFirewallRuleDirection::RULE_IN, "153.3.238.102", 1, 65535);
+    ruleList.push_back(rule);
+
+    BitmapManager manager;
+    int ret = manager.BuildBitmapMap(ruleList);
+    EXPECT_EQ(ret, 0);
+
+    EXPECT_FALSE(manager.GetSrcIp4Map().empty());
+    EXPECT_FALSE(manager.GetSrcIp6Map().empty());
+    EXPECT_FALSE(manager.GetDstIp4Map().empty());
+    EXPECT_FALSE(manager.GetDstIp6Map().empty());
+    EXPECT_FALSE(manager.GetSrcPortMap().Get().empty());
+    EXPECT_FALSE(manager.GetDstPortMap().Get().empty());
+    EXPECT_FALSE(manager.GetProtoMap().Empty());
+    EXPECT_FALSE(manager.GetActionMap().Empty());
+    EXPECT_FALSE(manager.GetAppIdMap().Empty());
+}
+
 HWTEST_F(NetsysNetFirewallTest, IpParamParserTest001, TestSize.Level0)
 {
     std::vector<Ip4Data> list;
@@ -242,7 +265,7 @@ HWTEST_F(NetsysNetFirewallTest, IpParamParserTest001, TestSize.Level0)
     endAddr.s_addr = 2887802770;
     EXPECT_NE(IpParamParser::GetIp4AndMask(endAddr, startAddr, list), 0);
     EXPECT_EQ(IpParamParser::GetIp4AndMask(startAddr, endAddr, list), 0);
-    EXPECT_EQ(IpParamParser::GetSuffixZeroLength(0), 0);
+    EXPECT_EQ(IpParamParser::GetSuffixZeroLength(0), 32);
     EXPECT_GE(IpParamParser::GetSuffixZeroLength(1000), 0);
 }
 

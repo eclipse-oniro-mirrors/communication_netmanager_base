@@ -256,17 +256,26 @@ static __always_inline bool match_ports(struct match_tuple *tuple, struct bitmap
         return false;
     }
     __u8 protocol = tuple->protocol;
-    port_key other_port_key = OTHER_PORT_KEY;
+    struct port_key other_port_key;
+    other_port_key.data = OTHER_PORT_KEY;
+    other_port_key.prefixlen = PORT_MAX_MASK;
+
+    struct port_key exact_key;
+    exact_key.data = tuple->sport;
+    exact_key.prefixlen = PORT_MAX_MASK;
+
     bool ingress = tuple->dir == INGRESS;
     struct bitmap *result = NULL;
 
-    result = lookup_map(GET_MAP(ingress, sport), &(tuple->sport), &other_port_key);
+    result = lookup_map(GET_MAP(ingress, sport), &exact_key, &other_port_key);
     if (result) {
         log_dbg2(DBG_MATCH_SPORT, tuple->dir, (__u32)tuple->sport, result->val[0]);
         bitmap_and(key->val, result->val);
         result = NULL;
     }
-    result = lookup_map(GET_MAP(ingress, dport), &(tuple->dport), &other_port_key);
+    exact_key.data = tuple->dport;
+    exact_key.prefixlen = PORT_MAX_MASK;
+    result = lookup_map(GET_MAP(ingress, dport), &exact_key, &other_port_key);
     if (result) {
         log_dbg2(DBG_MATCH_DPORT, tuple->dir, (__u32)tuple->dport, result->val[0]);
         bitmap_and(key->val, result->val);

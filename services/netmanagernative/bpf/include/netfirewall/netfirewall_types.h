@@ -30,7 +30,7 @@
 #define BITMAP_LEN 63
 #define IPV4_MAX_PREFIXLEN 32
 #define IPV6_MAX_PREFIXLEN 128
-
+#define PORT_MAX_MASK 16
 #define DNS_PORT 53
 #define DNS_QR_DEFALUT_MASK 15
 #define DNS_QRS_IPV4_TYPE 1
@@ -162,7 +162,7 @@ typedef __be32 ip4_key;
 typedef struct in6_addr ip6_key;
 typedef __u8 action_key;
 typedef struct bitmap action_val;
-typedef __be16 port_key;
+typedef __be16 port_key_val;
 typedef __u8 proto_key;
 typedef __u32 appuid_key;
 typedef __u32 uid_key;
@@ -184,6 +184,11 @@ struct ipv4_lpm_key {
 struct ipv6_lpm_key {
         __u32 prefixlen;
         ip6_key data;
+};
+
+struct port_key {
+        __u32 prefixlen;
+        __be16 data;
 };
 
 struct dnshdr {

@@ -216,7 +216,7 @@ void NetsysBpfNetFirewall::ClearBpfFirewallRules(NetFirewallRuleDirection direct
 {
     Ipv4LpmKey ip4Key = {};
     Ipv6LpmKey ip6Key = {};
-    PortKey portKey = 0;
+    PortKey portKey = {};
     ProtoKey protoKey = 0;
     AppUidKey appIdKey = 0;
     UidKey uidKey = 0;
@@ -588,7 +588,7 @@ int32_t NetsysBpfNetFirewall::WritePortBpfMap(BpfPortMap &portMap, const char *p
         return -1;
     }
     int32_t res = 0;
-    if (portMap.Empty()) {
+    if (portMap.Get().empty()) {
         NETNATIVE_LOGE("WriteSrcPortBpfMap: portMap is empty");
         return -1;
     } else {
@@ -598,11 +598,13 @@ int32_t NetsysBpfNetFirewall::WritePortBpfMap(BpfPortMap &portMap, const char *p
             return -1;
         }
         for (const auto &pair : portMap.Get()) {
-            PortKey key = pair.first;
-            Bitmap val = pair.second;
+            PortKey key;
+            key.prefixlen = pair.prefixlen;
+            key.data = pair.data;
+            Bitmap val = pair.bitmap;
             RuleCode rule;
             memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
-            NETNATIVE_LOG_D("sport_map=%{public}u", key);
+            NETNATIVE_LOG_D("sport_map=%{public}u", key.data);
             res += map.Write(key, rule, BPF_ANY) == 0 ? 0 : -1;
         }
     }
@@ -776,10 +778,10 @@ std::string NetsysBpfNetFirewall::DecodeDomainFromKey(const DomainHashKey &key)
     if (key.prefixlen == 0) {
         return "";
     }
-    if (key.prefixlen < sizeof(key.uid) + sizeof(key.appuid)) {
+    if (key.prefixlen < (sizeof(key.uid) + sizeof(key.appuid)) * BIT_PER_BYTE) {
         return "";
     }
-    unsigned int domainPrefixlen = key.prefixlen - sizeof(key.uid) - sizeof(key.appuid);
+    unsigned int domainPrefixlen = key.prefixlen - (sizeof(key.uid) + sizeof(key.appuid)) * BIT_PER_BYTE;
     if (domainPrefixlen <= 0) {
         return "";
     }
