@@ -416,10 +416,10 @@ int32_t FillBasicAddrInfo(struct AddrInfo *addrInfo, struct addrinfo *info)
     if (addrInfo == NULL || info == NULL) {
         return -1;
     }
-    addrInfo->aiFlags = info->ai_flags;
-    addrInfo->aiFamily = info->ai_family;
+    addrInfo->aiFlags = (uint32_t)(info->ai_flags);
+    addrInfo->aiFamily = (uint32_t)(info->ai_family);
     addrInfo->aiSockType = (uint32_t)(info->ai_socktype);
-    addrInfo->aiProtocol = info->ai_protocol;
+    addrInfo->aiProtocol = (uint32_t)(info->ai_protocol);
     addrInfo->aiAddrLen = info->ai_addrlen;
     // LCOV_EXCL_START
     if (info->ai_addr &&
