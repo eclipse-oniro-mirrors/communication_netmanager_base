@@ -1282,6 +1282,7 @@ bool NetStatsService::CommonEventPackageAdded(uint32_t uid)
 
 void NetStatsService::StartNetObserver()
 {
+    std::unique_lock<ffrt::shared_mutex> lock(netconnCallbackMutex_);
     NETMGR_LOG_I("StartNetObserver start");
     if (netconnCallback_ == nullptr) {
         netconnCallback_ = sptr<NetInfoObserver>::MakeSptr();

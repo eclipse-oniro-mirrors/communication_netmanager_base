@@ -203,6 +203,7 @@ private:
     int32_t defaultUserId_ = 0;
     std::atomic_bool isUpdate_ = false;
     sptr<NetInfoObserver> netconnCallback_ = nullptr;
+    ffrt::shared_mutex netconnCallbackMutex_;
 
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     uint64_t curIfIndex_ = UINT64_MAX;
