@@ -2963,7 +2963,11 @@ int32_t NetConnService::SetPacFileUrl(const std::string &pacUrl)
 
 int32_t NetConnService::FindProxyForURL(const std::string &url, const std::string &host, std::string &proxy)
 {
-    333
+    if (url.empty()) {
+        proxy.clear();
+        NETMGR_LOG_I("FindProxyForURL return empty");
+        return NETMANAGER_SUCCESS;
+    }
 #ifdef NETMANAGER_ENABLE_PAC_PROXY
     return GetNetPacManager()->FindProxyForURL(url, host, proxy);
 #else
