@@ -2160,5 +2160,14 @@ HWTEST_F(NetConnServiceTest, GetSystemNetPortStatesTest001, TestSize.Level1)
     auto ret = NetConnService::GetInstance()->GetSystemNetPortStates(netPortStatesInfo);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceTest, FindProxyForURL001, TestSize.Level1)
+{
+    std::string url = "";
+    std::string host = "";
+    std::string proxy = "11";
+    NetConnService::GetInstance()->FindProxyForURL(url, host, proxy);
+    EXPECT_TRUE(proxy.empty());
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
