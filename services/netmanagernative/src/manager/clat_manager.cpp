@@ -29,11 +29,87 @@
 #include "net_manager_native.h"
 #include "netnative_log_wrapper.h"
 #include "network_permission.h"
+#include "iptables_wrapper.h"
 
 namespace OHOS {
 namespace nmd {
 using namespace OHOS::NetManagerStandard;
 ClatManager::ClatManager() = default;
+
+// commands of create tables
+constexpr const char *CREATE_CLAT_OUTPUT = "-t raw -N ";
+
+// commands of set nat
+constexpr const char *APPEND_CLAT_OUTPUT = "-I OUTPUT -j ";
+constexpr const char *CLEAR_CLAT_OUTPUT_RULE = "-F "; //清除链中所有规则
+constexpr const char *DELETE_CLAT_OUTPUT_CHAIN = "-D OUTPUT -j "; // 拆除指定链挂载
+constexpr const char *DELETE_CLAT_CHAIN = "-X "; // 删除指定链
+
+constexpr const char *RAW_TABLE = "*raw";
+constexpr const char *CMD_COMMIT = "COMMIT";
+
+const std::string ClatManager::GetClatNetChains(const std::string &v6Iface)
+{
+    return "clat_raw_" + v6Iface + "_OUTPUT";
+}
+
+const std::string ClatManager::EnableByPassNatCmd(const std::string &v6Iface, const std::string &v6Ip) // 新链上执行规则
+{
+    return "-A " + GetClatNetChains(v6Iface) + " -p all -s " + v6Ip + " -j NOTRACK";
+}
+
+void ClatManager::CombineRestoreRules(const std::string &cmds, std::string &cmdSet)
+{
+    cmdSet.append(cmds + "\n");
+}
+
+int32_t ClatManager::AddNatBypassRules(const std::string &v6Iface, const std::string &v6Ip)
+{
+    NETNATIVE_LOGI("AddNatBypassRules");
+    DeleteNatBypassRules(v6Iface);
+    auto ret = IptablesWrapper::GetInstance()->RunCommand(
+        IPTYPE_IPV6, CREATE_CLAT_OUTPUT + GetClatNetChains(v6Iface)); // 创建子链
+    // LCOV_EXCL_START
+    if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("AddNatBypassRules create run command failed");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    // LCOV_EXCL_STOP
+    std::string cmdSet = "";
+    CombineRestoreRules(RAW_TABLE, cmdSet);
+    CombineRestoreRules(APPEND_CLAT_OUTPUT + GetClatNetChains(v6Iface), cmdSet);
+    CombineRestoreRules(EnableByPassNatCmd(v6Iface, v6Ip), cmdSet);
+    CombineRestoreRules(CMD_COMMIT, cmdSet);
+    // LCOV_EXCL_START
+    ret = IptablesWrapper::GetInstance()->RunRestoreCommands(IPTYPE_IPV6, cmdSet);
+    if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
+        DeleteNatBypassRules(v6Iface);
+        NETNATIVE_LOGE("AddNatBypassRules run command failed");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    // LCOV_EXCL_STOP
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t ClatManager::DeleteNatBypassRules(const std::string &v6Iface)
+{
+    NETNATIVE_LOGI("DeleteNatBypassRules %{public}s", v6Iface.c_str());
+    // LCOV_EXCL_STOP
+    std::string cmdSet = "";
+    CombineRestoreRules(RAW_TABLE, cmdSet);
+    CombineRestoreRules(CLEAR_CLAT_OUTPUT_RULE + GetClatNetChains(v6Iface), cmdSet); // 删除链上所有规则
+    CombineRestoreRules(DELETE_CLAT_OUTPUT_CHAIN + GetClatNetChains(v6Iface), cmdSet); // 拆除挂载
+    CombineRestoreRules(DELETE_CLAT_CHAIN + GetClatNetChains(v6Iface), cmdSet); // 删除链
+    CombineRestoreRules(CMD_COMMIT, cmdSet);
+    auto ret = IptablesWrapper::GetInstance()->RunRestoreCommands(IPTYPE_IPV6, cmdSet);
+    // LCOV_EXCL_START
+    if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("DeleteNatBypassRules run command failed");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    // LCOV_EXCL_STOP
+    return NETMANAGER_SUCCESS;
+}
 
 int32_t ClatManager::ClatStart(const std::string &v6Iface, int32_t netId, const std::string &nat64PrefixStr,
                                NetManagerNative *netsysService)
@@ -81,13 +157,16 @@ int32_t ClatManager::ClatStart(const std::string &v6Iface, int32_t netId, const 
     clatds_[v6Iface].Start();
 
     ret = RouteManager::AddClatTunInterface(tunIface, DEFAULT_V4_ADDR, v4Addr.address_);
-    if (ret != NETMANAGER_SUCCESS) {
+    // LCOV_EXCL_START
+    auto netRet = AddNatBypassRules(v6Iface, v6Addr.address_);
+    if (ret != NETMANAGER_SUCCESS || netRet != NETMANAGER_SUCCESS) {
         close(tunFd);
         close(readSock6);
         close(writeSock6);
         NETNATIVE_LOGW("Add route on %{public}s failed", tunIface.c_str());
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
+    // LCOV_EXCL_STOP
     netsysService->SetClatDnsEnableIpv4(netId, true);
     clatdTrackers_[v6Iface] = {v6Iface, tunIface, v4Addr, v6Addr, nat64PrefixStr, tunFd, readSock6, writeSock6, netId};
 
@@ -106,6 +185,7 @@ int32_t ClatManager::ClatStop(const std::string &v6Iface, NetManagerNative *nets
         NETNATIVE_LOGW("NetManagerNative pointer is null");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
+    DeleteNatBypassRules(v6Iface);
     NETNATIVE_LOGI("Stopping clatd on %{public}s", v6Iface.c_str());
     netsysService->SetClatDnsEnableIpv4(clatdTrackers_[v6Iface].netId, false);
     RouteManager::RemoveClatTunInterface(clatdTrackers_[v6Iface].tunIface);
@@ -253,7 +333,6 @@ int32_t ClatManager::CreateAndConfigureClatSocket(const std::string &v6Iface, co
         NETNATIVE_LOGW("Configure read socket failed");
         return ret;
     }
-
     return NETMANAGER_SUCCESS;
 }
 } // namespace nmd

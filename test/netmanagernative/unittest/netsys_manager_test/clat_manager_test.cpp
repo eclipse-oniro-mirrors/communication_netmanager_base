@@ -74,7 +74,6 @@ HWTEST_F(ClatManagerTest, ClatStartTest001, TestSize.Level1)
 
     int32_t ret = instance_->ClatStart(v6Iface, netId, nat64PrefixStr, netsysService);
     EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
-
     netsysService = new NetManagerNative();
     ret = instance_->ClatStart(v6Iface, netId, nat64PrefixStr, netsysService);
     EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
@@ -106,7 +105,6 @@ HWTEST_F(ClatManagerTest, GenerateClatSrcAddrTest001, TestSize.Level1)
     uint32_t fwmark = 1;
     INetAddr v4Addr;
     INetAddr v6Addr;
-
     int32_t ret = instance_->GenerateClatSrcAddr(v6Iface, fwmark, nat64PrefixStr, v4Addr, v6Addr);
     EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 }
@@ -143,6 +141,31 @@ HWTEST_F(ClatManagerTest, CreateAndConfigureClatSocketTest001, TestSize.Level1)
 
     int32_t ret = instance_->CreateAndConfigureClatSocket(v6Iface, v6Addr, fwmark, readSock6, writeSock6);
     EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: AddNatBypassRules
+ * @tc.desc: Test ConnManager AddNatBypassRules.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClatManagerTest, AddNatBypassRulesTest001, TestSize.Level1)
+{
+    const std::string v6Iface = "rmnet0";
+    const std::string v6Ip = "240e:46e:b900:27ab:1532:b318:192b:2841";
+    int32_t ret = instance_->AddNatBypassRules(v6Iface, v6Ip);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+}
+
+/**
+ * @tc.name: DeleteNatBypassRules
+ * @tc.desc: Test ConnManager DeleteNatBypassRules.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClatManagerTest, DeleteNatBypassRulesTest001, TestSize.Level1)
+{
+    const std::string v6Iface = "rmnet0";
+    int32_t ret = instance_->DeleteNatBypassRules(v6Iface);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 }
 } // namespace NetsysNative
 } // namespace OHOS
