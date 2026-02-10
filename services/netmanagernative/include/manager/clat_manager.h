@@ -48,7 +48,11 @@ private:
 
     int32_t CreateAndConfigureClatSocket(const std::string &v6Iface, const INetAddr &v6Addr, uint32_t fwmark,
                                          int &readSock6, int &writeSock6);
-
+    int32_t AddNatBypassRules(const std::string &v6Iface, const std::string &v6Ip);
+    int32_t DeleteNatBypassRules(const std::string &v6Iface);
+    void CombineRestoreRules(const std::string &cmds, std::string &cmdSet);
+    const std::string EnableByPassNatCmd(const std::string &v6Iface, const std::string &v6Ip);
+    const std::string GetClatNetChains(const std::string &v6Iface);
     std::map<std::string, Clatd> clatds_;
 
     std::map<std::string, ClatdTracker> clatdTrackers_;
