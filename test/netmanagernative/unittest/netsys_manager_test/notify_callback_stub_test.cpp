@@ -101,9 +101,7 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceAdded001, TestSize.Level1)
     std::string ifName = "test0";
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
-    if (!data.WriteString(ifName)) {
-        return;
-    }
+    ASSERT_NE(data.WriteString(ifName), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = notifyStub_->OnRemoteRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDED),
@@ -116,9 +114,7 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceRemoved001, TestSize.Level1)
     std::string ifName = "test0";
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
-    if (!data.WriteString(ifName)) {
-        return;
-    }
+    ASSERT_NE(data.WriteString(ifName), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = notifyStub_->OnRemoteRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_REMOVED),
@@ -132,12 +128,8 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceChanged001, TestSize.Level1)
     bool isUp = false;
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
-    if (!data.WriteString(ifName)) {
-        return;
-    }
-    if (!data.WriteBool(isUp)) {
-        return;
-    }
+    ASSERT_NE(data.WriteString(ifName), false);
+    ASSERT_NE(data.WriteBool(isUp), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = notifyStub_->OnRemoteRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_CHANGED),
@@ -151,12 +143,8 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceLinkStateChanged001, TestSize.Level1
     bool isUp = false;
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
-    if (!data.WriteString(ifName)) {
-        return;
-    }
-    if (!data.WriteBool(isUp)) {
-        return;
-    }
+    ASSERT_NE(data.WriteString(ifName), false);
+    ASSERT_NE(data.WriteBool(isUp), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = notifyStub_->OnRemoteRequest(
@@ -172,18 +160,10 @@ HWTEST_F(NotifyCallbackStubTest, OnRouteChanged001, TestSize.Level1)
     std::string ifName = "test0";
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
-    if (!data.WriteBool(updated)) {
-        return;
-    }
-    if (!data.WriteString(route)) {
-        return;
-    }
-    if (!data.WriteString(gateway)) {
-        return;
-    }
-    if (!data.WriteString(ifName)) {
-        return;
-    }
+    ASSERT_NE(data.WriteBool(updated), false);
+    ASSERT_NE(data.WriteString(route), false);
+    ASSERT_NE(data.WriteString(gateway), false);
+    ASSERT_NE(data.WriteString(ifName), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = notifyStub_->OnRemoteRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_ROUTE_CHANGED),
@@ -215,12 +195,8 @@ HWTEST_F(NotifyCallbackStubTest, OnBandwidthReachedLimit001, TestSize.Level1)
     std::string iface = "test0";
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
-    if (!data.WriteString(limitName)) {
-        return;
-    }
-    if (!data.WriteString(iface)) {
-        return;
-    }
+    ASSERT_NE(data.WriteString(limitName), false);
+    ASSERT_NE(data.WriteString(iface), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = notifyStub_->OnRemoteRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_BANDWIDTH_REACHED_LIMIT),
