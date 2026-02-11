@@ -16,14 +16,17 @@
 #ifndef NET_VPN_BASE_SERVICE_H
 #define NET_VPN_BASE_SERVICE_H
 
-#include "refbase.h"
+#include <set>
 
 namespace OHOS {
 namespace NetManagerStandard {
-class NetVpnBaseService : public virtual RefBase {
+class NetVpnBaseService {
 public:
+    NetVpnBaseService() = default;
+    virtual ~NetVpnBaseService() = default;
     virtual bool IsVpnApplication(int32_t uid) = 0;
     virtual bool IsAppUidInWhiteList(int32_t callingUid, int32_t appUid) = 0;
+    virtual void NotifyAllowConnectVpnBundleNameChanged(std::set<std::string> &&allowConnectVpnBundleName) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

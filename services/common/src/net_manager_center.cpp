@@ -227,7 +227,7 @@ int32_t NetManagerCenter::UpdateDualStackProbeTime(int32_t dualStackProbeTimeOut
     return connService_->UpdateDualStackProbeTime(dualStackProbeTimeOut);
 }
 
-void NetManagerCenter::RegisterVpnService(const sptr<NetVpnBaseService> &service)
+void NetManagerCenter::RegisterVpnService(const std::shared_ptr<NetVpnBaseService> &service)
 {
     vpnService_ = service;
 }
