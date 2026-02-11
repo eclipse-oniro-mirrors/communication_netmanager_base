@@ -66,14 +66,14 @@ public:
 
     bool IsVpnApplication(int32_t uid);
     bool IsAppUidInWhiteList(int32_t callingUid, int32_t appUid);
-    void RegisterVpnService(const sptr<NetVpnBaseService> &service);
+    void RegisterVpnService(const std::shared_ptr<NetVpnBaseService> &service);
 
 private:
     sptr<NetConnBaseService> connService_ = nullptr;
     sptr<NetStatsBaseService> statsService_ = nullptr;
     sptr<NetPolicyBaseService> policyService_ = nullptr;
     sptr<NetEthernetBaseService> ethernetService_ = nullptr;
-    sptr<NetVpnBaseService> vpnService_ = nullptr;
+    std::shared_ptr<NetVpnBaseService> vpnService_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
