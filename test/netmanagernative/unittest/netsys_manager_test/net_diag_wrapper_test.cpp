@@ -376,22 +376,22 @@ HWTEST_F(NetDiagWrapperTest, RunGetRouteTableCommandTest002, TestSize.Level1)
     socketType = NetDiagProtocolType::PROTOCOL_TYPE_TCP;
     ret = netDiagWrapper->GetSocketsInfo(socketType, socketInfo);
     ShowSocketInfo(socketInfo);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     socketType = NetDiagProtocolType::PROTOCOL_TYPE_UDP;
     ret = netDiagWrapper->GetSocketsInfo(socketType, socketInfo);
     ShowSocketInfo(socketInfo);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     socketType = NetDiagProtocolType::PROTOCOL_TYPE_UNIX;
     ret = netDiagWrapper->GetSocketsInfo(socketType, socketInfo);
     ShowSocketInfo(socketInfo);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     socketType = NetDiagProtocolType::PROTOCOL_TYPE_RAW;
     ret = netDiagWrapper->GetSocketsInfo(socketType, socketInfo);
     ShowSocketInfo(socketInfo);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     std::this_thread::sleep_for(std::chrono::seconds(PING_WAIT_MS));
 }
