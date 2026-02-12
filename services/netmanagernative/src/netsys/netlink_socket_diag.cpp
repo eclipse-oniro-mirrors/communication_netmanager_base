@@ -411,7 +411,7 @@ bool NetLinkSocketDiag::ProcessGetNetPortStatesInfo(const uint8_t proto, NetPort
 {
     inet_diag_msg *msg = reinterpret_cast<inet_diag_msg *>(NLMSG_DATA(nlh));
     uint32_t skPid = 0;
-    uint32_t attrLen = nlh->nlmsg_len - static_cast<u_int32_t>(NLMSG_LENGTH(sizeof(*msg)));
+    int32_t attrLen = nlh->nlmsg_len - static_cast<int32_t>(NLMSG_LENGTH(sizeof(*msg)));
     struct rtattr *attr = reinterpret_cast<struct rtattr*>(msg + 1);
     auto rtaret = RTA_OK(attr, attrLen);
     while (rtaret) {
