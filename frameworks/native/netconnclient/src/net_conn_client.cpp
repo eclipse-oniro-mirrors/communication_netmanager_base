@@ -1477,6 +1477,7 @@ int32_t NetConnClient::NetConnCallbackManager::AddNetConnCallback(const sptr<INe
     sptr<NetAllCapabilities> tempNetAllCap(netAllCap_);
     sptr<NetLinkInfo> tempNetLinkInfo(netLinkInfo_);
     handlerLock.unlock();
+// LCOV_EXCL_START
 #ifndef NETMANAGER_TEST
     auto wp = wptr<NetConnClient::NetConnCallbackManager>(this);
     ffrt::submit([wp, callback, tempNetHandler, tempNetAllCap, tempNetLinkInfo] () {
@@ -1486,6 +1487,7 @@ int32_t NetConnClient::NetConnCallbackManager::AddNetConnCallback(const sptr<INe
         },
         {}, {}, ffrt::task_attr().name("AddNetConnCallback"));
 #endif
+// LCOV_EXCL_STOP
     return NETMANAGER_SUCCESS;
 }
  
