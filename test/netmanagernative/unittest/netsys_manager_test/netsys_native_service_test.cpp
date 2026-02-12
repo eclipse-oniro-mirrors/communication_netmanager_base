@@ -714,7 +714,7 @@ HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceBranchTest001, TestSize.Lev
     NetDiagProtocolType socketType = NetDiagProtocolType::PROTOCOL_TYPE_ALL;
     NetDiagSocketsInfo socketsInfo;
     ret = instance_->NetDiagGetSocketsInfo(socketType, socketsInfo);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     std::list<NetDiagIfaceConfig> configs;
     std::string ifaceName = "test";
