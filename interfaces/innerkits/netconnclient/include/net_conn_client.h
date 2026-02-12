@@ -579,6 +579,7 @@ private:
         sptr<NetLinkInfo> netLinkInfo_ = nullptr;
         std::shared_mutex netConnCallbackListMutex_;
         std::list<sptr<INetConnCallback>> netConnCallbackList_;
+        bool isNetStateUpdated_ = false;
     };
 
 private:

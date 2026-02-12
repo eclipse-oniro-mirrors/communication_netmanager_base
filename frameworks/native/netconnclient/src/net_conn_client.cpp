@@ -1348,6 +1348,7 @@ int32_t NetConnClient::NetConnCallbackManager::NetAvailable(sptr<NetHandle> &net
     } else {
         netHandle_ = sptr<NetHandle>::MakeSptr(netHandle->GetNetId());
     }
+    isNetStateUpdated_ = true;
     handlerLock.unlock();
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
@@ -1400,6 +1401,7 @@ int32_t NetConnClient::NetConnCallbackManager::NetLost(sptr<NetHandle> &netHandl
         netAllCap_ = nullptr;
         netLinkInfo_ = nullptr;
     }
+    isNetStateUpdated_ = true;
     handlerLock.unlock();
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
@@ -1414,6 +1416,7 @@ int32_t NetConnClient::NetConnCallbackManager::NetUnavailable()
 {
     std::unique_lock<std::mutex> handlerLock(netHandlerMutex_);
     netHandle_ = nullptr;
+    isNetStateUpdated_ = true;
     handlerLock.unlock();
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
@@ -1448,6 +1451,8 @@ void NetConnClient::NetConnCallbackManager::PostTriggerNetChange(const sptr<INet
         if (netLinkInfo != nullptr) {
             callback->NetConnectionPropertiesChange(tempNetHandler, netLinkInfo);
         }
+    } else {
+        callback->NetUnavailable();
     }
 }
  
@@ -1464,19 +1469,20 @@ int32_t NetConnClient::NetConnCallbackManager::AddNetConnCallback(const sptr<INe
     }
     netConnCallbackList_.push_back(callback);
     lock.unlock();
-    if (netHandle_ == nullptr) {
+    std::unique_lock<std::mutex> handlerLock(netHandlerMutex_);
+    if (!isNetStateUpdated_) {
         return NETMANAGER_SUCCESS;
     }
-    std::unique_lock<std::mutex> handlerLock(netHandlerMutex_);
     sptr<NetHandle> tempNetHandler(netHandle_);
     sptr<NetAllCapabilities> tempNetAllCap(netAllCap_);
     sptr<NetLinkInfo> tempNetLinkInfo(netLinkInfo_);
     handlerLock.unlock();
 #ifndef NETMANAGER_TEST
-    ffrt::submit([this, callback, tempNetHandler, tempNetAllCap, tempNetLinkInfo] () {
-#endif
-            this->PostTriggerNetChange(callback, tempNetHandler, tempNetAllCap, tempNetLinkInfo);
-#ifndef NETMANAGER_TEST
+    auto wp = wptr<NetConnClient::NetConnCallbackManager>(this);
+    ffrt::submit([wp, callback, tempNetHandler, tempNetAllCap, tempNetLinkInfo] () {
+            if (auto sharedClient = wp.promote()) {
+                sharedClient->PostTriggerNetChange(callback, tempNetHandler, tempNetAllCap, tempNetLinkInfo);
+            }
         },
         {}, {}, ffrt::task_attr().name("AddNetConnCallback"));
 #endif

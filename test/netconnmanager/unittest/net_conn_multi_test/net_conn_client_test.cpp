@@ -2059,6 +2059,18 @@ HWTEST_F(NetConnClientTest, AddNetConnCallback006, TestSize.Level1)
     sptr<INetConnCallbackTest> callback = nullptr;
     EXPECT_EQ(netConnCallbackManager->AddNetConnCallback(callback), 2100105);
 }
+
+HWTEST_F(NetConnClientTest, AddNetConnCallback007, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    sptr<INetConnCallbackTest> callback1 = sptr<INetConnCallbackTest>::MakeSptr();
+    sptr<INetConnCallbackTest> callback2 = sptr<INetConnCallbackTest>::MakeSptr();
+    netConnCallbackManager->isNetStateUpdated_ = false;
+    netConnCallbackManager->AddNetConnCallback(callback1);
+    netConnCallbackManager->isNetStateUpdated_ = true;
+    netConnCallbackManager->AddNetConnCallback(callback2);
+    EXPECT_TRUE(netConnCallbackManager->isNetStateUpdated_);
+}
  
 HWTEST_F(NetConnClientTest, RemoveNetConnCallback001, TestSize.Level1)
 {
