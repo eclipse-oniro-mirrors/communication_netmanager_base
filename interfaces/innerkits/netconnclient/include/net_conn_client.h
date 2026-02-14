@@ -460,7 +460,7 @@ public:
      * @param preferCellular out param, whether prefer cellular
      * @return Returns 0, unregister the network successfully, otherwise it will fail
      */
-    int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular);
+    int32_t IsPreferCellularUrl(const std::string& url, PreferCellularType& preferCellular);
 
     int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback);
 
@@ -579,6 +579,7 @@ private:
         sptr<NetLinkInfo> netLinkInfo_ = nullptr;
         std::shared_mutex netConnCallbackListMutex_;
         std::list<sptr<INetConnCallback>> netConnCallbackList_;
+        bool isNetStateUpdated_ = false;
     };
 
 private:

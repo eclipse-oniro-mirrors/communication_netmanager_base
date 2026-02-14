@@ -92,7 +92,7 @@ public:
     int32_t GetSlotType(std::string &type) override;
     int32_t FactoryResetNetwork() override;
     int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) override;
-    int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular) override;
+    int32_t IsPreferCellularUrl(const std::string& url, PreferCellularType& preferCellular) override;
     int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     int32_t GetDefaultSupplierId(NetBearType bearerType, const std::string &ident,

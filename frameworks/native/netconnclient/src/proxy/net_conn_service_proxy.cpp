@@ -1932,7 +1932,7 @@ int32_t NetConnServiceProxy::RegisterNetFactoryResetCallback(const sptr<INetFact
     return replyParcel.ReadInt32();
 }
 
-int32_t NetConnServiceProxy::IsPreferCellularUrl(const std::string& url, bool& preferCellular)
+int32_t NetConnServiceProxy::IsPreferCellularUrl(const std::string& url, PreferCellularType& preferCellular)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1950,9 +1950,12 @@ int32_t NetConnServiceProxy::IsPreferCellularUrl(const std::string& url, bool& p
     }
     int32_t ret = reply.ReadInt32();
     if (ret == NETMANAGER_SUCCESS) {
-        if (!reply.ReadBool(preferCellular)) {
+        int32_t preferCellularType = 0;
+        if (!reply.ReadInt32(preferCellularType) ||
+            preferCellularType < 0 || preferCellularType >= static_cast<int32_t>(PreferCellularType::END)) {
             return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
+        preferCellular = static_cast<PreferCellularType>(preferCellularType);
     }
     return ret;
 }

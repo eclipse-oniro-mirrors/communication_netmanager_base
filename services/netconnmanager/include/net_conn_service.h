@@ -25,6 +25,7 @@
 #include <vector>
 #include <thread>
 #include <condition_variable>
+#include <tuple>
 
 #include "singleton.h"
 #include "system_ability.h"
@@ -395,7 +396,7 @@ public:
     int32_t GetSlotType(std::string &type) override;
     int32_t FactoryResetNetwork() override;
     int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) override;
-    int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular) override;
+    int32_t IsPreferCellularUrl(const std::string& url, PreferCellularType& preferCellular) override;
     int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     bool IsIfaceNameInUse(const std::string &ifaceName, int32_t netId);
@@ -580,7 +581,7 @@ private:
     void OnNetSysRestart();
 
     bool IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns);
-    std::vector<std::string> GetPreferredRegex();
+    std::tuple<std::vector<std::string>, std::vector<std::string>> GetPreferredRegex();
     bool IsValidDecValue(const std::string &inputValue);
     int32_t GetDelayNotifyTime();
     int32_t NetDetectionForDnsHealthSync(int32_t netId, bool dnsHealthSuccess);

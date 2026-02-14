@@ -1319,7 +1319,7 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest005, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     std::string url = "";
-    bool preferCellular = false;
+    PreferCellularType preferCellular = PreferCellularType::NOT_PREFER;
     ret = NetConnService::GetInstance()->IsPreferCellularUrl(url, preferCellular);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
