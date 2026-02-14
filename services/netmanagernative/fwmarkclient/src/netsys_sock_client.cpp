@@ -61,6 +61,9 @@ int HookSocket(int (*fn)(int, int, int), int domain, int type, int protocol)
         if (OHOS::nmd::FwmarkClient().BindSocket(fd, g_netIdForApp) != OHOS::NetManagerStandard::NETMANAGER_SUCCESS) {
             NETNATIVE_LOGE("BindSocket [%{public}d] to netid [%{public}d] failed",
                 fd, g_netIdForApp.load(std::memory_order_relaxed));
+// LCOV_EXCL_START
+            close(fd);
+// LCOV_EXCL_STOP
             return -1;
         }
     }
