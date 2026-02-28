@@ -688,6 +688,7 @@ HWTEST_F(NetManagerCenterTest, NotifyAllowConnectVpnBundleNameChanged0001, TestS
     EXPECT_EQ(netManagerCenter.vpnService_, nullptr);
     EXPECT_FALSE(allowConnectVpnBundleName.empty()); 
 }
+
 HWTEST_F(NetManagerCenterTest, NotifyAllowConnectVpnBundleNameChanged0002, TestSize.Level1)
 {
     auto vpnService = std::make_shared<TestNetVpnService>();
