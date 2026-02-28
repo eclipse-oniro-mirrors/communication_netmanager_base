@@ -249,5 +249,14 @@ bool NetManagerCenter::IsAppUidInWhiteList(int32_t callingUid, int32_t appUid)
 
     return vpnService_->IsAppUidInWhiteList(callingUid, appUid);
 }
+
+bool NetManagerCenter::NotifyAllowConnectVpnBundleNameChanged(std::set<std::string> &&allowConnectVpnBundleName)
+{
+    if (vpnService_ == nullptr) {
+        return false;
+    }
+    vpnService_->NotifyAllowConnectVpnBundleNameChanged(std::move(allowConnectVpnBundleName));
+    return true;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

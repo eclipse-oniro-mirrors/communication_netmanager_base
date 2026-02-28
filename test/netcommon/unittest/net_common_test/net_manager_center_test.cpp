@@ -14,7 +14,7 @@
  */
 
 #include <gtest/gtest.h>
-
+#define private public
 #include "net_conn_base_service.h"
 #include "net_conn_service_iface.h"
 #include "net_conn_types.h"
@@ -142,6 +142,28 @@ public:
     {
         return NETMANAGER_SUCCESS;
     }
+};
+
+class TestNetVpnService : public NetVpnBaseService {
+public:
+    TestNetVpnService() = default;
+    ~TestNetVpnService() override = default;
+    bool IsVpnApplication(int32_t uid) override
+    {
+        return true;
+    }
+
+    bool IsAppUidInWhiteList(int32_t callingUid, int32_t appUid) override
+    {
+        return true;
+    }
+
+    void NotifyAllowConnectVpnBundleNameChanged(std::set<std::string> &&allowConnectVpnBundleName) override
+    {
+        allowConnectVpnBundleName_ = std::move(allowConnectVpnBundleName);
+    }
+
+    std::set<std::string> allowConnectVpnBundleName_;
 };
 } // namespace
 
@@ -656,5 +678,29 @@ HWTEST_F(NetManagerCenterTest, UpdateDualStackProbeTime, TestSize.Level1)
     ret = instance_.UpdateDualStackProbeTime(testProbeTime);
     EXPECT_NE(ret, NETMANAGER_ERROR);
 }
+
+HWTEST_F(NetManagerCenterTest, NotifyAllowConnectVpnBundleNameChanged0001, TestSize.Level1)
+{
+    NetManagerCenter netManagerCenter;
+    std::set<std::string> allowConnectVpnBundleName;
+    allowConnectVpnBundleName.insert("test");
+    netManagerCenter.NotifyAllowConnectVpnBundleNameChanged(std::move(allowConnectVpnBundleName));
+    EXPECT_EQ(netManagerCenter.vpnService_, nullptr);
+    EXPECT_FALSE(allowConnectVpnBundleName.empty()); 
+}
+HWTEST_F(NetManagerCenterTest, NotifyAllowConnectVpnBundleNameChanged0002, TestSize.Level1)
+{
+    auto vpnService = std::make_shared<TestNetVpnService>();
+    NetManagerCenter netManagerCenter;
+    netManagerCenter.RegisterVpnService(vpnService);
+    std::set<std::string> allowConnectVpnBundleName;
+    allowConnectVpnBundleName.insert("test");
+    netManagerCenter.NotifyAllowConnectVpnBundleNameChanged(std::move(allowConnectVpnBundleName));
+    EXPECT_NE(netManagerCenter.vpnService_, nullptr);
+    EXPECT_TRUE(allowConnectVpnBundleName.empty());
+    EXPECT_FALSE(vpnService->allowConnectVpnBundleName_.empty());
+    EXPECT_TRUE(allowConnectVpnBundleName.empty());
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
