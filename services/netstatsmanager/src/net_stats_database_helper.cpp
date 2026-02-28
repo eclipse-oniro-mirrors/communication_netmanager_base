@@ -23,6 +23,7 @@
 #include "net_stats_constants.h"
 #include "net_stats_database_defines.h"
 #include "net_stats_info.h"
+#include "net_stats_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -157,9 +158,7 @@ int32_t NetStatsDatabaseHelper::InsertData(const std::string &tableName, const s
     statement_.BindInt64(++idx, info.rxPackets_);
     statement_.BindInt64(++idx, info.txBytes_);
     statement_.BindInt64(++idx, info.txPackets_);
-    if (paramCount == UID_PARAM_NUM) {
-        statement_.BindText(++idx, info.ident_);
-    }
+    statement_.BindText(++idx, info.ident_);
     statement_.BindInt64(++idx, info.flag_);
     statement_.BindInt64(++idx, info.userId_);
     ret = statement_.Step();
@@ -170,6 +169,52 @@ int32_t NetStatsDatabaseHelper::InsertData(const std::string &tableName, const s
     }
     return NETMANAGER_SUCCESS;
 }
+
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+int32_t NetStatsDatabaseHelper::InsertCalibrationTrafficInfo(const std::string &simId, int32_t startTime,
+    int32_t endTime, uint64_t usedTraffic, const std::string &tableName, const std::string &paramList)
+{
+    NETMGR_LOG_I("NetStatsDatabaseHelper InsertCalibrationTrafficInfo enter");
+    std::string params;
+    int32_t paramCount = count(paramList.begin(), paramList.end(), ',') + 1;
+    for (int32_t i = 0; i < paramCount; ++i) {
+        params += "?";
+        if (i != paramCount - 1) {
+            params += ",";
+        }
+    }
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
+    std::string sql = "INSERT INTO " + tableName + " (" + paramList + ") " + "VALUES" + " (" + params + ") ";
+    int32_t ret = statement_.Prepare(sqlite_, sql);
+    // LCOV_EXCL_START
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
+        return STATS_ERR_WRITE_DATA_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    int32_t idx = 1;
+    statement_.BindText(idx, simId);
+    statement_.BindInt32(++idx, startTime);
+    statement_.BindInt32(++idx, endTime);
+    statement_.BindInt64(++idx, usedTraffic);
+    ret = statement_.Step();
+    statement_.ResetStatementAndClearBindings();
+    // LCOV_EXCL_START
+    if (ret != SQLITE_DONE) {
+        NETMGR_LOG_E("Step failed ret12:%{public}d", ret);
+        return STATS_ERR_WRITE_DATA_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsDatabaseHelper::DeleteCalibrateData(const std::string &tableName, uint32_t simId)
+{
+    std::string sql =
+        DELETE_FROM + tableName + " WHERE Ident = " + std::to_string(simId);
+    return ExecSql(sql, nullptr, sqlCallback);
+}
+#endif
 
 int32_t NetStatsDatabaseHelper::SelectData(std::vector<NetStatsInfo> &infos, const std::string &tableName,
                                            uint64_t start, uint64_t end)
@@ -320,6 +365,109 @@ int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const st
     }
     return Step(infos);
 }
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+int32_t NetStatsDatabaseHelper::QueryCalibrationTrafficInfo(const std::string &tableName, const std::string &ident,
+    uint32_t &startTime, uint32_t &endTime, uint64_t &usedTraffic)
+{
+    std::string sql =
+        SELECT_FROM + tableName + " t WHERE 1=1 AND t.Ident = ? ";
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
+    int32_t ret = statement_.Prepare(sqlite_, sql);
+    // LCOV_EXCL_START
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+    int32_t idx = 1;
+    ret = statement_.BindText(idx, ident);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("bind text ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t rc = statement_.Step();
+    uint64_t usedTrafficTmp = 0;
+    int32_t index = 1;
+    while (rc != SQLITE_DONE) {
+        if (rc == SQLITE_ROW) {
+            statement_.GetColumnInt(index, startTime);
+            statement_.GetColumnInt(++index, endTime); 
+            statement_.GetColumnLong(++index, usedTrafficTmp);
+            rc = statement_.Step();
+        } else {
+            NETMGR_LOG_E("Step failed with rc:%{public}d", rc);
+            break;
+        }
+    }
+    // LCOV_EXCL_STOP
+
+    usedTraffic = usedTrafficTmp;
+    statement_.ResetStatementAndClearBindings();
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsDatabaseHelper::QueryChangeToIfaceTime(const std::string &tableName, uint32_t &startTime)
+{
+    std::string sql =
+        SELECT_FROM + tableName + " t WHERE 1=1";
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
+    int32_t ret = statement_.Prepare(sqlite_, sql);
+    // LCOV_EXCL_START
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t rc = statement_.Step();
+    std::string remainingDataStr;
+    while (rc != SQLITE_DONE) {
+        if (rc == SQLITE_ROW) {
+            statement_.GetColumnInt(0, startTime);
+            rc = statement_.Step();
+        } else {
+            NETMGR_LOG_E("Step failed with rc:%{public}d", rc);
+            break;
+        }
+    }
+    // LCOV_EXCL_STOP
+    statement_.ResetStatementAndClearBindings();
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsDatabaseHelper::InsertChangeToIndexTime(
+    uint32_t timestamp, const std::string &tableName, const std::string &paramList)
+{
+    std::string params;
+    int32_t paramCount = count(paramList.begin(), paramList.end(), ',') + 1;
+    for (int32_t i = 0; i < paramCount; ++i) {
+        params += "?";
+        if (i != paramCount - 1) {
+            params += ",";
+        }
+    }
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
+    std::string sql = "INSERT INTO " + tableName + " (" + paramList + ") " + "VALUES" + " (" + params + ") ";
+    int32_t ret = statement_.Prepare(sqlite_, sql);
+    int32_t rettmp = DeleteAndBackup(ret);
+    // LCOV_EXCL_START
+    if (rettmp != SQLITE_OK) {
+        NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
+        return STATS_ERR_WRITE_DATA_FAIL;
+    }
+    if (rettmp != ret) {
+        statement_.Prepare(sqlite_, sql);
+    }
+    statement_.BindInt32(1, static_cast<int32_t>(timestamp));  // 1: param index
+    ret = statement_.Step();
+    statement_.ResetStatementAndClearBindings();
+    if (ret != SQLITE_DONE) {
+        NETMGR_LOG_E("Step failed ret:%{public}d", ret);
+        return STATS_ERR_WRITE_DATA_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    return NETMANAGER_SUCCESS;
+}
+#endif
 
 int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const std::string &ident, const int32_t userId,
                                           uint64_t start, uint64_t end, std::vector<NetStatsInfo> &infos)
@@ -382,6 +530,37 @@ int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const ui
     if (ret != SQLITE_OK) {
         return ret;
     }
+    return Step(infos);
+}
+
+int32_t NetStatsDatabaseHelper::QueryIfaceStatsByIdent(const std::string &tableName, const std::string &ident,
+                                                       uint64_t start, uint64_t end, std::vector<NetStatsInfo> &infos)
+{
+    infos.clear();
+    std::string sql = SELECT_FROM + tableName + " t WHERE 1=1 AND t.Ident = ?" + DATA_MORE_THAN +
+                      DATA_LESS_THAN;
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
+    int32_t ret = statement_.Prepare(sqlite_, sql);
+    int32_t rettmp = DeleteAndBackup(ret);
+    // LCOV_EXCL_START
+    if (rettmp != SQLITE_OK) {
+        NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+    if (rettmp != ret) {
+        statement_.Prepare(sqlite_, sql);
+    }
+    int32_t idx = 1;
+    ret = statement_.BindText(idx, ident);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("bind text ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+    ret = BindInt64(idx, start, end);
+    if (ret != SQLITE_OK) {
+        return ret;
+    }
+    // LCOV_EXCL_STOP
     return Step(infos);
 }
 
@@ -468,11 +647,11 @@ int32_t NetStatsDatabaseHelper::Step(std::vector<NetStatsInfo> &infos)
         statement_.GetColumnLong(++i, info.rxPackets_);
         statement_.GetColumnLong(++i, info.txBytes_);
         statement_.GetColumnLong(++i, info.txPackets_);
+        statement_.GetColumnString(++i, info.ident_);
         if (statement_.GetColumnCount() == UID_PARAM_NUM) {
-            statement_.GetColumnString(++i, info.ident_);
+            statement_.GetColumnInt(++i, info.flag_);
+            statement_.GetColumnInt(++i, info.userId_);
         }
-        statement_.GetColumnInt(++i, info.flag_);
-        statement_.GetColumnInt(++i, info.userId_);
         infos.emplace_back(info);
         rc = statement_.Step();
         NETMGR_LOG_D("Step result:%{public}d", rc);
@@ -499,6 +678,7 @@ int32_t NetStatsDatabaseHelper::BindInt64(int32_t idx, uint64_t start, uint64_t 
 
 int32_t NetStatsDatabaseHelper::Upgrade()
 {
+    // LCOV_EXCL_START
     auto ret = ExecTableUpgrade(UID_TABLE, Version_1);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_TABLE, Version_1);
@@ -531,6 +711,15 @@ int32_t NetStatsDatabaseHelper::Upgrade()
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_SIM_TABLE, Version_6);
     }
+    ret = ExecTableUpgrade(UID_SIM_TABLE, Version_6);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_SIM_TABLE, Version_6);
+    }
+    ret = ExecTableUpgrade(IFACE_TABLE, Version_1);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_SIM_TABLE, Version_6);
+    }
+    // LCOV_EXCL_STOP
     return ret;
 }
 

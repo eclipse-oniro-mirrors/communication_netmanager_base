@@ -622,5 +622,35 @@ int32_t NetStatsServiceProxy::GetCookieTxBytes(uint64_t &stats, uint64_t cookie)
     }
     return error;
 }
+
+int32_t NetStatsServiceProxy::SetCalibrationTraffic(uint32_t simId, uint64_t remainingData, uint64_t totalMonthlyData)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteUint32(simId)) {
+        NETMGR_LOG_E("proxy simId write failed.");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteUint64(remainingData)) {
+        NETMGR_LOG_E("proxy remainingData write failed.");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteUint64(totalMonthlyData)) {
+        NETMGR_LOG_E("proxy totalMonthlyData write failed.");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    MessageParcel reply;
+    int32_t ret =
+        SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_CALIBRATION_TRAFFIC), data, reply);
+    if (ret != 0) {
+        NETMGR_LOG_E("proxy SendRequest failed, ret: [%{public}d]", ret);
+    }
+    return ret;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

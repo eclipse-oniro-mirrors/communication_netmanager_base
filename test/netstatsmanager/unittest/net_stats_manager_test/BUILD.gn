@@ -118,6 +118,7 @@ ohos_unittest("net_stats_manager_test") {
     "net_stats_service_stub_test.cpp",
     "net_stats_sqlite_statement_test.cpp",
     "net_info_observer_test.cpp",
+   # "net_stats_calibrate_test.cpp",
   ]
 
   include_dirs = [
@@ -300,6 +301,7 @@ ohos_unittest("net_stats_service_new_test") {
 
   sources = [
     "net_stats_service_new_test.cpp",
+    "net_stats_calibrate_test.cpp",
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode/common_mock_netmanager_permission.cpp"
   ]
 

@@ -55,6 +55,11 @@ struct NetStatsInfo final : public Parcelable {
         return info.uid_ == uid_ && info.iface_ == iface_;
     }
 
+    inline bool EqualsByIfaceAndIndet(const NetStatsInfo &info) const
+    {
+        return info.iface_ == iface_;
+    }
+
     inline bool HasNoData() const
     {
         return rxBytes_ == 0 && rxPackets_ == 0 && txBytes_ == 0 && txPackets_ == 0;

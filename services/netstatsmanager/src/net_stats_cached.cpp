@@ -37,10 +37,17 @@
 namespace OHOS {
 namespace NetManagerStandard {
 using namespace NetStatsDatabaseDefines;
+
+class NetStatsService;
 namespace {
 constexpr const char *IFACE_LO = "lo";
 constexpr const char *INSTALL_SOURCE_DEFAULT = "default";
 const std::string CELLULAR_IFACE_NAME = "rmnet";
+constexpr const char *CELLULAR_IFACE = "rmnet0";
+constexpr const char *CELLULAR_IFACE_1 = "rmnet1";
+constexpr const char *CELLULAR_IFACE_2 = "rmnet2";
+constexpr const char *CELLULAR_IFACE_3 = "rmnet3";
+const std::set<std::string> CELLULAR_IFACE_SET = {CELLULAR_IFACE, CELLULAR_IFACE_1, CELLULAR_IFACE_2, CELLULAR_IFACE_3};
 } // namespace
 const int8_t RETRY_TIME = 3;
 
@@ -102,13 +109,11 @@ int32_t NetStatsCached::CreatNetStatsTables(const std::string &tableName)
         NETMGR_LOG_I("Create table times: %{public}d", curRetryTimes + 1);
         ret = helper->CreateTable(VERSION_TABLE, VERSION_TABLE_CREATE_PARAM);
         if (ret != NETMANAGER_SUCCESS) {
-            NETMGR_LOG_E("Create version table failed");
             curRetryTimes++;
             continue;
         }
         ret = helper->CreateTable(UID_TABLE, UID_TABLE_CREATE_PARAM);
         if (ret != NETMANAGER_SUCCESS) {
-            NETMGR_LOG_E("Create uid table failed");
             curRetryTimes++;
             continue;
         }
@@ -120,7 +125,18 @@ int32_t NetStatsCached::CreatNetStatsTables(const std::string &tableName)
         }
         ret = helper->CreateTable(UID_SIM_TABLE, UID_SIM_TABLE_CREATE_PARAM);
         if (ret != NETMANAGER_SUCCESS) {
-            NETMGR_LOG_E("Create uid_sim table failed");
+            curRetryTimes++;
+            continue;
+        }
+        ret = helper->CreateTable(CALIBRATION_TABLE, CALIBRATION_TABLE_CREATE_PARAM);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("Create CALIBRATION_TABLE table failed");
+            curRetryTimes++;
+            continue;
+        }
+        ret = helper->CreateTable(CHANGE_TABLE, CHANGE_TABLE_CREATE_PARAM);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("Create CHANGE_TABLE table failed");
             curRetryTimes++;
             continue;
         }
@@ -210,7 +226,6 @@ void NetStatsCached::SetAppStats(const PushStatsInfo &info)
 
 void NetStatsCached::GetKernelStats(std::vector<NetStatsInfo> &statsInfo)
 {
-    NETMGR_LOG_I("GetKernelStats");
     std::lock_guard<ffrt::mutex> lock(lock_);
     GetKernelUidStats(statsInfo);
     GetKernelUidSimStats(statsInfo);
@@ -231,6 +246,16 @@ NetStatsInfo NetStatsCached::GetIncreasedSimStats(const NetStatsInfo &info)
     auto findRet = std::find_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
                                 [&info](const NetStatsInfo &lastInfo) { return info.Equals(lastInfo); });
     if (findRet == lastUidSimStatsInfo_.end()) {
+        return info;
+    }
+    return info - *findRet;
+}
+
+NetStatsInfo NetStatsCached::GetIncreasedIfaceStats(const NetStatsInfo &info)
+{
+    auto findRet = std::find_if(lastIfaceStatsMap_.begin(), lastIfaceStatsMap_.end(),
+                                [&info](const NetStatsInfo &lastInfo) { return info.EqualsByIfaceAndIndet(lastInfo); });
+    if (findRet == lastIfaceStatsMap_.end()) {
         return info;
     }
     return info - *findRet;
@@ -257,7 +282,6 @@ void NetStatsCached::CacheUidStats()
     });
 
     uint64_t curSecond = CommonUtils::GetCurrentSecond();
-    JudgeAndUpdateHistoryData(curSecond);
     std::for_each(statsInfos.begin(), statsInfos.end(), [this, &uidStatscache, curSecond](NetStatsInfo &info) {
         if (info.iface_ == IFACE_LO) {
             return;
@@ -279,7 +303,6 @@ void NetStatsCached::CacheUidStats()
         uidStatscache[info.ident_] += currentStats.GetStats();
     });
     lastUidStatsInfo_.swap(statsInfos);
-    UpdateHistoryData(uidStatscache);
 }
 
 void NetStatsCached::CacheAppStats()
@@ -296,8 +319,6 @@ void NetStatsCached::CacheAppStats()
     });
     // 获取当前时间
     uint64_t curSecond = CommonUtils::GetCurrentSecond();
-    // 判断是否在周期内,不在则更新historydata及周期
-    JudgeAndUpdateHistoryData(curSecond);
     std::map<std::string, uint64_t> uidStatscache;
     std::for_each(pushInfos.begin(), pushInfos.end(), [this, &uidStatscache, curSecond](auto &item) {
         item.date_ = curSecond;
@@ -317,7 +338,6 @@ void NetStatsCached::CacheAppStats()
         *findRet += item;
     });
     uidPushStatsInfo_.clear();
-    UpdateHistoryData(uidStatscache);
 }
 
 void NetStatsCached::UpdateNetStatsFlag(NetStatsInfo &info)
@@ -368,7 +388,6 @@ void NetStatsCached::CacheUidSimStats()
     });
 
     uint64_t curSecond = CommonUtils::GetCurrentSecond();
-    JudgeAndUpdateHistoryData(curSecond);
     std::lock_guard<std::mutex> lock(simIdMutex_);
     std::for_each(statsInfos.begin(), statsInfos.end(), [this, &uidStatscache, curSecond](NetStatsInfo &info) {
         if (info.iface_ == IFACE_LO) {
@@ -393,13 +412,18 @@ void NetStatsCached::CacheUidSimStats()
         uidStatscache[info.ident_] += currentStats.GetStats();
     });
     lastUidSimStatsInfo_.swap(statsInfos);
-    UpdateHistoryData(uidStatscache);
 }
 
 void NetStatsCached::CacheIfaceStats()
 {
     std::vector<std::string> ifNameList = NetsysController::GetInstance().InterfaceGetList();
-    std::for_each(ifNameList.begin(), ifNameList.end(), [this](const auto &ifName) {
+    std::map<std::string, uint64_t> uidStatscache;
+    uint64_t curSecond = CommonUtils::GetCurrentSecond();
+    // 判断是否在周期内,不在则更新historydata及周期
+    JudgeAndUpdateHistoryData(curSecond);
+    std::vector<NetStatsInfo> statsInfos;
+    std::for_each(ifNameList.begin(), ifNameList.end(),
+        [this, curSecond, &uidStatscache, &statsInfos](const auto &ifName) {
         if (ifName == IFACE_LO) {
             return;
         }
@@ -413,16 +437,42 @@ void NetStatsCached::CacheIfaceStats()
                                                       static_cast<uint32_t>(StatsType::STATS_TYPE_TX_BYTES), ifName);
         NetsysController::GetInstance().GetIfaceStats(statsInfo.txPackets_,
                                                       static_cast<uint32_t>(StatsType::STATS_TYPE_TX_PACKETS), ifName);
-        auto findRet = lastIfaceStatsMap_.find(ifName);
+        UpdateIdent(ifName, statsInfo);
+        auto findRet = std::find_if(lastIfaceStatsMap_.begin(), lastIfaceStatsMap_.end(),
+            [this, &statsInfo](const NetStatsInfo &lastInfo) { return statsInfo.EqualsByIfaceAndIndet(lastInfo); });
         if (findRet == lastIfaceStatsMap_.end()) {
+            statsInfo.date_ = curSecond;
             stats_.PushIfaceStats(statsInfo);
-            lastIfaceStatsMap_[ifName] = statsInfo;
-            return;
+            if (!statsInfo.ident_.empty()) {
+               uidStatscache[statsInfo.ident_] += statsInfo.GetStats();
+            }
+        } else {
+            auto currentStats = statsInfo - *findRet;
+            currentStats.date_ = curSecond;
+            stats_.PushIfaceStats(currentStats);
+            if (!currentStats.ident_.empty()) {
+                uidStatscache[statsInfo.ident_] += currentStats.GetStats();
+            }
         }
-        auto currentStats = statsInfo - findRet->second;
-        stats_.PushIfaceStats(currentStats);
-        lastIfaceStatsMap_[ifName] = statsInfo;
+        if (!statsInfo.HasNoData()) {
+            statsInfos.push_back(statsInfo);
+        }
     });
+    lastIfaceStatsMap_.swap(statsInfos);
+    UpdateHistoryData(uidStatscache);
+}
+
+void NetStatsCached::UpdateIdent(const std::string &ifName, NetStatsInfo &statsInfo)
+{
+    if (ifName == CELLULAR_IFACE || ifName == CELLULAR_IFACE_1 ||
+        ifName == CELLULAR_IFACE_2 || ifName == CELLULAR_IFACE_3) {
+        std::string ident = "";
+        bool ret = ifaceNameIdentMap_.Find(ifName, ident);
+        if (ret && ident != "") {
+            statsInfo.ident_ = ident;
+            NETMGR_LOG_I("ifaceNameIdentMap ifName:%{public}s, ident:%{public}s", ifName.c_str(), ident.c_str());
+        }
+    }
 }
 
 void NetStatsCached::CacheStats()
@@ -551,21 +601,28 @@ void NetStatsCached::SetCycleThreshold(uint32_t threshold)
 
 void NetStatsCached::ForceUpdateStats()
 {
+    NETMGR_LOG_I("ForceUpdateStats start");
     isForce_ = true;
 #ifndef UNITTEST_FORBID_FFRT
+    NETMGR_LOG_I("ForceUpdateStats start  1");
     std::function<void()> netCachedStats = [this] () {
 #endif
+        NETMGR_LOG_I("ForceUpdateStats start 2");
         isExec_ = true;
         CacheStats();
         WriteStats();
         isForce_ = false;
         LoadIfaceNameIdentMaps();
         isExec_ = false;
+        NETMGR_LOG_I("ForceUpdateStats start 3");
 #ifndef UNITTEST_FORBID_FFRT
     };
     if (!isExec_) {
+        NETMGR_LOG_I("ForceUpdateStats start 4");
         ffrt::submit(std::move(netCachedStats), {}, {}, ffrt::task_attr().name("NetCachedStats"));
+        NETMGR_LOG_I("ForceUpdateStats start 5");
     }
+    NETMGR_LOG_I("ForceUpdateStats start 6");
 #endif
 }
 
@@ -930,6 +987,34 @@ void NetStatsCached::GetKernelUidSimStats(std::vector<NetStatsInfo> &statsInfo)
     });
 }
 
+void NetStatsCached::GetKernelRmnetIfaceStats(std::vector<NetStatsInfo> &statsInfo)
+{
+    for (auto ifName : CELLULAR_IFACE_SET) {
+        NetStatsInfo statsInfoTmp;
+        statsInfoTmp.iface_ = ifName;
+        NetsysController::GetInstance().GetIfaceStats(statsInfoTmp.rxBytes_,
+                                                      static_cast<uint32_t>(StatsType::STATS_TYPE_RX_BYTES), ifName);
+        NetsysController::GetInstance().GetIfaceStats(statsInfoTmp.rxPackets_,
+                                                      static_cast<uint32_t>(StatsType::STATS_TYPE_RX_PACKETS), ifName);
+        NetsysController::GetInstance().GetIfaceStats(statsInfoTmp.txBytes_,
+                                                      static_cast<uint32_t>(StatsType::STATS_TYPE_TX_BYTES), ifName);
+        NetsysController::GetInstance().GetIfaceStats(statsInfoTmp.txPackets_,
+                                                      static_cast<uint32_t>(StatsType::STATS_TYPE_TX_PACKETS), ifName);
+
+        std::string ident;
+        bool ret = ifaceNameIdentMap_.Find(ifName, ident);
+        if (ret && ident != "") {
+            statsInfoTmp.ident_ = ident;
+        }
+        NetStatsInfo tmp = GetIncreasedIfaceStats(statsInfoTmp);
+        if (tmp.HasNoData()) {
+            continue;
+        }
+        tmp.date_ = CommonUtils::GetCurrentSecond();
+        statsInfo.push_back(std::move(tmp));
+    }
+}
+
 #ifdef SUPPORT_NETWORK_SHARE
 void NetStatsCached::GetIptablesStatsCached(std::vector<NetStatsInfo> &iptablesStatsInfo)
 {
@@ -978,7 +1063,6 @@ void NetStatsCached::CacheIptablesStatsService(nmd::NetworkSharingTraffic &traff
         });
     });
     uint64_t curSecond = CommonUtils::GetCurrentSecond();
-    JudgeAndUpdateHistoryData(curSecond);
     std::for_each(statsInfosVec.begin(), statsInfosVec.end(), [this, &uidStatscache, curSecond](NetStatsInfo &info) {
         if (info.iface_ == IFACE_LO) {
             return;
@@ -998,7 +1082,6 @@ void NetStatsCached::CacheIptablesStatsService(nmd::NetworkSharingTraffic &traff
     });
     NETMGR_LOG_D("CacheIptablesStatsService info success");
     lastIptablesStatsInfo_.swap(statsInfosVec);
-    UpdateHistoryData(uidStatscache);
 }
 
 void NetStatsCached::GetIptablesStatsIncrease(std::vector<NetStatsInfo> &infosVec)
@@ -1098,14 +1181,14 @@ void NetStatsCached::SetCurDefaultUserId(int32_t userId)
     curDefaultUserId_ = userId;
 }
 
-void NetStatsCached::ForceUpdateHistoryData(int32_t simId, int32_t beginDate)
+void NetStatsCached::ForceUpdateHistoryDataOld(int32_t simId, int32_t beginDate)
 {
-    NETMGR_LOG_I("ForceUpdateHistoryData start");
+    NETMGR_LOG_I("ForceUpdateHistoryDataOld start");
     if (simId <= 0) {
         NETMGR_LOG_E("simId invalid");
         return;
     }
-    std::function<void()> ForceUpdateHistoryData = [this, simId, beginDate]() {
+    std::function<void()> ForceUpdateHistoryDataOld = [this, simId, beginDate]() {
         uint64_t startTime = static_cast<uint64_t>(NetStatsUtils::GetStartTimestamp(beginDate));
         uint64_t endTime = static_cast<uint64_t>(NetStatsUtils::GetEndTimestamp(beginDate));
         uint64_t curSecond = CommonUtils::GetCurrentSecond();
@@ -1126,7 +1209,32 @@ void NetStatsCached::ForceUpdateHistoryData(int32_t simId, int32_t beginDate)
             simId, cellularHistoryData_[simId].startTime, cellularHistoryData_[simId].endTime,
             cellularHistoryData_[simId].trafficData);
     };
-    ffrt::submit(std::move(ForceUpdateHistoryData), {}, {}, ffrt::task_attr().name("ForceUpdateHistoryData"));
+    ffrt::submit(std::move(ForceUpdateHistoryDataOld), {}, {}, ffrt::task_attr().name("ForceUpdateHistoryDataOld"));
+}
+
+void NetStatsCached::ForceUpdateHistoryData(int32_t simId, int32_t beginDate, uint64_t historyData)
+{
+    NETMGR_LOG_I("ForceUpdateHistoryData start. simId:%{public}d, historyData:%{public}lu", simId, historyData);
+    if (simId <= 0) {
+        NETMGR_LOG_E("simId invalid");
+        return;
+    }
+    uint64_t startTime = static_cast<uint64_t>(NetStatsUtils::GetStartTimestamp(beginDate));
+    uint64_t endTime = static_cast<uint64_t>(NetStatsUtils::GetEndTimestamp(beginDate));
+
+    std::unique_lock<std::shared_mutex> lock(cellularHistoryDataMutex_);
+    if (cellularHistoryData_.find(simId) != cellularHistoryData_.end()) {
+        cellularHistoryData_.erase(simId);
+    }
+    HistoryData historyDataStru;
+    historyDataStru.beginDate = beginDate;
+    historyDataStru.startTime = startTime;
+    historyDataStru.endTime = endTime;
+    historyDataStru.trafficData = historyData;
+    cellularHistoryData_[simId] = historyDataStru;
+    NETMGR_LOG_I("historyData[%{public}d]:%{public}"  PRIu64 ", %{public}" PRIu64 ", %{public}" PRIu64,
+        simId, cellularHistoryData_[simId].startTime, cellularHistoryData_[simId].endTime,
+        cellularHistoryData_[simId].trafficData);
 }
 
 void NetStatsCached::DeleteHistoryData(int32_t simId)
@@ -1174,10 +1282,7 @@ int32_t NetStatsCached::GetTotalHistoryStatsByIdent(
 uint64_t NetStatsCached::GetMonthTrafficData(int32_t simId)
 {
     std::vector<NetStatsInfo> statsInfo;
-    GetKernelStats(statsInfo);   //  bpf data
-#ifdef SUPPORT_NETWORK_SHARE
-    GetIptablesStatsIncrease(statsInfo);
-#endif
+    GetKernelRmnetIfaceStats(statsInfo);
     uint64_t dataTemp = 0;
     for (const auto &info : statsInfo) {
         if (info.ident_ == std::to_string(simId)) {

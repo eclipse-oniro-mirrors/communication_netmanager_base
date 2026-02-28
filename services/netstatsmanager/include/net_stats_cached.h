@@ -82,6 +82,14 @@ public:
  
     void CacheUidSimStats();
 
+    void CacheIfaceStats();
+
+    void UpdateIdent(const std::string &ifName, NetStatsInfo &statsInfo);
+
+    void GetKernelRmnetIfaceStats(std::vector<NetStatsInfo> &statsInfo);
+
+    NetStatsInfo GetIncreasedIfaceStats(const NetStatsInfo &info);
+
 #ifdef SUPPORT_NETWORK_SHARE
     void GetIptablesStatsCached(std::vector<NetStatsInfo> &iptablesStatsInfo);
 
@@ -91,7 +99,8 @@ public:
 
     uint64_t GetMonthTrafficData(int32_t simId);
     void UpdateHistoryData(int32_t simId, int32_t beginDate);
-    void ForceUpdateHistoryData(int32_t simId, int32_t beginDate);
+    void ForceUpdateHistoryData(int32_t simId, int32_t beginDate, uint64_t historyData);
+    void ForceUpdateHistoryDataOld(int32_t simId, int32_t beginDate);
     void DeleteHistoryData(int32_t simId);
 
     inline void SetTrafficThreshold(uint64_t threshold)
@@ -175,7 +184,6 @@ private:
             if (info.HasNoData()) {
                 return;
             }
-            info.date_ = CommonUtils::GetCurrentSecond();
             ifaceStatsInfo_.push_back(info);
             currentIfaceStats_ += info.GetStats();
             if (netStatsCallbackManager_ != nullptr) {
@@ -331,7 +339,7 @@ private:
     std::vector<NetStatsInfo> allPushStatsInfo_;
     std::vector<NetStatsInfo> lastUidStatsInfo_;
     std::vector<NetStatsInfo> lastUidSimStatsInfo_;
-    std::map<std::string, NetStatsInfo> lastIfaceStatsMap_;
+    std::vector<NetStatsInfo> lastIfaceStatsMap_;
     std::atomic<int64_t> uninstalledUid_ = -1;
     SafeMap<std::string, std::string> ifaceNameIdentMap_;
     SafeMap<uint32_t, NetStatsDataFlag> uidStatsFlagMap_;
@@ -343,6 +351,7 @@ private:
     std::shared_mutex cellularHistoryDataMutex_;
     bool isPrivateSpaceExist_ = false;
     std::mutex simIdMutex_;
+    std::mutex calibrationLock_;
     std::string curDefaultSimId_;
 #ifdef SUPPORT_NETWORK_SHARE
     std::vector<NetStatsInfo> lastIptablesStatsInfo_;
@@ -356,7 +365,6 @@ private:
 
     void CacheStats();
     void CacheUidStats();
-    void CacheIfaceStats();
     void CacheAppStats();
     void GetKernelUidStats(std::vector<NetStatsInfo> &statsInfo);
     void GetKernelUidSimStats(std::vector<NetStatsInfo> &statsInfo);

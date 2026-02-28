@@ -48,4 +48,6 @@ interface OHOS.NetManagerStandard.INetStatsService {
     void GetCookieRxBytes([out] unsigned long stats, [in] unsigned long cookie);
     void GetCookieTxBytes([out] unsigned long stats, [in] unsigned long cookie);
     void SaveSharingTraffic([in] NetStatsInfo infos);
+    void SetCalibrationTraffic([in] unsigned int simId, [in] unsigned long remainingData,
+        [in] unsigned long totalMonthlyData);
 }

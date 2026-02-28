@@ -125,6 +125,8 @@ declare namespace statistics {
   function getIfaceUidStats(uidStatsInfo: UidStatsInfo, callback: AsyncCallback<NetStatsInfo>): void;
   function getIfaceUidStats(uidStatsInfo: UidStatsInfo): Promise<NetStatsInfo>;
 
+  function setCalibrationTraffic(simId: number, traffic: number): boolean;
+
   /**
    * @systemapi Hide this for inner system use.
    */

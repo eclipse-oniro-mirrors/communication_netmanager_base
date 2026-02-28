@@ -303,6 +303,18 @@ public:
      */
     int32_t GetSockfdTxBytes(uint64_t &stats, int32_t sockfd);
 
+    /**
+     * Set Calibration Traffic Data
+     *
+     * @param simId simId
+     * @param remainingData remainingData
+     * @param remaintotalMonthlyDataingData totalMonthlyData
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.GET_NETWORK_STATS
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t SetCalibrationTraffic(uint32_t simId, uint64_t remainingData, uint64_t totalMonthlyData);
+
 private:
     class NetStatsDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
