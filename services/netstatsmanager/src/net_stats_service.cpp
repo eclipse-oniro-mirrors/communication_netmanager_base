@@ -1303,7 +1303,7 @@ void NetStatsService::StartNetObserver()
  
 void NetStatsService::ProcessDefaultSimIdChanged(std::string simId)
 {
-    netStatsCached_->CacheUidSimStats();
+    netStatsCached_->CacheStatsSim();
     NetsysController::GetInstance().ClearSimStatsBpfMap();
     netStatsCached_->UpdateDefaultSimId(simId);
 }
