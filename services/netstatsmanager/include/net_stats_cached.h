@@ -58,6 +58,8 @@ public:
 
     int32_t StartCached();
 
+    void CacheStatsSim();
+    
     int32_t CreatNetStatsTables(const std::string &tableName);
 
     void SetCycleThreshold(uint32_t threshold);
