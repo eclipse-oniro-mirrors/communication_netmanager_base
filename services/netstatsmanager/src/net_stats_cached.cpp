@@ -438,6 +438,12 @@ void NetStatsCached::CacheStats()
 #endif
 }
 
+void NetStatsCached::CacheStatsSim()
+{
+    std::lock_guard<ffrt::mutex> lock(lock_);
+    CacheUidSimStats();
+}
+
 void NetStatsCached::WriteStats()
 {
     std::lock_guard<ffrt::mutex> lock(lock_);
