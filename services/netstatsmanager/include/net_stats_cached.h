@@ -355,6 +355,7 @@ private:
     std::optional<SampleBundleInfo> GetEarlySampleBundleInfo();
 
     void CacheStats();
+    void CacheStatsSim();
     void CacheUidStats();
     void CacheIfaceStats();
     void CacheAppStats();
