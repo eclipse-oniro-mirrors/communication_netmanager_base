@@ -686,7 +686,7 @@ HWTEST_F(NetManagerCenterTest, NotifyAllowConnectVpnBundleNameChanged0001, TestS
     allowConnectVpnBundleName.insert("test");
     netManagerCenter.NotifyAllowConnectVpnBundleNameChanged(std::move(allowConnectVpnBundleName));
     EXPECT_EQ(netManagerCenter.vpnService_, nullptr);
-    EXPECT_FALSE(allowConnectVpnBundleName.empty()); 
+    EXPECT_FALSE(allowConnectVpnBundleName.empty());
 }
 
 HWTEST_F(NetManagerCenterTest, NotifyAllowConnectVpnBundleNameChanged0002, TestSize.Level1)
