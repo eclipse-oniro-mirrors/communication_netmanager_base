@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cinttypes>
 #include "net_stats_calibrate.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_data_handler.h"
@@ -79,7 +80,7 @@ bool NetStatsCalibrate::InitCalibrationInfo(uint32_t simId)
     calibrateInfo_[simId].usedTraffic = info.usedTraffic;
     NETMGR_LOG_I("InitCalibrationInfo simId:%{public}d, start:%{public}d, end:%{public}d, data:%{public}" PRIu64,
         simId, calibrateInfo_[simId].startTime, calibrateInfo_[simId].endTime, calibrateInfo_[simId].usedTraffic);
-        return true;
+    return true;
 #else
     NETMGR_LOG_I("UpdateCalibrationInfo error. curr device not support traffic calibrate");
     return false;

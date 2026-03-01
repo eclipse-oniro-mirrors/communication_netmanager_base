@@ -393,6 +393,7 @@ HWTEST_F(NetStatsServiceTest, AddUidStatsFlagTest001, TestSize.Level1)
     EXPECT_EQ(netStatsServicePtr->isUpdate_, true);
 }
 
+#ifdef SUPPORT_TRAFFIC_STATISTIC
 HWTEST_F(NetStatsServiceTest, MergeTrafficStatsTest001, TestSize.Level1)
 {
     NetStatsService netStatsService;
@@ -440,6 +441,7 @@ HWTEST_F(NetStatsServiceTest, ResetNotifyStateTest001, TestSize.Level1)
     netStatsService.ResetNotifyState(1);
     EXPECT_NE(netStatsService.netStatsCached_, nullptr);
 }
+#endif
 
 HWTEST_F(NetStatsServiceTest, GetHistoryDataTest001, TestSize.Level1)
 {
