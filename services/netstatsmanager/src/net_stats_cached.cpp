@@ -1214,7 +1214,7 @@ void NetStatsCached::ForceUpdateHistoryDataOld(int32_t simId, int32_t beginDate)
 
 void NetStatsCached::ForceUpdateHistoryData(int32_t simId, int32_t beginDate, uint64_t historyData)
 {
-    NETMGR_LOG_I("ForceUpdateHistoryData start. simId:%{public}d, historyData:%{public}lu", simId, historyData);
+    NETMGR_LOG_I("ForceUpdateHistoryData start. simId:%{public}d, historyData:%{public}" PRIu64, simId, historyData);
     if (simId <= 0) {
         NETMGR_LOG_E("simId invalid");
         return;

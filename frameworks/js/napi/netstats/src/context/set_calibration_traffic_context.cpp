@@ -46,7 +46,7 @@ void SetCalibrationTrafficContext::ParseParams(napi_value *params, size_t params
         return;
     }
     remainingData_ = static_cast<uint64_t>(remainDataTmp);
-    NETMANAGER_BASE_LOGE("get remainingData_: %{public}lu", remainingData_);
+    NETMANAGER_BASE_LOGE("get remainingData_: %{public}" PRIu64, remainingData_);
     if (remainingData_ == UINT64_MAX) {
         NETMANAGER_BASE_LOGE("get remainingData_ false");
         SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
@@ -62,7 +62,7 @@ void SetCalibrationTrafficContext::ParseParams(napi_value *params, size_t params
             return;
         }
         totalMonthlyData_ = static_cast<uint64_t>(totalDataTmp);
-        NETMANAGER_BASE_LOGE("get totalMonthlyData_: %{public}lu", totalMonthlyData_);
+        NETMANAGER_BASE_LOGE("get totalMonthlyData_: %{public}" PRIu64, totalMonthlyData_);
         if (totalMonthlyData_ == UINT64_MAX) {
             NETMANAGER_BASE_LOGE("get totalMonthlyData_ false");
             SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);

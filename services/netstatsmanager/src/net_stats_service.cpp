@@ -1367,8 +1367,8 @@ void NetStatsService::StartAccountObserver()
 
 int32_t NetStatsService::SetCalibrationTraffic(uint32_t simId, uint64_t remainingData, uint64_t totalMonthlyData)
 {
-    NETMGR_LOG_E("SetCalibrationTraffic. simId:%{public}d, remainingData:%{public}lu, totalMonthlyData:%{public}lu",
-        simId, remainingData, totalMonthlyData);
+    NETMGR_LOG_I("SetCalibrationTraffic. simId:%{public}d, remainingData:%{public}" PRIu64 "\
+, totalMonthlyData:%{public}" PRIu64, simId, remainingData, totalMonthlyData);
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(simId);
     if (slotId != SLOT_0 && slotId != SLOT_1) {
@@ -1705,8 +1705,8 @@ void NetStatsService::GetHistoryTrafficInfo(const sptr<NetStatsNetwork> &network
     CalibrateInfo calibrateInfo;
     uint32_t changeToIfaceTime = netStatsCalibrate_->GetChangeToIfaceTime();
     bool ret = netStatsCalibrate_->GetCalibrationInfo(network->simId_, calibrateInfo);
-    NETMGR_LOG_I("GetHistoryTrafficInfo ret:%{public}d, cali.start:%{public}u, network->startTime_:%{public}lu\
- cali.end:%{public}u, network->endTime_:%{public}lu, changeToIfaceTime:%{public}d",
+    NETMGR_LOG_I("GetHistoryTrafficInfo ret:%{public}d, cali.start:%{public}u, network->startTime_:%{public}" PRIu64 "\
+ cali.end:%{public}u, network->endTime_:%{public}" PRIu64 ", changeToIfaceTime:%{public}d",
         ret, calibrateInfo.startTime, network->startTime_,
         calibrateInfo.endTime, network->endTime_, changeToIfaceTime);
 
@@ -1757,7 +1757,7 @@ void NetStatsService::PrintSumNetStatsInfo(const std::vector<NetStatsInfo> &info
         allUsedTraffic += it->rxBytes_;
         allUsedTraffic += it->txBytes_;
     }
-    NETMGR_LOG_I("PrintSumNetStatsInfo: %{public}lu", allUsedTraffic);
+    NETMGR_LOG_I("PrintSumNetStatsInfo: %{public}" PRIu64, allUsedTraffic);
 }
 
 int32_t NetStatsService::GetHistoryTrafficInUidTable(const NetStatsNetwork &network,
@@ -1972,7 +1972,8 @@ void NetStatsService::UpdateSettingsdata(int32_t simId, uint8_t flag, uint64_t v
 #ifndef UNITTEST_FORBID_FFRT
     trafficPlanFfrtQueue_->submit([this, simId, flag, value]() {
 #endif
-        NETMGR_LOG_I("UpdateSettingsdata. simId: %{public}d, flag: %{public}d, value: %{public}lu", simId, flag, value);
+        NETMGR_LOG_I("UpdateSettingsdata. simId: %{public}d, flag: %{public}d, value: %{public}" PRIu64,
+            simId, flag, value);
         UpdataSettingsdataFfrt(simId, flag, value);
 #ifndef UNITTEST_FORBID_FFRT
     });

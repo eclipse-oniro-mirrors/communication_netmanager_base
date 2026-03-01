@@ -77,7 +77,7 @@ bool NetStatsCalibrate::InitCalibrationInfo(uint32_t simId)
     calibrateInfo_[simId].startTime = info.startTime;
     calibrateInfo_[simId].endTime = info.endTime;
     calibrateInfo_[simId].usedTraffic = info.usedTraffic;
-    NETMGR_LOG_I("InitCalibrationInfo simId:%{public}d, start:%{public}d, end:%{public}d, data:%{public}lu",
+    NETMGR_LOG_I("InitCalibrationInfo simId:%{public}d, start:%{public}d, end:%{public}d, data:%{public}" PRIu64,
         simId, calibrateInfo_[simId].startTime, calibrateInfo_[simId].endTime, calibrateInfo_[simId].usedTraffic);
         return true;
 #else
@@ -104,7 +104,7 @@ bool NetStatsCalibrate::GetCalibrationInfo(uint32_t simId, CalibrateInfo &info)
 void NetStatsCalibrate::UpdateCalibrationInfo(uint32_t simId, uint64_t usedTraffic)
 {
 #ifdef SUPPORT_TRAFFIC_STATISTIC
-    NETMGR_LOG_I("UpdateCalibrationInfo. simId:%{public}d, usedTraffic:%{public}lu", simId, usedTraffic);
+    NETMGR_LOG_I("UpdateCalibrationInfo. simId:%{public}d, usedTraffic:%{public}" PRIu64, simId, usedTraffic);
     std::lock_guard<std::mutex> lock(calibrateInfoMutex_);
     CalibrateInfo info;
     if (calibrateInfo_.find(simId) == calibrateInfo_.end()) {
