@@ -444,7 +444,7 @@ void NetStatsCached::CacheIfaceStats()
             statsInfo.date_ = curSecond;
             stats_.PushIfaceStats(statsInfo);
             if (!statsInfo.ident_.empty()) {
-               uidStatscache[statsInfo.ident_] += statsInfo.GetStats();
+                uidStatscache[statsInfo.ident_] += statsInfo.GetStats();
             }
         } else {
             auto currentStats = statsInfo - *findRet;

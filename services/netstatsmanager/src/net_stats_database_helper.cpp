@@ -391,7 +391,7 @@ int32_t NetStatsDatabaseHelper::QueryCalibrationTrafficInfo(const std::string &t
     while (rc != SQLITE_DONE) {
         if (rc == SQLITE_ROW) {
             statement_.GetColumnInt(index, startTime);
-            statement_.GetColumnInt(++index, endTime); 
+            statement_.GetColumnInt(++index, endTime);
             statement_.GetColumnLong(++index, usedTrafficTmp);
             rc = statement_.Step();
         } else {

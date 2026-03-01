@@ -363,10 +363,10 @@ int32_t NetStatsService::GetMonthTrafficStatsByNetwork(uint32_t simId, uint64_t 
     monthDataIpc = 0;
     return NETMANAGER_ERR_OPERATION_FAILED;
 #else
-    // int32_t checkPermission = CheckNetManagerAvailable();
-    // if (checkPermission != NETMANAGER_SUCCESS) {
-    //     return checkPermission;
-    // }
+    int32_t checkPermission = CheckNetManagerAvailable();
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        return checkPermission;
+    }
 
     int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(simId);
     if (slotId != SLOT_0 && slotId != SLOT_1) {
@@ -2027,10 +2027,16 @@ int32_t NetStatsService::UpdataSettingsdataFfrt(int32_t simId, uint8_t flag, uin
             break;
     }
 
-    if (IsSimIdExist(simId)) {
-        UpdateBpfMap(simId);
-    }
+    ProcessSettingsDataUpdate(simId);
     return NETMANAGER_SUCCESS;
+}
+
+void NetStatsService::ProcessSettingsDataUpdate(int32_t simId)
+{
+    if (IsSimIdExist(simId)) {
+        return;
+    }
+    UpdateBpfMap(simId);
 }
 
 void NetStatsService::ProcessUpdateBeginDate(int32_t simId, uint32_t beginDate)

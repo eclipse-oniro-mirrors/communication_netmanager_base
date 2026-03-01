@@ -393,27 +393,6 @@ HWTEST_F(NetStatsServiceTest, AddUidStatsFlagTest001, TestSize.Level1)
     EXPECT_EQ(netStatsServicePtr->isUpdate_, true);
 }
 
-// HWTEST_F(NetStatsServiceTest, CommonEventPackageRemovedTest001, TestSize.Level1)
-// {
-//     NetStatsService netStatsService;
-//     bool ret = netStatsService.CommonEventPackageRemoved(123);
-//     EXPECT_EQ(ret, false);
-// }
-
-// HWTEST_F(NetStatsServiceTest, CommonEventPackageRemovedTest003, TestSize.Level1)
-// {
-//     NetStatsService netStatsService;
-//     bool ret = netStatsService.CommonEventPackageRemoved(SYSTEM_DEFAULT_USERID + USER_ID_DIVIDOR);
-//     EXPECT_EQ(ret, true);
-// }
-
-// HWTEST_F(NetStatsServiceTest, CommonEventPackageRemovedTest004, TestSize.Level1)
-// {
-//     NetStatsService netStatsService;
-//     bool ret = netStatsService.CommonEventPackageRemoved(SIM_PRIVATE_USERID * 1000 + 2);
-//     EXPECT_EQ(ret, false);
-// }
-
 HWTEST_F(NetStatsServiceTest, MergeTrafficStatsTest001, TestSize.Level1)
 {
     NetStatsService netStatsService;
