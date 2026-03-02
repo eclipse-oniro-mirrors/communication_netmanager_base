@@ -107,12 +107,14 @@ HWTEST_F(NetStatsCalibrateTest, UpdateCalibrationInfoTest002, TestSize.Level1)
     uint32_t simId = 1;
     uint64_t usedTraffic = 100*1024*2048;
     netStatsCalibrate.UpdateCalibrationInfo(simId, usedTraffic);
+    netStatsCalibrate.UpdateCalibrationInfo(simId, usedTraffic);
     auto iter = netStatsCalibrate.calibrateInfo_.find(simId);
     EXPECT_NE(iter, netStatsCalibrate.calibrateInfo_.end());
 
     bool ret = netStatsCalibrate.InitCalibrationInfo(simId);
     EXPECT_EQ(ret, true);
     ret = netStatsCalibrate.InitCalibrationInfo(simId);
+    ret = netStatsCalibrate.InitCalibrationInfo(simId + 1);
     EXPECT_EQ(ret, true);
 
     CalibrateInfo info;

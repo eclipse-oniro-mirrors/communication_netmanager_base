@@ -100,7 +100,6 @@ public:
     uint64_t GetMonthTrafficData(int32_t simId);
     void UpdateHistoryData(int32_t simId, int32_t beginDate);
     void ForceUpdateHistoryData(int32_t simId, int32_t beginDate, uint64_t historyData);
-    void ForceUpdateHistoryDataOld(int32_t simId, int32_t beginDate);
     void DeleteHistoryData(int32_t simId);
 
     inline void SetTrafficThreshold(uint64_t threshold)

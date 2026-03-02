@@ -445,6 +445,9 @@ int32_t NetStatsDatabaseHelper::InsertChangeToIndexTime(
             params += ",";
         }
     }
+    if (paramCount != 1) {
+        return STATS_ERR_WRITE_DATA_FAIL;
+    }
     std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     std::string sql = "INSERT INTO " + tableName + " (" + paramList + ") " + "VALUES" + " (" + params + ") ";
     int32_t ret = statement_.Prepare(sqlite_, sql);

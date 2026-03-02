@@ -1370,6 +1370,10 @@ int32_t NetStatsService::SetCalibrationTraffic(uint32_t simId, uint64_t remainin
     NETMGR_LOG_I("SetCalibrationTraffic. simId:%{public}d, remainingData:%{public}" PRIu64 "\
 , totalMonthlyData:%{public}" PRIu64, simId, remainingData, totalMonthlyData);
 #ifdef SUPPORT_TRAFFIC_STATISTIC
+    int32_t checkPermission = CheckNetManagerAvailable();
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        return checkPermission;
+    }
     int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(simId);
     if (slotId != SLOT_0 && slotId != SLOT_1) {
         NETMGR_LOG_E("simId:%{public}d, error", simId);
@@ -1389,7 +1393,6 @@ int32_t NetStatsService::SetCalibrationTraffic(uint32_t simId, uint64_t remainin
     // 3、检测流量超限。触发流量超限提醒  + 更新校准数据 (不带总额) —— 要放进ffrt队列
 #ifndef UNITTEST_FORBID_FFRT
     if (!trafficPlanFfrtQueue_) {
-        NETMGR_LOG_E("FFRT Init Fail");
         return NETMANAGER_ERR_INTERNAL;
     }
     trafficPlanFfrtQueue_->submit([this, simId, totalMonthlyData, remainingData]() {

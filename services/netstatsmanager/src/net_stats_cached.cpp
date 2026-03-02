@@ -601,28 +601,21 @@ void NetStatsCached::SetCycleThreshold(uint32_t threshold)
 
 void NetStatsCached::ForceUpdateStats()
 {
-    NETMGR_LOG_I("ForceUpdateStats start");
     isForce_ = true;
 #ifndef UNITTEST_FORBID_FFRT
-    NETMGR_LOG_I("ForceUpdateStats start  1");
     std::function<void()> netCachedStats = [this] () {
 #endif
-        NETMGR_LOG_I("ForceUpdateStats start 2");
         isExec_ = true;
         CacheStats();
         WriteStats();
         isForce_ = false;
         LoadIfaceNameIdentMaps();
         isExec_ = false;
-        NETMGR_LOG_I("ForceUpdateStats start 3");
 #ifndef UNITTEST_FORBID_FFRT
     };
     if (!isExec_) {
-        NETMGR_LOG_I("ForceUpdateStats start 4");
         ffrt::submit(std::move(netCachedStats), {}, {}, ffrt::task_attr().name("NetCachedStats"));
-        NETMGR_LOG_I("ForceUpdateStats start 5");
     }
-    NETMGR_LOG_I("ForceUpdateStats start 6");
 #endif
 }
 
@@ -1179,37 +1172,6 @@ void NetStatsCached::SetCurDefaultUserId(int32_t userId)
     std::lock_guard<std::mutex> lock(mutex_);
     NETMGR_LOG_I("set defaultUserId: %{public}d", userId);
     curDefaultUserId_ = userId;
-}
-
-void NetStatsCached::ForceUpdateHistoryDataOld(int32_t simId, int32_t beginDate)
-{
-    NETMGR_LOG_I("ForceUpdateHistoryDataOld start");
-    if (simId <= 0) {
-        NETMGR_LOG_E("simId invalid");
-        return;
-    }
-    std::function<void()> ForceUpdateHistoryDataOld = [this, simId, beginDate]() {
-        uint64_t startTime = static_cast<uint64_t>(NetStatsUtils::GetStartTimestamp(beginDate));
-        uint64_t endTime = static_cast<uint64_t>(NetStatsUtils::GetEndTimestamp(beginDate));
-        uint64_t curSecond = CommonUtils::GetCurrentSecond();
-        uint64_t historyData = 0;
-        GetTotalHistoryStatsByIdent(simId, startTime, curSecond, historyData); // 获取本月已存入DB的流量数据
-
-        std::unique_lock<std::shared_mutex> lock(cellularHistoryDataMutex_);
-        if (cellularHistoryData_.find(simId) != cellularHistoryData_.end()) {
-            cellularHistoryData_.erase(simId);
-        }
-        HistoryData historyDataStru;
-        historyDataStru.beginDate = beginDate;
-        historyDataStru.startTime = startTime;
-        historyDataStru.endTime = endTime;
-        historyDataStru.trafficData = historyData;
-        cellularHistoryData_[simId] = historyDataStru;
-        NETMGR_LOG_I("historyData[%{public}d]:%{public}"  PRIu64 ", %{public}" PRIu64 ", %{public}" PRIu64,
-            simId, cellularHistoryData_[simId].startTime, cellularHistoryData_[simId].endTime,
-            cellularHistoryData_[simId].trafficData);
-    };
-    ffrt::submit(std::move(ForceUpdateHistoryDataOld), {}, {}, ffrt::task_attr().name("ForceUpdateHistoryDataOld"));
 }
 
 void NetStatsCached::ForceUpdateHistoryData(int32_t simId, int32_t beginDate, uint64_t historyData)
