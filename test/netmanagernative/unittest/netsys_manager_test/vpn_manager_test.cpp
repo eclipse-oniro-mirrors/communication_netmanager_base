@@ -232,7 +232,6 @@ HWTEST_F(VpnManagerTest, SetVpnAddressTest004, TestSize.Level1)
 {
     VpnManager vpnmanager;
     std::string ifName = "12345678901234567890";
-
     std::vector<std::tuple<std::string, int32_t>> ipList = {
         { "2001:db8:1234::1", 64 },
         { "fd12:3456:789a::100", 64 },

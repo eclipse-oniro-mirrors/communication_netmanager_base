@@ -783,6 +783,10 @@ int32_t NetSysGetDefaultNetwork(uint16_t netId, int32_t* currentNetId)
 {
     // LCOV_EXCL_START
     int sockFd = CreateConnectionToNetSys();
+    if (sockFd < 0) {
+        DNS_CONFIG_PRINT("NetSysGetDefaultNetwork CreateConnectionToNetSys connect to netsys err: %d", errno);
+        return sockFd;
+    }
     int err = NetSysGetDefaultNetworkInternal(sockFd, netId, currentNetId);
     if (err < 0) {
         return -1;
