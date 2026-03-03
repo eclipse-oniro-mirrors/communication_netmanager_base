@@ -41,6 +41,7 @@
 #include "safe_map.h"
 #include "net_manager_constants.h"
 #include "net_info_observer.h"
+#include "net_stats_calibrate.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -80,6 +81,7 @@ public:
     int32_t GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
                                         const NetStatsNetwork &networkIpc) override;
     int32_t GetMonthTrafficStatsByNetwork(uint32_t simId, uint64_t &monthDataIpc) override;
+    int32_t SetCalibrationTraffic(uint32_t simId, uint64_t remainingData, uint64_t totalMonthlyData) override;
     int32_t SetAppStats(const PushStatsInfo &info) override;
     int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback) override;
     int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback) override;
@@ -110,13 +112,14 @@ public:
     void UpdateAllHistoryDateInfo();
     void UpdateHistoryData(int32_t simId);
     void DeleteHistoryData(int32_t simId);
+    bool CommonEventSimStateChanged(int32_t slotId, int32_t simState);
 #endif // SUPPORT_TRAFFIC_STATISTIC
 
 private:
     bool Init();
     void GetDumpMessage(std::string &message);
     void MergeTrafficStats(std::vector<NetStatsInfoSequence> &statsInfoSequences, const NetStatsInfo &info,
-                           uint32_t currentTime);
+                           uint32_t currentTime, bool isNeedMerge = false);
     bool GetIfaceNamesFromManager(std::list<std::string> &ifaceNames);
     std::unordered_map<uint32_t, SampleBundleInfo> GetSampleBundleInfosForActiveUser();
     SampleBundleInfo GetSampleBundleInfoForUid(uint32_t uid);
@@ -137,11 +140,16 @@ private:
 #endif
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     void UpdateBpfMapTimer();
-    bool CommonEventSimStateChanged(int32_t slotId, int32_t simState);
-    bool CommonEventSimStateChangedFfrt(int32_t slotId, int32_t simState);
+    bool CommonEventSimStateChangedFfrt(int32_t simId, int32_t simState);
     bool CellularDataStateChangedFfrt(int32_t slotId, int32_t dataState);
     bool CommonEventCellularDataStateChanged(int32_t slotId, int32_t dataState);
-    int32_t GetAllUsedTrafficStatsByNetwork(const sptr<NetStatsNetwork> &network, uint64_t &allUsedTraffic);
+    void GetAllUsedCellularTraffic(const sptr<NetStatsNetwork> &network, uint64_t &allUsedTraffic);
+    void GetDailyTrafficStatsByNetwork(const sptr<NetStatsNetwork> &network, std::vector<NetStatsInfoSequence> &infos);
+    void GetHistoryTrafficInfo(const sptr<NetStatsNetwork> &network, std::vector<NetStatsInfo> &infos,
+        bool isNeedCalibrate = false); // isNeedCalibrate - is calculate calibration traffic
+    int32_t GetHistoryTrafficInUidTable(const NetStatsNetwork &network, std::vector<NetStatsInfo> &infos);
+    int32_t GetHitstoryTrafficInIfaceTable(const NetStatsNetwork &network, std::vector<NetStatsInfo> &infos);
+    void PrintSumNetStatsInfo(const std::vector<NetStatsInfo> &infos);
     void UpdateBpfMap(int32_t simId);
     void SetTrafficMapMaxValue();
     void SetTrafficMapMaxValue(int32_t slotId);
@@ -157,10 +165,12 @@ private:
     void DealNotificaiton(int32_t simId, uint8_t flag);
     bool IsMobileDataEnabled();
     void UpdateTrafficLimitDate(int32_t simId);
+    void ResetNotifyState(int32_t simId);
     void UpdateNetStatsToMapFromDB(int32_t simId);
     bool CalculateTrafficAvailable(int32_t simId, uint64_t &monthlyAvailable,
                                    uint64_t &monthlyMarkAvailable, uint64_t &dailyMarkAvailable);
     int32_t UpdataSettingsdataFfrt(int32_t simId, uint8_t flag, uint64_t value);
+    void ProcessSettingsDataUpdate(int32_t simId);
     void ClearTrafficMapBySlotId(int32_t slotId, uint64_t ifIndex);
     void AddSimIdInTwoMap(int32_t simId, uint64_t ifIndex);
     void PrintTrafficBpfMapInfo(int32_t slotId);
@@ -169,6 +179,7 @@ private:
     void SubscribeTelephonyInfo();
     bool IsSimIdExist(int32_t simId);
     bool GetIfIndex(int32_t simId, uint64_t &ifIndex);
+    void ProcessUpdateBeginDate(int32_t simId, uint32_t beginDate);
 #endif // SUPPORT_TRAFFIC_STATISTIC
     void StartSysTimer();
     void StopSysTimer();
@@ -198,6 +209,7 @@ private:
     std::shared_ptr<NetStatsCallback> netStatsCallback_ = nullptr;
     std::shared_ptr<NetStatsListener> subscriber_ = nullptr;
     std::shared_ptr<NetStatsCached> netStatsCached_ = nullptr;
+    std::shared_ptr<NetStatsCalibrate> netStatsCalibrate_ = nullptr;
     uint64_t netStatsSysTimerId_ = 0;
     std::shared_ptr<NetStatsAccountSubscriber> accountSubscriber_ = nullptr;
     int32_t defaultUserId_ = 0;

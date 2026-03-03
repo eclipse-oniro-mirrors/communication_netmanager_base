@@ -50,6 +50,7 @@ enum class StatsInterfaceCode {
     CMD_GET_TRAFFIC_STATS_BY_UID_NETWORK,
     CMD_SET_APP_STATS,
     CMD_SET_SHARING_TRAFFIC_BEFORE_STOP,
+    CMD_SET_CALIBRATION_TRAFFIC,
     CMD_END = 100,
 };
 } // namespace NetManagerStandard

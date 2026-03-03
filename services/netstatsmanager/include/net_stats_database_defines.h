@@ -56,15 +56,27 @@ constexpr const char *IFACE_TABLE_CREATE_PARAM =
     "RxPackets INTEGER NOT NULL,"
     "TxBytes INTEGER NOT NULL,"
     "TxPackets INTEGER NOT NULL";
+constexpr const char *CALIBRATION_TABLE_CREATE_PARAM =
+    "Ident CHAR(100) NOT NULL,"
+    "StartDate INTEGER NOT NULL,"
+    "EndDate INTEGER NOT NULL,"
+    "UsedData BIGINT NOT NULL DEFAULT 0";
+constexpr const char *CHANGE_TABLE_CREATE_PARAM =
+    "StartTime INTEGER NOT NULL";
 constexpr const char *UID_TABLE_PARAM_LIST = "UID,IFace,Date,RxBytes,RxPackets,TxBytes,TxPackets,Ident,Flag,UserId";
 constexpr const char *UID_SIM_TABLE_PARAM_LIST = "UID,IFace,Date,RxBytes,RxPackets,TxBytes,TxPackets,Ident,Flag,UserId";
-constexpr const char *IFACE_TABLE_PARAM_LIST = "IFace,Date,RxBytes,RxPackets,TxBytes,TxPackets";
+constexpr const char *IFACE_TABLE_PARAM_LIST = "IFace,Date,RxBytes,RxPackets,TxBytes,TxPackets,Ident";
+constexpr const char *CALIBRATION_TABLE_PARAM_LIST = "Ident,StartDate,EndDate,UsedData";
+constexpr const char *CHANGE_TABLE_PARAM_LIST = "StartTime";
 constexpr const char *VERSION_TABLE = "T_version";
 constexpr const char *IFACE_TABLE = "T_iface";
 constexpr const char *UID_TABLE = "T_uid";
 constexpr const char *UID_SIM_TABLE = "T_uid_sim";
+constexpr const char *CALIBRATION_TABLE = "T_calibration_traffic";
+constexpr const char *CHANGE_TABLE = "T_change";
 
 constexpr int32_t UID_PARAM_NUM = 10;
+constexpr int32_t IFACE_PARAM_NUM = 7;
 
 enum class DataType {
     UID,

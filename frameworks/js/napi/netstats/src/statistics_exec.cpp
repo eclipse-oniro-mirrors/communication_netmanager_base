@@ -199,6 +199,19 @@ bool StatisticsExec::ExecGetSelfTrafficStats(GetSelfTrafficStatsContext *context
     return result == NETMANAGER_SUCCESS;
 }
 
+bool StatisticsExec::ExecSetCalibrationTraffic(SetCalibrationTrafficContext *context)
+{
+    if (context == nullptr) {
+        return false;
+    }
+    uint32_t simId = context->GetSimId();
+    uint64_t remainingData = context->GetRemainingData();
+    uint64_t totalMonthlyData = context->GetTotalMonthlyData();
+    int32_t result = NetStatsClient::GetInstance().SetCalibrationTraffic(simId, remainingData, totalMonthlyData);
+    context->SetErrorCode(result);
+    return result == NETMANAGER_SUCCESS;
+}
+
 napi_value StatisticsExec::GetCellularRxBytesCallback(GetCellularRxBytesContext *context)
 {
     return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
@@ -317,6 +330,11 @@ napi_value StatisticsExec::GetSelfTrafficStatsCallback(GetSelfTrafficStatsContex
     NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, RX_PACKETS, rxPackets);
     NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, TX_PACKETS, txPackets);
     return netStatsInfo;
+}
+
+napi_value StatisticsExec::SetCalibrationTrafficCallback(SetCalibrationTrafficContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
 }
 
 napi_value StatisticsExec::GetMonthTrafficStatsByNetworkCallback(GetMonthTrafficStatsByNetworkContext *context)

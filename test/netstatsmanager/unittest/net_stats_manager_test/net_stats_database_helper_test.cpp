@@ -410,5 +410,19 @@ HWTEST_F(NetStatsDatabaseHelperTest, GetTableVersionErrorHandlingTest001, TestSi
     int32_t ret = helper->GetTableVersion(version, VERSION_TABLE);
     EXPECT_EQ(ret, STATS_ERR_READ_DATA_FAIL);
 }
+
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+HWTEST_F(NetStatsDatabaseHelperTest, InsertChangeToIndexTimeTest001, TestSize.Level1)
+{
+    NETMGR_LOG_I("InsertChangeToIndexTimeTest001");
+    auto helper = std::make_unique<NetStatsDatabaseHelper>("");
+
+    uint32_t timestamp = 123456789;
+    std::string tableName = CHANGE_TABLE;
+    std::string paramList = "StartTime,ErrorTest";
+    int32_t ret = helper->InsertChangeToIndexTime(timestamp, tableName, paramList);
+    EXPECT_EQ(ret, STATS_ERR_WRITE_DATA_FAIL);
+}
+#endif
 } // namespace NetManagerStandard
 } // namespace OHOS

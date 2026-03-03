@@ -74,6 +74,19 @@ int32_t NetStatsHistory::GetHistoryByIdent(std::vector<NetStatsInfo> &recv, cons
     return handler->ReadStatsDataByIdent(recv, ident, start, end);
 }
 
+int32_t NetStatsHistory::GetIfaceTableHistoryByIdent(std::vector<NetStatsInfo> &recv, const std::string &ident,
+                                                     uint64_t start, uint64_t end)
+{
+    auto handler = std::make_unique<NetStatsDataHandler>();
+    // LCOV_EXCL_START
+    if (handler == nullptr) {
+        NETMGR_LOG_E("NetStatsDataHandler instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    // LCOV_EXCL_STOP
+    return handler->ReadIfaceTableHistoryByIdent(recv, ident, start, end);
+}
+
 int32_t NetStatsHistory::GetHistory(std::vector<NetStatsInfo> &recv, uint32_t uid, const std::string &ident,
                                     uint64_t start, uint64_t end)
 {

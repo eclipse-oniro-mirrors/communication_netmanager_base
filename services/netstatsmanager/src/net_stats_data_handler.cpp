@@ -121,6 +121,26 @@ int32_t NetStatsDataHandler::ReadStatsDataByIdent(std::vector<NetStatsInfo> &inf
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetStatsDataHandler::ReadIfaceTableHistoryByIdent(std::vector<NetStatsInfo> &recv, const std::string &ident,
+                                                          uint64_t start, uint64_t end)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    // LCOV_EXCL_START
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    int32_t ret1;
+    int32_t ret2;
+    int32_t ret = helper->QueryData(IFACE_TABLE, ident, start, end, recv);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("QueryData wrong, ret=%{public}d", ret);
+        return ret;
+    }
+    // LCOV_EXCL_STOP
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, uint32_t uid, const std::string &ident,
                                            uint64_t start, uint64_t end)
 {
@@ -242,6 +262,100 @@ int32_t NetStatsDataHandler::WriteStatsData(const std::vector<NetStatsInfo> &inf
     }
     return NETMANAGER_ERR_PARAMETER_ERROR;
 }
+
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+int32_t NetStatsDataHandler::WriteCalibrationTrafficInfo(uint32_t simId, uint32_t startTime, uint32_t endTime,
+                                                         uint64_t usedTraffic)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    // LCOV_EXCL_START
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    uint32_t startTimeTemp = 0;
+    uint32_t endTimeTemp = 0;
+    uint64_t usedDataTemp = 0;
+    ReadCalibrationTrafficInfo(simId, startTimeTemp, endTimeTemp, usedDataTemp);
+    if (startTimeTemp != 0) {
+        int32_t ret = DeleteCalibrationTrafficInfo(simId);
+        if (ret != NETMANAGER_SUCCESS) {
+            return NETMANAGER_ERR_INTERNAL;
+        }
+    }
+    // LCOV_EXCL_STOP
+    return helper->InsertCalibrationTrafficInfo(std::to_string(simId), startTime, endTime, usedTraffic,
+        CALIBRATION_TABLE, CALIBRATION_TABLE_PARAM_LIST);
+}
+
+int32_t NetStatsDataHandler::DeleteCalibrationTrafficInfo(uint32_t simId)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    // LCOV_EXCL_START
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    int32_t ret = helper->DeleteCalibrateData(CALIBRATION_TABLE, simId);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("DeleteCalibrateData error: %{public}d", ret);
+    }
+    // LCOV_EXCL_STOP
+    return ret;
+}
+
+int32_t NetStatsDataHandler::ReadCalibrationTrafficInfo(uint32_t simId, uint32_t &startTime, uint32_t &endTime,
+    uint64_t &usedTraffic)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    // LCOV_EXCL_START
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    // LCOV_EXCL_STOP
+    return helper->QueryCalibrationTrafficInfo(CALIBRATION_TABLE, std::to_string(simId),
+        startTime, endTime, usedTraffic);
+}
+
+int32_t NetStatsDataHandler::WriteChangeToIfaceTime(uint32_t startTime)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    // LCOV_EXCL_START
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    // LCOV_EXCL_STOP
+    return helper->InsertChangeToIndexTime(startTime, CHANGE_TABLE, CHANGE_TABLE_PARAM_LIST);
+}
+
+int32_t NetStatsDataHandler::ReadChangeToIfaceTime(uint32_t &startTime)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    // LCOV_EXCL_START
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    // LCOV_EXCL_STOP
+    return helper->QueryChangeToIfaceTime(CHANGE_TABLE, startTime);
+}
+
+int32_t NetStatsDataHandler::ReadIfaceStatsByIdent(std::vector<NetStatsInfo> &recv, const std::string &ident,
+                                                   uint64_t start, uint64_t end)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    // LCOV_EXCL_START
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    // LCOV_EXCL_STOP
+    int32_t ret = helper->QueryIfaceStatsByIdent(CALIBRATION_TABLE, ident, start, end, recv);
+    return ret;
+}
+#endif
 
 int32_t NetStatsDataHandler::DeleteByUid(uint64_t uid)
 {

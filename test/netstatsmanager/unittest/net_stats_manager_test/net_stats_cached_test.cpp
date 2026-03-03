@@ -297,5 +297,15 @@ HWTEST_F(NetStatsCachedTest, GetIncreasedSimStatsTest002, TestSize.Level1)
     NetStatsInfo ret = instance_->GetIncreasedSimStats(info);
     EXPECT_EQ(ret.uid_, info.uid_);
 }
+
+HWTEST_F(NetStatsCachedTest, GetKernelRmnetIfaceStatsTest002, TestSize.Level1)
+{
+    std::vector<NetStatsInfo> statsInfo;
+    std::string ifaceName = "rmnet3";
+    std::string ident = "123456";
+    instance_->ifaceNameIdentMap_.EnsureInsert(std::move(ifaceName), std::move(ident));
+    instance_->GetKernelRmnetIfaceStats(statsInfo);
+    EXPECT_EQ(statsInfo.size(), 1);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

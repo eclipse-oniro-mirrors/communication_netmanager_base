@@ -32,6 +32,7 @@
 #include "statistics_exec.h"
 #include "statistics_observer_wrapper.h"
 #include "update_iface_stats_context.h"
+#include "set_calibration_traffic_context.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -57,7 +58,8 @@ constexpr const char *FUNCTION_GET_SOCKFD_TXBYTES = "getSockfdTxBytes";
 constexpr const char *FUNCTION_GET_TRAFFIC_STATS_BY_NETWORK = "getTrafficStatsByNetwork";
 constexpr const char *FUNCTION_GET_TRAFFIC_STATS_BY_UID_NETWORK = "getTrafficStatsByUidNetwork";
 constexpr const char *FUNCTION_GET_SELF_TRAFFIC_STATS = "getSelfTrafficStats";
-constexpr const char *FUNCTION_GET_MONTH_TRAFFIC_STATS_BY_NETWORK = "getMonthTrafficStatsByNetwork";
+constexpr const char *FUNCTION_GET_MONTH_TRAFFIC_STATS_BY_NETWORK = "getMonthTrafficStats";
+constexpr const char *FUNCTION_SET_CALIBRATION_TRAFFIC = "setCalibrationTraffic";
 } // namespace
 
 napi_value GetCellularRxBytes(napi_env env, napi_callback_info info)
@@ -197,6 +199,13 @@ napi_value Off(napi_env env, napi_callback_info info)
     return StatisticsObserverWrapper::GetInstance().Off(env, info, {EVENT_STATS_CHANGE}, false);
 }
 
+napi_value SetCalibrationTraffic(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<SetCalibrationTrafficContext>(env, info, FUNCTION_SET_CALIBRATION_TRAFFIC, nullptr,
+                                                              StatisticsAsyncWork::ExecSetCalibrationTraffic,
+                                                              StatisticsAsyncWork::SetCalibrationTrafficCallback);
+}
+
 napi_value InitStatisticsModule(napi_env env, napi_value exports)
 {
     NapiUtils::DefineProperties(
@@ -222,6 +231,7 @@ napi_value InitStatisticsModule(napi_env env, napi_value exports)
             DECLARE_NAPI_FUNCTION(FUNCTION_UPDATE_STATS_DATA, UpdateStatsData),
             DECLARE_NAPI_FUNCTION(FUNCTION_ON, On),
             DECLARE_NAPI_FUNCTION(FUNCTION_OFF, Off),
+            DECLARE_NAPI_FUNCTION(FUNCTION_SET_CALIBRATION_TRAFFIC, SetCalibrationTraffic),
         });
     NapiUtils::SetEnvValid(env);
     auto envWrapper = new (std::nothrow) napi_env;

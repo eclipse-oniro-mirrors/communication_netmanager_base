@@ -36,7 +36,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 using namespace NetStatsDatabaseDefines;
-
+constexpr uint32_t DAY_SECONDS = 2 * 24 * 60 * 60;
 using namespace testing::ext;
 class NetStatsServiceTest : public testing::Test {
 public:
@@ -393,26 +393,55 @@ HWTEST_F(NetStatsServiceTest, AddUidStatsFlagTest001, TestSize.Level1)
     EXPECT_EQ(netStatsServicePtr->isUpdate_, true);
 }
 
-HWTEST_F(NetStatsServiceTest, CommonEventPackageRemovedTest001, TestSize.Level1)
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+HWTEST_F(NetStatsServiceTest, MergeTrafficStatsTest001, TestSize.Level1)
 {
     NetStatsService netStatsService;
-    bool ret = netStatsService.CommonEventPackageRemoved(123);
-    EXPECT_EQ(ret, false);
+    std::vector<NetStatsInfoSequence> statsInfoSequences;
+    NetStatsInfoSequence infoSque;
+    infoSque.startTime_ = CommonUtils::GetCurrentSecond() - 100;
+    infoSque.endTime_ = CommonUtils::GetCurrentSecond() - 100;
+    statsInfoSequences.push_back(infoSque);
+    NetStatsInfo info;
+    info.date_ = CommonUtils::GetCurrentSecond();
+    uint32_t endTimestamp = CommonUtils::GetCurrentSecond();
+    bool isNeedMerge = true;
+    netStatsService.MergeTrafficStats(statsInfoSequences, info, endTimestamp);
+    EXPECT_EQ(statsInfoSequences.size(), 2);
+
+    std::vector<NetStatsInfoSequence> statsInfoSequences2;
+    statsInfoSequences2.push_back(infoSque);
+    netStatsService.MergeTrafficStats(statsInfoSequences2, info, endTimestamp, isNeedMerge);
+    EXPECT_EQ(statsInfoSequences2.size(), 1);
 }
 
-HWTEST_F(NetStatsServiceTest, CommonEventPackageRemovedTest003, TestSize.Level1)
+HWTEST_F(NetStatsServiceTest, SetCalibrationTrafficTest001, TestSize.Level1)
 {
     NetStatsService netStatsService;
-    bool ret = netStatsService.CommonEventPackageRemoved(SYSTEM_DEFAULT_USERID + USER_ID_DIVIDOR);
-    EXPECT_EQ(ret, true);
+    uint32_t simId = 20;
+    uint64_t remainingData = 100;
+    uint64_t totalMonthlyData = 500;
+    netStatsService.SetCalibrationTraffic(1, remainingData, totalMonthlyData);
+    netStatsService.SetCalibrationTraffic(1, remainingData + 500, totalMonthlyData);
+    netStatsService.SetCalibrationTraffic(1, remainingData + 500, UINT64_MAX);
+    int32_t ret = netStatsService.SetCalibrationTraffic(simId, remainingData, totalMonthlyData);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 }
 
-HWTEST_F(NetStatsServiceTest, CommonEventPackageRemovedTest004, TestSize.Level1)
+HWTEST_F(NetStatsServiceTest, ResetNotifyStateTest001, TestSize.Level1)
 {
     NetStatsService netStatsService;
-    bool ret = netStatsService.CommonEventPackageRemoved(SIM_PRIVATE_USERID * 1000 + 2);
-    EXPECT_EQ(ret, false);
+    int32_t simId = 0;
+    ObserverPtr trafficDataObserver = std::make_shared<TrafficDataObserver>(simId);
+    SettingsInfoPtr trafficSettingsInfo = std::make_shared<TrafficSettingsInfo>();
+    trafficDataObserver->ReadTrafficDataSettings(trafficSettingsInfo);
+    netStatsService.settingsTrafficMap_.insert(
+        std::make_pair(simId, std::make_pair(trafficDataObserver, trafficSettingsInfo)));
+    netStatsService.ResetNotifyState(0);
+    netStatsService.ResetNotifyState(1);
+    EXPECT_NE(netStatsService.netStatsCached_, nullptr);
 }
+#endif
 
 HWTEST_F(NetStatsServiceTest, GetHistoryDataTest001, TestSize.Level1)
 {

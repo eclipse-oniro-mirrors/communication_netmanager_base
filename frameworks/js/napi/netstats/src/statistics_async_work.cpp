@@ -26,6 +26,7 @@
 #include "get_uid_rxbytes_context.h"
 #include "statistics_exec.h"
 #include "update_iface_stats_context.h"
+#include "set_calibration_traffic_context.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -223,6 +224,17 @@ void StatisticsAsyncWork::GetSelfTrafficStatsCallback(napi_env env, napi_status 
 {
     BaseAsyncWork::AsyncWorkCallback<GetSelfTrafficStatsContext,
                                      StatisticsExec::GetSelfTrafficStatsCallback>(env, status, data);
+}
+
+void StatisticsAsyncWork::ExecSetCalibrationTraffic(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<SetCalibrationTrafficContext, StatisticsExec::ExecSetCalibrationTraffic>(env, data);
+}
+
+void StatisticsAsyncWork::SetCalibrationTrafficCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<SetCalibrationTrafficContext,
+                                     StatisticsExec::SetCalibrationTrafficCallback>(env, status, data);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -24,6 +24,8 @@ static constexpr const int PARAM_NONE = 0;
 static constexpr const int PARAM_JUST_OPTIONS = 1;
 static constexpr const int PARAM_JUST_CALLBACK = 1;
 static constexpr const int PARAM_OPTIONS_AND_CALLBACK = 2;
+static constexpr const int PARAM_JUST_OPTIONS_TWO = 2;
+static constexpr const int PARAM_JUST_OPTIONS_THREE = 3;
 
 static constexpr const char *EVENT_NET_AVAILABLE = "netAvailable";
 static constexpr const char *EVENT_NET_BLOCK_STATUS_CHANGE = "netBlockStatusChange";

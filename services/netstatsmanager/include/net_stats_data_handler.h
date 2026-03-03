@@ -39,6 +39,10 @@ public:
                           uint64_t end);
     int32_t ReadStatsDataByIdentAndUserId(std::vector<NetStatsInfo> &infos, const std::string &ident,
                                           const int32_t userId, uint64_t start, uint64_t end);
+    int32_t ReadIfaceTableHistoryByIdent(std::vector<NetStatsInfo> &recv, const std::string &ident,
+                                         uint64_t start, uint64_t end);
+    int32_t ReadIfaceStatsByIdent(std::vector<NetStatsInfo> &recv, const std::string &ident,
+                                                   uint64_t start, uint64_t end);
     int32_t DeleteByUid(uint64_t uid);
     int32_t DeleteSimStatsByUid(uint64_t uid);
     int32_t DeleteByDate(const std::string &tableName, uint64_t start, uint64_t end);
@@ -51,6 +55,13 @@ public:
     int32_t UpdateSimDataFlag(uint32_t oldFlag, uint32_t newFlag);
     int32_t ClearData();
     int32_t BackupNetStatsData(const std::string &sourceDb, const std::string &backupDb);
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+    int32_t WriteCalibrationTrafficInfo(uint32_t simId, uint32_t startTime, uint32_t endTime, uint64_t usedTraffic);
+    int32_t ReadCalibrationTrafficInfo(uint32_t simId, uint32_t &startTime, uint32_t &endTime, uint64_t &usedTraffic);
+    int32_t DeleteCalibrationTrafficInfo(uint32_t simId);
+    int32_t WriteChangeToIfaceTime(uint32_t startTime);
+    int32_t ReadChangeToIfaceTime(uint32_t &startTime);
+#endif
 
 private:
     bool isDisplayTrafficAncoList = false;

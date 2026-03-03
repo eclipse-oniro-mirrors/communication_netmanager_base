@@ -127,6 +127,11 @@ public:
         return 0;
     }
 
+    int32_t SetCalibrationTraffic(uint32_t simId, uint64_t remainingData, uint64_t totalMonthlyData) override
+    {
+        return 0;
+    }
+
     int32_t SetAppStats(const PushStatsInfo &info) override
     {
         return 0;

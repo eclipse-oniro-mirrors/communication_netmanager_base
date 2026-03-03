@@ -451,6 +451,18 @@ int32_t NetStatsClient::GetSockfdTxBytes(uint64_t &stats, int32_t sockfd)
     return proxy->GetCookieTxBytes(stats, optrval);
 }
 
+int32_t NetStatsClient::SetCalibrationTraffic(uint32_t simId, uint64_t remainingData, uint64_t totalMonthlyData)
+{
+    sptr<INetStatsService> proxy = GetProxy();
+    // LCOV_EXCL_START
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    return proxy->SetCalibrationTraffic(simId, remainingData, totalMonthlyData);
+}
+
 extern "C" int32_t GetUidTxBytesEx(uint64_t *stats, uint32_t uid)
 {
     NETMGR_LOG_D("GetUidTxBytesEx in");

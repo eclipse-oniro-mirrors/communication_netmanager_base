@@ -66,6 +66,17 @@ public:
     bool IntegrityCheck(sqlite3 *db);
     int32_t UpdateStatsFlagByUserId(const std::string &tableName, int32_t userId, uint32_t flag);
     int32_t UpdateStatsUserIdByUserId(const std::string &tableName, int32_t oldUserId, int32_t newUserId);
+    int32_t QueryIfaceStatsByIdent(const std::string &tableName, const std::string &ident,
+                                   uint64_t start, uint64_t end, std::vector<NetStatsInfo> &infos);
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+    int32_t InsertCalibrationTrafficInfo(const std::string &simId, int32_t startTime, int32_t endTime,
+        uint64_t usedTraffic, const std::string &tableName, const std::string &paramList);
+    int32_t QueryCalibrationTrafficInfo(const std::string &tableName, const std::string &ident,
+        uint32_t &startTime, uint32_t &endTime, uint64_t &usedTraffic);
+    int32_t QueryChangeToIfaceTime(const std::string &tableName, uint32_t &startTime);
+    int32_t InsertChangeToIndexTime(uint32_t timestamp, const std::string &tableName, const std::string &paramList);
+    int32_t DeleteCalibrateData(const std::string &tableName, uint32_t simId);
+#endif
 
 private:
     enum TableVersion : int32_t {
