@@ -785,7 +785,7 @@ int32_t NetSysGetDefaultNetwork(uint16_t netId, int32_t* currentNetId)
     int sockFd = CreateConnectionToNetSys();
     if (sockFd < 0) {
         DNS_CONFIG_PRINT("NetSysGetDefaultNetwork CreateConnectionToNetSys connect to netsys err: %d", errno);
-        return sockFd;
+        return -errno;
     }
     int err = NetSysGetDefaultNetworkInternal(sockFd, netId, currentNetId);
     if (err < 0) {
