@@ -55,15 +55,7 @@ NetPACManager::~NetPACManager()
 
 bool NetPACManager::InitPACScript(const std::string &script)
 {
-    std::lock_guard<std::mutex> guard{pacMutex_};
-    if (jerry_value_is_undefined(pacScriptVal_) == false) {
-        jerry_release_value(pacScriptVal_);
-        pacScriptVal_ = jerry_create_undefined();
-    }
-    if (engineInitialized_) {
-        jerry_cleanup();
-        engineInitialized_ = false;
-    }
+    ReleasePACScript();
     const char *pac_script = script.c_str();
     jerry_init(JERRY_INIT_EMPTY);
     engineInitialized_ = true;
@@ -83,8 +75,20 @@ bool NetPACManager::InitPACScript(const std::string &script)
 
 bool NetPACManager::InitPACScriptWithURL(const std::string &scriptUrl)
 {
-    scriptFileUrl_ = scriptUrl;
     std::lock_guard<std::mutex> guard{pacMutex_};
+    scriptFileUrl_ = scriptUrl;
+    g_script.clear();
+    DownloadPACScript(scriptUrl);
+    if (g_script.empty()) {
+        ReleasePACScript();
+        status_ = false;
+        return false;
+    }
+    return InitPACScript(g_script);
+}
+
+void NetPACManager::ReleasePACScript()
+{
     if (jerry_value_is_undefined(pacScriptVal_) == false) {
         jerry_release_value(pacScriptVal_);
         pacScriptVal_ = jerry_create_undefined();
@@ -93,33 +97,8 @@ bool NetPACManager::InitPACScriptWithURL(const std::string &scriptUrl)
         jerry_cleanup();
         engineInitialized_ = false;
     }
-    g_script.clear();
-    DownloadPACScript(scriptUrl);
-    if (g_script.empty()) {
-        status_ = false;
-        return false;
-    }
-    const char *pac_script = g_script.c_str();
-    jerry_init(JERRY_INIT_EMPTY);
-    engineInitialized_ = true;
-    PacFunctions::RegisterPacFunctions();
-    pacScriptVal_ = jerry_parse(NULL, 0, (jerry_char_t *)pac_script, strlen(pac_script), JERRY_PARSE_NO_OPTS);
-    if (jerry_value_is_error(pacScriptVal_)) {
-        jerry_value_t error_value = jerry_get_value_from_error(pacScriptVal_, false);
-        jerry_release_value(pacScriptVal_);
-        jerry_release_value(error_value);
-        pacScriptVal_ = jerry_create_undefined();
-        status_ = false;
-        return false;
-    }
-    status_ = true;
-    return true;
 }
 
-PAC_STATUS NetPACManager::FindProxyForURL(const std::string &url, std::string &proxy)
-{
-    return FindProxyForURL(url, ParseHost(url), proxy);
-}
 
 static void ReleaseValues(const std::vector<jerry_value_t> &values)
 {
@@ -238,11 +217,6 @@ void NetPACManager::DownloadPACScript(const std::string &url)
         NETMGR_LOG_W("Downloaded content may not be a valid PAC script (no FindProxyForURL function found)");
     }
     return;
-}
-
-void NetPACManager::SetFileUrl(const std::string &url)
-{
-    scriptFileUrl_ = url;
 }
 
 std::string NetPACManager::ParseHost(const std::string &url)

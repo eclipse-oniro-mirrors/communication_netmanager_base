@@ -65,9 +65,9 @@ public:
 
     std::string ParseHost(const std::string &url);
 
-    void SetFileUrl(const std::string &url);
-
 private:
+    void ReleasePACScript();
+
     uint32_t pacScriptVal_;
     std::mutex pacMutex_;
     std::string scriptFileUrl_;

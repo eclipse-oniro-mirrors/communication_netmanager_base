@@ -525,10 +525,6 @@ void GetNetworkAccessPolicyFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    if (!WriteInterfaceToken(dataParcel)) {
-        return;
-    }
-
     bool flag = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL;
     uint32_t uid = NetPolicyGetData<uint32_t>();
     uint32_t userId = NetPolicyGetData<uint32_t>();
@@ -548,10 +544,6 @@ void AddNetworkAccessPolicyFuzzTest(const uint8_t *data, size_t size)
     NetManagerBaseAccessToken token;
     MessageParcel dataParcel;
     if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
-        return;
-    }
-
-    if (!WriteInterfaceToken(dataParcel)) {
         return;
     }
 
@@ -577,10 +569,6 @@ void RemoveNetworkAccessPolicyFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    if (!WriteInterfaceToken(dataParcel)) {
-        return;
-    }
-
     uint32_t vectorSize = NetPolicyGetData<uint32_t>() % 10;
     std::vector<std::string> bundleNames;
     for (uint32_t i = 0; i < vectorSize; i++) {
@@ -603,12 +591,8 @@ void NotifyNetAccessPolicyDiagFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    if (!WriteInterfaceToken(dataParcel)) {
-        return;
-    }
-
     uint32_t uid = NetPolicyGetData<uint32_t>();
-    dataParcel.WriteInt32(uid);
+    dataParcel.WriteUint32(uid);
     OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_NOTIFY_NETWORK_ACCESS_POLICY_DIAG), dataParcel);
 }
 
