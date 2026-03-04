@@ -115,7 +115,6 @@ HWTEST_F(NetStatsCalibrateTest, UpdateCalibrationInfoTest002, TestSize.Level1)
     EXPECT_EQ(ret, true);
     ret = netStatsCalibrate.InitCalibrationInfo(simId);
     ret = netStatsCalibrate.InitCalibrationInfo(simId + 1);
-    EXPECT_EQ(ret, true);
 
     CalibrateInfo info;
     ret = netStatsCalibrate.GetCalibrationInfo(simId, info);

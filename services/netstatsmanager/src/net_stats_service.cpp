@@ -1678,7 +1678,7 @@ void NetStatsService::GetAllUsedCellularTraffic(const sptr<NetStatsNetwork> &net
             allUsedTraffic += it->txBytes_;
         }
     }
-    NETMGR_LOG_I("GetAllUsedCellularTraffic simId:%{publcid}d, startTime: %{public}" PRIu64 ", \
+    NETMGR_LOG_I("GetAllUsedCellularTraffic simId:%{public}d, startTime: %{public}" PRIu64 ", \
 endTime: %{public}" PRIu64 ", allUsedTraffic: %{public}" PRIu64,
         network->simId_, network->startTime_, network->endTime_, allUsedTraffic);
     return;
