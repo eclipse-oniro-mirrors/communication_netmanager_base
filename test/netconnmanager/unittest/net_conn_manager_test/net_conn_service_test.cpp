@@ -1323,14 +1323,6 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest005, TestSize.Level1)
     ret = NetConnService::GetInstance()->IsPreferCellularUrl(url, preferCellular);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
-    url = "https://rcs.cmpassport.com";
-    ret = NetConnService::GetInstance()->IsPreferCellularUrl(url, preferCellular);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
- 
-    url = "https://example.ctm.net";
-    ret = NetConnService::GetInstance()->IsPreferCellularUrl(url, preferCellular);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
     NetConnService::GetInstance()->netFactoryResetCallback_ = nullptr;
     ret = NetConnService::GetInstance()->FactoryResetNetwork();
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
@@ -2185,6 +2177,60 @@ HWTEST_F(NetConnServiceTest, FindProxyForURL002, TestSize.Level1)
     std::string proxy = "11";
     NetConnService::GetInstance()->FindProxyForURL(url, host, proxy);
     EXPECT_TRUE(host.empty());
+}
+
+HWTEST_F(NetConnServiceTest, IsPreferCellularUrlTest001, TestSize.Level1) {
+    std::string url = "https://rcs.cmpassport.com";
+    PreferCellularType preferCellular = PreferCellularType::NOT_PREFER;
+    auto ret = NetConnService::GetInstance()->IsPreferCellularUrl(url, preferCellular);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_TRUE(preferCellular != PreferCellularType::END);
+}
+
+HWTEST_F(NetConnServiceTest, IsPreferCellularUrlTest002, TestSize.Level1) {
+    std::string url = "https://example.ctm.net";
+    PreferCellularType preferCellular = PreferCellularType::NOT_PREFER;
+    auto ret = NetConnService::GetInstance()->IsPreferCellularUrl(url, preferCellular);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_TRUE(preferCellular != PreferCellularType::END);
+}
+
+HWTEST_F(NetConnServiceTest, IsPreferCellularUrlTest003, TestSize.Level1) {
+    std::string url = "https://exampleasjfaspoifqanfakjb";
+    PreferCellularType preferCellular = PreferCellularType::NOT_PREFER;
+    auto ret = NetConnService::GetInstance()->IsPreferCellularUrl(url, preferCellular);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_TRUE(preferCellular != PreferCellularType::END);
+}
+
+HWTEST_F(NetConnServiceTest, IsInPreferredListTest001, TestSize.Level1) {
+    std::string hostName = "example.com";
+    std::vector<std::string> regexList = {"^example\\.[a-z]{2,}$", "^test\\.[a-z]{2,}$"};
+    EXPECT_TRUE(NetConnService::GetInstance()->IsInPreferredList(hostName, regexList));
+}
+
+HWTEST_F(NetConnServiceTest, IsInPreferredListTest002, TestSize.Level1) {
+    std::string hostName = "example.org";
+    std::vector<std::string> regexList = {"^example\\.[a-z]{2,}$", "^test\\.[a-z]{2,}$"};
+    EXPECT_FALSE(NetConnService::GetInstance()->IsInPreferredList(hostName, regexList));
+}
+
+HWTEST_F(NetConnServiceTest, IsInPreferredListTest003, TestSize.Level1) {
+    std::string hostName = "example.com";
+    std::vector<std::string> regexList = {};
+    EXPECT_FALSE(NetConnService::GetInstance()->IsInPreferredList(hostName, regexList));
+}
+
+HWTEST_F(NetConnServiceTest, IsInPreferredListTest004, TestSize.Level1) {
+    std::string hostName = "";
+    std::vector<std::string> regexList = {"^example\\.[a-z]{2,}$", "^test\\.[a-z]{2,}$"};
+    EXPECT_FALSE(NetConnService::GetInstance()->IsInPreferredList(hostName, regexList));
+}
+
+HWTEST_F(NetConnServiceTest, IsInPreferredListTest005, TestSize.Level1) {
+    std::string hostName = "example.com";
+    std::vector<std::string> regexList = {"invalid[regex", "another[invalid[regex"};
+    EXPECT_FALSE(NetConnService::GetInstance()->IsInPreferredList(hostName, regexList));
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
