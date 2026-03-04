@@ -1323,6 +1323,14 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest005, TestSize.Level1)
     ret = NetConnService::GetInstance()->IsPreferCellularUrl(url, preferCellular);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
+    url = "https://rcs.cmpassport.com";
+    ret = NetConnService::GetInstance()->IsPreferCellularUrl(url, preferCellular);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+ 
+    url = "https://example.ctm.net";
+    ret = NetConnService::GetInstance()->IsPreferCellularUrl(url, preferCellular);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
     NetConnService::GetInstance()->netFactoryResetCallback_ = nullptr;
     ret = NetConnService::GetInstance()->FactoryResetNetwork();
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);

@@ -3821,8 +3821,8 @@ std::tuple<std::vector<std::string>, std::vector<std::string>> NetConnService::G
             line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
             line.erase(std::remove(line.begin(), line.end(), '\t'), line.end());
             if (line.length() > CURRENT_CELLULAR_FORMAT_LENGTH &&
-                line.compare(0, currentFormatLen, currentFormat) &&
-                line.compare(line.length() - currentFormatLen, currentFormatLen, currentFormat)) {
+                line.compare(0, currentFormatLen, currentFormat) == 0 &&
+                line.compare(line.length() - currentFormatLen, currentFormatLen, currentFormat) == 0) {
                 currentCellularRegexList.emplace_back(
                     line.substr(currentFormatLen, line.length() - CURRENT_CELLULAR_FORMAT_LENGTH));
             } else {
