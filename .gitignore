@@ -7,3 +7,5 @@ CMakeLists.txt
 *.diff
 .vscode
 Cargo.lock
+
+.codemate
