@@ -2206,31 +2206,36 @@ HWTEST_F(NetConnServiceTest, IsPreferCellularUrlTest003, TestSize.Level1) {
 HWTEST_F(NetConnServiceTest, IsInPreferredListTest001, TestSize.Level1) {
     std::string hostName = "example.com";
     std::vector<std::string> regexList = {"^example\\.[a-z]{2,}$", "^test\\.[a-z]{2,}$"};
-    EXPECT_TRUE(NetConnService::GetInstance()->IsInPreferredList(hostName, regexList));
+    auto ret = NetConnService::GetInstance()->IsInPreferredList(hostName, regexList);
+    EXPECT_TRUE(ret);
 }
 
 HWTEST_F(NetConnServiceTest, IsInPreferredListTest002, TestSize.Level1) {
     std::string hostName = "example.org";
     std::vector<std::string> regexList = {"^example\\.[a-z]{2,}$", "^test\\.[a-z]{2,}$"};
-    EXPECT_FALSE(NetConnService::GetInstance()->IsInPreferredList(hostName, regexList));
+    auto ret = NetConnService::GetInstance()->IsInPreferredList(hostName, regexList);
+    EXPECT_FALSE(ret);
 }
 
 HWTEST_F(NetConnServiceTest, IsInPreferredListTest003, TestSize.Level1) {
     std::string hostName = "example.com";
     std::vector<std::string> regexList = {};
-    EXPECT_FALSE(NetConnService::GetInstance()->IsInPreferredList(hostName, regexList));
+    auto ret = NetConnService::GetInstance()->IsInPreferredList(hostName, regexList);
+    EXPECT_FALSE(ret);
 }
 
 HWTEST_F(NetConnServiceTest, IsInPreferredListTest004, TestSize.Level1) {
     std::string hostName = "";
     std::vector<std::string> regexList = {"^example\\.[a-z]{2,}$", "^test\\.[a-z]{2,}$"};
-    EXPECT_FALSE(NetConnService::GetInstance()->IsInPreferredList(hostName, regexList));
+    auto ret = NetConnService::GetInstance()->IsInPreferredList(hostName, regexList);
+    EXPECT_FALSE(ret);
 }
 
 HWTEST_F(NetConnServiceTest, IsInPreferredListTest005, TestSize.Level1) {
     std::string hostName = "example.com";
     std::vector<std::string> regexList = {"invalid[regex", "another[invalid[regex"};
-    EXPECT_FALSE(NetConnService::GetInstance()->IsInPreferredList(hostName, regexList));
+    auto ret = NetConnService::GetInstance()->IsInPreferredList(hostName, regexList);
+    EXPECT_FALSE(ret);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
