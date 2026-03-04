@@ -93,6 +93,7 @@ constexpr const char *SETTINGS_DATASHARE_URI_HTTP =
         "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=EffectiveTime";
 constexpr int32_t INVALID_UID = -1;
 constexpr int32_t ERRNO_EADDRNOTAVAIL = -99;
+constexpr int32_t CURRENT_CELLULAR_FORMAT_LENGTH = 10;
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
@@ -3761,11 +3762,9 @@ void NetConnService::OnNetSysRestart()
     }
 }
 
-int32_t NetConnService::IsPreferCellularUrl(const std::string& url, bool& preferCellular)
+bool NetConnService::IsInPreferredList(const std::string &hostName, const std::vector<std::string> &regexList)
 {
-    std::string hostName = CommonUtils::GetHostnameFromURL(url);
-    static std::vector<std::string> preferredRegexList = GetPreferredRegex();
-    preferCellular = std::any_of(preferredRegexList.begin(), preferredRegexList.end(),
+    return std::any_of(regexList.begin(), regexList.end(),
         [&hostName](const std::string &str) -> bool {
             try {
                 return std::regex_match(hostName, std::regex(str));
@@ -3774,6 +3773,19 @@ int32_t NetConnService::IsPreferCellularUrl(const std::string& url, bool& prefer
                 return false;
             }
         });
+}
+
+int32_t NetConnService::IsPreferCellularUrl(const std::string& url, PreferCellularType& preferCellular)
+{
+    std::string hostName = CommonUtils::GetHostnameFromURL(url);
+    static auto regexLists = GetPreferredRegex();
+    if (IsInPreferredList(hostName, std::get<0>(regexLists))) {
+        preferCellular = PreferCellularType::LEGACY;
+    } else if (IsInPreferredList(hostName, std::get<1>(regexLists))) {
+        preferCellular = PreferCellularType::CURRENT;
+    } else {
+        preferCellular = PreferCellularType::NOT_PREFER;
+    }
     NETMGR_LOG_I("preferCellular:%{public}d", preferCellular);
     return 0;
 }
@@ -3795,23 +3807,33 @@ bool NetConnService::IsIfaceNameInUse(const std::string &ifaceName, int32_t netI
     return false;
 }
 
-std::vector<std::string> NetConnService::GetPreferredRegex()
+std::tuple<std::vector<std::string>, std::vector<std::string>> NetConnService::GetPreferredRegex()
 {
-    std::vector<std::string> preferCellularRegexList;
+    std::vector<std::string> legacyCellularRegexList;
+    std::vector<std::string> currentCellularRegexList;
     const std::string preferCellularRegexPath = "/system/etc/prefer_cellular_regex_list.txt";
+    constexpr static std::string_view currentFormat = "#####";
+    constexpr static size_t currentFormatLen = currentFormat.length();
     std::ifstream preferCellularFile(preferCellularRegexPath);
     if (preferCellularFile.is_open()) {
         std::string line;
         while (getline(preferCellularFile, line)) {
             line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
             line.erase(std::remove(line.begin(), line.end(), '\t'), line.end());
-            preferCellularRegexList.push_back(line);
+            if (line.length() > CURRENT_CELLULAR_FORMAT_LENGTH &&
+                line.compare(0, currentFormatLen, currentFormat) == 0 &&
+                line.compare(line.length() - currentFormatLen, currentFormatLen, currentFormat) == 0) {
+                currentCellularRegexList.emplace_back(
+                    line.substr(currentFormatLen, line.length() - CURRENT_CELLULAR_FORMAT_LENGTH));
+            } else {
+                legacyCellularRegexList.emplace_back(line);
+            }
         }
         preferCellularFile.close();
     } else {
         NETMGR_LOG_E("open prefer cellular url file failure.");
     }
-    return preferCellularRegexList;
+    return {legacyCellularRegexList, currentCellularRegexList};
 }
 
 std::vector<sptr<NetSupplier>> NetConnService::FindSupplierWithInternetByBearerType(

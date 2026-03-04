@@ -300,7 +300,7 @@ public:
         return 0;
     }
 
-    int32_t IsPreferCellularUrl(const std::string &url, bool &preferCellular) override
+    int32_t IsPreferCellularUrl(const std::string &url, PreferCellularType &preferCellular) override
     {
         return 0;
     }

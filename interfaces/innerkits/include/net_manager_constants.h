@@ -200,6 +200,13 @@ enum RegisterType {
     REGISTER,
     REQUEST
 };
+
+enum class PreferCellularType {
+    NOT_PREFER,
+    LEGACY,
+    CURRENT,
+    END
+};
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NETMANAGER_CONSTANTS_H

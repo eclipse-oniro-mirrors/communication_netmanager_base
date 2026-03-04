@@ -1935,12 +1935,12 @@ int32_t NetConnServiceStub::OnIsPreferCellularUrl(MessageParcel &data, MessagePa
     if (!data.ReadString(url)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
-    bool preferCellular = false;
+    PreferCellularType preferCellular = PreferCellularType::NOT_PREFER;
     int32_t ret = IsPreferCellularUrl(url, preferCellular);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    if (!reply.WriteBool(preferCellular)) {
+    if (!reply.WriteInt32(static_cast<int32_t>(preferCellular))) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
  

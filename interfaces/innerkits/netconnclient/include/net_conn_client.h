@@ -460,7 +460,7 @@ public:
      * @param preferCellular out param, whether prefer cellular
      * @return Returns 0, unregister the network successfully, otherwise it will fail
      */
-    int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular);
+    int32_t IsPreferCellularUrl(const std::string& url, PreferCellularType& preferCellular);
 
     int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback);
 

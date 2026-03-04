@@ -1127,7 +1127,7 @@ int32_t NetConnClient::RegisterNetFactoryResetCallback(const sptr<INetFactoryRes
     return proxy->RegisterNetFactoryResetCallback(callback);
 }
 
-int32_t NetConnClient::IsPreferCellularUrl(const std::string& url, bool& preferCellular)
+int32_t NetConnClient::IsPreferCellularUrl(const std::string& url, PreferCellularType& preferCellular)
 {
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
