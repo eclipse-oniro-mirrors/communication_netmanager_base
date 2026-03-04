@@ -3762,7 +3762,7 @@ void NetConnService::OnNetSysRestart()
     }
 }
 
-bool IsInPreferredList(const std::string &hostName, const std::vector<std::string> &regexList)
+bool NetConnService::IsInPreferredList(const std::string &hostName, const std::vector<std::string> &regexList)
 {
     return std::any_of(regexList.begin(), regexList.end(),
         [&hostName](const std::string &str) -> bool {

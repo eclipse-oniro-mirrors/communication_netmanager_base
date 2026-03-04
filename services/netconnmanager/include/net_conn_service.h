@@ -632,6 +632,7 @@ private:
     NetBearType GetDefaultNetSupplierType();
     uint32_t GetDefaultNetSupplierId();
     void RegisterAppStateAware();
+    bool IsInPreferredList(const std::string& hostName, const std::vector<std::string> &Regexlist);
 
 private:
     enum ServiceRunningState {
