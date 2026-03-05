@@ -49,6 +49,8 @@ struct NetLinkInfo final : public Parcelable {
     std::string tcpBufferSizes_;
     std::string ident_;
     HttpProxy httpProxy_;
+    bool isIpv4LinkValid_ = false;
+    bool isIpv6LinkValid_ = false;
 
     NetLinkInfo() = default;
     NetLinkInfo(const NetLinkInfo &cap);
@@ -74,6 +76,7 @@ struct NetLinkInfo final : public Parcelable {
     std::string ToStringAddr(const std::string &tab) const;
     std::string ToStringDns(const std::string &tab) const;
     std::string ToStringRoute(const std::string &tab) const;
+    std::string ToStringLinkValid(const std::string &tab) const;
     bool isUserDefinedDnsServer_ = false;
 };
 } // namespace NetManagerStandard

@@ -104,6 +104,26 @@ constexpr const char *SIM2_BUNDLENAMES = "com.easy.abroadHarmony.temp,com.easy.h
 constexpr const char *INSTALL_SOURCE_FROM_SIM2 = "com.easy.abroad";
 std::mutex g_commonUtilsMutex;
 
+// IPv6 related constants to avoid magic numbers
+constexpr uint8_t IPV6_LOOPBACK_BYTES[BYTE_16] = {
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x01
+};
+
+// ORCHID prefix (2001:0010::/28) components and mask/value for checking
+constexpr uint8_t ORCHID_PREFIX_BYTE0 = 0x20;
+constexpr uint8_t ORCHID_PREFIX_BYTE1 = 0x01;
+constexpr uint8_t ORCHID_PREFIX_BYTE2 = 0x00;
+constexpr uint8_t ORCHID_BYTE3_MASK = 0xF0; // high 4 bits
+constexpr uint8_t ORCHID_BYTE3_VALUE = 0x10;
+// Byte indices for ORCHID prefix check to avoid magic index literals
+constexpr int ORCHID_BYTE_IDX0 = 0;
+constexpr int ORCHID_BYTE_IDX1 = 1;
+constexpr int ORCHID_BYTE_IDX2 = 2;
+constexpr int ORCHID_BYTE_IDX3 = 3;
+
 std::string Strip(const std::string &str, char ch)
 {
     auto size = static_cast<int64_t>(str.size());
@@ -1035,6 +1055,75 @@ std::string ExtractDomainFormUrl(const std::string &url)
         domain = url.substr(domainStartPos);
     }
     return domain;
+}
+
+bool IsUsableGlobalIpv6Addr(const std::string &ipv6Addr)
+{
+    if (ipv6Addr.empty()) {
+        return false;
+    }
+
+    struct in6_addr addr = IN6ADDR_ANY_INIT;
+    if (inet_pton(AF_INET6, ipv6Addr.c_str(), &addr) != 1) {
+        return false;
+    }
+
+    // Check if is unspecified address (::)
+    if (memcmp(addr.s6_addr, in6addr_any.s6_addr, BYTE_16) == 0) {
+        NETMGR_LOG_I("Reject unspecified address");
+        return false;
+    }
+
+    if (memcmp(addr.s6_addr, IPV6_LOOPBACK_BYTES, BYTE_16) == 0) {
+        NETMGR_LOG_I("Reject loopback address");
+        return false;
+    }
+
+    // check if is document address (2001:db8::/32)
+    const uint8_t docAddrPrefix[4] = {0x20, 0x01, 0x0d, 0xb8};
+    if (memcmp(addr.s6_addr, docAddrPrefix, sizeof(docAddrPrefix)) == 0) {
+        NETMGR_LOG_I("Reject documentation address");
+        return false;
+    }
+
+    // check if is multicast address (ff00::/8)
+    if (addr.s6_addr[0] == 0xFF) {
+        NETMGR_LOG_I("Reject multicast address");
+        return false;
+    }
+
+    // check if is link local address (fe80::/10)
+    if (addr.s6_addr[0] == 0xFE && (addr.s6_addr[1] & 0xC0) == 0x80) {
+        NETMGR_LOG_I("Reject link local address");
+        return false;
+    }
+
+    // check if is unique local address/private address (fc00::/7)
+    if ((addr.s6_addr[0] & 0xFE) == 0xFC) {
+        NETMGR_LOG_I("Reject unique local address");
+        return false;
+    }
+
+    // check if is site local address (fec0::/10) - deprecated but still filtered
+    if (addr.s6_addr[0] == 0xFE && (addr.s6_addr[1] & 0xC0) == 0xC0) {
+        NETMGR_LOG_I("Reject site local address");
+        return false;
+    }
+
+    const uint8_t globalUnicastPrefix = 0x20;
+    const uint8_t mask = 0xE0;
+    
+    if ((addr.s6_addr[0] & mask) == globalUnicastPrefix) {
+        if (addr.s6_addr[ORCHID_BYTE_IDX0] == ORCHID_PREFIX_BYTE0 &&
+            addr.s6_addr[ORCHID_BYTE_IDX1] == ORCHID_PREFIX_BYTE1 &&
+            addr.s6_addr[ORCHID_BYTE_IDX2] == ORCHID_PREFIX_BYTE2 &&
+            (addr.s6_addr[ORCHID_BYTE_IDX3] & ORCHID_BYTE3_MASK) == ORCHID_BYTE3_VALUE) {
+            return false;
+        }
+        return true;
+    }
+
+    return false;
 }
 
 bool IsValidAddress(const std::string &ipStrAddr)

@@ -139,6 +139,244 @@ HWTEST_F(NetworkTest, GetNetLinkInfoTest002, TestSize.Level1)
     EXPECT_EQ(ret.routeList_.size(), 2);
 }
 
+HWTEST_F(NetworkTest, UpdateNetLinkInfoLinkTypeTest, TestSize.Level1)
+{
+    int32_t netId = 1;
+    uint32_t supplierId = 1;
+    auto network = std::make_shared<Network>(netId, supplierId, NetBearType::BEARER_CELLULAR, nullptr);
+    network->netLinkInfo_.ifaceName_ = "test";
+    
+    INetAddr addr1;
+    addr1.address_ = "10.0.0.2";
+    addr1.family_ = AF_INET;
+    
+    Route ipv4Route;
+    ipv4Route.destination_.address_ = "10.0.0.0";
+    ipv4Route.destination_.prefixlen_ = 24;
+    ipv4Route.iface_ = "test";
+    ipv4Route.gateway_.address_ = "10.0.0.1";
+    
+    network->netLinkInfo_.netAddrList_.push_back(addr1);
+    network->netLinkInfo_.routeList_.push_back(ipv4Route);
+    network->UpdateNetLinkInfoLinkType(network->netLinkInfo_);
+    auto res1 = network->GetNetLinkInfo();
+    EXPECT_TRUE(res1.isIpv4LinkValid_);
+    EXPECT_FALSE(res1.isIpv6LinkValid_);
+
+    INetAddr addr2;
+    addr2.address_ = "2001:db8::1";
+    addr2.family_ = AF_INET6;
+    
+    Route ipv6Route;
+    ipv6Route.destination_.address_ = "2001:db8::";
+    ipv6Route.destination_.prefixlen_ = 32;
+    ipv6Route.iface_ = "test";
+    ipv6Route.gateway_.address_ = "fe80::1";
+    
+    network->netLinkInfo_.netAddrList_.push_back(addr2);
+    network->netLinkInfo_.routeList_.push_back(ipv6Route);
+    network->UpdateNetLinkInfoLinkType(network->netLinkInfo_);
+    auto res2 = network->GetNetLinkInfo();
+    EXPECT_TRUE(res2.isIpv4LinkValid_);
+    EXPECT_FALSE(res2.isIpv6LinkValid_);
+}
+
+HWTEST_F(NetworkTest, UpdateNetLinkInfoLinkTypeTest002, TestSize.Level1)
+{
+    int32_t netId = 1;
+    uint32_t supplierId = 1;
+    auto network = std::make_shared<Network>(netId, supplierId, NetBearType::BEARER_CELLULAR, nullptr);
+    
+    network->netLinkInfo_.ifaceName_ = "test";
+    
+    INetAddr addr2;
+    addr2.address_ = "2001:4860::1";
+    addr2.family_ = AF_INET6;
+    
+    Route ipv6Route;
+    ipv6Route.destination_.address_ = "2001:4860::";
+    ipv6Route.destination_.prefixlen_ = 32;
+    ipv6Route.iface_ = "test";
+    ipv6Route.gateway_.address_ = "fe80::1";
+    
+    network->netLinkInfo_.netAddrList_.push_back(addr2);
+    network->netLinkInfo_.routeList_.push_back(ipv6Route);
+    network->UpdateNetLinkInfoLinkType(network->netLinkInfo_);
+    auto res2 = network->GetNetLinkInfo();
+    EXPECT_FALSE(res2.isIpv4LinkValid_);
+    EXPECT_TRUE(res2.isIpv6LinkValid_);
+}
+
+HWTEST_F(NetworkTest, UpdateNetLinkInfoLinkTypeTest003, TestSize.Level1)
+{
+    int32_t netId = 1;
+    uint32_t supplierId = 1;
+    auto network = std::make_shared<Network>(netId, supplierId, NetBearType::BEARER_CELLULAR, nullptr);
+    network->netLinkInfo_.ifaceName_ = "test";
+
+    INetAddr addr3;
+    addr3.address_ = "fe80::1";
+    addr3.family_ = AF_INET6;
+    network->netLinkInfo_.netAddrList_.push_back(addr3);
+
+    Route ipv6Route;
+    ipv6Route.destination_.address_ = "2001:4860::";
+    ipv6Route.destination_.prefixlen_ = 32;
+    ipv6Route.iface_ = "test";
+    ipv6Route.gateway_.address_ = "fe80::1";
+    
+    network->netLinkInfo_.routeList_.push_back(ipv6Route);
+    network->UpdateNetLinkInfoLinkType(network->netLinkInfo_);
+    auto res3 = network->GetNetLinkInfo();
+    EXPECT_FALSE(res3.isIpv4LinkValid_);
+    EXPECT_FALSE(res3.isIpv6LinkValid_);
+}
+
+HWTEST_F(NetworkTest, UpdateNetLinkInfoLinkTypeTest004, TestSize.Level1)
+{
+    int32_t netId = 1;
+    uint32_t supplierId = 1;
+    auto network = std::make_shared<Network>(netId, supplierId, NetBearType::BEARER_CELLULAR, nullptr);
+    network->netLinkInfo_.ifaceName_ = "test";
+    
+    INetAddr addr4;
+    addr4.address_ = "192.168.1.100";
+    addr4.family_ = AF_INET;
+    
+    Route invalidIpv4Route;
+    invalidIpv4Route.destination_.address_ = "invalid.address";
+    invalidIpv4Route.destination_.prefixlen_ = 24;
+    invalidIpv4Route.iface_ = "test";
+    invalidIpv4Route.gateway_.address_ = "192.168.1.1";
+    
+    network->netLinkInfo_.netAddrList_.push_back(addr4);
+    network->netLinkInfo_.routeList_.push_back(invalidIpv4Route);
+    network->UpdateNetLinkInfoLinkType(network->netLinkInfo_);
+    auto res4 = network->GetNetLinkInfo();
+    EXPECT_FALSE(res4.isIpv4LinkValid_);
+    EXPECT_FALSE(res4.isIpv6LinkValid_);
+}
+
+HWTEST_F(NetworkTest, UpdateNetLinkInfoLinkTypeTest005, TestSize.Level1)
+{
+    int32_t netId = 1;
+    uint32_t supplierId = 1;
+    auto network = std::make_shared<Network>(netId, supplierId, NetBearType::BEARER_CELLULAR, nullptr);
+    network->netLinkInfo_.ifaceName_ = "test";
+    
+    INetAddr addr5_ipv4;
+    addr5_ipv4.address_ = "192.168.1.100";
+    addr5_ipv4.family_ = AF_INET;
+    
+    INetAddr addr5_ipv6;
+    addr5_ipv6.address_ = "2001:4860::1";
+    addr5_ipv6.family_ = AF_INET6;
+    
+    Route ipv4Route, ipv6Route;
+    ipv4Route.destination_.address_ = "192.168.1.0";
+    ipv4Route.destination_.prefixlen_ = 24;
+    ipv4Route.iface_ = "test";
+    ipv4Route.gateway_.address_ = "192.168.1.1";
+    
+    ipv6Route.destination_.address_ = "2001:4860::";
+    ipv6Route.destination_.prefixlen_ = 32;
+    ipv6Route.iface_ = "test";
+    ipv6Route.gateway_.address_ = "fe80::1";
+    
+    network->netLinkInfo_.netAddrList_.push_back(addr5_ipv4);
+    network->netLinkInfo_.netAddrList_.push_back(addr5_ipv6);
+    network->netLinkInfo_.routeList_.push_back(ipv4Route);
+    network->netLinkInfo_.routeList_.push_back(ipv6Route);
+    network->UpdateNetLinkInfoLinkType(network->netLinkInfo_);
+    auto res5 = network->GetNetLinkInfo();
+    EXPECT_TRUE(res5.isIpv4LinkValid_);
+    EXPECT_TRUE(res5.isIpv6LinkValid_);
+}
+
+HWTEST_F(NetworkTest, IsValidIpRouteIpv4Test001, TestSize.Level1)
+{
+    int32_t netId = 1;
+    uint32_t supplierId = 1;
+    auto network = std::make_shared<Network>(netId, supplierId, NetBearType::BEARER_CELLULAR, nullptr);
+    
+    INetAddr ipv4Dest1;
+    ipv4Dest1.address_ = "192.168.1.0/24";
+    ipv4Dest1.family_ = AF_INET;
+    EXPECT_TRUE(network->IsValidIpRoute(ipv4Dest1, "192.168.1.1"));
+    
+    INetAddr ipv4Dest2;
+    ipv4Dest2.address_ = "192.168.1.0/24";
+    ipv4Dest2.family_ = AF_INET;
+    EXPECT_TRUE(network->IsValidIpRoute(ipv4Dest2, ""));
+    
+    INetAddr ipv4Dest3;
+    ipv4Dest3.address_ = "192.168.1.0";
+    ipv4Dest3.family_ = AF_INET;
+    EXPECT_TRUE(network->IsValidIpRoute(ipv4Dest3, ""));
+    
+    INetAddr ipv4Dest4;
+    ipv4Dest4.address_ = "192.168.1.0/24";
+    ipv4Dest4.family_ = AF_INET;
+    EXPECT_FALSE(network->IsValidIpRoute(ipv4Dest4, "invalid.gateway"));
+    
+    INetAddr ipv4Dest5;
+    ipv4Dest5.address_ = "192.168.1.0/24";
+    ipv4Dest5.family_ = AF_INET;
+    EXPECT_FALSE(network->IsValidIpRoute(ipv4Dest5, "2001:4860::1"));
+    
+    INetAddr invalidDest1;
+    invalidDest1.address_ = "invalid.ip.address";
+    invalidDest1.family_ = AF_INET;
+    EXPECT_FALSE(network->IsValidIpRoute(invalidDest1, ""));
+}
+
+HWTEST_F(NetworkTest, IsValidIpRouteIpv6Test001, TestSize.Level1)
+{
+    int32_t netId = 1;
+    uint32_t supplierId = 1;
+    auto network = std::make_shared<Network>(netId, supplierId, NetBearType::BEARER_CELLULAR, nullptr);
+    
+    INetAddr ipv6Dest1;
+    ipv6Dest1.address_ = "2001:4860::/32";
+    ipv6Dest1.family_ = AF_INET6;
+    EXPECT_TRUE(network->IsValidIpRoute(ipv6Dest1, "2001:4860::1"));
+    
+    INetAddr ipv6Dest2;
+    ipv6Dest2.address_ = "2001:4860::/32";
+    ipv6Dest2.family_ = AF_INET6;
+    EXPECT_TRUE(network->IsValidIpRoute(ipv6Dest2, ""));
+    
+    INetAddr ipv6Dest3;
+    ipv6Dest3.address_ = "2001:4860::/1";
+    ipv6Dest3.family_ = AF_INET6;
+    EXPECT_TRUE(network->IsValidIpRoute(ipv6Dest3, "2001:4860::1"));
+    
+    INetAddr ipv6Dest4;
+    ipv6Dest4.address_ = "2001:4860::/0";
+    ipv6Dest4.family_ = AF_INET6;
+    EXPECT_FALSE(network->IsValidIpRoute(ipv6Dest4, ""));
+    
+    INetAddr ipv6Dest5;
+    ipv6Dest5.address_ = "2001:4860::/32";
+    ipv6Dest5.family_ = AF_INET6;
+    EXPECT_FALSE(network->IsValidIpRoute(ipv6Dest5, "invalid.ipv6.gateway"));
+    
+    INetAddr ipv6Dest6;
+    ipv6Dest6.address_ = "2001:4860::/32";
+    ipv6Dest6.family_ = AF_INET6;
+    EXPECT_FALSE(network->IsValidIpRoute(ipv6Dest6, "192.168.1.1"));
+    
+    INetAddr invalidDest2;
+    invalidDest2.address_ = "invalid.ipv6.format";
+    invalidDest2.family_ = AF_INET6;
+    EXPECT_FALSE(network->IsValidIpRoute(invalidDest2, ""));
+    
+    INetAddr invalidDest3;
+    invalidDest3.address_ = "unknown.format";
+    invalidDest3.family_ = AF_UNSPEC;
+    EXPECT_FALSE(network->IsValidIpRoute(invalidDest3, ""));
+}
+
 HWTEST_F(NetworkTest, UpdateInterfacesTest001, TestSize.Level1)
 {
     int32_t netId = 1;

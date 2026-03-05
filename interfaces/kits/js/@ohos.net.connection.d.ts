@@ -1538,6 +1538,20 @@ declare namespace connection {
      * @since 8
      */
     mtu: number;
+    /**
+     * Whether the IPv4 address of the interface is valid.
+     * @type { ?boolean }
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @since 24 dynamic&static
+     */
+    isIPv4LinkValid?: boolean;
+    /**
+     * Whether the IPv6 address of the interface is valid.
+     * @type { ?boolean }
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @since 24 dynamic&static
+     */
+    isIPv6LinkValid?: boolean;
   }
 
   /**

@@ -1331,6 +1331,39 @@ HWTEST_F(UtNetmanagerBaseCommon, AnonymizeIptablesCommandTest001, TestSize.Level
     ASSERT_FALSE(result.empty());
 }
 
+HWTEST_F(UtNetmanagerBaseCommon, IsUsableGlobalIpv6AddrTest001, TestSize.Level2)
+{
+    EXPECT_FALSE(CommonUtils::IsUsableGlobalIpv6Addr(""));
+    EXPECT_FALSE(CommonUtils::IsUsableGlobalIpv6Addr("::"));
+    EXPECT_FALSE(CommonUtils::IsUsableGlobalIpv6Addr("::1"));
+    EXPECT_FALSE(CommonUtils::IsUsableGlobalIpv6Addr("2001:db8::1"));
+    EXPECT_FALSE(CommonUtils::IsUsableGlobalIpv6Addr("2001:db8::ffff"));
+    EXPECT_FALSE(CommonUtils::IsUsableGlobalIpv6Addr("fe80::1"));
+    EXPECT_FALSE(CommonUtils::IsUsableGlobalIpv6Addr("fe80::ffff"));
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsUsableGlobalIpv6AddrTest002, TestSize.Level2)
+{
+    EXPECT_FALSE(CommonUtils::IsUsableGlobalIpv6Addr("fc00::1"));
+    EXPECT_FALSE(CommonUtils::IsUsableGlobalIpv6Addr("fdff::ffff"));
+    EXPECT_FALSE(CommonUtils::IsUsableGlobalIpv6Addr("ff00::1"));
+    EXPECT_FALSE(CommonUtils::IsUsableGlobalIpv6Addr("ff02::1"));
+    EXPECT_FALSE(CommonUtils::IsUsableGlobalIpv6Addr("fec0::1"));
+    EXPECT_FALSE(CommonUtils::IsUsableGlobalIpv6Addr("fec0::ffff"));
+    EXPECT_TRUE(CommonUtils::IsUsableGlobalIpv6Addr("2001:4860::1"));
+    EXPECT_TRUE(CommonUtils::IsUsableGlobalIpv6Addr("2400::1"));
+    EXPECT_TRUE(CommonUtils::IsUsableGlobalIpv6Addr("2a00::1"));
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsUsableGlobalIpv6AddrTest003, TestSize.Level2)
+{
+    EXPECT_FALSE(CommonUtils::IsUsableGlobalIpv6Addr("invalid.ipv6"));
+    EXPECT_FALSE(CommonUtils::IsUsableGlobalIpv6Addr("192.168.1.1"));
+    EXPECT_FALSE(CommonUtils::IsUsableGlobalIpv6Addr("2001::4860::zzzz"));
+    EXPECT_FALSE(CommonUtils::IsUsableGlobalIpv6Addr("2001:0010::1"));
+    EXPECT_FALSE(CommonUtils::IsUsableGlobalIpv6Addr("2001:0010::ffff"));
+}
+
 HWTEST_F(UtNetmanagerBaseCommon, IsValidAddressTest001, TestSize.Level2)
 {
     EXPECT_FALSE(CommonUtils::IsValidAddress(""));
