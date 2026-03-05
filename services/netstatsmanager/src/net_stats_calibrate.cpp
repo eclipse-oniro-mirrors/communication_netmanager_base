@@ -111,7 +111,7 @@ void NetStatsCalibrate::UpdateCalibrationInfo(uint32_t simId, uint64_t usedTraff
     if (calibrateInfo_.find(simId) == calibrateInfo_.end()) {
         calibrateInfo_.insert({simId, info});
     }
-    calibrateInfo_[simId].startTime = NetStatsUtils::GetStartTimestamp(1);  // 1: month begin day
+    calibrateInfo_[simId].startTime = static_cast<uint64_t>(NetStatsUtils::GetStartTimestamp(1));  // 1: month begin day
     calibrateInfo_[simId].endTime = CommonUtils::GetCurrentSecond();
     calibrateInfo_[simId].usedTraffic = usedTraffic;
     auto handler = std::make_unique<NetStatsDataHandler>();

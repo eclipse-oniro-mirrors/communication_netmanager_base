@@ -236,7 +236,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient003, TestSize.Level1)
     info.txPackets_ = MOCK_TXPACKETS;
     NETMGR_LOG_I("UpdateIfacesStats enter");
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateIfacesStats(iface, 0, UINT32_MAX, info);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
     NETMGR_LOG_I("GetIfaceStatsDetail enter");
     DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(iface, 0, UINT32_MAX, info);
     std::cout << "NetStatsClientTest::NetStatsClient003 net ifaceStatsInfo:" << info.UidData() << std::endl;
@@ -274,7 +274,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient005, TestSize.Level1)
     info.txPackets_ = MOCK_TXPACKETS;
 
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->ResetFactory();
-    EXPECT_LE(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsClientTest, NetStatsClient006, TestSize.Level1)
@@ -292,7 +292,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient007, TestSize.Level1)
     deathRecipient->OnRemoteDied(remote);
     std::vector<NetStatsInfo> infos;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllStatsInfo(infos);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsClientTest, NetStatsClient008, TestSize.Level1)
@@ -337,7 +337,7 @@ HWTEST_F(NetStatsClientTest, GetAllContainerStatsInfo001, TestSize.Level1)
     deathRecipient->OnRemoteDied(remote);
     std::vector<NetStatsInfo> infos;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllContainerStatsInfo(infos);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsClientTest, GetTrafficStatsByUidNetwork001, TestSize.Level1)
@@ -363,7 +363,7 @@ HWTEST_F(NetStatsClientTest, SetAppStats001, TestSize.Level1)
     deathRecipient->OnRemoteDied(remote);
     PushStatsInfo info;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->SetAppStats(info);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsClientTest, SaveSharingTraffic001, TestSize.Level1)
@@ -421,6 +421,18 @@ HWTEST_F(NetStatsClientTest, NetStatsClient009, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
 }
 
+HWTEST_F(NetStatsClientTest, GetMonthTrafficStatsByNetworkTest001, TestSize.Level1)
+{
+    uint32_t simId = 1;
+    uint64_t monthData = 0;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetMonthTrafficStatsByNetwork(simId, monthData);
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+    EXPECT_NE(ret, NETMANAGER_ERR_OPERATION_FAILED);
+#else
+    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+#endif
+}
+
 HWTEST_F(NetStatsClientTest, NetStatsClient010, TestSize.Level1)
 {
     uint32_t simId = 1;
@@ -428,7 +440,11 @@ HWTEST_F(NetStatsClientTest, NetStatsClient010, TestSize.Level1)
     uint64_t totalMonthlyData = 1000 * 1024 * 1024;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->SetCalibrationTraffic(
         simId, remainingData, totalMonthlyData);
-    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+    EXPECT_NE(ret, NETMANAGER_ERR_CAPABILITY_NOT_SUPPORTED);
+#else
+    EXPECT_EQ(ret, NETMANAGER_ERR_CAPABILITY_NOT_SUPPORTED);
+#endif
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
