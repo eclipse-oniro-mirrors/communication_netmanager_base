@@ -19,6 +19,11 @@
 #include <iosfwd>
 #include <sstream>
 #include <vector>
+#include <sys/ioctl.h>
+
+#define HMFS_MONITOR_FL 0x00000002
+#define HMFS_IOCTL_HW_GET_FLAGS _IOR(0xf5, 70, unsigned int)
+#define HMFS_IOCTL_HW_SET_FLAGS _IOR(0xf5, 71, unsigned int)
 
 namespace OHOS::NetManagerStandard {
 constexpr uint32_t ROUTE_INTERNAL_DEFAULT_TABLE = 10;
@@ -119,6 +124,8 @@ std::string ExtractDomainFormUrl(const std::string &url);
 bool IsUsableGlobalIpv6Addr(const std::string &ipv6Addr);
 bool IsValidAddress(const std::string &ipStrAddr);
 bool IsIPv6LinkLocal(const std::string& ipv6Addr);
+void RemoveDeleteControlFromPath(const char *path);
+void RemoveDeleteControlFlag(int fd);
 } // namespace OHOS::NetManagerStandard::CommonUtils
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H */
