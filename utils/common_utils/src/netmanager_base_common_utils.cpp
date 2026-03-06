@@ -1160,4 +1160,30 @@ bool IsIPv6LinkLocal(const std::string& ipv6Addr)
     
     return (addr.s6_addr[0] == 0xfe) && ((addr.s6_addr[1] & 0xc0) == 0x80);
 }
+
+void RemoveDeleteControlFromPath(const char *path)
+{
+    int fd = open(path, O_RDONLY);
+    if (fd > 0) {
+        RemoveDeleteControlFlag(fd);
+        close(fd);
+    }
+}
+
+void RemoveDeleteControlFlag(int fd)
+{
+    if (fd <= 0) {
+        return;
+    }
+    uint32_t flags = 0;
+    int ret = ioctl(fd, HMFS_IOCTL_HW_GET_FLAGS, &flags);
+    if (ret < 0) {
+        return;
+    }
+    if (!(flags & HMFS_MONITOR_FL)) {
+        return;
+    }
+    flags &= ~HMFS_MONITOR_FL;
+    ioctl(fd, HMFS_IOCTL_HW_SET_FLAGS, &flags);
+}
 } // namespace OHOS::NetManagerStandard::CommonUtils
