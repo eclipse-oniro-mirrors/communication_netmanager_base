@@ -35,6 +35,7 @@
 #include <random>
 #include <arpa/inet.h>
 #include <poll.h>
+#include <fcntl.h>
 
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
