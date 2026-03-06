@@ -66,20 +66,9 @@ declare_args() {
 }
 fuzz_test_path = "netmanager_base/netmanager_base"
 
-common_cflags = []
- 
-if (netmanager_base_build_oz){
-common_cflags += [
+common_cflags = [
   "-D_FORTIFY_SOURCE=2",
   "-fdata-sections",
   "-ffunction-sections",
   "-Oz",
-]
-} else {
-common_cflags += [
-  "-D_FORTIFY_SOURCE=2",
-  "-fdata-sections",
-  "-ffunction-sections",
-  "-Os",
-  "-O2",
 ]
