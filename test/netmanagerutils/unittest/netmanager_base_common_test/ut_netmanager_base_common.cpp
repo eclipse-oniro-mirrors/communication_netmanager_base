@@ -1400,5 +1400,26 @@ HWTEST_F(UtNetmanagerBaseCommon, IsIPv6LinkLocal005, TestSize.Level0)
     std::string addrWithoutPercent = "fe80::1"; // 没有百分号部分的IPv6地址
     EXPECT_TRUE(CommonUtils::IsIPv6LinkLocal(addrWithoutPercent));
 }
+
+HWTEST_F(UtNetmanagerBaseCommon, RemoveDeleteControlFromPath001, TestSize.Level0)
+{
+    const char* path1 = "/data/cxy";
+    CommonUtils::RemoveDeleteControlFromPath(path1);
+    const char* path2 = "/data/service/el1/public/netmanager/";
+    CommonUtils::RemoveDeleteControlFromPath(path2);
+    CommonUtils::RemoveDeleteControlFromPath(path2);
+    std::string emptyAddr = "";
+    EXPECT_FALSE(CommonUtils::IsIPv6LinkLocal(emptyAddr));
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, RemoveDeleteControlFlag001, TestSize.Level0)
+{
+    int fd = 0;
+    CommonUtils::RemoveDeleteControlFlag(fd);
+    fd = 1;
+    CommonUtils::RemoveDeleteControlFlag(fd);
+    std::string emptyAddr = "";
+    EXPECT_FALSE(CommonUtils::IsIPv6LinkLocal(emptyAddr));
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

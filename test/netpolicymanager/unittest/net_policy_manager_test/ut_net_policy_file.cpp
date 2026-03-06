@@ -136,5 +136,13 @@ HWTEST_F(UtNetPolicyFile, AddBackgroundPolicy001, TestSize.Level1)
     netPolicyFile_->AddBackgroundPolicy(nullptr);
     EXPECT_NE(netPolicyFile_->netPolicy_.backgroundPolicyStatus, "");
 }
+
+HWTEST_F(UtNetPolicyFile, GetHandler001, TestSize.Level1)
+{
+    auto netPolicyFileInstance = std::make_shared<NetPolicyFile>();
+    auto handler = netPolicyFileInstance->GetHandler();
+    ASSERT_NE(handler, nullptr);
+    EXPECT_TRUE(handler->Write());
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
