@@ -24,6 +24,7 @@
 
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_inner_define.h"
+#include "netmanager_base_common_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -91,6 +92,7 @@ bool NetPolicyFileEventHandler::Write()
 {
     NETMGR_LOG_D("write file to disk.");
     struct stat buffer;
+    CommonUtils::RemoveDeleteControlFromPath(POLICY_FILE_BAK_PATH);
     if (stat(POLICY_FILE_NAME, &buffer) == 0) {
         std::ifstream oldFile(POLICY_FILE_NAME, std::ios::binary);
         std::ofstream newFile(POLICY_FILE_BAK_NAME, std::ios::binary);
