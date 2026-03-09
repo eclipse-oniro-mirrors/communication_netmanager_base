@@ -279,35 +279,6 @@ typedef struct NetConn_NetConnCallback {
     OH_NetConn_NetBlockStatusChange onNetBlockStatusChange;
 } NetConn_NetConnCallback;
 
-constexpr int32_t NETCONN_MAX_RTT_NUM = 4;
-typedef struct NetConn_ProbeResultInfo {
-    uint8_t lossRate;
-
-    uint32_t rtt[NETCONN_MAX_RTT_NUM];
-} NetConn_ProbeResultInfo;
-
-typedef enum NetConn_PacketsType {
-    /** ICMP */
-    NETCONN_PACKETS_ICMP = 0,
-    /** UDP */
-    NETCONN_PACKETS_UDP = 1,
-} NetConn_PacketsType;
-
-typedef struct NetConn_TraceRouteOption {
-    /** Maximum number of jumps */
-    uint8_t maxJumpNumber; /** default NETCONN_MAX_JUMP_NUM */
-    /** Packets Type */
-    NetConn_PacketsType packetsType; /** default ICMP */
-} NetConn_TraceRouteOption;
-
-typedef struct NetConn_TraceRouteInfo {
-    /** Number of jumps */
-    uint8_t jumpNo;
-    /** host name or address */
-    char address[NETCONN_MAX_STR_LEN];
-    /** RTT in millisecond */
-    uint32_t rtt[NETCONN_MAX_RTT_NUM];
-} NetConn_TraceRouteInfo;
 #ifdef __cplusplus
 }
 #endif

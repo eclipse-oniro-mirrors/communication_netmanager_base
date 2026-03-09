@@ -382,7 +382,7 @@ public:
     }
 
     int32_t QueryTraceRoute(const std::string &destination, int32_t maxJumpNumber, int32_t packetsType,
-        std::string &traceRouteInfo) override
+        std::string &traceRouteInfo, bool isCallerNative) override
     {
         return 0;
     }

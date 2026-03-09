@@ -1835,6 +1835,18 @@ void SetPacFileUrlFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_PAC_FILE_URL), dataParcel);
 }
 
+void SetPacUrlFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    std::string pacUrl = "test.pac";
+    dataParcel.WriteString(pacUrl);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_PAC_URL), dataParcel);
+}
+
 void SetProxyModeFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;
@@ -1867,6 +1879,16 @@ void GetPacFileUrlFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PAC_FILE_URL), dataParcel);
 }
 
+void GetPacUrlFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PAC_URL), dataParcel);
+}
+
 void FindProxyForURLFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;
@@ -1888,6 +1910,8 @@ void PacFileUrlFuzzTest(const uint8_t *data, size_t size)
     GetProxyModeFuzzTest(data, size);
     GetPacFileUrlFuzzTest(data, size);
     FindProxyForURLFuzzTest(data, size);
+    SetPacUrlFuzzTest(data, size);
+    GetPacUrlFuzzTest(data, size);
 }
 
 void SetReuseSupplierIdFuzzTest(const uint8_t *data, size_t size)

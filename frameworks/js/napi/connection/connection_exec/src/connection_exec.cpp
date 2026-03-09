@@ -35,6 +35,7 @@
 #include "securec.h"
 #include "hi_app_event_report.h"
 #include "icu_helper.h"
+#include "net_probe.h"
 
 namespace OHOS::NetManagerStandard {
 std::mutex g_predefinedHostMtx;
@@ -1563,6 +1564,94 @@ bool ConnectionExec::ExecFindProxyForUrl(FindPacFileUrlContext *context)
 napi_value ConnectionExec::FindProxyForUrlCallback(FindPacFileUrlContext *context)
 {
     return NapiUtils::CreateStringUtf8(context->GetEnv(), context->proxy_);
+}
+
+bool ConnectionExec::ExecQueryTraceRoute(QueryTraceRouteContext *context)
+{
+    int32_t errorCode = NetConnClient::GetInstance().QueryTraceRoute(context->dest_, context->option_.maxJumpNumber_,
+        static_cast<int32_t>(context->option_.packetsType_), context->traceRouteInfoStr_, false);
+    if (errorCode != NET_CONN_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec ExecQueryTraceRoute failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::QueryTraceRouteCallback(QueryTraceRouteContext *context)
+{
+    context->Conv2TraceRouteInfo(context->traceRouteInfoStr_, context->traceRouteInfo_,
+                                 context->option_.maxJumpNumber_);
+    napi_value array = NapiUtils::CreateArray(context->GetEnv(), context->traceRouteInfo_.size());
+    if (context->traceRouteInfo_.empty()) {
+        NETMANAGER_BASE_LOGE("trace route info is empty!");
+        return array;
+    }
+    uint32_t index = 0;
+    std::for_each(context->traceRouteInfo_.begin(), context->traceRouteInfo_.end(),
+        [array, &index, context](const TraceRouteInfo &traceRouteInfo) {
+        NapiUtils::SetArrayElement(context->GetEnv(), array, index,
+            CreateTraceRouteInfo(context->GetEnv(), traceRouteInfo));
+        ++index;
+    });
+    return array;
+}
+
+napi_value ConnectionExec::CreateTraceRouteInfo(napi_env env, const TraceRouteInfo &traceRouteInfo)
+{
+    napi_value jsTraceRoute = NapiUtils::CreateObject(env);
+    if (NapiUtils::GetValueType(env, jsTraceRoute) != napi_object) {
+        return NapiUtils::GetUndefined(env);
+    }
+
+    napi_value jsRttArray = NapiUtils::CreateArray(env, traceRouteInfo.rtt_.size());
+    if (NapiUtils::GetValueType(env, jsRttArray) != napi_object) {
+        return NapiUtils::GetUndefined(env);
+    }
+    auto it = traceRouteInfo.rtt_.begin();
+    for (uint32_t index = 0; it != traceRouteInfo.rtt_.end(); ++index, ++it) {
+        NapiUtils::SetArrayElement(env, jsRttArray, index, NapiUtils::CreateUint32(env, *it));
+    }
+
+    NapiUtils::SetUint32Property(env, jsTraceRoute, KEY_JUMP_NO, traceRouteInfo.jumpNo_);
+    NapiUtils::SetStringPropertyUtf8(env, jsTraceRoute, KEY_ADDRESS, traceRouteInfo.address_);
+    NapiUtils::SetNamedProperty(env, jsTraceRoute, KEY_RTT, jsRttArray);
+
+    return jsTraceRoute;
+}
+
+bool ConnectionExec::ExecQueryProbeResult(QueryProbeResultContext *context)
+{
+    NetProbe np;
+    int32_t errorCode = np.QueryProbeResult(context->dest_, context->duration_, context->probeResultInfo_);
+    if (errorCode != NET_CONN_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec ExecQueryProbeResult failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::QueryProbeResultCallback(QueryProbeResultContext *context)
+{
+    napi_env env = context->GetEnv();
+    napi_value jsProbeResult = NapiUtils::CreateObject(env);
+    if (NapiUtils::GetValueType(env, jsProbeResult) != napi_object) {
+        return NapiUtils::GetUndefined(env);
+    }
+    NapiUtils::SetUint32Property(env, jsProbeResult, KEY_LOSS_RATE, context->probeResultInfo_.lossRate);
+    
+    napi_value jsRttArray = NapiUtils::CreateArray(env, OHOS::NetManagerStandard::NETCONN_MAX_RTT_NUM);
+    if (NapiUtils::GetValueType(env, jsRttArray) != napi_object) {
+        return NapiUtils::GetUndefined(env);
+    }
+    for (uint32_t index = 0; index < OHOS::NetManagerStandard::NETCONN_MAX_RTT_NUM; ++index) {
+        NapiUtils::SetArrayElement(env, jsRttArray, index,
+            NapiUtils::CreateUint32(env, context->probeResultInfo_.rtt[index]));
+    }
+    NapiUtils::SetNamedProperty(env, jsProbeResult, KEY_RTT, jsRttArray);
+
+    return jsProbeResult;
 }
 
 } // namespace OHOS::NetManagerStandard

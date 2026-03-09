@@ -1718,6 +1718,48 @@ HWTEST_F(NetConnClientTest, QueryTraceRoute001, TestSize.Level1)
     EXPECT_NE(ret0, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnClientTest, QueryTraceRoute002, TestSize.Level1)
+{
+    std::string url = "";
+    int32_t maxJumpNumber = 1;
+    int32_t packetsType = 1;
+    std::string traceRouteInfo;
+    auto ret0 = NetConnClient::GetInstance().QueryTraceRoute(url, maxJumpNumber, packetsType, traceRouteInfo, false);
+    EXPECT_EQ(ret0, NETMANAGER_ERR_INVALID_PARAMETER);
+}
+
+HWTEST_F(NetConnClientTest, QueryTraceRoute003, TestSize.Level1)
+{
+    std::string url = "www.baidu.com";
+    int32_t maxJumpNumber = 31;
+    int32_t packetsType = 1;
+    std::string traceRouteInfo;
+    auto ret0 = NetConnClient::GetInstance().QueryTraceRoute(url, maxJumpNumber, packetsType, traceRouteInfo, false);
+    EXPECT_EQ(ret0, NETMANAGER_ERR_INVALID_PARAMETER);
+
+    maxJumpNumber = -1;
+    auto ret1 = NetConnClient::GetInstance().QueryTraceRoute(url, maxJumpNumber, packetsType, traceRouteInfo, false);
+    EXPECT_EQ(ret1, NETMANAGER_ERR_INVALID_PARAMETER);
+}
+
+HWTEST_F(NetConnClientTest, QueryTraceRoute004, TestSize.Level1)
+{
+    std::string url = "www.baidu.com";
+    int32_t maxJumpNumber = 10;
+    int32_t packetsType = 3;
+    std::string traceRouteInfo;
+    auto ret0 = NetConnClient::GetInstance().QueryTraceRoute(url, maxJumpNumber, packetsType, traceRouteInfo, false);
+    EXPECT_EQ(ret0, NETMANAGER_ERR_INVALID_PARAMETER);
+
+    packetsType = 0;
+    auto ret1 = NetConnClient::GetInstance().QueryTraceRoute(url, maxJumpNumber, packetsType, traceRouteInfo, false);
+    EXPECT_NE(ret1, NETMANAGER_ERR_INVALID_PARAMETER);
+
+    packetsType = 1;
+    auto ret2 = NetConnClient::GetInstance().QueryTraceRoute(url, maxJumpNumber, packetsType, traceRouteInfo, false);
+    EXPECT_NE(ret2, NETMANAGER_ERR_INVALID_PARAMETER);
+}
+
 HWTEST_F(NetConnClientTest, SetAppIsFrozenedTest001, TestSize.Level1)
 {
     auto ret = NetConnClient::GetInstance().SetAppIsFrozened(20020177, true);

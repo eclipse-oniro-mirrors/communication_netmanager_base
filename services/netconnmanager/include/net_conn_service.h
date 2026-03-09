@@ -418,7 +418,7 @@ public:
     int32_t GetPacFileUrl(std::string &pacUrl) override;
     int32_t FindProxyForURL(const std::string &url, const std::string &host, std::string &proxy) override;
     int32_t QueryTraceRoute(const std::string &destination, int32_t maxJumpNumber, int32_t packetsType,
-        std::string &traceRouteInfo) override;
+        std::string &traceRouteInfo, bool isCallerNative = true) override;
     int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened) override;
     int32_t EnableAppFrozenedCallbackLimitation(bool flag) override;
     bool IsAppFrozenedCallbackLimitation();

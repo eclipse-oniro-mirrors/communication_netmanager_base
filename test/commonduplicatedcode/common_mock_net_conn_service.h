@@ -115,7 +115,7 @@ public:
     MOCK_METHOD(int32_t, GetPacFileUrl, (std::string &pacUrl));
     MOCK_METHOD(int32_t, FindProxyForURL, (const std::string &url, const std::string &host, std::string &proxy));
     MOCK_METHOD(int32_t, QueryTraceRoute, (const std::string &destination, int32_t maxJumpNumber, int32_t packetsType,
-        std::string &traceRouteInfo));
+        std::string &traceRouteInfo, bool isCallerNative));
     MOCK_METHOD(int32_t, SetAppIsFrozened, (uint32_t uid, bool isFrozened));
     MOCK_METHOD(int32_t, EnableAppFrozenedCallbackLimitation, (bool flag));
     MOCK_METHOD(int32_t, SetReuseSupplierId, (uint32_t supplierId, uint32_t reuseSupplierId, bool isReused));

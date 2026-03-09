@@ -51,6 +51,8 @@
 #include "deletevlanip_context.h"
 #include "getdns_context.h"
 #include "getsystemnetportstates_context.h"
+#include "querytraceroute_context.h"
+#include "queryproberesult_context.h"
 
 #define DECLARE_WRITABLE_NAPI_FUNCTION(name, func)                                  \
     {                                                                               \
@@ -258,6 +260,16 @@ public:
     static bool ExecGetSystemNetPortStates(GetSystemNetPortStatesContext *context);
 
     static napi_value GetSystemNetPortStatesCallback(GetSystemNetPortStatesContext *context);
+
+    static bool ExecQueryProbeResult(QueryProbeResultContext *context);
+
+    static napi_value QueryProbeResultCallback(QueryProbeResultContext *context);
+
+    static bool ExecQueryTraceRoute(QueryTraceRouteContext *context);
+
+    static napi_value QueryTraceRouteCallback(QueryTraceRouteContext *context);
+
+    static napi_value CreateTraceRouteInfo(napi_env env, const TraceRouteInfo &traceRouteInfo);
 
     class NetHandleExec final {
     public:

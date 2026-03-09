@@ -1265,8 +1265,8 @@ int32_t NetConnServiceProxy::GetPacUrl(std::string &pacUrl)
     return NetConnServicePacProxyHelper::GetInstance(fun)->GetPacUrl(pacUrl);
 }
 
-int32_t NetConnServiceProxy::QueryTraceRoute(
-    const std::string &destination, int32_t maxJumpNumber, int32_t packetsType, std::string &traceRouteInfo)
+int32_t NetConnServiceProxy::QueryTraceRoute(const std::string &destination, int32_t maxJumpNumber,
+    int32_t packetsType, std::string &traceRouteInfo, bool isCallerNative)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -1284,8 +1284,9 @@ int32_t NetConnServiceProxy::QueryTraceRoute(
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_QUERY_TRACEROUTE),
-                                      data, reply);
+    ConnInterfaceCode interfaceCode = isCallerNative ? ConnInterfaceCode::CMD_NM_QUERY_TRACEROUTE :
+        ConnInterfaceCode::CMD_NM_QUERY_TRACEROUTE_JS;
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(interfaceCode), data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
     }

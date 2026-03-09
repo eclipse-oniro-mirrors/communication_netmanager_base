@@ -549,4 +549,26 @@ void ConnectionAsyncWork::SetNetExtAttributeCallback(napi_env env, napi_status s
     BaseAsyncWork::AsyncWorkCallback<SetNetExtAttributeContext, ConnectionExec::SetNetExtAttributeCallback>(env,
         status, data);
 }
+
+void ConnectionAsyncWork::ExecQueryTraceRoute(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<QueryTraceRouteContext, ConnectionExec::ExecQueryTraceRoute>(env, data);
+}
+
+void ConnectionAsyncWork::QueryTraceRouteCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<QueryTraceRouteContext, ConnectionExec::QueryTraceRouteCallback>(env,
+        status, data);
+}
+
+void ConnectionAsyncWork::ExecQueryProbeResult(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<QueryProbeResultContext, ConnectionExec::ExecQueryProbeResult>(env, data);
+}
+
+void ConnectionAsyncWork::QueryProbeResultCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<QueryProbeResultContext, ConnectionExec::QueryProbeResultCallback>(env,
+        status, data);
+}
 } // namespace OHOS::NetManagerStandard

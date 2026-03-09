@@ -18,7 +18,7 @@
 
 #include <string>
 
-#include "net_connection_type.h"
+#include "net_trace_route_info.h"
 
 namespace OHOS {
 namespace NetManagerStandard {

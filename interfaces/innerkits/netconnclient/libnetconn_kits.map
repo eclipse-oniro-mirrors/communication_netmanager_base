@@ -49,7 +49,7 @@
       "OHOS::NetManagerStandard::NetConnClient::RegisterAppHttpProxyCallback(std::__h::function<void (OHOS::NetManagerStandard::HttpProxy const&)>, unsigned int&)";
       "OHOS::NetManagerStandard::NetConnClient::SetPacUrl(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetConnClient::GetPacUrl(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
-      "OHOS::NetManagerStandard::NetConnClient::QueryTraceRoute(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int, int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
+      "OHOS::NetManagerStandard::NetConnClient::QueryTraceRoute(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int, int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&, bool)";
       "OHOS::NetManagerStandard::NetConnClient::GetAppNet(int&)";
       "OHOS::NetManagerStandard::NetConnClient::SetAppNet(int)";
       "OHOS::NetManagerStandard::NetConnClient::ProtectProcessNet()";
@@ -243,6 +243,7 @@
       "OHOS::NetManagerStandard::NetConnClient::GetSystemNetPortStates(OHOS::NetManagerStandard::NetPortStatesInfo&)";
       "VTT for OHOS::NetManagerStandard::NetPortStatesInfo";
       "vtable for OHOS::NetManagerStandard::NetPortStatesInfo";
+      "OHOS::NetManagerStandard::NetProbe::QueryProbeResult(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&, int, OHOS::NetManagerStandard::NetConn_ProbeResultInfo&)";
     };
   local:
    *;

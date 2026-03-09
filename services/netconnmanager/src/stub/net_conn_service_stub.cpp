@@ -241,7 +241,9 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMapExt()
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_QUERY_TRACEROUTE)] = {
         &NetConnServiceStub::OnQueryTraceRoute,
         {Permission::INTERNET, Permission::GET_NETWORK_LOCATION, Permission::ACCESS_NET_TRACE_INFO}};
-
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_QUERY_TRACEROUTE_JS)] = {
+        &NetConnServiceStub::OnQueryTraceRoute, {Permission::INTERNET, Permission::GET_NETWORK_LOCATION,
+        Permission::GET_NETWORK_APPROXIMATE_LOCATION, Permission::ACCESS_NET_TRACE_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IP_NEIGH_TABLE)] = {
         &NetConnServiceStub::OnGetIpNeighTable, {Permission::GET_NETWORK_INFO, Permission::GET_IP_MAC_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_CREATE_VLAN)] = {

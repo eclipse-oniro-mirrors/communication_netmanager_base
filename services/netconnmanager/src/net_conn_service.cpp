@@ -2737,7 +2737,7 @@ int32_t NetConnService::GetPacUrl(std::string &pacUrl)
 }
 
 int32_t NetConnService::QueryTraceRoute(const std::string &destination, int32_t maxJumpNumber, int32_t packetsType,
-    std::string &traceRouteInfo)
+    std::string &traceRouteInfo, bool isCallerNative)
 {
     return OHOS::NetManagerStandard::QueryTraceRouteProbeResult(destination, maxJumpNumber,
         packetsType, traceRouteInfo);
