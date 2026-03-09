@@ -1117,6 +1117,15 @@ HWTEST_F(NetConnServiceStubTest, OnQueryTraceRouteTest001, TestSize.Level1)
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceStubTest, OnQueryTraceRouteTest002, TestSize.Level1)
+{
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteInt32(TEST_INT32_VALUE));
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_QUERY_TRACEROUTE_JS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetConnServiceStubTest, PAC_OnSetPacFileUrl001, TestSize.Level1)
 {
     MessageParcel data;

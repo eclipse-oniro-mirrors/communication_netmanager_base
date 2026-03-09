@@ -35,6 +35,7 @@
 #include "safe_map.h"
 #include <shared_mutex>
 #include "net_conn_callback_stub.h"
+#include "net_trace_route_info.h"
 
 namespace OHOS {
 class ISystemAbilityStatusChange;
@@ -519,8 +520,8 @@ public:
 
     int32_t FindProxyForURL(const std::string &url, std::string &proxy, const std::string host = "");
 
-    int32_t QueryTraceRoute(
-        const std::string &destination, int32_t maxJumpNumber, int32_t packetsType, std::string &traceRouteInfo);
+    int32_t QueryTraceRoute(const std::string &destination, int32_t maxJumpNumber,
+        int32_t packetsType, std::string &traceRouteInfo, bool isCallerNative = true);
 
     int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList);
     int32_t GetSpecificNetByIdent(NetBearType bearerType, const std::string &ident, std::list<int32_t> &netIdList);

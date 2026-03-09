@@ -124,6 +124,8 @@ ohos_shared_library("connection_if") {
     "async_context/src/setinterfaceup_context.cpp",
     "async_context/src/unregisternetsupplier_context.cpp",
     "async_context/src/netextattribute_context.cpp",
+    "async_context/src/queryproberesult_context.cpp",
+    "async_context/src/querytraceroute_context.cpp",
     "async_work/src/connection_async_work.cpp",
     "connection_exec/src/connection_exec.cpp",
     "connection_helper/src/icu_helper.cpp",
@@ -149,6 +151,7 @@ ohos_shared_library("connection_if") {
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETMANAGER_BASE_ROOT/utils/napi_utils:napi_utils",
+    "$NETMANAGER_BASE_ROOT/interfaces/kits/c/netconnclient:net_connection",
   ]
   external_deps = [
     "c_utils:utils",

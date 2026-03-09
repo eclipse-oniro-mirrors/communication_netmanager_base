@@ -465,7 +465,7 @@ int32_t OH_NetConn_FindProxyForURL(const char *url, const char *host, char *prox
 }
 
 int32_t OH_NetConn_QueryProbeResult(const char *destination, int32_t duration,
-                                    struct NetConn_ProbeResultInfo *result)
+                                    OHOS::NetManagerStandard::NetConn_ProbeResultInfo *result)
 {
     if (destination == nullptr || result == nullptr) {
         NETMGR_LOG_E("OH_NetConn_QueryProbeResult received invalid parameters");
@@ -481,8 +481,8 @@ int32_t OH_NetConn_QueryProbeResult(const char *destination, int32_t duration,
     return ret;
 }
 
-int32_t OH_NetConn_QueryTraceRoute(
-    const char *destination, NetConn_TraceRouteOption *option, NetConn_TraceRouteInfo *traceRouteInfo)
+int32_t OH_NetConn_QueryTraceRoute(const char *destination, OHOS::NetManagerStandard::NetConn_TraceRouteOption *option,
+    OHOS::NetManagerStandard::NetConn_TraceRouteInfo *traceRouteInfo)
 {
     if (destination == nullptr || traceRouteInfo == nullptr) {
         NETMGR_LOG_E("OH_NetConn_QueryTraceRoute received invalid parameters");

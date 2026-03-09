@@ -178,6 +178,14 @@ public:
 
     static void GetSystemNetPortStatesCallback(napi_env env, napi_status status, void *data);
 
+    static void ExecQueryTraceRoute(napi_env env, void *data);
+
+    static void QueryTraceRouteCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecQueryProbeResult(napi_env env, void *data);
+
+    static void QueryProbeResultCallback(napi_env env, napi_status status, void *data);
+
     class NetHandleAsyncWork final {
     public:
         NetHandleAsyncWork() = delete;

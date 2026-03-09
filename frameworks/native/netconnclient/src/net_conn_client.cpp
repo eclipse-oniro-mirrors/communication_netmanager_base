@@ -808,17 +808,23 @@ int32_t NetConnClient::GetPacUrl(std::string &pacUrl)
     return proxy->GetPacUrl(pacUrl);
 }
 
-int32_t NetConnClient::QueryTraceRoute(
-    const std::string &destination, int32_t maxJumpNumber, int32_t packetsType, std::string &traceRouteInfo)
+int32_t NetConnClient::QueryTraceRoute(const std::string &destination, int32_t maxJumpNumber,
+    int32_t packetsType, std::string &traceRouteInfo, bool isCallerNative)
 {
-    NETMGR_LOG_D("Enter QueryTraceRoute");
-
+    if (!isCallerNative) {
+        if (destination == "" || maxJumpNumber <= 0 || maxJumpNumber > NETCONN_MAX_JUMP_NUM) {
+            return NETMANAGER_ERR_INVALID_PARAMETER;
+        }
+        if (packetsType != NETCONN_PACKETS_ICMP && packetsType != NETCONN_PACKETS_UDP) {
+            return NETMANAGER_ERR_INVALID_PARAMETER;
+        }
+    }
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->QueryTraceRoute(destination, maxJumpNumber, packetsType, traceRouteInfo);
+    return proxy->QueryTraceRoute(destination, maxJumpNumber, packetsType, traceRouteInfo, isCallerNative);
 }
 
 int32_t NetConnClient::SetProxyMode(const OHOS::NetManagerStandard::ProxyModeType mode)

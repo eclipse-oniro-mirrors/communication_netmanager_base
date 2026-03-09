@@ -42,6 +42,7 @@
 
 #include "net_all_capabilities.h"
 #include "net_connection_type.h"
+#include "net_trace_route_info.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -269,10 +270,11 @@ int32_t OH_NetConn_SetPacUrl(const char *pacUrl);
 
 int32_t OH_NetConn_GetPacUrl(char *pacUrl);
 
-int32_t OH_NetConn_QueryProbeResult(const char *destination, int32_t duration, struct NetConn_ProbeResultInfo *result);
+int32_t OH_NetConn_QueryProbeResult(const char *destination, int32_t duration,
+    OHOS::NetManagerStandard::NetConn_ProbeResultInfo *result);
 
-int32_t OH_NetConn_QueryTraceRoute(
-    const char *destination, NetConn_TraceRouteOption *option, NetConn_TraceRouteInfo *traceRouteInfo);
+int32_t OH_NetConn_QueryTraceRoute(const char *destination, OHOS::NetManagerStandard::NetConn_TraceRouteOption *option,
+    OHOS::NetManagerStandard::NetConn_TraceRouteInfo *traceRouteInfo);
 
 int32_t OH_NetConn_SetPacFileUrl(const char *pacUrl);
 

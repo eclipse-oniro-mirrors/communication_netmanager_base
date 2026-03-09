@@ -42,6 +42,8 @@
 #include "getinterfaceconfig_context.h"
 #include "registernetsupplier_context.h"
 #include "unregisternetsupplier_context.h"
+#include "queryproberesult_context.h"
+#include "querytraceroute_context.h"
 #include "icu_helper.h"
 
 static constexpr const char *CONNECTION_MODULE_NAME = "net.connection";
@@ -56,6 +58,12 @@ static thread_local uint64_t g_moduleId;
 #define DECLARE_CONVERSION_PROCESS(process) \
     DECLARE_NAPI_STATIC_PROPERTY(#process,  \
                                  NapiUtils::CreateUint32(env, static_cast<uint32_t>(ConversionProcess::process)))
+
+#define DECLARE_PROXY_MODE(mode) \
+    DECLARE_NAPI_STATIC_PROPERTY(#mode, NapiUtils::CreateUint32(env, static_cast<uint32_t>(ProxyModeType::mode)))
+
+#define DECLARE_PACKETS_TYPE(type) \
+    DECLARE_NAPI_STATIC_PROPERTY(#type, NapiUtils::CreateUint32(env, static_cast<uint32_t>(NetConn_PacketsType::type)))
 
 namespace OHOS::NetManagerStandard {
 
@@ -229,6 +237,10 @@ static void AddCleanupHook(napi_env env)
     DECLARE_NAPI_FUNCTION(FUNCTION_ADD_VLAN_IP, AddVlanIp),           \
     DECLARE_NAPI_FUNCTION(FUNCTION_DELETE_VLAN_IP, DeleteVlanIp),     \
 
+#define DEFINE_TRACEROUTE_PING_FUNCTIONS \
+    DECLARE_NAPI_FUNCTION(FUNCTION_QUERY_TRACE_ROUTE, QueryTraceRoute),          \
+    DECLARE_NAPI_FUNCTION(FUNCTION_QUERY_PROBE_RESULT, QueryProbeResult),        \
+
 std::initializer_list<napi_property_descriptor> ConnectionModule::createPropertyList()
 {
     std::initializer_list<napi_property_descriptor> functions = {
@@ -275,6 +287,7 @@ std::initializer_list<napi_property_descriptor> ConnectionModule::createProperty
         DEFINE_NET_EXT_ATTRIBUTE_FUNCTIONS
         DEFINE_VLAN_FUNCTIONS
         DEFINE_PAC_FUNCTIONS
+        DEFINE_TRACEROUTE_PING_FUNCTIONS
     };
     return functions;
 }
@@ -325,14 +338,10 @@ void ConnectionModule::InitClasses(napi_env env, napi_value exports)
 void ConnectionModule::InitProperties(napi_env env, napi_value exports)
 {
     std::initializer_list<napi_property_descriptor> netCaps = {
-        DECLARE_NET_CAP(NET_CAPABILITY_MMS),
-        DECLARE_NET_CAP(NET_CAPABILITY_NOT_METERED),
-        DECLARE_NET_CAP(NET_CAPABILITY_INTERNET),
-        DECLARE_NET_CAP(NET_CAPABILITY_NOT_VPN),
-        DECLARE_NET_CAP(NET_CAPABILITY_VALIDATED),
-        DECLARE_NET_CAP(NET_CAPABILITY_PORTAL),
-        DECLARE_NET_CAP(NET_CAPABILITY_INTERNAL_DEFAULT),
-        DECLARE_NET_CAP(NET_CAPABILITY_CHECKING_CONNECTIVITY),
+        DECLARE_NET_CAP(NET_CAPABILITY_MMS), DECLARE_NET_CAP(NET_CAPABILITY_NOT_METERED),
+        DECLARE_NET_CAP(NET_CAPABILITY_INTERNET), DECLARE_NET_CAP(NET_CAPABILITY_NOT_VPN),
+        DECLARE_NET_CAP(NET_CAPABILITY_VALIDATED), DECLARE_NET_CAP(NET_CAPABILITY_PORTAL),
+        DECLARE_NET_CAP(NET_CAPABILITY_INTERNAL_DEFAULT), DECLARE_NET_CAP(NET_CAPABILITY_CHECKING_CONNECTIVITY),
     };
     napi_value caps = NapiUtils::CreateObject(env);
     NapiUtils::DefineProperties(env, caps, netCaps);
@@ -349,10 +358,7 @@ void ConnectionModule::InitProperties(napi_env env, napi_value exports)
     NapiUtils::SetNamedProperty(env, exports, INTERFACE_NET_BEAR_TYPE, types);
 
     std::initializer_list<napi_property_descriptor> proxyModeTypes = {
-        DECLARE_NAPI_STATIC_PROPERTY("PROXY_MODE_OFF",
-            NapiUtils::CreateUint32(env, static_cast<uint32_t>(ProxyModeType::PROXY_MODE_OFF))),
-        DECLARE_NAPI_STATIC_PROPERTY("PROXY_MODE_AUTO",
-            NapiUtils::CreateUint32(env, static_cast<uint32_t>(ProxyModeType::PROXY_MODE_AUTO))),
+        DECLARE_PROXY_MODE(PROXY_MODE_OFF), DECLARE_PROXY_MODE(PROXY_MODE_AUTO),
     };
 
     napi_value pmtypes = NapiUtils::CreateObject(env);
@@ -368,6 +374,14 @@ void ConnectionModule::InitProperties(napi_env env, napi_value exports)
     napi_value process = NapiUtils::CreateObject(env);
     NapiUtils::DefineProperties(env, process, conversionProcess);
     NapiUtils::SetNamedProperty(env, exports, INTERFACE_CONVERSION_PROCESS, process);
+
+    std::initializer_list<napi_property_descriptor> packetsType = {
+        DECLARE_PACKETS_TYPE(NETCONN_PACKETS_ICMP), DECLARE_PACKETS_TYPE(NETCONN_PACKETS_UDP),
+    };
+
+    napi_value packtypes = NapiUtils::CreateObject(env);
+    NapiUtils::DefineProperties(env, packtypes, packetsType);
+    NapiUtils::SetNamedProperty(env, exports, INTERFACE_PACKETS_TYPE, packtypes);
 }
 
 void ConnectionModule::InitFamilyTypes(napi_env env, napi_value exports)
@@ -831,6 +845,20 @@ napi_value ConnectionModule::FindProxyForUrl(napi_env env, napi_callback_info in
     return ModuleTemplate::InterfaceSync<FindPacFileUrlContext>(env, info, FUNCTION_GET_FILE_PAC_URL, nullptr,
                                                                 ConnectionExec::ExecFindProxyForUrl,
                                                                 ConnectionExec::FindProxyForUrlCallback);
+}
+
+napi_value ConnectionModule::QueryTraceRoute(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<QueryTraceRouteContext>(env, info, FUNCTION_QUERY_TRACE_ROUTE, nullptr,
+                                                             ConnectionAsyncWork::ExecQueryTraceRoute,
+                                                             ConnectionAsyncWork::QueryTraceRouteCallback);
+}
+
+napi_value ConnectionModule::QueryProbeResult(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<QueryProbeResultContext>(env, info, FUNCTION_QUERY_PROBE_RESULT, nullptr,
+                                                              ConnectionAsyncWork::ExecQueryProbeResult,
+                                                              ConnectionAsyncWork::QueryProbeResultCallback);
 }
 
 napi_value ConnectionModule::NetConnectionInterface::On(napi_env env, napi_callback_info info)

@@ -1862,8 +1862,8 @@ HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest09, TestSize.Level1)
 HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest10, TestSize.Level1)
 {
     const char *destination = "www.text.com";
-    NetConn_TraceRouteInfo traceRouteInfo[30] = {};
-    NetConn_TraceRouteOption Option = {30, NETCONN_PACKETS_ICMP};
+    OHOS::NetManagerStandard::NetConn_TraceRouteInfo traceRouteInfo[30] = {};
+    OHOS::NetManagerStandard::NetConn_TraceRouteOption Option = {30, NETCONN_PACKETS_ICMP};
     OH_NetConn_QueryTraceRoute(destination, &Option, traceRouteInfo);
     Option = {31, NETCONN_PACKETS_ICMP};
     auto ret = OH_NetConn_QueryTraceRoute(destination, &Option, traceRouteInfo);

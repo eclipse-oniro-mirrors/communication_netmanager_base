@@ -101,6 +101,10 @@ static constexpr const char *KEY_UDP_LOCAL_PORT = "udpLocalPort";
 static constexpr const char *KEY_UDP_UID = "udpUid";
 static constexpr const char *KEY_UDP_PID = "udpPid";
 
+static constexpr const char *KEY_JUMP_NO = "jumpNo";
+static constexpr const char *KEY_RTT = "rtt";
+static constexpr const char *KEY_LOSS_RATE = "lossRate";
+
 enum {
     ARG_NUM_0,
     ARG_NUM_1,
