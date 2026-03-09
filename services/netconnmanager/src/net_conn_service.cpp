@@ -699,10 +699,8 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId, bool ign
         NETMGR_LOG_E("supplier doesn't exist.");
         return NET_CONN_ERR_NO_SUPPLIER;
     }
-    if (!ignoreUid && CheckAndCompareUid(supplier, callingUid) != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("UnregisterNetSupplierAsync uid[%{public}d] is not equal to callingUid[%{public}d].",
-                     supplier->GetUid(), callingUid);
-        return NETMANAGER_ERR_INVALID_PARAMETER;
+    if (!ignoreUid) {
+        ReportFaultEventIfUidNotMatch(supplier, callingUid);
     }
     struct EventInfo eventInfo = {.bearerType = supplier->GetNetSupplierType(),
                                   .ident = supplier->GetNetSupplierIdent(),
@@ -731,10 +729,12 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId, bool ign
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::CheckAndCompareUid(sptr<NetSupplier> &supplier, int32_t callingUid)
+void NetConnService::ReportFaultEventIfUidNotMatch(sptr<NetSupplier> &supplier, int32_t callingUid)
 {
     int32_t uid = supplier->GetUid();
     if (uid != callingUid) {
+        NETMGR_LOG_W("supplier[%{public}u] uid[%{public}d] not equals callingUid[%{public}d].",
+            supplier->GetSupplierId(), supplier->GetUid(), callingUid);
         struct EventInfo eventInfo = {
             .errorType = static_cast<int32_t>(NETMANAGER_ERR_INVALID_PARAMETER),
             .errorMsg = std::string(ERROR_MSG_UPDATE_ERROR_UID) +
@@ -742,7 +742,6 @@ int32_t NetConnService::CheckAndCompareUid(sptr<NetSupplier> &supplier, int32_t 
         };
         EventReport::SendSupplierFaultEvent(eventInfo);
     }
-    return NETMANAGER_SUCCESS;
 }
 
 #ifdef FEATURE_SUPPORT_POWERMANAGER
@@ -1055,11 +1054,7 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
         return NET_CONN_ERR_NO_SUPPLIER;
     }
 
-    if (CheckAndCompareUid(supplier, callingUid) != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("UpdateNetSupplierInfoAsync uid[%{public}d] is not equal to callingUid[%{public}d].",
-                     supplier->GetUid(), callingUid);
-        return NETMANAGER_ERR_INVALID_PARAMETER;
-    }
+    ReportFaultEventIfUidNotMatch(supplier, callingUid);
     eventInfo.bearerType = supplier->GetNetSupplierType();
     eventInfo.netId = supplier->GetNetId();
     EventReport::SendSupplierBehaviorEvent(eventInfo);
@@ -1165,11 +1160,7 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
         return NET_CONN_ERR_NO_SUPPLIER;
     }
 
-    if (CheckAndCompareUid(supplier, callingUid) != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("UpdateNetLinkInfoAsync uid[%{public}d] is not equal to callingUid[%{public}d].",
-                     supplier->GetUid(), callingUid);
-        return NETMANAGER_ERR_INVALID_PARAMETER;
-    }
+    ReportFaultEventIfUidNotMatch(supplier, callingUid);
     eventInfo.bearerType = supplier->GetNetSupplierType();
     eventInfo.netId = supplier->GetNetId();
     EventReport::SendSupplierBehaviorEvent(eventInfo);
