@@ -2037,7 +2037,7 @@ int32_t NetStatsService::UpdataSettingsdataFfrt(int32_t simId, uint8_t flag, uin
 
 void NetStatsService::ProcessSettingsDataUpdate(int32_t simId)
 {
-    if (IsSimIdExist(simId)) {
+    if (!IsSimIdExist(simId)) {
         return;
     }
     UpdateBpfMap(simId);
