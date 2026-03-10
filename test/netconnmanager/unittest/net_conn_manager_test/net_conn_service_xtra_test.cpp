@@ -197,7 +197,7 @@ HWTEST_F(NetConnServiceExtTest, UnregisterNetSupplierAsyncTest002, TestSize.Leve
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetConnServiceExtTest, CheckAndCompareUidTest001, TestSize.Level1)
+HWTEST_F(NetConnServiceExtTest, ReportFaultEventIfUidNotMatchTest001, TestSize.Level1)
 {
     uint32_t supplierId = 1;
     int32_t callingUid = 2;
@@ -210,7 +210,7 @@ HWTEST_F(NetConnServiceExtTest, CheckAndCompareUidTest001, TestSize.Level1)
     EXPECT_EQ(supplier, netSupplier);
     int32_t uid = netSupplier->GetUid();
     EXPECT_NE(uid, callingUid);
-    netConnService->CheckAndCompareUid(supplier, callingUid);
+    netConnService->ReportFaultEventIfUidNotMatch(supplier, callingUid);
 }
 
 HWTEST_F(NetConnServiceExtTest, HandleScreenEventTest001, TestSize.Level1)

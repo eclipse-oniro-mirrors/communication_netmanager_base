@@ -615,7 +615,7 @@ private:
     // for NET_CAPABILITY_INTERNAL_DEFAULT
     bool IsInRequestNetUids(int32_t uid);
     void NotifyNetBearerTypeChange();
-    int32_t CheckAndCompareUid(sptr<NetSupplier> &supplier, int32_t callingUid);
+    void ReportFaultEventIfUidNotMatch(sptr<NetSupplier> &supplier, int32_t callingUid);
 #ifdef SUPPORT_SYSVPN
     int32_t realCallingUid_ = -1;
     bool IsCallingUserSupplier(uint32_t supplierId);
