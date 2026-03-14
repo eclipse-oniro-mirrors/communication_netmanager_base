@@ -38,8 +38,8 @@ void QueryTraceRouteContext::ParseParams(napi_value *params, size_t paramsCount)
         SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
         return;
     }
+    dest_ = NapiUtils::GetStringFromValueUtf8(GetEnv(), params[ARG_INDEX_0]);
     if (paramsCount == PARAM_JUST_OPTIONS) {
-        dest_ = NapiUtils::GetStringFromValueUtf8(GetEnv(), params[ARG_INDEX_0]);
         SetParseOK(true);
         return;
     }

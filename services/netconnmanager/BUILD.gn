@@ -29,6 +29,10 @@ config("net_conn_manager_config") {
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETMANAGER_BASE_ROOT/utils/data_share",
   ]
+
+  if(netmanager_base_enable_pac_proxy){
+    defines = [ "NETMANAGER_ENABLE_PAC_PROXY" ]
+  }
 }
 
 ohos_shared_library("net_conn_manager") {
@@ -72,7 +76,7 @@ ohos_shared_library("net_conn_manager") {
   ]
   use_exceptions = true
 
-  configs = [ ":net_conn_manager_config" ]
+  public_configs = [ ":net_conn_manager_config" ]
 
   deps = [
     "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if",
@@ -128,7 +132,6 @@ ohos_shared_library("net_conn_manager") {
   ]
 
   if(netmanager_base_enable_pac_proxy){
-    defines += [ "NETMANAGER_ENABLE_PAC_PROXY" ]
     external_deps += [ "jerryscript:jerryscript_shared_not_lite" ]
     sources += [
       "src/net_pac_local_proxy_server.cpp",
@@ -209,7 +212,7 @@ ohos_static_library("net_conn_manager_static") {
     "src/stub/net_supplier_callback_proxy.cpp",
   ]
 
-  configs = [ ":net_conn_manager_config" ]
+  public_configs = [ ":net_conn_manager_config" ]
 
   deps = [
     "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if",
@@ -250,7 +253,6 @@ ohos_static_library("net_conn_manager_static") {
   ]
 
   if(netmanager_base_enable_pac_proxy){
-    defines += [ "NETMANAGER_ENABLE_PAC_PROXY" ]
     external_deps += [ "jerryscript:jerryscript_shared_not_lite" ]
     sources += [
       "src/net_pac_local_proxy_server.cpp",
