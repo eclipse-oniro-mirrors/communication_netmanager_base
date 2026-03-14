@@ -1351,7 +1351,7 @@ int32_t NetConnServiceStub::OnQueryTraceRoute(MessageParcel &data, MessageParcel
     if (!data.ReadInt32(packetsType)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
-    int32_t result = QueryTraceRoute(destination, maxJumpNumber, packetsType, traceRouteInfo);
+    int32_t result = QueryTraceRoute(destination, maxJumpNumber, packetsType, traceRouteInfo, true);
     if (!reply.WriteInt32(result)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

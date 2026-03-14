@@ -1953,7 +1953,8 @@ HWTEST_F(NetConnServiceTest, QueryTraceRouteTest001, TestSize.Level1)
     int32_t maxJumpNumber = 30;
     int32_t packetsType = 1;
     std::string traceRouteInfo = "";
-    auto ret = NetConnService::GetInstance()->QueryTraceRoute(destination, maxJumpNumber, packetsType, traceRouteInfo);
+    auto ret = NetConnService::GetInstance()->QueryTraceRoute(destination, maxJumpNumber,
+        packetsType, traceRouteInfo, true);
     EXPECT_EQ("", traceRouteInfo);
 }
 
@@ -1963,7 +1964,8 @@ HWTEST_F(NetConnServiceTest, QueryTraceRouteTest002, TestSize.Level1)
     int32_t maxJumpNumber = 30;
     int32_t packetsType = 1;
     std::string traceRouteInfo = "";
-    auto ret = NetConnService::GetInstance()->QueryTraceRoute(destination, maxJumpNumber, packetsType, traceRouteInfo);
+    auto ret = NetConnService::GetInstance()->QueryTraceRoute(destination, maxJumpNumber,
+        packetsType, traceRouteInfo, true);
     EXPECT_EQ("", traceRouteInfo);
 }
 
