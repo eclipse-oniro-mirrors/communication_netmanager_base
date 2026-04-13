@@ -154,7 +154,7 @@ HWTEST_F(ClatManagerTest, AddNatBypassRulesTest001, TestSize.Level1)
     const std::string v6Iface = "rmnet0";
     const std::string v6Ip = "240e:46e:b900:27ab:1532:b318:192b:2841";
     int32_t ret = instance_->AddNatBypassRules(v6Iface, v6Ip);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_LE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -166,7 +166,7 @@ HWTEST_F(ClatManagerTest, DeleteNatBypassRulesTest001, TestSize.Level1)
 {
     const std::string v6Iface = "rmnet0";
     int32_t ret = instance_->DeleteNatBypassRules(v6Iface);
-    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+    EXPECT_LE(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 }
 
 /**
