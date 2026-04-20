@@ -2239,5 +2239,68 @@ HWTEST_F(NetConnServiceTest, IsInPreferredListTest005, TestSize.Level1) {
     auto ret = NetConnService::GetInstance()->IsInPreferredList(hostName, regexList);
     EXPECT_FALSE(ret);
 }
+
+HWTEST_F(NetConnServiceTest, UpdateUidDeadFlowResetTest001, TestSize.Level1)
+{
+    std::vector<std::string> bundleNameVec;
+    bundleNameVec.push_back("com.test.bundle1");
+    bundleNameVec.push_back("com.test.bundle2");
+    int32_t ret = NetConnService::GetInstance()->UpdateUidDeadFlowReset(bundleNameVec);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, UpdateUidDeadFlowResetTest002, TestSize.Level1)
+{
+    std::vector<std::string> bundleNameVec;
+    int32_t ret = NetConnService::GetInstance()->UpdateUidDeadFlowReset(bundleNameVec);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, IsDeadFlowResetTargetBundleTest001, TestSize.Level1)
+{
+    std::vector<std::string> bundleNameVec;
+    bundleNameVec.push_back("com.test.target");
+    bundleNameVec.push_back("com.test.other");
+    int32_t ret = NetConnService::GetInstance()->UpdateUidDeadFlowReset(bundleNameVec);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    bool flag = false;
+    ret = NetConnService::GetInstance()->IsDeadFlowResetTargetBundle("com.test.target", flag);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_TRUE(flag);
+}
+
+HWTEST_F(NetConnServiceTest, IsDeadFlowResetTargetBundleTest002, TestSize.Level1)
+{
+    std::vector<std::string> bundleNameVec;
+    bundleNameVec.push_back("com.test.bundle1");
+    int32_t ret = NetConnService::GetInstance()->UpdateUidDeadFlowReset(bundleNameVec);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    bool flag = false;
+    ret = NetConnService::GetInstance()->IsDeadFlowResetTargetBundle("com.test.notexist", flag);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_FALSE(flag);
+}
+
+HWTEST_F(NetConnServiceTest, IsDeadFlowResetTargetBundleTest003, TestSize.Level1)
+{
+    std::vector<std::string> bundleNameVec;
+    int32_t ret = NetConnService::GetInstance()->UpdateUidDeadFlowReset(bundleNameVec);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    bool flag = false;
+    ret = NetConnService::GetInstance()->IsDeadFlowResetTargetBundle("com.test.empty", flag);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_FALSE(flag);
+}
+
+HWTEST_F(NetConnServiceTest, IsDeadFlowResetTargetBundleTest004, TestSize.Level1)
+{
+    bool flag = false;
+    int32_t ret = NetConnService::GetInstance()->IsDeadFlowResetTargetBundle("", flag);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_FALSE(flag);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

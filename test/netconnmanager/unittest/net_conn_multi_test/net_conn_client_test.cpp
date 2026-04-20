@@ -1778,6 +1778,20 @@ HWTEST_F(NetConnClientTest, EnableAppFrozenedCallbackLimitationTest001, TestSize
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
+HWTEST_F(NetConnClientTest, IsDeadFlowResetTargetBundleTest001, TestSize.Level1)
+{
+    const std::string bundleName = "com.test.bundle";
+    EXPECT_CALL(*mockNetConnService, IsDeadFlowResetTargetBundle(bundleName, _))
+        .WillOnce(DoAll(SetArgReferee<1>(true), Return(NETMANAGER_SUCCESS)));
+
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->NetConnService_ = mockNetConnService;
+    bool flag = false;
+    int32_t ret = netConnClient->IsDeadFlowResetTargetBundle(bundleName, flag);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_TRUE(flag);
+}
+
 HWTEST_F(NetConnClientTest, SetReuseSupplierId001, TestSize.Level1)
 {
     uint32_t supplierId = 1004;

@@ -27,6 +27,10 @@
 
 namespace OHOS::nmd {
 
+static constexpr size_t MAX_NODATA_CACHE_SIZE = 100;
+static constexpr uint64_t MILLIS_PER_SEC = 1000ULL;
+static constexpr uint64_t NANOS_PER_MILLI = 1000000ULL;
+
 class DnsResolvConfig {
 public:
     DnsResolvConfig();
@@ -60,6 +64,16 @@ public:
     bool IsUserDefinedServer();
     void SetClatDnsEnableIpv4(bool enable);
     bool IsClatIpv4Enable();
+
+    // NODATA cache methods
+    void SetNodataCache(const std::string &hostName);
+    bool IsInNodataCache(const std::string &hostName);
+    void ClearNodataCache();
+    uint64_t GetNowMs();
+
+private:
+    uint64_t HashHostName(const std::string &hostName) const;
+
 private:
     class DelayedTaskWrapper {
     public:
@@ -94,6 +108,10 @@ private:
     bool isIpv4Enable_;
     bool isUserDefinedDnsServer_;
     bool isClatIpv4Enable_;
+
+    // NODATA cache: using vector for memory efficiency (100 elements max)
+    // hash(hostName) -> timestamp in milliseconds (uint64_t)
+    std::vector<std::pair<uint64_t, uint64_t>> nodataCache_;
 };
 } // namespace OHOS::nmd
 #endif // INCLUDE_DNSRESOLV_CONFIG_H

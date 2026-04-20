@@ -121,6 +121,7 @@ private:
     int32_t OnGetProxyMode(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetProxyMode(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetAppIsFrozened(MessageParcel &data, MessageParcel &reply);
+    int32_t OnIsDeadFlowResetTargetBundle(MessageParcel &data, MessageParcel &reply);
     int32_t OnEnableAppFrozenedCallbackLimitation(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetReuseSupplierId(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetNetExtAttribute(MessageParcel &data, MessageParcel &reply);

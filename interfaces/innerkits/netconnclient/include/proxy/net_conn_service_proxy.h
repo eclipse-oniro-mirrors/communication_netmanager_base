@@ -109,6 +109,7 @@ public:
     int32_t QueryTraceRoute(const std::string &destination, int32_t maxJumpNumber, int32_t packetsType,
         std::string &traceRouteInfo, bool isCallerNative) override;
     virtual int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened) override;
+    int32_t IsDeadFlowResetTargetBundle(const std::string &bundleName, bool &flag) override;
     virtual int32_t EnableAppFrozenedCallbackLimitation(bool flag) override;
     int32_t SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused) override;
     int32_t GetNetExtAttribute(int32_t netId, std::string &netExtAttribute) override;

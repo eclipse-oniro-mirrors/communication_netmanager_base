@@ -185,6 +185,14 @@ int32_t NetManagerCenter::UpdateUidLostDelay(const std::set<uint32_t> &uidLostDe
     return connService_->UpdateUidLostDelay(uidLostDelaySet);
 }
 
+int32_t NetManagerCenter::UpdateUidDeadFlowReset(const std::vector<std::string> &bundleNameVec)
+{
+    if (connService_ == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    return connService_->UpdateUidDeadFlowReset(bundleNameVec);
+}
+
 int32_t NetManagerCenter::GetConnectionProperties(int32_t netId, NetLinkInfo &info)
 {
     if (connService_ == nullptr) {

@@ -1568,6 +1568,9 @@ napi_value ConnectionExec::FindProxyForUrlCallback(FindPacFileUrlContext *contex
 
 bool ConnectionExec::ExecQueryTraceRoute(QueryTraceRouteContext *context)
 {
+    if (!context->IsParseOK()) {
+        return false;
+    }
     int32_t errorCode = NetConnClient::GetInstance().QueryTraceRoute(context->dest_, context->option_.maxJumpNumber_,
         static_cast<int32_t>(context->option_.packetsType_), context->traceRouteInfoStr_, false);
     if (errorCode != NET_CONN_SUCCESS) {
@@ -1622,6 +1625,9 @@ napi_value ConnectionExec::CreateTraceRouteInfo(napi_env env, const TraceRouteIn
 
 bool ConnectionExec::ExecQueryProbeResult(QueryProbeResultContext *context)
 {
+    if (!context->IsParseOK()) {
+        return false;
+    }
     NetProbe np;
     int32_t errorCode = np.QueryProbeResult(context->dest_, context->duration_, context->probeResultInfo_);
     if (errorCode != NET_CONN_SUCCESS) {
@@ -1645,6 +1651,7 @@ napi_value ConnectionExec::QueryProbeResultCallback(QueryProbeResultContext *con
     if (NapiUtils::GetValueType(env, jsRttArray) != napi_object) {
         return NapiUtils::GetUndefined(env);
     }
+    std::swap(context->probeResultInfo_.rtt[NETCONN_RTT_MAX], context->probeResultInfo_.rtt[NETCONN_RTT_AVG]);
     for (uint32_t index = 0; index < OHOS::NetManagerStandard::NETCONN_MAX_RTT_NUM; ++index) {
         NapiUtils::SetArrayElement(env, jsRttArray, index,
             NapiUtils::CreateUint32(env, context->probeResultInfo_.rtt[index]));

@@ -58,8 +58,8 @@ bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissio
     {
         std::lock_guard<std::mutex> lock(mutex);
         auto iter = permissionMap.find(callerToken);
-        if (iter != permissionMap.end()) {
-            return iter->second;
+        if (iter != permissionMap.end() && iter->second) {
+            return true;
         }
     }
     bool res = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName) ==

@@ -470,5 +470,220 @@ HWTEST_F(DNSParamCacheTest, SetDnsCacheTest003, TestSize.Level1)
     dnsParCache.DestroyNetworkCache(1);
 }
 
+HWTEST_F(DNSParamCacheTest, GetDefaultNetworkTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("GetDefaultNetworkTest001 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    dnsParCache.SetDefaultNetwork(netId);
+    int32_t ret = dnsParCache.GetDefaultNetwork();
+    EXPECT_EQ(ret, netId);
+}
+
+HWTEST_F(DNSParamCacheTest, GetDefaultNetworkTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("GetDefaultNetworkTest002 enter");
+    DnsParamCache dnsParCache;
+    int32_t ret = dnsParCache.GetDefaultNetwork();
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(DNSParamCacheTest, AddUidRangeTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("AddUidRangeTest001 enter");
+    DnsParamCache dnsParCache;
+    uint32_t netId = 1;
+    std::vector<NetManagerStandard::UidRange> uidRanges;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, netId, 0);
+    uidRanges.push_back(uidrange1);
+    int32_t ret = dnsParCache.AddUidRange(netId, uidRanges);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(DNSParamCacheTest, AddUidRangeTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("AddUidRangeTest002 enter");
+    DnsParamCache dnsParCache;
+    uint32_t netId = 1;
+    std::vector<NetManagerStandard::UidRange> uidRanges;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, netId, 0);
+    uidRanges.push_back(uidrange1);
+    NetManagerStandard::UidRange uidrange2(30000, 40000, netId, 0);
+    uidRanges.push_back(uidrange2);
+    int32_t ret = dnsParCache.AddUidRange(netId, uidRanges);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(DNSParamCacheTest, DelUidRangeTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("DelUidRangeTest001 enter");
+    DnsParamCache dnsParCache;
+    uint32_t netId = 1;
+    std::vector<NetManagerStandard::UidRange> uidRanges;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, netId, 0);
+    uidRanges.push_back(uidrange1);
+    dnsParCache.AddUidRange(netId, uidRanges);
+    int32_t ret = dnsParCache.DelUidRange(netId, uidRanges);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(DNSParamCacheTest, IsVpnOpenTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsVpnOpenTest001 enter");
+    DnsParamCache dnsParCache;
+    bool ret = dnsParCache.IsVpnOpen();
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(DNSParamCacheTest, IsVpnOpenTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsVpnOpenTest002 enter");
+    DnsParamCache dnsParCache;
+    uint32_t netId = 1;
+    std::vector<NetManagerStandard::UidRange> uidRanges;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, netId, 0);
+    uidRanges.push_back(uidrange1);
+    dnsParCache.AddUidRange(netId, uidRanges);
+    bool ret = dnsParCache.IsVpnOpen();
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(DNSParamCacheTest, SetNodataCacheTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetNodataCacheTest001 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    std::string hostName = "test.example.com";
+    dnsParCache.CreateCacheForNet(netId);
+    dnsParCache.EnableIpv4(netId);
+    dnsParCache.SetNodataCache(netId, hostName);
+    bool ret = dnsParCache.IsInNodataCache(netId, hostName);
+    EXPECT_TRUE(ret);
+    dnsParCache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DNSParamCacheTest, SetNodataCacheTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetNodataCacheTest002 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    std::string hostName = "test.example.com";
+    dnsParCache.SetNodataCache(netId, hostName);
+    bool ret = dnsParCache.IsInNodataCache(netId, hostName);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(DNSParamCacheTest, IsInNodataCacheTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsInNodataCacheTest001 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    std::string hostName = "test.example.com";
+    dnsParCache.CreateCacheForNet(netId);
+    dnsParCache.EnableIpv4(netId);
+    bool ret = dnsParCache.IsInNodataCache(netId, hostName);
+    EXPECT_FALSE(ret);
+    dnsParCache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DNSParamCacheTest, IsInNodataCacheTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsInNodataCacheTest002 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    std::string hostName = "test.example.com";
+    bool ret = dnsParCache.IsInNodataCache(netId, hostName);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(DNSParamCacheTest, SetNodataCacheTest003, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetNodataCacheTest003 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    std::string hostName = "test.example.com";
+    dnsParCache.CreateCacheForNet(netId);
+    dnsParCache.EnableIpv4(netId);
+    // Set cache first time
+    dnsParCache.SetNodataCache(netId, hostName);
+    bool ret = dnsParCache.IsInNodataCache(netId, hostName);
+    EXPECT_TRUE(ret);
+    // Update existing cache entry - covers DnsResolvConfig::SetNodataCache branch for updating existing entry
+    dnsParCache.SetNodataCache(netId, hostName);
+    ret = dnsParCache.IsInNodataCache(netId, hostName);
+    EXPECT_TRUE(ret);
+    dnsParCache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DNSParamCacheTest, IsInNodataCacheTest003, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsInNodataCacheTest003 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    std::string hostName = "test.example.com";
+    dnsParCache.CreateCacheForNet(netId);
+    dnsParCache.EnableIpv4(netId);
+    dnsParCache.SetNodataCache(netId, hostName);
+    bool ret = dnsParCache.IsInNodataCache(netId, hostName);
+    EXPECT_TRUE(ret);
+    // Clear the cache to simulate expiration - covers DnsResolvConfig::IsInNodataCache branch for cache not exist
+    dnsParCache.FlushDnsCache(netId);
+    ret = dnsParCache.IsInNodataCache(netId, hostName);
+    EXPECT_FALSE(ret);
+    dnsParCache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DNSParamCacheTest, SetNodataCacheTest004, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetNodataCacheTest004 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    dnsParCache.CreateCacheForNet(netId);
+    // Not enable IPv4, SetNodataCache should return directly without setting cache
+    // This covers DnsResolvConfig::SetNodataCache branch: if (!IsIpv4Enable()) return;
+    std::string hostName = "test.example.com";
+    dnsParCache.SetNodataCache(netId, hostName);
+    bool ret = dnsParCache.IsInNodataCache(netId, hostName);
+    EXPECT_FALSE(ret);
+    dnsParCache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DNSParamCacheTest, SetNodataCacheTest005, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetNodataCacheTest005 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    dnsParCache.CreateCacheForNet(netId);
+    dnsParCache.EnableIpv4(netId);
+    // Fill cache to MAX_NODATA_CACHE_SIZE (100) and verify oldest is removed
+    // This covers DnsResolvConfig::SetNodataCache branch: if (nodataCache_.size() >= MAX_NODATA_CACHE_SIZE)
+    for (size_t i = 0; i < MAX_NODATA_CACHE_SIZE + 1; ++i) {
+        std::string hostName = "host" + std::to_string(i) + ".example.com";
+        dnsParCache.SetNodataCache(netId, hostName);
+    }
+    // The first entry should be removed due to cache size limit
+    std::string firstHostName = "host0.example.com";
+    EXPECT_FALSE(dnsParCache.IsInNodataCache(netId, firstHostName));
+    // The last entry should still exist
+    std::string lastHostName = "host100.example.com";
+    EXPECT_TRUE(dnsParCache.IsInNodataCache(netId, lastHostName));
+    dnsParCache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DNSParamCacheTest, GetDumpInfoTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("GetDumpInfoTest001 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    dnsParCache.CreateCacheForNet(netId);
+    std::vector<std::string> servers = {"8.8.8.8"};
+    std::vector<std::string> domains = {"example.com"};
+    dnsParCache.SetResolverConfig(netId, 1000, 3, servers, domains);
+    std::string info;
+    dnsParCache.GetDumpInfo(info);
+    EXPECT_FALSE(info.empty());
+    dnsParCache.DestroyNetworkCache(netId);
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

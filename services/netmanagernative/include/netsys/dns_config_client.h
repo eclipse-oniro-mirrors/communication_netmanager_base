@@ -61,7 +61,8 @@ extern "C" {
 #define FAIL_CAUSE_RETURN_CNAME 6
 #define FAIL_CAUSE_RETURN_NO_ANSWER 7
 #define FAIL_CAUSE_INTERFACE_NOT_DEFAULT 8
-#define DEFAULT_DELAYED_COUNT 30
+#define DEFAULT_DELAYED_COUNT (60 * 10)
+#define DEFAULT_AAAA_BLACK (30 * 60 * 1000)
 
 enum CommandType {
     GET_CONFIG = 1,
@@ -75,6 +76,8 @@ enum CommandType {
     POST_DNS_ABNORMAL_RESULT = 9, // for musl and c-ares
     GET_CONFIG_EXT = 10, // for musl and c-ares
     JUDGE_IPV4 = 11,
+    SET_NODATA_CACHE = 12, // for musl to set AAAA NODATA cache
+    GET_NODATA_CACHE = 13, // for musl to get AAAA NODATA cache status
 };
 
 struct RequestInfo {

@@ -81,6 +81,10 @@ public:
     {
         return NETMANAGER_SUCCESS;
     }
+    inline int32_t UpdateUidDeadFlowReset(const std::vector<std::string> &bundleNameVec) override
+    {
+        return NETMANAGER_SUCCESS;
+    }
     inline int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) override
     {
         return NETMANAGER_SUCCESS;
@@ -709,6 +713,37 @@ HWTEST_F(NetManagerCenterTest, NotifyAllowConnectVpnBundleNameChanged0002, TestS
     EXPECT_TRUE(allowConnectVpnBundleName.empty());
     EXPECT_FALSE(vpnService->allowConnectVpnBundleName_.empty());
     EXPECT_TRUE(allowConnectVpnBundleName.empty());
+}
+
+HWTEST_F(NetManagerCenterTest, UpdateUidDeadFlowResetTest001, TestSize.Level1)
+{
+    instance_.RegisterConnService(nullptr);
+    std::vector<std::string> bundleNameVec;
+    bundleNameVec.push_back("com.test.bundle");
+    auto ret = instance_.UpdateUidDeadFlowReset(bundleNameVec);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetManagerCenterTest, UpdateUidDeadFlowResetTest002, TestSize.Level1)
+{
+    NetManagerCenter netManagerCenter;
+    sptr<NetConnBaseService> connService = new (std::nothrow) TestConnService();
+    netManagerCenter.RegisterConnService(connService);
+    std::vector<std::string> bundleNameVec;
+    bundleNameVec.push_back("com.test.bundle1");
+    bundleNameVec.push_back("com.test.bundle2");
+    auto ret = netManagerCenter.UpdateUidDeadFlowReset(bundleNameVec);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetManagerCenterTest, UpdateUidDeadFlowResetTest003, TestSize.Level1)
+{
+    NetManagerCenter netManagerCenter;
+    sptr<NetConnBaseService> connService = new (std::nothrow) TestConnService();
+    netManagerCenter.RegisterConnService(connService);
+    std::vector<std::string> bundleNameVec;
+    auto ret = netManagerCenter.UpdateUidDeadFlowReset(bundleNameVec);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
 }
 
 } // namespace NetManagerStandard

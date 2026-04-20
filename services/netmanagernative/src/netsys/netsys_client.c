@@ -1163,6 +1163,127 @@ int32_t NetSysPostDnsQueryResult(int netid, struct addrinfo *addr, char *srcAddr
     return 0;
 }
 
+static int32_t NetSysSetNodataCacheInternal(int sockFd, uint16_t netId, const char *host)
+{
+    struct RequestInfo info = {
+        .uid = getuid(),
+        .command = SET_NODATA_CACHE,
+        .netId = netId,
+    };
+    if (netId == 0 && GetNetForApp() > 0) {
+        info.netId = (uint32_t)GetNetForApp();
+    }
+
+    DNS_CONFIG_PRINT("NetSysSetNodataCacheInternal begin netid: %{public}d, host: %{public}s",
+        info.netId, host);
+    // LCOV_EXCL_START
+    if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    uint32_t nameLen = strlen(host) + 1;
+    if (!PollSendData(sockFd, (const char *)&nameLen, sizeof(nameLen))) {
+        DNS_CONFIG_PRINT("send nameLen failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollSendData(sockFd, host, nameLen)) {
+        DNS_CONFIG_PRINT("send host failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+    // LCOV_EXCL_STOP
+    DNS_CONFIG_PRINT("NetSysSetNodataCacheInternal end");
+    return CloseSocketReturn(sockFd, 0);
+}
+
+int32_t NetSysSetNodataCache(uint16_t netId, const char *host)
+{
+    if (host == NULL || strlen(host) == 0) {
+        DNS_CONFIG_PRINT("NetSysSetNodataCache Invalid Param");
+        return -EINVAL;
+    }
+    DNS_CONFIG_PRINT("NetSysSetNodataCache begin netid: %{public}d, host: %{public}s",
+        netId, host);
+    // LCOV_EXCL_START
+    int sockFd = CreateConnectionToNetSys();
+    if (sockFd < 0) {
+        DNS_CONFIG_PRINT("NetSysSetNodataCache CreateConnectionToNetSys connect to netsys err: %d", errno);
+        return sockFd;
+    }
+
+    int err = NetSysSetNodataCacheInternal(sockFd, netId, host);
+    if (err < 0) {
+        DNS_CONFIG_PRINT("NetSysSetNodataCache NetSysSetNodataCacheInternal err: %d", errno);
+        return err;
+    }
+    // LCOV_EXCL_STOP
+    return 0;
+}
+
+static int32_t NetSysGetNodataCacheInternal(int sockFd, uint16_t netId, const char *host, int *enable)
+{
+    struct RequestInfo info = {
+        .uid = getuid(),
+        .command = GET_NODATA_CACHE,
+        .netId = netId,
+    };
+    if (netId == 0 && GetNetForApp() > 0) {
+        info.netId = (uint32_t)GetNetForApp();
+    }
+
+    DNS_CONFIG_PRINT("NetSysGetNodataCacheInternal begin netid: %{public}d, host: %{public}s",
+        info.netId, host);
+    // LCOV_EXCL_START
+    if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    uint32_t nameLen = strlen(host) + 1;
+    if (!PollSendData(sockFd, (const char *)&nameLen, sizeof(nameLen))) {
+        DNS_CONFIG_PRINT("send nameLen failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollSendData(sockFd, host, nameLen)) {
+        DNS_CONFIG_PRINT("send host failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollRecvData(sockFd, (char *)enable, sizeof(int))) {
+        DNS_CONFIG_PRINT("read enable failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+    // LCOV_EXCL_STOP
+    DNS_CONFIG_PRINT("NetSysGetNodataCacheInternal end enable: %{public}d", *enable);
+    return CloseSocketReturn(sockFd, 0);
+}
+
+int NetSysGetNodataCache(uint16_t netId, const char *host)
+{
+    if (host == NULL || strlen(host) == 0) {
+        DNS_CONFIG_PRINT("NetSysGetNodataCache Invalid Param");
+        return 0;
+    }
+    // LCOV_EXCL_START
+    int sockFd = CreateConnectionToNetSys();
+    if (sockFd < 0) {
+        DNS_CONFIG_PRINT("NetSysGetNodataCache CreateConnectionToNetSys connect to netsys err: %d", errno);
+        return 0;
+    }
+
+    int enable = 0;
+    int err = NetSysGetNodataCacheInternal(sockFd, netId, host, &enable);
+    if (err < 0) {
+        DNS_CONFIG_PRINT("NetSysGetNodataCache NetSysGetNodataCacheInternal err: %d", errno);
+        return 0;
+    }
+    // LCOV_EXCL_STOP
+    DNS_CONFIG_PRINT("NetSysGetNodataCache : enable:%d", enable);
+    return enable;
+}
+
 #ifdef __cplusplus
 }
 #endif

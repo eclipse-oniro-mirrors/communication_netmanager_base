@@ -527,6 +527,7 @@ public:
     int32_t GetSpecificNetByIdent(NetBearType bearerType, const std::string &ident, std::list<int32_t> &netIdList);
 
     int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened);
+    int32_t IsDeadFlowResetTargetBundle(const std::string &bundleName, bool &flag);
     int32_t EnableAppFrozenedCallbackLimitation(bool flag);
 
     void UnsubscribeSystemAbility();

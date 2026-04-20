@@ -50,7 +50,9 @@ void HandleQueryAbnormalReport(struct DnsProcessInfoExt dnsProcessInfo,
 int32_t NetSysPostDnsQueryResult(int netid, struct addrinfo *addr, char *srcAddr,
     struct DnsProcessInfo *processInfo);
 int32_t FillBasicAddrInfo(struct AddrInfo *addrInfo, struct addrinfo *info);
-
+int32_t NetSysSetNodataCache(uint16_t netId, const char *host);
+int32_t NetSysGetResolvConfExt(uint16_t netId, struct ResolvConfigExt *config);
+int NetSysGetNodataCache(uint16_t netId, const char *host);
 #ifdef __cplusplus
 }
 #endif
@@ -392,6 +394,69 @@ HWTEST_F(NetsysClientTest, FillBasicAddrInfoTest001, TestSize.Level1)
     addr.aiAddr.sin.sin_addr.s_addr = 1;
     ret = FillBasicAddrInfo(&addr, &ai);
     EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NetsysClientTest, NetSysGetResolvConfExtTest001, TestSize.Level1)
+{
+    uint16_t netId = 0;
+    struct ResolvConfigExt config;
+    auto ret = NetSysGetResolvConfExt(netId, nullptr);
+    EXPECT_EQ(ret, -EINVAL);
+
+    SetNetForApp(1);
+    ret = NetSysGetResolvConfExt(netId, &config);
+
+    config.nameservers[0][0] = '\0';
+    ret = NetSysGetResolvConfExt(netId, &config);
+}
+
+HWTEST_F(NetsysClientTest, NetSysIsIpv6EnableTest001, TestSize.Level1)
+{
+    uint16_t netId = 0;
+    SetNetForApp(1);
+    auto ret = NetSysIsIpv6Enable(netId);
+    EXPECT_GE(ret, -1);
+}
+
+HWTEST_F(NetsysClientTest, NetSysIsIpv4EnableTest001, TestSize.Level1)
+{
+    uint16_t netId = 0;
+    SetNetForApp(1);
+    auto ret = NetSysIsIpv4Enable(netId);
+    EXPECT_GE(ret, -1);
+}
+
+HWTEST_F(NetsysClientTest, NetSysSetNodataCacheTest001, TestSize.Level1)
+{
+    uint16_t netId = 0;
+    SetNetForApp(1);
+    auto ret = NetSysSetNodataCache(netId, nullptr);
+    EXPECT_EQ(ret, -EINVAL);
+
+    ret = NetSysSetNodataCache(netId, "");
+    EXPECT_EQ(ret, -EINVAL);
+
+    ret = NetSysSetNodataCache(netId, "test.example.com");
+    EXPECT_NE(ret, -EINVAL);
+}
+
+HWTEST_F(NetsysClientTest, NetSysGetNodataCacheTest001, TestSize.Level1)
+{
+    uint16_t netId = 0;
+    SetNetForApp(1);
+    auto ret = NetSysGetNodataCache(netId, nullptr);
+    EXPECT_EQ(ret, 0);
+
+    ret = NetSysGetNodataCache(netId, "");
+    EXPECT_EQ(ret, 0);
+
+    // First set the nodata cache, then get it
+    ret = NetSysSetNodataCache(netId, "test.example.com");
+    EXPECT_EQ(ret, 0);
+
+    // Get the nodata cache that was just set
+    ret = NetSysGetNodataCache(netId, "test.example.com");
+    EXPECT_GE(ret, 0);
 }
 
 } // namespace nmd

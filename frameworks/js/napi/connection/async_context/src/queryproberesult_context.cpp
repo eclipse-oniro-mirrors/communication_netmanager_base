@@ -21,6 +21,9 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+
+constexpr int32_t MAX_PING_DURATION = 1000;
+
 QueryProbeResultContext::QueryProbeResultContext(napi_env env,
     std::shared_ptr<EventManager> &manager) : BaseContext(env, manager)
 {
@@ -39,7 +42,7 @@ void QueryProbeResultContext::ParseParams(napi_value *params, size_t paramsCount
     }
     dest_ = NapiUtils::GetStringFromValueUtf8(GetEnv(), params[ARG_INDEX_0]);
     duration_ = NapiUtils::GetInt32FromValue(GetEnv(), params[ARG_INDEX_1]);
-    if (dest_ == "" || duration_ <= 0) {
+    if (dest_ == "" || duration_ <= 0 || duration_ > MAX_PING_DURATION) {
         SetParseOK(false);
         SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
         return;

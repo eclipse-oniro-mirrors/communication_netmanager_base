@@ -109,6 +109,11 @@ int32_t NetConnServiceIface::UpdateUidLostDelay(const std::set<uint32_t> &uidLos
     return NetConnService::GetInstance()->UpdateUidLostDelay(uidLostDelaySet);
 }
 
+int32_t NetConnServiceIface::UpdateUidDeadFlowReset(const std::vector<std::string> &bundleNameVec)
+{
+    return NetConnService::GetInstance()->UpdateUidDeadFlowReset(bundleNameVec);
+}
+
 int32_t NetConnServiceIface::GetConnectionProperties(int32_t netId, NetLinkInfo &info)
 {
     return NetConnService::GetInstance()->GetConnectionProperties(netId, info);

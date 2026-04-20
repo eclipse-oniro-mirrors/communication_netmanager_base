@@ -166,7 +166,7 @@ HWTEST_F(ClatManagerTest, DeleteNatBypassRulesTest001, TestSize.Level1)
 {
     const std::string v6Iface = "rmnet0";
     int32_t ret = instance_->DeleteNatBypassRules(v6Iface);
-    EXPECT_LE(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**

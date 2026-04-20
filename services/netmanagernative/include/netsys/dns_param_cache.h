@@ -120,6 +120,10 @@ public:
 
     int32_t FlushDnsCache(uint16_t netId);
 
+    // NODATA cache methods
+    void SetNodataCache(uint16_t netId, const std::string &hostName);
+    bool IsInNodataCache(uint16_t netId, const std::string &hostName);
+
 private:
     DnsParamCache();
 

@@ -25,6 +25,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 constexpr int32_t MAX_VNIC_UID_ARRAY_SIZE = 20;
+constexpr size_t MAX_BUNDLE_NAME_LEN = 256;
 constexpr uint32_t MAX_IFACE_NUM = 16;
 constexpr uint32_t MAX_NET_CAP_NUM = 32;
 constexpr uint32_t UID_FOUNDATION = 5523;
@@ -256,6 +257,8 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMapExt()
         &NetConnServiceStub::OnDeleteVlanIp, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_CONNECT_OWNER_UID)] = {
         &NetConnServiceStub::OnGetConnectOwnerUid, {Permission::GET_NETWORK_INFO}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEAD_FLOW_RESET_TARGET_BUNDLE)] = {
+        &NetConnServiceStub::OnIsDeadFlowResetTargetBundle, {Permission::INTERNET}};
 }
 
 void NetConnServiceStub::InitVnicFuncToInterfaceMap()
@@ -2329,5 +2332,28 @@ int32_t NetConnServiceStub::OnGetSystemNetPortStates(MessageParcel &data, Messag
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetConnServiceStub::OnIsDeadFlowResetTargetBundle(MessageParcel &data, MessageParcel &reply)
+{
+    std::string bundleName;
+    if (!data.ReadString(bundleName)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (bundleName.size() > MAX_BUNDLE_NAME_LEN) {
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    bool flag = false;
+    int32_t result = IsDeadFlowResetTargetBundle(bundleName, flag);
+    // LCOV_EXCL_START
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (result == NETMANAGER_SUCCESS) {
+        if (!reply.WriteBool(flag)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
+    // LCOV_EXCL_STOP
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

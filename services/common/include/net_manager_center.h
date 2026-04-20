@@ -58,6 +58,7 @@ public:
 
     int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback);
     int32_t UpdateUidLostDelay(const std::set<uint32_t> &uidLostDelaySet);
+    int32_t UpdateUidDeadFlowReset(const std::vector<std::string> &bundleNameVec);
     int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info);
     int32_t RegisterDualStackProbeCallback(int32_t netId, std::shared_ptr<IDualStackProbeCallback>& callback);
     int32_t UnRegisterDualStackProbeCallback(int32_t netId, std::shared_ptr<IDualStackProbeCallback>& callback);

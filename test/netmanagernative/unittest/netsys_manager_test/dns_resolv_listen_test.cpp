@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <arpa/inet.h>
 #include <dlfcn.h>
 #include <gtest/gtest.h>
 
@@ -87,5 +88,156 @@ HWTEST_F(DnsResolvListenTest, NetSysGetResolvConfExtTest001, TestSize.Level1)
     int ret = func(0, &config);
     dlclose(handle);
 }
+
+HWTEST_F(DnsResolvListenTest, DnsResolvListenStartListenTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("DnsResolvListenStartListenTest001 enter");
+    std::shared_ptr<DnsResolvListen> listen = std::make_shared<DnsResolvListen>();
+    EXPECT_TRUE(listen != nullptr);
+}
+
+HWTEST_F(DnsResolvListenTest, DnsParamCacheInteractionTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("DnsParamCacheInteractionTest001 enter");
+    DnsParamCache &cache = DnsParamCache::GetInstance();
+    uint16_t netId = 100;
+    cache.CreateCacheForNet(netId);
+    std::vector<std::string> servers = {"8.8.8.8"};
+    std::vector<std::string> domains = {"example.com"};
+    int32_t ret = cache.SetResolverConfig(netId, 1000, 3, servers, domains);
+    EXPECT_EQ(ret, 0);
+    cache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DnsResolvListenTest, DnsParamCacheInteractionTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("DnsParamCacheInteractionTest002 enter");
+    DnsParamCache &cache = DnsParamCache::GetInstance();
+    uint16_t netId = 100;
+    cache.CreateCacheForNet(netId);
+    cache.SetDefaultNetwork(netId);
+    int32_t defaultNet = cache.GetDefaultNetwork();
+    EXPECT_EQ(defaultNet, netId);
+    cache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DnsResolvListenTest, DnsParamCacheInteractionTest003, TestSize.Level1)
+{
+    NETNATIVE_LOGI("DnsParamCacheInteractionTest003 enter");
+    DnsParamCache &cache = DnsParamCache::GetInstance();
+    uint16_t netId = 100;
+    cache.CreateCacheForNet(netId);
+    cache.EnableIpv6(netId);
+    bool isIpv6Enable = cache.IsIpv6Enable(netId);
+    EXPECT_TRUE(isIpv6Enable);
+    cache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DnsResolvListenTest, DnsParamCacheInteractionTest004, TestSize.Level1)
+{
+    NETNATIVE_LOGI("DnsParamCacheInteractionTest004 enter");
+    DnsParamCache &cache = DnsParamCache::GetInstance();
+    uint16_t netId = 100;
+    cache.CreateCacheForNet(netId);
+    cache.EnableIpv4(netId);
+    bool isIpv4Enable = cache.IsIpv4Enable(netId);
+    EXPECT_TRUE(isIpv4Enable);
+    cache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DnsResolvListenTest, DnsParamCacheInteractionTest005, TestSize.Level1)
+{
+    NETNATIVE_LOGI("DnsParamCacheInteractionTest005 enter");
+    DnsParamCache &cache = DnsParamCache::GetInstance();
+    uint16_t netId = 100;
+    cache.CreateCacheForNet(netId);
+    cache.EnableIpv4(netId);
+    std::string hostName = "test.example.com";
+    cache.SetNodataCache(netId, hostName);
+    bool isInNodataCache = cache.IsInNodataCache(netId, hostName);
+    EXPECT_TRUE(isInNodataCache);
+    cache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DnsResolvListenTest, DnsParamCacheInteractionTest006, TestSize.Level1)
+{
+    NETNATIVE_LOGI("DnsParamCacheInteractionTest006 enter");
+    DnsParamCache &cache = DnsParamCache::GetInstance();
+    uint16_t netId = 100;
+    cache.CreateCacheForNet(netId);
+    cache.EnableIpv4(netId);
+    std::string hostName = "test.example.com";
+    cache.SetNodataCache(netId, hostName);
+    cache.FlushDnsCache(netId);
+    bool isInNodataCache = cache.IsInNodataCache(netId, hostName);
+    EXPECT_FALSE(isInNodataCache);
+    cache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DnsResolvListenTest, DnsParamCacheInteractionTest007, TestSize.Level1)
+{
+    NETNATIVE_LOGI("DnsParamCacheInteractionTest007 enter");
+    DnsParamCache &cache = DnsParamCache::GetInstance();
+    uint32_t netId = 100;
+    std::vector<NetManagerStandard::UidRange> uidRanges;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, netId, 0);
+    uidRanges.push_back(uidrange1);
+    int32_t ret = cache.AddUidRange(netId, uidRanges);
+    EXPECT_EQ(ret, 0);
+    bool isVpnOpen = cache.IsVpnOpen();
+    EXPECT_TRUE(isVpnOpen);
+}
+
+HWTEST_F(DnsResolvListenTest, DnsParamCacheInteractionTest008, TestSize.Level1)
+{
+    NETNATIVE_LOGI("DnsParamCacheInteractionTest008 enter");
+    DnsParamCache &cache = DnsParamCache::GetInstance();
+    uint16_t netId = 100;
+    cache.CreateCacheForNet(netId);
+    bool flag = true;
+    int32_t ret = cache.SetUserDefinedServerFlag(netId, flag);
+    EXPECT_EQ(ret, 0);
+    bool resultFlag = false;
+    ret = cache.GetUserDefinedServerFlag(netId, resultFlag);
+    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(resultFlag, flag);
+    cache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DnsResolvListenTest, DnsParamCacheInteractionTest009, TestSize.Level1)
+{
+    NETNATIVE_LOGI("DnsParamCacheInteractionTest009 enter");
+    DnsParamCache &cache = DnsParamCache::GetInstance();
+    uint16_t netId = 100;
+    cache.CreateCacheForNet(netId);
+    std::string hostName = "test.example.com";
+    AddrInfo addrInfo;
+    addrInfo.aiFamily = AF_INET;
+    addrInfo.aiAddr.sin.sin_addr.s_addr = inet_addr("192.168.1.1");
+    cache.SetDnsCache(netId, hostName, addrInfo);
+    auto result = cache.GetDnsCache(netId, hostName);
+    EXPECT_EQ(result.size(), 1);
+    EXPECT_EQ(result[0].aiFamily, addrInfo.aiFamily);
+    cache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DnsResolvListenTest, DnsParamCacheInteractionTest010, TestSize.Level1)
+{
+    NETNATIVE_LOGI("DnsParamCacheInteractionTest010 enter");
+    DnsParamCache &cache = DnsParamCache::GetInstance();
+    uint16_t netId = 100;
+    cache.CreateCacheForNet(netId);
+    std::string hostName = "test.example.com";
+    AddrInfo addrInfo;
+    addrInfo.aiFamily = AF_INET;
+    addrInfo.aiAddr.sin.sin_addr.s_addr = inet_addr("192.168.1.1");
+    cache.SetDnsCache(netId, hostName, addrInfo);
+    int32_t ret = cache.FlushDnsCache(netId);
+    EXPECT_EQ(ret, 0);
+    auto result = cache.GetDnsCache(netId, hostName);
+    EXPECT_EQ(result.size(), 0);
+    cache.DestroyNetworkCache(netId);
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

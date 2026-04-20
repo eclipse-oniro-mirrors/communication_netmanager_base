@@ -38,6 +38,14 @@ void DnsResolvConfig::DelayedTaskWrapper::Execute() const
     }
 }
 
+uint64_t DnsResolvConfig::GetNowMs()
+{
+    struct timespec ts;
+    return (clock_gettime(CLOCK_REALTIME, &ts) == 0)
+               ? static_cast<uint64_t>(ts.tv_sec) * MILLIS_PER_SEC + static_cast<uint64_t>(ts.tv_nsec) / NANOS_PER_MILLI
+               : static_cast<uint64_t>(time(nullptr)) * MILLIS_PER_SEC;
+}
+
 uint32_t DnsResolvConfig::DelayedTaskWrapper::GetUpdateTime()
 {
     std::vector<AddrInfoWithTtl> infos = cache_.Get(hostName_);
@@ -170,5 +178,68 @@ void DnsResolvConfig::SetUserDefinedServerFlag(bool flag)
 bool DnsResolvConfig::IsUserDefinedServer()
 {
     return isUserDefinedDnsServer_;
+}
+
+uint64_t DnsResolvConfig::HashHostName(const std::string &hostName) const
+{
+    // Simple hash function for hostName to reduce memory usage
+    // Using std::hash which is efficient and provides good distribution
+    return std::hash<std::string>{}(hostName);
+}
+
+void DnsResolvConfig::SetNodataCache(const std::string &hostName)
+{
+    if (!IsIpv4Enable()) {
+        return;
+    }
+    uint64_t now = GetNowMs();
+    uint64_t hashKey = HashHostName(hostName);
+
+    // Check if entry already exists and update it
+    for (auto &entry : nodataCache_) {
+        if (entry.first == hashKey) {
+            entry.second = now;
+            return;
+        }
+    }
+
+    // Limit nodata cache to MAX_NODATA_CACHE_SIZE entries
+    if (nodataCache_.size() >= MAX_NODATA_CACHE_SIZE) {
+        // Find and remove the oldest entry
+        uint64_t oldestTime = UINT64_MAX;
+        size_t oldestIdx = 0;
+        for (size_t i = 0; i < nodataCache_.size(); ++i) {
+            if (nodataCache_[i].second < oldestTime) {
+                oldestTime = nodataCache_[i].second;
+                oldestIdx = i;
+            }
+        }
+        nodataCache_.erase(nodataCache_.begin() + oldestIdx);
+    }
+    nodataCache_.emplace_back(hashKey, now);
+}
+
+bool DnsResolvConfig::IsInNodataCache(const std::string &hostName)
+{
+    uint64_t hashKey = HashHostName(hostName);
+    uint64_t now = GetNowMs();
+
+    for (auto it = nodataCache_.begin(); it != nodataCache_.end(); ++it) {
+        if (it->first == hashKey) {
+            uint64_t diff = now - it->second;
+            if (diff > DEFAULT_AAAA_BLACK) {
+                nodataCache_.erase(it);
+                return false;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+void DnsResolvConfig::ClearNodataCache()
+{
+    nodataCache_.clear();
+    nodataCache_.shrink_to_fit();  // Release unused memory
 }
 } // namespace OHOS::nmd

@@ -46,6 +46,7 @@ public:
     bool IsIfaceNameInUse(const std::string &ifaceName, int32_t netId);
     int32_t SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused) override;
     int32_t UpdateUidLostDelay(const std::set<uint32_t> &uidLostDelaySet) override;
+    int32_t UpdateUidDeadFlowReset(const std::vector<std::string> &bundleNameVec) override;
     int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) override;
     int32_t RegisterDualStackProbeCallback(int32_t netId, std::shared_ptr<IDualStackProbeCallback>& callback) override;
     int32_t UnRegisterDualStackProbeCallback(int32_t netId,

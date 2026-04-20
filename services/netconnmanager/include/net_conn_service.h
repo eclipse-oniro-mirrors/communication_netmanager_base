@@ -420,6 +420,7 @@ public:
     int32_t QueryTraceRoute(const std::string &destination, int32_t maxJumpNumber, int32_t packetsType,
         std::string &traceRouteInfo, bool isCallerNative) override;
     int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened) override;
+    int32_t IsDeadFlowResetTargetBundle(const std::string &bundleName, bool &flag) override;
     int32_t EnableAppFrozenedCallbackLimitation(bool flag) override;
     bool IsAppFrozenedCallbackLimitation();
     int32_t SetNetExtAttribute(int32_t netId, const std::string &netExtAttribute) override;
@@ -429,6 +430,7 @@ public:
     int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
         const std::string &ifName) override;
     int32_t UpdateUidLostDelay(const std::set<uint32_t> &uidLostDelaySet);
+    int32_t UpdateUidDeadFlowReset(const std::vector<std::string> &bundleNameVec);
     int32_t RegUnRegisterNetProbeCallback(int32_t netId,
         std::shared_ptr<IDualStackProbeCallback>& callback, bool isReg);
     int32_t DualStackProbe(uint32_t netId);
@@ -696,6 +698,8 @@ private:
 #endif
     std::shared_mutex uidLostDelayMutex_;
     std::set<uint32_t> uidLostDelaySet_;
+    ffrt::shared_mutex deadFlowResetVecMutex_;
+    std::vector<std::string> deadFlowResetBundleNameVec_;
     SafeMap<int32_t, bool> notifyLostDelayCache_;
     ffrt::shared_mutex defaultNetSupplierMutex_;
 

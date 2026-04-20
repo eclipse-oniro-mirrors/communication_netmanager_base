@@ -16,13 +16,6 @@
 #ifndef NET_CONN_SERVICE_STUB_TEST_H
 #define NET_CONN_SERVICE_STUB_TEST_H
 
-#include <gtest/gtest.h>
-
-#ifdef GTEST_API_
-#define private public
-#define protected public
-#endif
-
 #include "i_net_conn_service.h"
 #include "net_conn_service_stub.h"
 
@@ -458,6 +451,11 @@ public:
     }
 
     int32_t GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo) override
+    {
+        return 0;
+    }
+
+    int32_t IsDeadFlowResetTargetBundle(const std::string &bundleName, bool &flag) override
     {
         return 0;
     }

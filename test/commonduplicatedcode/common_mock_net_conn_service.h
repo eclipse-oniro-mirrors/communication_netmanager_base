@@ -117,6 +117,7 @@ public:
     MOCK_METHOD(int32_t, QueryTraceRoute, (const std::string &destination, int32_t maxJumpNumber, int32_t packetsType,
         std::string &traceRouteInfo, bool isCallerNative));
     MOCK_METHOD(int32_t, SetAppIsFrozened, (uint32_t uid, bool isFrozened));
+    MOCK_METHOD(int32_t, IsDeadFlowResetTargetBundle, (const std::string &bundleName, bool &flag));
     MOCK_METHOD(int32_t, EnableAppFrozenedCallbackLimitation, (bool flag));
     MOCK_METHOD(int32_t, SetReuseSupplierId, (uint32_t supplierId, uint32_t reuseSupplierId, bool isReused));
     MOCK_METHOD(int32_t, SetNetExtAttribute, (int32_t netId, const std::string &netExtAttribute));

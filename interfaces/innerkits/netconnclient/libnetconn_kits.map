@@ -244,6 +244,7 @@
       "VTT for OHOS::NetManagerStandard::NetPortStatesInfo";
       "vtable for OHOS::NetManagerStandard::NetPortStatesInfo";
       "OHOS::NetManagerStandard::NetProbe::QueryProbeResult(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&, int, OHOS::NetManagerStandard::NetConn_ProbeResultInfo&)";
+      "OHOS::NetManagerStandard::NetConnClient::IsDeadFlowResetTargetBundle(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool&)";
     };
   local:
    *;

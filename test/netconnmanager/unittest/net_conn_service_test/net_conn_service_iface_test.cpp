@@ -150,5 +150,20 @@ HWTEST_F(NetConnServiceIfaceTest, UpdateDualStackProbeTimeTest001, TestSize.Leve
     int32_t ret = instance_.UpdateDualStackProbeTime(testProbeTime);
     EXPECT_EQ(ret, 0);
 }
+
+HWTEST_F(NetConnServiceIfaceTest, UpdateUidDeadFlowResetTest001, TestSize.Level1)
+{
+    std::vector<std::string> bundleNameVec;
+    bundleNameVec.push_back("com.test.bundle");
+    int32_t ret = instance_.UpdateUidDeadFlowReset(bundleNameVec);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NetConnServiceIfaceTest, UpdateUidDeadFlowResetTest002, TestSize.Level1)
+{
+    std::vector<std::string> bundleNameVec;
+    int32_t ret = instance_.UpdateUidDeadFlowReset(bundleNameVec);
+    EXPECT_EQ(ret, 0);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

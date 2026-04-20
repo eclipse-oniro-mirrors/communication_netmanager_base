@@ -80,6 +80,7 @@ int32_t DnsParamCache::CreateCacheForNet(uint16_t netId, bool isVpnNet)
         NETNATIVE_LOGI("DnsParamCache::CreateCacheForNet clear all dns cache when vpn net create");
         for (auto iterator = serverConfigMap_.begin(); iterator != serverConfigMap_.end(); iterator++) {
             iterator->second.GetCache().Clear();
+            iterator->second.ClearNodataCache();
         }
     }
     return 0;
@@ -101,6 +102,7 @@ int32_t DnsParamCache::DestroyNetworkCache(uint16_t netId, bool isVpnNet)
         NETNATIVE_LOGI("DnsParamCache::DestroyNetworkCache clear all dns cache when vpn net destroy");
         for (auto it = serverConfigMap_.begin(); it != serverConfigMap_.end(); it++) {
             it->second.GetCache().Clear();
+            it->second.ClearNodataCache();
         }
     }
     return 0;
@@ -131,6 +133,7 @@ int32_t DnsParamCache::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMse
 
     if (oldDnsServers != newDnsServers) {
         it->second.GetCache().Clear();
+        it->second.ClearNodataCache();
     }
 
     it->second.SetNetId(netId);
@@ -594,6 +597,7 @@ void DnsParamCache::ClearAllDnsCache()
     NETNATIVE_LOGI("ClearAllDnsCache");
     for (auto it = serverConfigMap_.begin(); it != serverConfigMap_.end(); it++) {
         it->second.GetCache().Clear();
+        it->second.ClearNodataCache();
     }
 }
 #endif
@@ -711,6 +715,40 @@ int32_t DnsParamCache::FlushDnsCache(uint16_t netId)
         return -ENOENT;
     }
     it->second.GetCache().Clear();
+    it->second.ClearNodataCache();
     return 0;
+}
+
+void DnsParamCache::SetNodataCache(uint16_t netId, const std::string &hostName)
+{
+    if (netId == 0) {
+        netId = defaultNetId_;
+    }
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
+    auto it = serverConfigMap_.find(netId);
+    if (it == serverConfigMap_.end()) {
+        DNS_CONFIG_PRINT("SetNodataCache failed: netid is not have netid:%{public}d,", netId);
+        return;
+    }
+    NETNATIVE_LOGI("SetNodataCache netid:%{public}d", netId);
+    it->second.SetNodataCache(hostName);
+}
+
+bool DnsParamCache::IsInNodataCache(uint16_t netId, const std::string &hostName)
+{
+    if (netId == 0) {
+        netId = defaultNetId_;
+    }
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
+    auto it = serverConfigMap_.find(netId);
+    if (it == serverConfigMap_.end()) {
+        DNS_CONFIG_PRINT("IsInNodataCache failed: netid is not have netid:%{public}d,", netId);
+        return false;
+    }
+    bool enable = it->second.IsInNodataCache(hostName);
+    if (enable) {
+        NETNATIVE_LOGI("IsInNodataCache netid:%{public}d", netId);
+    }
+    return enable;
 }
 } // namespace OHOS::nmd

@@ -2117,6 +2117,39 @@ int32_t NetConnServiceProxy::SetAppIsFrozened(uint32_t uid, bool isFrozened)
     return reply.ReadInt32();
 }
 
+int32_t NetConnServiceProxy::IsDeadFlowResetTargetBundle(const std::string &bundleName, bool &flag)
+{
+    MessageParcel dataParcel;
+    // LCOV_EXCL_START
+    if (!WriteInterfaceToken(dataParcel)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!dataParcel.WriteString(bundleName)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    // LCOV_EXCL_STOP
+
+    MessageParcel replyParcel;
+    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEAD_FLOW_RESET_TARGET_BUNDLE),
+                                        dataParcel, replyParcel);
+    if (retCode != NETMANAGER_SUCCESS) {
+        return retCode;
+    }
+    NETMGR_LOG_D("SendRequest retCode:[%{public}d]", retCode);
+
+    int32_t ret = 0;
+    if (!replyParcel.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!replyParcel.ReadBool(flag)) {
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+    }
+    return ret;
+}
+
 int32_t NetConnServiceProxy::EnableAppFrozenedCallbackLimitation(bool flag)
 {
     MessageParcel data;
