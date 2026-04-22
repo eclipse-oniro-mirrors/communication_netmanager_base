@@ -892,17 +892,6 @@ HWTEST_F(NetConnServiceExtTest, OnRemoveSystemAbilityTest002, TestSize.Level1)
     EXPECT_FALSE(netConnService->hasSARemoved_);
 }
 
-HWTEST_F(NetConnServiceExtTest, IsSupplierMatchRequestAndNetworkTest002, TestSize.Level1)
-{
-    auto netConnService = std::make_shared<NetConnService>();
-    std::string netSupplierIdent;
-    std::set<NetCap> netCaps;
-    sptr<NetSupplier> supplier = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
-    netConnService->netActivates_[0] = nullptr;
-    bool ret = netConnService->IsSupplierMatchRequestAndNetwork(supplier);
-    EXPECT_FALSE(ret);
-}
-
 HWTEST_F(NetConnServiceExtTest, IsSupplierMatchRequestAndNetworkTest003, TestSize.Level1)
 {
     auto netConnService = std::make_shared<NetConnService>();
@@ -1331,7 +1320,6 @@ HWTEST_F(NetConnServiceExtTest, SetAppIsFrozenedAsyncTest005, TestSize.Level1)
     active->SetServiceSupply(nullptr);
     activates.push_back(active);
     netConnService->netUidActivates_[uid] = activates;
-    netConnService->netActivates_[reqId] = active;
     netConnService->notifyLostDelayCache_.EnsureInsert(netId, true);
     netConnService->uidLostDelaySet_.insert(uid);
     netConnService->SetAppIsFrozenedAsync(uid, isFrozened);
@@ -1525,7 +1513,7 @@ HWTEST_F(NetConnServiceExtTest, CallbackForSupplier, TestSize.Level1)
     uint32_t uid = 1099;
     auto active = std::make_shared<NetActivate>(specifier, callback, timeoutCallback, 0, handler, uid, REQUEST);
     active->SetRequestId(reqId);
-    netConnService->netActivates_[reqId] = active;
+    netConnService->netUidActivates_[uid].push_back(active);
     netConnService->notifyLostDelayCache_.EnsureInsert(netId, true);
     netConnService->uidLostDelaySet_.insert(uid);
     CallbackType type = CallbackType::CALL_TYPE_LOST;
@@ -1534,7 +1522,7 @@ HWTEST_F(NetConnServiceExtTest, CallbackForSupplier, TestSize.Level1)
     EXPECT_EQ(active->notifyLostNetId_, netId);
     netConnService->uidLostDelaySet_.clear();
     netConnService->notifyLostDelayCache_.Clear();
-    netConnService->netActivates_[reqId] = nullptr;
+    netConnService->netUidActivates_.clear();
 }
 
 HWTEST_F(NetConnServiceExtTest, FindNotifyLostUid, TestSize.Level1)

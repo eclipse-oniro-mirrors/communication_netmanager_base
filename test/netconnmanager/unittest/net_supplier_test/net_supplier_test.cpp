@@ -257,5 +257,71 @@ HWTEST_F(NetSupplierTest, SetOnceSuppress001, TestSize.Level1)
     supplier->SetNetValid(QUALITY_GOOD_STATE);
     EXPECT_EQ(supplier->netQuality_, QUALITY_GOOD_STATE);
 }
+
+HWTEST_F(NetSupplierTest, RequestToConnect001, TestSize.Level1)
+{
+    std::set<NetCap> netCpas;
+    auto netSupplier = std::make_shared<NetSupplier>(NetBearType::BEARER_CELLULAR, "Test", netCpas);
+    NetRequest netrequest;
+    netrequest.isControlled = true;
+    bool ret = netSupplier->RequestToConnect(netrequest);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(NetSupplierTest, SelectAsBestNetwork001, TestSize.Level1)
+{
+    std::set<NetCap> netCpas;
+    auto netSupplier = std::make_shared<NetSupplier>(NetBearType::BEARER_WIFI, "Test", netCpas);
+    NetRequest netrequest;
+    netrequest.requestId = 1;
+    netrequest.isControlled = true;
+    bool ret = netSupplier->SelectAsBestNetwork(netrequest);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetSupplierTest, SelectAsBestNetwork002, TestSize.Level1)
+{
+    std::set<NetCap> netCpas;
+    auto netSupplier = std::make_shared<NetSupplier>(NetBearType::BEARER_WIFI, "Test", netCpas);
+    netSupplier->requestList_.insert(1);
+    NetRequest netrequest;
+    netrequest.requestId = 1;
+    netrequest.isControlled = false;
+    bool ret = netSupplier->SelectAsBestNetwork(netrequest);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetSupplierTest, SelectAsBestNetwork003, TestSize.Level1)
+{
+    std::set<NetCap> netCpas;
+    auto netSupplier = std::make_shared<NetSupplier>(NetBearType::BEARER_CELLULAR, "Test", netCpas);
+    netSupplier->requestList_.insert(1);
+    NetRequest netrequest;
+    netrequest.requestId = 1;
+    netrequest.isControlled = false;
+    bool ret = netSupplier->SelectAsBestNetwork(netrequest);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetSupplierTest, SelectAsBestNetwork004, TestSize.Level1)
+{
+    std::set<NetCap> netCpas;
+    auto netSupplier = std::make_shared<NetSupplier>(NetBearType::BEARER_CELLULAR, "Test", netCpas);
+    netSupplier->requestList_.insert(1);
+    NetRequest netrequest;
+    netrequest.requestId = 1;
+    netrequest.isControlled = true;
+    bool ret = netSupplier->SelectAsBestNetwork(netrequest);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetSupplierTest, AddBestRequest001, TestSize.Level1)
+{
+    std::set<NetCap> netCpas;
+    auto netSupplier = std::make_shared<NetSupplier>(NetBearType::BEARER_CELLULAR, "Test", netCpas);
+    netSupplier->bestReqList_.insert(1);
+    netSupplier->AddBestRequest(1);
+    EXPECT_EQ(netSupplier->bestReqList_.size(), 1);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

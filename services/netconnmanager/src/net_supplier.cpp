@@ -265,12 +265,8 @@ bool NetSupplier::IsAvailable() const
 
 bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps, const NetRequest &netRequest)
 {
-    NETMGR_LOG_D("Supplier[%{public}d, %{public}s] request connect, available=%{public}d", supplierId_,
+    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request connect, available=%{public}d", supplierId_,
                  netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
-    if (netSupplierInfo_.isAvailable_ && netRequest.ident.empty()) {
-        NETMGR_LOG_D("The supplier is currently available, there is no need to repeat the request for connection.");
-        return true;
-    }
     if (!(netSupplierType_ == NetBearType::BEARER_WIFI && !netRequest.ident.empty())) {
         UpdateNetConnState(NET_CONN_STATE_IDLE);
     }
@@ -302,9 +298,6 @@ bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps, const N
 {
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] request disconnect, available=%{public}d", supplierId_,
                  netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
-    bool isInternal = HasNetCap(NET_CAPABILITY_INTERNAL_DEFAULT);
-    bool isXcap = HasNetCap(NET_CAPABILITY_XCAP);
-    bool isMms = HasNetCap(NET_CAPABILITY_MMS);
     if (netController_ == nullptr) {
         NETMGR_LOG_E("netController_ is nullptr");
         return false;
@@ -315,9 +308,7 @@ bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps, const N
     request.uid = netrequest.uid;
     request.ident = netSupplierIdent_;
     request.netCaps = netCaps;
-    if (!netSupplierInfo_.isAvailable_ && !isInternal && !isXcap && !isMms) {
-        request.isRemoveUid = REMOVE_UID_ONLY;
-    }
+    request.registerType = netrequest.registerType;
     request.bearTypes = netrequest.bearTypes;
     int32_t errCode = netController_->ReleaseNetwork(request);
     NETMGR_LOG_D("ReleaseNetwork retCode[%{public}d]", errCode);
@@ -353,31 +344,24 @@ bool NetSupplier::IsConnected() const
 
 bool NetSupplier::RequestToConnect(const NetRequest &netrequest)
 {
-    std::unique_lock<std::shared_mutex> lock(requestListMutex_);
-    if (requestList_.find(netrequest.requestId) == requestList_.end()) {
-        requestList_.insert(netrequest.requestId);
+    if (netSupplierType_ == BEARER_CELLULAR && netrequest.isControlled) {
+        NETMGR_LOG_E("RequestToConnect is Controlled");
+        return true;
     }
-    lock.unlock();
-    AddRequest(netrequest);
-    return SupplierConnection(netCaps_.ToSet(), netrequest);
+    return AddRequest(netrequest);
 }
 
 int32_t NetSupplier::SelectAsBestNetwork(const NetRequest &netrequest)
 {
     HILOG_COMM_IMPL(LOG_INFO, LOG_DOMAIN, LOG_TAG,
-        "Request[%{public}d] select [%{public}d, %{public}s] as best network", netrequest.requestId,
-        supplierId_, netSupplierIdent_.c_str());
-    std::unique_lock<std::shared_mutex> reqLock(requestListMutex_);
-    if (requestList_.find(netrequest.requestId) == requestList_.end()) {
-        requestList_.insert(netrequest.requestId);
+        "Request[%{public}d] select [%{public}d,%{public}s] as best network, isControlled:%{public}d, size:%{public}zu",
+        netrequest.requestId, supplierId_, netSupplierIdent_.c_str(), netrequest.isControlled, requestList_.size());
+    if (netSupplierType_ != BEARER_CELLULAR || !netrequest.isControlled) {
+        AddRequest(netrequest);
+    } else {
+        RemoveRequest(netrequest.requestId);
     }
-    reqLock.unlock();
-    std::unique_lock<std::shared_mutex> bestLock(bestReqListMutex_);
-    if (bestReqList_.find(netrequest.requestId) == bestReqList_.end()) {
-        bestReqList_.insert(netrequest.requestId);
-    }
-    bestLock.unlock();
-    AddRequest(netrequest);
+    AddBestRequest(netrequest.requestId);
     return NETMANAGER_SUCCESS;
 }
 
@@ -390,11 +374,6 @@ void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const
         return;
     }
     std::shared_lock<std::shared_mutex> rLock(requestListMutex_);
-    if (requestList_.empty() && HasNetCap(NET_CAPABILITY_INTERNET)) {
-        rLock.unlock();
-        SupplierDisconnection(netCaps_.ToSet(), netrequest);
-        return;
-    }
     if (requestList_.find(netrequest.requestId) == requestList_.end()) {
         NETMGR_LOG_D("Can not find request[%{public}d]", netrequest.requestId);
         return;
@@ -404,50 +383,58 @@ void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const
         NETMGR_LOG_D("High priority network, no need to disconnect");
         return;
     }
-    std::unique_lock<std::shared_mutex> wlock(requestListMutex_);
-    requestList_.erase(netrequest.requestId);
+    RemoveRequest(netrequest.requestId);
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] remaining request list size[%{public}zd]", supplierId_,
                  netSupplierIdent_.c_str(), requestList_.size());
-    wlock.unlock();
-    SupplierDisconnection(netCaps_.ToSet(), netrequest);
 }
 
 int32_t NetSupplier::CancelRequest(const NetRequest &netrequest)
 {
-    std::unique_lock<std::shared_mutex> reqLock(requestListMutex_);
-    auto iter = requestList_.find(netrequest.requestId);
-    if (iter == requestList_.end()) {
+    int32_t ret = RemoveRequest(netrequest.requestId);
+    if (!ret) {
         return NET_CONN_ERR_SERVICE_NO_REQUEST;
     }
     NETMGR_LOG_I("CancelRequest requestId:%{public}u", netrequest.requestId);
-    requestList_.erase(netrequest.requestId);
-    reqLock.unlock();
-    std::unique_lock<std::shared_mutex> bestLock(bestReqListMutex_);
-    bestReqList_.erase(netrequest.requestId);
-    bestLock.unlock();
-    SupplierDisconnection(netCaps_.ToSet(), netrequest);
+    RemoveBestRequest(netrequest.requestId);
     return NETMANAGER_SUCCESS;
 }
 
-void NetSupplier::AddRequest(const NetRequest &netRequest)
+bool NetSupplier::AddRequest(const NetRequest &netrequest)
 {
-    if (netController_ == nullptr) {
-        NETMGR_LOG_E("netController_ is nullptr");
-        return;
+    std::unique_lock<std::shared_mutex> lock(requestListMutex_);
+    bool isEmpty = requestList_.empty();
+    if (requestList_.find(netrequest.requestId) == requestList_.end()) {
+        requestList_.insert(netrequest.requestId);
     }
-    NetRequest request;
-    request.requestId = netRequest.requestId;
-    request.uid = netRequest.uid;
-    request.ident = netSupplierIdent_;
-    request.netCaps = netCaps_.ToSet();
-    NETMGR_LOG_D("execute AddRequest");
-    int32_t errCode = netController_->AddRequest(request);
-    NETMGR_LOG_D("AddRequest errCode[%{public}d]", errCode);
-    if (errCode != REG_OK) {
-        NETMGR_LOG_E("AddRequest fail");
-        return;
+    lock.unlock();
+    if (isEmpty) {
+        return SupplierConnection(netCaps_.ToSet(), netrequest);
     }
-    return;
+    return true;
+}
+
+bool NetSupplier::RemoveRequest(uint32_t reqId)
+{
+    std::unique_lock<std::shared_mutex> lock(requestListMutex_);
+    auto iter = requestList_.find(reqId);
+    if (iter == requestList_.end()) {
+        return false;
+    }
+    requestList_.erase(reqId);
+    bool isEmpty = requestList_.empty();
+    lock.unlock();
+    if (isEmpty) {
+        SupplierDisconnection(netCaps_.ToSet(), NetRequest());
+    }
+    return true;
+}
+
+void NetSupplier::AddBestRequest(uint32_t reqId)
+{
+    std::unique_lock<std::shared_mutex> lock(bestReqListMutex_);
+    if (bestReqList_.find(reqId) == bestReqList_.end()) {
+        bestReqList_.insert(reqId);
+    }
 }
 
 void NetSupplier::RemoveBestRequest(uint32_t reqId)

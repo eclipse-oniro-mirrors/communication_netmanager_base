@@ -16,8 +16,11 @@
 #define NET_CONN_BASE_SERVICE_H
 
 #include <set>
+#include <functional>
+#include <vector>
 #include "net_all_capabilities.h"
 #include "net_link_info.h"
+#include "net_supplier_callback_base.h"
 #include "net_supplier_info.h"
 #include "i_net_conn_callback.h"
 #include "refbase.h"
@@ -49,6 +52,9 @@ public:
     virtual int32_t DualStackProbe(int32_t netId) = 0;
     virtual int32_t UpdateDualStackProbeTime(int32_t dualStackProbeTimeOut) = 0;
     virtual ProbeUrls GetDataShareUrl() = 0;
+    virtual bool RegisterNetRequestControlFunc(std::function<bool(const NetRequest &)> func) = 0;
+    virtual bool GetAllNetRequest(std::vector<NetRequest> &netRequests) = 0;
+    virtual bool UpdateNetRequestControlState(const std::vector<NetRequest> &netRequests) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -30,7 +30,7 @@ struct NetRequest {
     uint32_t uid = 0;
     uint32_t requestId = 0;
     uint32_t registerType = REGISTER;
-    uint32_t isRemoveUid = 0;
+    bool isControlled = false;
     std::string ident;
     std::set<NetBearType> bearTypes;
     std::set<NetCap> netCaps;
@@ -50,7 +50,6 @@ public:
                                    const std::set<NetCap> &netCaps,
                                    const NetRequest &netrequest = {});
     virtual int32_t ReleaseNetwork(const NetRequest &netrequest);
-    virtual int32_t AddRequest(const NetRequest &netrequest);
 };
 } // NetManagerStandard
 } // OHOS

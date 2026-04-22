@@ -113,6 +113,21 @@ public:
         ProbeUrls urls;
         return urls;
     }
+
+    bool RegisterNetRequestControlFunc(std::function<bool(const NetRequest &)> func) override
+    {
+        return true;
+    }
+
+    bool GetAllNetRequest(std::vector<NetRequest> &netRequests) override
+    {
+        return true;
+    }
+
+    bool UpdateNetRequestControlState(const std::vector<NetRequest> &netRequests) override
+    {
+        return true;
+    }
 };
 
 class TestNetEthernetService : public NetEthernetBaseService {
@@ -746,5 +761,40 @@ HWTEST_F(NetManagerCenterTest, UpdateUidDeadFlowResetTest003, TestSize.Level1)
     EXPECT_NE(ret, NETMANAGER_ERROR);
 }
 
+HWTEST_F(NetManagerCenterTest, RegisterNetRequestControlFunc001, TestSize.Level1)
+{
+    NetManagerCenter netManagerCenter;
+    auto func = [](const NetRequest & netRequest) -> bool { return true; };
+    bool ret = netManagerCenter.RegisterNetRequestControlFunc(func);
+    EXPECT_FALSE(ret);
+    sptr<NetConnBaseService> connService = sptr<TestConnService>::MakeSptr();
+    netManagerCenter.RegisterConnService(connService);
+    ret = netManagerCenter.RegisterNetRequestControlFunc(func);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(NetManagerCenterTest, GetAllNetRequest001, TestSize.Level1)
+{
+    NetManagerCenter netManagerCenter;
+    std::vector<NetRequest> netRequests;
+    bool ret = netManagerCenter.GetAllNetRequest(netRequests);
+    EXPECT_FALSE(ret);
+    sptr<NetConnBaseService> connService = sptr<TestConnService>::MakeSptr();
+    netManagerCenter.RegisterConnService(connService);
+    ret = netManagerCenter.GetAllNetRequest(netRequests);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(NetManagerCenterTest, UpdateNetRequestControlState001, TestSize.Level1)
+{
+    NetManagerCenter netManagerCenter;
+    std::vector<NetRequest> netRequests;
+    bool ret = netManagerCenter.UpdateNetRequestControlState(netRequests);
+    EXPECT_FALSE(ret);
+    sptr<NetConnBaseService> connService = sptr<TestConnService>::MakeSptr();
+    netManagerCenter.RegisterConnService(connService);
+    ret = netManagerCenter.UpdateNetRequestControlState(netRequests);
+    EXPECT_TRUE(true);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

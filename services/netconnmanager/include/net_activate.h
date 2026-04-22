@@ -24,6 +24,7 @@
 #include "i_net_conn_callback.h"
 #include "net_specifier.h"
 #include "net_supplier.h"
+#include "net_supplier_callback_base.h"
 class NetSupplier;
 
 namespace OHOS {
@@ -31,12 +32,13 @@ namespace NetManagerStandard {
 constexpr uint32_t DEFAULT_REQUEST_ID = 0;
 constexpr uint32_t MIN_REQUEST_ID = DEFAULT_REQUEST_ID + 1;
 constexpr uint32_t MAX_REQUEST_ID = 0x7FFFFFFF;
+class NetActivate;
 class INetActivateCallback {
 public:
     virtual ~INetActivateCallback() = default;
 
 public:
-    virtual void OnNetActivateTimeOut(uint32_t reqId) = 0;
+    virtual void OnNetActivateTimeOut(std::shared_ptr<NetActivate> activate) = 0;
 };
 
 class NetActivate : public std::enable_shared_from_this<NetActivate> {
@@ -71,6 +73,8 @@ public:
     void SetNotifyLostNetId(int32_t notifyLostNetId);
     int32_t GetNotifyLostNetId();
     bool GetNotifyLostDelay();
+    NetRequest &GetNetRequest();
+
 private:
     bool CompareByNetworkIdent(const std::string &ident, NetBearType bearerType, bool skipCheckIdent);
     bool CompareByNetworkCapabilities(const NetCaps &netCaps);
@@ -81,7 +85,6 @@ private:
     void TimeOutNetAvailable();
 
 private:
-    uint32_t requestId_ = 1;
     sptr<NetSpecifier> netSpecifier_ = nullptr;
     sptr<INetConnCallback> netConnCallback_ = nullptr;
     sptr<NetSupplier> netServiceSupplied_ = nullptr;
@@ -89,8 +92,7 @@ private:
     std::weak_ptr<INetActivateCallback> timeoutCallback_;
     std::shared_ptr<AppExecFwk::EventHandler> netActEventHandler_;
     std::string activateName_ = "";
-    uint32_t uid_ = 0;
-    int32_t registerType_ = REGISTER;
+    NetRequest netRequest_;
     std::atomic<bool> isAppFrozened_ = false;
     std::atomic<int32_t> lastCallbackType_ = 0;
     int32_t lastNetId_ = 0;

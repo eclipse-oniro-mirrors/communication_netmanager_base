@@ -147,5 +147,20 @@ ProbeUrls NetConnServiceIface::GetDataShareUrl()
 {
     return NetConnService::GetInstance()->GetDataShareUrl();
 }
+
+bool NetConnServiceIface::RegisterNetRequestControlFunc(std::function<bool(const NetRequest &)> func)
+{
+    return NetConnService::GetInstance()->RegisterNetRequestControlFunc(func);
+}
+
+bool NetConnServiceIface::GetAllNetRequest(std::vector<NetRequest> &netRequests)
+{
+    return NetConnService::GetInstance()->GetAllNetRequest(netRequests);
+}
+
+bool NetConnServiceIface::UpdateNetRequestControlState(const std::vector<NetRequest> &netRequests)
+{
+    return NetConnService::GetInstance()->UpdateNetRequestControlState(netRequests);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

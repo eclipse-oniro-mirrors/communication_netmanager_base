@@ -51,10 +51,8 @@
 #include "app_state_aware.h"
 
 #include "net_trace_route_probe.h"
-#include "net_pac_local_proxy_server.h"
-#include "net_pac_manager.h"
-#include "net_pac_local_proxy_server.h"
 #ifdef NETMANAGER_ENABLE_PAC_PROXY
+#include "net_pac_local_proxy_server.h"
 #include "net_pac_manager.h"
 #endif
 namespace OHOS {
@@ -70,7 +68,6 @@ class NetConnService : public SystemAbility,
     NetConnService();
     virtual ~NetConnService();
     using NET_SUPPLIER_MAP = std::map<uint32_t, sptr<NetSupplier>>;
-    using NET_ACTIVATE_MAP = std::map<uint32_t, std::shared_ptr<NetActivate>>;
     using NET_UIDREQUEST_MAP = std::map<uint32_t, uint32_t>;
     using NET_UIDACTIVATE_MAP = std::map<uint32_t, std::vector<std::shared_ptr<NetActivate>>>;
 
@@ -361,9 +358,9 @@ public:
     /**
      * Activate network timeout
      *
-     * @param reqId Net request id
+     * @param activate NetActivate pointer
      */
-    void OnNetActivateTimeOut(uint32_t reqId) override;
+    void OnNetActivateTimeOut(std::shared_ptr<NetActivate> activate) override;
 
     /**
      * The interface of network detection called when DNS health check failed
@@ -446,6 +443,9 @@ public:
     void SendNetPolicyChange(uint32_t uid, uint32_t policy);
     int32_t GetConnectOwnerUid(const NetConnInfo &netConnInfo, int32_t &ownerUid) override;
     int32_t GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo) override;
+    bool RegisterNetRequestControlFunc(std::function<bool(const NetRequest &)> func);
+    bool GetAllNetRequest(std::vector<NetRequest> &netRequests);
+    bool UpdateNetRequestControlState(const std::vector<NetRequest> &netRequests);
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
@@ -628,8 +628,7 @@ private:
     void StopAllNetDetection();
     void StartAllNetDetection();
 #endif
-    void DecreaseNetActivatesForUid(const uint32_t callingUid, const sptr<INetConnCallback> &callback);
-    void DecreaseNetActivates(const uint32_t callingUid, const sptr<INetConnCallback> &callback, uint32_t reqId);
+    void DecreaseNetActivates(const uint32_t callingUid, const sptr<INetConnCallback> &callback);
     sptr<NetSupplier> GetSupplierByNetId(int32_t netId);
     void RegisterNetDataShareObserver();
     void UnregisterNetDataShareObserver();
@@ -651,8 +650,6 @@ private:
     sptr<NetSupplier> defaultNetSupplier_ = nullptr;
     ffrt::shared_mutex netSuppliersMutex_;
     NET_SUPPLIER_MAP netSuppliers_;
-    NET_ACTIVATE_MAP netActivates_;
-    std::shared_mutex netActivatesMutex_;
     NET_UIDREQUEST_MAP netUidRequest_;
     NET_UIDREQUEST_MAP internalDefaultUidRequest_;
     NET_UIDACTIVATE_MAP netUidActivates_;
@@ -767,6 +764,7 @@ private:
     std::shared_ptr<NetConnListener> subscriberPtr_ = nullptr;
     bool isScreenOn_ = true;
     int32_t dualStackProbeTime_ = 0;
+    std::function<bool(const NetRequest &)> controlFunc_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -128,11 +128,12 @@ public:
     void SetRestrictBackground(bool restrictBackground);
     bool GetRestrictBackground() const;
     bool RequestToConnect(const NetRequest &netrequest = {});
-    void AddRequest(const NetRequest &netrequest);
-    void RemoveRequest(const NetRequest &netrequest);
+    bool AddRequest(const NetRequest &netrequest);
+    bool RemoveRequest(uint32_t reqId);
     int32_t SelectAsBestNetwork(const NetRequest &netrequest);
     void ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const NetRequest &netrequest);
     int32_t CancelRequest(const NetRequest &netrequest);
+    void AddBestRequest(uint32_t reqId);
     void RemoveBestRequest(uint32_t reqId);
     bool HasBestRequest(uint32_t reqId);
     size_t GetBestRequestSize();

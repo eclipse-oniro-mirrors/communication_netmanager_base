@@ -37,10 +37,6 @@ public:
     virtual int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
         const NetRequest &netrequest = {}) = 0;
     virtual int32_t ReleaseNetwork(const NetRequest &netrequest) = 0;
-    virtual int32_t AddRequest(const NetRequest &netrequest)
-    {
-        return ERR_NONE;
-    }
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

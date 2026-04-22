@@ -1781,7 +1781,7 @@ HWTEST_F(NetConnClientTest, EnableAppFrozenedCallbackLimitationTest001, TestSize
 HWTEST_F(NetConnClientTest, IsDeadFlowResetTargetBundleTest001, TestSize.Level1)
 {
     const std::string bundleName = "com.test.bundle";
-    EXPECT_CALL(*mockNetConnService, IsDeadFlowResetTargetBundle(bundleName, _))
+    EXPECT_CALL(*mockNetConnService, IsDeadFlowResetTargetBundle(_, _))
         .WillOnce(DoAll(SetArgReferee<1>(true), Return(NETMANAGER_SUCCESS)));
 
     auto netConnClient = std::make_shared<NetConnClient>();

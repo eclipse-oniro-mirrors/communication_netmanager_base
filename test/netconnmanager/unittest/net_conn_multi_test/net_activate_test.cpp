@@ -34,9 +34,11 @@ constexpr uint32_t TEST_REQUEST_ID = 54656;
 constexpr const char *TEST_IDENT = "testIdent";
 
 class NetActivateCallbackTest : public INetActivateCallback {
-    void OnNetActivateTimeOut(uint32_t reqId) override
+    void OnNetActivateTimeOut(std::shared_ptr<NetActivate> activate) override
     {
-        std::cout << "Activate network request " << reqId << " timeout." << std::endl;
+        if (activate) {
+            std::cout << "Activate network request " << activate->GetRequestId() << " timeout." << std::endl;
+        }
     }
 };
 } // namespace
@@ -360,6 +362,40 @@ HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest003, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
+HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest004, TestSize.Level1)
+{
+    std::set<NetCap> netCaps { NET_CAPABILITY_INTERNET };
+    sptr<NetSupplier> supplier = sptr<NetSupplier>::MakeSptr(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps);
+    sptr<NetSpecifier> netSpecifier = sptr<NetSpecifier>::MakeSptr();
+    netSpecifier->SetCapabilities(netCaps);
+    netSpecifier->SetType(NetBearType::BEARER_ETHERNET);
+    netSpecifier->ident_ = "";
+    sptr<INetConnCallback> callback = sptr<NetConnCallbackStubCb>::MakeSptr();
+    auto timeoutCallback = std::make_shared<NetActivateCallbackTest>();
+    auto netActEventHandler = std::make_shared<AppExecFwk::EventHandler>(netActEventRunner_);
+    auto activate = std::make_shared<NetActivate>(netSpecifier, callback, timeoutCallback, TEST_TIMEOUT_MS,
+        netActEventHandler);
+    auto ret = activate->MatchRequestAndNetwork(supplier, false);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest005, TestSize.Level1)
+{
+    std::set<NetCap> netCaps { NET_CAPABILITY_INTERNET };
+    sptr<NetSupplier> supplier = sptr<NetSupplier>::MakeSptr(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps);
+    sptr<NetSpecifier> netSpecifier = sptr<NetSpecifier>::MakeSptr();
+    netSpecifier->SetCapabilities(netCaps);
+    netSpecifier->SetType(NetBearType::BEARER_ETHERNET);
+    netSpecifier->ident_ = "errorIDENT";
+    sptr<INetConnCallback> callback = sptr<NetConnCallbackStubCb>::MakeSptr();
+    auto timeoutCallback = std::make_shared<NetActivateCallbackTest>();
+    auto netActEventHandler = std::make_shared<AppExecFwk::EventHandler>(netActEventRunner_);
+    auto activate = std::make_shared<NetActivate>(netSpecifier, callback, timeoutCallback, TEST_TIMEOUT_MS,
+        netActEventHandler);
+    auto ret = activate->MatchRequestAndNetwork(supplier, false);
+    EXPECT_FALSE(ret);
+}
+
 HWTEST_F(NetActivateTest, CompareByNetworkIdentTest002, TestSize.Level1)
 {
     std::string ident = "test";
@@ -399,7 +435,7 @@ HWTEST_F(NetActivateTest, IsAllowCallbackTest002, TestSize.Level1)
     EXPECT_TRUE(ret);
 
     instance_->isAppFrozened_ = true;
-    instance_->uid_ = 1;
+    instance_->GetNetRequest().uid = 1;
     AppStateAwareManager::GetInstance().appStateObserver_ = new (std::nothrow)AppStateObserver();
     AppStateAwareManager::GetInstance().foregroundAppUid_ = 1;
     ret = instance_->IsAllowCallback(callbackType);
