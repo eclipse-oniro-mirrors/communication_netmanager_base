@@ -75,7 +75,8 @@ void NetsysBpfNetFirewall::ConntrackGcTask()
 
     timespec now = { 0 };
     // bpf_ktime_get_ns: CLOCK_MONOTONIC
-    if (!clock_gettime(CLOCK_MONOTONIC, &now)) {
+    if (clock_gettime(CLOCK_MONOTONIC, &now) != 0) {
+        NETNATIVE_LOGE("ConntrackGcTask: clock_gettime failed");
         return;
     }
     for (const CtKey &k : keys) {
