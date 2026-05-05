@@ -453,7 +453,7 @@ int32_t NetsysNativeService::EnableDistributedClientNet(const std::string &virni
 int32_t NetsysNativeService::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
                                                         const std::string &dstAddr, const std::string &gw)
 {
-    if (iif.empty() || devIface.empty() || dstAddr.empty()) {
+    if (iif.empty() || dstAddr.empty()) {
         NETNATIVE_LOGE("EnableDistributedServerNet param is empty.");
         return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
     }

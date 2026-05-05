@@ -65,5 +65,15 @@ HWTEST_F(RouteManagerTest, EnableDistributedServerNet001, TestSize.Level1)
     std::string virnicName = "virnic";
     ret = RouteManager::DisableDistributedNet(isServer, virnicName, dstAddr);
 }
+
+HWTEST_F(RouteManagerTest, EnableDistributedServerNet002, TestSize.Level1)
+{
+    std::string iif = "lo";
+    std::string devIface = "";
+    std::string dstAddr = "1.189.55.61";
+    std::string gw = "0.0.0.0";
+    auto ret = RouteManager::EnableDistributedServerNet(iif, devIface, dstAddr, gw);
+    EXPECT_EQ(ret, 0);
+}
 } // namespace nmd
 } // namespace OHOS

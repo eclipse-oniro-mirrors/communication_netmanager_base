@@ -4148,8 +4148,8 @@ int32_t NetConnService::EnableDistributedServerNet(const std::string &iif, const
 int32_t NetConnService::EnableDistributedServerNetAsync(const std::string &iif, const std::string &devIface,
                                                         const std::string &dstAddr, const std::string &gw)
 {
-    if (iif.empty() || devIface.empty()) {
-        NETMGR_LOG_E("iif || devIface is empty");
+    if (iif.empty()) {
+        NETMGR_LOG_E("iif is empty");
         return NET_CONN_ERR_INVALID_NETWORK;
     }
 
