@@ -864,8 +864,10 @@ int32_t RouteManager::EnableDistributedServerNet(const std::string &iif, const s
                    iif.c_str(), devIface.c_str(), ToAnonymousIp(dstAddr).c_str(), ToAnonymousIp(gw).c_str());
 
     int32_t ret = ROUTEMANAGER_SUCCESS;
-    DistributedManager::GetInstance().SetServerNicInfo(iif, devIface);
-    ret += AddServerUplinkRoute(iif, devIface, gw);
+    if (devIface != "") {
+        DistributedManager::GetInstance().SetServerNicInfo(iif, devIface);
+        ret += AddServerUplinkRoute(iif, devIface, gw);
+    }
     ret += AddServerDownlinkRoute(iif, dstAddr);
 
     return ret;
