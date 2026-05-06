@@ -79,6 +79,9 @@ static constexpr const char *LOCALE_TO_RESOURCE_PATH =
 static constexpr const char *LANGUAGE_RESOURCE_PARENT_PATH =
     "//system/etc/netmanager_base/resources/";
 static constexpr const char *LANGUAGE_RESOURCE_CHILD_PATH = "/element/string.json";
+static constexpr const char *SETTING_BUNDLE_NAME = "com.huawei.hmos.settings";
+static constexpr const char *SETTING_ABILITY_NAME = "com.huawei.hmos.settings.MainAbility";
+static constexpr const char *URI = "settings://mobile_data_manage_entry";
 
 static std::mutex g_callbackMutex {};
 static NetMgrStatsLimitNtfCallback g_netMgrStatsLimitNtfCallback = nullptr;
@@ -353,6 +356,23 @@ NetMgrNetStatsLimitNotification::~NetMgrNetStatsLimitNotification()
     NETMGR_LOG_I("NetMgr Notification destructor enter.");
 }
 
+void NetMgrNetStatsLimitNotification::SetWantAgent(Notification::NotificationRequest &request)
+{
+    auto want = std::make_shared<AAFwk::Want>();
+    want->SetElementName(SETTING_BUNDLE_NAME, SETTING_ABILITY_NAME);
+    want->SetUri(URI);
+    std::vector<std::shared_ptr<AAFwk::Want>> wants;
+    wants.push_back(want);
+
+    std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
+    flags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::CONSTANT_FLAG);
+
+    AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
+        0, AbilityRuntime::WantAgent::WantAgentConstant::OperationType::START_ABILITY, flags, wants, nullptr);
+    auto wantAgent = AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo);
+    request.SetWantAgent(wantAgent);
+}
+
 void NetMgrNetStatsLimitNotification::PublishNetStatsLimitNotification(int notificationId, int simId, bool isDualCard)
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -386,6 +406,7 @@ void NetMgrNetStatsLimitNotification::PublishNetStatsLimitNotification(int notif
     request.SetSlotType(OHOS::Notification::NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     request.SetNotificationControlFlags(NETMGR_TRAFFIC_NTF_CONTROL_FLAG);
     request.SetLittleIcon(netmgrStatsLimitIconPixelMap_);
+    SetWantAgent(request);
     int ret = Notification::NotificationHelper::PublishNotification(request);
     NETMGR_LOG_I("publish notification result = %{public}d", ret);
 }
