@@ -982,7 +982,7 @@ static int32_t NetSysPostDnsQueryResultInternal(void)
     }
 
     if (!PollSendData(sockFd, (char *)&pid, sizeof(int32_t))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     if (!PollSendData(sockFd, (char *)&g_curDnsStoreSize, sizeof(int32_t))) {
         return CloseSocketReturn(sockFd, -errno);
