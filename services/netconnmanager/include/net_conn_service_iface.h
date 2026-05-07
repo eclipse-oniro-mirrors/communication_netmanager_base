@@ -55,6 +55,9 @@ public:
     int32_t DualStackProbe(int32_t netId) override;
     int32_t UpdateDualStackProbeTime(int32_t dualStackProbeTime) override;
     ProbeUrls GetDataShareUrl() override;
+    bool RegisterNetRequestControlFunc(std::function<bool(const NetRequest &)> func) override;
+    bool GetAllNetRequest(std::vector<NetRequest> &netRequests) override;
+    bool UpdateNetRequestControlState(const std::vector<NetRequest> &netRequests) override;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

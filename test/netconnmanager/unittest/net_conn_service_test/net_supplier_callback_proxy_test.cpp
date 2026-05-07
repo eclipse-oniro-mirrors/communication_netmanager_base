@@ -136,44 +136,5 @@ HWTEST_F(NetSupplierCallbackProxyTest, ReleaseNetwork_003, TestSize.Level1)
     int32_t result = proxy->ReleaseNetwork(netrequest);
     ASSERT_EQ(result, NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
 }
-
-HWTEST_F(NetSupplierCallbackProxyTest, AddRequest_001, TestSize.Level1)
-{
-    NetRequest netRequest;
-    netRequest.uid = 1;
-    netRequest.requestId = 1;
-    netRequest.registerType = 1;
-    netRequest.ident = "test";
-    netRequest.bearTypes = {BEARER_WIFI, BEARER_BLUETOOTH, BEARER_ETHERNET};
-    netRequest.netCaps = {NET_CAPABILITY_SUPL, NET_CAPABILITY_DUN, NET_CAPABILITY_IA};
-
-    EXPECT_CALL(*remoteObjectMocker, SendRequest(_, _, _, _)).WillOnce(Return(ERR_TRANSACTION_FAILED));
-    int32_t result = proxy->AddRequest(netRequest);
-    ASSERT_EQ(result, ERR_TRANSACTION_FAILED);
-}
-
-HWTEST_F(NetSupplierCallbackProxyTest, AddRequest_002, TestSize.Level1)
-{
-    NetRequest netRequest;
-    netRequest.uid = 1;
-    netRequest.requestId = 1;
-    netRequest.registerType = 1;
-    netRequest.ident = "test";
-    netRequest.bearTypes = {BEARER_WIFI, BEARER_BLUETOOTH, BEARER_ETHERNET};
-    netRequest.netCaps = {NET_CAPABILITY_SUPL, NET_CAPABILITY_DUN, NET_CAPABILITY_IA};
-
-    EXPECT_CALL(*remoteObjectMocker, SendRequest(_, _, _, _)).WillOnce(Return(ERR_NONE));
-    int32_t result = proxy->AddRequest(netRequest);
-    ASSERT_EQ(result, ERR_NONE);
-}
-
-HWTEST_F(NetSupplierCallbackProxyTest, AddRequest_003, TestSize.Level1)
-{
-    sptr<NetSupplierCallbackProxy> proxy = new (std::nothrow) NetSupplierCallbackProxy(NULL);
-    NetRequest netRequest;
-    int32_t result = proxy->AddRequest(netRequest);
-    ASSERT_EQ(result, NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
-}
-
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -17,6 +17,7 @@
 
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "net_supplier_callback_base.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -268,6 +269,30 @@ bool NetManagerCenter::NotifyAllowConnectVpnBundleNameChanged(
     vpnService_->NotifyAllowConnectVpnBundleNameChanged(
         std::move(allowConnectVpnBundleName), std::move(allowVpnStartWithoutCheckPermissions));
     return true;
+}
+
+bool NetManagerCenter::RegisterNetRequestControlFunc(std::function<bool(const NetRequest &)> func)
+{
+    if (connService_ == nullptr) {
+        return false;
+    }
+    return connService_->RegisterNetRequestControlFunc(func);
+}
+
+bool NetManagerCenter::GetAllNetRequest(std::vector<NetRequest> &netRequests)
+{
+    if (connService_ == nullptr) {
+        return false;
+    }
+    return connService_->GetAllNetRequest(netRequests);
+}
+
+bool NetManagerCenter::UpdateNetRequestControlState(const std::vector<NetRequest> &netRequests)
+{
+    if (connService_ == nullptr) {
+        return false;
+    }
+    return connService_->UpdateNetRequestControlState(netRequests);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

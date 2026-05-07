@@ -37,10 +37,14 @@ NetActivate::NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetCon
       timeoutMS_(timeoutMS),
       timeoutCallback_(timeoutCallback),
       netActEventHandler_(netActEventHandler),
-      uid_(uid),
-      registerType_(registerType)
+      netRequest_(uid, 0, registerType)
 {
-    requestId_ = g_nextRequestId++;
+    if (specifier != nullptr) {
+        netRequest_.ident = specifier->ident_;
+        netRequest_.bearTypes = specifier->netCapabilities_.bearerTypes_;
+        netRequest_.netCaps = specifier->netCapabilities_.netCaps_;
+    }
+    netRequest_.requestId = g_nextRequestId++;
     if (g_nextRequestId > MAX_REQUEST_ID) {
         g_nextRequestId = MIN_REQUEST_ID;
     }
@@ -48,7 +52,7 @@ NetActivate::NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetCon
 
 void NetActivate::StartTimeOutNetAvailable()
 {
-    activateName_ = "NetActivate" + std::to_string(requestId_);
+    activateName_ = "NetActivate" + std::to_string(netRequest_.requestId);
     auto self = shared_from_this();
     if (netActEventHandler_ != nullptr && timeoutMS_ > 0) {
         netActEventHandler_->PostTask([self]() { self->TimeOutNetAvailable(); }, activateName_, timeoutMS_);
@@ -73,39 +77,37 @@ void NetActivate::TimeOutNetAvailable()
 
     auto timeoutCb = timeoutCallback_.lock();
     if (timeoutCb) {
-        timeoutCb->OnNetActivateTimeOut(requestId_);
+        timeoutCb->OnNetActivateTimeOut(shared_from_this());
     }
 }
 
 bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier, bool skipCheckIdent)
 {
-    NETMGR_LOG_D("supplier[%{public}d, %{public}s], request[%{public}d]",
-                 (supplier ? supplier->GetSupplierId() : 0),
-                 (supplier ? supplier->GetNetSupplierIdent().c_str() : "nullptr"), requestId_);
+    NETMGR_LOG_D("supplier[%{public}d, %{public}s], request[%{public}d]", (supplier ? supplier->GetSupplierId() : 0),
+                 (supplier ? supplier->GetNetSupplierIdent().c_str() : "nullptr"), netRequest_.requestId);
     if (supplier == nullptr) {
         NETMGR_LOG_E("Supplier is null");
         return false;
     }
     if (!CompareByNetworkCapabilities(supplier->GetNetCaps())) {
         NETMGR_LOG_D("Supplier[%{public}d], request[%{public}d], capability is not matched", supplier->GetSupplierId(),
-                     requestId_);
+                     netRequest_.requestId);
         return false;
     }
     if (!CompareByNetworkNetType((supplier->GetNetSupplierType()))) {
         NETMGR_LOG_D("Supplier[%{public}d], request[%{public}d], Supplier net type not matched",
-                     supplier->GetSupplierId(), requestId_);
+                     supplier->GetSupplierId(), netRequest_.requestId);
         return false;
     }
-    if (!CompareByNetworkIdent(supplier->GetNetSupplierIdent(), supplier->GetNetSupplierType(),
-        skipCheckIdent)) {
+    if (!CompareByNetworkIdent(supplier->GetNetSupplierIdent(), supplier->GetNetSupplierType(), skipCheckIdent)) {
         NETMGR_LOG_W("Supplier[%{public}d], request[%{public}d], Supplier ident is not matched",
-                     supplier->GetSupplierId(), requestId_);
+                     supplier->GetSupplierId(), netRequest_.requestId);
         return false;
     }
     NetAllCapabilities netAllCaps = supplier->GetNetCapabilities();
     if (!CompareByNetworkBand(netAllCaps.linkUpBandwidthKbps_, netAllCaps.linkDownBandwidthKbps_)) {
         NETMGR_LOG_W("Supplier[%{public}d], request[%{public}d], supplier net band not matched",
-                     supplier->GetSupplierId(), requestId_);
+                     supplier->GetSupplierId(), netRequest_.requestId);
         return false;
     }
 
@@ -174,7 +176,7 @@ sptr<NetSpecifier> NetActivate::GetNetSpecifier()
 
 uint32_t NetActivate::GetRequestId() const
 {
-    return requestId_;
+    return netRequest_.requestId;
 }
 
 std::set<NetBearType> NetActivate::GetBearType() const
@@ -184,12 +186,12 @@ std::set<NetBearType> NetActivate::GetBearType() const
 
 int32_t NetActivate::GetRegisterType() const
 {
-    return registerType_;
+    return netRequest_.registerType;
 }
 
 void NetActivate::SetRequestId(uint32_t reqId)
 {
-    requestId_ = reqId;
+    netRequest_.requestId = reqId;
 }
 
 sptr<NetSupplier> NetActivate::GetServiceSupply() const
@@ -237,7 +239,7 @@ bool NetActivate::HaveTypes(const std::set<NetBearType> &bearerTypes) const
 
 uint32_t NetActivate::GetUid() const
 {
-    return uid_;
+    return netRequest_.uid;
 }
 
 bool NetActivate::IsAppFrozened() const
@@ -280,7 +282,7 @@ void NetActivate::SetLastNetid(const int32_t netid)
 bool NetActivate::IsAllowCallback(CallbackType callbackType)
 {
     bool isAppFrozened = isAppFrozened_.load();
-    bool isForegroundApp = AppStateAwareManager::GetInstance().IsForegroundApp(uid_);
+    bool isForegroundApp = AppStateAwareManager::GetInstance().IsForegroundApp(netRequest_.uid);
     if (NetConnService::GetInstance()->IsAppFrozenedCallbackLimitation() && isAppFrozened && !isForegroundApp) {
         if (lastCallbackType_ != CALL_TYPE_LOST && callbackType == CALL_TYPE_LOST
             && lastNetId_ == 0 && netServiceSupplied_ != nullptr
@@ -288,14 +290,14 @@ bool NetActivate::IsAllowCallback(CallbackType callbackType)
                 lastNetId_ = netServiceSupplied_->GetNetHandle()->GetNetId();
         }
         SetLastCallbackType(callbackType);
-        NETMGR_LOG_I("UID[%{public}d] is AppFrozened, not Allow send callbackType[%{public}d]",
-            uid_, callbackType);
+        NETMGR_LOG_I("UID[%{public}d] is AppFrozened, not Allow send callbackType[%{public}d]", netRequest_.uid,
+                     callbackType);
         return false;
     }
     std::unique_lock<std::recursive_mutex> lock(notifyLostMutex_);
     if (isNotifyLostDelay_ && callbackType == CALL_TYPE_LOST) {
-        NETMGR_LOG_I("UID[%{public}d] is delay, not Allow send callbackType[%{public}d]",
-            uid_, callbackType);
+        NETMGR_LOG_I("UID[%{public}d] is delay, not Allow send callbackType[%{public}d]", netRequest_.uid,
+                     callbackType);
         return false;
     }
     isNotifyLostDelay_ = false;
@@ -325,6 +327,11 @@ bool NetActivate::GetNotifyLostDelay()
 {
     std::unique_lock<std::recursive_mutex> lock(notifyLostMutex_);
     return isNotifyLostDelay_;
+}
+
+NetRequest &NetActivate::GetNetRequest()
+{
+    return netRequest_;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

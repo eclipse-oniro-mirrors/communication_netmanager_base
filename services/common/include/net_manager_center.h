@@ -17,6 +17,7 @@
 #define NET_MANAGER_CENTER_H
 
 #include <set>
+#include <functional>
 
 #include "net_all_capabilities.h"
 #include "net_conn_base_service.h"
@@ -28,6 +29,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+struct NetRequest;
 class NetManagerCenter {
 public:
     static NetManagerCenter &GetInstance();
@@ -71,6 +73,10 @@ public:
     bool NotifyAllowConnectVpnBundleNameChanged(
         std::set<std::string> &&allowConnectVpnBundleName,
         std::set<std::string> &&allowVpnStartWithoutCheckPermissions);
+
+    bool RegisterNetRequestControlFunc(std::function<bool(const NetRequest&)> func);
+    bool GetAllNetRequest(std::vector<NetRequest>& netRequests);
+    bool UpdateNetRequestControlState(const std::vector<NetRequest>& netRequests);
 
 private:
     sptr<NetConnBaseService> connService_ = nullptr;
