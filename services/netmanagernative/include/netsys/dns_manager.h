@@ -173,7 +173,7 @@ public:
     int32_t UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
 #endif
 
-    void EnableIpv6(uint16_t netId, std::string &destination, const std::string &nextHop);
+    void EnableIpv6(uint16_t netId, std::string &destination, const std::string &nextHop, bool enable = true);
     void EnableIpv4(uint16_t netId, const std::string &destination, const std::string &nextHop);
 
     int32_t RegisterDnsResultCallback(const sptr<NetsysNative::INetDnsResultCallback> &callback, uint32_t timeStep);

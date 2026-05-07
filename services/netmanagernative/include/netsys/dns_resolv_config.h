@@ -53,7 +53,7 @@ public:
 
     bool IsIpv6Enable();
 
-    void EnableIpv6();
+    void EnableIpv6(bool enable = true);
 
     bool IsIpv4Enable();
 

@@ -71,7 +71,7 @@ public:
 
     bool IsIpv6Enable(uint16_t netId);
 
-    void EnableIpv6(uint16_t netId);
+    void EnableIpv6(uint16_t netId, bool enable = true);
 
     bool IsIpv4Enable(uint16_t netId);
 

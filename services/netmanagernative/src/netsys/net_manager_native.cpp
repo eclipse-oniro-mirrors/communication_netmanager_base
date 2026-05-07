@@ -38,6 +38,7 @@ namespace nmd {
 namespace {
 constexpr const char *TUN_CARD_NAME = "vpn-tun";
 constexpr const char *TCP_RMEM_PROC_FILE = "/proc/sys/net/ipv4/tcp_rmem";
+constexpr int32_t NETID_UNSET = -1;
 constexpr const char *TCP_WMEM_PROC_FILE = "/proc/sys/net/ipv4/tcp_wmem";
 constexpr uint32_t TCP_BUFFER_SIZES_TYPE = 2;
 constexpr uint32_t MAX_TCP_BUFFER_SIZES_COUNT = 6;
@@ -422,6 +423,16 @@ int32_t NetManagerNative::SetIpv6PrivacyExtensions(const std::string &interfaceN
 
 int32_t NetManagerNative::SetEnableIpv6(const std::string &interfaceName, const uint32_t on, bool needRestart)
 {
+    if (on == 0 && interfaceName.find("wlan") == 0) {
+        NETNATIVE_LOGI("Disable ipv6 dns, iface=%{public}s", interfaceName.c_str());
+        int32_t netId = connManager_->GetNetIdByInterface(interfaceName);
+        if (netId != NETID_UNSET) {
+            std::string destination;
+            dnsManager_->EnableIpv6(static_cast<uint16_t>(netId), destination, std::string(), false);
+        } else {
+            NETNATIVE_LOGE("netId not found, iface=%{public}s", interfaceName.c_str());
+        }
+    }
     return sharingManager_->SetEnableIpv6(interfaceName, on, needRestart);
 }
 

@@ -593,5 +593,57 @@ HWTEST_F(NetManagerNativeTest, InterfaceManagerNullptrDelAddressTest001, TestSiz
     instance_->interfaceManager_ = originalInterfaceManager;
 }
 
+HWTEST_F(NetManagerNativeTest, SetEnableIpv6_DisableIpv6Dns_Success, TestSize.Level1)
+{
+    NetManagerNative netManagerNative;
+    std::string interfaceName = "wlan0";
+    uint32_t on = 0;
+    bool needRestart = false;
+
+    int32_t netId = 600;
+    netManagerNative.NetworkCreatePhysical(netId, PERMISSION_NONE);
+    netManagerNative.NetworkAddInterface(netId, interfaceName, BEARER_WIFI);
+    netManagerNative.DnsCreateNetworkCache(static_cast<uint16_t>(netId));
+
+    auto ret = netManagerNative.SetEnableIpv6(interfaceName, on, needRestart);
+    EXPECT_GE(ret, NETMANAGER_ERROR);
+
+    netManagerNative.DnsDestroyNetworkCache(static_cast<uint16_t>(netId));
+    netManagerNative.NetworkDestroy(netId);
+}
+
+HWTEST_F(NetManagerNativeTest, SetEnableIpv6_DisableIpv6Dns_NetIdNotFound, TestSize.Level1)
+{
+    NetManagerNative netManagerNative;
+    std::string interfaceName = "wlan0";
+    uint32_t on = 0;
+    bool needRestart = false;
+
+    auto ret = netManagerNative.SetEnableIpv6(interfaceName, on, needRestart);
+    EXPECT_GE(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetManagerNativeTest, SetEnableIpv6_NonWifiInterface, TestSize.Level1)
+{
+    NetManagerNative netManagerNative;
+    std::string interfaceName = "rmnet0";
+    uint32_t on = 0;
+    bool needRestart = false;
+
+    auto ret = netManagerNative.SetEnableIpv6(interfaceName, on, needRestart);
+    EXPECT_GE(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetManagerNativeTest, SetEnableIpv6_EnableIpv6_CallsSharing, TestSize.Level1)
+{
+    NetManagerNative netManagerNative;
+    std::string interfaceName = "wlan0";
+    uint32_t on = 1;
+    bool needRestart = true;
+
+    auto ret = netManagerNative.SetEnableIpv6(interfaceName, on, needRestart);
+    EXPECT_GE(ret, NETMANAGER_ERROR);
+}
+
 } // namespace nmd
 } // namespace OHOS
