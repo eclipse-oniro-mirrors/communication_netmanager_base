@@ -91,7 +91,7 @@ static bool NonBlockConnect(int sock, struct sockaddr *addr, socklen_t addrLen)
         return true;
     }
     // LCOV_EXCL_START
-    if (errno != EINPROGRESS) {
+    if (errno != EINPROGRESS && errno != 0) {
         return false;
     }
 
@@ -192,7 +192,7 @@ static int32_t NetSysGetResolvConfInternal(int sockFd, uint16_t netId, struct Re
 
     if (!PollRecvData(sockFd, (char *)(config), sizeof(struct ResolvConfig))) {
         HILOG_ERROR(LOG_CORE, "receive failed %{public}d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     // LCOV_EXCL_STOP
 
@@ -219,12 +219,12 @@ static int32_t NetSysGetResolvConfInternalExt(int sockFd, uint16_t netId, struct
     // LCOV_EXCL_START
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         HILOG_ERROR(LOG_CORE, "send failed %{public}d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollRecvData(sockFd, (char *)(config), sizeof(struct ResolvConfigExt))) {
         HILOG_ERROR(LOG_CORE, "receive failed %{public}d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     // LCOV_EXCL_STOP
 
@@ -302,18 +302,18 @@ static int32_t NetsysSendKeyForCache(int sockFd, struct ParamWrapper param, stru
     DNS_CONFIG_PRINT("NetSysSetResolvCacheInternal begin netid: %d", info.netId);
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     uint32_t nameLen = strlen(key) + 1;
     if (!PollSendData(sockFd, (const char *)&nameLen, sizeof(nameLen))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollSendData(sockFd, key, nameLen)) {
         DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     // LCOV_EXCL_STOP
     return 0;
@@ -348,7 +348,7 @@ static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, const st
 
     if (!PollRecvData(sockFd, (char *)num, sizeof(uint32_t))) {
         DNS_CONFIG_PRINT("read failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     // LCOV_EXCL_STOP
 
@@ -360,7 +360,7 @@ static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, const st
     // LCOV_EXCL_START
     if (!PollRecvData(sockFd, (char *)addrInfo, sizeof(struct AddrInfo) * (*num))) {
         DNS_CONFIG_PRINT("read failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     // LCOV_EXCL_STOP
 
@@ -561,7 +561,7 @@ static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, const st
     // LCOV_EXCL_START
     if (!PollSendData(sockFd, (char *)&resNum, sizeof(resNum))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (resNum == 0) {
@@ -571,7 +571,7 @@ static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, const st
     // LCOV_EXCL_START
     if (!PollSendData(sockFd, (char *)addrInfo, sizeof(struct AddrInfoWithTtl) * resNum)) {
         DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     // LCOV_EXCL_STOP
 
@@ -613,12 +613,12 @@ static int32_t NetSysIsIpv6EnableInternal(int sockFd, uint16_t netId, int *enabl
     // LCOV_EXCL_START
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollRecvData(sockFd, (char *)enable, sizeof(int))) {
         DNS_CONFIG_PRINT("read failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     // LCOV_EXCL_STOP
 
@@ -653,12 +653,12 @@ static int32_t NetSysIsIpv4EnableInternal(int sockFd, uint16_t netId, const int 
     // LCOV_EXCL_START
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollRecvData(sockFd, (char *)enable, sizeof(int))) {
         DNS_CONFIG_PRINT("read failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     // LCOV_EXCL_STOP
 
@@ -692,19 +692,19 @@ static int32_t NetSysPostDnsResultPollSendData(struct DnsResultPollParam param,
     int32_t resNum = param.resNum;
     int32_t dnsServerNum = param.dnsServerNum;
     if (!PollSendData(sockFd, (char *)&param.queryRet, sizeof(int))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollSendData(sockFd, (char *)&resNum, sizeof(int32_t))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollSendData(sockFd, (char *)param.param, sizeof(struct QueryParam))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
  
     if (!PollSendData(sockFd, (char *)&param.dnsServerNum, sizeof(int32_t))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     // LCOV_EXCL_STOP
 
@@ -712,7 +712,7 @@ static int32_t NetSysPostDnsResultPollSendData(struct DnsResultPollParam param,
         // LCOV_EXCL_START
         if (!PollSendData(sockFd, (char *)addrInfo, sizeof(struct AddrInfo) * resNum)) {
             DNS_CONFIG_PRINT("send failed %d", errno);
-            return CloseSocketReturn(sockFd, -1);
+            return CloseSocketReturn(sockFd, -errno);
         }
         // LCOV_EXCL_STOP
     }
@@ -720,7 +720,7 @@ static int32_t NetSysPostDnsResultPollSendData(struct DnsResultPollParam param,
     if (dnsServerNum > 0) {
         if (!PollSendData(sockFd, (char *)dnsServerInfo, sizeof(struct DnsServerInfo) * dnsServerNum)) {
             DNS_CONFIG_PRINT("send failed %d", errno);
-            return CloseSocketReturn(sockFd, -1);
+            return CloseSocketReturn(sockFd, -errno);
         }
     }
     // LCOV_EXCL_STOP
@@ -763,27 +763,27 @@ static int32_t NetSysPostDnsResultInternal(int sockFd, uint16_t netId, char* nam
 
     // LCOV_EXCL_START
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollSendData(sockFd, (char *)&uid, sizeof(int32_t))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollSendData(sockFd, (char *)&pid, sizeof(int32_t))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollSendData(sockFd, (char *)&nameLen, sizeof(uint32_t))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollSendData(sockFd, name, (sizeof(char) * nameLen))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollSendData(sockFd, (char *)&usedtime, sizeof(int))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     struct DnsResultPollParam pollParam;
     pollParam.sockFd = sockFd;
@@ -827,12 +827,12 @@ static int32_t NetSysGetDefaultNetworkInternal(int sockFd, uint16_t netId, int32
     // LCOV_EXCL_START
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollRecvData(sockFd, (char *)currentNetId, sizeof(int))) {
         DNS_CONFIG_PRINT("read failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     // LCOV_EXCL_STOP
     DNS_CONFIG_PRINT("currentNetId %d", *currentNetId);
@@ -866,12 +866,12 @@ static int32_t NetSysBindSocketInternal(int sockFd, uint16_t netId, int32_t fd)
     // LCOV_EXCL_START
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollSendData(sockFd, (const char *)(&fd), sizeof(int32_t))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     // LCOV_EXCL_STOP
 
@@ -974,21 +974,21 @@ static int32_t NetSysPostDnsQueryResultInternal(void)
     uint32_t allDnsCacheSize = GetDnsCacheSize();
     // LCOV_EXCL_START
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollSendData(sockFd, (char *)&uid, sizeof(int32_t))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollSendData(sockFd, (char *)&pid, sizeof(int32_t))) {
         return CloseSocketReturn(sockFd, -1);
     }
     if (!PollSendData(sockFd, (char *)&g_curDnsStoreSize, sizeof(int32_t))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     if (!PollSendData(sockFd, (char *)&allDnsCacheSize, sizeof(int32_t))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     // LCOV_EXCL_STOP
     for (uint32_t i = 0; i < g_curDnsStoreSize; i++) {
@@ -1126,16 +1126,16 @@ int32_t NetsysPostDnsAbnormal(int32_t failcause, struct DnsCacheInfo dnsInfo)
         .netId = 0,
     };
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     if (!PollSendData(sockFd, (char *)&uid, sizeof(int32_t))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     if (!PollSendData(sockFd, (char *)&pid, sizeof(int32_t))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     if (!PollSendData(sockFd, (char *)&failcause, sizeof(int32_t))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     // LCOV_EXCL_STOP
     int32_t ret = NetSysPostDnsQueryForOne(sockFd, dnsInfo);
@@ -1239,18 +1239,18 @@ static int32_t NetSysSetNodataCacheInternal(int sockFd, uint16_t netId, const ch
     // LCOV_EXCL_START
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     uint32_t nameLen = strlen(host) + 1;
     if (!PollSendData(sockFd, (const char *)&nameLen, sizeof(nameLen))) {
         DNS_CONFIG_PRINT("send nameLen failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollSendData(sockFd, host, nameLen)) {
         DNS_CONFIG_PRINT("send host failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     // LCOV_EXCL_STOP
     DNS_CONFIG_PRINT("NetSysSetNodataCacheInternal end");
@@ -1297,23 +1297,23 @@ static int32_t NetSysGetNodataCacheInternal(int sockFd, uint16_t netId, const ch
     // LCOV_EXCL_START
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     uint32_t nameLen = strlen(host) + 1;
     if (!PollSendData(sockFd, (const char *)&nameLen, sizeof(nameLen))) {
         DNS_CONFIG_PRINT("send nameLen failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollSendData(sockFd, host, nameLen)) {
         DNS_CONFIG_PRINT("send host failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollRecvData(sockFd, (char *)enable, sizeof(int))) {
         DNS_CONFIG_PRINT("read enable failed %d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     // LCOV_EXCL_STOP
     DNS_CONFIG_PRINT("NetSysGetNodataCacheInternal end enable: %{public}d", *enable);
