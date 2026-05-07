@@ -124,6 +124,7 @@
       "OHOS::NetManagerStandard::NetStatsInfo::Unmarshalling(OHOS::Parcel&, std::__h::vector<OHOS::NetManagerStandard::NetStatsInfo, std::__h::allocator<OHOS::NetManagerStandard::NetStatsInfo>>&)";
       "OHOS::NetManagerStandard::StatsInfoUnmarshallingVector(OHOS::Parcel&, std::__h::vector<OHOS::NetManagerStandard::NetStatsInfo, std::__h::allocator<OHOS::NetManagerStandard::NetStatsInfo>>&)";
       "OHOS::NetManagerStandard::PushStatsInfo::Unmarshalling(OHOS::Parcel&, OHOS::NetManagerStandard::PushStatsInfo&)";
+      "OHOS::NetManagerStandard::NetStatsClient::SetCalibrationTraffic(unsigned int, long, unsigned long)";
     };
     *GetUidTxBytesEx*;
     *GetUidRxBytesEx*;
