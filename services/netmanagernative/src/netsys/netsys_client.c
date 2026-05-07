@@ -132,7 +132,7 @@ static int CreateConnectionToNetSys(void)
     // LCOV_EXCL_START
     if (!MakeNonBlock(sockFd)) {
         DNS_CONFIG_PRINT("MakeNonBlock failed");
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     // LCOV_EXCL_STOP
 
@@ -146,7 +146,7 @@ static int CreateConnectionToNetSys(void)
 
     // LCOV_EXCL_START
     if (!NonBlockConnect(sockFd, (struct sockaddr *)&address, sizeof(address))) {
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
     // LCOV_EXCL_STOP
 
@@ -187,7 +187,7 @@ static int32_t NetSysGetResolvConfInternal(int sockFd, uint16_t netId, struct Re
     // LCOV_EXCL_START
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         HILOG_ERROR(LOG_CORE, "send failed %{public}d", errno);
-        return CloseSocketReturn(sockFd, -1);
+        return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollRecvData(sockFd, (char *)(config), sizeof(struct ResolvConfig))) {
