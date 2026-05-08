@@ -416,7 +416,7 @@ HWTEST_F(UtNetPolicyService, ReportFirewallPolicyChange001, TestSize.Level1)
     policyService.netPolicyTraffic_ = std::make_shared<NetPolicyTraffic>();
     std::string testFnc = "testFnc";
     std::shared_ptr<FirewallRule> testFireWall;
-    policyService.netPolicyFirewall_->ReportFirewallPolicyChange(testFnc, 1, true, testFireWall);
+    policyService.netPolicyFirewall_->ReportFirewallPolicyChange(testFnc, 2, true, testFireWall);
     NetAccessPolicy policy;
     policy.allowWiFi = false;
     policy.allowCellular = false;
