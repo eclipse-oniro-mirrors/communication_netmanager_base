@@ -22,6 +22,7 @@
 #include "net_policy_event_handler.h"
 #include "net_settings.h"
 #include <dlfcn.h>
+#include "net_bundle.h"
 #include "broadcast_manager.h"
 #include "netmanager_base_common_utils.h"
 
