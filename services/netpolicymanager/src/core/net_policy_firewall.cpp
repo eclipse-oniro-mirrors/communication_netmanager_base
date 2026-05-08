@@ -22,11 +22,14 @@
 #include "net_policy_event_handler.h"
 #include "net_settings.h"
 #include <dlfcn.h>
-#include "net_bundle.h"
-#include "event_report.h"
+#include "broadcast_manager.h"
+#include "netmanager_base_common_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+constexpr const char *NETWORK_POLICY_CHANGED_EVENT = "custom.event.NETWORK_POLICY_CHANGED";
+constexpr const char *NETWORK_FIREWALL_POLICY_KEY = "FIREWALL_POLICY_INFO";
+constexpr const int32_t HIVIEW_UID = 1201;
 constexpr uint32_t MAX_LIST_SIZE = 1000;
 void NetPolicyFirewall::Init()
 {
@@ -102,17 +105,22 @@ void NetPolicyFirewall::ReportFirewallPolicyChange(const std::string &callingFnc
     }
     uint32_t pid = IPCSkeleton::GetCallingPid();
     uint32_t uid = IPCSkeleton::GetCallingUid();
-    std::string callingBundleName = GetBundleNameForUid(uid);
+    uint64_t curTime = CommonUtils::GetCurrentMilliSecond();
     std::stringstream ss;
-    ss << "[{";
-    ss << "\"callingFnc\":\"" << callingFnc << "\",";
-    ss << "\"callingPid\":" << pid << ", ";
+    ss << "{\"callingFnc\":\"" << callingFnc << "\",";
+    ss << "\"callingBundle\":\"" << callingBundleName << "\",";
+    ss << "\"timestamp\":" << curTime << ",";
+    ss << "\"callingUid\":" << uid << ",";
+    ss << "\"callingPid\":" << pid << ",";
     ss << "\"chainType\":" << chainType << ",";
     ss << "\"enable\":" << (enable ? 1 : 0) << ",";
-    ss << "\"allowList\":\"" << GetUidsBundleStr(rule->GetAllowedList()) << "\",";
-    ss << "\"deniedList\":\"" << GetUidsBundleStr(rule->GetDeniedList()) << "\"";
-    ss << "}]";
-    EventReport::SendNetworkPolicyChangeEvent(uid, callingBundleName, ss.str());
+    ss << "\"allowList\":" << GetUidsBundleStr(rule->GetAllowedList()) << ",";
+    ss << "\"deniedList\":" << GetUidsBundleStr(rule->GetDeniedList()) << "}";
+    BroadcastInfo info;
+    info.action = NETWORK_POLICY_CHANGED_EVENT;
+    info.subscriberUid = HIVIEW_UID;
+    std::map<std::string, std::string> param = {{NETWORK_FIREWALL_POLICY_KEY, ss.str()}};
+    BroadcastManager::GetInstance().SendBroadcast(info, param);
 }
 
 int32_t NetPolicyFirewall::SetDeviceIdleTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
