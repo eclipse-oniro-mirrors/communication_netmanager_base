@@ -608,6 +608,8 @@ private:
     int32_t DisableDistributedNetAsync(bool isServer, const std::string &virnicName, const std::string &dstAddr);
     int32_t CloseSocketsUidAsync(int32_t netId, uint32_t uid);
     int32_t SetAppIsFrozenedAsync(uint32_t uid, bool isFrozened);
+    void HandleUnfrozenCallback(uint32_t uid, std::shared_ptr<NetActivate> &curNetAct);
+    void HandleSkipRequest(uint32_t uid, std::shared_ptr<NetActivate> &curNetAct);
     int32_t EnableAppFrozenedCallbackLimitationAsync(bool flag);
     void HandleCallback(sptr<NetSupplier> &supplier, sptr<NetHandle> &netHandle,
                         sptr<INetConnCallback> callback, CallbackType type);
@@ -745,7 +747,7 @@ private:
         bool isFirstTimeDetect);
     void RemoveDelayNetwork();
     void UpdateNetSupplierInfoAsyncInvalid(uint32_t supplierId);
-    bool CheckNotifyLostDelay(uint32_t uid, int32_t netId, CallbackType type);
+    bool CheckNotifyLostDelay(const std::shared_ptr<NetActivate> &active, int32_t netId, CallbackType type);
     void HandleNotifyLostDelay(int32_t netId);
     bool FindNotifyLostUid(uint32_t uid);
     void StopNotifyLostDelay(int32_t netId);

@@ -2652,7 +2652,7 @@ HWTEST_F(NetConnServiceTest, CallbackForSupplier004, TestSize.Level1)
     EXPECT_TRUE(netSupplier->HasBestRequest(active->GetRequestId()));
     EXPECT_NE(active->GetNetCallback(), nullptr);
     EXPECT_FALSE(netConnService->FindNotifyLostDelayCache(netSupplier->GetNetId()));
-    EXPECT_FALSE(netConnService->CheckNotifyLostDelay(active->GetUid(), netSupplier->GetNetId(), CALL_TYPE_LOST));
+    EXPECT_FALSE(netConnService->CheckNotifyLostDelay(active, netSupplier->GetNetId(), CALL_TYPE_LOST));
 }
 
 HWTEST_F(NetConnServiceTest, CallbackForSupplier005, TestSize.Level1)
@@ -2674,7 +2674,7 @@ HWTEST_F(NetConnServiceTest, CallbackForSupplier005, TestSize.Level1)
     EXPECT_TRUE(netSupplier->HasBestRequest(active->GetRequestId()));
     EXPECT_NE(active->GetNetCallback(), nullptr);
     EXPECT_TRUE(netConnService->FindNotifyLostDelayCache(netSupplier->GetNetId()));
-    EXPECT_FALSE(netConnService->CheckNotifyLostDelay(active->GetUid(), netSupplier->GetNetId(), CALL_TYPE_LOST));
+    EXPECT_FALSE(netConnService->CheckNotifyLostDelay(active, netSupplier->GetNetId(), CALL_TYPE_LOST));
 }
 
 HWTEST_F(NetConnServiceTest, CallbackForSupplier006, TestSize.Level1)
@@ -2699,7 +2699,7 @@ HWTEST_F(NetConnServiceTest, CallbackForSupplier006, TestSize.Level1)
     EXPECT_TRUE(netSupplier->HasBestRequest(active->GetRequestId()));
     EXPECT_NE(active->GetNetCallback(), nullptr);
     EXPECT_FALSE(netConnService->FindNotifyLostDelayCache(netSupplier->GetNetId()));
-    EXPECT_TRUE(netConnService->CheckNotifyLostDelay(active->GetUid(), netSupplier->GetNetId(), CALL_TYPE_LOST));
+    EXPECT_TRUE(netConnService->CheckNotifyLostDelay(active, netSupplier->GetNetId(), CALL_TYPE_LOST));
 }
 
 HWTEST_F(NetConnServiceTest, CallbackForSupplier007, TestSize.Level1)
@@ -2725,7 +2725,7 @@ HWTEST_F(NetConnServiceTest, CallbackForSupplier007, TestSize.Level1)
     EXPECT_TRUE(netSupplier->HasBestRequest(active->GetRequestId()));
     EXPECT_NE(active->GetNetCallback(), nullptr);
     EXPECT_TRUE(netConnService->FindNotifyLostDelayCache(netSupplier->GetNetId()));
-    EXPECT_TRUE(netConnService->CheckNotifyLostDelay(active->GetUid(), netSupplier->GetNetId(), CALL_TYPE_LOST));
+    EXPECT_TRUE(netConnService->CheckNotifyLostDelay(active, netSupplier->GetNetId(), CALL_TYPE_LOST));
 }
 
 HWTEST_F(NetConnServiceTest, IsSupplierMatchRequestAndNetwork001, TestSize.Level1)

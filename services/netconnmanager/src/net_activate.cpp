@@ -333,5 +333,34 @@ NetRequest &NetActivate::GetNetRequest()
 {
     return netRequest_;
 }
+
+void NetActivate::SetIsFrozenedSkip(bool isFrozenedSkip)
+{
+    isFrozenedSkip_ = isFrozenedSkip;
+}
+
+bool NetActivate::IsFrozenedSkip() const
+{
+    return isFrozenedSkip_;
+}
+
+void NetActivate::SetNeedSkipLostDelay(bool NeedSkipLostDelay)
+{
+    NeedSkipLostDelay_ = NeedSkipLostDelay;
+}
+
+bool NetActivate::NeedSkipLostDelay() const
+{
+    return NeedSkipLostDelay_;
+}
+
+bool NetActivate::CheckTypes(const std::set<NetBearType> &bearerTypes) const
+{
+    if (netSpecifier_ == nullptr) {
+        return false;
+    }
+    auto &typesRef = netSpecifier_->netCapabilities_.bearerTypes_;
+    return (typesRef.find(BEARER_WIFI) == typesRef.end()) && HaveTypes(bearerTypes);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

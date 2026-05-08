@@ -74,7 +74,11 @@ public:
     int32_t GetNotifyLostNetId();
     bool GetNotifyLostDelay();
     NetRequest &GetNetRequest();
-
+    bool CheckTypes(const std::set<NetBearType> &bearerTypes) const;
+    void SetIsFrozenedSkip(bool isFrozenedSkip);
+    bool IsFrozenedSkip() const;
+    void SetNeedSkipLostDelay(bool NeedSkipLostDelay);
+    bool NeedSkipLostDelay() const;
 private:
     bool CompareByNetworkIdent(const std::string &ident, NetBearType bearerType, bool skipCheckIdent);
     bool CompareByNetworkCapabilities(const NetCaps &netCaps);
@@ -99,6 +103,8 @@ private:
     std::recursive_mutex notifyLostMutex_;
     std::atomic<bool> isNotifyLostDelay_ = false;
     std::atomic<int32_t> notifyLostNetId_ = 0;
+    std::atomic<bool> isFrozenedSkip_ = false;
+    std::atomic<bool> NeedSkipLostDelay_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
