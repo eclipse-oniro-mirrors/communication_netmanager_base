@@ -1327,6 +1327,157 @@ HWTEST_F(NetConnServiceExtTest, SetAppIsFrozenedAsyncTest005, TestSize.Level1)
     EXPECT_GE(active->notifyLostNetId_, 0);
 }
 
+HWTEST_F(NetConnServiceExtTest, SetAppIsFrozenedAsyncTest006, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    uint32_t uid = 1;
+    bool isFrozened = true;
+    std::vector<std::shared_ptr<NetActivate>> activates;
+    sptr<NetSpecifier> specifier = new (std::nothrow) NetSpecifier();
+    specifier->SetTypes({BEARER_CELLULAR});
+    sptr<NetSpecifier> specifier1 = new (std::nothrow) NetSpecifier();
+    specifier1->SetTypes({BEARER_WIFI});
+    sptr<INetConnCallback> callback = nullptr;
+    std::weak_ptr<INetActivateCallback> timeoutCallback;
+    std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
+    auto active = std::make_shared<NetActivate>(specifier, callback, timeoutCallback, 0, handler);
+    auto active1 = std::make_shared<NetActivate>(specifier1, callback, timeoutCallback, 0, handler);
+    auto active2 = std::make_shared<NetActivate>(specifier, callback, timeoutCallback, 0, handler);
+    active2 = nullptr;
+    activates.push_back(active);
+    activates.push_back(active1);
+    activates.push_back(active2);
+    activates[0]->SetLastCallbackType(CallbackType::CALL_TYPE_AVAILABLE);
+    activates[0]->SetServiceSupply(nullptr);
+    netConnService->netUidActivates_[uid] = activates;
+
+    netConnService->SetAppIsFrozenedAsync(uid, isFrozened);
+    EXPECT_EQ(true, activates[0]->IsFrozenedSkip());
+    activates[1]->SetIsFrozenedSkip(false);
+    netConnService->SetAppIsFrozenedAsync(uid, !isFrozened);
+    EXPECT_FALSE(activates[0]->IsFrozenedSkip());
+}
+
+HWTEST_F(NetConnServiceExtTest, HandleUnfrozenCallbackTest001, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    sptr<NetSpecifier> specifier = new (std::nothrow) NetSpecifier();
+    specifier->SetTypes({BEARER_CELLULAR});
+    sptr<INetConnCallback> callback = new (std::nothrow) NetConnCallbackStubCb();
+    std::weak_ptr<INetActivateCallback> timeoutCallback;
+    std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
+    auto active = std::make_shared<NetActivate>(specifier, callback, timeoutCallback, 0, handler);
+
+    uint32_t supplierId = 1;
+    std::string netSupplierIdent;
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_VALIDATED);
+    sptr<NetSupplier> supplier = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
+    active->SetServiceSupply(supplier);
+    active->SetLastCallbackType(CallbackType::CALL_TYPE_LOST);
+    netConnService->HandleUnfrozenCallback(1, active);
+    CallbackType callbackType = active->GetLastCallbackType();
+    EXPECT_EQ(callbackType, CallbackType::CALL_TYPE_UNKNOWN);
+
+    active->SetLastCallbackType(CallbackType::CALL_TYPE_AVAILABLE);
+    netConnService->HandleUnfrozenCallback(1, active);
+    callbackType = active->GetLastCallbackType();
+    EXPECT_EQ(callbackType, CallbackType::CALL_TYPE_UNKNOWN);
+}
+
+HWTEST_F(NetConnServiceExtTest, HandleUnfrozenCallbackTest002, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
+    sptr<NetSpecifier> specifier = new (std::nothrow) NetSpecifier();
+    specifier->SetTypes({BEARER_CELLULAR});
+    sptr<INetConnCallback> callback = nullptr;
+    std::weak_ptr<INetActivateCallback> timeoutCallback;
+    std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
+    auto active = std::make_shared<NetActivate>(specifier, callback, timeoutCallback, 0, handler);
+
+    active->SetServiceSupply(nullptr);
+    active->SetLastCallbackType(CallbackType::CALL_TYPE_AVAILABLE);
+    netConnService->HandleUnfrozenCallback(1, active);
+    CallbackType callbackType = active->GetLastCallbackType();
+    EXPECT_NE(callbackType, CallbackType::CALL_TYPE_UNKNOWN);
+
+    active->SetLastCallbackType(CallbackType::CALL_TYPE_LOST);
+    active->SetLastNetid(100);
+    netConnService->HandleUnfrozenCallback(1, active);
+    callbackType = active->GetLastCallbackType();
+    EXPECT_EQ(callbackType, CallbackType::CALL_TYPE_UNKNOWN);
+
+    sptr<INetConnCallback> callback1 = new (std::nothrow) NetConnCallbackStubCb();
+    auto active1 = std::make_shared<NetActivate>(specifier, callback1, timeoutCallback, 0, handler);
+    active1->SetServiceSupply(nullptr);
+    active1->SetLastCallbackType(CallbackType::CALL_TYPE_LOST);
+    active1->SetLastNetid(100);
+    netConnService->HandleUnfrozenCallback(1, active1);
+    callbackType = active1->GetLastCallbackType();
+    EXPECT_EQ(callbackType, CallbackType::CALL_TYPE_UNKNOWN);
+}
+
+HWTEST_F(NetConnServiceExtTest, HandleNotifyLostDelayTest001, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    uint32_t uid = 1099;
+    int32_t netId = 123;
+    std::vector<std::shared_ptr<NetActivate>> activates;
+    sptr<NetSpecifier> specifier = nullptr;
+    sptr<INetConnCallback> callback = new (std::nothrow) NetConnCallbackStubCb();
+    sptr<INetConnCallback> callback1 = nullptr;
+    std::weak_ptr<INetActivateCallback> timeoutCallback;
+    std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
+    auto active = std::make_shared<NetActivate>(specifier, callback, timeoutCallback, 0, handler);
+    auto active1 = std::make_shared<NetActivate>(specifier, callback1, timeoutCallback, 0, handler);
+    auto active2 = std::make_shared<NetActivate>(specifier, callback1, timeoutCallback, 0, handler);
+    active2 = nullptr;
+    activates.push_back(active);
+    activates.push_back(active1);
+    activates.push_back(active2);
+    netConnService->netUidActivates_[uid] = activates;
+    active->isNotifyLostDelay_ = true;
+    netConnService->HandleNotifyLostDelay(netId);
+    EXPECT_TRUE(active->isNotifyLostDelay_);
+    active->SetNeedSkipLostDelay(true);
+    active1->SetNeedSkipLostDelay(true);
+    std::string netSupplierIdent;
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_VALIDATED);
+    sptr<NetSupplier> supplier = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
+    active->SetServiceSupply(supplier);
+    netConnService->HandleNotifyLostDelay(netId);
+    EXPECT_TRUE(active->isNotifyLostDelay_);
+}
+
+HWTEST_F(NetConnServiceExtTest, CheckNotifyLostDelayTest001, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    uint32_t uid = 100;
+    int32_t netId = 123;
+    bool ret = true;
+    netConnService->netConnEventHandler_  = nullptr;
+    sptr<NetSpecifier> specifier = new (std::nothrow) NetSpecifier();
+    specifier->SetTypes({BEARER_CELLULAR});
+    sptr<INetConnCallback> callback = nullptr;
+    std::weak_ptr<INetActivateCallback> timeoutCallback;
+    std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
+    auto active = std::make_shared<NetActivate>(specifier, callback, timeoutCallback, 0, handler);
+    active->netRequest_.uid = uid;
+    ret = netConnService->CheckNotifyLostDelay(active, netId, CallbackType::CALL_TYPE_LOST);
+    EXPECT_FALSE(ret);
+
+    netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
+    ret = netConnService->CheckNotifyLostDelay(active, netId, CallbackType::CALL_TYPE_UNKNOWN);
+    EXPECT_FALSE(ret);
+
+    ret = netConnService->CheckNotifyLostDelay(active, netId, CallbackType::CALL_TYPE_LOST);
+    EXPECT_FALSE(ret);
+}
+
 HWTEST_F(NetConnServiceExtTest, EnableAppFrozenedCallbackLimitationTest002, TestSize.Level1)
 {
     auto netConnService = std::make_shared<NetConnService>();
