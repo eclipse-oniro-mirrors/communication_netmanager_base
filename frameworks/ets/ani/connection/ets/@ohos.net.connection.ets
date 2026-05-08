@@ -31,8 +31,8 @@ export default namespace connection {
     native clean(): void
   }
 
-  let destroyRegister = new FinalizationRegistry<Cleaner>((cleaner: Cleaner) => {cleaner.clean()})
-  let unregisterToken = new object()
+  let destroyRegister: FinalizationRegistry<Cleaner> = new FinalizationRegistry<Cleaner>((cleaner: Cleaner) => {cleaner.clean()})
+  let unregisterToken: object = new object()
 
   // type HttpRequest = http.HttpRequest;
 
