@@ -203,6 +203,26 @@ int32_t ConnManager::GetDefaultNetwork() const
     return defaultNetId_;
 }
 
+int32_t ConnManager::GetNetIdByInterface(const std::string &interfaceName)
+{
+    int32_t interfaceId = INTERFACE_UNSET;
+    std::string ifaceName = interfaceName;
+    networks_.Iterate([&interfaceId, &ifaceName](int32_t id, std::shared_ptr<NetsysNetwork> &netsysNetworkPtr) {
+        if (interfaceId != INTERFACE_UNSET || netsysNetworkPtr == nullptr) {
+            return;
+        }
+        if (netsysNetworkPtr->ExistInterface(ifaceName)) {
+            interfaceId = id;
+        }
+    });
+    if (interfaceId == INTERFACE_UNSET) {
+        NETNATIVE_LOGE("netId not found, iface=%{public}s", interfaceName.c_str());
+    } else {
+        NETNATIVE_LOGI("iface=%{public}s, netId=%{public}d", interfaceName.c_str(), interfaceId);
+    }
+    return interfaceId;
+}
+
 int32_t ConnManager::GetNetworkForInterface(int32_t netId, std::string &interfaceName)
 {
     NETNATIVE_LOG_D("Entry ConnManager::GetNetworkForInterface interfaceName:%{public}s", interfaceName.c_str());

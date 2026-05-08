@@ -157,7 +157,7 @@ void DnsParamCache::SetDefaultNetwork(uint16_t netId)
     defaultNetId_ = netId;
 }
 
-void DnsParamCache::EnableIpv6(uint16_t netId)
+void DnsParamCache::EnableIpv6(uint16_t netId, bool enable)
 {
     std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     auto it = serverConfigMap_.find(netId);
@@ -166,7 +166,7 @@ void DnsParamCache::EnableIpv6(uint16_t netId)
         return;
     }
 
-    it->second.EnableIpv6();
+    it->second.EnableIpv6(enable);
 }
 
 bool DnsParamCache::IsIpv6Enable(uint16_t netId)

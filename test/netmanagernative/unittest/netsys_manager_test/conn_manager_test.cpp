@@ -1115,5 +1115,70 @@ HWTEST_F(ConnManagerTest, ConnManager_RemoveInterfaceFromNetwork_VirtualNetwork,
     ret = instance_->DestroyNetwork(netId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+/**
+ * @tc.number: ConnManager_GetNetIdByInterface_Success
+ * @tc.name: Test GetNetIdByInterface returns correct netId
+ * @tc.desc: Verify that GetNetIdByInterface returns the correct network ID for a given interface
+ */
+HWTEST_F(ConnManagerTest, ConnManager_GetNetIdByInterface_Success, TestSize.Level1)
+{
+    ConnManager connManager;
+    int32_t netId = 500;
+    int32_t ret = connManager.CreatePhysicalNetwork(netId, PERMISSION_NONE);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    std::string interfaceName = "wlan0";
+    ret = connManager.AddInterfaceToNetwork(netId, interfaceName, BEARER_WIFI);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    int32_t foundNetId = connManager.GetNetIdByInterface(interfaceName);
+    EXPECT_EQ(foundNetId, netId);
+
+    ret = connManager.DestroyNetwork(netId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.number: ConnManager_GetNetIdByInterface_NotFound
+ * @tc.name: Test GetNetIdByInterface returns INTERFACE_UNSET when interface not found
+ * @tc.desc: Verify that GetNetIdByInterface returns INTERFACE_UNSET for non-existent interface
+ */
+HWTEST_F(ConnManagerTest, ConnManager_GetNetIdByInterface_NotFound, TestSize.Level1)
+{
+    ConnManager connManager;
+    std::string interfaceName = "nonexistent0";
+    int32_t foundNetId = connManager.GetNetIdByInterface(interfaceName);
+    EXPECT_EQ(foundNetId, INVALID_VALUE);
+}
+
+/**
+ * @tc.number: ConnManager_GetNetIdByInterface_MultipleNetworks
+ * @tc.name: Test GetNetIdByInterface with multiple networks
+ * @tc.desc: Verify that GetNetIdByInterface returns the first matching network ID
+ */
+HWTEST_F(ConnManagerTest, ConnManager_GetNetIdByInterface_MultipleNetworks, TestSize.Level1)
+{
+    ConnManager connManager;
+    int32_t netId1 = 501;
+    int32_t netId2 = 502;
+
+    int32_t ret = connManager.CreatePhysicalNetwork(netId1, PERMISSION_NONE);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = connManager.CreatePhysicalNetwork(netId2, PERMISSION_NONE);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    std::string interfaceName = "eth1";
+    ret = connManager.AddInterfaceToNetwork(netId1, interfaceName, BEARER_DEFAULT);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    int32_t foundNetId = connManager.GetNetIdByInterface(interfaceName);
+    EXPECT_EQ(foundNetId, netId1);
+
+    ret = connManager.DestroyNetwork(netId1);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = connManager.DestroyNetwork(netId2);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

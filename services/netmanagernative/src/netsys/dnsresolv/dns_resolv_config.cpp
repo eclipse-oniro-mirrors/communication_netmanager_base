@@ -70,9 +70,9 @@ DnsResolvConfig::DnsResolvConfig()
 {
 }
 
-void DnsResolvConfig::EnableIpv6()
+void DnsResolvConfig::EnableIpv6(bool enable)
 {
-    isIpv6Enable_ = true;
+    isIpv6Enable_ = enable;
 }
 
 bool DnsResolvConfig::IsIpv6Enable()

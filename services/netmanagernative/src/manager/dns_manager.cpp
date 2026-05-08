@@ -61,8 +61,14 @@ DnsManager::DnsManager() : dnsProxyListen_(std::make_shared<DnsProxyListen>())
 #endif
 }
 
-void DnsManager::EnableIpv6(uint16_t netId, std::string &destination, const std::string &nextHop)
+void DnsManager::EnableIpv6(uint16_t netId, std::string &destination, const std::string &nextHop, bool enable)
 {
+    if (!enable) {
+        NETNATIVE_LOGI("Disable ipv6 dns, netId=%{public}d", netId);
+        DnsParamCache::GetInstance().EnableIpv6(netId, false);
+        return;
+    }
+
     auto pos = destination.find("/");
     if (pos == std::string::npos) {
         return;
@@ -76,6 +82,7 @@ void DnsManager::EnableIpv6(uint16_t netId, std::string &destination, const std:
     }
 
     if ((IsValidIPV6(ip) && prefix == 0) && (IsValidIPV6(nextHop) || nextHop.empty())) {
+        NETNATIVE_LOGI("Enable ipv6 dns, netId=%{public}d", netId);
         DnsParamCache::GetInstance().EnableIpv6(netId);
     }
 }

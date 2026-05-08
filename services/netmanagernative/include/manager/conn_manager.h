@@ -111,6 +111,8 @@ public:
      */
     int32_t GetDefaultNetwork() const;
 
+    int32_t GetNetIdByInterface(const std::string &interfaceName);
+
     /**
      * Add an interface to a network. The interface must not be assigned to any network, including
      *        the specified network
