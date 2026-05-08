@@ -106,6 +106,7 @@ void NetPolicyFirewall::ReportFirewallPolicyChange(const std::string &callingFnc
     }
     uint32_t pid = IPCSkeleton::GetCallingPid();
     uint32_t uid = IPCSkeleton::GetCallingUid();
+    std::string callingBundleName = GetBundleNameForUid(uid);
     uint64_t curTime = CommonUtils::GetCurrentMilliSecond();
     std::stringstream ss;
     ss << "{\"callingFnc\":\"" << callingFnc << "\",";
