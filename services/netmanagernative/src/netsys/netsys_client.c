@@ -91,7 +91,7 @@ static bool NonBlockConnect(int sock, struct sockaddr *addr, socklen_t addrLen)
         return true;
     }
     // LCOV_EXCL_START
-    if (errno != EINPROGRESS) {
+    if (errno != EINPROGRESS && errno != 0) {
         return false;
     }
 
