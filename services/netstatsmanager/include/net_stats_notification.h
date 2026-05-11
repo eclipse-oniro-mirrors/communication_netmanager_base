@@ -62,6 +62,8 @@ private:
         std::shared_ptr<Notification::NotificationNormalContent> content, bool isDaulCard);
     std::string GetTrafficNum(double traffic);
 
+    void SetWantAgent(Notification::NotificationRequest &request);
+
     std::shared_ptr<Media::PixelMap> netmgrStatsLimitIconPixelMap_  {};
     std::map<std::string, std::string> resourceMap;
     std::map<std::string, std::string> languageMap;
