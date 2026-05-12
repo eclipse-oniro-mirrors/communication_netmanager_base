@@ -390,7 +390,7 @@ void NetsysBpfNetFirewall::GetDomainHashKey(const std::string &domain, DomainHas
     int i = 0;
     for (auto &s : v) {
         int strLen = static_cast<int>(s.length());
-        if (i + strlen + 1 > DNS_DOMAIN_LEN) {
+        if (i + strLen + 1 > DNS_DOMAIN_LEN) {
             NETNATIVE_LOGE("GetDomainHashKey: domain length exceeds DNS_DOMAIN_LEN");
             return;
         }
