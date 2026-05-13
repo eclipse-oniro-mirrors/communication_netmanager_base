@@ -85,7 +85,7 @@ bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier, bool skipCh
 {
     NETMGR_LOG_D("supplier[%{public}d, %{public}s], request[%{public}d]", (supplier ? supplier->GetSupplierId() : 0),
                  (supplier ? supplier->GetNetSupplierIdent().c_str() : "nullptr"), netRequest_.requestId);
-    if (supplier == nullptr) {
+    if (supplier == nullptr || supplier->GetSupplierCallback() == nullptr) {
         NETMGR_LOG_E("Supplier is null");
         return false;
     }
