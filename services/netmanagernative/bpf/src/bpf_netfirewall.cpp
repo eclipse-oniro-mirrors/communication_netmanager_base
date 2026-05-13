@@ -75,7 +75,8 @@ void NetsysBpfNetFirewall::ConntrackGcTask()
 
     timespec now = { 0 };
     // bpf_ktime_get_ns: CLOCK_MONOTONIC
-    if (!clock_gettime(CLOCK_MONOTONIC, &now)) {
+    if (clock_gettime(CLOCK_MONOTONIC, &now) != 0) {
+        NETNATIVE_LOGE("ConntrackGcTask: clock_gettime failed");
         return;
     }
     for (const CtKey &k : keys) {
@@ -389,6 +390,10 @@ void NetsysBpfNetFirewall::GetDomainHashKey(const std::string &domain, DomainHas
     int i = 0;
     for (auto &s : v) {
         int strLen = static_cast<int>(s.length());
+        if (i + strLen + 1 > DNS_DOMAIN_LEN) {
+            NETNATIVE_LOGE("GetDomainHashKey: domain length exceeds DNS_DOMAIN_LEN");
+            return;
+        }
         if (memcpy_s(out.data + i, DNS_DOMAIN_LEN - i, (uint8_t *)s.c_str(), strLen) != EOK) {
             NETNATIVE_LOGE("GetDomainHashKey: memcpy_s failed");
             return;
