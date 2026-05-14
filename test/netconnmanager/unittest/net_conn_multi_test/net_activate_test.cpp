@@ -82,6 +82,7 @@ HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest001, TestSize.Level1)
     std::set<NetCap> netCaps;
     netCaps.insert(NET_CAPABILITY_INTERNET);
     sptr<NetSupplier> supplier = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps);
+    supplier->netController_ = sptr<NetSupplierCallbackStubTestCb>::MakeSptr();
     bool ret = instance_->MatchRequestAndNetwork(supplier);
     EXPECT_TRUE(ret);
     sptr<NetSupplier> supplier001 = nullptr;
@@ -89,14 +90,17 @@ HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest001, TestSize.Level1)
     EXPECT_FALSE(ret);
     std::string test;
     sptr<NetSupplier> supplier002 = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, test, netCaps);
+    supplier002->netController_ = sptr<NetSupplierCallbackStubTestCb>::MakeSptr();
     ret = instance_->MatchRequestAndNetwork(supplier002);
     EXPECT_TRUE(ret);
     std::set<NetCap> netCaps1;
     netCaps1.insert(NET_CAPABILITY_INTERNET);
     sptr<NetSupplier> supplier003 = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps1);
+    supplier003->netController_ = sptr<NetSupplierCallbackStubTestCb>::MakeSptr();
     ret = instance_->MatchRequestAndNetwork(supplier003);
     EXPECT_TRUE(ret);
     sptr<NetSupplier> supplier004 = new (std::nothrow) NetSupplier(NetBearType::BEARER_CELLULAR, TEST_IDENT, netCaps);
+    supplier004->netController_ = sptr<NetSupplierCallbackStubTestCb>::MakeSptr();
     ret = instance_->MatchRequestAndNetwork(supplier004);
     EXPECT_TRUE(ret);
 }
@@ -109,6 +113,7 @@ HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest002, TestSize.Level1)
     bool ret = instance_->MatchRequestAndNetwork(supplier);
     EXPECT_EQ(ret, false);
     supplier = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps);
+    supplier->netController_ = sptr<NetSupplierCallbackStubTestCb>::MakeSptr();
     ret = instance_->MatchRequestAndNetwork(supplier);
     EXPECT_TRUE(ret);
 }
@@ -349,6 +354,7 @@ HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest003, TestSize.Level1)
     instance_->netSpecifier_->netCapabilities_.linkUpBandwidthKbps_ = 0;
     supplier->netAllCapabilities_.linkDownBandwidthKbps_ = 0;
     instance_->netSpecifier_->netCapabilities_.linkDownBandwidthKbps_ = 1;
+    supplier->netController_ = sptr<NetSupplierCallbackStubTestCb>::MakeSptr();
     auto ret = instance_->MatchRequestAndNetwork(supplier, true);
     EXPECT_FALSE(ret);
 
@@ -366,6 +372,7 @@ HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest004, TestSize.Level1)
 {
     std::set<NetCap> netCaps { NET_CAPABILITY_INTERNET };
     sptr<NetSupplier> supplier = sptr<NetSupplier>::MakeSptr(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps);
+    supplier->netController_ = sptr<NetSupplierCallbackStubTestCb>::MakeSptr();
     sptr<NetSpecifier> netSpecifier = sptr<NetSpecifier>::MakeSptr();
     netSpecifier->SetCapabilities(netCaps);
     netSpecifier->SetType(NetBearType::BEARER_ETHERNET);
@@ -383,6 +390,7 @@ HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest005, TestSize.Level1)
 {
     std::set<NetCap> netCaps { NET_CAPABILITY_INTERNET };
     sptr<NetSupplier> supplier = sptr<NetSupplier>::MakeSptr(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps);
+    supplier->netController_ = sptr<NetSupplierCallbackStubTestCb>::MakeSptr();
     sptr<NetSpecifier> netSpecifier = sptr<NetSpecifier>::MakeSptr();
     netSpecifier->SetCapabilities(netCaps);
     netSpecifier->SetType(NetBearType::BEARER_ETHERNET);
