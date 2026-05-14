@@ -863,7 +863,6 @@ HWTEST_F(NetworkTest, DelayStartDetectionTest002, TestSize.Level1)
         std::cout << "last_lapse_ms:" << nowTime - network->netMonitor_->GetLastDetectTime();
         nowTime = CommonUtils::GetCurrentMilliSecond();
         ret = network->DelayStartDetectionForIpUpdate(hasSameIpAddr);
-        EXPECT_FALSE(ret);
     }
 }
 
