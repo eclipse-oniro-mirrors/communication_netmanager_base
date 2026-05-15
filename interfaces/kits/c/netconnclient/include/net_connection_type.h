@@ -83,6 +83,10 @@ typedef enum NetConn_NetCap {
     NETCONN_NET_CAPABILITY_VALIDATED = 16,
     /** portal */
     NETCONN_NET_CAPABILITY_PORTAL = 17,
+    /** oem paid */
+    NETCONN_NET_CAPABILITY_OEM_PAID = 26,
+    /** oem private */
+    NETCONN_NET_CAPABILITY_OEM_PRIVATE = 27,
     /** Checking connectivity */
     NETCONN_NET_CAPABILITY_CHECKING_CONNECTIVITY = 31
 } NetConn_NetCap;

@@ -996,6 +996,11 @@ int32_t NetConnService::UpdateNetCapsAsync(const std::set<NetCap> &netCaps, cons
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
     network->SetNetCaps(netCaps);
+
+    supplier->UpdateNetCap(netCaps);
+    std::string tab{" "};
+    NETMGR_LOG_I("%{public}s\n", supplier->GetNetCapabilities().ToString(tab).c_str());
+
     CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     FindBestNetworkForAllRequest();
     return NETMANAGER_SUCCESS;

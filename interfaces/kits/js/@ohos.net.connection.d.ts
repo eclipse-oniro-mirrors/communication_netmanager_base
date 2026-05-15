@@ -1436,6 +1436,18 @@ declare namespace connection {
      * @since 8
      */
     NET_CAPABILITY_VALIDATED = 16,
+    /**
+     * Indicates oem paid.
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @since 8
+     */
+    NET_CAPABILITY_OEM_PAID = 26,
+    /**
+     * Indicates oem private.
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @since 8
+     */
+    NET_CAPABILITY_OEM_PRIVATE = 27,
   }
 
   /**

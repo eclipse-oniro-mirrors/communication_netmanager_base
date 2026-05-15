@@ -681,6 +681,14 @@ void NetSupplier::SetReuseCap(NetCap reuseCap, bool add)
     }
 }
 
+void NetSupplier::UpdateNetCap(const std::set<NetCap> &netCaps)
+{
+    NetCaps caps(netCaps);
+    netCaps_ = caps;
+    std::unique_lock<std::shared_mutex> lock(netAllCapabilities_.netCapsMutex_);
+    netAllCapabilities_.netCaps_ = netCaps;
+}
+
 std::string NetSupplier::GetNetExtAttribute()
 {
     if (netExtAttribute_.empty() && netHandle_ != nullptr) {
