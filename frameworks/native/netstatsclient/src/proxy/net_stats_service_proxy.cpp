@@ -652,5 +652,67 @@ int32_t NetStatsServiceProxy::SetCalibrationTraffic(uint32_t simId, int64_t rema
     }
     return ret;
 }
+
+int32_t NetStatsServiceProxy::SetTrafficPlanInfo(int32_t simId, int32_t param, int64_t value)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteInt32(simId)) {
+        NETMGR_LOG_E("proxy simId write failed.");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteInt32(param)) {
+        NETMGR_LOG_E("proxy TrafficPlanParam write failed.");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteInt64(value)) {
+        NETMGR_LOG_E("proxy value write failed.");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    MessageParcel reply;
+    int32_t ret =
+        SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_TRAFFIC_PLAN_INFO), data, reply);
+    if (ret != 0) {
+        NETMGR_LOG_E("proxy SendRequest failed, ret: [%{public}d]", ret);
+        return ret;
+    }
+    return ret;
+}
+
+int32_t NetStatsServiceProxy::GetTrafficPlanInfo(int32_t simId, int32_t param, int64_t &value)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteInt32(simId)) {
+        NETMGR_LOG_E("proxy simId write failed.");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteInt32(param)) {
+        NETMGR_LOG_E("proxy TrafficPlanParam write failed.");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    MessageParcel reply;
+    int32_t ret =
+        SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_PLAN_INFO), data, reply);
+    if (ret != 0) {
+        NETMGR_LOG_E("proxy SendRequest failed, ret: [%{public}d]", ret);
+        return ret;
+    }
+    if (!reply.ReadInt64(value)) {
+        NETMGR_LOG_E("ReadInt64 failed");
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return ret;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

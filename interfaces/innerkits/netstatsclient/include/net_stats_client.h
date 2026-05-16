@@ -29,6 +29,7 @@
 #include "net_stats_info_sequence.h"
 #include "net_stats_network.h"
 #include "network_sharing.h"
+#include "traffic_plan_param.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -314,6 +315,8 @@ public:
      * @systemapi Hide this for inner system use.
      */
     int32_t SetCalibrationTraffic(uint32_t simId, int64_t remainingData, uint64_t totalMonthlyData);
+    int32_t SetTrafficPlanInfo(int32_t simId, int32_t param, int64_t value);
+    int32_t GetTrafficPlanInfo(int32_t simId, int32_t param, int64_t &value);
 
 private:
     class NetStatsDeathRecipient : public IRemoteObject::DeathRecipient {

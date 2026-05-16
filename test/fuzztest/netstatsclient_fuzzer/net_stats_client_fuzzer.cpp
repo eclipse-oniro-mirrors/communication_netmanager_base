@@ -372,6 +372,30 @@ void SetCalibrationTrafficFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteUint64(tatalData);
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_CALIBRATION_TRAFFIC), dataParcel);
 }
+
+void SetTrafficPlanInfoFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    CheckParamVaild(dataParcel, data, size);
+    int32_t simId = NetStatsGetData<int32_t>();
+    int32_t param = NetStatsGetData<int32_t>();
+    int64_t value = NetStatsGetData<int64_t>();
+    dataParcel.WriteInt32(simId);
+    dataParcel.WriteInt32(param);
+    dataParcel.WriteInt64(value);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_TRAFFIC_PLAN_INFO), dataParcel);
+}
+
+void GetTrafficPlanInfoFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    CheckParamVaild(dataParcel, data, size);
+    int32_t simId = NetStatsGetData<int32_t>();
+    int32_t param = NetStatsGetData<int32_t>();
+    dataParcel.WriteInt32(simId);
+    dataParcel.WriteInt32(param);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_PLAN_INFO), dataParcel);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -399,5 +423,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetTrafficStatsByUidNetworkFuzzTest(data, size);
     OHOS::NetManagerStandard::GetMonthTrafficStatsByNetworkFuzzTest(data, size);
     OHOS::NetManagerStandard::SetCalibrationTrafficFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetTrafficPlanInfoFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetTrafficPlanInfoFuzzTest(data, size);
     return 0;
 }

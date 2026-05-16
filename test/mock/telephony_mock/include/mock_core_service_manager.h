@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,30 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-#ifndef SWITCH_OBSERVER_H
-#define SWITCH_OBSERVER_H
- 
-#include <vector>
-#include <map>
-#include <memory>
-#include "singleton.h"
-#include "data_ability_observer_stub.h"
-#include "traffic_plan_param.h"
- 
+#ifndef MOCK_CORE_SERVICE_MANAGER_H
+#define MOCK_CORE_SERVICE_MANAGER_H
+
+
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
 namespace OHOS {
 namespace NetManagerStandard {
- 
-class TrafficDataObserver {
+// using namespace Telephony;
+class MockCoreServiceManager {
 public:
-    TrafficDataObserver(int32_t simId_);
-    ~TrafficDataObserver() = default;
-    void ReadTrafficDataSettings(TrafficPlanInfo &info);
-    void ReadTrafficDataSettingsPart2(TrafficPlanInfo &info);
+    static MockCoreServiceManager &GetInstance(void);
+    MOCK_METHOD(int32_t, GetSlotId, (int32_t simId));
+    MOCK_METHOD(int32_t, GetSimIccId, (int32_t simId, std::u16string &iccId));
 
-public:
-    int32_t simId_ { -1 };
+private:
+    MockCoreServiceManager() {}
+    ~MockCoreServiceManager() {}
 };
-}
-}
+} // namespace NetManagerStandard
+} // namespace OHOS
 #endif

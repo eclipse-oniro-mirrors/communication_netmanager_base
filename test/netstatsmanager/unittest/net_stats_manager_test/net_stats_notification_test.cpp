@@ -24,7 +24,6 @@
 #include "net_stats_utils.h"
 #include "net_stats_rdb.h"
 #include "net_stats_service.h"
-#include "net_stats_settings_observer.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -110,38 +109,6 @@ HWTEST_F(NetStatsNotificationTest, GetDayNotificationTextTest001, TestSize.Level
     ret = notification.GetDayNotificationText();
     EXPECT_TRUE(ret.empty());
     notification.resourceMap[KEY_DAILY_NOTIFY_TEXT] = temp;
-}
-
-HWTEST_F(NetStatsNotificationTest, GetMonthNotificationTextTest001, TestSize.Level1)
-{
-    auto &notification = NetMgrNetStatsLimitNotification::GetInstance();
-    std::string temp = notification.resourceMap[KEY_MONTH_NOTIFY_TEXT];
-    notification.resourceMap.erase(KEY_MONTH_NOTIFY_TEXT);
-    auto ret = notification.GetMonthNotificationText();
-    EXPECT_TRUE(ret.empty());
-
-    notification.resourceMap[KEY_MONTH_NOTIFY_TEXT] = "";
-    ret = notification.GetMonthNotificationText();
-    EXPECT_TRUE(ret.empty());
-    notification.resourceMap[KEY_MONTH_NOTIFY_TEXT] = temp;
-    ret = notification.GetMonthNotificationText();
-    EXPECT_TRUE(ret.empty());
-#ifdef SUPPORT_TRAFFIC_STATISTIC
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
-    notification.resourceMap[KEY_MONTH_NOTIFY_TEXT] = temp;
-    std::shared_ptr<TrafficDataObserver> observer = std::make_shared<TrafficDataObserver>(0);
-    std::shared_ptr<TrafficSettingsInfo> settingsInfo = std::make_shared<TrafficSettingsInfo>();
-    netStatsService->settingsTrafficMap_.insert(std::make_pair(0, std::make_pair(observer, settingsInfo)));
-    ret = notification.GetMonthNotificationText();
-    EXPECT_FALSE(ret.empty());
-#endif
-}
-
-HWTEST_F(NetStatsNotificationTest, ReadBeginDateSettingsTest001, TestSize.Level1)
-{
-    std::shared_ptr<TrafficDataObserver> observer = std::make_shared<TrafficDataObserver>(0);
-    int beginDate = observer->ReadBeginDateSettings();
-    EXPECT_EQ(beginDate, 1);
 }
 
 HWTEST_F(NetStatsNotificationTest, GetMonthAlertTextTest001, TestSize.Level1)

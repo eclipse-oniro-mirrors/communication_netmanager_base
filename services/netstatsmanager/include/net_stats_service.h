@@ -6,7 +6,6 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -28,9 +27,10 @@
 #include "net_stats_service_stub.h"
 #include "netlink_manager.h"
 #include "net_bundle.h"
+#include "net_stats_traffic_plan_service.h"
+#include "traffic_plan_param.h"
 #ifdef SUPPORT_TRAFFIC_STATISTIC
 #include "ffrt_timer.h"
-#include "net_stats_settings_observer.h"
 #include "netsys_traffic_callback_stub.h"
 #include "netsys_controller_callback.h"
 #include "net_stats_trafficLimit_dialog.h"
@@ -47,8 +47,6 @@ namespace OHOS {
 namespace NetManagerStandard {
 class NetStatsCached;
 #ifdef SUPPORT_TRAFFIC_STATISTIC
-using ObserverPtr = std::shared_ptr<TrafficDataObserver>;
-using SettingsInfoPtr = std::shared_ptr<TrafficSettingsInfo>;
 class TrafficObserver;
 class NetsysControllerObserver;
 class TelephonyInfoObserver;
@@ -100,15 +98,17 @@ public:
     int32_t SaveSharingTraffic(const NetStatsInfo &infos) override;
     void AddUidStatsFlag(uint64_t delay);
     void ProcessDefaultSimIdChanged(std::string simId);
+    int32_t SetTrafficPlanInfo(int32_t simId, int32_t param, int64_t value) override;
+    int32_t GetTrafficPlanInfo(int32_t simId, int32_t param, int64_t &value) override;
+    int32_t OnExtension(const std::string& extension, MessageParcel& data, MessageParcel& reply) override;
 
 #ifdef SUPPORT_TRAFFIC_STATISTIC
-    void UpdateSettingsdata(int32_t simId, uint8_t flag, uint64_t value);
-    std::map<int32_t, std::pair<ObserverPtr, SettingsInfoPtr>> GetSettingsObserverMap();
+    int32_t UpdateSettingsdata(int32_t simId, uint8_t flag, uint64_t value);
     int32_t NotifyTrafficAlert(int32_t simId, uint8_t flag);
     int32_t NotifyTrafficAlertFfrt(int32_t simId, uint8_t flag);
     bool GetMonthlyLimitBySimId(int32_t simId, uint64_t &monthlyLimit);
     bool GetMonthlyMarkBySimId(int32_t simId, uint16_t &monthlyMark);
-    bool GetdailyMarkBySimId(int32_t simId, uint16_t &dailyMark);
+    bool GetDailyMarkBySimId(int32_t simId, uint16_t &dailyMark);
 
     void UpdateAllHistoryDateInfo();
     void UpdateHistoryData(int32_t simId);
@@ -156,7 +156,6 @@ private:
     void SetTrafficMapMaxValue();
     void SetTrafficMapMaxValue(int32_t slotId);
     void StartTrafficOvserver();
-    void StopTrafficOvserver();
     bool GetNotifyStats(int32_t simId, uint8_t flag);
     bool GetMonAlertStatus(int32_t simId);
     bool GetMonNotifyStatus(int32_t simId);
@@ -167,8 +166,6 @@ private:
     void DealNotificaiton(int32_t simId, uint8_t flag);
     bool IsMobileDataEnabled();
     void UpdateTrafficLimitDate(int32_t simId);
-    void ResetNotifyState(int32_t simId);
-    void UpdateNetStatsToMapFromDB(int32_t simId);
     bool CalculateTrafficAvailable(int32_t simId, uint64_t &monthlyAvailable,
                                    uint64_t &monthlyMarkAvailable, uint64_t &dailyMarkAvailable);
     int32_t UpdataSettingsdataFfrt(int32_t simId, uint8_t flag, uint64_t value);
@@ -182,6 +179,7 @@ private:
     bool IsSimIdExist(int32_t simId);
     bool GetIfIndex(int32_t simId, uint64_t &ifIndex);
     void ProcessUpdateBeginDate(int32_t simId, uint32_t beginDate);
+    std::string GetFieldNameByParam(TrafficPlanParam param);
 #endif // SUPPORT_TRAFFIC_STATISTIC
     void StartSysTimer();
     void StopSysTimer();
@@ -224,7 +222,6 @@ private:
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     uint64_t curIfIndex_ = UINT64_MAX;
     std::atomic_bool isWifiConnected_ = false;
-    std::map<int32_t, std::pair<ObserverPtr, SettingsInfoPtr>> settingsTrafficMap_;
     ffrt::shared_mutex simIdToIfIndexMapMutex_;
     std::map<int32_t, uint64_t> simIdToIfIndexMap_;
     std::unique_ptr<FfrtTimer> trafficTimer_ = nullptr;
@@ -236,6 +233,7 @@ private:
     sptr<TelephonyInfoObserver> telephonyInfoObserver_ = nullptr;
 #endif // SUPPORT_TRAFFIC_STATISTIC
     std::mutex timerMutex_;
+    std::shared_ptr<NetStatsTrafficPlanService> trafficPlanService_ = nullptr;
     std::set<std::string> callingRecordSet_;
     ffrt::mutex recordCallingDataMutex_;
     std::shared_ptr<ffrt::queue> recordReportFfrtQueue_;
@@ -256,6 +254,7 @@ public:
     ~TelephonyInfoObserver() = default;
     void OnSimStateUpdated(
          int32_t slotId, Telephony::CardType type, Telephony::SimState state, Telephony::LockReason reason) override;
+    void OnIccAccountUpdated() override;
 };
 
 #endif // SUPPORT_TRAFFIC_STATISTIC

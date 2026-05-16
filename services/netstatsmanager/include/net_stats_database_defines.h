@@ -63,6 +63,16 @@ constexpr const char *CALIBRATION_TABLE_CREATE_PARAM =
     "UsedData BIGINT NOT NULL DEFAULT 0";
 constexpr const char *CHANGE_TABLE_CREATE_PARAM =
     "StartTime INTEGER NOT NULL";
+constexpr const char *TRAFFIC_PLAN_TABLE_CREATE_PARAM =
+    "ICCID CHAR(100) NOT NULL UNIQUE,"
+    "simId INTEGER NOT NULL,"
+    "DisplayTrafficSwitch INTEGER NOT NULL DEFAULT 0,"
+    "UnlimitTrafficSwitch INTEGER NOT NULL DEFAULT 0,"
+    "TrafficLimit INTEGER NOT NULL DEFAULT 0,"
+    "StartDate INTEGER NOT NULL DEFAULT 1,"
+    "OverLimitBehavior INTEGER NOT NULL DEFAULT 1,"
+    "MonthlyLimitPercentage INTEGER NOT NULL DEFAULT 80,"
+    "DailyLimitPercentage INTEGER NOT NULL DEFAULT 10";
 constexpr const char *UID_TABLE_PARAM_LIST = "UID,IFace,Date,RxBytes,RxPackets,TxBytes,TxPackets,Ident,Flag,UserId";
 constexpr const char *UID_SIM_TABLE_PARAM_LIST = "UID,IFace,Date,RxBytes,RxPackets,TxBytes,TxPackets,Ident,Flag,UserId";
 constexpr const char *IFACE_TABLE_PARAM_LIST = "IFace,Date,RxBytes,RxPackets,TxBytes,TxPackets,Ident";
@@ -74,6 +84,7 @@ constexpr const char *UID_TABLE = "T_uid";
 constexpr const char *UID_SIM_TABLE = "T_uid_sim";
 constexpr const char *CALIBRATION_TABLE = "T_calibration_traffic";
 constexpr const char *CHANGE_TABLE = "T_change";
+constexpr const char *TRAFFIC_PLAN_TABLE = "T_traffic_plan";
 
 constexpr int32_t UID_PARAM_NUM = 10;
 constexpr int32_t IFACE_PARAM_NUM = 7;

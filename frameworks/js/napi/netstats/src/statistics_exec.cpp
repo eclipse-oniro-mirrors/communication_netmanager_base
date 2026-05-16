@@ -212,6 +212,30 @@ bool StatisticsExec::ExecSetCalibrationTraffic(SetCalibrationTrafficContext *con
     return result == NETMANAGER_SUCCESS;
 }
 
+bool StatisticsExec::ExecSetTrafficPlanInfo(SetTrafficPlanInfoContext *context)
+{
+    if (context == nullptr) {
+        return false;
+    }
+    int32_t result = NetStatsClient::GetInstance().SetTrafficPlanInfo(
+        context->GetSimId(), static_cast<int32_t>(context->GetParam()), context->GetValue());
+    context->SetErrorCode(result);
+    return result == NETMANAGER_SUCCESS;
+}
+
+bool StatisticsExec::ExecGetTrafficPlanInfo(GetTrafficPlanInfoContext *context)
+{
+    if (context == nullptr) {
+        return false;
+    }
+    int64_t value = 0;
+    int32_t result = NetStatsClient::GetInstance().GetTrafficPlanInfo(
+        context->GetSimId(), static_cast<int32_t>(context->GetParam()), value);
+    context->SetValue(value);
+    context->SetErrorCode(result);
+    return result == NETMANAGER_SUCCESS;
+}
+
 napi_value StatisticsExec::GetCellularRxBytesCallback(GetCellularRxBytesContext *context)
 {
     return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
@@ -361,5 +385,16 @@ napi_value StatisticsExec::GetSockfdTxBytesCallback(GetSockfdTxBytesContext *con
 {
     return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
+
+napi_value StatisticsExec::SetTrafficPlanInfoCallback(SetTrafficPlanInfoContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+napi_value StatisticsExec::GetTrafficPlanInfoCallback(GetTrafficPlanInfoContext *context)
+{
+    return NapiUtils::CreateInt64(context->GetEnv(), context->GetValue());
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -17,6 +17,7 @@
 #include <thread>
 #include <vector>
 
+#include "gmock/gmock.h"
 #include <gtest/gtest.h>
 
 #ifdef GTEST_API_
@@ -24,19 +25,21 @@
 #define protected public
 #endif
 
+#include "mock_core_service_manager.h"
 #include "net_manager_center.h"
+#include "net_mgr_log_wrapper.h"
+#include "net_stats_cached.h"
 #include "net_stats_callback_test.h"
 #include "net_stats_constants.h"
-#include "net_stats_service.h"
-#include "net_stats_cached.h"
 #include "net_stats_database_defines.h"
+#include "net_stats_service.h"
 #include "system_ability_definition.h"
-#include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 using namespace NetStatsDatabaseDefines;
 constexpr uint32_t DAY_SECONDS = 2 * 24 * 60 * 60;
+using namespace testing;
 using namespace testing::ext;
 class NetStatsServiceTest : public testing::Test {
 public:
@@ -154,7 +157,7 @@ HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest005, TestSize.Level1)
 HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest001, TestSize.Level1)
 {
     NetStatsService netStatsService;
-    
+
     int32_t curUserId = -1;
     int32_t ret1 = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
     int32_t defaultUserId = -1;
@@ -180,7 +183,7 @@ HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest001, TestSize.Level1
 HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest002, TestSize.Level1)
 {
     NetStatsService netStatsService;
-    
+
     int32_t curUserId = -1;
     int32_t ret1 = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
     int32_t defaultUserId = -1;
@@ -209,7 +212,7 @@ HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest002, TestSize.Level1
 HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest003, TestSize.Level1)
 {
     NetStatsService netStatsService;
-    
+
     int32_t curUserId = -1;
     int32_t ret1 = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
     int32_t defaultUserId = -1;
@@ -444,13 +447,10 @@ HWTEST_F(NetStatsServiceTest, ResetNotifyStateTest001, TestSize.Level1)
 {
     NetStatsService netStatsService;
     int32_t simId = 0;
-    ObserverPtr trafficDataObserver = std::make_shared<TrafficDataObserver>(simId);
-    SettingsInfoPtr trafficSettingsInfo = std::make_shared<TrafficSettingsInfo>();
-    trafficDataObserver->ReadTrafficDataSettings(trafficSettingsInfo);
-    netStatsService.settingsTrafficMap_.insert(
-        std::make_pair(simId, std::make_pair(trafficDataObserver, trafficSettingsInfo)));
-    netStatsService.ResetNotifyState(0);
-    netStatsService.ResetNotifyState(1);
+    auto info = std::make_shared<TrafficPlanInfo>();
+    netStatsService.trafficPlanService_->trafficPlanInfoMap_.insert(std::make_pair(simId, info));
+    netStatsService.trafficPlanService_->ResetNotifyState(0);
+    netStatsService.trafficPlanService_->ResetNotifyState(1);
     EXPECT_NE(netStatsService.netStatsCached_, nullptr);
 }
 #endif
@@ -479,7 +479,7 @@ HWTEST_F(NetStatsServiceTest, UpdateBpfMapTimerTaskTest001, TestSize.Level1)
     auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
     netStatsService->trafficPlanFfrtQueue_ = nullptr;
     netStatsService->UpdateBpfMapTimerTask();
-    EXPECT_EQ(netStatsService->settingsTrafficMap_.size(), 0);
+    EXPECT_EQ(netStatsService->trafficPlanService_->trafficPlanInfoMap_.size(), 0);
 }
 
 HWTEST_F(NetStatsServiceTest, NotifyTrafficAlertFfrtTest001, TestSize.Level1)
@@ -504,16 +504,18 @@ HWTEST_F(NetStatsServiceTest, UpdateCurActiviteSimChangedTest001, TestSize.Level
     uint64_t index = 12;
     netStatsService.trafficPlanFfrtQueue_ = std::make_shared<ffrt::queue>("TrafficPlanStatistic");
     netStatsService.UpdateCurActiviteSimChanged(simId, index);
-    bool ret =
-        netStatsService.settingsTrafficMap_.find(simId) == netStatsService.settingsTrafficMap_.end() ? true : false;
+    bool ret = netStatsService.trafficPlanService_->trafficPlanInfoMap_.find(simId) ==
+                       netStatsService.trafficPlanService_->trafficPlanInfoMap_.end()
+                   ? true : false;
     EXPECT_EQ(ret, false);
 
     int32_t simId2 = 11;
     uint64_t index2 = 13;
     netStatsService.simIdToIfIndexMap_[simId2] = index2;
     netStatsService.UpdateCurActiviteSimChanged(simId2, index2);
-    ret =
-        netStatsService.settingsTrafficMap_.find(simId) == netStatsService.settingsTrafficMap_.end() ? true : false;
+    ret = netStatsService.trafficPlanService_->trafficPlanInfoMap_.find(simId) ==
+                  netStatsService.trafficPlanService_->trafficPlanInfoMap_.end()
+              ? true : false;
     EXPECT_EQ(ret, false);
 }
 
@@ -521,76 +523,187 @@ HWTEST_F(NetStatsServiceTest, UpdateCurActiviteSimChangedTest002, TestSize.Level
 {
     NetStatsService netStatsService;
     int32_t simId = 0;
-    ObserverPtr trafficDataObserver = std::make_shared<TrafficDataObserver>(simId);
-    SettingsInfoPtr trafficSettingsInfo = std::make_shared<TrafficSettingsInfo>();
-    trafficDataObserver->ReadTrafficDataSettings(trafficSettingsInfo);
-    netStatsService.settingsTrafficMap_.insert(
-        std::make_pair(simId, std::make_pair(trafficDataObserver, trafficSettingsInfo)));
-    netStatsService.settingsTrafficMap_[simId].second->monthlyLimit = UINT64_MAX;
-    netStatsService.settingsTrafficMap_[simId].second->unLimitedDataEnable = 0;
- 
+    auto info = std::make_shared<TrafficPlanInfo>();
+    netStatsService.trafficPlanService_->trafficPlanInfoMap_.insert(std::make_pair(simId, info));
+
     netStatsService.trafficPlanFfrtQueue_ = std::make_shared<ffrt::queue>("TrafficPlanStatistic");
     netStatsService.UpdateCurActiviteSimChanged(simId, 10);
-    bool ret =
-        netStatsService.settingsTrafficMap_.find(simId) == netStatsService.settingsTrafficMap_.end() ? true : false;
+    bool ret = netStatsService.trafficPlanService_->trafficPlanInfoMap_.find(simId) ==
+                       netStatsService.trafficPlanService_->trafficPlanInfoMap_.end()
+                   ? true : false;
     EXPECT_EQ(ret, false);
 }
- 
+
 HWTEST_F(NetStatsServiceTest, UpdateCurActiviteSimChangedTest003, TestSize.Level1)
 {
     NetStatsService netStatsService;
     int32_t simId = 0;
-    ObserverPtr trafficDataObserver = std::make_shared<TrafficDataObserver>(simId);
-    SettingsInfoPtr trafficSettingsInfo = std::make_shared<TrafficSettingsInfo>();
-    trafficDataObserver->ReadTrafficDataSettings(trafficSettingsInfo);
-    netStatsService.settingsTrafficMap_.insert(
-        std::make_pair(simId, std::make_pair(trafficDataObserver, trafficSettingsInfo)));
-    netStatsService.settingsTrafficMap_[simId].second->monthlyLimit = 132465789;
-    netStatsService.settingsTrafficMap_[simId].second->unLimitedDataEnable = 1;
- 
+    auto info = std::make_shared<TrafficPlanInfo>();
+    info->trafficLimit = 132465789;
+    info->unlimitTrafficSwitch = 1;
+    netStatsService.trafficPlanService_->trafficPlanInfoMap_.insert(std::make_pair(simId, info));
+
     netStatsService.trafficPlanFfrtQueue_ = std::make_shared<ffrt::queue>("TrafficPlanStatistic");
     netStatsService.UpdateCurActiviteSimChanged(simId, 10);
-    bool ret =
-        netStatsService.settingsTrafficMap_.find(simId) == netStatsService.settingsTrafficMap_.end() ? true : false;
+    bool ret = netStatsService.trafficPlanService_->trafficPlanInfoMap_.find(simId) ==
+                       netStatsService.trafficPlanService_->trafficPlanInfoMap_.end()
+                   ? true : false;
     EXPECT_EQ(ret, false);
 }
- 
+
 HWTEST_F(NetStatsServiceTest, UpdateCurActiviteSimChangedTest004, TestSize.Level1)
 {
     NetStatsService netStatsService;
     int32_t simId = 0;
-    ObserverPtr trafficDataObserver = std::make_shared<TrafficDataObserver>(simId);
-    SettingsInfoPtr trafficSettingsInfo = std::make_shared<TrafficSettingsInfo>();
-    trafficDataObserver->ReadTrafficDataSettings(trafficSettingsInfo);
-    netStatsService.settingsTrafficMap_.insert(
-        std::make_pair(simId, std::make_pair(trafficDataObserver, trafficSettingsInfo)));
-    netStatsService.settingsTrafficMap_[simId].second->monthlyLimit = UINT64_MAX;
-    netStatsService.settingsTrafficMap_[simId].second->unLimitedDataEnable = 1;
- 
+    auto info = std::make_shared<TrafficPlanInfo>();
+    info->trafficLimit = UINT64_MAX;
+    info->unlimitTrafficSwitch = 1;
+    netStatsService.trafficPlanService_->trafficPlanInfoMap_.insert(std::make_pair(simId, info));
+
     netStatsService.trafficPlanFfrtQueue_ = std::make_shared<ffrt::queue>("TrafficPlanStatistic");
     netStatsService.UpdateCurActiviteSimChanged(simId, 10);
-    bool ret =
-        netStatsService.settingsTrafficMap_.find(simId) == netStatsService.settingsTrafficMap_.end() ? true : false;
+    bool ret = netStatsService.trafficPlanService_->trafficPlanInfoMap_.find(simId) ==
+                       netStatsService.trafficPlanService_->trafficPlanInfoMap_.end()
+                   ? true : false;
     EXPECT_EQ(ret, false);
 }
- 
+
 HWTEST_F(NetStatsServiceTest, UpdateCurActiviteSimChangedTest005, TestSize.Level1)
 {
     NetStatsService netStatsService;
     int32_t simId = 0;
-    ObserverPtr trafficDataObserver = std::make_shared<TrafficDataObserver>(simId);
-    SettingsInfoPtr trafficSettingsInfo = std::make_shared<TrafficSettingsInfo>();
-    trafficDataObserver->ReadTrafficDataSettings(trafficSettingsInfo);
-    netStatsService.settingsTrafficMap_.insert(
-        std::make_pair(simId, std::make_pair(trafficDataObserver, trafficSettingsInfo)));
-    netStatsService.settingsTrafficMap_[simId].second->monthlyLimit = 132465789;
-    netStatsService.settingsTrafficMap_[simId].second->unLimitedDataEnable = 0;
- 
+    auto info = std::make_shared<TrafficPlanInfo>();
+    info->trafficLimit = 132465789;
+    info->unlimitTrafficSwitch = 0;
+    netStatsService.trafficPlanService_->trafficPlanInfoMap_.insert(std::make_pair(simId, info));
+
     netStatsService.trafficPlanFfrtQueue_ = std::make_shared<ffrt::queue>("TrafficPlanStatistic");
     netStatsService.UpdateCurActiviteSimChanged(simId, 10);
-    bool ret =
-        netStatsService.settingsTrafficMap_.find(simId) == netStatsService.settingsTrafficMap_.end() ? true : false;
+    bool ret = netStatsService.trafficPlanService_->trafficPlanInfoMap_.find(simId) ==
+                       netStatsService.trafficPlanService_->trafficPlanInfoMap_.end()
+                   ? true : false;
     EXPECT_EQ(ret, false);
+}
+
+HWTEST_F(NetStatsServiceTest, OnExtensionTest, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    NetStatsService netStatsService;
+    int32_t ret = netStatsService.OnExtension("backup", data, reply);
+    EXPECT_NE(ret, -1);
+}
+
+HWTEST_F(NetStatsServiceTest, OnExtensionTest2, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    NetStatsService netStatsService;
+    int32_t ret = netStatsService.OnExtension("restore", data, reply);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetStatsServiceTest, SetTrafficPlanInfoTest01, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    netStatsService.trafficPlanService_ = nullptr;
+    int32_t ret = netStatsService.SetTrafficPlanInfo(1, 1, 1);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetStatsServiceTest, SetTrafficPlanInfoTest02, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSlotId(_)).WillRepeatedly(Return(-1));
+    int32_t ret = netStatsService.SetTrafficPlanInfo(1, 1, 1);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+}
+
+HWTEST_F(NetStatsServiceTest, SetTrafficPlanInfoTest03, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    std::u16string iccid = {u"1234564654651"};
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSlotId(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimIccId(_, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(iccid), Return(0)));
+    int32_t ret = netStatsService.SetTrafficPlanInfo(1, 1, 1);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsServiceTest, SetTrafficPlanInfoTest04, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    std::u16string iccid = {u"1234564654651"};
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSlotId(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimIccId(_, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(iccid), Return(0)));
+    int32_t ret = netStatsService.SetTrafficPlanInfo(1, 99, 1);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsServiceTest, SetTrafficPlanInfoTest05, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    std::u16string iccid = {u"1234564654651"};
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSlotId(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimIccId(_, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(iccid), Return(0)));
+    int32_t ret = netStatsService.SetTrafficPlanInfo(1, -19, 1);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest01, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    netStatsService.trafficPlanService_ = nullptr;
+    int64_t value = 0;
+    int32_t ret = netStatsService.GetTrafficPlanInfo(1, 1, value);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest02, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSlotId(_)).WillRepeatedly(Return(-1));
+    int64_t value = 0;
+    int32_t ret = netStatsService.GetTrafficPlanInfo(1, 1, value);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+}
+
+HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest03, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    std::u16string iccid = {u"1234564654651"};
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSlotId(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimIccId(_, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(iccid), Return(0)));
+    int64_t value = 0;
+    int32_t ret = netStatsService.GetTrafficPlanInfo(1, 1, value);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest04, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    std::u16string iccid = {u"1234564654651"};
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSlotId(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimIccId(_, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(iccid), Return(0)));
+    int64_t value = 0;
+    int32_t ret = netStatsService.GetTrafficPlanInfo(1, -1, value);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest05, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    std::u16string iccid = {u"1234564654651"};
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSlotId(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimIccId(_, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(iccid), Return(0)));
+    int64_t value = 0;
+    int32_t ret = netStatsService.GetTrafficPlanInfo(1, 99, value);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 #endif
 } // namespace NetManagerStandard

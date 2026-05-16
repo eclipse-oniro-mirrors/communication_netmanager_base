@@ -33,6 +33,8 @@
 #include "statistics_observer_wrapper.h"
 #include "update_iface_stats_context.h"
 #include "set_calibration_traffic_context.h"
+#include "set_traffic_plan_info_context.h"
+#include "get_traffic_plan_info_context.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -60,7 +62,15 @@ constexpr const char *FUNCTION_GET_TRAFFIC_STATS_BY_UID_NETWORK = "getTrafficSta
 constexpr const char *FUNCTION_GET_SELF_TRAFFIC_STATS = "getSelfTrafficStats";
 constexpr const char *FUNCTION_GET_MONTH_TRAFFIC_STATS_BY_NETWORK = "getMonthTrafficStats";
 constexpr const char *FUNCTION_SET_CALIBRATION_TRAFFIC = "setCalibrationTraffic";
+constexpr const char *FUNCTION_SET_TRAFFIC_PLAN_INFO = "setTrafficPlanInfo";
+constexpr const char *FUNCTION_GET_TRAFFIC_PLAN_INFO = "getTrafficPlanInfo";
+constexpr const char *ENUM_TRAFFIC_PLAN_PARAM = "TrafficPlanParam";
 } // namespace
+
+napi_property_descriptor CreateTrafficPlanParamProperty(napi_env env, const char *name, TrafficPlanParam param)
+{
+    return DECLARE_NAPI_STATIC_PROPERTY(name, NapiUtils::CreateInt32(env, static_cast<int32_t>(param)));
+}
 
 napi_value GetCellularRxBytes(napi_env env, napi_callback_info info)
 {
@@ -206,6 +216,20 @@ napi_value SetCalibrationTraffic(napi_env env, napi_callback_info info)
                                                               StatisticsAsyncWork::SetCalibrationTrafficCallback);
 }
 
+napi_value SetTrafficPlanInfo(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<SetTrafficPlanInfoContext>(env, info, FUNCTION_SET_TRAFFIC_PLAN_INFO, nullptr,
+                                                              StatisticsAsyncWork::ExecSetTrafficPlanInfo,
+                                                              StatisticsAsyncWork::SetTrafficPlanInfoCallback);
+}
+
+napi_value GetTrafficPlanInfo(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetTrafficPlanInfoContext>(env, info, FUNCTION_GET_TRAFFIC_PLAN_INFO, nullptr,
+                                                              StatisticsAsyncWork::ExecGetTrafficPlanInfo,
+                                                              StatisticsAsyncWork::GetTrafficPlanInfoCallback);
+}
+
 napi_value InitStatisticsModule(napi_env env, napi_value exports)
 {
     NapiUtils::DefineProperties(
@@ -232,7 +256,23 @@ napi_value InitStatisticsModule(napi_env env, napi_value exports)
             DECLARE_NAPI_FUNCTION(FUNCTION_ON, On),
             DECLARE_NAPI_FUNCTION(FUNCTION_OFF, Off),
             DECLARE_NAPI_FUNCTION(FUNCTION_SET_CALIBRATION_TRAFFIC, SetCalibrationTraffic),
+            DECLARE_NAPI_FUNCTION(FUNCTION_SET_TRAFFIC_PLAN_INFO, SetTrafficPlanInfo),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_TRAFFIC_PLAN_INFO, GetTrafficPlanInfo),
         });
+    
+    std::initializer_list<napi_property_descriptor> trafficPlanParam = {
+        CreateTrafficPlanParamProperty(env, "DISPLAY_TRAFFIC_SWITCH", TrafficPlanParam::DISPLAY_TRAFFIC_SWITCH),
+        CreateTrafficPlanParamProperty(env, "UNLIMIT_TRAFFIC_SWITCH", TrafficPlanParam::UNLIMIT_TRAFFIC_SWITCH),
+        CreateTrafficPlanParamProperty(env, "TRAFFIC_LIMIT", TrafficPlanParam::TRAFFIC_LIMIT),
+        CreateTrafficPlanParamProperty(env, "START_DATE", TrafficPlanParam::START_DATE),
+        CreateTrafficPlanParamProperty(env, "OVER_LIMIT_BEHAVIOR", TrafficPlanParam::OVER_LIMIT_BEHAVIOR),
+        CreateTrafficPlanParamProperty(env, "MONTHLY_LIMIT_PERCENTAGE", TrafficPlanParam::MONTHLY_LIMIT_PERCENTAGE),
+        CreateTrafficPlanParamProperty(env, "DAILY_LIMIT_PERCENTAGE", TrafficPlanParam::DAILY_LIMIT_PERCENTAGE),
+    };
+    napi_value plan = NapiUtils::CreateObject(env);
+    NapiUtils::DefineProperties(env, plan, trafficPlanParam);
+    NapiUtils::SetNamedProperty(env, exports, ENUM_TRAFFIC_PLAN_PARAM, plan);
+
     NapiUtils::SetEnvValid(env);
     auto envWrapper = new (std::nothrow) napi_env;
     if (envWrapper == nullptr) {

@@ -65,6 +65,10 @@ public:
     static void GetSelfTrafficStatsCallback(napi_env env, napi_status status, void *data);
     static void GetMonthTrafficStatsByNetworkCallback(napi_env env, napi_status status, void *data);
     static void SetCalibrationTrafficCallback(napi_env env, napi_status status, void *data);
+    static void ExecSetTrafficPlanInfo(napi_env env, void *data);
+    static void ExecGetTrafficPlanInfo(napi_env env, void *data);
+    static void SetTrafficPlanInfoCallback(napi_env env, napi_status status, void *data);
+    static void GetTrafficPlanInfoCallback(napi_env env, napi_status status, void *data);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

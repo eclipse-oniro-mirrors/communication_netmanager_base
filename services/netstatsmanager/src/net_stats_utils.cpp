@@ -29,6 +29,8 @@ const int32_t TM_YEAR_START = 1900;
 const int32_t MONTH_NUM = 12;
 static const int32_t DAYS_IN_MONTH[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 constexpr uint32_t ONE_MONTH_SECOND = 31 * 24 * 60 * 60;
+constexpr int32_t SLOT_0 = 0;
+constexpr int32_t SLOT_1 = 1;
 
 int32_t NetStatsUtils::GetStartTimestamp(int32_t startdate)
 {
@@ -296,5 +298,48 @@ bool NetStatsUtils::IsLessThanOneMonthAgoPrecise(time_t timestamp)
     time_t beforeOneMonthTimestamp = nowTimestamp - static_cast<time_t>(ONE_MONTH_SECOND);
     return timestamp < beforeOneMonthTimestamp;
 }
+
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+std::string NetStatsUtils::GetIccIdBySlotId(int32_t slotId)
+{
+    std::u16string u16Hplmn;
+    Telephony::CoreServiceClient::GetInstance().GetSimIccId(slotId, u16Hplmn);
+    return OHOS::Str16ToStr8(u16Hplmn);
+}
+
+std::string NetStatsUtils::GetIccIdBySimId(int32_t simId)
+{
+    if (!IsSimIdValid(simId)) {
+        return "";
+    }
+    int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(simId);
+    std::u16string u16Hplmn;
+    int32_t ret = Telephony::CoreServiceClient::GetInstance().GetSimIccId(slotId, u16Hplmn);
+    if (ret != 0) {
+        NETMGR_LOG_E("GetSimIccId error. slot:%{public}d, ret:%{public}d", slotId, ret);
+        return OHOS::Str16ToStr8(u16Hplmn);
+    }
+    return OHOS::Str16ToStr8(u16Hplmn);
+}
+
+bool NetStatsUtils::IsSimIdValid(int32_t simId)
+{
+    int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(simId);
+    if (!IsSlotIdValid(slotId)) {
+        NETMGR_LOG_E("simId:%{public}d, error", simId);
+        return false;
+    }
+    return true;
+}
+
+bool NetStatsUtils::IsSlotIdValid(int32_t slotId)
+{
+    if (slotId != SLOT_0 && slotId != SLOT_1) {
+        NETMGR_LOG_E("slotId:%{public}d, error", slotId);
+        return false;
+    }
+    return true;
+}
+#endif
 }
 }
