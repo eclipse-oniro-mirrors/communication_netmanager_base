@@ -17,8 +17,10 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <mutex>
+#include <condition_variable>
 
 #include "constant.h"
 #include "errorcode_convertor.h"
@@ -45,6 +47,7 @@ constexpr int32_t NO_PERMISSION_CODE = 1;
 constexpr int32_t PERMISSION_DENIED_CODE = 13;
 constexpr int32_t NET_UNREACHABLE_CODE = 101;
 constexpr int32_t INVALID_UID = -1;
+constexpr int32_t REFRESH_HTTP_PROXY_MAX_TIME = 15;
 static int64_t g_limitSdkReport = 0;
 static int64_t g_limitSdkReports = 0;
 } // namespace
@@ -425,6 +428,57 @@ bool ConnectionExec::ExecSetGlobalHttpProxy(SetGlobalHttpProxyContext *context)
 napi_value ConnectionExec::SetGlobalHttpProxyCallback(SetGlobalHttpProxyContext *context)
 {
     return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+bool ConnectionExec::ExecRefreshGlobalHttpProxy(GetHttpProxyContext *context)
+{
+    auto mtx = std::make_shared<std::mutex>();
+    auto cv = std::make_shared<std::condition_variable>();
+    auto ready = std::make_shared<bool>(false);
+    auto result = std::make_shared<int32_t>(NETMANAGER_SUCCESS);
+    auto httpProxy = std::make_shared<HttpProxy>();
+
+    auto callback = [mtx, cv, ready, result, httpProxy](int32_t ret, const HttpProxy &proxy) {
+        std::lock_guard<std::mutex> lock(*mtx);
+        *result = ret;
+        *httpProxy = proxy;
+        *ready = true;
+        cv->notify_one();
+    };
+
+    int32_t ret = NetConnClient::GetInstance().RefreshGlobalHttpProxy(callback);
+    if (ret != NETMANAGER_SUCCESS) {
+        context->SetErrorCode(ret);
+        return false;
+    }
+
+    std::unique_lock<std::mutex> lock(*mtx);
+    cv->wait_for(lock, std::chrono::seconds(REFRESH_HTTP_PROXY_MAX_TIME), [&ready] { return *ready; });
+
+    if (*result != NETMANAGER_SUCCESS) {
+        context->SetErrorCode(*result);
+        return false;
+    }
+    context->httpProxy_ = *httpProxy;
+    return true;
+}
+
+napi_value ConnectionExec::RefreshGlobalHttpProxyCallback(GetHttpProxyContext *context)
+{
+    napi_value host = NapiUtils::CreateStringUtf8(context->GetEnv(), context->httpProxy_.GetHost());
+    napi_value port = NapiUtils::CreateInt32(context->GetEnv(), context->httpProxy_.GetPort());
+    auto lists = context->httpProxy_.GetExclusionList();
+    napi_value exclusionList = NapiUtils::CreateArray(context->GetEnv(), lists.size());
+    size_t index = 0;
+    for (auto list : lists) {
+        napi_value jsList = NapiUtils::CreateStringUtf8(context->GetEnv(), list);
+        NapiUtils::SetArrayElement(context->GetEnv(), exclusionList, index++, jsList);
+    }
+    napi_value httpProxy = NapiUtils::CreateObject(context->GetEnv());
+    NapiUtils::SetNamedProperty(context->GetEnv(), httpProxy, "host", host);
+    NapiUtils::SetNamedProperty(context->GetEnv(), httpProxy, "port", port);
+    NapiUtils::SetNamedProperty(context->GetEnv(), httpProxy, "exclusionList", exclusionList);
+    return httpProxy;
 }
 
 bool ConnectionExec::ExecSetAppHttpProxy(SetAppHttpProxyContext *context)

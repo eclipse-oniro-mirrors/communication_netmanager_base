@@ -212,6 +212,8 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
         &NetConnServiceStub::OnGetGlobalHttpProxy, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_DEFAULT_HTTP_PROXY)] = {
         &NetConnServiceStub::OnGetDefaultHttpProxy, {}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REFRESH_GLOBAL_HTTP_PROXY)] = {
+        &NetConnServiceStub::OnRefreshGlobalHttpProxy, {Permission::INTERNET}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_ID_BY_IDENTIFIER)] = {
         &NetConnServiceStub::OnGetNetIdByIdentifier, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_INTERFACE_CONFIGURATION)] = {
@@ -1353,6 +1355,36 @@ int32_t NetConnServiceStub::OnGetDefaultHttpProxy(MessageParcel &data, MessagePa
     if (!httpProxy.Marshalling(reply)) {
         return ERR_FLATTEN_OBJECT;
     }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnRefreshGlobalHttpProxy(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("stub execute OnRefreshGlobalHttpProxy");
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("OnRefreshGlobalHttpProxy remote is nullptr");
+        // LCOV_EXCL_START
+        if (!reply.WriteInt32(NETMANAGER_ERR_LOCAL_PTR_NULL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        // LCOV_EXCL_END
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    sptr<IRefreshHttpProxyCallback> callback = iface_cast<IRefreshHttpProxyCallback>(remote);
+    // LCOV_EXCL_START
+    if (callback == nullptr) {
+        NETMGR_LOG_E("OnRefreshGlobalHttpProxy callback is nullptr");
+        if (!reply.WriteInt32(NETMANAGER_ERR_LOCAL_PTR_NULL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    int32_t result = RefreshGlobalHttpProxy(callback);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    // LCOV_EXCL_END
     return NETMANAGER_SUCCESS;
 }
 

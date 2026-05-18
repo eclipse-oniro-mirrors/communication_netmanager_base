@@ -211,6 +211,11 @@ public:
         return 0;
     }
 
+    int32_t RefreshGlobalHttpProxy(const sptr<IRefreshHttpProxyCallback> &callback) override
+    {
+        return 0;
+    }
+
     int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList) override
     {
         return 0;

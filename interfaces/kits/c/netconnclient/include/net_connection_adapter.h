@@ -49,6 +49,9 @@ int32_t Conv2TraceRouteInfo(
 
 int32_t Conv2TraceRouteInfoRtt(const std::string &rttStr, uint32_t (*rtt)[NETCONN_MAX_RTT_NUM]);
 
+void InvokeRefreshCallback(OH_NetConn_GlobalHttpProxyRefreshCallback callback, int32_t ret, const HttpProxy &httpProxy,
+    void *userContext);
+
 class NetConnCallbackStubAdapter : public NetConnCallbackStub {
 public:
     NetConnCallbackStubAdapter(NetConn_NetConnCallback *callback);

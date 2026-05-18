@@ -139,6 +139,10 @@ public:
 
     static napi_value SetGlobalHttpProxyCallback(SetGlobalHttpProxyContext *context);
 
+    static bool ExecRefreshGlobalHttpProxy(GetHttpProxyContext *context);
+
+    static napi_value RefreshGlobalHttpProxyCallback(GetHttpProxyContext *context);
+
     static bool ExecSetAppHttpProxy(SetAppHttpProxyContext *context);
 
     static napi_value SetAppHttpProxyCallback(SetAppHttpProxyContext *context);

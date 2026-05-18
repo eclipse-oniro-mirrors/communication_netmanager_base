@@ -32,6 +32,7 @@
 #include "netmanager_base_test_security.h"
 #include "network.h"
 #include "network_security_config.h"
+#include "refresh_http_proxy_callback_stub.h"
 #include "common_mock_net_conn_service.h"
 
 namespace OHOS {
@@ -2207,5 +2208,154 @@ HWTEST_F(NetConnClientTest, PostTriggerNetChange002, TestSize.Level1)
     netConnCallbackManager->PostTriggerNetChange(callback, nullptr, nullptr, nullptr);
     EXPECT_EQ(netConnCallbackManager->netHandle_, nullptr);
 }
+
+HWTEST_F(NetConnClientTest, RefreshGlobalHttpProxy001, TestSize.Level1)
+{
+    auto ret = NetConnClient::GetInstance().RefreshGlobalHttpProxy(nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetConnClientTest, RefreshGlobalHttpProxy002, TestSize.Level1)
+{
+    EXPECT_CALL(*mockNetConnService, RefreshGlobalHttpProxy(_)).WillRepeatedly(Return(NETMANAGER_SUCCESS));
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->NetConnService_ = mockNetConnService;
+    bool callbackInvoked = false;
+    int32_t callbackResult = -1;
+    HttpProxy callbackProxy;
+    auto callback = [&callbackInvoked, &callbackResult, &callbackProxy](int32_t result, const HttpProxy &httpProxy) {
+        callbackInvoked = true;
+        callbackResult = result;
+        callbackProxy = httpProxy;
+    };
+    auto ret = netConnClient->RefreshGlobalHttpProxy(callback);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_TRUE(netConnClient->refreshInProgress_);
+    EXPECT_NE(netConnClient->refreshCallbackStub_, nullptr);
+    netConnClient->ResetRefreshState();
+}
+
+HWTEST_F(NetConnClientTest, RefreshGlobalHttpProxy003, TestSize.Level1)
+{
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->NetConnService_ = nullptr;
+    auto callback = [](int32_t result, const HttpProxy &httpProxy) {};
+    auto ret = netConnClient->RefreshGlobalHttpProxy(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+    EXPECT_FALSE(netConnClient->refreshInProgress_);
+}
+
+HWTEST_F(NetConnClientTest, PrepareRefreshCallback001, TestSize.Level1)
+{
+    auto netConnClient = std::make_shared<NetConnClient>();
+    bool needSendRequest = false;
+    auto callback = [](int32_t result, const HttpProxy &httpProxy) {};
+    auto ret = netConnClient->PrepareRefreshCallback(callback, needSendRequest);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_TRUE(needSendRequest);
+    EXPECT_TRUE(netConnClient->refreshInProgress_);
+    EXPECT_NE(netConnClient->refreshCallbackStub_, nullptr);
+    netConnClient->ResetRefreshState();
+}
+
+HWTEST_F(NetConnClientTest, PrepareRefreshCallback002, TestSize.Level1)
+{
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->refreshInProgress_ = true;
+    bool needSendRequest = false;
+    auto callback = [](int32_t result, const HttpProxy &httpProxy) {};
+    auto ret = netConnClient->PrepareRefreshCallback(callback, needSendRequest);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_FALSE(needSendRequest);
+    EXPECT_EQ(netConnClient->pendingRefreshCallbacks_.size(), 1u);
+    netConnClient->ResetRefreshState();
+}
+
+HWTEST_F(NetConnClientTest, PrepareRefreshCallback003, TestSize.Level1)
+{
+    auto netConnClient = std::make_shared<NetConnClient>();
+    auto callback1 = [](int32_t result, const HttpProxy &httpProxy) {};
+    auto callback2 = [](int32_t result, const HttpProxy &httpProxy) {};
+    bool needSendRequest1 = false;
+    auto ret = netConnClient->PrepareRefreshCallback(callback1, needSendRequest1);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_TRUE(needSendRequest1);
+    bool needSendRequest2 = false;
+    ret = netConnClient->PrepareRefreshCallback(callback2, needSendRequest2);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_FALSE(needSendRequest2);
+    EXPECT_EQ(netConnClient->pendingRefreshCallbacks_.size(), 2u);
+    netConnClient->ResetRefreshState();
+}
+
+HWTEST_F(NetConnClientTest, PrepareRefreshCallback004, TestSize.Level1)
+{
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->refreshInProgress_ = true;
+    netConnClient->pendingRefreshCallbacks_.push_back([](int32_t, const HttpProxy &) {});
+    bool needSendRequest = false;
+    auto callback = [](int32_t result, const HttpProxy &httpProxy) {};
+    auto ret = netConnClient->PrepareRefreshCallback(callback, needSendRequest);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_FALSE(needSendRequest);
+    EXPECT_EQ(netConnClient->pendingRefreshCallbacks_.size(), 2u);
+    netConnClient->ResetRefreshState();
+}
+
+HWTEST_F(NetConnClientTest, SendRefreshHttpProxyRequest001, TestSize.Level1)
+{
+    EXPECT_CALL(*mockNetConnService, RefreshGlobalHttpProxy(_)).WillRepeatedly(Return(NETMANAGER_SUCCESS));
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->NetConnService_ = mockNetConnService;
+    auto stub = new (std::nothrow) RefreshHttpProxyCallbackStub();
+    auto ret = netConnClient->SendRefreshHttpProxyRequest(stub);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnClientTest, SendRefreshHttpProxyRequest002, TestSize.Level1)
+{
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->NetConnService_ = nullptr;
+    netConnClient->refreshInProgress_ = true;
+    auto stub = new (std::nothrow) RefreshHttpProxyCallbackStub();
+    auto ret = netConnClient->SendRefreshHttpProxyRequest(stub);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+    EXPECT_FALSE(netConnClient->refreshInProgress_);
+}
+
+HWTEST_F(NetConnClientTest, SendRefreshHttpProxyRequest003, TestSize.Level1)
+{
+    EXPECT_CALL(*mockNetConnService, RefreshGlobalHttpProxy(_)).WillRepeatedly(Return(NETMANAGER_ERR_INTERNAL));
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->NetConnService_ = mockNetConnService;
+    netConnClient->refreshInProgress_ = true;
+    auto stub = new (std::nothrow) RefreshHttpProxyCallbackStub();
+    auto ret = netConnClient->SendRefreshHttpProxyRequest(stub);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+    EXPECT_FALSE(netConnClient->refreshInProgress_);
+}
+
+HWTEST_F(NetConnClientTest, ResetRefreshState001, TestSize.Level1)
+{
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->refreshInProgress_ = true;
+    netConnClient->refreshCallbackStub_ = new (std::nothrow) RefreshHttpProxyCallbackStub();
+    netConnClient->pendingRefreshCallbacks_.push_back([](int32_t, const HttpProxy &) {});
+    netConnClient->pendingRefreshCallbacks_.push_back([](int32_t, const HttpProxy &) {});
+    netConnClient->ResetRefreshState();
+    EXPECT_FALSE(netConnClient->refreshInProgress_);
+    EXPECT_EQ(netConnClient->refreshCallbackStub_, nullptr);
+    EXPECT_TRUE(netConnClient->pendingRefreshCallbacks_.empty());
+}
+
+HWTEST_F(NetConnClientTest, ResetRefreshState002, TestSize.Level1)
+{
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->ResetRefreshState();
+    EXPECT_FALSE(netConnClient->refreshInProgress_);
+    EXPECT_EQ(netConnClient->refreshCallbackStub_, nullptr);
+    EXPECT_TRUE(netConnClient->pendingRefreshCallbacks_.empty());
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -54,6 +54,7 @@ private:
 
     static inline BrokerDelegator<PreAirplaneCallbackProxy> delegator_;
 };
+
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NET_CONN_CALLBACK_PROXY_H

@@ -251,6 +251,11 @@ typedef int (*OH_NetConn_CustomDnsResolver)(const char *host, const char *serv, 
 
 typedef void (*OH_NetConn_AppHttpProxyChange)(NetConn_HttpProxy *proxy);
 
+typedef void (*OH_NetConn_GlobalHttpProxyRefresh)(NetConn_HttpProxy *proxy);
+
+typedef void (*OH_NetConn_GlobalHttpProxyRefreshCallback)(int32_t result, const NetConn_HttpProxy *proxy,
+    void *userContext);
+
 typedef struct NetConn_NetSpecifier {
     NetConn_NetCapabilities caps;
     char *bearerPrivateIdentifier;

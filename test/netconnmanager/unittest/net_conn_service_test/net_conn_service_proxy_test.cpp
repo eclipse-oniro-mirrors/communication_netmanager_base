@@ -21,6 +21,7 @@
 #include "i_net_conn_service.h"
 #include "i_net_detection_callback.h"
 #include "i_net_factoryreset_callback.h"
+#include "refresh_http_proxy_callback_stub.h"
 #include "net_all_capabilities.h"
 #include "net_conn_service_proxy.h"
 
@@ -148,6 +149,10 @@ public:
                 break;
             case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY):
             case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_DEFAULT_HTTP_PROXY):
+                reply.WriteInt32(NETMANAGER_SUCCESS);
+                HandleGetHttpProxyReply(reply);
+                break;
+            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REFRESH_GLOBAL_HTTP_PROXY):
                 reply.WriteInt32(NETMANAGER_SUCCESS);
                 HandleGetHttpProxyReply(reply);
                 break;
@@ -660,6 +665,25 @@ HWTEST_F(NetConnServiceProxyTest, GetGlobalHttpProxyTest001, TestSize.Level1)
     HttpProxy proxy;
     int32_t ret = instance_->GetGlobalHttpProxy(proxy);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: RefreshGlobalHttpProxyTest001
+ * @tc.desc: Test NetConnServiceProxy RefreshGlobalHttpProxy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceProxyTest, RefreshGlobalHttpProxyTest001, TestSize.Level1)
+{
+    sptr<IRefreshHttpProxyCallback> callback = new RefreshHttpProxyCallbackStub();
+    int32_t ret = instance_->RefreshGlobalHttpProxy(callback);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RefreshGlobalHttpProxyTest002, TestSize.Level1)
+{
+    sptr<IRefreshHttpProxyCallback> callback = nullptr;
+    int32_t ret = instance_->RefreshGlobalHttpProxy(callback);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 /**

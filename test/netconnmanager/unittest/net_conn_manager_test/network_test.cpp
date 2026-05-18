@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+#include <atomic>
+#include <chrono>
+#include <thread>
+
 #include <gtest/gtest.h>
 
 #ifdef GTEST_API_
@@ -57,6 +61,7 @@ constexpr int32_t VALID_NETID_START = 100;
 constexpr int32_t PAC_URL_MAX_LEN = 1024;
 constexpr int32_t BATCH_ROUTE_THRESHOLD = 1024;
 constexpr int32_t DNS_NUM_TEST = 5;
+constexpr uint32_t CALLBACK_WAIT_TIMEOUT_S = 1;
 } // namespace
 
 class NetworkTest : public testing::Test {
@@ -2234,6 +2239,75 @@ HWTEST_F(NetworkTest, BatchUpdateRoutesTest003, TestSize.Level1)
     newNetLinkInfo.routeList_.push_back(route);
     network->BatchUpdateRoutes(netLinkInfoBck, newNetLinkInfo);
     EXPECT_EQ(network->netLinkInfo_.routeList_.size(), 0);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_RefreshGlobalHttpProxyWithCallbackTest001, TestSize.Level1)
+{
+    OH_NetConn_GlobalHttpProxyRefreshCallback callback = nullptr;
+    auto ret = OH_NetConn_RefreshGlobalHttpProxyWithCallback(callback, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_RefreshGlobalHttpProxyWithCallbackTest002, TestSize.Level1)
+{
+    OH_NetConn_GlobalHttpProxyRefreshCallback callback =
+        [](int32_t result, const NetConn_HttpProxy *proxy, void *userContext) {};
+    auto ret = OH_NetConn_RefreshGlobalHttpProxyWithCallback(callback, nullptr);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetworkTest, InvokeRefreshCallbackNullCallback, TestSize.Level1)
+{
+    HttpProxy httpProxy;
+    InvokeRefreshCallback(nullptr, NETMANAGER_SUCCESS, httpProxy, nullptr);
+    EXPECT_TRUE(httpProxy.GetHost().empty());
+}
+
+HWTEST_F(NetworkTest, InvokeRefreshCallbackAuthFailed, TestSize.Level1)
+{
+    static std::atomic<bool> receivedNullptr{false};
+    receivedNullptr = false;
+    OH_NetConn_GlobalHttpProxyRefreshCallback callback =
+        [](int32_t result, const NetConn_HttpProxy *proxy, void *userContext) {
+            if (proxy == nullptr) {
+                receivedNullptr = true;
+            }
+        };
+    HttpProxy httpProxy;
+    InvokeRefreshCallback(callback, NETMANAGER_ERR_INTERNAL, httpProxy, nullptr);
+    EXPECT_TRUE(receivedNullptr.load());
+}
+
+HWTEST_F(NetworkTest, InvokeRefreshCallbackEmptyHost, TestSize.Level1)
+{
+    static std::atomic<bool> receivedNullptr{false};
+    receivedNullptr = false;
+    OH_NetConn_GlobalHttpProxyRefreshCallback callback =
+        [](int32_t result, const NetConn_HttpProxy *proxy, void *userContext) {
+            if (proxy == nullptr) {
+                receivedNullptr = true;
+            }
+        };
+    HttpProxy httpProxy;
+    InvokeRefreshCallback(callback, NETMANAGER_SUCCESS, httpProxy, nullptr);
+    EXPECT_TRUE(receivedNullptr.load());
+}
+
+HWTEST_F(NetworkTest, InvokeRefreshCallbackSuccess, TestSize.Level1)
+{
+    static std::atomic<bool> receivedProxy{false};
+    receivedProxy = false;
+    OH_NetConn_GlobalHttpProxyRefreshCallback callback =
+        [](int32_t result, const NetConn_HttpProxy *proxy, void *userContext) {
+            if (proxy != nullptr) {
+                receivedProxy = true;
+            }
+        };
+    HttpProxy httpProxy;
+    httpProxy.SetHost("127.0.0.1");
+    httpProxy.SetPort(8080);
+    InvokeRefreshCallback(callback, NETMANAGER_SUCCESS, httpProxy, nullptr);
+    EXPECT_TRUE(receivedProxy.load());
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

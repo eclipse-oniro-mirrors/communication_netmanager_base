@@ -220,6 +220,17 @@ void ConnectionAsyncWork::SetGlobalHttpProxyCallback(napi_env env, napi_status s
                                                                                                             data);
 }
 
+void ConnectionAsyncWork::ExecRefreshGlobalHttpProxy(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetHttpProxyContext, ConnectionExec::ExecRefreshGlobalHttpProxy>(env, data);
+}
+
+void ConnectionAsyncWork::RefreshGlobalHttpProxyCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetHttpProxyContext, ConnectionExec::RefreshGlobalHttpProxyCallback>(env, status,
+                                                                                                          data);
+}
+
 void ConnectionAsyncWork::ExecGetAppNet(napi_env env, void *data)
 {
     BaseAsyncWork::ExecAsyncWork<GetAppNetContext, ConnectionExec::ExecGetAppNet>(env, data);

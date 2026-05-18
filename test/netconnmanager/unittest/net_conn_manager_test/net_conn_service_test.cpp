@@ -27,6 +27,7 @@
 #include "net_conn_client.h"
 #include "net_conn_constants.h"
 #include "net_conn_service.h"
+#include "refresh_http_proxy_callback_stub.h"
 #include "net_conn_types.h"
 #include "net_detection_callback_test.h"
 #include "net_factoryreset_callback_stub.h"
@@ -78,6 +79,10 @@ constexpr int64_t TEST_UID = 1010;
 constexpr uint32_t TEST_NOTEXISTSUPPLIER = 1000;
 constexpr int32_t MAIN_USERID = 100;
 constexpr int32_t INVALID_USERID = 1;
+constexpr long SUCCESS_CODE = 204;
+constexpr int32_t RETRY_TIMES = 3;
+constexpr const char *PROXY_NAME = "123456789";
+constexpr int32_t PROXY_NAME_SIZE = 9;
 
 sptr<INetConnCallback> g_callback = new (std::nothrow) NetConnCallbackStubCb();
 sptr<INetDetectionCallback> g_detectionCallback = new (std::nothrow) NetDetectionCallbackTest();
@@ -902,6 +907,419 @@ HWTEST_F(NetConnServiceTest, GetLocalUserIdTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+/**
+ * @tc.name: RefreshGlobalHttpProxyTest001
+ * @tc.desc: Test NetConnService RefreshGlobalHttpProxy with empty host.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceTest, RefreshGlobalHttpProxyTest001, TestSize.Level1)
+{
+    sptr<IRefreshHttpProxyCallback> callback = new RefreshHttpProxyCallbackStub();
+    int32_t ret = NetConnService::GetInstance()->RefreshGlobalHttpProxy(callback);
+    EXPECT_NE(ret, NET_CONN_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, RefreshGlobalHttpProxyTest002, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    int32_t userId = 0;
+    service->GetActiveUserId(userId);
+    HttpProxy cachedProxy;
+    cachedProxy.SetHost(TEST_PROXY_HOST);
+    cachedProxy.SetPort(8080);
+    SecureData userName;
+    userName.append(PROXY_NAME, PROXY_NAME_SIZE);
+    cachedProxy.SetUserName(userName);
+    cachedProxy.SetUserId(userId);
+    service->globalHttpProxyCache_.EnsureInsert(userId, cachedProxy);
+    service->httpProxyThreadNeedRun_ = true;
+
+    service->refreshInProgress_ = true;
+    service->lastRefreshTime_ = std::chrono::steady_clock::now() - std::chrono::seconds(100);
+    sptr<IRefreshHttpProxyCallback> callback = new RefreshHttpProxyCallbackStub();
+    auto ret = service->RefreshGlobalHttpProxy(callback);
+    service->httpProxyThreadNeedRun_ = false;
+    service->refreshInProgress_ = false;
+    service->refreshCallbacks_.clear();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, RefreshGlobalHttpProxyTest003, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    int32_t userId = 0;
+    service->GetActiveUserId(userId);
+    HttpProxy cachedProxy;
+    cachedProxy.SetHost(TEST_PROXY_HOST);
+    cachedProxy.SetPort(8080);
+    SecureData userName;
+    userName.append(PROXY_NAME, PROXY_NAME_SIZE);
+    cachedProxy.SetUserName(userName);
+    cachedProxy.SetUserId(userId);
+    service->globalHttpProxyCache_.EnsureInsert(userId, cachedProxy);
+    service->httpProxyThreadNeedRun_ = true;
+
+    service->refreshInProgress_ = false;
+    service->lastRefreshTime_ = std::chrono::steady_clock::now() - std::chrono::seconds(100);
+    sptr<IRefreshHttpProxyCallback> callback = new RefreshHttpProxyCallbackStub();
+    auto ret = service->RefreshGlobalHttpProxy(callback);
+    service->httpProxyThreadNeedRun_ = false;
+    service->refreshInProgress_ = false;
+    service->refreshCallbacks_.clear();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, RefreshGlobalHttpProxyTest004, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    int32_t userId = 0;
+    service->GetActiveUserId(userId);
+    HttpProxy cachedProxy;
+    cachedProxy.SetHost(TEST_PROXY_HOST);
+    cachedProxy.SetPort(8080);
+    SecureData userName;
+    userName.append(PROXY_NAME, PROXY_NAME_SIZE);
+    cachedProxy.SetUserName(userName);
+    cachedProxy.SetUserId(userId);
+    service->globalHttpProxyCache_.EnsureInsert(userId, cachedProxy);
+    service->httpProxyThreadNeedRun_ = true;
+
+    service->refreshInProgress_ = false;
+    service->lastRefreshTime_ = std::chrono::steady_clock::now();
+    sptr<IRefreshHttpProxyCallback> callback = new RefreshHttpProxyCallbackStub();
+    auto ret = service->RefreshGlobalHttpProxy(callback);
+    service->httpProxyThreadNeedRun_ = false;
+    service->refreshInProgress_ = false;
+    service->refreshCallbacks_.clear();
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetConnServiceTest, IsRefreshRateLimitedTest001, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    service->lastRefreshTime_ = std::chrono::steady_clock::now();
+    service->lastRefreshProxy_.SetHost(TEST_PROXY_HOST);
+    service->lastRefreshProxy_.SetPort(8080);
+    HttpProxy currentProxy;
+    currentProxy.SetHost(TEST_PROXY_HOST);
+    currentProxy.SetPort(8080);
+    bool limited = service->IsRefreshRateLimited(currentProxy);
+    EXPECT_TRUE(limited);
+}
+
+HWTEST_F(NetConnServiceTest, IsRefreshRateLimitedTest002, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    service->lastRefreshTime_ = std::chrono::steady_clock::now() - std::chrono::seconds(20);
+    service->lastRefreshProxy_.SetHost(TEST_PROXY_HOST);
+    service->lastRefreshProxy_.SetPort(8080);
+    HttpProxy currentProxy;
+    currentProxy.SetHost(TEST_PROXY_HOST);
+    currentProxy.SetPort(8080);
+    bool limited = service->IsRefreshRateLimited(currentProxy);
+    EXPECT_FALSE(limited);
+}
+
+HWTEST_F(NetConnServiceTest, IsRefreshRateLimitedTest003, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    service->lastRefreshTime_ = std::chrono::steady_clock::now();
+    service->lastRefreshProxy_.SetHost(TEST_PROXY_HOST);
+    service->lastRefreshProxy_.SetPort(8080);
+    HttpProxy currentProxy;
+    currentProxy.SetHost("different_host");
+    currentProxy.SetPort(8080);
+    bool limited = service->IsRefreshRateLimited(currentProxy);
+    EXPECT_FALSE(limited);
+}
+
+HWTEST_F(NetConnServiceTest, IsRefreshRateLimitedTest004, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    service->refreshInProgress_ = true;
+    service->refreshResultReady_ = false;
+    std::thread setter([&service]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        service->NotifyRefreshGlobalHttpProxyResult(SUCCESS_CODE);
+    });
+    HttpProxy currentProxy;
+    currentProxy.SetHost(TEST_PROXY_HOST);
+    currentProxy.SetPort(8080);
+    HttpProxy httpProxy;
+    service->ExecuteRefreshInFfrt(currentProxy);
+    setter.join();
+    service->refreshInProgress_ = false;
+    service->refreshCallbacks_.clear();
+}
+
+HWTEST_F(NetConnServiceTest, IsRefreshRateLimitedTest005, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    service->refreshInProgress_ = true;
+    service->refreshResultReady_ = false;
+    std::thread setter([&service]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        service->NotifyRefreshGlobalHttpProxyResult(0);
+    });
+    HttpProxy currentProxy;
+    currentProxy.SetHost(TEST_PROXY_HOST);
+    currentProxy.SetPort(8080);
+    HttpProxy httpProxy;
+    service->ExecuteRefreshInFfrt(currentProxy);
+    setter.join();
+    service->refreshInProgress_ = false;
+    service->refreshCallbacks_.clear();
+}
+    
+HWTEST_F(NetConnServiceTest, IsRefreshRateLimitedTest006, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    service->refreshInProgress_ = false;
+    service->lastRefreshTime_ = std::chrono::steady_clock::now() - std::chrono::seconds(20);
+    service->lastRefreshProxy_.SetHost(TEST_PROXY_HOST);
+    service->lastRefreshProxy_.SetPort(8080);
+    service->httpProxyThreadNeedRun_ = true;
+    sptr<IRefreshHttpProxyCallback> callback = new RefreshHttpProxyCallbackStub();
+    int32_t ret = service->RefreshGlobalHttpProxy(callback);
+    service->httpProxyThreadNeedRun_ = false;
+    service->refreshInProgress_ = false;
+    service->refreshCallbacks_.clear();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, PerformProxyCurlProbeTest001, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    long code = service->PerformProxyCurlProbe(nullptr);
+    EXPECT_EQ(code, 0);
+}
+
+HWTEST_F(NetConnServiceTest, PerformProxyCurlProbeTest002, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    CURL *curl = nullptr;
+    curl = curl_easy_init();
+    long code = service->PerformProxyCurlProbe(curl);
+    curl_easy_cleanup(curl);
+    EXPECT_NE(code, SUCCESS_CODE);
+}
+
+HWTEST_F(NetConnServiceTest, NotifyRefreshGlobalHttpProxyResultTest001, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    service->refreshInProgress_ = false;
+    service->NotifyRefreshGlobalHttpProxyResult(SUCCESS_CODE);
+    EXPECT_FALSE(service->refreshResultReady_);
+}
+
+HWTEST_F(NetConnServiceTest, NotifyRefreshGlobalHttpProxyResultTest002, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    service->refreshInProgress_ = true;
+    service->refreshResultReady_ = false;
+    service->NotifyRefreshGlobalHttpProxyResult(SUCCESS_CODE);
+    EXPECT_TRUE(service->refreshAuthSuccess_);
+    EXPECT_TRUE(service->refreshResultReady_);
+    service->refreshInProgress_ = false;
+    service->refreshResultReady_ = false;
+}
+
+HWTEST_F(NetConnServiceTest, NotifyRefreshGlobalHttpProxyResultTest003, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    service->refreshInProgress_ = true;
+    service->refreshResultReady_ = false;
+    service->NotifyRefreshGlobalHttpProxyResult(0);
+    EXPECT_FALSE(service->refreshAuthSuccess_);
+    EXPECT_TRUE(service->refreshResultReady_);
+    service->refreshInProgress_ = false;
+    service->refreshResultReady_ = false;
+}
+
+HWTEST_F(NetConnServiceTest, WaitForNextActiveCycleTest001, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    service->httpProxyThreadNeedRun_ = false;
+    uint32_t retryTimes = RETRY_TIMES;
+    service->WaitForNextActiveCycle(retryTimes, 0);
+    service->httpProxyThreadNeedRun_ = true;
+    EXPECT_EQ(retryTimes, RETRY_TIMES);
+}
+
+HWTEST_F(NetConnServiceTest, WaitForNextActiveCycleTest002, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    service->httpProxyThreadNeedRun_ = true;
+    uint32_t retryTimes = RETRY_TIMES;
+    service->WaitForNextActiveCycle(retryTimes, 0);
+    service->httpProxyThreadNeedRun_ = false;
+    EXPECT_EQ(retryTimes, RETRY_TIMES - 1);
+}
+
+HWTEST_F(NetConnServiceTest, WaitForNextActiveCycleTest003, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    service->httpProxyThreadNeedRun_ = false;
+    service->httpProxyThreadCv_.notify_all();
+    uint32_t retryTimes = 0;
+    std::thread notifier([&service]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        service->httpProxyThreadCv_.notify_all();
+    });
+    service->httpProxyThreadNeedRun_ = true;
+    service->WaitForNextActiveCycle(retryTimes, 0);
+    service->httpProxyThreadNeedRun_ = false;
+    notifier.join();
+    EXPECT_EQ(retryTimes, RETRY_TIMES);
+}
+
+HWTEST_F(NetConnServiceTest, WaitForNextActiveCycleTest004, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    service->httpProxyThreadNeedRun_ = false;
+    service->httpProxyThreadCv_.notify_all();
+    uint32_t retryTimes = RETRY_TIMES;
+    std::thread notifier([&service]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        service->httpProxyThreadCv_.notify_all();
+    });
+    service->httpProxyThreadNeedRun_ = true;
+    service->WaitForNextActiveCycle(retryTimes, SUCCESS_CODE);
+    service->httpProxyThreadNeedRun_ = false;
+    notifier.join();
+    EXPECT_EQ(retryTimes, RETRY_TIMES);
+}
+
+HWTEST_F(NetConnServiceTest, PrepareRefreshGlobalHttpProxyTest001, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    service->lastRefreshTime_ = std::chrono::steady_clock::now();
+    service->lastRefreshProxy_.SetHost(TEST_PROXY_HOST);
+    service->lastRefreshProxy_.SetPort(8080);
+    service->refreshInProgress_ = false;
+    sptr<IRefreshHttpProxyCallback> callback = new RefreshHttpProxyCallbackStub();
+    HttpProxy currentProxy;
+    currentProxy.SetHost(TEST_PROXY_HOST);
+    currentProxy.SetPort(8080);
+    auto ret = service->PrepareRefreshGlobalHttpProxy(currentProxy, callback);
+    EXPECT_EQ(ret, NET_CONN_ERR_HTTP_PROXY_INVALID);
+    service->refreshInProgress_ = false;
+    service->refreshCallbacks_.clear();
+}
+
+HWTEST_F(NetConnServiceTest, PrepareRefreshGlobalHttpProxyTest002, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    service->refreshInProgress_ = true;
+    sptr<IRefreshHttpProxyCallback> callback = new RefreshHttpProxyCallbackStub();
+    HttpProxy currentProxy;
+    currentProxy.SetHost("different_host");
+    currentProxy.SetPort(9090);
+    auto ret = service->PrepareRefreshGlobalHttpProxy(currentProxy, callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+    service->refreshInProgress_ = false;
+    service->refreshCallbacks_.clear();
+}
+
+HWTEST_F(NetConnServiceTest, PrepareRefreshGlobalHttpProxyTest003, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    service->refreshInProgress_ = false;
+    service->lastRefreshTime_ = std::chrono::steady_clock::now() - std::chrono::seconds(20);
+    service->lastRefreshProxy_.SetHost(TEST_PROXY_HOST);
+    service->lastRefreshProxy_.SetPort(8080);
+    sptr<IRefreshHttpProxyCallback> callback = new RefreshHttpProxyCallbackStub();
+    HttpProxy currentProxy;
+    currentProxy.SetHost(TEST_PROXY_HOST);
+    currentProxy.SetPort(8080);
+    auto ret = service->PrepareRefreshGlobalHttpProxy(currentProxy, callback);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_TRUE(service->refreshInProgress_);
+    service->refreshInProgress_ = false;
+    service->refreshCallbacks_.clear();
+}
+
+HWTEST_F(NetConnServiceTest, ExecuteRefreshInFfrtTimeoutTest, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    service->refreshInProgress_ = true;
+    service->refreshResultReady_ = false;
+    sptr<IRefreshHttpProxyCallback> callback = new RefreshHttpProxyCallbackStub();
+    service->refreshCallbacks_.push_back(callback);
+    HttpProxy currentProxy;
+    currentProxy.SetHost(TEST_PROXY_HOST);
+    currentProxy.SetPort(8080);
+    service->ExecuteRefreshInFfrt(currentProxy);
+    EXPECT_FALSE(service->refreshInProgress_);
+    service->refreshCallbacks_.clear();
+}
+
+HWTEST_F(NetConnServiceTest, LoadCurrentProxyForRefreshTest001, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    int32_t userId = 0;
+    service->GetActiveUserId(userId);
+    HttpProxy cachedProxy;
+    cachedProxy.SetHost("");
+    HttpProxy currentProxy;
+    service->globalHttpProxyCache_.EnsureInsert(userId, cachedProxy);
+    auto ret = service->LoadCurrentProxyForRefresh(currentProxy);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetConnServiceTest, LoadCurrentProxyForRefreshTest002, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    int32_t userId = 0;
+    service->GetActiveUserId(userId);
+    HttpProxy cachedProxy;
+    cachedProxy.SetHost(TEST_PROXY_HOST);
+    cachedProxy.SetPort(8080);
+    HttpProxy currentProxy;
+    service->globalHttpProxyCache_.EnsureInsert(userId, cachedProxy);
+    auto ret = service->LoadCurrentProxyForRefresh(currentProxy);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetConnServiceTest, LoadCurrentProxyForRefreshTest003, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    int32_t userId = 0;
+    service->GetActiveUserId(userId);
+    HttpProxy cachedProxy;
+    cachedProxy.SetHost(TEST_PROXY_HOST);
+    cachedProxy.SetPort(8080);
+    SecureData userName;
+    userName.append(PROXY_NAME, PROXY_NAME_SIZE);
+    cachedProxy.SetUserName(userName);
+    cachedProxy.SetUserId(userId);
+    service->globalHttpProxyCache_.EnsureInsert(userId, cachedProxy);
+    service->httpProxyThreadNeedRun_ = false;
+    HttpProxy currentProxy;
+    auto ret = service->LoadCurrentProxyForRefresh(currentProxy);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetConnServiceTest, LoadCurrentProxyForRefreshTest004, TestSize.Level1)
+{
+    auto &service = NetConnService::GetInstance();
+    int32_t userId = 0;
+    service->GetActiveUserId(userId);
+    HttpProxy cachedProxy;
+    cachedProxy.SetHost(TEST_PROXY_HOST);
+    cachedProxy.SetPort(8080);
+    SecureData userName;
+    userName.append(PROXY_NAME, PROXY_NAME_SIZE);
+    cachedProxy.SetUserName(userName);
+    cachedProxy.SetUserId(userId);
+    service->globalHttpProxyCache_.EnsureInsert(userId, cachedProxy);
+    service->httpProxyThreadNeedRun_ = true;
+    HttpProxy currentProxy;
+    auto ret = service->LoadCurrentProxyForRefresh(currentProxy);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    service->httpProxyThreadNeedRun_ = false;
+}
+
 HWTEST_F(NetConnServiceTest, GetActiveUserIdTest001, TestSize.Level1)
 {
     int32_t userId;
@@ -1616,12 +2034,6 @@ HWTEST_F(NetConnServiceTest, SetAirplaneModeTest003, TestSize.Level1)
     NetConnService::GetInstance()->preAirplaneCallbacks_ = preAirplaneMap;
     int32_t ret = NetConnService::GetInstance()->SetAirplaneMode(state);
     ASSERT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
-}
-
-HWTEST_F(NetConnServiceTest, ActiveHttpProxy001, TestSize.Level1)
-{
-    NetConnService::GetInstance()->ActiveHttpProxy();
-    ASSERT_FALSE(NetConnService::GetInstance()->httpProxyThreadNeedRun_.load());
 }
 
 HWTEST_F(NetConnServiceTest, NetDetectionForDnsHealthTest002, TestSize.Level1)

@@ -55,6 +55,7 @@ public:
     static constexpr const char *FUNCTION_GET_DEFAULT_HTTP_PROXY = "getDefaultHttpProxy";
     static constexpr const char *FUNCTION_GET_GLOBAL_HTTP_PROXY = "getGlobalHttpProxy";
     static constexpr const char *FUNCTION_SET_GLOBAL_HTTP_PROXY = "setGlobalHttpProxy";
+    static constexpr const char *FUNCTION_REFRESH_GLOBAL_HTTP_PROXY = "refreshGlobalHttpProxy";
     static constexpr const char *FUNCTION_SET_CUSTOM_DNS_RULE = "addCustomDnsRule";
     static constexpr const char *FUNCTION_DELETE_CUSTOM_DNS_RULE = "removeCustomDnsRule";
     static constexpr const char *FUNCTION_DELETE_CUSTOM_DNS_RULES = "clearCustomDnsRules";
@@ -164,6 +165,7 @@ private:
     static napi_value GetDefaultHttpProxy(napi_env env, napi_callback_info info);
     static napi_value GetGlobalHttpProxy(napi_env env, napi_callback_info info);
     static napi_value SetGlobalHttpProxy(napi_env env, napi_callback_info info);
+    static napi_value RefreshGlobalHttpProxy(napi_env env, napi_callback_info info);
     static napi_value AddCustomDnsRule(napi_env env, napi_callback_info info);
     static napi_value RemoveCustomDnsRule(napi_env env, napi_callback_info info);
     static napi_value ClearCustomDnsRules(napi_env env, napi_callback_info info);

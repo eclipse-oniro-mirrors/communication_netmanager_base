@@ -785,6 +785,81 @@ int32_t NetConnClient::GetDefaultHttpProxy(HttpProxy &httpProxy)
     return proxy->GetDefaultHttpProxy(bindNetId, httpProxy);
 }
 
+void NetConnClient::ResetRefreshState()
+{
+    std::lock_guard<std::mutex> innerLock(refreshCbMutex_);
+    refreshInProgress_ = false;
+    refreshCallbackStub_ = nullptr;
+    pendingRefreshCallbacks_.clear();
+}
+
+int32_t NetConnClient::PrepareRefreshCallback(const std::function<void(int32_t, const HttpProxy &)> &callback,
+    bool &needSendRequest)
+{
+    std::unique_lock<std::mutex> lock(refreshCbMutex_);
+    needSendRequest = !refreshInProgress_;
+    refreshInProgress_ = true;
+    pendingRefreshCallbacks_.push_back(callback);
+
+    if (!needSendRequest) {
+        NETMGR_LOG_I("RefreshGlobalHttpProxy: reuse existing refresh");
+        return NETMANAGER_SUCCESS;
+    }
+
+    refreshCallbackStub_ = new (std::nothrow) RefreshHttpProxyCallbackStub();
+    if (refreshCallbackStub_ == nullptr) {
+        NETMGR_LOG_E("RefreshGlobalHttpProxy: create stub failed");
+        refreshInProgress_ = false;
+        pendingRefreshCallbacks_.clear();
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    refreshCallbackStub_->SetRefreshCallback([this](int32_t result, const HttpProxy &httpProxy) {
+        std::vector<std::function<void(int32_t, const HttpProxy &)>> callbacks;
+        {
+            std::lock_guard<std::mutex> innerLock(refreshCbMutex_);
+            callbacks = std::move(pendingRefreshCallbacks_);
+            pendingRefreshCallbacks_.clear();
+            refreshInProgress_ = false;
+            refreshCallbackStub_ = nullptr;
+        }
+        for (auto &cb : callbacks) {
+            cb(result, httpProxy);
+        }
+    });
+    lock.unlock();
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnClient::SendRefreshHttpProxyRequest(const sptr<IRefreshHttpProxyCallback> &stub)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        ResetRefreshState();
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    int32_t ret = proxy->RefreshGlobalHttpProxy(stub);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("RefreshGlobalHttpProxy failed: %{public}d", ret);
+        ResetRefreshState();
+    }
+    return ret;
+}
+
+int32_t NetConnClient::RefreshGlobalHttpProxy(const std::function<void(int32_t, const HttpProxy &)> &callback)
+{
+    if (callback == nullptr) {
+        NETMGR_LOG_E("callback is nullptr");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    bool needSendRequest = false;
+    int32_t ret = PrepareRefreshCallback(callback, needSendRequest);
+    if (ret != NETMANAGER_SUCCESS || !needSendRequest) {
+        return ret;
+    }
+    return SendRefreshHttpProxyRequest(refreshCallbackStub_);
+}
+
 int32_t NetConnClient::SetPacUrl(const std::string &pacUrl)
 {
     NETMGR_LOG_I("Enter SetPacUrl");

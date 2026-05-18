@@ -36,6 +36,7 @@
 #include "net_conn_event_handler.h"
 #include "net_conn_service_iface.h"
 #include "net_conn_service_stub.h"
+#include "i_refresh_http_proxy_callback.h"
 #include "net_supplier.h"
 #include "netsys_controller_callback.h"
 #include "network.h"
@@ -346,6 +347,8 @@ public:
      */
     int32_t GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy) override;
 
+    int32_t RefreshGlobalHttpProxy(const sptr<IRefreshHttpProxyCallback> &callback) override;
+
     /**
      * Get net id by identifier
      *
@@ -575,6 +578,14 @@ private:
     void ProcessHttpProxyCancel(const sptr<NetSupplier> &supplier);
     void ActiveHttpProxy();
     void CreateActiveHttpProxyThread();
+    bool IsRefreshRateLimited(const HttpProxy &currentProxy);
+    int32_t LoadCurrentProxyForRefresh(HttpProxy &currentProxy);
+    int32_t PrepareRefreshGlobalHttpProxy(const HttpProxy &currentProxy,
+        const sptr<IRefreshHttpProxyCallback> &callback);
+    void ExecuteRefreshInFfrt(const HttpProxy &currentProxy);
+    long PerformProxyCurlProbe(CURL *curl);
+    void NotifyRefreshGlobalHttpProxyResult(long responseCode);
+    void WaitForNextActiveCycle(uint32_t &retryTimes, long responseCode);
     void DecreaseNetConnCallbackCntForUid(const uint32_t callingUid,
         const RegisterType registerType = REGISTER);
     int32_t IncreaseNetConnCallbackCntForUid(const uint32_t callingUid,
@@ -674,6 +685,16 @@ private:
     std::mutex httpProxyThreadMutex_;
     static constexpr uint32_t HTTP_PROXY_ACTIVE_PERIOD_S = 120;
     static constexpr uint32_t HTTP_PROXY_ACTIVE_PERIOD_IN_SLEEP_S = 240;
+    std::mutex refreshProxyMutex_;
+    bool refreshInProgress_ = false;
+    bool refreshAuthSuccess_ = false;
+    bool refreshResultReady_ = false;
+    std::condition_variable refreshResultCv_;
+    std::vector<sptr<IRefreshHttpProxyCallback>> refreshCallbacks_;
+    std::chrono::steady_clock::time_point lastRefreshTime_;
+    HttpProxy lastRefreshProxy_;
+    static constexpr uint32_t REFRESH_RATE_LIMIT_S = 10;
+    static constexpr uint32_t REFRESH_WAIT_TIMEOUT_S = 15;
     std::map<int32_t, sptr<IPreAirplaneCallback>> preAirplaneCallbacks_;
     std::mutex preAirplaneCbsMutex_;
     std::mutex dataShareMutex_;
