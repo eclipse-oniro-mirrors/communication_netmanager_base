@@ -243,6 +243,36 @@ HWTEST_F(NetSupplierTest, UpdateNetLinkInfo, TestSize.Level1) {
     EXPECT_EQ(supplier->UpdateNetLinkInfo(netLinkInfo1), NET_CONN_ERR_INVALID_NETWORK);
 }
 
+HWTEST_F(NetSupplierTest, UpdateNetCapTest001, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NET_CAPABILITY_INTERNET);
+    netCaps.insert(NET_CAPABILITY_NOT_METERED);
+
+    supplier->UpdateNetCap(netCaps);
+
+    EXPECT_TRUE(supplier->netCaps_.HasNetCap(NET_CAPABILITY_INTERNET));
+    EXPECT_TRUE(supplier->netCaps_.HasNetCap(NET_CAPABILITY_NOT_METERED));
+
+    std::unique_lock<std::shared_mutex> lock(supplier->netAllCapabilities_.netCapsMutex_);
+    EXPECT_TRUE(supplier->netAllCapabilities_.netCaps_.count(NET_CAPABILITY_INTERNET) > 0);
+    EXPECT_TRUE(supplier->netAllCapabilities_.netCaps_.count(NET_CAPABILITY_NOT_METERED) > 0);
+}
+
+HWTEST_F(NetSupplierTest, UpdateNetCapTest002, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NET_CAPABILITY_MMS);
+
+    supplier->UpdateNetCap(netCaps);
+    EXPECT_TRUE(supplier->netCaps_.HasNetCap(NET_CAPABILITY_MMS));
+    EXPECT_FALSE(supplier->netCaps_.HasNetCap(NET_CAPABILITY_INTERNET));
+
+    std::unique_lock<std::shared_mutex> lock(supplier->netAllCapabilities_.netCapsMutex_);
+    EXPECT_TRUE(supplier->netAllCapabilities_.netCaps_.count(NET_CAPABILITY_MMS) > 0);
+    EXPECT_FALSE(supplier->netAllCapabilities_.netCaps_.count(NET_CAPABILITY_INTERNET) > 0);
+}
+
 HWTEST_F(NetSupplierTest, SetOnceSuppress001, TestSize.Level1)
 {
     supplier->netSupplierInfo_.isAvailable_ = false;

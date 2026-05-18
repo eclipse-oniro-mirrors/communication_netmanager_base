@@ -15,6 +15,10 @@
 
 #include <gtest/gtest.h>
 
+#ifdef GTEST_API_
+    #define private public
+    #define protected public
+#endif
 #include "net_all_capabilities.h"
 
 namespace OHOS {
@@ -81,6 +85,81 @@ HWTEST_F(NetAllCapabilitiesTest, ToStringTest, TestSize.Level1)
     allCap->linkUpBandwidthKbps_ = 0;
     allCap->linkDownBandwidthKbps_ = 1;
     EXPECT_FALSE(allCap->CapsIsNull());
+}
+
+HWTEST_F(NetAllCapabilitiesTest, ConvertCapToStrTest001, TestSize.Level1)
+{
+    auto allCap = std::make_shared<NetAllCapabilities>();
+    std::string str;
+
+    allCap->ConvertCapToStr(NET_CAPABILITY_MMS, str);
+    EXPECT_EQ(str, "NET_CAPABILITY_MMS");
+
+    str.clear();
+    allCap->ConvertCapToStr(NET_CAPABILITY_INTERNET, str);
+    EXPECT_EQ(str, "NET_CAPABILITY_INTERNET");
+
+    str.clear();
+    allCap->ConvertCapToStr(NET_CAPABILITY_NOT_METERED, str);
+    EXPECT_EQ(str, "NET_CAPABILITY_NOT_METERED");
+
+    str.clear();
+    allCap->ConvertCapToStr(NET_CAPABILITY_VALIDATED, str);
+    EXPECT_EQ(str, "NET_CAPABILITY_VALIDATED");
+    
+    str.clear();
+    allCap->ConvertCapToStr(NET_CAPABILITY_BIP, str);
+    EXPECT_EQ(str, "NET_CAPABILITY_BIP");
+}
+
+HWTEST_F(NetAllCapabilitiesTest, ConvertCapToStrTest002, TestSize.Level1)
+{
+    auto allCap = std::make_shared<NetAllCapabilities>();
+    std::string str;
+    
+    allCap->ConvertCapToStr(NET_CAPABILITY_SUPL, str);
+    EXPECT_EQ(str, "NET_CAPABILITY_SUPL");
+    
+    str.clear();
+    allCap->ConvertCapToStr(NET_CAPABILITY_IA, str);
+    EXPECT_EQ(str, "NET_CAPABILITY_IA");
+    
+    str.clear();
+    allCap->ConvertCapToStr(NET_CAPABILITY_XCAP, str);
+    EXPECT_EQ(str, "NET_CAPABILITY_XCAP");
+    
+    str.clear();
+    allCap->ConvertCapToStr(NET_CAPABILITY_NOT_VPN, str);
+    EXPECT_EQ(str, "NET_CAPABILITY_NOT_VPN");
+    
+    str.clear();
+    allCap->ConvertCapToStr(NET_CAPABILITY_PORTAL, str);
+    EXPECT_EQ(str, "NET_CAPABILITY_PORTAL");
+    
+    str.clear();
+    allCap->ConvertCapToStr(NET_CAPABILITY_INTERNAL_DEFAULT, str);
+    EXPECT_EQ(str, "NET_CAPABILITY_INTERNAL_DEFAULT");
+    
+    str.clear();
+    allCap->ConvertCapToStr(NET_CAPABILITY_CHECKING_CONNECTIVITY, str);
+    EXPECT_EQ(str, "NET_CAPABILITY_CHECKING_CONNECTIVITY");
+}
+
+HWTEST_F(NetAllCapabilitiesTest, ConvertCapToStrTest003, TestSize.Level1)
+{
+    auto allCap = std::make_shared<NetAllCapabilities>();
+    std::string str;
+    
+    allCap->ConvertCapToStr(NET_CAPABILITY_END, str);
+    EXPECT_EQ(str, "unknown NetCap");
+    
+    str.clear();
+    allCap->ConvertCapToStr(NET_CAPABILITY_OEM_PAID, str);
+    EXPECT_EQ(str, "unknown NetCap");
+    
+    str.clear();
+    allCap->ConvertCapToStr(NET_CAPABILITY_OEM_PRIVATE, str);
+    EXPECT_EQ(str, "unknown NetCap");
 }
 
 HWTEST_F(NetAllCapabilitiesTest, ParcelTest, TestSize.Level1)

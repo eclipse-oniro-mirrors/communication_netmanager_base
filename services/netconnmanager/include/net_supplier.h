@@ -147,6 +147,7 @@ public:
     std::string TechToType(NetSlotTech type);
     void SetDetectionDone();
     void SetReuseCap(NetCap reuseCap, bool add);
+    void UpdateNetCap(const std::set<NetCap> &netCaps);
     bool ResumeNetworkInfo();
     bool IsNetAcceptUnavalidate();
     bool IsInFirstTimeDetecting() const;

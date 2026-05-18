@@ -179,54 +179,65 @@ std::string NetAllCapabilities::ToString(const std::string &tab) const
     return str;
 }
 
+void NetAllCapabilities::ConvertCapToStr(const NetCap &netCap, std::string &str) const
+{
+    switch (netCap) {
+        case NET_CAPABILITY_MMS:
+            str.append("NET_CAPABILITY_MMS");
+            break;
+        case NET_CAPABILITY_SUPL:
+            str.append("NET_CAPABILITY_SUPL");
+            break;
+        case NET_CAPABILITY_DUN:
+            str.append("NET_CAPABILITY_DUN");
+            break;
+        case NET_CAPABILITY_IA:
+            str.append("NET_CAPABILITY_IA");
+            break;
+        case NET_CAPABILITY_XCAP:
+            str.append("NET_CAPABILITY_XCAP");
+            break;
+        case NET_CAPABILITY_NOT_METERED:
+            str.append("NET_CAPABILITY_NOT_METERED");
+            break;
+        case NET_CAPABILITY_INTERNET:
+            str.append("NET_CAPABILITY_INTERNET");
+            break;
+        case NET_CAPABILITY_NOT_VPN:
+            str.append("NET_CAPABILITY_NOT_VPN");
+            break;
+        case NET_CAPABILITY_VALIDATED:
+            str.append("NET_CAPABILITY_VALIDATED");
+            break;
+        case NET_CAPABILITY_PORTAL:
+            str.append("NET_CAPABILITY_PORTAL");
+            break;
+        case NET_CAPABILITY_INTERNAL_DEFAULT:
+            str.append("NET_CAPABILITY_INTERNAL_DEFAULT");
+            break;
+        case NET_CAPABILITY_CHECKING_CONNECTIVITY:
+            str.append("NET_CAPABILITY_CHECKING_CONNECTIVITY");
+            break;
+        case NET_CAPABILITY_BIP:
+            str.append("NET_CAPABILITY_BIP");
+            break;
+        default:
+            str.append("unknown NetCap");
+            break;
+    }
+}
+
 void NetAllCapabilities::ToStrNetCaps(const std::set<NetCap> &netCaps, std::string &str) const
 {
     str.append("netCaps_ =");
     for (auto netCap : netCaps) {
         str.append(" ");
-        switch (netCap) {
-            case NET_CAPABILITY_MMS:
-                str.append("NET_CAPABILITY_MMS");
-                break;
-            case NET_CAPABILITY_SUPL:
-                str.append("NET_CAPABILITY_SUPL");
-                break;
-            case NET_CAPABILITY_DUN:
-                str.append("NET_CAPABILITY_DUN");
-                break;
-            case NET_CAPABILITY_IA:
-                str.append("NET_CAPABILITY_IA");
-                break;
-            case NET_CAPABILITY_XCAP:
-                str.append("NET_CAPABILITY_XCAP");
-                break;
-            case NET_CAPABILITY_NOT_METERED:
-                str.append("NET_CAPABILITY_NOT_METERED");
-                break;
-            case NET_CAPABILITY_INTERNET:
-                str.append("NET_CAPABILITY_INTERNET");
-                break;
-            case NET_CAPABILITY_NOT_VPN:
-                str.append("NET_CAPABILITY_NOT_VPN");
-                break;
-            case NET_CAPABILITY_VALIDATED:
-                str.append("NET_CAPABILITY_VALIDATED");
-                break;
-            case NET_CAPABILITY_PORTAL:
-                str.append("NET_CAPABILITY_PORTAL");
-                break;
-            case NET_CAPABILITY_INTERNAL_DEFAULT:
-                str.append("NET_CAPABILITY_INTERNAL_DEFAULT");
-                break;
-            case NET_CAPABILITY_CHECKING_CONNECTIVITY:
-                str.append("NET_CAPABILITY_CHECKING_CONNECTIVITY");
-                break;
-            case NET_CAPABILITY_BIP:
-                str.append("NET_CAPABILITY_BIP");
-                break;
-            default:
-                str.append("unknown NetCap");
-                break;
+        if (netCap == NET_CAPABILITY_OEM_PAID) {
+            str.append("NET_CAPABILITY_OEM_PAID");
+        } else if (netCap == NET_CAPABILITY_OEM_PRIVATE) {
+            str.append("NET_CAPABILITY_OEM_PRIVATE");
+        } else {
+            ConvertCapToStr(netCap, str);
         }
     }
 }

@@ -43,6 +43,8 @@ enum NetCap {
     NET_CAPABILITY_SNSSAI5 = 23,
     NET_CAPABILITY_SNSSAI6 = 24,
     NET_CAPABILITY_INTERNAL_CHANNEL = 25,
+    NET_CAPABILITY_OEM_PAID = 26,
+    NET_CAPABILITY_OEM_PRIVATE = 27,
     NET_CAPABILITY_CHECKING_CONNECTIVITY = 31,
     NET_CAPABILITY_END = 32 // The maximum value is 32. Do not exceed the limit.
 };
@@ -80,6 +82,7 @@ struct NetAllCapabilities final : public Parcelable {
     std::string ToString(const std::string &tab) const;
 
 private:
+    void ConvertCapToStr(const NetCap &netCap, std::string &str) const;
     void ToStrNetCaps(const std::set<NetCap> &netCaps, std::string &str) const;
     void ToStrNetBearTypes(const std::set<NetBearType> &bearerTypes, std::string &str) const;
 };
