@@ -194,7 +194,8 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
     }
 
     ifaddrmsg ifm = {static_cast<uint8_t>(family), static_cast<uint8_t>(prefixLen), 0, 0, index};
-    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, getpid());
+    uint16_t flags = action == RTM_NEWADDR ? NLM_F_CREATE | NLM_F_EXCL : NLM_F_CREATE;
+    nmd::NetlinkMsg nlmsg(flags, nmd::NETLINK_MAX_LEN, getpid());
     nlmsg.AddAddress(action, ifm);
 
     if (family == AF_INET6) {
@@ -540,7 +541,7 @@ int32_t InterfaceManager::DelStaticIpv6Addr(const std::string &ipv6Addr, const s
     const std::string &ifName)
 {
     NETNATIVE_LOGI("DelStaticIpv6Addr");
-    nmd::NetlinkMsg nlmsg(NLM_F_EXCL, nmd::NETLINK_MAX_LEN, getpid());
+    nmd::NetlinkMsg nlmsg(0, nmd::NETLINK_MAX_LEN, getpid());
     int32_t res = AssembleIPv6Neighbor(ipv6Addr, macAddr, ifName, nlmsg, RTM_DELNEIGH);
     if (res != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("AssembleIPv6Neighbor error");
@@ -706,7 +707,7 @@ int32_t InterfaceManager::DestroyVlan(const std::string &ifName, uint32_t vlanId
         NETNATIVE_LOGE("DestroyVlan, ifName error %{public}d", errno);
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
-    nmd::NetlinkMsg nlmsg(NLM_F_EXCL, nmd::NETLINK_MAX_LEN, getpid());
+    nmd::NetlinkMsg nlmsg(0, nmd::NETLINK_MAX_LEN, getpid());
     struct ifinfomsg ifm;
     ifm.ifi_family = AF_UNSPEC;
     ifm.ifi_type = ARPHRD_ETHER;
