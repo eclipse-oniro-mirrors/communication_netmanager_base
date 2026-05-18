@@ -182,6 +182,7 @@ private:
     int32_t uid_ = 0;
     std::string netExtAttribute_ = "";
     bool isOnceSuppress_ = false;
+    NetRequest netRequest_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

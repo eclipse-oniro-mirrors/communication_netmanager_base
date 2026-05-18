@@ -51,6 +51,10 @@ sptr<INetSupplierCallback> NetSupplier::GetSupplierCallback()
 void NetSupplier::RegisterSupplierCallback(const sptr<INetSupplierCallback> &callback)
 {
     netController_ = callback;
+    std::shared_lock<std::shared_mutex> rLock(requestListMutex_);
+    if (netController_!= nullptr && !requestList_.empty()) {
+        SupplierConnection(netCaps_.ToSet(), netRequest_);
+    }
 }
 
 void NetSupplier::InitNetScore()
@@ -273,6 +277,7 @@ bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps, const NetR
 
     if (netController_ == nullptr) {
         NETMGR_LOG_E("netController_ is nullptr");
+        netRequest_ = netRequest;
         return false;
     }
     NETMGR_LOG_D("execute RequestNetwork");
