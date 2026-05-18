@@ -138,7 +138,7 @@ int32_t RouteManager::UpdateVnicRoute(const std::string &interfaceName, const st
     routeInfo.routeInterfaceName = interfaceName;
     routeInfo.routeDestinationName = destinationName;
     routeInfo.routeNextHop = nextHop;
-    uint16_t flags = add ? (NLM_F_CREATE | NLM_F_EXCL) : NLM_F_EXCL;
+    uint16_t flags = add ? (NLM_F_CREATE | NLM_F_EXCL) : 0;
     uint16_t action = add ? RTM_NEWROUTE : RTM_DELROUTE;
 
     return UpdateRouteRule(action, flags, routeInfo);
@@ -231,7 +231,7 @@ int32_t RouteManager::RemoveRoute(TableType tableType, const std::string &interf
     if (SetRouteInfo(tableType, networkRouteInfo, routeInfo) != 0) {
         return -1;
     }
-    return UpdateRouteRule(RTM_DELROUTE, NLM_F_EXCL, routeInfo);
+    return UpdateRouteRule(RTM_DELROUTE, 0, routeInfo);
 }
 
 int32_t RouteManager::UpdateRoute(TableType tableType, const std::string &interfaceName,
@@ -904,11 +904,11 @@ int32_t RouteManager::DisableDistributedNet(bool isServer, const std::string &vi
 
             routeInfo.routeTable = ROUTE_DISTRIBUTE_FROM_CLIENT_TABLE;
             routeInfo.routeInterfaceName = DistributedManager::GetInstance().GetServerDevIfaceNic();
-            ret += UpdateRouteRule(RTM_DELROUTE, NLM_F_EXCL, routeInfo);
+            ret += UpdateRouteRule(RTM_DELROUTE, 0, routeInfo);
             
             routeInfo.routeTable = ROUTE_DISTRIBUTE_TO_CLIENT_TABLE;
             routeInfo.routeInterfaceName = DistributedManager::GetInstance().GetServerIifNic();
-            ret += UpdateRouteRule(RTM_DELROUTE, NLM_F_EXCL, routeInfo);
+            ret += UpdateRouteRule(RTM_DELROUTE, 0, routeInfo);
         }
     } else {
         ret += UpdateDistributedRule(RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID);
@@ -1443,11 +1443,7 @@ int32_t RouteManager::UpdateDistributedRule(uint32_t action, uint8_t ruleType, R
 
 uint16_t RouteManager::GetRuleFlag(uint32_t action)
 {
-#ifdef SUPPORT_SYSVPN
     return (action == RTM_NEWRULE) ? NLM_F_CREATE : 0;
-#else
-    return (action == RTM_NEWRULE) ? NLM_F_CREATE : NLM_F_EXCL;
-#endif // SUPPORT_SYSVPN
 }
 
 int32_t RouteManager::SetRuleMsgPriority(NetlinkMsg &nlmsg, RuleInfo &ruleInfo)
