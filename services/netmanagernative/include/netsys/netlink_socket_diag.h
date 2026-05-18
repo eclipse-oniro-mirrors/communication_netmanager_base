@@ -67,6 +67,7 @@ public:
         const nlmsghdr *nlh);
 
 private:
+    static std::string StripV4MappedPrefix(const std::string &addr);
     static bool InLookBack(uint32_t a);
 
     bool CreateNetlinkSocket();

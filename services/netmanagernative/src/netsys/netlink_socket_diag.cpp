@@ -47,11 +47,24 @@ constexpr int32_t TCP_STATES = (1 << TCP_ESTABLISHED) | (1 << TCP_SYN_SENT) | (1
     (1 << TCP_FIN_WAIT1) | (1 << TCP_FIN_WAIT2) | (1 << TCP_TIME_WAIT) | (1 << TCP_CLOSE) | (1 << TCP_CLOSE_WAIT) |
     (1 << TCP_LAST_ACK) | (1 << TCP_LISTEN) | (1 << TCP_CLOSING);
 constexpr int32_t INET_DIAG_SK_PID = 23;
+constexpr const char *V4_MAPPED_PREFIX = "::ffff:";
 } // namespace
 
 NetLinkSocketDiag::~NetLinkSocketDiag()
 {
     CloseNetlinkSocket();
+}
+
+std::string NetLinkSocketDiag::StripV4MappedPrefix(const std::string &addr)
+{
+    if (addr.find(V4_MAPPED_PREFIX) != 0) {
+        return addr;
+    }
+    std::string stripped = addr.substr(strlen(V4_MAPPED_PREFIX));
+    if (CommonUtils::IsValidIPV4(stripped)) {
+        return stripped;
+    }
+    return addr;
 }
 
 // LCOV_EXCL_START
@@ -369,13 +382,19 @@ bool NetLinkSocketDiag::GetTcpNetPortStatesInfo(const inet_diag_msg* msg,
         in_addr aDst{.s_addr = msg->id.idiag_dst[0]};
         inet_ntop(AF_INET, &aSrc, localAddr, sizeof(localAddr));
         inet_ntop(AF_INET, &aDst, remoteAddr, sizeof(remoteAddr));
+        tcpInfo.tcpLocalIp_ = localAddr;
+        tcpInfo.tcpRemoteIp_ = remoteAddr;
     } else if (msg->idiag_family == AF_INET6) {
         inet_ntop(AF_INET6, msg->id.idiag_src, localAddr, sizeof(localAddr));
         inet_ntop(AF_INET6, msg->id.idiag_dst, remoteAddr, sizeof(remoteAddr));
+        tcpInfo.tcpLocalIp_ = StripV4MappedPrefix(localAddr);
+        tcpInfo.tcpRemoteIp_ = StripV4MappedPrefix(remoteAddr);
     }
-    tcpInfo.tcpLocalIp_ = localAddr;
+    if ((!CommonUtils::IsValidIPV4(tcpInfo.tcpLocalIp_) && !CommonUtils::IsValidIPV6(tcpInfo.tcpLocalIp_)) ||
+        (!CommonUtils::IsValidIPV4(tcpInfo.tcpRemoteIp_) && !CommonUtils::IsValidIPV6(tcpInfo.tcpRemoteIp_))) {
+        return false;
+    }
     tcpInfo.tcpLocalPort_ = ntohs(msg->id.idiag_sport);
-    tcpInfo.tcpRemoteIp_ = remoteAddr;
     tcpInfo.tcpRemotePort_ = ntohs(msg->id.idiag_dport);
     tcpInfo.tcpUid_ = msg->idiag_uid;
     tcpInfo.tcpPid_ = pid;
@@ -395,10 +414,14 @@ bool NetLinkSocketDiag::GetUdpNetPortStatesInfo(const inet_diag_msg* msg,
     if (msg->idiag_family == AF_INET) {
         in_addr aSrc { .s_addr = msg->id.idiag_src[0] };
         inet_ntop(AF_INET, &aSrc, localAddr, sizeof(localAddr));
+        udpInfo.udpLocalIp_ = localAddr;
     } else if (msg->idiag_family == AF_INET6) {
         inet_ntop(AF_INET6, msg->id.idiag_src, localAddr, sizeof(localAddr));
+        udpInfo.udpLocalIp_ = StripV4MappedPrefix(localAddr);
     }
-    udpInfo.udpLocalIp_ = localAddr;
+    if (!CommonUtils::IsValidIPV4(udpInfo.udpLocalIp_) && !CommonUtils::IsValidIPV6(udpInfo.udpLocalIp_)) {
+        return false;
+    }
     udpInfo.udpLocalPort_ = ntohs(msg->id.idiag_sport);
     udpInfo.udpUid_ = msg->idiag_uid;
     udpInfo.udpPid_ = pid;
