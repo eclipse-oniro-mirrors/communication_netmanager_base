@@ -196,22 +196,17 @@ HWTEST_F(NetlinkSocketDiagTest, IsMatchNetwork006, TestSize.Level1)
 HWTEST_F(NetlinkSocketDiagTest, SetSocketDestroyType001, TestSize.Level1)
 {
     NetLinkSocketDiag netLinkSocketDiag;
-    netLinkSocketDiag.SetSocketDestroyType("NET_CAPABILITY_INTERNAL_DEFAULT");
+    int socketType = static_cast<int>(SocketDestroyType::DESTROY_SPECIAL_CELLULAR);
+    netLinkSocketDiag.SetSocketDestroyType(socketType);
     EXPECT_EQ(netLinkSocketDiag.socketDestroyType_, SocketDestroyType::DESTROY_SPECIAL_CELLULAR);
 
-    netLinkSocketDiag.SetSocketDestroyType("BEARER_CELLULAR");
+    socketType = static_cast<int>(SocketDestroyType::DESTROY_DEFAULT_CELLULAR);
+    netLinkSocketDiag.SetSocketDestroyType(socketType);
     EXPECT_EQ(netLinkSocketDiag.socketDestroyType_, SocketDestroyType::DESTROY_DEFAULT_CELLULAR);
 
-    netLinkSocketDiag.SetSocketDestroyType("OTHER_CAPABILITY");
+    socketType = static_cast<int>(SocketDestroyType::DESTROY_DEFAULT);
+    netLinkSocketDiag.SetSocketDestroyType(socketType);
     EXPECT_EQ(netLinkSocketDiag.socketDestroyType_, SocketDestroyType::DESTROY_DEFAULT);
-}
-
-HWTEST_F(NetlinkSocketDiagTest, InLookBack002, TestSize.Level1)
-{
-    NetLinkSocketDiag netLinkSocketDiag;
-    uint32_t a = 0x6f000000;
-    bool result = netLinkSocketDiag.InLookBack(a);
-    EXPECT_EQ(result, false);
 }
 
 HWTEST_F(NetlinkSocketDiagTest, CloseNetlinkSocket001, TestSize.Level1)
@@ -222,6 +217,209 @@ HWTEST_F(NetlinkSocketDiagTest, CloseNetlinkSocket001, TestSize.Level1)
     netLinkSocketDiag.CloseNetlinkSocket();
     EXPECT_EQ(netLinkSocketDiag.dumpSock_, -1);
     EXPECT_EQ(netLinkSocketDiag.destroySock_, -1);
+}
+
+HWTEST_F(NetlinkSocketDiagTest, StripV4MappedPrefix001, TestSize.Level1)
+{
+    std::string result = NetLinkSocketDiag::StripV4MappedPrefix("::ffff:192.168.1.1");
+    EXPECT_EQ(result, "192.168.1.1");
+}
+
+HWTEST_F(NetlinkSocketDiagTest, StripV4MappedPrefix002, TestSize.Level1)
+{
+    std::string result = NetLinkSocketDiag::StripV4MappedPrefix("192.168.1.1");
+    EXPECT_EQ(result, "192.168.1.1");
+}
+
+HWTEST_F(NetlinkSocketDiagTest, StripV4MappedPrefix003, TestSize.Level1)
+{
+    std::string result = NetLinkSocketDiag::StripV4MappedPrefix("2001:db8::1");
+    EXPECT_EQ(result, "2001:db8::1");
+}
+
+HWTEST_F(NetlinkSocketDiagTest, StripV4MappedPrefix004, TestSize.Level1)
+{
+    std::string result = NetLinkSocketDiag::StripV4MappedPrefix("::ffff:invalid");
+    EXPECT_EQ(result, "::ffff:invalid");
+}
+
+HWTEST_F(NetlinkSocketDiagTest, StripV4MappedPrefix005, TestSize.Level1)
+{
+    std::string result = NetLinkSocketDiag::StripV4MappedPrefix("::1");
+    EXPECT_EQ(result, "::1");
+}
+
+HWTEST_F(NetlinkSocketDiagTest, StripV4MappedPrefix006, TestSize.Level1)
+{
+    std::string result = NetLinkSocketDiag::StripV4MappedPrefix("");
+    EXPECT_EQ(result, "");
+}
+
+HWTEST_F(NetlinkSocketDiagTest, StripV4MappedPrefix007, TestSize.Level1)
+{
+    std::string result = NetLinkSocketDiag::StripV4MappedPrefix("::ffff:10.0.0.1");
+    EXPECT_EQ(result, "10.0.0.1");
+}
+
+HWTEST_F(NetlinkSocketDiagTest, StripV4MappedPrefix008, TestSize.Level1)
+{
+    std::string result = NetLinkSocketDiag::StripV4MappedPrefix("::ffff:127.0.0.1");
+    EXPECT_EQ(result, "127.0.0.1");
+}
+
+HWTEST_F(NetlinkSocketDiagTest, GetTcpNetPortStatesInfoV4Mapped001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    inet_diag_msg msg;
+    msg.idiag_family = AF_INET6;
+    msg.id.idiag_src[0] = 0;
+    msg.id.idiag_src[1] = 0;
+    msg.id.idiag_src[2] = htonl(0xffff);
+    msg.id.idiag_src[3] = inet_addr("192.168.1.10");
+    msg.id.idiag_dst[0] = 0;
+    msg.id.idiag_dst[1] = 0;
+    msg.id.idiag_dst[2] = htonl(0xffff);
+    msg.id.idiag_dst[3] = inet_addr("10.0.0.1");
+    msg.id.idiag_sport = htons(12345);
+    msg.id.idiag_dport = htons(80);
+    msg.idiag_uid = 1000;
+    msg.idiag_state = TCP_ESTABLISHED;
+
+    NetManagerStandard::NetPortStatesInfo netPortStatesInfo;
+    bool ret = netLinkSocketDiag.GetTcpNetPortStatesInfo(&msg, netPortStatesInfo, 100);
+    EXPECT_TRUE(ret);
+    ASSERT_EQ(netPortStatesInfo.tcpNetPortStatesInfo_.size(), 1U);
+    EXPECT_EQ(netPortStatesInfo.tcpNetPortStatesInfo_[0].tcpLocalIp_, "192.168.1.10");
+    EXPECT_EQ(netPortStatesInfo.tcpNetPortStatesInfo_[0].tcpRemoteIp_, "10.0.0.1");
+}
+
+HWTEST_F(NetlinkSocketDiagTest, GetTcpNetPortStatesInfoV6Native001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    inet_diag_msg msg;
+    msg.idiag_family = AF_INET6;
+    inet_pton(AF_INET6, "2001:db8::1", &msg.id.idiag_src);
+    inet_pton(AF_INET6, "2001:db8::2", &msg.id.idiag_dst);
+    msg.id.idiag_sport = htons(12345);
+    msg.id.idiag_dport = htons(80);
+    msg.idiag_uid = 1000;
+    msg.idiag_state = TCP_ESTABLISHED;
+
+    NetManagerStandard::NetPortStatesInfo netPortStatesInfo;
+    bool ret = netLinkSocketDiag.GetTcpNetPortStatesInfo(&msg, netPortStatesInfo, 100);
+    EXPECT_TRUE(ret);
+    ASSERT_EQ(netPortStatesInfo.tcpNetPortStatesInfo_.size(), 1U);
+    EXPECT_EQ(netPortStatesInfo.tcpNetPortStatesInfo_[0].tcpLocalIp_, "2001:db8::1");
+    EXPECT_EQ(netPortStatesInfo.tcpNetPortStatesInfo_[0].tcpRemoteIp_, "2001:db8::2");
+}
+
+HWTEST_F(NetlinkSocketDiagTest, GetTcpNetPortStatesInfoNull001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    NetManagerStandard::NetPortStatesInfo netPortStatesInfo;
+    bool ret = netLinkSocketDiag.GetTcpNetPortStatesInfo(nullptr, netPortStatesInfo, 100);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetlinkSocketDiagTest, GetTcpNetPortStatesInfoV4Direct001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    inet_diag_msg msg;
+    msg.idiag_family = AF_INET;
+    msg.id.idiag_src[0] = inet_addr("192.168.1.10");
+    msg.id.idiag_dst[0] = inet_addr("10.0.0.1");
+    msg.id.idiag_sport = htons(12345);
+    msg.id.idiag_dport = htons(80);
+    msg.idiag_uid = 1000;
+    msg.idiag_state = TCP_ESTABLISHED;
+
+    NetManagerStandard::NetPortStatesInfo netPortStatesInfo;
+    bool ret = netLinkSocketDiag.GetTcpNetPortStatesInfo(&msg, netPortStatesInfo, 100);
+    EXPECT_TRUE(ret);
+    ASSERT_EQ(netPortStatesInfo.tcpNetPortStatesInfo_.size(), 1U);
+    EXPECT_EQ(netPortStatesInfo.tcpNetPortStatesInfo_[0].tcpLocalIp_, "192.168.1.10");
+    EXPECT_EQ(netPortStatesInfo.tcpNetPortStatesInfo_[0].tcpRemoteIp_, "10.0.0.1");
+}
+
+HWTEST_F(NetlinkSocketDiagTest, GetUdpNetPortStatesInfoV4Mapped001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    inet_diag_msg msg;
+    msg.idiag_family = AF_INET6;
+    msg.id.idiag_src[0] = 0;
+    msg.id.idiag_src[1] = 0;
+    msg.id.idiag_src[2] = htonl(0xffff);
+    msg.id.idiag_src[3] = inet_addr("192.168.1.20");
+    msg.id.idiag_sport = htons(54321);
+    msg.idiag_uid = 2000;
+
+    NetManagerStandard::NetPortStatesInfo netPortStatesInfo;
+    bool ret = netLinkSocketDiag.GetUdpNetPortStatesInfo(&msg, netPortStatesInfo, 200);
+    EXPECT_TRUE(ret);
+    ASSERT_EQ(netPortStatesInfo.udpNetPortStatesInfo_.size(), 1U);
+    EXPECT_EQ(netPortStatesInfo.udpNetPortStatesInfo_[0].udpLocalIp_, "192.168.1.20");
+}
+
+HWTEST_F(NetlinkSocketDiagTest, GetTcpNetPortStatesInfoInvalidAddr001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    inet_diag_msg msg;
+    msg.idiag_family = AF_UNSPEC;
+
+    NetManagerStandard::NetPortStatesInfo netPortStatesInfo;
+    bool ret = netLinkSocketDiag.GetTcpNetPortStatesInfo(&msg, netPortStatesInfo, 100);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetlinkSocketDiagTest, GetUdpNetPortStatesInfoInvalidAddr001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    inet_diag_msg msg;
+    msg.idiag_family = AF_UNSPEC;
+
+    NetManagerStandard::NetPortStatesInfo netPortStatesInfo;
+    bool ret = netLinkSocketDiag.GetUdpNetPortStatesInfo(&msg, netPortStatesInfo, 200);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetlinkSocketDiagTest, GetUdpNetPortStatesInfoV6Native001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    inet_diag_msg msg;
+    msg.idiag_family = AF_INET6;
+    inet_pton(AF_INET6, "fe80::1", &msg.id.idiag_src);
+    msg.id.idiag_sport = htons(54321);
+    msg.idiag_uid = 2000;
+
+    NetManagerStandard::NetPortStatesInfo netPortStatesInfo;
+    bool ret = netLinkSocketDiag.GetUdpNetPortStatesInfo(&msg, netPortStatesInfo, 200);
+    EXPECT_TRUE(ret);
+    ASSERT_EQ(netPortStatesInfo.udpNetPortStatesInfo_.size(), 1U);
+    EXPECT_EQ(netPortStatesInfo.udpNetPortStatesInfo_[0].udpLocalIp_, "fe80::1");
+}
+
+HWTEST_F(NetlinkSocketDiagTest, GetUdpNetPortStatesInfoNull001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    NetManagerStandard::NetPortStatesInfo netPortStatesInfo;
+    bool ret = netLinkSocketDiag.GetUdpNetPortStatesInfo(nullptr, netPortStatesInfo, 200);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetlinkSocketDiagTest, GetUdpNetPortStatesInfoV4Direct001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    inet_diag_msg msg;
+    msg.idiag_family = AF_INET;
+    msg.id.idiag_src[0] = inet_addr("192.168.1.20");
+    msg.id.idiag_sport = htons(54321);
+    msg.idiag_uid = 2000;
+
+    NetManagerStandard::NetPortStatesInfo netPortStatesInfo;
+    bool ret = netLinkSocketDiag.GetUdpNetPortStatesInfo(&msg, netPortStatesInfo, 200);
+    EXPECT_TRUE(ret);
+    ASSERT_EQ(netPortStatesInfo.udpNetPortStatesInfo_.size(), 1U);
+    EXPECT_EQ(netPortStatesInfo.udpNetPortStatesInfo_[0].udpLocalIp_, "192.168.1.20");
 }
 } // namespace nmd
 } // namespace OHOS
