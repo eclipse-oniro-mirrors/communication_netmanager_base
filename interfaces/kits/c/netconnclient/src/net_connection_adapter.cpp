@@ -14,6 +14,8 @@
  */
 
 #include <map>
+#include <memory>
+#include <new>
 #include <sstream>
 
 #include "net_conn_client.h"
@@ -400,17 +402,22 @@ int32_t NetConnCallbackStubAdapter::NetConnectionPropertiesChange(sptr<NetHandle
         return NETMANAGER_SUCCESS;
     }
     NetConn_NetHandle netHandleInner;
-    NetConn_ConnectionProperties netInfoInner;
+    auto netInfoInner = std::unique_ptr<NetConn_ConnectionProperties>(
+        new (std::nothrow) NetConn_ConnectionProperties());
+    if (netInfoInner == nullptr) {
+        NETMGR_LOG_E("NetConn_ConnectionProperties alloc failed");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     int32_t ret = Conv2NetHandle(*netHandle, &netHandleInner);
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
-    ret = Conv2NetLinkInfo(*info, &netInfoInner);
+    ret = Conv2NetLinkInfo(*info, netInfoInner.get());
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
 
-    this->callback_.onConnetionProperties(&netHandleInner, &netInfoInner);
+    this->callback_.onConnetionProperties(&netHandleInner, netInfoInner.get());
     return NETMANAGER_SUCCESS;
 }
 
