@@ -796,5 +796,25 @@ HWTEST_F(NetManagerCenterTest, UpdateNetRequestControlState001, TestSize.Level1)
     ret = netManagerCenter.UpdateNetRequestControlState(netRequests);
     EXPECT_TRUE(true);
 }
+
+HWTEST_F(NetManagerCenterTest, IsAppUidInWhiteListTest001, TestSize.Level1)
+{
+    NetManagerCenter netManagerCenter;
+    int32_t callingUid = 1000;
+    int32_t appUid = 2000;
+    bool ret = netManagerCenter.IsAppUidInWhiteList(callingUid, appUid);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetManagerCenterTest, IsAppUidInWhiteListTest002, TestSize.Level1)
+{
+    auto vpnService = std::make_shared<TestNetVpnService>();
+    NetManagerCenter netManagerCenter;
+    netManagerCenter.RegisterVpnService(vpnService);
+    int32_t callingUid = 1000;
+    int32_t appUid = 2000;
+    bool ret = netManagerCenter.IsAppUidInWhiteList(callingUid, appUid);
+    EXPECT_TRUE(ret);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
