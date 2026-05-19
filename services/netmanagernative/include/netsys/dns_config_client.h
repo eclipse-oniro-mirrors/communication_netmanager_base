@@ -63,6 +63,7 @@ extern "C" {
 #define FAIL_CAUSE_INTERFACE_NOT_DEFAULT 8
 #define DEFAULT_DELAYED_COUNT (60 * 10)
 #define DEFAULT_AAAA_BLACK (30 * 60 * 1000)
+#define MAX_ALL_CACHE_SIZE (200 * 1024 * 1024)
 
 enum CommandType {
     GET_CONFIG = 1,
