@@ -20,7 +20,7 @@
 #include <string_ex.h>
 #include <string>
 
-#include <ability_manager_client.h>
+#include "extension_manager_client.h"
 #include <message_parcel.h>
 
 #include "net_stats_rdb.h"
@@ -147,17 +147,13 @@ bool TrafficLimitDialog::ShowTrafficLimitDialog()
         NETMGR_LOG_E("TrafficLimitAbilityConn create failed");
         return false;
     }
-    auto abilityManager = OHOS::AAFwk::AbilityManagerClient::GetInstance();
-    if (abilityManager == nullptr) {
-        NETMGR_LOG_E("AbilityManagerClient is nullptr");
-        return false;
-    }
     DelayedRefSingleton<Telephony::CellularDataClient>::GetInstance().EnableCellularData(false);
 
     Want want;
     want.SetElementName("com.ohos.sceneboard", "com.ohos.sceneboard.systemdialog");
     NETMGR_LOG_I("ConnectAbility start");
-    auto ret = abilityManager->ConnectAbility(want, trafficlimitAbilityConn_, INVALID_USERID);
+    auto ret = ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(
+        want, trafficlimitAbilityConn_->AsObject(), INVALID_USERID);
     if (ret != ERR_OK) {
         NETMGR_LOG_E("ConnectServiceExtensionAbility systemui failed");
         trafficlimitAbilityConn_ = nullptr;
@@ -174,15 +170,10 @@ bool TrafficLimitDialog::UnShowTrafficLimitDialog()
         return true;
     }
 
-    auto abmc = OHOS::AAFwk::AbilityManagerClient::GetInstance();
-    if (abmc == nullptr) {
-        NETMGR_LOG_E("GetInstance failed");
-        return false;
-    }
     NETMGR_LOG_I("Unshow TrafficLimit Dialog");
     trafficlimitAbilityConn_->CloseDialog();
 
-    auto ret = abmc->DisconnectAbility(trafficlimitAbilityConn_);
+    auto ret = ExtensionManagerClient::GetInstance().DisconnectAbility(trafficlimitAbilityConn_->AsObject());
     if (ret != 0) {
         NETMGR_LOG_E("DisconnectAbility failed %{public}d", ret);
         return false;

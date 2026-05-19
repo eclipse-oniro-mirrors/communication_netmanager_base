@@ -22,7 +22,7 @@
 #include <string_ex.h>
 #include <string>
 
-#include <ability_manager_client.h>
+#include "extension_manager_client.h"
 #include <message_parcel.h>
 #include "net_mgr_log_wrapper.h"
 
@@ -57,15 +57,10 @@ bool NetAccessPolicyDialogImpl::ConnectSystemUi(uint32_t uid)
         return true;
     }
 
-    auto abilityManager = AbilityManagerClient::GetInstance();
-    if (abilityManager == nullptr) {
-        NETMGR_LOG_E("Get abilityManager err");
-        return false;
-    }
-
     Want want;
     want.SetElementName("com.ohos.sceneboard", "com.ohos.sceneboard.systemdialog");
-    ErrCode result = abilityManager->ConnectAbility(want, dialogConnectionCallback_, INVALID_USERID);
+    ErrCode result = ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(
+        want, dialogConnectionCallback_->AsObject(), INVALID_USERID);
     if (result != ERR_OK) {
         NETMGR_LOG_E("ConnectAbility err");
         return false;

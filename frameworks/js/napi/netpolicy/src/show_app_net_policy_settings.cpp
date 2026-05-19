@@ -18,6 +18,8 @@
 #include "ui_content.h"
 #include "netmanager_base_common_utils.h"
 #include "netmanager_base_log.h"
+#include "data_ability_helper.h"
+#include "ipc_skeleton.h"
 namespace OHOS {
 namespace NetManagerStandard {
  
