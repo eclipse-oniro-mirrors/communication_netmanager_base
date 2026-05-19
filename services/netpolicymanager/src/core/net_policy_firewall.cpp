@@ -82,14 +82,7 @@ std::string NetPolicyFirewall::GetUidsBundleStr(const std::vector<uint32_t> &uid
     std::stringstream ss;
     ss << "[";
     for (size_t i = 0; i < uids.size(); ++i) {
-        std::string bundleName = GetBundleNameForUid(uids[i]);
-        if (bundleName.empty()) {
-            ss << "\"" << uids[i] << "\"";
-        } else {
-            // LCOV_EXCL_START
-            ss << "\"" << bundleName << "\"";
-            // LCOV_EXCL_STOP
-        }
+        ss << "\"" << uids[i] << "\"";
         if (i < uids.size() - 1) {
             ss << ",";
         }
