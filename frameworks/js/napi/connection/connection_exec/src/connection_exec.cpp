@@ -1628,6 +1628,10 @@ bool ConnectionExec::ExecQueryProbeResult(QueryProbeResultContext *context)
     if (!context->IsParseOK()) {
         return false;
     }
+    if (!CommonUtils::HasInternetPermission()) {
+        context->SetErrorCode(NETMANAGER_ERR_PERMISSION_DENIED);
+        return false;
+    }
     NetProbe np;
     int32_t errorCode = np.QueryProbeResult(context->dest_, context->duration_, context->probeResultInfo_);
     if (errorCode != NET_CONN_SUCCESS) {
