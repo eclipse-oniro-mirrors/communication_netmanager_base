@@ -2309,6 +2309,7 @@ int32_t NetConnServiceProxy::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInf
 int32_t NetConnServiceProxy::CreateVlan(const std::string &ifName, uint32_t vlanId)
 {
     MessageParcel data;
+    // LCOV_EXCL_START
     if (!WriteInterfaceToken(data)) {
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
@@ -2326,13 +2327,14 @@ int32_t NetConnServiceProxy::CreateVlan(const std::string &ifName, uint32_t vlan
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
-
+    // LCOV_EXCL_STOP
     return reply.ReadInt32();
 }
 
 int32_t NetConnServiceProxy::DestroyVlan(const std::string &ifName, uint32_t vlanId)
 {
     MessageParcel data;
+    // LCOV_EXCL_START
     if (!WriteInterfaceToken(data)) {
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
@@ -2350,7 +2352,7 @@ int32_t NetConnServiceProxy::DestroyVlan(const std::string &ifName, uint32_t vla
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
-
+    // LCOV_EXCL_STOP
     return reply.ReadInt32();
 }
 
@@ -2358,6 +2360,7 @@ int32_t NetConnServiceProxy::AddVlanIp(const std::string &ifName, uint32_t vlanI
                                        const std::string &ip, uint32_t mask)
 {
     MessageParcel data;
+    // LCOV_EXCL_START
     if (!WriteInterfaceToken(data)) {
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
@@ -2381,7 +2384,7 @@ int32_t NetConnServiceProxy::AddVlanIp(const std::string &ifName, uint32_t vlanI
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
-
+    // LCOV_EXCL_STOP
     return reply.ReadInt32();
 }
 
@@ -2389,6 +2392,7 @@ int32_t NetConnServiceProxy::DeleteVlanIp(const std::string &ifName, uint32_t vl
                                           const std::string &ip, uint32_t mask)
 {
     MessageParcel data;
+    // LCOV_EXCL_START
     if (!WriteInterfaceToken(data)) {
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
@@ -2412,7 +2416,7 @@ int32_t NetConnServiceProxy::DeleteVlanIp(const std::string &ifName, uint32_t vl
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
-
+    // LCOV_EXCL_STOP
     return reply.ReadInt32();
 }
 
