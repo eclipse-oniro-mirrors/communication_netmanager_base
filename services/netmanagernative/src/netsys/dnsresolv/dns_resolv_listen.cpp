@@ -879,6 +879,9 @@ ReceiverRunner DnsResolvListenInternal::ProcPostDnsThreadQueryResult(uint16_t ne
             data.data() + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint32_t), sizeof(uint32_t)) != EOK) {
             return FixedLengthReceiverState::ONERROR;
         }
+        if (allCacheSize > MAX_ALL_CACHE_SIZE) {
+            return FixedLengthReceiverState::ONERROR;
+        }
         server_->AddReceiver(fd, allCacheSize,
             ProcGetKeyLengthForAllQueryResult(netId, uid, pid, dnsCacheSize, allCacheSize));
         return FixedLengthReceiverState::CONTINUE;
