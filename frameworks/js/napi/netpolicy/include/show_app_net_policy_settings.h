@@ -17,7 +17,7 @@
 #define SHOW_APP_NETWORK_SETTINGS
 
 #include "napi/native_api.h"
-#include "ability.h"
+#include "ability_context.h"
 #include "ui_extension_context.h"
 namespace OHOS {
 namespace NetManagerStandard {

@@ -323,7 +323,7 @@ ohos_shared_library("net_access_policy_dialog") {
     "ability_base:session_info",
     "ability_base:want",
     "ability_runtime:ability_connect_callback_stub",
-    "ability_runtime:ability_manager",
+    "ability_runtime:extension_manager",
     "ability_runtime:abilitykit_native",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
