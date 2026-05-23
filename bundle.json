@@ -129,7 +129,7 @@
                     "//foundation/communication/netmanager_base/services/netmanagernative:netsys_client"
                 ],
                 "service_group": [
-                    "//foundation/communication/netmanager_base/services:netmanager_services",
+                    "//foundation/communication/netmanager_base/services:netmanager_base_services",
                     "//foundation/communication/netmanager_base/services/etc/init:netdetectionurl.conf",
                     "//foundation/communication/netmanager_base/services/etc/init:netmanager_trust",
                     "//foundation/communication/netmanager_base/services/etc/init:netsysnative_trust",
