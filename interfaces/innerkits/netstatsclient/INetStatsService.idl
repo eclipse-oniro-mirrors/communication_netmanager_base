@@ -50,4 +50,6 @@ interface OHOS.NetManagerStandard.INetStatsService {
     void SaveSharingTraffic([in] NetStatsInfo infos);
     void SetCalibrationTraffic([in] unsigned int simId, [in] long remainingData,
         [in] unsigned long totalMonthlyData);
+    void SetTrafficPlanInfo([in] int simId, [in] int param, [in] long value);
+    void GetTrafficPlanInfo([in] int simId, [in] int param, [out] long value);
 }

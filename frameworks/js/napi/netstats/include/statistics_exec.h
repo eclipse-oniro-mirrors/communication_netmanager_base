@@ -33,6 +33,8 @@
 #include "update_iface_stats_context.h"
 #include "get_sockfd_rxbytes_context.h"
 #include "set_calibration_traffic_context.h"
+#include "set_traffic_plan_info_context.h"
+#include "get_traffic_plan_info_context.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -60,6 +62,8 @@ public:
     static bool ExecGetSelfTrafficStats(GetSelfTrafficStatsContext *context);
     static bool ExecGetMonthTrafficStatsByNetwork(GetMonthTrafficStatsByNetworkContext *context);
     static bool ExecSetCalibrationTraffic(SetCalibrationTrafficContext *context);
+    static bool ExecSetTrafficPlanInfo(SetTrafficPlanInfoContext *context);
+    static bool ExecGetTrafficPlanInfo(GetTrafficPlanInfoContext *context);
 
     static napi_value GetCellularRxBytesCallback(GetCellularRxBytesContext *context);
     static napi_value GetCellularTxBytesCallback(GetCellularTxBytesContext *context);
@@ -80,6 +84,8 @@ public:
     static napi_value GetSelfTrafficStatsCallback(GetSelfTrafficStatsContext *context);
     static napi_value GetMonthTrafficStatsByNetworkCallback(GetMonthTrafficStatsByNetworkContext *context);
     static napi_value SetCalibrationTrafficCallback(SetCalibrationTrafficContext *context);
+    static napi_value SetTrafficPlanInfoCallback(SetTrafficPlanInfoContext *context);
+    static napi_value GetTrafficPlanInfoCallback(GetTrafficPlanInfoContext *context);
 
     static napi_value CreateCodeMessage(napi_env env, const std::string &msg, int32_t code);
 };

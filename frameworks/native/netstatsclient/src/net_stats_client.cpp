@@ -463,6 +463,26 @@ int32_t NetStatsClient::SetCalibrationTraffic(uint32_t simId, int64_t remainingD
     return proxy->SetCalibrationTraffic(simId, remainingData, totalMonthlyData);
 }
 
+int32_t NetStatsClient::SetTrafficPlanInfo(int32_t simId, int32_t param, int64_t value)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetTrafficPlanInfo(simId, param, value);
+}
+
+int32_t NetStatsClient::GetTrafficPlanInfo(int32_t simId, int32_t param, int64_t &value)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetTrafficPlanInfo(simId, param, value);
+}
+
 extern "C" int32_t GetUidTxBytesEx(uint64_t *stats, uint32_t uid)
 {
     NETMGR_LOG_D("GetUidTxBytesEx in");

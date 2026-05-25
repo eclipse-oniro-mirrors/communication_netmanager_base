@@ -788,24 +788,18 @@ HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest001, TestSize.Level
 #ifdef SUPPORT_TRAFFIC_STATISTIC
 HWTEST_F(NetStatsServiceTest, CalculateTrafficAvailableTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    NetStatsService netStatsService;
     int32_t simId = 1;
-    bool ret = netStatsService->CalculateTrafficAvailable(simId, UINT64_MAX, UINT64_MAX, UINT64_MAX);
+    uint64_t monthlyAvailable = UINT64_MAX;
+    uint64_t monthlyMarkAvailable = UINT64_MAX;
+    uint64_t dailyMarkAvailable = UINT64_MAX;
+    bool ret = netStatsService.CalculateTrafficAvailable(
+        simId, monthlyAvailable, monthlyMarkAvailable, dailyMarkAvailable);
     EXPECT_EQ(ret, false);
 
-    netStatsService->settingsTrafficMap_.insert(
-                std::make_pair(simId, std::make_pair(trafficDataObserver, trafficSettingsInfo)));
-    netStatsService->CalculateTrafficAvailable(simId, UINT64_MAX, UINT64_MAX, UINT64_MAX);
-    EXPECT_EQ(ret, true);
-}
-
-HWTEST_F(NetStatsServiceTest, UpdateBpfMapTest001, TestSize.Level1)
-{
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
-    int32_t simId = 1;
-    netStatsService->settingsTrafficMap_.insert(
-                std::make_pair(simId, std::make_pair(trafficDataObserver, trafficSettingsInfo)));
-    netStatsService->UpdateBpfMap(simId);
+    auto info = std::make_shared<TrafficPlanInfo>();
+    netStatsService.trafficPlanService_->trafficPlanInfoMap_.insert(std::make_pair(simId, info));
+    ret = netStatsService.CalculateTrafficAvailable(simId, monthlyAvailable, monthlyMarkAvailable, dailyMarkAvailable);
     EXPECT_EQ(ret, true);
 }
 
@@ -818,7 +812,7 @@ HWTEST_F(NetStatsServiceTest, UpdateBpfMapTimerTest001, TestSize.Level1)
     auto netStatsService2 = DelayedSingleton<NetStatsService>::GetInstance();
     netStatsService2->trafficPlanFfrtQueue_ = nullptr;
     netStatsService2->UpdateBpfMapTimer();
-    EXPECT_EQ(netStatsService2->settingsTrafficMap_.size(), 0);
+    EXPECT_EQ(netStatsService2->trafficPlanService_->trafficPlanInfoMap_.size(), 0);
 }
 
 HWTEST_F(NetStatsServiceTest, CellularDataStateChangedFfrtTest001, TestSize.Level1)

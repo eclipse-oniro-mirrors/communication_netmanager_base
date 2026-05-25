@@ -27,6 +27,8 @@
 #include "statistics_exec.h"
 #include "update_iface_stats_context.h"
 #include "set_calibration_traffic_context.h"
+#include "set_traffic_plan_info_context.h"
+#include "get_traffic_plan_info_context.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -236,5 +238,27 @@ void StatisticsAsyncWork::SetCalibrationTrafficCallback(napi_env env, napi_statu
     BaseAsyncWork::AsyncWorkCallback<SetCalibrationTrafficContext,
                                      StatisticsExec::SetCalibrationTrafficCallback>(env, status, data);
 }
+void StatisticsAsyncWork::ExecSetTrafficPlanInfo(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<SetTrafficPlanInfoContext, StatisticsExec::ExecSetTrafficPlanInfo>(env, data);
+}
+
+void StatisticsAsyncWork::ExecGetTrafficPlanInfo(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetTrafficPlanInfoContext, StatisticsExec::ExecGetTrafficPlanInfo>(env, data);
+}
+
+void StatisticsAsyncWork::SetTrafficPlanInfoCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<SetTrafficPlanInfoContext,
+                                     StatisticsExec::SetTrafficPlanInfoCallback>(env, status, data);
+}
+
+void StatisticsAsyncWork::GetTrafficPlanInfoCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetTrafficPlanInfoContext,
+                                     StatisticsExec::GetTrafficPlanInfoCallback>(env, status, data);
+}
+
+}
 } // namespace NetManagerStandard
-} // namespace OHOS

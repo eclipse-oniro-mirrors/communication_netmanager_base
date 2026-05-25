@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,30 +12,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-#ifndef SWITCH_OBSERVER_H
-#define SWITCH_OBSERVER_H
- 
-#include <vector>
-#include <map>
-#include <memory>
-#include "singleton.h"
-#include "data_ability_observer_stub.h"
-#include "traffic_plan_param.h"
- 
+
+#ifndef NET_POLICY_DB_CLONE_H
+#define NET_POLICY_DB_CLONE_H
+
+#include <mutex>
+#include <string>
+#include "unique_fd.h"
+#include "ffrt.h"
 namespace OHOS {
 namespace NetManagerStandard {
- 
-class TrafficDataObserver {
+constexpr const char* NET_STATS_DATA_BACKUP_FILE =
+    "/data/service/el1/public/netmanager/net_stats_data_backup.txt";
+class NetStatsDataClone {
 public:
-    TrafficDataObserver(int32_t simId_);
-    ~TrafficDataObserver() = default;
-    void ReadTrafficDataSettings(TrafficPlanInfo &info);
-    void ReadTrafficDataSettingsPart2(TrafficPlanInfo &info);
+    static NetStatsDataClone &GetInstance();
+    bool FdClone(UniqueFd &fd);
+    int32_t OnBackup(UniqueFd &fd, const std::string &backupInfo);
+    int32_t OnRestore(UniqueFd &fd, const std::string &restoreInfo);
 
-public:
-    int32_t simId_ { -1 };
+private:
+    ffrt::mutex mutex_;
 };
 }
 }
+
 #endif

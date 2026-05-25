@@ -40,6 +40,12 @@ public:
     static bool ConvertToUint64(const std::string &str, uint64_t &value);
     static bool ConvertToInt32(const std::string &str, int32_t &value);
     static bool IsLessThanOneMonthAgoPrecise(time_t timestamp);
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+    static std::string GetIccIdBySlotId(int32_t slotId);
+    static std::string GetIccIdBySimId(int32_t simId);
+    static bool IsSimIdValid(int32_t simId);
+    static bool IsSlotIdValid(int32_t slotId);
+#endif
 };
 }
 }

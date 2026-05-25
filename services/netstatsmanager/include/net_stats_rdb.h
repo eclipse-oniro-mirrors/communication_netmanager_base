@@ -22,7 +22,7 @@
 #include "rdb_store.h"
 #include "result_set.h"
 #include "rdb_sql_utils.h"
-#include "net_stats_service.h"
+#include "traffic_plan_param.h"
 #include "rdb_predicates.h"
 
 namespace OHOS {
@@ -73,6 +73,20 @@ public:
     int32_t BackUpNetStatsFreqDB(const std::string &sourceDB, const std::string &targetDB);
     int32_t InitRdbStoreBackupDB();
 
+    NativeRdb::ValuesBucket BuildValuesBucket(const TrafficPlanInfo &info);
+    
+    int32_t InsertTrafficPlanInfo(const NativeRdb::ValuesBucket &values);
+
+    std::string GetFieldNameByParam(TrafficPlanParam param);
+
+    int32_t InsertOrUpdateTrafficPlanInfo(const TrafficPlanInfo &info);
+
+    int32_t QueryTrafficPlanInfoByIccid(const std::string &iccid, TrafficPlanInfo &info);
+    int32_t QueryAllTrafficPlanInfo(std::vector<TrafficPlanInfo> &infoList);
+    int32_t UpdateTrafficPlanParam(const std::string &iccid, TrafficPlanParam param, int64_t value);
+    int32_t UpdatePlanInfoByIccid(const TrafficPlanInfo &info);
+
+    std::shared_ptr<NativeRdb::RdbStore> GetRdbStorePtr();
     class RdbDataOpenCallback : public NativeRdb::RdbOpenCallback {
     public:
         int32_t OnCreate(NativeRdb::RdbStore &rdbStore) override;

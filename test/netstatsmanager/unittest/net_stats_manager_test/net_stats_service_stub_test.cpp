@@ -165,7 +165,7 @@ public:
     }
 
     int32_t UpdateIfacesStats(const std::string &iface, uint64_t start, uint64_t end,
-                                      const NetStatsInfo &stats) override
+                              const NetStatsInfo &stats) override
     {
         return 0;
     }
@@ -186,6 +186,16 @@ public:
     }
 
     int32_t GetCookieTxBytes(uint64_t &stats, uint64_t cookie) override
+    {
+        return 0;
+    }
+
+    int32_t SetTrafficPlanInfo(int32_t simId, int32_t param, int64_t value) override
+    {
+        return 0;
+    }
+
+    int32_t GetTrafficPlanInfo(int32_t simId, int32_t param, int64_t &value) override
     {
         return 0;
     }
@@ -641,8 +651,8 @@ HWTEST_F(TestNetStatsServiceStub, GetAllSimStatsInfoTest001, TestSize.Level1)
     ASSERT_NE(data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor()), false);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(
-        static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_SIM_STATS_INFO), data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_SIM_STATS_INFO),
+                                             data, reply, option);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 

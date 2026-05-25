@@ -169,7 +169,7 @@ std::string NetMgrNetStatsLimitNotification::GetDayNotificationText()
     int32_t simId = simId_;
     uint64_t traffic = 0;
     uint16_t dayPercent = 0;
-    bool ret = DelayedSingleton<NetStatsService>::GetInstance()->GetdailyMarkBySimId(simId, dayPercent);
+    bool ret = DelayedSingleton<NetStatsService>::GetInstance()->GetDailyMarkBySimId(simId, dayPercent);
     DelayedSingleton<NetStatsService>::GetInstance()->GetMonthlyLimitBySimId(simId, traffic);
     if (!ret) {
         NETMGR_LOG_E("simId does not exist:: simId %{public}d", simId);

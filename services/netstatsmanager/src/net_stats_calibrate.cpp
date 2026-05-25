@@ -61,6 +61,10 @@ void NetStatsCalibrate::UpdateChangeToIfaceTime(uint32_t startTime)
 bool NetStatsCalibrate::InitCalibrationInfo(uint32_t simId)
 {
 #ifdef SUPPORT_TRAFFIC_STATISTIC
+    if (calibrateInfo_.find(simId) != calibrateInfo_.end()) {
+        NETMGR_LOG_I("has calicrationInfo, no need read DB. simId:%{public}d", simId);
+        return true;
+    }
     CalibrateInfo info;
     ReadCalibrationTrafficInfo(simId, info);
     if (info.startTime == 0 || info.endTime == 0) {
@@ -133,7 +137,7 @@ void NetStatsCalibrate::ReadCalibrationTrafficInfo(uint32_t simId, CalibrateInfo
     info.startTime = startTime;
     info.endTime = endTime;
     info.usedTraffic = usedTraffic;
-    NETMGR_LOG_I("ReadCalibrationTrafficInfo startTime:%{public}d, endTime:%{public}d, usedTraffic:%{public}ld",
+    NETMGR_LOG_I("ReadCalibrationTrafficInfo startTime:%{public}d, endTime:%{public}d, usedTraffic:%{public}" PRIu64,
         startTime, endTime, usedTraffic);
 #else
     NETMGR_LOG_I("UpdateCalibrationInfo error. curr device not support traffic calibrate");
