@@ -36,7 +36,8 @@
             "netmanager_base_enable_pac_proxy",
             "netmanager_base_share_traffic_limit_enable",
             "netmanager_base_enable_set_app_frozened",
-            "netmanager_base_feature_enterprise_route_custom"
+            "netmanager_base_feature_enterprise_route_custom",
+            "netmanager_base_fpga_mode_enable"
         ],
         "adapted_system_type": [
             "standard"
@@ -128,10 +129,7 @@
                     "//foundation/communication/netmanager_base/services/netmanagernative:netsys_client"
                 ],
                 "service_group": [
-                    "//foundation/communication/netmanager_base/services/netmanagernative:netsys_native_manager",
-                    "//foundation/communication/netmanager_base/services/netconnmanager:net_conn_manager",
-                    "//foundation/communication/netmanager_base/services/netpolicymanager:net_policy_manager",
-                    "//foundation/communication/netmanager_base/services/netstatsmanager:net_stats_manager",
+                    "//foundation/communication/netmanager_base/services:netmanager_base_services",
                     "//foundation/communication/netmanager_base/services/etc/init:netdetectionurl.conf",
                     "//foundation/communication/netmanager_base/services/etc/init:netmanager_trust",
                     "//foundation/communication/netmanager_base/services/etc/init:netsysnative_trust",
