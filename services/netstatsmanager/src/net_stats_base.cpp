@@ -431,7 +431,7 @@ int32_t NetStatsRDB::InsertTrafficPlanInfo(const NativeRdb::ValuesBucket &values
 
 int32_t NetStatsRDB::QueryTrafficPlanInfoByIccid(const std::string &iccid, TrafficPlanInfo &info)
 {
-    NETMGR_LOG_I("QueryTrafficPlanInfoByIccid start, iccid: %{public}s", iccid.c_str());
+    NETMGR_LOG_I("QueryTrafficPlanInfoByIccid start");
 
     int32_t ret = GetRdbStore();
     if (ret != NETMANAGER_SUCCESS) {
@@ -458,7 +458,7 @@ int32_t NetStatsRDB::QueryTrafficPlanInfoByIccid(const std::string &iccid, Traff
     }
     
     if (rowCount == 0) {
-        NETMGR_LOG_E("QueryTrafficPlanInfoByIccid: no record found for iccid: %{public}s", iccid.c_str());
+        NETMGR_LOG_E("QueryTrafficPlanInfoByIccid: no record found");
         queryResultSet->Close();
         return TRAFFIC_PLAN_ERR_ICCID_NOT_FOUND;
     }
@@ -550,8 +550,8 @@ int32_t NetStatsRDB::QueryAllTrafficPlanInfo(std::vector<TrafficPlanInfo> &infoL
 
 int32_t NetStatsRDB::UpdateTrafficPlanParam(const std::string &iccid, TrafficPlanParam param, int64_t value)
 {
-    NETMGR_LOG_I("UpdateTrafficPlanParam start, iccid: %{public}s, param: %{public}d, value: %{public}" PRId64,
-                 iccid.c_str(), static_cast<int32_t>(param), value);
+    NETMGR_LOG_I("UpdateTrafficPlanParam start, param: %{public}d, value: %{public}" PRId64,
+                 static_cast<int32_t>(param), value);
     if (iccid.empty()) {
         return TRAFFIC_PLAN_ERR_INVALID_PARAM;
     }

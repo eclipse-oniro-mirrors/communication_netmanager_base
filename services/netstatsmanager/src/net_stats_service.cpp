@@ -1538,6 +1538,11 @@ int32_t NetStatsService::SetTrafficPlanInfo(int32_t simId, int32_t param, int64_
     NETMGR_LOG_I("SetTrafficPlanInfo start, simId: %{public}d, param: %{public}d, value: %{public}" PRId64,
                  simId, param, value);
 #ifdef SUPPORT_TRAFFIC_STATISTIC
+    int32_t checkPermission = CheckNetManagerAvailable();
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        return checkPermission;
+    }
+
     if (trafficPlanService_ == nullptr) {
         NETMGR_LOG_E("trafficPlanService_ is nullptr");
         return NETMANAGER_ERR_INTERNAL;
@@ -1574,6 +1579,11 @@ int32_t NetStatsService::GetTrafficPlanInfo(int32_t simId, int32_t param, int64_
     NETMGR_LOG_I("GetTrafficPlanInfo start, simId: %{public}d, param: %{public}d",
                  simId, static_cast<int32_t>(param));
 #ifdef SUPPORT_TRAFFIC_STATISTIC
+    int32_t checkPermission = CheckNetManagerAvailable();
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        return checkPermission;
+    }
+
     if (trafficPlanService_ == nullptr) {
         NETMGR_LOG_E("trafficPlanService_ is nullptr");
         return NETMANAGER_ERR_INTERNAL;
