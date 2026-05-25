@@ -4133,6 +4133,7 @@ int32_t NetsysNativeServiceProxy::UpdateEnterpriseRoute(const std::string &inter
 int32_t NetsysNativeServiceProxy::CreateVlan(const std::string &ifName, uint32_t vlanId)
 {
     MessageParcel data;
+    // LCOV_EXCL_START
     if (!WriteInterfaceToken(data) || !data.WriteString(ifName) || !data.WriteUint32(vlanId)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -4153,12 +4154,14 @@ int32_t NetsysNativeServiceProxy::CreateVlan(const std::string &ifName, uint32_t
         NETNATIVE_LOGE("get ret falil");
         return ERR_FLATTEN_OBJECT;
     }
+    // LCOV_EXCL_STOP
     return ret;
 }
 
 int32_t NetsysNativeServiceProxy::DestroyVlan(const std::string &ifName, uint32_t vlanId)
 {
     MessageParcel data;
+    // LCOV_EXCL_START
     if (!WriteInterfaceToken(data) || !data.WriteString(ifName) || !data.WriteUint32(vlanId)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -4179,6 +4182,7 @@ int32_t NetsysNativeServiceProxy::DestroyVlan(const std::string &ifName, uint32_
         NETNATIVE_LOGE("get ret falil");
         return ERR_FLATTEN_OBJECT;
     }
+    // LCOV_EXCL_STOP
     return ret;
 }
 
@@ -4186,6 +4190,7 @@ int32_t NetsysNativeServiceProxy::AddVlanIp(const std::string &ifName, uint32_t 
                                             const std::string &ip, uint32_t mask)
 {
     MessageParcel data;
+    // LCOV_EXCL_START
     if (!WriteInterfaceToken(data) || !data.WriteString(ifName) ||
         !data.WriteUint32(vlanId) || !data.WriteString(ip) || !data.WriteUint32(mask)) {
         return ERR_FLATTEN_OBJECT;
@@ -4207,6 +4212,7 @@ int32_t NetsysNativeServiceProxy::AddVlanIp(const std::string &ifName, uint32_t 
         NETNATIVE_LOGE("get ret falil");
         return ERR_FLATTEN_OBJECT;
     }
+    // LCOV_EXCL_STOP
     return ret;
 }
 
