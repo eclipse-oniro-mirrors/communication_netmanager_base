@@ -330,6 +330,14 @@
                     }
                 },
                 {
+                    "name": "//foundation/communication/netmanager_base/frameworks/cj/statistics:cj_net_statistics_ffi",
+                    "header": {
+                        "header_files": [
+                        ],
+                        "header_base": "//foundation/communication/netmanager_base/frameworks/cj/statistics/include"
+                    }
+                },
+                {
                     "type": "so",
                     "name": "//foundation/communication/netmanager_base/common/ani_rs:ani_rs"
                 }
