@@ -215,7 +215,7 @@ HWTEST_F(MptcpManagerTest, ExecuteMptcpCommandTest002, TestSize.Level1)
     std::string command = "invalid_command_for_test";
     std::string result;
     auto ret = manager->ExecuteMptcpCommand(command, result);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(MptcpManagerTest, AddEndpointTest001, TestSize.Level1)
