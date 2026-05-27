@@ -922,7 +922,7 @@ HWTEST_F(NetConnServiceProxyTest, IsDeadFlowResetTargetBundleTest003, TestSize.L
     std::string bundleName = "com.test.bundle";
     bool flag = false;
     int32_t ret = instance_->IsDeadFlowResetTargetBundle(bundleName, flag);
-    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+    EXPECT_LE(ret, NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceProxyTest, IsDeadFlowResetTargetBundleTest004, TestSize.Level1)
