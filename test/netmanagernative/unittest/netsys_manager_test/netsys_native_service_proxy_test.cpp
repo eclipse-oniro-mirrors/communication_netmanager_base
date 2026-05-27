@@ -625,7 +625,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, GetNetworkCellularSharingTraffic001, Test
     std::string ifaceName = "virnic";
 
     int32_t ret = netsysNativeService->GetNetworkCellularSharingTraffic(traffic, ifaceName);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeServiceProxyTest, SetGetClearNetStateTrafficMap001, TestSize.Level1)
