@@ -42,15 +42,15 @@ const std::string SQL_TABLE_COLUMS = std::string(
     "INTEGER NOT NULL, monthWarningState INTEGER NOT NULL, dayNontificationState "
     "INTEGER NOT NULL, monNontificationState INTEGER NOT NULL");
 
-const std::string FILED_ICCID = "ICCID";
-const std::string FILED_SIMID = "simId";
-const std::string FILED_DISPLAY_TRAFFIC_SWITCH = "DisplayTrafficSwitch";
-const std::string FILED_UNLIMIT_TRAFFIC_SWITCH = "UnlimitTrafficSwitch";
-const std::string FILED_TRAFFIC_LIMIT = "TrafficLimit";
-const std::string FILED_START_DATE = "StartDate";
-const std::string FILED_OVER_LIMIT_BEHAVIOR = "OverLimitBehavior";
-const std::string FILED_MONTHLY_LIMIT_PERCENTAGE = "MonthlyLimitPercentage";
-const std::string FILED_DAILY_LIMIT_PERCENTAGE = "DailyLimitPercentage";
+constexpr const char *FILED_ICCID = "ICCID";
+constexpr const char *FILED_SIMID = "simId";
+constexpr const char *FILED_DISPLAY_TRAFFIC_SWITCH = "DisplayTrafficSwitch";
+constexpr const char *FILED_UNLIMIT_TRAFFIC_SWITCH = "UnlimitTrafficSwitch";
+constexpr const char *FILED_TRAFFIC_LIMIT = "TrafficLimit";
+constexpr const char *FILED_START_DATE = "StartDate";
+constexpr const char *FILED_OVER_LIMIT_BEHAVIOR = "OverLimitBehavior";
+constexpr const char *FILED_MONTHLY_LIMIT_PERCENTAGE = "MonthlyLimitPercentage";
+constexpr const char *FILED_DAILY_LIMIT_PERCENTAGE = "DailyLimitPercentage";
 } // namespace
 
 int NetStatsRDB::RdbDataOpenCallback::OnCreate(NativeRdb::RdbStore &rdbStore)
@@ -460,7 +460,7 @@ int32_t NetStatsRDB::QueryTrafficPlanInfoByIccid(const std::string &iccid, Traff
     if (rowCount == 0) {
         NETMGR_LOG_E("QueryTrafficPlanInfoByIccid: no record found");
         queryResultSet->Close();
-        return TRAFFIC_PLAN_ERR_ICCID_NOT_FOUND;
+        return TRAFFIC_PLAN_ERR_DATABASE_FAILED;
     }
 
     ret = queryResultSet->GoToFirstRow();

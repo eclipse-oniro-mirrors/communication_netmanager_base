@@ -761,6 +761,8 @@ HWTEST_F(UtNetPolicyClient, GetSelfNetworkAccessPolicy001, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
     NetAccessPolicy policy;
+    policy.allowWiFi = false;
+    policy.allowCellular = false;
     int32_t result = g_netPolicyClient->GetSelfNetworkAccessPolicy(policy);
     std::cout << "NetPolicyClient GetSelfNetworkAccessPolicy ret:" << result << std::endl;
     ASSERT_EQ(result, NETMANAGER_SUCCESS);

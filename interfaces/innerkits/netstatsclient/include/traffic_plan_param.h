@@ -27,7 +27,6 @@ namespace NetManagerStandard {
 constexpr int32_t TRAFFIC_PLAN_ERR_INVALID_PARAM = 2100001;
 constexpr int32_t TRAFFIC_PLAN_ERR_SERVICE_FAILED = 2100002;
 constexpr int32_t TRAFFIC_PLAN_ERR_DATABASE_FAILED = 2100003;
-constexpr int32_t TRAFFIC_PLAN_ERR_ICCID_NOT_FOUND = 2100004;
 
 // Traffic plan parameters enumeration
 enum class TrafficPlanParam : int32_t {
