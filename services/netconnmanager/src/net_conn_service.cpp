@@ -997,9 +997,11 @@ int32_t NetConnService::UpdateNetCapsAsync(const std::set<NetCap> &netCaps, cons
     }
     network->SetNetCaps(netCaps);
 
+#ifdef FEATURE_UPDATE_NETCAP
     supplier->UpdateNetCap(netCaps);
     std::string tab{" "};
     NETMGR_LOG_I("%{public}s\n", supplier->GetNetCapabilities().ToString(tab).c_str());
+#endif
 
     CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     FindBestNetworkForAllRequest();

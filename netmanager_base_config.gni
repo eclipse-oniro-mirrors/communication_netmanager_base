@@ -63,6 +63,7 @@ declare_args() {
   netmanager_base_enable_set_app_frozened = false
   netmanager_base_feature_enterprise_route_custom = false
   netmanager_base_fpga_mode_enable = false
+  netmanager_base_update_netcap = false
 }
 fuzz_test_path = "netmanager_base/netmanager_base"
 

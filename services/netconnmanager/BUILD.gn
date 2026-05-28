@@ -167,6 +167,10 @@ ohos_shared_library("net_conn_manager") {
     defines += [ "FEATURE_ENTERPRISE_ROUTE_CUSTOM" ]
   }
 
+  if (netmanager_base_update_netcap) {
+    defines += [ "FEATURE_UPDATE_NETCAP" ]
+  }
+
   if (factory == true) {
     defines += ["CONFIG_FACTORY_MODE"]
   }
