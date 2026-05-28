@@ -638,7 +638,7 @@ HWTEST_F(NetStatsServiceTest, SetTrafficPlanInfoTest04, TestSize.Level1)
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimIccId(_, _))
         .WillRepeatedly(DoAll(SetArgReferee<1>(iccid), Return(0)));
     int32_t ret = netStatsService.SetTrafficPlanInfo(1, 99, 1);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 }
 
 HWTEST_F(NetStatsServiceTest, SetTrafficPlanInfoTest05, TestSize.Level1)
@@ -649,7 +649,7 @@ HWTEST_F(NetStatsServiceTest, SetTrafficPlanInfoTest05, TestSize.Level1)
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimIccId(_, _))
         .WillRepeatedly(DoAll(SetArgReferee<1>(iccid), Return(0)));
     int32_t ret = netStatsService.SetTrafficPlanInfo(1, -19, 1);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 }
 
 HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest01, TestSize.Level1)
@@ -673,25 +673,25 @@ HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest02, TestSize.Level1)
 HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest03, TestSize.Level1)
 {
     NetStatsService netStatsService;
-    std::u16string iccid = {u"1234564654651"};
+    std::u16string iccid = {u"1234564654651123"};
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSlotId(_)).WillRepeatedly(Return(0));
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimIccId(_, _))
         .WillRepeatedly(DoAll(SetArgReferee<1>(iccid), Return(0)));
     int64_t value = 0;
     int32_t ret = netStatsService.GetTrafficPlanInfo(1, 1, value);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, TRAFFIC_PLAN_ERR_DATABASE_FAILED);
 }
 
 HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest04, TestSize.Level1)
 {
     NetStatsService netStatsService;
-    std::u16string iccid = {u"1234564654651"};
+    std::u16string iccid = {u"1234564654651123"};
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSlotId(_)).WillRepeatedly(Return(0));
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimIccId(_, _))
         .WillRepeatedly(DoAll(SetArgReferee<1>(iccid), Return(0)));
     int64_t value = 0;
     int32_t ret = netStatsService.GetTrafficPlanInfo(1, -1, value);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 }
 
 HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest05, TestSize.Level1)
@@ -703,7 +703,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest05, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgReferee<1>(iccid), Return(0)));
     int64_t value = 0;
     int32_t ret = netStatsService.GetTrafficPlanInfo(1, 99, value);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 }
 #endif
 } // namespace NetManagerStandard

@@ -91,5 +91,11 @@ HWTEST_F(NetManagerPermissionTest, CheckNetSysInternalPermissionTest002, TestSiz
     auto ret = NetManagerPermission::CheckNetSysInternalPermission({"ohos.permission.MANAGE_VPN"});
     EXPECT_FALSE(ret);
 }
+
+HWTEST_F(NetManagerPermissionTest, GetApiVersionTest001, TestSize.Level1)
+{
+    auto ret = NetManagerPermission::GetApiVersion();
+    EXPECT_EQ(ret, -1);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

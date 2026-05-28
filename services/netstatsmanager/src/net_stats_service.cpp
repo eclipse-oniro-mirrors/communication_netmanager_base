@@ -1488,18 +1488,21 @@ int32_t NetStatsService::SetCalibrationTraffic(uint32_t simId, int64_t remaining
         return checkPermission;
     }
 
+    if (!NetStatsUtils::IsSimIdValid(simId)) {
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+
     if (remainingData > 0 && static_cast<uint64_t>(remainingData) > totalMonthlyData) {
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-    // 1、触发网卡cache
+
     netStatsCached_->CacheIfaceStats();
-    // 2、更新校准数据 (带总额)
     uint64_t usedTraffic = 0;
     if (totalMonthlyData != UINT64_MAX) {
         usedTraffic = totalMonthlyData - remainingData;
         netStatsCalibrate_->UpdateCalibrationInfo(simId, usedTraffic);
     }
-    // 3、检测流量超限。触发流量超限提醒  + 更新校准数据 (不带总额) —— 要放进ffrt队列
+
 #ifndef UNITTEST_FORBID_FFRT
     if (!trafficPlanFfrtQueue_) {
         return NETMANAGER_ERR_INTERNAL;
@@ -1512,14 +1515,13 @@ int32_t NetStatsService::SetCalibrationTraffic(uint32_t simId, int64_t remaining
         }
         if (totalMonthlyData == UINT64_MAX && infoPtr) {
             uint64_t usedTraffic = infoPtr->trafficLimit - remainingData;
-            if (remainingData > 0 &&
-                infoPtr->trafficLimit < static_cast<uint64_t>(remainingData)) {
+            if (remainingData > 0 && infoPtr->trafficLimit < static_cast<uint64_t>(remainingData)) {
                 usedTraffic = 0;
             }
             netStatsCalibrate_->UpdateCalibrationInfo(simId, usedTraffic);
         }
-        trafficPlanService_->ResetNotifyState(simId);
 
+        trafficPlanService_->ResetNotifyState(simId);
         UpdateHistoryData(simId);
         UpdateBpfMap(simId);
 #ifndef UNITTEST_FORBID_FFRT
@@ -1531,7 +1533,6 @@ int32_t NetStatsService::SetCalibrationTraffic(uint32_t simId, int64_t remaining
     return NETMANAGER_ERR_CAPABILITY_NOT_SUPPORTED;
 #endif // SUPPORT_TRAFFIC_STATISTIC
 }
-
 
 int32_t NetStatsService::SetTrafficPlanInfo(int32_t simId, int32_t param, int64_t value)
 {
