@@ -61,12 +61,12 @@ public:
 void NetStatsServiceTest::SetUpTestCase()
 {
     callback_ = new (std::nothrow) NetStatsCallbackTest();
-    DelayedSingleton<NetStatsService>::GetInstance()->OnStart();
+    NetStatsService::GetInstance()->OnStart();
 }
 
 void NetStatsServiceTest::TearDownTestCase()
 {
-    DelayedSingleton<NetStatsService>::GetInstance()->OnStop();
+    NetStatsService::GetInstance()->OnStop();
 }
 
 void NetStatsServiceTest::SetUp() {}
@@ -80,7 +80,7 @@ void NetStatsServiceTest::TearDown() {}
  */
 HWTEST_F(NetStatsServiceTest, DumpTest001, TestSize.Level1)
 {
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->Dump(TEST_FD, {});
+    int32_t ret = NetStatsService::GetInstance()->Dump(TEST_FD, {});
     EXPECT_GE(ret, -1);
 }
 
@@ -91,7 +91,7 @@ HWTEST_F(NetStatsServiceTest, DumpTest001, TestSize.Level1)
  */
 HWTEST_F(NetStatsServiceTest, RegisterNetStatsCallbackTest001, TestSize.Level1)
 {
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->RegisterNetStatsCallback(callback_);
+    int32_t ret = NetStatsService::GetInstance()->RegisterNetStatsCallback(callback_);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -102,7 +102,7 @@ HWTEST_F(NetStatsServiceTest, RegisterNetStatsCallbackTest001, TestSize.Level1)
  */
 HWTEST_F(NetStatsServiceTest, RegisterNetStatsCallbackTest002, TestSize.Level1)
 {
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->RegisterNetStatsCallback(nullptr);
+    int32_t ret = NetStatsService::GetInstance()->RegisterNetStatsCallback(nullptr);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
@@ -113,7 +113,7 @@ HWTEST_F(NetStatsServiceTest, RegisterNetStatsCallbackTest002, TestSize.Level1)
  */
 HWTEST_F(NetStatsServiceTest, UnregisterNetStatsCallbackTest001, TestSize.Level1)
 {
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->UnregisterNetStatsCallback(callback_);
+    int32_t ret = NetStatsService::GetInstance()->UnregisterNetStatsCallback(callback_);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -124,7 +124,7 @@ HWTEST_F(NetStatsServiceTest, UnregisterNetStatsCallbackTest001, TestSize.Level1
  */
 HWTEST_F(NetStatsServiceTest, UnregisterNetStatsCallbackTest002, TestSize.Level1)
 {
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->UnregisterNetStatsCallback(nullptr);
+    int32_t ret = NetStatsService::GetInstance()->UnregisterNetStatsCallback(nullptr);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
@@ -136,7 +136,7 @@ HWTEST_F(NetStatsServiceTest, UnregisterNetStatsCallbackTest002, TestSize.Level1
 HWTEST_F(NetStatsServiceTest, GetIfaceRxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetIfaceRxBytes(stats, ETH_IFACE_NAME);
+    int32_t ret = NetStatsService::GetInstance()->GetIfaceRxBytes(stats, ETH_IFACE_NAME);
     EXPECT_GE(stats, static_cast<uint64_t>(0));
     DTEST_LOG << "Ret" << ret << std::endl;
 }
@@ -149,7 +149,7 @@ HWTEST_F(NetStatsServiceTest, GetIfaceRxBytesTest001, TestSize.Level1)
 HWTEST_F(NetStatsServiceTest, GetIfaceTxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetIfaceTxBytes(stats, ETH_IFACE_NAME);
+    int32_t ret = NetStatsService::GetInstance()->GetIfaceTxBytes(stats, ETH_IFACE_NAME);
     EXPECT_GE(stats, static_cast<uint64_t>(0));
     DTEST_LOG << "Ret" << ret << std::endl;
 }
@@ -163,7 +163,7 @@ HWTEST_F(NetStatsServiceTest, GetCellularRxBytesTest001, TestSize.Level1)
 {
     std::list<std::string> ifaceNames;
     uint64_t stats = 0;
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetCellularRxBytes(stats);
+    int32_t ret = NetStatsService::GetInstance()->GetCellularRxBytes(stats);
     GetIfaceNamesFromManager(ifaceNames);
     ASSERT_FALSE(ifaceNames.empty());
     EXPECT_GE(stats, static_cast<uint64_t>(0));
@@ -178,7 +178,7 @@ HWTEST_F(NetStatsServiceTest, GetCellularTxBytesTest001, TestSize.Level1)
 {
     std::list<std::string> ifaceNames;
     uint64_t stats = 0;
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetCellularTxBytes(stats);
+    int32_t ret = NetStatsService::GetInstance()->GetCellularTxBytes(stats);
     GetIfaceNamesFromManager(ifaceNames);
     ASSERT_FALSE(ifaceNames.empty());
     EXPECT_GE(stats, static_cast<uint64_t>(0));
@@ -192,7 +192,7 @@ HWTEST_F(NetStatsServiceTest, GetCellularTxBytesTest001, TestSize.Level1)
 HWTEST_F(NetStatsServiceTest, GetAllRxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetAllRxBytes(stats);
+    int32_t ret = NetStatsService::GetInstance()->GetAllRxBytes(stats);
     EXPECT_GE(stats, static_cast<uint64_t>(0));
     DTEST_LOG << "Ret" << ret << std::endl;
 }
@@ -205,7 +205,7 @@ HWTEST_F(NetStatsServiceTest, GetAllRxBytesTest001, TestSize.Level1)
 HWTEST_F(NetStatsServiceTest, GetAllTxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetAllTxBytes(stats);
+    int32_t ret = NetStatsService::GetInstance()->GetAllTxBytes(stats);
     EXPECT_GE(stats, static_cast<uint64_t>(0));
     DTEST_LOG << "Ret" << ret << std::endl;
 }
@@ -218,7 +218,7 @@ HWTEST_F(NetStatsServiceTest, GetAllTxBytesTest001, TestSize.Level1)
 HWTEST_F(NetStatsServiceTest, GetUidRxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetUidRxBytes(stats, TEST_UID);
+    int32_t ret = NetStatsService::GetInstance()->GetUidRxBytes(stats, TEST_UID);
     EXPECT_GE(stats, static_cast<uint64_t>(0));
     DTEST_LOG << "Ret" << ret << std::endl;
 }
@@ -231,7 +231,7 @@ HWTEST_F(NetStatsServiceTest, GetUidRxBytesTest001, TestSize.Level1)
 HWTEST_F(NetStatsServiceTest, GetUidTxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetUidTxBytes(stats, TEST_UID);
+    int32_t ret = NetStatsService::GetInstance()->GetUidTxBytes(stats, TEST_UID);
     EXPECT_GE(stats, static_cast<uint64_t>(0));
     DTEST_LOG << "Ret" << ret << std::endl;
 }
@@ -245,7 +245,7 @@ HWTEST_F(NetStatsServiceTest, GetIfaceStatsDetail001, TestSize.Level1)
 {
     NetStatsInfo info;
     std::string iface = "wlan0";
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetIfaceStatsDetail(iface, 0, UINT32_MAX, info);
+    int32_t ret = NetStatsService::GetInstance()->GetIfaceStatsDetail(iface, 0, UINT32_MAX, info);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -260,7 +260,7 @@ HWTEST_F(NetStatsServiceTest, GetUidStatsDetail001, TestSize.Level1)
     std::string iface = "wlan0";
     uint32_t uid = 1234;
     int32_t ret =
-        DelayedSingleton<NetStatsService>::GetInstance()->GetUidStatsDetail(iface, uid, 0, UINT32_MAX, info);
+        NetStatsService::GetInstance()->GetUidStatsDetail(iface, uid, 0, UINT32_MAX, info);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -270,7 +270,7 @@ HWTEST_F(NetStatsServiceTest, GetUidStatsDetail002, TestSize.Level1)
     std::string iface = "wlan0";
     uint32_t uid = 2132132;
     int32_t ret =
-        DelayedSingleton<NetStatsService>::GetInstance()->GetUidStatsDetail(iface, uid, 0, UINT32_MAX, info);
+        NetStatsService::GetInstance()->GetUidStatsDetail(iface, uid, 0, UINT32_MAX, info);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 /**
@@ -282,7 +282,7 @@ HWTEST_F(NetStatsServiceTest, UpdateIfacesStats, TestSize.Level1)
 {
     NetStatsInfo info;
     std::string iface = "wlan0";
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->UpdateIfacesStats(iface, 0, UINT32_MAX, info);
+    int32_t ret = NetStatsService::GetInstance()->UpdateIfacesStats(iface, 0, UINT32_MAX, info);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -301,7 +301,7 @@ HWTEST_F(NetStatsServiceTest, ResetFactory001, TestSize.Level1)
     info.rxPackets_ = 1000;
     info.txPackets_ = 1100;
 
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->ResetFactory();
+    int32_t ret = NetStatsService::GetInstance()->ResetFactory();
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -320,7 +320,7 @@ HWTEST_F(NetStatsServiceTest, UpdateStatsData001, TestSize.Level1)
     info.rxPackets_ = 1000;
     info.txPackets_ = 1100;
 
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->UpdateStatsData();
+    int32_t ret = NetStatsService::GetInstance()->UpdateStatsData();
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -334,28 +334,28 @@ HWTEST_F(NetStatsServiceTest, UpdateStatsDataInner001, TestSize.Level1)
     info.rxPackets_ = 1000;
     info.txPackets_ = 1100;
 
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->UpdateStatsDataInner();
+    int32_t ret = NetStatsService::GetInstance()->UpdateStatsDataInner();
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsServiceTest, GetCookieRxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetCookieRxBytes(stats, TEST_COOKIE);
+    int32_t ret = NetStatsService::GetInstance()->GetCookieRxBytes(stats, TEST_COOKIE);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetStatsServiceTest, GetCookieTxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetCookieTxBytes(stats, TEST_COOKIE);
+    int32_t ret = NetStatsService::GetInstance()->GetCookieTxBytes(stats, TEST_COOKIE);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetStatsServiceTest, GetAllSimStatsInfoTest001, TestSize.Level1)
 {
     std::vector<NetStatsInfo> infos;
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetAllSimStatsInfo(infos);
+    int32_t ret = NetStatsService::GetInstance()->GetAllSimStatsInfo(infos);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -363,7 +363,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByNetworkTest001, TestSize.Level1)
 {
     std::unordered_map<uint32_t, NetStatsInfo> infos;
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetTrafficStatsByNetwork(infos, *network);
+    int32_t ret = NetStatsService::GetInstance()->GetTrafficStatsByNetwork(infos, *network);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -372,28 +372,28 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest001, TestSize.Level
     std::vector<NetStatsInfoSequence> infos;
     uint32_t uid = 1;
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetTrafficStatsByUidNetwork(infos, uid, *network);
+    int32_t ret = NetStatsService::GetInstance()->GetTrafficStatsByUidNetwork(infos, uid, *network);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsServiceTest, SetAppStats001, TestSize.Level1)
 {
     PushStatsInfo info;
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->SetAppStats(info);
+    int32_t ret = NetStatsService::GetInstance()->SetAppStats(info);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsServiceTest, OnStartTest001, TestSize.Level1)
 {
-    DelayedSingleton<NetStatsService>::GetInstance()->state_ =
-        DelayedSingleton<NetStatsService>::GetInstance()->STATE_RUNNING;
-    DelayedSingleton<NetStatsService>::GetInstance()->OnStart();
-    EXPECT_EQ(DelayedSingleton<NetStatsService>::GetInstance()->state_, 1);
+    NetStatsService::GetInstance()->state_ =
+        NetStatsService::GetInstance()->STATE_RUNNING;
+    NetStatsService::GetInstance()->OnStart();
+    EXPECT_EQ(NetStatsService::GetInstance()->state_, 1);
 }
 
 HWTEST_F(NetStatsServiceTest, GetIfaceStatsDetailTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     const std::string iface = "wlan0";
     uint64_t start = 1;
     uint64_t end = 0;
@@ -413,7 +413,7 @@ HWTEST_F(NetStatsServiceTest, GetIfaceStatsDetailTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, GetUidStatsDetailTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     const std::string iface = "wlan0";
     uint32_t uid = 1;
     uint64_t start = 1;
@@ -434,7 +434,7 @@ HWTEST_F(NetStatsServiceTest, GetUidStatsDetailTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, UpdateIfacesStatsTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     const std::string iface = "wlan0";
     uint64_t start = 1;
     uint64_t end = 0;
@@ -449,7 +449,7 @@ HWTEST_F(NetStatsServiceTest, UpdateIfacesStatsTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, UpdateStatsDataTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     netStatsService->netStatsCached_ = nullptr;
     int32_t ret = netStatsService->UpdateStatsData();
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
@@ -459,7 +459,7 @@ HWTEST_F(NetStatsServiceTest, UpdateStatsDataTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, GetAllStatsInfoTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     NetStatsInfo netStatsInfo;
     std::vector<NetStatsInfo> infos = {netStatsInfo};
     netStatsService->netStatsCached_ = nullptr;
@@ -473,7 +473,7 @@ HWTEST_F(NetStatsServiceTest, GetAllStatsInfoTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, GetTrafficStatsByNetworkTest002, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     NetStatsInfo netStatsInfo;
     std::unordered_map<uint32_t, NetStatsInfo> infos = {{1, netStatsInfo}};
     const sptr<NetStatsNetwork> network1 = nullptr;
@@ -496,7 +496,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByNetworkTest002, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, GetTrafficStatsByNetworkTest003, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     NetStatsInfo netStatsInfo;
     std::unordered_map<uint32_t, NetStatsInfo> infos = {{1, netStatsInfo}};
     uint32_t uid = 1;
@@ -531,7 +531,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByNetworkTest003, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest002, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     std::vector<NetStatsInfoSequence> infos = {};
     uint32_t uid = 1;
     const sptr<NetStatsNetwork> network1 = nullptr;
@@ -554,7 +554,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest002, TestSize.Level
 
 HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest003, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     std::vector<NetStatsInfoSequence> infos = {};
     uint32_t uid = 1;
     netStatsService->netStatsCached_ = std::make_unique<NetStatsCached>();
@@ -592,7 +592,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest003, TestSize.Level
 
 HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest004, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     std::vector<NetStatsInfoSequence> infos = {};
     uint32_t uid = 1;
     netStatsService->netStatsCached_ = std::make_unique<NetStatsCached>();
@@ -605,7 +605,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest004, TestSize.Level
 
 HWTEST_F(NetStatsServiceTest, SetAppStatsTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     const PushStatsInfo info{};
     netStatsService->netStatsCached_ = nullptr;
     int32_t ret = netStatsService->SetAppStats(info);
@@ -619,12 +619,12 @@ HWTEST_F(NetStatsServiceTest, SetAppStatsTest001, TestSize.Level1)
  */
 HWTEST_F(NetStatsServiceTest, StartSysTimerTest001, TestSize.Level1)
 {
-    DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_ = 100;
-    DelayedSingleton<NetStatsService>::GetInstance()->StartSysTimer();
-    EXPECT_EQ(DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_, 100);
-    DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_ = 0;
-    DelayedSingleton<NetStatsService>::GetInstance()->StartSysTimer();
-    EXPECT_EQ(DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_, 0);
+    NetStatsService::GetInstance()->netStatsSysTimerId_ = 100;
+    NetStatsService::GetInstance()->StartSysTimer();
+    EXPECT_EQ(NetStatsService::GetInstance()->netStatsSysTimerId_, 100);
+    NetStatsService::GetInstance()->netStatsSysTimerId_ = 0;
+    NetStatsService::GetInstance()->StartSysTimer();
+    EXPECT_EQ(NetStatsService::GetInstance()->netStatsSysTimerId_, 0);
 }
 
 /**
@@ -634,11 +634,11 @@ HWTEST_F(NetStatsServiceTest, StartSysTimerTest001, TestSize.Level1)
  */
 HWTEST_F(NetStatsServiceTest, StopSysTimerTest001, TestSize.Level1)
 {
-    DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_ = 0;
-    DelayedSingleton<NetStatsService>::GetInstance()->StopSysTimer();
-    DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_ = 1000;
-    DelayedSingleton<NetStatsService>::GetInstance()->StopSysTimer();
-    EXPECT_EQ(DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_, 0);
+    NetStatsService::GetInstance()->netStatsSysTimerId_ = 0;
+    NetStatsService::GetInstance()->StopSysTimer();
+    NetStatsService::GetInstance()->netStatsSysTimerId_ = 1000;
+    NetStatsService::GetInstance()->StopSysTimer();
+    EXPECT_EQ(NetStatsService::GetInstance()->netStatsSysTimerId_, 0);
 }
 
 /**
@@ -648,22 +648,22 @@ HWTEST_F(NetStatsServiceTest, StopSysTimerTest001, TestSize.Level1)
  */
 HWTEST_F(NetStatsServiceTest, ModifySysTimerTest001, TestSize.Level1)
 {
-    DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_ = 0;
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->ModifySysTimer();
+    NetStatsService::GetInstance()->netStatsSysTimerId_ = 0;
+    int32_t ret = NetStatsService::GetInstance()->ModifySysTimer();
     EXPECT_EQ(ret, NETMANAGER_ERROR);
-    DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_ = 1000;
+    NetStatsService::GetInstance()->netStatsSysTimerId_ = 1000;
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsServiceTest, OnAddSystemAbilityTest001, TestSize.Level1)
 {
-    DelayedSingleton<NetStatsService>::GetInstance()->OnAddSystemAbility(TIME_SERVICE_ID, "10");
-    EXPECT_NE(DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_, 0);
+    NetStatsService::GetInstance()->OnAddSystemAbility(TIME_SERVICE_ID, "10");
+    EXPECT_NE(NetStatsService::GetInstance()->netStatsSysTimerId_, 0);
 }
 
 HWTEST_F(NetStatsServiceTest, InitPrivateUserIdTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     netStatsService->InitPrivateUserId();
     int32_t userId = netStatsService->netStatsCached_->GetCurPrivateUserId();
     EXPECT_EQ(userId, 100);
@@ -671,7 +671,7 @@ HWTEST_F(NetStatsServiceTest, InitPrivateUserIdTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     AccountSA::OsAccountState state = AccountSA::OsAccountState::CREATED;
     int32_t userId = 101;
     int32_t ret = netStatsService->ProcessOsAccountChanged(userId, state);
@@ -689,7 +689,7 @@ HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest002, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     AccountSA::OsAccountState state = AccountSA::OsAccountState::SWITCHED;
     int32_t userId = 101;
     netStatsService->netStatsCached_->SetCurPrivateUserId(106);
@@ -707,7 +707,7 @@ HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest002, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     
     int32_t curUserId = -1;
     int32_t ret1 = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
@@ -735,7 +735,7 @@ HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest001, TestSize.Level1
 
 HWTEST_F(NetStatsServiceTest, GetHistoryDataTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     std::vector<NetStatsInfo> infos;
     uint32_t start = 1745847234;
     uint32_t end = 1745847823;
@@ -753,7 +753,7 @@ HWTEST_F(NetStatsServiceTest, GetHistoryDataTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     int32_t defaultUserId = -1;
     AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(defaultUserId);
     std::vector<NetStatsInfoSequence> infos;
@@ -805,11 +805,11 @@ HWTEST_F(NetStatsServiceTest, CalculateTrafficAvailableTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, UpdateBpfMapTimerTest001, TestSize.Level1)
 {
-    auto netStatsService1 = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService1 = NetStatsService::GetInstance();
     netStatsService1->trafficPlanFfrtQueue_ = nullptr;
     netStatsService1->UpdateBpfMapTimer();
 
-    auto netStatsService2 = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService2 = NetStatsService::GetInstance();
     netStatsService2->trafficPlanFfrtQueue_ = nullptr;
     netStatsService2->UpdateBpfMapTimer();
     EXPECT_EQ(netStatsService2->trafficPlanService_->trafficPlanInfoMap_.size(), 0);
@@ -856,7 +856,7 @@ HWTEST_F(NetStatsServiceTest, AddSimIdInTwoMapTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, SetTrafficMapMaxValueTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     netStatsService->SetTrafficMapMaxValue(0);
     netStatsService->SetTrafficMapMaxValue(1);
     netStatsService->SetTrafficMapMaxValue(2);

@@ -22,13 +22,29 @@ namespace NetManagerStandard {
 int32_t NetStatsServiceCommon::GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end,
                                                    NetStatsInfo &info)
 {
-    return DelayedSingleton<NetStatsService>::GetInstance()->GetIfaceStatsDetail(iface, start, end, info);
+    return NetStatsService::GetInstance()->GetIfaceStatsDetail(iface, start, end, info);
 }
 
 int32_t NetStatsServiceCommon::ResetStatsFactory()
 {
-    DelayedSingleton<NetStatsService>::GetInstance()->ResetFactory();
+    NetStatsService::GetInstance()->ResetFactory();
     return 0;
 }
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+bool NetStatsServiceCommon::GetDailyMarkBySimId(int32_t simId, uint16_t &dailyMark)
+{
+    return NetStatsService::GetInstance()->GetDailyMarkBySimId(simId, dailyMark);
+}
+
+bool NetStatsServiceCommon::GetMonthlyLimitBySimId(int32_t simId, uint64_t &monthlyLimit)
+{
+    return NetStatsService::GetInstance()->GetMonthlyLimitBySimId(simId, monthlyLimit);
+}
+
+bool NetStatsServiceCommon::GetMonthlyMarkBySimId(int32_t simId, uint16_t &monthlyMark)
+{
+    return NetStatsService::GetInstance()->GetMonthlyMarkBySimId(simId, monthlyMark);
+}
+#endif
 } // namespace NetManagerStandard
 } // namespace OHOS

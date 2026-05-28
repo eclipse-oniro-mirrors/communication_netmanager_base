@@ -24,6 +24,11 @@ class NetStatsServiceCommon : public NetStatsBaseService {
 public:
     int32_t GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end, NetStatsInfo &info) override;
     int32_t ResetStatsFactory() override;
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+    bool GetDailyMarkBySimId(int32_t simId, uint16_t &dailyMark) override;
+    bool GetMonthlyLimitBySimId(int32_t simId, uint64_t &monthlyLimit) override;
+    bool GetMonthlyMarkBySimId(int32_t simId, uint16_t &monthlyMark) override;
+#endif
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

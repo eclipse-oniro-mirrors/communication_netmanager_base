@@ -77,7 +77,11 @@ public:
     bool RegisterNetRequestControlFunc(std::function<bool(const NetRequest&)> func);
     bool GetAllNetRequest(std::vector<NetRequest>& netRequests);
     bool UpdateNetRequestControlState(const std::vector<NetRequest>& netRequests);
-
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+    bool GetDailyMarkBySimId(int32_t simId, uint16_t &dailyMark);
+    bool GetMonthlyLimitBySimId(int32_t simId, uint64_t &monthlyLimit);
+    bool GetMonthlyMarkBySimId(int32_t simId, uint16_t &monthlyMark);
+#endif
 private:
     sptr<NetConnBaseService> connService_ = nullptr;
     sptr<NetStatsBaseService> statsService_ = nullptr;

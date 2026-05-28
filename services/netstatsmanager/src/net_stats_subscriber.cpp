@@ -25,7 +25,7 @@ void NetStatsAccountSubscriber::OnStateChanged(const AccountSA::OsAccountStateDa
 {
     NETMGR_LOG_E("State: %{public}d, fromId: %{public}d, toId: %{public}d, callback is nullptr: %{public}d", data.state,
                  data.fromId, data.toId, data.callback == nullptr);
-    DelayedSingleton<NetStatsService>::GetInstance()->ProcessOsAccountChanged(data.toId, data.state);
+    NetStatsService::GetInstance()->ProcessOsAccountChanged(data.toId, data.state);
 }
 void NetStatsAccountSubscriber::OnAccountsChanged(const int &id) {}
 void NetStatsAccountSubscriber::OnAccountsSwitch(const int &newId, const int &oldId) {}

@@ -24,28 +24,24 @@
 #include "notification_helper.h"
 #include "number_format.h"
 
+#include "net_stats_notification_interface.h"
+
 static const int32_t COMM_NETSYS_NATIVE_SYS_ABILITY_ID = 1158;
 
-typedef void (*NetMgrStatsLimitNtfCallback)(int notificationId);
-
-enum NetMgrStatsLimitNotificationId : int {
-    NETMGR_STATS_LIMIT_DAY = 115800,
-    NETMGR_STATS_LIMIT_MONTH = 115801,
-    NETMGR_STATS_ALERT_MONTH = 115802,
-};
 namespace OHOS {
 namespace NetManagerStandard {
-class NetMgrNetStatsLimitNotification {
+class NetMgrNetStatsLimitNotification : public INetMgrStatsLimitNotification {
 
 public:
-    static NetMgrNetStatsLimitNotification &GetInstance(void);
-
-    void PublishNetStatsLimitNotification(int notificationId, int32_t simId, bool isDaulCard);
-    void RegNotificationCallback(NetMgrStatsLimitNtfCallback callback);
-
-private:
     NetMgrNetStatsLimitNotification();
     ~NetMgrNetStatsLimitNotification();
+    static std::shared_ptr<NetMgrNetStatsLimitNotification> GetInstance();
+    static std::shared_ptr<INetMgrStatsLimitNotification> GetInstancePtr(void);
+
+    void PublishNetStatsLimitNotification(int notificationId, int32_t simId, bool isDaulCard) override;
+    void RegNotificationCallback(NetMgrStatsLimitNtfCallback callback) override;
+
+private:
     NetMgrNetStatsLimitNotification(const NetMgrNetStatsLimitNotification&) = delete;
     NetMgrNetStatsLimitNotification &operator=(const NetMgrNetStatsLimitNotification&) = delete;
 
@@ -58,20 +54,23 @@ private:
     std::string GetMonthNotificationText();
     std::string GetMonthAlertText();
     std::string GetNotificationTitle(std::string &notificationType);
-    bool SetTitleAndText(int notificationId,
-        std::shared_ptr<Notification::NotificationNormalContent> content, bool isDaulCard);
+    bool SetTitleAndText(int notificationId, std::shared_ptr<Notification::NotificationNormalContent> content,
+                         bool isDaulCard);
     std::string GetTrafficNum(double traffic);
 
     void SetWantAgent(Notification::NotificationRequest &request);
 
-    std::shared_ptr<Media::PixelMap> netmgrStatsLimitIconPixelMap_  {};
+    std::shared_ptr<Media::PixelMap> netmgrStatsLimitIconPixelMap_{};
     std::map<std::string, std::string> resourceMap;
     std::map<std::string, std::string> languageMap;
     std::string localeBaseName;
     std::mutex mutex_;
     const int NETMGR_TRAFFIC_NTF_CONTROL_FLAG = 0;
     int32_t simId_ = 0;
+
+    static std::mutex instanceLock_;
+    static std::shared_ptr<NetMgrNetStatsLimitNotification> instance_;
 };
-}  // namespace NetManagerStandard
-}  // namespace OHOS
-#endif  // NETMGR_LIMIT_NOTIFICATION_H
+} // namespace NetManagerStandard
+} // namespace OHOS
+#endif // NETMGR_LIMIT_NOTIFICATION_H

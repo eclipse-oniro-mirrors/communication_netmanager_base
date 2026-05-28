@@ -294,5 +294,30 @@ bool NetManagerCenter::UpdateNetRequestControlState(const std::vector<NetRequest
     }
     return connService_->UpdateNetRequestControlState(netRequests);
 }
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+bool NetManagerCenter::GetDailyMarkBySimId(int32_t simId, uint16_t &dailyMark)
+{
+    if (statsService_ == nullptr) {
+        return false;
+    }
+    return statsService_->GetDailyMarkBySimId(simId, dailyMark);
+}
+
+bool NetManagerCenter::GetMonthlyLimitBySimId(int32_t simId, uint64_t &monthlyLimit)
+{
+    if (statsService_ == nullptr) {
+        return false;
+    }
+    return statsService_->GetMonthlyLimitBySimId(simId, monthlyLimit);
+}
+
+bool NetManagerCenter::GetMonthlyMarkBySimId(int32_t simId, uint16_t &monthlyMark)
+{
+    if (statsService_ == nullptr) {
+        return false;
+    }
+    return statsService_->GetMonthlyMarkBySimId(simId, monthlyMark);
+}
+#endif
 } // namespace NetManagerStandard
 } // namespace OHOS
