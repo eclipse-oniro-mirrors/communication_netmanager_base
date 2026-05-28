@@ -168,7 +168,6 @@
       "OHOS::NetManagerStandard::NetsysNativeClient::StartDnsProxyListen()";
       "OHOS::NetManagerStandard::NetsysNativeClient::UnregisterDnsResultCallback(OHOS::sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> const&)";
       "OHOS::NetManagerStandard::NetsysController::NetworkAddRoutes(int, std::__h::vector<OHOS::nmd::NetworkRouteInfo, std::__h::allocator<OHOS::nmd::NetworkRouteInfo>> const&)";
-      "OHOS::NetManagerStandard::NetsysController::UnRegisterNetsysTrafficCallback(OHOS::sptr<OHOS::NetsysNative::INetsysTrafficCallback> const&)";
     };
   local:
    *;
