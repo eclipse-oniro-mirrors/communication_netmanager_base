@@ -43,7 +43,8 @@ if (netmanager_base_enable_traffic_statistic) {
 
     deps = [
         "$INNERKITS_ROOT/netstatsclient:netstats_service_interface_stub",
-        "$NETCONNMANAGER_COMMON_DIR:net_service_common"
+        "$NETCONNMANAGER_COMMON_DIR:net_service_common",
+        "$INNERKITS_ROOT/netstatsclient:net_stats_parcel",
     ]
 
     cflags = common_cflags
