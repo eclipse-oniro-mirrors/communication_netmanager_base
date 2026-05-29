@@ -1740,6 +1740,7 @@ bool NetStatsService::CellularDataStateChangedFfrt(int32_t slotId, int32_t dataS
 
     netStatsCalibrate_->InitCalibrationInfo(simId);
     trafficPlanService_->InitTrafficPlanInfo(simId);
+    trafficPlanService_->UpdateNetStatsToMapFromDB(simId);
 
     if (dataState != static_cast<int32_t>(Telephony::DataConnectState::DATA_STATE_CONNECTED)) {
         uint64_t ifIndex = UINT64_MAX;
