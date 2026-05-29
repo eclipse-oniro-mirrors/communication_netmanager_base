@@ -53,7 +53,7 @@
 #include "core_service_client.h"
 #include "net_conn_client.h"
 #include "cellular_data_types.h"
-#include "net_stats_notification.h"
+#include "net_stats_limit_notification_adapter.h"
 #include "net_stats_rdb.h"
 #include "telephony_observer_broker.h"
 #include "telephony_observer_client.h"
@@ -115,7 +115,7 @@ constexpr const char *NET_STATS_CALL_INFO_KEY = "NET_STATS_CALL_INFO";
 constexpr int32_t API_VERSION_26 = 26;
 } // namespace
 const bool REGISTER_LOCAL_RESULT =
-    SystemAbility::MakeAndRegisterAbility(DelayedSingleton<NetStatsService>::GetInstance().get());
+    SystemAbility::MakeAndRegisterAbility(NetStatsService::GetInstance().get());
 
 NetStatsService::NetStatsService()
     : SystemAbility(COMM_NET_STATS_MANAGER_SYS_ABILITY_ID, true), registerToService_(false), state_(STATE_STOPPED)
@@ -134,6 +134,21 @@ NetStatsService::NetStatsService()
 }
 
 NetStatsService::~NetStatsService() = default;
+
+std::mutex NetStatsService::instanceLock_;
+std::shared_ptr<NetStatsService> NetStatsService::instance_ = nullptr;
+
+std::shared_ptr<NetStatsService> NetStatsService::GetInstance()
+{
+    if (instance_ == nullptr) {
+        std::lock_guard<std::mutex> lockGuard(instanceLock_);
+        if (instance_ == nullptr) {
+            instance_ = std::make_shared<NetStatsService>();
+            return instance_;
+        }
+    }
+    return instance_;
+}
 
 // LCOV_EXCL_START
 void NetStatsService::OnStart()
@@ -530,7 +545,7 @@ bool NetStatsService::Init()
     }
     if (!registerToService_) {
 #ifndef NETMANAGER_TEST
-        if (!Publish(DelayedSingleton<NetStatsService>::GetInstance().get())) {
+        if (!Publish(NetStatsService::GetInstance().get())) {
             NETMGR_LOG_E("Register to sa manager failed");
             return false;
         }
@@ -2297,7 +2312,7 @@ int32_t TrafficObserver::OnExceedTrafficLimits(int8_t &flag)
         return -1;
     }
 
-    DelayedSingleton<NetStatsService>::GetInstance()->NotifyTrafficAlertFfrt(simId, trafficFlag);
+    NetStatsService::GetInstance()->NotifyTrafficAlertFfrt(simId, trafficFlag);
     return 0;
 }
 
@@ -2460,8 +2475,9 @@ void NetStatsService::DealDayNotification(int32_t simId, bool isDualCard)
     if (!trafficPlaninfoPtr) {
         return;
     }
-    NetMgrNetStatsLimitNotification::GetInstance().PublishNetStatsLimitNotification(NETMGR_STATS_LIMIT_DAY,
-                                                                                    simId, isDualCard);
+    if (g_registerNotificationOps(gNetmgrStatsLmtNtf_)) {
+        gNetmgrStatsLmtNtf_->PublishNetStatsLimitNotification(NETMGR_STATS_LIMIT_DAY, simId, isDualCard);
+    }
     trafficPlaninfoPtr->lastDayNotifyTime = NetStatsUtils::GetNowTimestamp();
     trafficPlanService_->UpdateTrafficLimitDate(simId);
     NETMGR_LOG_I("update DayNotification time:%{public}d", trafficPlaninfoPtr->lastDayNotifyTime);
@@ -2474,8 +2490,9 @@ void NetStatsService::DealMonNotification(int32_t simId, bool isDualCard)
     if (!trafficPlaninfoPtr) {
         return;
     }
-    NetMgrNetStatsLimitNotification::GetInstance().PublishNetStatsLimitNotification(NETMGR_STATS_LIMIT_MONTH,
-                                                                                    simId, isDualCard);
+    if (g_registerNotificationOps(gNetmgrStatsLmtNtf_)) {
+        gNetmgrStatsLmtNtf_->PublishNetStatsLimitNotification(NETMGR_STATS_LIMIT_MONTH, simId, isDualCard);
+    }
     trafficPlaninfoPtr->lastMonNotifyTime = NetStatsUtils::GetNowTimestamp();
     trafficPlanService_->UpdateTrafficLimitDate(simId);
     NETMGR_LOG_I("update MonNotification time:%{public}d", trafficPlaninfoPtr->lastMonNotifyTime);
@@ -2493,8 +2510,9 @@ void NetStatsService::DealMonAlert(int32_t simId, bool isDualCard)
         return;
     }
 
-    NetMgrNetStatsLimitNotification::GetInstance().PublishNetStatsLimitNotification(NETMGR_STATS_ALERT_MONTH,
-                                                                                    simId, isDualCard);
+    if (g_registerNotificationOps(gNetmgrStatsLmtNtf_)) {
+        gNetmgrStatsLmtNtf_->PublishNetStatsLimitNotification(NETMGR_STATS_ALERT_MONTH, simId, isDualCard);
+    }
     if (trafficPlaninfoPtr->overLimitBehavior) {
         dialog_->PopUpTrafficLimitDialog(simId);
     }
@@ -2539,11 +2557,11 @@ void TelephonyInfoObserver::OnSimStateUpdated(int32_t slotId, Telephony::CardTyp
     NETMGR_LOG_I("OnSimStateUpdated simId:%{public}d", simId);
 
     if (state == Telephony::SimState::SIM_STATE_NOT_PRESENT) {
-        DelayedSingleton<NetStatsService>::GetInstance()->DeleteHistoryData(simId);
+        NetStatsService::GetInstance()->DeleteHistoryData(simId);
     } else if (state == Telephony::SimState::SIM_STATE_LOADED) {
-        DelayedSingleton<NetStatsService>::GetInstance()->UpdateHistoryData(simId);
+        NetStatsService::GetInstance()->UpdateHistoryData(simId);
     }
-    DelayedSingleton<NetStatsService>::GetInstance()->CommonEventSimStateChanged(slotId,
+    NetStatsService::GetInstance()->CommonEventSimStateChanged(slotId,
         static_cast<int32_t>(state));
 }
 
@@ -2553,13 +2571,13 @@ void TelephonyInfoObserver::OnIccAccountUpdated()
     Telephony::CoreServiceClient::GetInstance().GetSimState(SLOT_0, simState);
     NETMGR_LOG_I("OnIccAccountUpdated slotId: 0, simState:%{public}d", static_cast<int32_t>(simState));
     if (simState == Telephony::SimState::SIM_STATE_LOADED) {
-        DelayedSingleton<NetStatsService>::GetInstance()->CommonEventSimStateChanged(
+        NetStatsService::GetInstance()->CommonEventSimStateChanged(
             SLOT_0, static_cast<int32_t>(Telephony::SimState::SIM_STATE_LOADED));
     }
     Telephony::CoreServiceClient::GetInstance().GetSimState(SLOT_1, simState);
     NETMGR_LOG_I("OnIccAccountUpdated slotId: 1, simState:%{public}d", static_cast<int32_t>(simState));
     if (simState == Telephony::SimState::SIM_STATE_LOADED) {
-        DelayedSingleton<NetStatsService>::GetInstance()->CommonEventSimStateChanged(
+        NetStatsService::GetInstance()->CommonEventSimStateChanged(
             SLOT_1, static_cast<int32_t>(Telephony::SimState::SIM_STATE_LOADED));
     }
 }

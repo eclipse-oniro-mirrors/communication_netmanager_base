@@ -35,6 +35,7 @@
 #include "netsys_controller_callback.h"
 #include "net_stats_trafficLimit_dialog.h"
 #include "telephony_observer.h"
+#include "net_stats_notification_interface.h"
 #endif // SUPPORT_TRAFFIC_STATISTIC
 #include "network_sharing.h"
 #include "net_stats_subscriber.h"
@@ -55,10 +56,12 @@ class TelephonyInfoObserver;
 class NetStatsService : public SystemAbility,
                         public NetStatsServiceStub,
                         public std::enable_shared_from_this<NetStatsService> {
-    DECLARE_DELAYED_SINGLETON(NetStatsService)
     DECLARE_SYSTEM_ABILITY(NetStatsService)
 
 public:
+    NetStatsService();
+    ~NetStatsService();
+    static std::shared_ptr<NetStatsService> GetInstance();
     void OnStart() override;
     void OnStop() override;
     void StartNetObserver();
@@ -231,6 +234,7 @@ private:
     std::shared_ptr<TrafficLimitDialog> dialog_ = nullptr;
     std::shared_ptr<ffrt::queue> trafficPlanFfrtQueue_ = nullptr;
     sptr<TelephonyInfoObserver> telephonyInfoObserver_ = nullptr;
+    std::shared_ptr<INetMgrStatsLimitNotification> gNetmgrStatsLmtNtf_ = nullptr;
 #endif // SUPPORT_TRAFFIC_STATISTIC
     std::mutex timerMutex_;
     std::shared_ptr<NetStatsTrafficPlanService> trafficPlanService_ = nullptr;
@@ -238,6 +242,8 @@ private:
     ffrt::mutex recordCallingDataMutex_;
     std::shared_ptr<ffrt::queue> recordReportFfrtQueue_;
     bool isPostDelayReport_ = false;
+    static std::mutex instanceLock_;
+    static std::shared_ptr<NetStatsService> instance_;
 };
 
 #ifdef SUPPORT_TRAFFIC_STATISTIC

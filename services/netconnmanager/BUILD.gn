@@ -175,6 +175,10 @@ ohos_shared_library("net_conn_manager") {
     defines += ["CONFIG_FACTORY_MODE"]
   }
 
+  if (netmanager_base_enable_traffic_statistic) {
+    defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
+  }
+
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
@@ -269,6 +273,10 @@ ohos_static_library("net_conn_manager_static") {
 
   if (enable_sys_func) {
     defines += [ "SYS_FUNC" ]
+  }
+
+  if (netmanager_base_enable_traffic_statistic) {
+    defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
   }
 
   external_deps += [ "hilog:libhilog" ]

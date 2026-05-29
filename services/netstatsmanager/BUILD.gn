@@ -28,6 +28,7 @@ config("net_stats_manager_config") {
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys/wrapper",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf/include",
+    "$NETMANAGER_BASE_ROOT/services/netstatslimitntf/include",
   ]
 }
 
@@ -118,15 +119,13 @@ ohos_shared_library("net_stats_manager") {
       "cellular_data:tel_cellular_data_api",
       "core_service:tel_core_service_api",
       "data_share:datashare_consumer",
-      "distributed_notification_service:ans_innerkits",
-      "i18n:intl_util",
       "relational_store:native_rdb",
       "state_registry:tel_state_registry_api",
     ]
     defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
     sources += [
       "src/net_stats_base.cpp",
-      "src/net_stats_notification.cpp",
+      "src/net_stats_limit_notification_adapter.cpp",
       "src/net_stats_trafficLimit_dialog.cpp",
       "src/net_stats_traffic_plan_service.cpp",
       "src/net_stats_data_clone.cpp",
@@ -229,7 +228,8 @@ ohos_static_library("net_stats_manager_static") {
     defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
     sources += [
       "src/net_stats_base.cpp",
-      "src/net_stats_notification.cpp",
+      "$NETMANAGER_BASE_ROOT/services/netstatslimitntf/src/net_stats_notification.cpp",
+      "src/net_stats_limit_notification_adapter.cpp",
       "src/net_stats_trafficLimit_dialog.cpp",
       "src/net_stats_traffic_plan_service.cpp",
       "src/net_stats_data_clone.cpp",

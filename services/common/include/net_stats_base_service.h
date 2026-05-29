@@ -26,6 +26,11 @@ public:
     virtual int32_t GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end,
                                         NetStatsInfo &info) = 0;
     virtual int32_t ResetStatsFactory() = 0;
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+    virtual bool GetDailyMarkBySimId(int32_t simId, uint16_t &dailyMark) = 0;
+    virtual bool GetMonthlyLimitBySimId(int32_t simId, uint64_t &monthlyLimit) = 0;
+    virtual bool GetMonthlyMarkBySimId(int32_t simId, uint16_t &monthlyMark) = 0;
+#endif
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

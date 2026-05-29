@@ -457,7 +457,7 @@ HWTEST_F(NetStatsServiceTest, ResetNotifyStateTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, GetHistoryDataTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     std::vector<NetStatsInfo> infos;
     uint32_t start = 1745847234;
     uint32_t end = 1745847823;
@@ -476,7 +476,7 @@ HWTEST_F(NetStatsServiceTest, GetHistoryDataTest001, TestSize.Level1)
 #ifdef SUPPORT_TRAFFIC_STATISTIC
 HWTEST_F(NetStatsServiceTest, UpdateBpfMapTimerTaskTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsService = NetStatsService::GetInstance();
     netStatsService->trafficPlanFfrtQueue_ = nullptr;
     netStatsService->UpdateBpfMapTimerTask();
     EXPECT_EQ(netStatsService->trafficPlanService_->trafficPlanInfoMap_.size(), 0);

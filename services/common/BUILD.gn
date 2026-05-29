@@ -279,6 +279,10 @@ ohos_shared_library("net_service_common") {
     defines += [ "NETMGR_DEBUG" ]
   }
 
+  if (netmanager_base_enable_traffic_statistic) {
+    defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
+  }
+
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"

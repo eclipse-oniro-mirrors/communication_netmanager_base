@@ -81,7 +81,7 @@ static bool g_isInited = false;
 void Init()
 {
     if (!g_isInited) {
-        DelayedSingleton<NetStatsService>::GetInstance()->Init();
+        NetStatsService::GetInstance()->Init();
         g_isInited = true;
     } else {
         g_isInited = false;
@@ -97,7 +97,7 @@ __attribute__((no_sanitize("cfi"))) int32_t OnRemoteRequest(uint32_t code, Messa
     MessageParcel reply;
     MessageOption option;
 
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->OnRemoteRequest(code, data, reply, option);
+    int32_t ret = NetStatsService::GetInstance()->OnRemoteRequest(code, data, reply, option);
     return ret;
 }
 

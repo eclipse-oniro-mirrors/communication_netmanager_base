@@ -16,11 +16,11 @@
 #include "net_stats_notification.h"
 #include "net_stats_service.h"
 
-#include <string>
-#include <map>
-#include <vector>
-#include <sstream>
 #include <iomanip>
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include "cJSON.h"
 #include "file_ex.h"
@@ -31,12 +31,13 @@
 #include "want_agent_helper.h"
 #include "want_agent_info.h"
 
+#include "core_service_client.h"
 #include "image_source.h"
-#include "pixel_map.h"
-#include "notification_normal_content.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_utils.h"
-#include "core_service_client.h"
+#include "notification_normal_content.h"
+#include "pixel_map.h"
+#include "net_manager_center.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -76,14 +77,13 @@ static constexpr const char *NETWORK_ICON_PATH = "//system/etc/netmanager_base/r
 static constexpr const char *DEFAULT_LANGUAGE_NAME_EN = "base";
 static constexpr const char *LOCALE_TO_RESOURCE_PATH =
     "//system/etc/netmanager_base/resources/locale_to_resourcePath.json";
-static constexpr const char *LANGUAGE_RESOURCE_PARENT_PATH =
-    "//system/etc/netmanager_base/resources/";
+static constexpr const char *LANGUAGE_RESOURCE_PARENT_PATH = "//system/etc/netmanager_base/resources/";
 static constexpr const char *LANGUAGE_RESOURCE_CHILD_PATH = "/element/string.json";
 static constexpr const char *SETTING_BUNDLE_NAME = "com.huawei.hmos.settings";
 static constexpr const char *SETTING_ABILITY_NAME = "com.huawei.hmos.settings.MainAbility";
 static constexpr const char *URI = "settings://mobile_data_manage_entry";
 
-static std::mutex g_callbackMutex {};
+static std::mutex g_callbackMutex{};
 static NetMgrStatsLimitNtfCallback g_netMgrStatsLimitNtfCallback = nullptr;
 
 void NetMgrNetStatsLimitNotification::ParseJSONFile(
@@ -105,7 +105,8 @@ void NetMgrNetStatsLimitNotification::ParseJSONFile(
     } else {
         container.clear();
         cJSON *resJsonEach = nullptr;
-        cJSON_ArrayForEach(resJsonEach, resJson) {
+        cJSON_ArrayForEach(resJsonEach, resJson)
+        {
             cJSON *key = cJSON_GetObjectItemCaseSensitive(resJsonEach, KEY_NAME);
             cJSON *value = cJSON_GetObjectItemCaseSensitive(resJsonEach, KEY_VALUE);
             container.insert(std::pair<std::string, std::string>(key->valuestring, value->valuestring));
@@ -123,15 +124,15 @@ void NetMgrNetStatsLimitNotification::UpdateResourceMap()
         return;
     }
 
-    NETMGR_LOG_I("UpdateResourceMap: change from %{public}s to %{public}s",
-        localeBaseName.c_str(), curBaseName.c_str());
+    NETMGR_LOG_I("UpdateResourceMap: change from %{public}s to %{public}s", localeBaseName.c_str(),
+                 curBaseName.c_str());
     localeBaseName = curBaseName;
 
     std::string languagePath = DEFAULT_LANGUAGE_NAME_EN;
     if (languageMap.find(localeBaseName) != languageMap.end()) {
         languagePath = languageMap[localeBaseName];
     } else {
-        for (auto& eachPair : languageMap) {
+        for (auto &eachPair : languageMap) {
             OHOS::Global::I18n::LocaleInfo eachLocale(eachPair.first);
             if (OHOS::Global::I18n::LocaleMatcher::Match(&locale, &eachLocale)) {
                 languagePath = eachPair.second;
@@ -141,7 +142,7 @@ void NetMgrNetStatsLimitNotification::UpdateResourceMap()
     }
 
     std::string resourcePath = LANGUAGE_RESOURCE_PARENT_PATH + languagePath + LANGUAGE_RESOURCE_CHILD_PATH;
-    char tmpPath[PATH_MAX] = { 0 };
+    char tmpPath[PATH_MAX] = {0};
     if (!realpath(resourcePath.c_str(), tmpPath)) {
         NETMGR_LOG_E("file name is illegal");
         return;
@@ -169,8 +170,8 @@ std::string NetMgrNetStatsLimitNotification::GetDayNotificationText()
     int32_t simId = simId_;
     uint64_t traffic = 0;
     uint16_t dayPercent = 0;
-    bool ret = DelayedSingleton<NetStatsService>::GetInstance()->GetDailyMarkBySimId(simId, dayPercent);
-    DelayedSingleton<NetStatsService>::GetInstance()->GetMonthlyLimitBySimId(simId, traffic);
+    bool ret = NetManagerCenter::GetInstance().GetDailyMarkBySimId(simId, dayPercent);
+    NetManagerCenter::GetInstance().GetMonthlyLimitBySimId(simId, traffic);
     if (!ret) {
         NETMGR_LOG_E("simId does not exist:: simId %{public}d", simId);
         return "";
@@ -194,15 +195,14 @@ std::string NetMgrNetStatsLimitNotification::GetMonthNotificationText()
 
     int32_t simId = simId_;
     uint16_t monUsedPercent = 0;
-    bool ret = DelayedSingleton<NetStatsService>::GetInstance()->GetMonthlyMarkBySimId(simId, monUsedPercent);
+    bool ret = NetManagerCenter::GetInstance().GetMonthlyMarkBySimId(simId, monUsedPercent);
     if (!ret) {
         NETMGR_LOG_E("simId does not exist:: simId %{public}d", simId);
         return "";
     }
     std::string style = "percent";
     std::string unitStyle = "short";
-    std::map<std::string, std::string> mp = { { "style", style},
-                                    { "unitStyle", unitStyle } };
+    std::map<std::string, std::string> mp = {{"style", style}, {"unitStyle", unitStyle}};
 
     std::string systemLocalStr = Global::I18n::LocaleConfig::GetSystemLocale();
     std::vector<std::string> local{systemLocalStr};
@@ -212,7 +212,7 @@ std::string NetMgrNetStatsLimitNotification::GetMonthNotificationText()
     std::string percent = str;
     auto ret_order = Global::I18n::LocaleConfig::IsRTL(systemLocalStr);
     if (ret_order) {
-        percent =  "‭" + str + "‬";
+        percent = "‭" + str + "‬";
     }
     outText = outText.replace(outText.find("%s"), TWO_CHAR, percent);
     NETMGR_LOG_I("GetMonthNotificationText outText [%{public}s]", outText.c_str());
@@ -230,7 +230,7 @@ std::string NetMgrNetStatsLimitNotification::GetMonthAlertText()
     std::string outText = resourceMap[KEY_MONTH_LIMIT_TEXT];
     int32_t simId = simId_;
     uint64_t traffic = 0;
-    bool ret = DelayedSingleton<NetStatsService>::GetInstance()->GetMonthlyLimitBySimId(simId, traffic);
+    bool ret = NetManagerCenter::GetInstance().GetMonthlyLimitBySimId(simId, traffic);
     NETMGR_LOG_I("GetMonthAlertText trafficLimit:%{public}" PRIu64 "", traffic);
     if (!ret) {
         return "";
@@ -257,10 +257,9 @@ std::string NetMgrNetStatsLimitNotification::GetNotificationTitle(std::string &n
     return outText;
 }
 
-bool NetMgrNetStatsLimitNotification::SetTitleAndText(
-    int notificationId,
-    std::shared_ptr<Notification::NotificationNormalContent> content,
-    bool isDualCard)
+bool NetMgrNetStatsLimitNotification::SetTitleAndText(int notificationId,
+                                                      std::shared_ptr<Notification::NotificationNormalContent> content,
+                                                      bool isDualCard)
 {
     NETMGR_LOG_I("start NetMgrNetStatsLimitNotification::SetTitleAndText");
     if (content == nullptr) {
@@ -335,10 +334,18 @@ void NetMgrNetStatsLimitNotification::GetPixelMap()
     netmgrStatsLimitIconPixelMap_ = std::move(pixelMap);
 }
 
-NetMgrNetStatsLimitNotification& NetMgrNetStatsLimitNotification::GetInstance()
+std::mutex NetMgrNetStatsLimitNotification::instanceLock_;
+std::shared_ptr<NetMgrNetStatsLimitNotification> NetMgrNetStatsLimitNotification::instance_ = nullptr;
+std::shared_ptr<NetMgrNetStatsLimitNotification> NetMgrNetStatsLimitNotification::GetInstance()
 {
-    static NetMgrNetStatsLimitNotification instance;
-    return instance;
+    if (instance_ == nullptr) {
+        std::lock_guard<std::mutex> lockGuard(instanceLock_);
+        if (instance_ == nullptr) {
+            instance_ = std::make_shared<NetMgrNetStatsLimitNotification>();
+            return instance_;
+        }
+    }
+    return instance_;
 }
 
 NetMgrNetStatsLimitNotification::NetMgrNetStatsLimitNotification()
@@ -429,9 +436,7 @@ std::string NetMgrNetStatsLimitNotification::GetTrafficNum(double traffic)
     std::string style = "unit";
     std::string unit = unitFullNamesLower[record];
     std::string unitStyle = "short";
-    std::map<std::string, std::string> mp = { { "style", style},
-                                    { "unit", unit },
-                                    { "unitStyle", unitStyle } };
+    std::map<std::string, std::string> mp = {{"style", style}, {"unit", unit}, {"unitStyle", unitStyle}};
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(2) << traffic; // 2: 保留两位小数
     std::string strt = oss.str();
@@ -447,5 +452,11 @@ std::string NetMgrNetStatsLimitNotification::GetTrafficNum(double traffic)
     }
     return str;
 }
+
+std::shared_ptr<INetMgrStatsLimitNotification> NetMgrNetStatsLimitNotification::GetInstancePtr()
+{
+    return NetMgrNetStatsLimitNotification::GetInstance();
+}
+
 }  // namespace NetManagerStandard
 }  // namespace OHOS

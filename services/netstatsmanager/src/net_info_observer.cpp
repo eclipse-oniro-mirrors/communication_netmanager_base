@@ -57,7 +57,7 @@ int32_t NetInfoObserver::NetConnectionPropertiesChange(sptr<NetHandle> &netHandl
     ident_ = info->ident_;
     auto simId = info->ident_;
     auto task = [simId]() {
-        DelayedSingleton<NetStatsService>::GetInstance()->ProcessDefaultSimIdChanged(simId);
+        NetStatsService::GetInstance()->ProcessDefaultSimIdChanged(simId);
     };
     ffrt::submit(std::move(task), {}, {}, ffrt::task_attr().name("ProcessDefaultSimIdChanged"));
     return 0;

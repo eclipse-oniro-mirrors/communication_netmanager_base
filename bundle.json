@@ -146,7 +146,8 @@
                     "//foundation/communication/netmanager_base/services/etc/init:netmanager_base.para.dac",
                     "//foundation/communication/netmanager_base/services/common:net_service_common",
                     "//foundation/communication/netmanager_base/sa_profile:net_manager_profile",
-                    "//foundation/communication/netmanager_base/services/netpolicymanager:net_access_policy_dialog"
+                    "//foundation/communication/netmanager_base/services/netpolicymanager:net_access_policy_dialog",
+                    "//foundation/communication/netmanager_base/services/netstatslimitntf:netmanager_stats_limit_notification_target"
                 ]
             },
             "inner_kits": [

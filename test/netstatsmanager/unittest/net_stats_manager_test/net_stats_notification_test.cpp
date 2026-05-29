@@ -84,103 +84,103 @@ public:
 
 HWTEST_F(NetStatsNotificationTest, ParseJSONFileTest001, TestSize.Level1)
 {
-    auto &notification = NetMgrNetStatsLimitNotification::GetInstance();
+    auto notification = NetMgrNetStatsLimitNotification::GetInstance();
     std::string filePath;
-    notification.ParseJSONFile(filePath, notification.languageMap);
-    EXPECT_FALSE(notification.languageMap.empty());
+    notification->ParseJSONFile(filePath, notification->languageMap);
+    EXPECT_FALSE(notification->languageMap.empty());
 }
 
 HWTEST_F(NetStatsNotificationTest, UpdateResourceMapTest001, TestSize.Level1)
 {
-    auto &notification = NetMgrNetStatsLimitNotification::GetInstance();
-    notification.UpdateResourceMap();
-    EXPECT_FALSE(notification.localeBaseName.empty());
+    auto notification = NetMgrNetStatsLimitNotification::GetInstance();
+    notification->UpdateResourceMap();
+    EXPECT_FALSE(notification->localeBaseName.empty());
 }
 
 HWTEST_F(NetStatsNotificationTest, GetDayNotificationTextTest001, TestSize.Level1)
 {
-    auto &notification = NetMgrNetStatsLimitNotification::GetInstance();
-    std::string temp = notification.resourceMap[KEY_DAILY_NOTIFY_TEXT];
-    notification.resourceMap.erase(KEY_DAILY_NOTIFY_TEXT);
-    auto ret = notification.GetDayNotificationText();
+    auto notification = NetMgrNetStatsLimitNotification::GetInstance();
+    std::string temp = notification->resourceMap[KEY_DAILY_NOTIFY_TEXT];
+    notification->resourceMap.erase(KEY_DAILY_NOTIFY_TEXT);
+    auto ret = notification->GetDayNotificationText();
     EXPECT_TRUE(ret.empty());
 
-    notification.resourceMap[KEY_DAILY_NOTIFY_TEXT] = "";
-    ret = notification.GetDayNotificationText();
+    notification->resourceMap[KEY_DAILY_NOTIFY_TEXT] = "";
+    ret = notification->GetDayNotificationText();
     EXPECT_TRUE(ret.empty());
-    notification.resourceMap[KEY_DAILY_NOTIFY_TEXT] = temp;
+    notification->resourceMap[KEY_DAILY_NOTIFY_TEXT] = temp;
 }
 
 HWTEST_F(NetStatsNotificationTest, GetMonthAlertTextTest001, TestSize.Level1)
 {
-    auto &notification = NetMgrNetStatsLimitNotification::GetInstance();
-    std::string temp = notification.resourceMap[KEY_MONTH_LIMIT_TEXT];
-    notification.resourceMap.erase(KEY_MONTH_LIMIT_TEXT);
-    auto ret = notification.GetMonthAlertText();
+    auto notification = NetMgrNetStatsLimitNotification::GetInstance();
+    std::string temp = notification->resourceMap[KEY_MONTH_LIMIT_TEXT];
+    notification->resourceMap.erase(KEY_MONTH_LIMIT_TEXT);
+    auto ret = notification->GetMonthAlertText();
     EXPECT_TRUE(ret.empty());
 
-    notification.resourceMap[KEY_MONTH_LIMIT_TEXT] = "";
-    ret = notification.GetMonthAlertText();
+    notification->resourceMap[KEY_MONTH_LIMIT_TEXT] = "";
+    ret = notification->GetMonthAlertText();
     EXPECT_TRUE(ret.empty());
-    notification.resourceMap[KEY_MONTH_LIMIT_TEXT] = temp;
+    notification->resourceMap[KEY_MONTH_LIMIT_TEXT] = temp;
 }
 
 HWTEST_F(NetStatsNotificationTest, SetTitleAndTextTest001, TestSize.Level1)
 {
-    auto &notification = NetMgrNetStatsLimitNotification::GetInstance();
+    auto notification = NetMgrNetStatsLimitNotification::GetInstance();
     int notificationId = 0;
     std::shared_ptr<Notification::NotificationNormalContent> content = nullptr;
     bool isDualCard = false;
-    auto ret = notification.SetTitleAndText(notificationId, content, isDualCard);
+    auto ret = notification->SetTitleAndText(notificationId, content, isDualCard);
     EXPECT_FALSE(ret);
 
     content = std::make_shared<Notification::NotificationNormalContent>();
-    ret = notification.SetTitleAndText(notificationId, content, isDualCard);
+    ret = notification->SetTitleAndText(notificationId, content, isDualCard);
     EXPECT_FALSE(ret);
 
-    notification.resourceMap[""] = "test";
-    ret = notification.SetTitleAndText(notificationId, content, isDualCard);
+    notification->resourceMap[""] = "test";
+    ret = notification->SetTitleAndText(notificationId, content, isDualCard);
     EXPECT_FALSE(ret);
-    notification.resourceMap.erase("");
+    notification->resourceMap.erase("");
 }
 
 HWTEST_F(NetStatsNotificationTest, SetTitleAndTextTest002, TestSize.Level1)
 {
-    auto &notification = NetMgrNetStatsLimitNotification::GetInstance();
+    auto notification = NetMgrNetStatsLimitNotification::GetInstance();
     int notificationId = NETMGR_STATS_LIMIT_DAY;
     auto content = std::make_shared<Notification::NotificationNormalContent>();
     bool isDualCard = false;
-    auto ret = notification.SetTitleAndText(notificationId, content, isDualCard);
+    auto ret = notification->SetTitleAndText(notificationId, content, isDualCard);
     EXPECT_TRUE(ret);
 
     notificationId = NETMGR_STATS_LIMIT_MONTH;
-    ret = notification.SetTitleAndText(notificationId, content, isDualCard);
+    ret = notification->SetTitleAndText(notificationId, content, isDualCard);
     EXPECT_TRUE(ret);
 
     isDualCard = true;
     notificationId = NETMGR_STATS_ALERT_MONTH;
-    ret = notification.SetTitleAndText(notificationId, content, isDualCard);
+    ret = notification->SetTitleAndText(notificationId, content, isDualCard);
     EXPECT_TRUE(ret);
 }
 
 HWTEST_F(NetStatsNotificationTest, GetPixelMapTest001, TestSize.Level1)
 {
-    auto &notification = NetMgrNetStatsLimitNotification::GetInstance();
-    EXPECT_NE(notification.netmgrStatsLimitIconPixelMap_, nullptr);
-    notification.GetPixelMap();
+    auto notification = NetMgrNetStatsLimitNotification::GetInstance();
+    EXPECT_NE(notification->netmgrStatsLimitIconPixelMap_, nullptr);
+    notification->GetPixelMap();
 }
 
 HWTEST_F(NetStatsNotificationTest, GetTrafficNumTest001, TestSize.Level1)
 {
-    auto &notification = NetMgrNetStatsLimitNotification::GetInstance();
+    auto notification = NetMgrNetStatsLimitNotification::GetInstance();
     double traffic = static_cast<double>(UNIT_CONVERT_1024);
-    auto ret = notification.GetTrafficNum(traffic);
+    auto ret = notification->GetTrafficNum(traffic);
     EXPECT_FALSE(ret.empty());
 
     for (int i = 0; i < 4; i++) {
         traffic *= UNIT_CONVERT_1024;
     }
-    ret = notification.GetTrafficNum(traffic);
+    ret = notification->GetTrafficNum(traffic);
     EXPECT_FALSE(ret.empty());
 }
 
