@@ -1265,6 +1265,40 @@ int32_t NetConnServiceProxy::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &h
     return ret;
 }
 
+int32_t NetConnServiceProxy::RefreshGlobalHttpProxy(const sptr<IRefreshHttpProxyCallback> &callback)
+{
+    MessageParcel data;
+    // LCOV_EXCL_START
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    // LCOV_EXCL_END
+    if (callback == nullptr) {
+        NETMGR_LOG_E("callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    // LCOV_EXCL_START
+    if (!data.WriteRemoteObject(callback->AsObject())) {
+        NETMGR_LOG_E("WriteRemoteObject failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    MessageParcel reply;
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REFRESH_GLOBAL_HTTP_PROXY),
+                                      data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+
+    int32_t ret = NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    // LCOV_EXCL_END
+    return ret;
+}
+
 int32_t NetConnServiceProxy::SetPacUrl(const std::string &pacUrl)
 {
     auto fun = [&](uint32_t code, MessageParcel &data, MessageParcel &reply) {

@@ -94,6 +94,10 @@ public:
 
     static void SetGlobalHttpProxyCallback(napi_env env, napi_status status, void *data);
 
+    static void ExecRefreshGlobalHttpProxy(napi_env env, void *data);
+
+    static void RefreshGlobalHttpProxyCallback(napi_env env, napi_status status, void *data);
+
     static void ExecGetAppNet(napi_env env, void *data);
 
     static void GetAppNetCallback(napi_env env, napi_status status, void *data);

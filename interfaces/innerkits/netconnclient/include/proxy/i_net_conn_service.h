@@ -22,6 +22,7 @@
 
 #include "http_proxy.h"
 #include "i_net_conn_callback.h"
+#include "i_refresh_http_proxy_callback.h"
 #include "i_net_detection_callback.h"
 #include "i_net_interface_callback.h"
 #include "i_net_supplier_callback.h"
@@ -83,6 +84,7 @@ public:
     virtual int32_t SetGlobalHttpProxy(const HttpProxy &httpProxy) = 0;
     virtual int32_t GetGlobalHttpProxy(HttpProxy &httpProxy) = 0;
     virtual int32_t GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy) = 0;
+    virtual int32_t RefreshGlobalHttpProxy(const sptr<IRefreshHttpProxyCallback> &callback) = 0;
     virtual int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList) = 0;
     virtual int32_t SetAppNet(int32_t netId) = 0;
     virtual int32_t RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback) = 0;

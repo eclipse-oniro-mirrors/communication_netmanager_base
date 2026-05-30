@@ -260,6 +260,7 @@ std::initializer_list<napi_property_descriptor> ConnectionModule::createProperty
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEFAULT_HTTP_PROXY, GetDefaultHttpProxy),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_GLOBAL_HTTP_PROXY, GetGlobalHttpProxy),
         DECLARE_NAPI_FUNCTION(FUNCTION_SET_GLOBAL_HTTP_PROXY, SetGlobalHttpProxy),
+        DECLARE_NAPI_FUNCTION(FUNCTION_REFRESH_GLOBAL_HTTP_PROXY, RefreshGlobalHttpProxy),
         DECLARE_NAPI_FUNCTION(FUNCTION_SET_CUSTOM_DNS_RULE, AddCustomDnsRule),
         DECLARE_NAPI_FUNCTION(FUNCTION_DELETE_CUSTOM_DNS_RULE, RemoveCustomDnsRule),
         DECLARE_NAPI_FUNCTION(FUNCTION_DELETE_CUSTOM_DNS_RULES, ClearCustomDnsRules),
@@ -658,6 +659,13 @@ napi_value ConnectionModule::SetGlobalHttpProxy(napi_env env, napi_callback_info
     return ModuleTemplate::Interface<SetGlobalHttpProxyContext>(env, info, FUNCTION_SET_GLOBAL_HTTP_PROXY, nullptr,
                                                                 ConnectionAsyncWork::ExecSetGlobalHttpProxy,
                                                                 ConnectionAsyncWork::SetGlobalHttpProxyCallback);
+}
+
+napi_value ConnectionModule::RefreshGlobalHttpProxy(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetHttpProxyContext>(env, info, FUNCTION_REFRESH_GLOBAL_HTTP_PROXY, nullptr,
+                                                          ConnectionAsyncWork::ExecRefreshGlobalHttpProxy,
+                                                          ConnectionAsyncWork::RefreshGlobalHttpProxyCallback);
 }
 
 napi_value ConnectionModule::SetAppHttpProxy(napi_env env, napi_callback_info info)

@@ -14,6 +14,7 @@
  */
 
 #include <netdb.h>
+#include <atomic>
 
 #include "net_probe.h"
 #include "net_connection.h"
@@ -531,4 +532,21 @@ int32_t OH_NetConn_QueryTraceRoute(const char *destination, OHOS::NetManagerStan
         NETMGR_LOG_E("OH_NetConn_QueryTraceRoute conv2 routeinfo failed");
     }
     return ret;
+}
+
+int32_t OH_NetConn_RefreshGlobalHttpProxyWithCallback(OH_NetConn_GlobalHttpProxyRefreshCallback callback,
+    void *userContext)
+{
+    if (callback == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_RefreshGlobalHttpProxyWithCallback callback is NULL");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    auto refreshCallback = [callback, userContext](int32_t ret, const HttpProxy &httpProxy) {
+        InvokeRefreshCallback(callback, ret, httpProxy, userContext);
+    };
+    int32_t ret = NetConnClient::GetInstance().RefreshGlobalHttpProxy(refreshCallback);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    return NETMANAGER_SUCCESS;
 }

@@ -750,6 +750,19 @@ declare namespace connection {
   function setGlobalHttpProxy(httpProxy: HttpProxy): Promise<void>;
 
   /**
+   * Notifies the system that global proxy re-authentication is required.
+   * Upon receiving the notification, the system will reproces the global proxy's authentication status.
+   *
+   * @returns { Promise<HttpProxy> } the promise returned by the function.
+   * @throws { BusinessError } 2100002 - Failed to connect to the service..
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @stagemodelonly
+   * @since 26.0.0 dynamic&static
+   */
+  function refreshGlobalHttpProxy(): Promise<HttpProxy>;
+
+  /**
    * Obtains the default {@link HttpProxy} proxy settings.
    *
    * If a global proxy is set, the global proxy parameters are returned.

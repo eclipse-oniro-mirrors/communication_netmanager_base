@@ -22,6 +22,7 @@
 
 #include "common_net_conn_callback_test.h"
 #include "net_conn_service_stub_test.h"
+#include "refresh_http_proxy_callback_stub.h"
 #include "net_interface_callback_stub.h"
 #include "netmanager_base_test_security.h"
 #include "net_conn_types.h"
@@ -480,6 +481,36 @@ HWTEST_F(NetConnServiceStubTest, OnGetDefaultHttpProxyTest001, TestSize.Level1)
     EXPECT_TRUE(data.WriteInt32(TEST_INT32_VALUE));
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_GET_DEFAULT_HTTP_PROXY);
     EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
+
+/**
+ * @tc.name: OnRefreshGlobalHttpProxyTest001
+ * @tc.desc: Test NetConnServiceStub OnRefreshGlobalHttpProxy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnRefreshGlobalHttpProxyTest001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    sptr<IRefreshHttpProxyCallback> callback = new RefreshHttpProxyCallbackStub();
+    EXPECT_TRUE(data.WriteRemoteObject(callback->AsObject()));
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REFRESH_GLOBAL_HTTP_PROXY);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnRefreshGlobalHttpProxyTest002
+ * @tc.desc: Test NetConnServiceStub OnRefreshGlobalHttpProxy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnRefreshGlobalHttpProxyTest002, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REFRESH_GLOBAL_HTTP_PROXY);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**

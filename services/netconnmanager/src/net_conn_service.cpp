@@ -35,6 +35,8 @@
 #include "event_report.h"
 #include "net_activate.h"
 #include "net_conn_service.h"
+#include "i_refresh_http_proxy_callback.h"
+#include "refresh_http_proxy_callback_proxy.h"
 #include "net_conn_callback_proxy_wrapper.h"
 #include "net_conn_types.h"
 #include "net_policy_client.h"
@@ -2560,6 +2562,49 @@ int32_t NetConnService::SetAirplaneMode(bool state)
     return NETMANAGER_SUCCESS;
 }
 
+long NetConnService::PerformProxyCurlProbe(CURL *curl)
+{
+    long responseCode = 0;
+    if (curl == nullptr) {
+        return responseCode;
+    }
+    auto ret = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
+    NETMGR_LOG_D("ActiveHttpProxy ret: %{public}d, code: %{public}d",
+                 static_cast<int>(ret), static_cast<int32_t>(responseCode));
+    curl_easy_cleanup(curl);
+    return responseCode;
+}
+
+void NetConnService::NotifyRefreshGlobalHttpProxyResult(long responseCode)
+{
+    std::lock_guard<std::mutex> lock(refreshProxyMutex_);
+    if (!refreshInProgress_) {
+        return;
+    }
+    refreshAuthSuccess_ = (responseCode == SUCCESS_CODE);
+    refreshResultReady_ = true;
+    refreshResultCv_.notify_one();
+}
+
+void NetConnService::WaitForNextActiveCycle(uint32_t &retryTimes, long responseCode)
+{
+    if (!httpProxyThreadNeedRun_.load()) {
+        NETMGR_LOG_W("ActiveHttpProxy has been clear.");
+        return;
+    }
+    if (responseCode != SUCCESS_CODE && retryTimes > 0) {
+        retryTimes--;
+        return;
+    }
+    NotifyRefreshGlobalHttpProxyResult(responseCode);
+    retryTimes = RETRY_TIMES;
+    std::unique_lock lock(httpProxyThreadMutex_);
+    auto notifyRet = httpProxyThreadCv_.wait_for(lock, std::chrono::seconds(isInSleep_.load() ?
+        HTTP_PROXY_ACTIVE_PERIOD_IN_SLEEP_S : HTTP_PROXY_ACTIVE_PERIOD_S));
+    retryTimes = (notifyRet == std::cv_status::timeout) ? 0 : RETRY_TIMES;
+}
+
 void NetConnService::ActiveHttpProxy()
 {
     NETMGR_LOG_D("ActiveHttpProxy thread start");
@@ -2570,7 +2615,6 @@ void NetConnService::ActiveHttpProxy()
         HttpProxy tempProxy;
         {
             auto userInfoHelp = NetProxyUserinfo::GetInstance();
-            // executed in the SA process, so load http proxy from current active user.
             LoadGlobalHttpProxy(ACTIVE, tempProxy);
             userInfoHelp.GetHttpProxyHostPass(tempProxy);
         }
@@ -2578,29 +2622,8 @@ void NetConnService::ActiveHttpProxy()
             curl = curl_easy_init();
             SetCurlOptions(curl, tempProxy);
         }
-        if (curl) {
-            long response_code;
-            auto ret = curl_easy_perform(curl);
-            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-            NETMGR_LOG_D("SetGlobalHttpProxy ActiveHttpProxy ret: %{public}d, code: %{public}d", static_cast<int>(ret),
-                         static_cast<int32_t>(response_code));
-            if (response_code != SUCCESS_CODE && retryTimes == 0 && !isInSleep_.load()) {
-                retryTimes = RETRY_TIMES;
-            }
-            curl_easy_cleanup(curl);
-        }
-        if (httpProxyThreadNeedRun_.load()) {
-            if (retryTimes == 0) {
-                std::unique_lock lock(httpProxyThreadMutex_);
-                auto notifyRet = httpProxyThreadCv_.wait_for(lock, std::chrono::seconds(isInSleep_.load() ?
-                    HTTP_PROXY_ACTIVE_PERIOD_IN_SLEEP_S : HTTP_PROXY_ACTIVE_PERIOD_S));
-                retryTimes = (notifyRet == std::cv_status::timeout) ? 0 : RETRY_TIMES;
-            } else {
-                retryTimes--;
-            }
-        } else {
-            NETMGR_LOG_W("ActiveHttpProxy has been clear.");
-        }
+        long responseCode = PerformProxyCurlProbe(curl);
+        WaitForNextActiveCycle(retryTimes, responseCode);
     }
 }
 
@@ -2692,6 +2715,109 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
         httpProxyThreadNeedRun_ = false;
     }
     NETMGR_LOG_I("End SetGlobalHttpProxy.");
+    return NETMANAGER_SUCCESS;
+}
+
+bool NetConnService::IsRefreshRateLimited(const HttpProxy &currentProxy)
+{
+    auto now = std::chrono::steady_clock::now();
+    bool sameProxy = lastRefreshProxy_.GetHost() == currentProxy.GetHost() &&
+                     lastRefreshProxy_.GetPort() == currentProxy.GetPort() &&
+                     lastRefreshProxy_.GetExclusionList() == currentProxy.GetExclusionList();
+    bool withinRateLimit = (now - lastRefreshTime_) < std::chrono::seconds(REFRESH_RATE_LIMIT_S);
+    return sameProxy && withinRateLimit;
+}
+
+int32_t NetConnService::LoadCurrentProxyForRefresh(HttpProxy &currentProxy)
+{
+    auto userInfoHelp = NetProxyUserinfo::GetInstance();
+    LoadGlobalHttpProxy(ACTIVE, currentProxy);
+    userInfoHelp.GetHttpProxyHostPass(currentProxy);
+    if (currentProxy.host_.empty() || currentProxy.username_.empty()) {
+        NETMGR_LOG_E("RefreshGlobalHttpProxy: host or username is empty");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    if (!httpProxyThreadNeedRun_.load()) {
+        NETMGR_LOG_E("RefreshGlobalHttpProxy: thread is not running");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::PrepareRefreshGlobalHttpProxy(const HttpProxy &currentProxy,
+    const sptr<IRefreshHttpProxyCallback> &callback)
+{
+    std::lock_guard<std::mutex> lock(refreshProxyMutex_);
+    if (IsRefreshRateLimited(currentProxy)) {
+        NETMGR_LOG_E("RefreshGlobalHttpProxy: rate limited");
+        return NET_CONN_ERR_HTTP_PROXY_INVALID;
+    }
+    if (refreshInProgress_) {
+        NETMGR_LOG_I("RefreshGlobalHttpProxy: reuse existing refresh");
+        refreshCallbacks_.push_back(callback);
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    refreshInProgress_ = true;
+    refreshResultReady_ = false;
+    refreshAuthSuccess_ = false;
+    lastRefreshProxy_ = currentProxy;
+    lastRefreshTime_ = std::chrono::steady_clock::now();
+    refreshCallbacks_.push_back(callback);
+    return NETMANAGER_SUCCESS;
+}
+
+void NetConnService::ExecuteRefreshInFfrt(const HttpProxy &currentProxy)
+{
+    httpProxyThreadCv_.notify_all();
+    std::unique_lock<std::mutex> lock(refreshProxyMutex_);
+    bool ready = refreshResultCv_.wait_for(lock, std::chrono::seconds(REFRESH_WAIT_TIMEOUT_S),
+        [this] { return refreshResultReady_; });
+
+    int32_t ret = NETMANAGER_SUCCESS;
+    HttpProxy httpProxy;
+    if (!ready) {
+        NETMGR_LOG_E("RefreshGlobalHttpProxy: wait timeout");
+        ret = NETMANAGER_ERR_INTERNAL;
+    } else if (refreshAuthSuccess_) {
+        httpProxy.SetHost(currentProxy.GetHost());
+        httpProxy.SetPort(currentProxy.GetPort());
+        httpProxy.SetExclusionList(currentProxy.GetExclusionList());
+    }
+
+    auto callbacks = std::move(refreshCallbacks_);
+    refreshCallbacks_.clear();
+    refreshInProgress_ = false;
+    refreshResultReady_ = false;
+    lock.unlock();
+
+    for (auto &cb : callbacks) {
+        if (cb != nullptr) {
+            cb->OnRefreshHttpProxyResult(ret, httpProxy);
+        }
+    }
+}
+
+int32_t NetConnService::RefreshGlobalHttpProxy(const sptr<IRefreshHttpProxyCallback> &callback)
+{
+    NETMGR_LOG_I("Enter RefreshGlobalHttpProxy");
+    if (callback == nullptr) {
+        NETMGR_LOG_E("RefreshGlobalHttpProxy: callback is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    HttpProxy currentProxy;
+    int32_t ret = LoadCurrentProxyForRefresh(currentProxy);
+    if (ret != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    ret = PrepareRefreshGlobalHttpProxy(currentProxy, callback);
+    if (ret == NET_CONN_ERR_HTTP_PROXY_INVALID) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        ffrt::submit([this, currentProxy]() {
+            ExecuteRefreshInFfrt(currentProxy);
+            }, {}, {}, ffrt::task_attr().name("RefreshGlobalHttpProxy"));
+    }
     return NETMANAGER_SUCCESS;
 }
 

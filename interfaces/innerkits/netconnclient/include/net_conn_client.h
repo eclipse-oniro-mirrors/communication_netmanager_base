@@ -35,6 +35,7 @@
 #include "safe_map.h"
 #include <shared_mutex>
 #include "net_conn_callback_stub.h"
+#include "refresh_http_proxy_callback_stub.h"
 #include "net_trace_route_info.h"
 
 namespace OHOS {
@@ -363,6 +364,12 @@ public:
      */
     int32_t GetDefaultHttpProxy(HttpProxy &httpProxy);
 
+    int32_t RefreshGlobalHttpProxy(const std::function<void(int32_t, const HttpProxy &)> &callback);
+    void ResetRefreshState();
+    int32_t PrepareRefreshCallback(const std::function<void(int32_t, const HttpProxy &)> &callback,
+        bool &needSendRequest);
+    int32_t SendRefreshHttpProxyRequest(const sptr<IRefreshHttpProxyCallback> &stub);
+
     /**
      * set network id of app binding network
      *
@@ -625,6 +632,10 @@ private:
     std::mutex netSupplierCallbackMutex_;
     std::string pacUrl_;
     sptr<ISystemAbilityStatusChange> saStatusListener_;
+    std::mutex refreshCbMutex_;
+    sptr<RefreshHttpProxyCallbackStub> refreshCallbackStub_;
+    bool refreshInProgress_ = false;
+    std::vector<std::function<void(int32_t, const HttpProxy &)>> pendingRefreshCallbacks_;
     static inline std::mutex instanceMtx_;
     static inline std::shared_ptr<NetConnClient> instance_ = nullptr;
 };

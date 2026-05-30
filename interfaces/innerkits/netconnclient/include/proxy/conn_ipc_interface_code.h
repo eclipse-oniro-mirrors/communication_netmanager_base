@@ -109,6 +109,7 @@ enum class ConnInterfaceCode {
     CMD_NM_GET_CONNECT_OWNER_UID,
     CMD_NM_GET_SYSTEM_NET_PORT_STATES,
     CMD_NM_DEAD_FLOW_RESET_TARGET_BUNDLE,
+    CMD_NM_REFRESH_GLOBAL_HTTP_PROXY,
 };
 
 enum class AdjCallbackInterfaceCode {
@@ -160,6 +161,10 @@ enum class SupplierInterfaceCode {
 
 enum class FactoryResetCallbackInterfaceCode {
     NET_FACTORYRESET = 0,
+};
+
+enum class RefreshHttpProxyCallbackInterfaceCode {
+    ON_REFRESH_HTTP_PROXY_RESULT,
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

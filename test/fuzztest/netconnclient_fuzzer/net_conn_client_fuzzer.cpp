@@ -617,6 +617,17 @@ void GetDefaultHttpProxyFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_DEFAULT_HTTP_PROXY), dataParcel);
 }
 
+void RefreshGlobalHttpProxyFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REFRESH_GLOBAL_HTTP_PROXY), dataParcel);
+}
+
 void GetNetIdByIdentifierFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;
@@ -2050,6 +2061,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::SetGlobalHttpProxyFuzzTest(data, size);
     OHOS::NetManagerStandard::GetGlobalHttpProxyFuzzTest(data, size);
     OHOS::NetManagerStandard::GetDefaultHttpProxyFuzzTest(data, size);
+    OHOS::NetManagerStandard::RefreshGlobalHttpProxyFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetIdByIdentifierFuzzTest(data, size);
     OHOS::NetManagerStandard::RegisterNetInterfaceCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetInterfaceConfigurationFuzzTest(data, size);

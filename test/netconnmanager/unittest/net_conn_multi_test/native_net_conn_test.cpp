@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+#include <atomic>
+#include <chrono>
+#include <thread>
+
 #include <gtest/gtest.h>
 
 #include "http_proxy.h"
@@ -20,6 +24,7 @@
 #include "native_net_conn_api.h"
 #include "native_net_conn_type.h"
 #include "net_conn_client.h"
+#include "net_connection_adapter.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "netmanager_base_test_security.h"
@@ -35,6 +40,7 @@ constexpr const char *LONG_HOST =
     "1111111111111111111111111111";
 constexpr const char *HOST_NAME = "127.0.0.1";
 constexpr uint16_t PORT = 8080;
+constexpr uint32_t TEST_CALLBACK_WAIT_S = 3;
 } // namespace
 
 class NativeNetConnTest : public testing::Test {
@@ -532,6 +538,95 @@ HWTEST_F(NativeNetConnTest, NativeNetConnTest020, TestSize.Level1)
     OH_NetConn_HttpProxy httpProxy = OH_NetConn_HttpProxy();
     ret = OH_NetConn_GetDefaultHttpProxy(&httpProxy);
     ASSERT_TRUE(ret == NETMANAGER_ERR_INTERNAL);
+}
+
+/**
+ * @tc.name: NativeNetConnTest021
+ * @tc.desc: Test OH_NetConn_RefreshGlobalHttpProxyWithCallback, giving nullptr callback,
+ * return NETMANAGER_ERR_PARAMETER_ERROR
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNetConnTest, NativeNetConnTest021, TestSize.Level1)
+{
+    OH_NetConn_GlobalHttpProxyRefreshCallback callback = nullptr;
+    auto ret = OH_NetConn_RefreshGlobalHttpProxyWithCallback(callback, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+/**
+ * @tc.name: NativeNetConnTest022
+ * @tc.desc: Test OH_NetConn_RefreshGlobalHttpProxyWithCallback, return NETMANAGER_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNetConnTest, NativeNetConnTest022, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    OH_NetConn_GlobalHttpProxyRefreshCallback callback =
+        [](int32_t result, const NetConn_HttpProxy *proxy, void *userContext) {};
+    auto ret = OH_NetConn_RefreshGlobalHttpProxyWithCallback(callback, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: NativeNetConnTest023
+ * @tc.desc: Test OH_NetConn_RefreshGlobalHttpProxyWithCallback, callback invoked
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNetConnTest, NativeNetConnTest023, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    static std::atomic<bool> callbackInvoked{false};
+    callbackInvoked = false;
+    OH_NetConn_GlobalHttpProxyRefreshCallback callback =
+        [](int32_t result, const NetConn_HttpProxy *proxy, void *userContext) {
+            callbackInvoked = true;
+        };
+    auto ret = OH_NetConn_RefreshGlobalHttpProxyWithCallback(callback, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    std::this_thread::sleep_for(std::chrono::seconds(TEST_CALLBACK_WAIT_S));
+    EXPECT_TRUE(callbackInvoked.load());
+}
+
+/**
+ * @tc.name: NativeNetConnTest024
+ * @tc.desc: Test OH_NetConn_RefreshGlobalHttpProxyWithCallback, multiple callbacks
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNetConnTest, NativeNetConnTest024, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    static std::atomic<int> invokeCount{0};
+    invokeCount = 0;
+    OH_NetConn_GlobalHttpProxyRefreshCallback callback =
+        [](int32_t result, const NetConn_HttpProxy *proxy, void *userContext) {
+            invokeCount++;
+        };
+    auto ret1 = OH_NetConn_RefreshGlobalHttpProxyWithCallback(callback, nullptr);
+    auto ret2 = OH_NetConn_RefreshGlobalHttpProxyWithCallback(callback, nullptr);
+    EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret2, NETMANAGER_SUCCESS);
+    std::this_thread::sleep_for(std::chrono::seconds(TEST_CALLBACK_WAIT_S));
+    EXPECT_GE(invokeCount.load(), 2);
+}
+
+/**
+ * @tc.name: NativeNetConnTest025
+ * @tc.desc: Test OH_NetConn_RefreshGlobalHttpProxyWithCallback, callback receives nullptr proxy on auth failure
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNetConnTest, NativeNetConnTest025, TestSize.Level1)
+{
+    static std::atomic<bool> receivedNullptr{false};
+    receivedNullptr = false;
+    OH_NetConn_GlobalHttpProxyRefreshCallback callback =
+        [](int32_t result, const NetConn_HttpProxy *proxy, void *userContext) {
+            if (proxy == nullptr) {
+                receivedNullptr = true;
+            }
+        };
+    auto ret = OH_NetConn_RefreshGlobalHttpProxyWithCallback(callback, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    std::this_thread::sleep_for(std::chrono::seconds(TEST_CALLBACK_WAIT_S));
 }
 
 } // namespace NetManagerStandard

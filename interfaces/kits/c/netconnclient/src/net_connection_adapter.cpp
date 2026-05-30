@@ -347,6 +347,25 @@ int32_t Conv2TraceRouteInfo(const std::string &traceRouteInfoStr, NetConn_TraceR
     return NETMANAGER_SUCCESS;
 }
 
+void InvokeRefreshCallback(OH_NetConn_GlobalHttpProxyRefreshCallback callback, int32_t ret, const HttpProxy &httpProxy,
+    void *userContext)
+{
+    if (callback == nullptr) {
+        return;
+    }
+    if (ret != NETMANAGER_SUCCESS || httpProxy.GetHost().empty()) {
+        callback(ret, nullptr, userContext);
+        return;
+    }
+    NetConn_HttpProxy netHttpProxy;
+    int32_t retConv = Conv2HttpProxy(httpProxy, &netHttpProxy);
+    if (retConv != NETMANAGER_SUCCESS) {
+        callback(ret, nullptr, userContext);
+    } else {
+        callback(ret, &netHttpProxy, userContext);
+    }
+}
+
 NetConnCallbackStubAdapter::NetConnCallbackStubAdapter(NetConn_NetConnCallback *callback)
 {
     this->callback_.onNetworkAvailable = callback->onNetworkAvailable;

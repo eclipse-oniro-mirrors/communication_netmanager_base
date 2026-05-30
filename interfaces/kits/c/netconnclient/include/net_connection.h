@@ -311,6 +311,9 @@ int32_t OH_NetConn_GetPacFileUrl(char *pacUrl);
 
 int32_t OH_NetConn_FindProxyForURL(const char *url, const char *host, char *proxy);
 
+int32_t OH_NetConn_RefreshGlobalHttpProxyWithCallback(OH_NetConn_GlobalHttpProxyRefreshCallback callback,
+    void *userContext);
+
 #ifdef __cplusplus
 }
 #endif
