@@ -705,6 +705,37 @@ HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest05, TestSize.Level1)
     int32_t ret = netStatsService.GetTrafficPlanInfo(1, 99, value);
     EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 }
+
+HWTEST_F(NetStatsServiceTest, CellularDataStateChangedFfrtTest01, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(1));
+    int32_t dataState = 0;
+    int32_t slotId = -1;
+    int32_t ret = netStatsService.CellularDataStateChangedFfrt(slotId, dataState);
+    EXPECT_EQ(ret, false);
+}
+
+HWTEST_F(NetStatsServiceTest, CellularDataStateChangedFfrtTest02, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(1));
+    int32_t dataState = 0;
+    int32_t slotId = 0;
+    int32_t ret = netStatsService.CellularDataStateChangedFfrt(slotId, dataState);
+    EXPECT_EQ(ret, true);
+}
+
+HWTEST_F(NetStatsServiceTest, CellularDataStateChangedFfrtTest03, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(1));
+    int32_t dataState = 0;
+    int32_t slotId = 0;
+    netStatsService.trafficPlanService_->trafficPlanInfoMap_[1] = std::make_shared<TrafficPlanInfo>();
+    int32_t ret = netStatsService.CellularDataStateChangedFfrt(slotId, dataState);
+    EXPECT_EQ(ret, true);
+}
 #endif
 } // namespace NetManagerStandard
 } // namespace OHOS
