@@ -23,7 +23,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 
-#define NETMGR_STATS_LIMIT_NOTIFICATION_LIB "libnetmanager_stats_limit_notification.z.so"
+constexpr const char NETMGR_STATS_LIMIT_NOTIFICATION_LIB[] = "libnetmanager_stats_limit_notification.z.so";
 
 using GetNotificationInstancePtrFunc = std::shared_ptr<INetMgrStatsLimitNotification> (*)();
 
