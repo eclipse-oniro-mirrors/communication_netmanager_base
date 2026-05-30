@@ -26,6 +26,7 @@ class MockCoreServiceManager {
 public:
     static MockCoreServiceManager &GetInstance(void);
     MOCK_METHOD(int32_t, GetSlotId, (int32_t simId));
+    MOCK_METHOD(int32_t, GetSimId, (int32_t slotId));
     MOCK_METHOD(int32_t, GetSimIccId, (int32_t simId, std::u16string &iccId));
 
 private:
