@@ -36,6 +36,7 @@ int32_t LocalNetwork::AddInterface(std::string &interfaceName)
         return NETMANAGER_ERROR;
     }
 
+    std::lock_guard locker(mutex_);
     interfaces_.insert(interfaceName);
     return NETMANAGER_SUCCESS;
 }
@@ -52,6 +53,7 @@ int32_t LocalNetwork::RemoveInterface(std::string &interfaceName)
         return NETMANAGER_ERROR;
     }
 
+    std::lock_guard locker(mutex_);
     interfaces_.erase(interfaceName);
     return NETMANAGER_SUCCESS;
 }
