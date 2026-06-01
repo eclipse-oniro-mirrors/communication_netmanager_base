@@ -517,7 +517,7 @@ int32_t MultiVpnManager::SetVpnAddressIPv6(const std::string &ifName, const std:
         return NETMANAGER_ERROR;
     }
 
-    uint32_t ifindex = 0;
+    int32_t ifindex = 0;
     if (ioctl(net6Sock, SIOCGIFINDEX, &ifr) < 0) {
         NETNATIVE_LOGE("get ifindex failed: %{public}d", errno);
         close(net6Sock);
