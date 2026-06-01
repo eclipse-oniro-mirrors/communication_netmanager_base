@@ -97,8 +97,8 @@ void NetPolicyFirewall::ReportFirewallPolicyChange(const std::string &callingFnc
     if (rule == nullptr) {
         return;
     }
-    uint32_t pid = IPCSkeleton::GetCallingPid();
-    uint32_t uid = IPCSkeleton::GetCallingUid();
+    uint32_t pid = static_cast<uint32_t>(IPCSkeleton::GetCallingPid());
+    uint32_t uid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
     std::string callingBundleName = GetBundleNameForUid(uid);
     uint64_t curTime = CommonUtils::GetCurrentMilliSecond();
     std::stringstream ss;

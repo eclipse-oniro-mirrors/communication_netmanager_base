@@ -672,7 +672,7 @@ int32_t NetStatsService::GetAllTxBytes(uint64_t &stats)
 
 int32_t NetStatsService::GetUidRxBytes(uint64_t &stats, uint32_t uid)
 {
-    uint32_t callingUid = IPCSkeleton::GetCallingUid();
+    uint32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
     int32_t version = NetManagerPermission::GetApiVersion();
     NETMGR_LOG_D("Enter GetUidRxBytes, uid:%{public}d, version:%{public}d, callingUid:%{public}d",
         uid, version, callingUid);
@@ -688,7 +688,7 @@ int32_t NetStatsService::GetUidRxBytes(uint64_t &stats, uint32_t uid)
 
 int32_t NetStatsService::GetUidTxBytes(uint64_t &stats, uint32_t uid)
 {
-    uint32_t callingUid = IPCSkeleton::GetCallingUid();
+    uint32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
     int32_t version = NetManagerPermission::GetApiVersion();
     NETMGR_LOG_D("Enter GetUidTxBytes, uid:%{public}d, version:%{public}d, callingUid:%{public}d",
         uid, version, callingUid);
@@ -704,7 +704,7 @@ int32_t NetStatsService::GetUidTxBytes(uint64_t &stats, uint32_t uid)
 
 void NetStatsService::RecordCallingData(const std::string &callingFunction, uint32_t uid)
 {
-    uint32_t callingUid = IPCSkeleton::GetCallingUid();
+    uint32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
     SampleBundleInfo callingBundleInfo = GetSampleBundleInfoForUid(callingUid);
     std::string bundleName = callingBundleInfo.bundleName_;
     cJSON *recordJson = cJSON_CreateObject();
@@ -1514,7 +1514,7 @@ int32_t NetStatsService::SetCalibrationTraffic(uint32_t simId, int64_t remaining
     netStatsCached_->CacheIfaceStats();
     uint64_t usedTraffic = 0;
     if (totalMonthlyData != UINT64_MAX) {
-        usedTraffic = totalMonthlyData - remainingData;
+        usedTraffic = totalMonthlyData - static_cast<uint64_t>(remainingData);
         netStatsCalibrate_->UpdateCalibrationInfo(simId, usedTraffic);
     }
 
@@ -1529,7 +1529,7 @@ int32_t NetStatsService::SetCalibrationTraffic(uint32_t simId, int64_t remaining
             infoPtr->trafficLimit = totalMonthlyData;
         }
         if (totalMonthlyData == UINT64_MAX && infoPtr) {
-            uint64_t usedTraffic = infoPtr->trafficLimit - remainingData;
+            uint64_t usedTraffic = infoPtr->trafficLimit - static_cast<uint64_t>(remainingData);
             if (remainingData > 0 && infoPtr->trafficLimit < static_cast<uint64_t>(remainingData)) {
                 usedTraffic = 0;
             }
