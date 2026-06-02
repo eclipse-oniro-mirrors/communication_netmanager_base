@@ -31,6 +31,11 @@ int32_t CoreServiceClient::GetSlotId(int32_t simId)
     return NetManagerStandard::MockCoreServiceManager::GetInstance().GetSlotId(simId);
 }
 
+int32_t CoreServiceClient::GetSimId(int32_t slotId)
+{
+    return NetManagerStandard::MockCoreServiceManager::GetInstance().GetSimId(slotId);
+}
+
 int32_t CoreServiceClient::GetSimIccId(int32_t slotId, std::u16string &iccId)
 {
     return NetManagerStandard::MockCoreServiceManager::GetInstance().GetSimIccId(slotId, iccId);
