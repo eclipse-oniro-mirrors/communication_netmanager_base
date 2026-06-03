@@ -280,6 +280,12 @@ int32_t DnsParamCache::GetVpnResolverConfig(uint32_t uid, std::vector<std::strin
                 servers.assign(dns.begin(), dns.end());
             }
 #endif
+// LCOV_EXCL_START
+            if (servers.empty()) {
+                DNS_CONFIG_PRINT("GetVpnResolverConfig failed, servers is empty");
+                return -1;
+            }
+// LCOV_EXCL_STOP
             domains = it->second.GetDomains();
             baseTimeoutMsec = it->second.GetTimeoutMsec();
             retryCount = it->second.GetRetryCount();

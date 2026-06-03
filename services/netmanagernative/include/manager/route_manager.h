@@ -360,9 +360,6 @@ private:
     static bool CheckTunVpnCall(const std::string &vpnName);
     static bool CheckMultiVpnCall(const std::string &vpnName);
 
-    static int32_t InitOutcomingPacketMark();
-    static int32_t UpdateOutcomingIpMark(uint16_t netId, const std::string &addr, bool add);
-    static int32_t UpdateOutcomingUidMark(uint16_t netId, uid_t startUid, uid_t endUid, bool add);
     static int32_t UpdateVpnOutPutPenetrationRule(int32_t netId, const std::string &interfaceName,
                                                   const std::string &ruleDstIp, bool add);
     static uint32_t FindVpnIdByInterfacename(VpnRuleIdType type, const std::string &interfaceName);

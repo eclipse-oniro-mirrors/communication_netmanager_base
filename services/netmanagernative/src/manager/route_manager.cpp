@@ -121,9 +121,6 @@ std::string RouteManager::defauleNetWorkName_ = "";
 RouteManager::RouteManager()
 {
     Init();
-#ifdef SUPPORT_SYSVPN
-    InitOutcomingPacketMark();
-#endif // SUPPORT_SYSVPN
 }
 
 int32_t RouteManager::UpdateVnicRoute(const std::string &interfaceName, const std::string &destinationName,
@@ -356,29 +353,6 @@ int32_t RouteManager::ModifyPhysicalNetworkPermission(uint16_t netId, const std:
 }
 
 #ifdef SUPPORT_SYSVPN
-int32_t RouteManager::InitOutcomingPacketMark()
-{
-    NETNATIVE_LOGI("InitOutcomingPacketMark");
-    // need to call IptablesWrapper's RunCommand function.
-    std::string commandNew;
-    commandNew.append("-t mangle -N ");
-    commandNew.append(LOCAL_MANGLE_OUTPUT);
-    if (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, commandNew) == ROUTEMANAGER_ERROR) {
-        NETNATIVE_LOGI("InitOutcomingPacketMark error");
-        return ROUTEMANAGER_ERROR;
-    }
-
-    std::string commandJump;
-    commandJump.append("-t mangle");
-    commandJump.append(" -A OUTPUT -j ");
-    commandJump.append(LOCAL_MANGLE_OUTPUT);
-    if (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, commandJump) == ROUTEMANAGER_ERROR) {
-        NETNATIVE_LOGE("InitOutcomingPacketMark error");
-        return ROUTEMANAGER_ERROR;
-    }
-    return ROUTEMANAGER_SUCCESS;
-}
-
 int32_t RouteManager::UpdateVpnRules(uint16_t netId, const std::string &interface,
     const std::vector<std::string> &extMessages, bool add)
 {
@@ -400,63 +374,9 @@ int32_t RouteManager::UpdateVpnRules(uint16_t netId, const std::string &interfac
             NETNATIVE_LOGI("TUN mode, skipping update for interface: %{public}s", interface.c_str());
             continue;
         }
-        if (isSysVpn) {
-            ret = UpdateVpnOutPutPenetrationRule(netId, defauleNetWorkName_, msg, add);
-        } else {
-            ret = UpdateOutcomingIpMark(netId, msg, add);
-        }
+        ret = UpdateVpnOutPutPenetrationRule(netId, defauleNetWorkName_, msg, add);
     }
     return ret;
-}
-
-int32_t RouteManager::UpdateOutcomingIpMark(uint16_t netId, const std::string &addr, bool add)
-{
-    NETNATIVE_LOGI("UpdateOutcomingIpMark,add===%{public}d", add);
-    Fwmark fwmark;
-    fwmark.netId = netId;
-    NetworkPermission permission = NetworkPermission::PERMISSION_SYSTEM;
-    fwmark.permission = permission;
-    std::string action = "";
-    if (add) {
-        action = "-A ";
-    } else {
-        action = "-D ";
-    }
-    std::stringstream ss;
-    ss << "-t mangle " << action << LOCAL_MANGLE_OUTPUT << " -s " << addr
-    << " -j MARK --set-mark 0x" << std::nouppercase
-    << std::hex << fwmark.intValue;
-    // need to call IptablesWrapper's RunCommand function.
-    if (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, ss.str()) == ROUTEMANAGER_ERROR) {
-        NETNATIVE_LOGE("UpdateOutcomingIpMark error");
-        return ROUTEMANAGER_ERROR;
-    }
-    return ROUTEMANAGER_SUCCESS;
-}
-
-int32_t RouteManager::UpdateOutcomingUidMark(uint16_t netId, uid_t startUid, uid_t endUid, bool add)
-{
-    NETNATIVE_LOGI("UpdateOutcomingUidMark,add===%{public}d", add);
-    Fwmark fwmark;
-    fwmark.netId = netId;
-    NetworkPermission permission = NetworkPermission::PERMISSION_SYSTEM;
-    fwmark.permission = permission;
-    std::string action = "";
-    if (add) {
-        action = "-A ";
-    } else {
-        action = "-D ";
-    }
-    std::stringstream ss;
-    ss << "-t mangle " << action << LOCAL_MANGLE_OUTPUT << " -m owner --uid-owner " << startUid << "-" << endUid
-       << " -j MARK --set-mark 0x" << std::nouppercase
-       << std::hex << fwmark.intValue;
-    // need to call IptablesWrapper's RunCommand function.
-    if (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, ss.str()) == ROUTEMANAGER_ERROR) {
-        NETNATIVE_LOGE("UpdateOutcomingUidMark error");
-        return ROUTEMANAGER_ERROR;
-    }
-    return ROUTEMANAGER_SUCCESS;
 }
 
 int32_t RouteManager::SetVpnCallMode(const std::string &message)
@@ -698,14 +618,6 @@ int32_t RouteManager::UpdateVirtualNetwork(int32_t netId, const std::string &int
         ret += UpdateExplicitNetworkRuleWithUid(netId, table, PERMISSION_NONE, range.begin_, range.end_, add,
                                                 interfaceName);
         ret += UpdateOutputInterfaceRulesWithUid(interfaceName, table, PERMISSION_NONE, range.begin_, range.end_, add);
-
-        if (CheckMultiVpnCall(interfaceName)) {
-            NETNATIVE_LOGI("is ext vpn, add uid mark");
-            ret += UpdateOutcomingUidMark(netId, range.begin_, range.end_, add);
-            if (ret != ROUTEMANAGER_SUCCESS) {
-                NETNATIVE_LOGE("add uid mark error.");
-            }
-        }
 #else
         ret += UpdateVpnUidRangeRule(table, range.begin_, range.end_, add);
         ret += UpdateExplicitNetworkRuleWithUid(netId, table, PERMISSION_NONE, range.begin_, range.end_, add);

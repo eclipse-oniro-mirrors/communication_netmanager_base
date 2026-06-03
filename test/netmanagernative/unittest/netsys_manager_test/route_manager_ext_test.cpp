@@ -399,35 +399,6 @@ HWTEST_F(RouteManagerExtTest, CheckTunVpnCall001, TestSize.Level1)
     EXPECT_FALSE(RouteManager::CheckTunVpnCall(infaceName));
 }
 
-HWTEST_F(RouteManagerExtTest, InitOutcomingPacketMark001, TestSize.Level1)
-{
-    int32_t result = RouteManager::InitOutcomingPacketMark();
-    EXPECT_EQ(result, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(RouteManagerExtTest, UpdateOutcomingIpMark001, TestSize.Level1)
-{
-    uint16_t netId = 103;
-    std::string addr = "10.2.0.3";
-    int32_t result = RouteManager::UpdateOutcomingIpMark(netId, addr, true);
-    EXPECT_EQ(result, NETMANAGER_SUCCESS);
-
-    result = RouteManager::UpdateOutcomingIpMark(netId, addr, false);
-    EXPECT_EQ(result, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(RouteManagerExtTest, UpdateOutcomingUidMark001, TestSize.Level1)
-{
-    uint16_t netId = 103;
-    uid_t start = 2000021;
-    uid_t end = 2000021;
-    int32_t result = RouteManager::UpdateOutcomingUidMark(netId, start, end, true);
-    EXPECT_EQ(result, NETMANAGER_SUCCESS);
-
-    result = RouteManager::UpdateOutcomingUidMark(netId, start, end, false);
-    EXPECT_EQ(result, NETMANAGER_SUCCESS);
-}
-
 HWTEST_F(RouteManagerExtTest, UpdateVpnOutPutPenetrationRule001, TestSize.Level1)
 {
     uint16_t netId = 105;
