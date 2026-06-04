@@ -374,8 +374,8 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
         fromIface.find(P2P_IFACE_NAME) != std::string::npos) {
         wifiShareInterface_ = fromIface;
         EnableShareUnreachableRoute(RouteManager::UNREACHABLE_NETWORK);
-        AddSharingSecurityRules(fromIface, toIface);
     }
+    AddSharingSecurityRules(fromIface, toIface);
     interfaceForwards_.insert(fromIface + toIface);
     return 0;
 }
@@ -417,9 +417,9 @@ int32_t SharingManager::IpfwdRemoveInterfaceForward(const std::string &fromIface
         fromIface.find(P2P_IFACE_NAME) != std::string::npos) {
         ClearForbidIpRules();
         DisableShareUnreachableRoute(RouteManager::UNREACHABLE_NETWORK);
-        RemoveSharingSecurityRules(fromIface, toIface);
         wifiShareInterface_ = "";
     }
+    RemoveSharingSecurityRules(fromIface, toIface);
     return 0;
 }
 
