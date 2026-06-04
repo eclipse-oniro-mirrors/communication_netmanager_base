@@ -125,19 +125,20 @@ int32_t DnsParamCache::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMse
         return -ENOENT;
     }
 
+    auto uniqueServers = RemoveDuplicateNameservers(servers);
     auto oldDnsServers = it->second.GetServers();
     std::sort(oldDnsServers.begin(), oldDnsServers.end());
 
-    auto newDnsServers = RemoveDuplicateNameservers(servers);
+    auto newDnsServers = uniqueServers;
     std::sort(newDnsServers.begin(), newDnsServers.end());
 
     if (oldDnsServers != newDnsServers) {
         it->second.GetCache().Clear();
         it->second.ClearNodataCache();
     }
-
+    
     it->second.SetNetId(netId);
-    it->second.SetServers(newDnsServers);
+    it->second.SetServers(uniqueServers);
     it->second.SetDomains(domains);
     if (retryCount == 0) {
         it->second.SetRetryCount(RES_DEFAULT_RETRY);
