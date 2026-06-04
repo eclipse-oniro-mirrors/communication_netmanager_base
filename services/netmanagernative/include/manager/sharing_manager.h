@@ -124,6 +124,9 @@ private:
     std::mutex enableV6mutex_;
     std::string wifiShareInterface_ = "";
 
+    std::map<std::string, std::string> sharingIfaceToIpMap_;
+    std::mutex sharingIfaceToIpMutex_;
+
     void IpfwdExecSaveBak();
     void InitChildChains();
     void CheckInited();
@@ -137,6 +140,9 @@ private:
     int32_t EnableShareUnreachableRoute(RouteManager::TableType tableType);
     int32_t DisableShareUnreachableRoute(RouteManager::TableType tableType);
     void ClearForbidIpRules();
+    std::string GetLocalIpAddress(const std::string &upstreamIface);
+    void AddSharingSecurityRules(const std::string &fromIface, const std::string &toIface);
+    void RemoveSharingSecurityRules(const std::string &fromIface, const std::string &toIface);
 };
 } // namespace nmd
 } // namespace OHOS

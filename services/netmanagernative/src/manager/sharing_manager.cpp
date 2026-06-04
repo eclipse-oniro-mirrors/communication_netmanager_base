@@ -17,6 +17,7 @@
 
 #include <cerrno>
 #include <fcntl.h>
+#include <ifaddrs.h>
 #include <regex>
 #include <unistd.h>
 #include <charconv>
@@ -51,6 +52,14 @@ constexpr const char *OPEN_IPV6_PRIVACY_EXTENSIONS = "2";
 constexpr const char *CLOSE_IPV6_PRIVACY_EXTENSIONS = "0";
 constexpr const char *ENABLE_IPV6_VALUE = "0";
 constexpr const char *DISABLE_IPV6_VALUE = "1";
+
+// Sharing security rules constants
+constexpr const char *INPUT_CHAIN = " INPUT";
+constexpr const char *FORWARD_CHAIN = " FORWARD";
+constexpr const char *INPUT_I_OPT = " -i ";
+constexpr const char *SRC_OPT = " -s ";
+constexpr const char *DST_OPT = " -d ";
+constexpr const char *J_DROP = " -j DROP";
 
 // commands of set nat
 constexpr const char *APPEND_NAT_POSTROUTING = "-A POSTROUTING -j tetherctrl_nat_POSTROUTING";
@@ -365,6 +374,7 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
         fromIface.find(P2P_IFACE_NAME) != std::string::npos) {
         wifiShareInterface_ = fromIface;
         EnableShareUnreachableRoute(RouteManager::UNREACHABLE_NETWORK);
+        AddSharingSecurityRules(fromIface, toIface);
     }
     interfaceForwards_.insert(fromIface + toIface);
     return 0;
@@ -407,6 +417,7 @@ int32_t SharingManager::IpfwdRemoveInterfaceForward(const std::string &fromIface
         fromIface.find(P2P_IFACE_NAME) != std::string::npos) {
         ClearForbidIpRules();
         DisableShareUnreachableRoute(RouteManager::UNREACHABLE_NETWORK);
+        RemoveSharingSecurityRules(fromIface, toIface);
         wifiShareInterface_ = "";
     }
     return 0;
@@ -521,6 +532,9 @@ static bool ConvertStrToLong(const std::string &str, int64_t &value)
 void SharingManager::GetTraffic(std::smatch &matches, std::string &ifaceName, NetworkSharingTraffic &traffic,
     bool &isFindTx, bool &isFindRx)
 {
+    if (matches.empty()) {
+        return;
+    }
     for (uint32_t i = 0; i < matches.size() - 1; i++) {
         std::string matchTemp = matches[i];
         NETNATIVE_LOG_D("GetNetworkCellularSharingTraffic matche[%{public}s]", matchTemp.c_str());
@@ -663,6 +677,125 @@ int32_t SharingManager::SetInternetAccessByIpForWifiShare(
     uint16_t action = accessInternet ? RTM_DELRULE : RTM_NEWRULE;
     int32_t res = RouteManager::SetSharingUnreachableIpRule(action, wifiShareInterface_, ipAddr, family);
     return res;
+}
+
+std::string SharingManager::GetLocalIpAddress(const std::string &upstreamIface)
+{
+    struct ifaddrs *ifaddr = nullptr;
+    struct ifaddrs *ifa = nullptr;
+    std::string localIp;
+
+    if (getifaddrs(&ifaddr) == -1) {
+        NETNATIVE_LOGE("GetLocalIpAddress: getifaddrs failed");
+        return localIp;
+    }
+
+    for (ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == nullptr) {
+            continue;
+        }
+
+        if (ifa->ifa_addr->sa_family != AF_INET) {
+            continue;
+        }
+
+        if (ifa->ifa_name == nullptr) {
+            continue;
+        }
+
+        std::string ifaceName(ifa->ifa_name);
+        if (ifaceName != upstreamIface) {
+            continue;
+        }
+
+        struct sockaddr_in *ipv4 = reinterpret_cast<sockaddr_in *>(ifa->ifa_addr);
+        char ip[INET_ADDRSTRLEN] = {0};
+        if (inet_ntop(AF_INET, &(ipv4->sin_addr), ip, INET_ADDRSTRLEN) != nullptr) {
+            localIp = ip;
+            break;
+        }
+    }
+
+    freeifaddrs(ifaddr);
+    return localIp;
+}
+
+void SharingManager::AddSharingSecurityRules(const std::string &fromIface, const std::string &toIface)
+{
+    std::string localIp = GetLocalIpAddress(toIface);
+    if (localIp.empty()) {
+        NETNATIVE_LOGW("AddSharingSecurityRules: localIp is empty, skip adding security rules");
+        return;
+    }
+
+    // Record the mapping of fromIface to localIp for use during Remove
+    {
+        std::lock_guard<std::mutex> guard(sharingIfaceToIpMutex_);
+        sharingIfaceToIpMap_[fromIface] = localIp;
+    }
+
+    std::string cmdSet = "";
+    CombineRestoreRules(FILTER_TABLE, cmdSet);
+
+    std::string inputDropRule = std::string(INPUT_CHAIN) + INPUT_I_OPT + fromIface + SRC_OPT + localIp + J_DROP;
+    SetForwardRules(true, inputDropRule, cmdSet);
+
+    std::string inputDropRuleDst = std::string(INPUT_CHAIN) + INPUT_I_OPT + fromIface + DST_OPT + localIp + J_DROP;
+    SetForwardRules(true, inputDropRuleDst, cmdSet);
+
+    std::string forwardDropRule = std::string(FORWARD_CHAIN) + INPUT_I_OPT + fromIface + SRC_OPT + localIp + J_DROP;
+    SetForwardRules(true, forwardDropRule, cmdSet);
+
+    std::string forwardDropRuleDst = std::string(FORWARD_CHAIN) + INPUT_I_OPT + fromIface + DST_OPT + localIp + J_DROP;
+    SetForwardRules(true, forwardDropRuleDst, cmdSet);
+
+    CombineRestoreRules(CMD_COMMIT, cmdSet);
+    iptablesWrapper_->RunRestoreCommands(IPTYPE_IPV4, cmdSet);
+    NETNATIVE_LOGI("AddSharingSecurityRules: added security rules for interface %{public}s with IP %{private}s",
+        fromIface.c_str(), localIp.c_str());
+}
+
+void SharingManager::RemoveSharingSecurityRules(const std::string &fromIface, const std::string &toIface)
+{
+    // First try to get IP from the recorded mapping
+    std::string localIp;
+    {
+        std::lock_guard<std::mutex> guard(sharingIfaceToIpMutex_);
+        auto it = sharingIfaceToIpMap_.find(fromIface);
+        if (it != sharingIfaceToIpMap_.end()) {
+            localIp = it->second;
+            sharingIfaceToIpMap_.erase(it);
+        }
+    }
+
+    // If not found in mapping, try to get IP from interface (may fail if interface is already down)
+    if (localIp.empty()) {
+        localIp = GetLocalIpAddress(toIface);
+        if (localIp.empty()) {
+            NETNATIVE_LOGW("RemoveSharingSecurityRules: localIp is empty, skip removing security rules");
+            return;
+        }
+    }
+
+    std::string cmdSet = "";
+    CombineRestoreRules(FILTER_TABLE, cmdSet);
+
+    std::string inputDropRule = std::string(INPUT_CHAIN) + INPUT_I_OPT + fromIface + SRC_OPT + localIp + J_DROP;
+    SetForwardRules(false, inputDropRule, cmdSet);
+
+    std::string inputDropRuleDst = std::string(INPUT_CHAIN) + INPUT_I_OPT + fromIface + DST_OPT + localIp + J_DROP;
+    SetForwardRules(false, inputDropRuleDst, cmdSet);
+
+    std::string forwardDropRule = std::string(FORWARD_CHAIN) + INPUT_I_OPT + fromIface + SRC_OPT + localIp + J_DROP;
+    SetForwardRules(false, forwardDropRule, cmdSet);
+
+    std::string forwardDropRuleDst = std::string(FORWARD_CHAIN) + INPUT_I_OPT + fromIface + DST_OPT + localIp + J_DROP;
+    SetForwardRules(false, forwardDropRuleDst, cmdSet);
+
+    CombineRestoreRules(CMD_COMMIT, cmdSet);
+    iptablesWrapper_->RunRestoreCommands(IPTYPE_IPV4, cmdSet);
+    NETNATIVE_LOGI("RemoveSharingSecurityRules: removed security rules for interface %{public}s with IP %{private}s",
+        fromIface.c_str(), localIp.c_str());
 }
 } // namespace nmd
 } // namespace OHOS
