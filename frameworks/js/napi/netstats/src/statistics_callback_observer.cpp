@@ -52,8 +52,6 @@ int32_t StatisticsCallbackObserver::NetUidStatsChanged(const std::string &iface,
 
 napi_value StatisticsCallbackObserver::CreateNetIfaceStatsChangedParam(napi_env env, void *data)
 {
-    auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
-    std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
     auto pair(reinterpret_cast<std::pair<std::string, uint32_t> *>(data));
     napi_value obj = NapiUtils::CreateObject(env);
     NapiUtils::SetStringPropertyUtf8(env, obj, KEY_IFACE, pair->first);
@@ -63,8 +61,6 @@ napi_value StatisticsCallbackObserver::CreateNetIfaceStatsChangedParam(napi_env 
 
 napi_value StatisticsCallbackObserver::CreateNetUidStatsChangedParam(napi_env env, void *data)
 {
-    auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
-    std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
     auto pair(reinterpret_cast<std::pair<std::string, uint32_t> *>(data));
     napi_value obj = NapiUtils::CreateObject(env);
     NapiUtils::SetStringPropertyUtf8(env, obj, KEY_IFACE, pair->first);

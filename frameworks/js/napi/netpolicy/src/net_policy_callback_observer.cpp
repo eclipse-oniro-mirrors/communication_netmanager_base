@@ -88,8 +88,6 @@ int32_t NetPolicyCallbackObserver::NetBackgroundPolicyChange(bool isBackgroundPo
 
 napi_value NetPolicyCallbackObserver::CreateNetUidPolicyChangeParam(napi_env env, void *data)
 {
-    auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
-    std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
     auto pair = static_cast<std::pair<uint32_t, uint32_t> *>(data);
     napi_value obj = NapiUtils::CreateObject(env);
     NapiUtils::SetUint32Property(env, obj, KEY_UID, pair->first);
@@ -100,8 +98,6 @@ napi_value NetPolicyCallbackObserver::CreateNetUidPolicyChangeParam(napi_env env
 
 napi_value NetPolicyCallbackObserver::CreateNetUidRuleChangeParam(napi_env env, void *data)
 {
-    auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
-    std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
     auto pair = static_cast<std::pair<uint32_t, uint32_t> *>(data);
     napi_value obj = NapiUtils::CreateObject(env);
     NapiUtils::SetUint32Property(env, obj, KEY_UID, pair->first);
@@ -112,8 +108,6 @@ napi_value NetPolicyCallbackObserver::CreateNetUidRuleChangeParam(napi_env env, 
 
 napi_value NetPolicyCallbackObserver::CreateNetQuotaPolicyChangeParam(napi_env env, void *data)
 {
-    auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
-    std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
     auto quotaPolicies = static_cast<std::vector<NetQuotaPolicy> *>(data);
     auto arraySize = quotaPolicies->size();
     napi_value callbackValue = NapiUtils::CreateArray(env, arraySize);
@@ -128,8 +122,6 @@ napi_value NetPolicyCallbackObserver::CreateNetQuotaPolicyChangeParam(napi_env e
 
 napi_value NetPolicyCallbackObserver::CreateMeteredIfacesChangeParam(napi_env env, void *data)
 {
-    auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
-    std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
     auto ifaces = static_cast<std::vector<std::string> *>(data);
     auto arraySize = ifaces->size();
     napi_value callbackValue = NapiUtils::CreateArray(env, arraySize);
@@ -144,8 +136,6 @@ napi_value NetPolicyCallbackObserver::CreateMeteredIfacesChangeParam(napi_env en
 
 napi_value NetPolicyCallbackObserver::CreateNetBackgroundPolicyChangeParam(napi_env env, void *data)
 {
-    auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
-    std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
     auto isAllowPtr = static_cast<bool *>(data);
     if (isAllowPtr == nullptr) {
         return nullptr;
