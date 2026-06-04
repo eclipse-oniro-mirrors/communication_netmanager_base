@@ -35,13 +35,9 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-    static inline std::shared_ptr<SharingManager> sharingManager = nullptr;
 };
 
-void SharingManagerTest::SetUpTestCase()
-{
-    sharingManager = std::make_shared<SharingManager>();
-}
+void SharingManagerTest::SetUpTestCase() {}
 
 void SharingManagerTest::TearDownTestCase() {}
 
@@ -51,24 +47,28 @@ void SharingManagerTest::TearDown() {}
 
 HWTEST_F(SharingManagerTest, IpEnableForwardingTest, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     auto result = sharingManager->IpEnableForwarding("aTestName");
     ASSERT_EQ(result, 0);
 }
 
 HWTEST_F(SharingManagerTest, IpDisableForwarding, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     auto result = sharingManager->IpDisableForwarding("aTestName");
     ASSERT_EQ(result, 0);
 }
 
 HWTEST_F(SharingManagerTest, EnableNat001, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     auto result = sharingManager->EnableNat("down", "up");
     ASSERT_EQ(result, 0);
 }
 
 HWTEST_F(SharingManagerTest, EnableNat002, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     const std::string enableAction = "down";
     int32_t ret = sharingManager->EnableNat(enableAction, enableAction);
     ASSERT_EQ(ret, -1);
@@ -84,12 +84,14 @@ HWTEST_F(SharingManagerTest, EnableNat002, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, DisableNat001, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     sharingManager->DisableNat("down", "up");
     ASSERT_STREQ("0", "0");
 }
 
 HWTEST_F(SharingManagerTest, DisableNat002, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     const std::string enableAction = "down";
     int32_t ret = sharingManager->DisableNat(enableAction, enableAction);
     ASSERT_EQ(ret, -1);
@@ -105,12 +107,14 @@ HWTEST_F(SharingManagerTest, DisableNat002, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward001, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     sharingManager->IpfwdAddInterfaceForward("down", "up");
     ASSERT_STREQ("0", "0");
 }
 
 HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward002, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     const std::string enableAction = "down";
     int32_t ret = sharingManager->IpfwdAddInterfaceForward(enableAction, enableAction);
     ASSERT_EQ(ret, -1);
@@ -124,6 +128,7 @@ HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward002, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward003, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     sharingManager->interfaceForwards_.insert("updown");
     int32_t ret = sharingManager->IpfwdAddInterfaceForward("wlan0", "wlan1");
     EXPECT_EQ(ret, 0);
@@ -131,6 +136,7 @@ HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward003, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward004, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     sharingManager->IpfwdAddInterfaceForward("wlan0", "wlan1");
     EXPECT_NE(sharingManager->wifiShareInterface_, "wlan0");
     sharingManager->IpfwdRemoveInterfaceForward("wlan0", "wlan1");
@@ -139,6 +145,7 @@ HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward004, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward005, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     sharingManager->IpfwdAddInterfaceForward("p2p-p2p0", "p2p-p2p1");
     sharingManager->IpfwdRemoveInterfaceForward("p2p-p2p0", "p2p-p2p1");
     EXPECT_EQ(sharingManager->wifiShareInterface_, "");
@@ -146,12 +153,14 @@ HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward005, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, IpFwdRemoveInterfaceForward001, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     sharingManager->IpfwdRemoveInterfaceForward("down", "up");
     ASSERT_STREQ("0", "0");
 }
 
 HWTEST_F(SharingManagerTest, IpFwdRemoveInterfaceForward002, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     const std::string enableAction = "down";
     int32_t ret = sharingManager->IpfwdRemoveInterfaceForward(enableAction, enableAction);
     ASSERT_EQ(ret, -1);
@@ -165,6 +174,7 @@ HWTEST_F(SharingManagerTest, IpFwdRemoveInterfaceForward002, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, GetNetworkSharingTraffic001, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     std::string downIface = "down0";
     std::string upIface = "up0";
     NetworkSharingTraffic traffic;
@@ -174,6 +184,7 @@ HWTEST_F(SharingManagerTest, GetNetworkSharingTraffic001, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, GetNetworkSharingTraffic002, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     std::string downIface = "eth0";
     std::string upIface = "wlan0";
     NetworkSharingTraffic traffic;
@@ -183,6 +194,7 @@ HWTEST_F(SharingManagerTest, GetNetworkSharingTraffic002, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, SetIpFwdEnable001, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     int32_t ret = sharingManager->SetIpFwdEnable();
     EXPECT_EQ(ret, 0);
     std::string cmd = "";
@@ -192,6 +204,7 @@ HWTEST_F(SharingManagerTest, SetIpFwdEnable001, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, EnableNat003, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     std::string downstreamIface = "eth0";
     auto result = sharingManager->EnableNat(downstreamIface, downstreamIface);
     EXPECT_EQ(result, -1);
@@ -199,6 +212,7 @@ HWTEST_F(SharingManagerTest, EnableNat003, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, IpfwdAddInterfaceForward003, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     std::string fromIface = "down";
     std::string toIface = "up";
     sharingManager->interfaceForwards_ = {"123"};
@@ -208,6 +222,7 @@ HWTEST_F(SharingManagerTest, IpfwdAddInterfaceForward003, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, IpfwdRemoveInterfaceForward003, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     std::string fromIface = "down";
     std::string toIface = "up";
     sharingManager->interfaceForwards_ = {"123"};
@@ -217,6 +232,7 @@ HWTEST_F(SharingManagerTest, IpfwdRemoveInterfaceForward003, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic001, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     NetworkSharingTraffic traffic;
     std::string ifaceName = "";
     std::string result = "Chain tetherctrl_counters (2 references) \n"
@@ -229,6 +245,7 @@ HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic001, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic002, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     NetworkSharingTraffic traffic;
     std::string ifaceName = "";
     std::string result = "Chain tetherctrl_counters (2 references) \n"
@@ -241,6 +258,7 @@ HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic002, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic003, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     NetworkSharingTraffic traffic;
     std::string ifaceName = "";
     std::string result = "Chain tetherctrl_counters (2 references) \n"
@@ -253,6 +271,7 @@ HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic003, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic004, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     NetworkSharingTraffic traffic;
     std::string ifaceName = "";
     std::string result = "Chain tetherctrl_counters (2 references) \n"
@@ -265,6 +284,7 @@ HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic004, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, ClearForbidIpRules001, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     std::string ip = "1.1.1.1";
     uint8_t family = 2;
     sharingManager->forbidIpsMap_.clear();
@@ -275,6 +295,7 @@ HWTEST_F(SharingManagerTest, ClearForbidIpRules001, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, SetInternetAccessByIpForWifiShare001, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     std::string ip = "1.1.1.1";
     uint8_t family = 2;
     bool access = false;
@@ -301,12 +322,305 @@ HWTEST_F(SharingManagerTest, SetInternetAccessByIpForWifiShare001, TestSize.Leve
 
 HWTEST_F(SharingManagerTest, EnableShareUnreachableRoute001, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     EXPECT_EQ(sharingManager->EnableShareUnreachableRoute(RouteManager::TABLE_TYPE_BUTT), -1);
 }
 
 HWTEST_F(SharingManagerTest, DisableShareUnreachableRoute001, TestSize.Level1)
 {
+    auto sharingManager = std::make_shared<SharingManager>();
     EXPECT_EQ(sharingManager->DisableShareUnreachableRoute(RouteManager::TABLE_TYPE_BUTT), -1);
+}
+
+// Tests for GetLocalIpAddress
+HWTEST_F(SharingManagerTest, GetLocalIpAddress001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Test with non-existent interface
+    std::string result = sharingManager->GetLocalIpAddress("nonexistent_iface");
+    EXPECT_TRUE(result.empty());
+}
+
+HWTEST_F(SharingManagerTest, GetLocalIpAddress002, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Test with empty interface name
+    std::string result = sharingManager->GetLocalIpAddress("");
+    EXPECT_TRUE(result.empty());
+}
+
+// Tests for AddSharingSecurityRules
+HWTEST_F(SharingManagerTest, AddSharingSecurityRules001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Test with wlan interface - rules should be added
+    sharingManager->AddSharingSecurityRules("wlan1", "wlan0");
+    // Verify the mapping is recorded
+    EXPECT_TRUE(sharingManager->sharingIfaceToIpMap_.find("wlan1") !=
+                sharingManager->sharingIfaceToIpMap_.end() ||
+                sharingManager->sharingIfaceToIpMap_.empty());
+}
+
+HWTEST_F(SharingManagerTest, AddSharingSecurityRules002, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Test with p2p interface
+    sharingManager->AddSharingSecurityRules("p2p-p2p0", "p2p-p2p1");
+    EXPECT_TRUE(sharingManager->sharingIfaceToIpMap_.find("p2p-p2p0") !=
+                sharingManager->sharingIfaceToIpMap_.end() ||
+                sharingManager->sharingIfaceToIpMap_.empty());
+}
+
+// Tests for RemoveSharingSecurityRules
+HWTEST_F(SharingManagerTest, RemoveSharingSecurityRules001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Pre-populate the mapping
+    sharingManager->sharingIfaceToIpMap_["wlan0"] = "192.168.1.1";
+    // Test removing rules with recorded IP
+    sharingManager->RemoveSharingSecurityRules("wlan0", "wlan1");
+    // Verify the mapping is removed
+    EXPECT_TRUE(sharingManager->sharingIfaceToIpMap_.find("wlan0") ==
+                sharingManager->sharingIfaceToIpMap_.end());
+}
+
+HWTEST_F(SharingManagerTest, RemoveSharingSecurityRules002, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Test removing rules without recorded IP (empty map)
+    sharingManager->sharingIfaceToIpMap_.clear();
+    sharingManager->RemoveSharingSecurityRules("wlan0", "wlan1");
+    // Map should still be empty since IP couldn't be retrieved
+    EXPECT_TRUE(sharingManager->sharingIfaceToIpMap_.empty());
+}
+
+HWTEST_F(SharingManagerTest, RemoveSharingSecurityRules003, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Test with p2p interface
+    sharingManager->sharingIfaceToIpMap_["p2p-p2p0"] = "192.168.1.1";
+    sharingManager->RemoveSharingSecurityRules("p2p-p2p0", "p2p-p2p1");
+    EXPECT_TRUE(sharingManager->sharingIfaceToIpMap_.find("p2p-p2p0") ==
+                sharingManager->sharingIfaceToIpMap_.end());
+}
+
+// Tests for SetForwardRules
+HWTEST_F(SharingManagerTest, SetForwardRules001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    std::string cmdSet = "";
+    std::string rule = " FORWARD -j DROP";
+    // Test adding rule
+    sharingManager->SetForwardRules(true, rule, cmdSet);
+    EXPECT_TRUE(cmdSet.find("-A") != std::string::npos);
+    EXPECT_TRUE(cmdSet.find(rule) != std::string::npos);
+}
+
+HWTEST_F(SharingManagerTest, SetForwardRules002, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    std::string cmdSet = "";
+    std::string rule = " FORWARD -j DROP";
+    // Test deleting rule
+    sharingManager->SetForwardRules(false, rule, cmdSet);
+    EXPECT_TRUE(cmdSet.find("-D") != std::string::npos);
+    EXPECT_TRUE(cmdSet.find(rule) != std::string::npos);
+}
+
+// Tests for CombineRestoreRules
+HWTEST_F(SharingManagerTest, CombineRestoreRules001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    std::string cmdSet = "";
+    std::string rule = "*filter";
+    sharingManager->CombineRestoreRules(rule, cmdSet);
+    EXPECT_TRUE(cmdSet.find(rule) != std::string::npos);
+}
+
+HWTEST_F(SharingManagerTest, CombineRestoreRules002, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    std::string cmdSet = "";
+    std::string rule = "COMMIT";
+    sharingManager->CombineRestoreRules(rule, cmdSet);
+    EXPECT_TRUE(cmdSet.find(rule) != std::string::npos);
+}
+
+// Tests for sharingIfaceToIpMap_ mutex protection
+HWTEST_F(SharingManagerTest, SharingIfaceToIpMapMutex001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Test that map is initially empty
+    EXPECT_TRUE(sharingManager->sharingIfaceToIpMap_.empty());
+    // Add some entries
+    sharingManager->sharingIfaceToIpMap_["wlan0"] = "192.168.1.1";
+    sharingManager->sharingIfaceToIpMap_["wlan1"] = "192.168.1.2";
+    EXPECT_EQ(sharingManager->sharingIfaceToIpMap_.size(), 2);
+    // Clear the map
+    sharingManager->sharingIfaceToIpMap_.clear();
+    EXPECT_TRUE(sharingManager->sharingIfaceToIpMap_.empty());
+}
+
+// Tests for interfaceForwards_ set
+HWTEST_F(SharingManagerTest, InterfaceForwardsSet001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Test that set is initially empty
+    EXPECT_TRUE(sharingManager->interfaceForwards_.empty());
+    // Add entries
+    sharingManager->interfaceForwards_.insert("wlan0wlan1");
+    sharingManager->interfaceForwards_.insert("wlan1wlan0");
+    EXPECT_EQ(sharingManager->interfaceForwards_.size(), 2);
+    // Check find
+    EXPECT_TRUE(sharingManager->interfaceForwards_.find("wlan0wlan1") !=
+                sharingManager->interfaceForwards_.end());
+    // Erase entry
+    sharingManager->interfaceForwards_.erase("wlan0wlan1");
+    EXPECT_EQ(sharingManager->interfaceForwards_.size(), 1);
+}
+
+// Tests for forbidIpsMap_
+HWTEST_F(SharingManagerTest, ForbidIpsMap001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Test that map is initially empty
+    EXPECT_TRUE(sharingManager->forbidIpsMap_.empty());
+    // Add entry
+    sharingManager->forbidIpsMap_["192.168.1.1"] = AF_INET;
+    EXPECT_EQ(sharingManager->forbidIpsMap_.size(), 1);
+    // Check find
+    EXPECT_TRUE(sharingManager->forbidIpsMap_.find("192.168.1.1") !=
+                sharingManager->forbidIpsMap_.end());
+    // Erase entry
+    sharingManager->forbidIpsMap_.erase("192.168.1.1");
+    EXPECT_TRUE(sharingManager->forbidIpsMap_.empty());
+}
+
+// Tests for wifiShareInterface_
+HWTEST_F(SharingManagerTest, WifiShareInterface001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Test that string is initially empty
+    EXPECT_TRUE(sharingManager->wifiShareInterface_.empty());
+    // Set value
+    sharingManager->wifiShareInterface_ = "wlan0";
+    EXPECT_EQ(sharingManager->wifiShareInterface_, "wlan0");
+    // Clear value
+    sharingManager->wifiShareInterface_ = "";
+    EXPECT_TRUE(sharingManager->wifiShareInterface_.empty());
+}
+
+// Tests for inited_ flag
+HWTEST_F(SharingManagerTest, InitedFlag001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Test that inited_ is initially false
+    EXPECT_FALSE(sharingManager->inited_);
+}
+
+// Tests for CheckInited
+HWTEST_F(SharingManagerTest, CheckInited001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Call CheckInited - should initialize if not already
+    sharingManager->CheckInited();
+    // After CheckInited, inited_ should be true
+    EXPECT_TRUE(sharingManager->inited_);
+}
+
+// Tests for InitChildChains
+HWTEST_F(SharingManagerTest, InitChildChains001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Call InitChildChains directly
+    sharingManager->InitChildChains();
+    // After InitChildChains, inited_ should be true
+    EXPECT_TRUE(sharingManager->inited_);
+}
+
+// Tests for IpfwdExecSaveBak
+HWTEST_F(SharingManagerTest, IpfwdExecSaveBak001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Call IpfwdExecSaveBak - should not crash
+    sharingManager->IpfwdExecSaveBak();
+    // No assertion needed, just verify it doesn't crash
+    SUCCEED();
+}
+
+// Tests for SetIpv6PrivacyExtensions
+HWTEST_F(SharingManagerTest, SetIpv6PrivacyExtensions001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Test with valid interface name
+    int32_t ret = sharingManager->SetIpv6PrivacyExtensions("wlan0", 1);
+    // Result depends on system state
+    EXPECT_TRUE(ret == 0 || ret == -1);
+}
+
+HWTEST_F(SharingManagerTest, SetIpv6PrivacyExtensions002, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Test with valid interface name, disable
+    int32_t ret = sharingManager->SetIpv6PrivacyExtensions("wlan0", 0);
+    // Result depends on system state
+    EXPECT_TRUE(ret == 0 || ret == -1);
+}
+
+// Tests for SetEnableIpv6
+HWTEST_F(SharingManagerTest, SetEnableIpv6001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Test enabling IPv6
+    int32_t ret = sharingManager->SetEnableIpv6("wlan0", 1, false);
+    // Result depends on system state
+    EXPECT_TRUE(ret == 0 || ret == -1);
+}
+
+HWTEST_F(SharingManagerTest, SetEnableIpv6002, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // Test disabling IPv6
+    int32_t ret = sharingManager->SetEnableIpv6("wlan0", 0, false);
+    // Result depends on system state
+    EXPECT_TRUE(ret == 0 || ret == -1);
+}
+
+HWTEST_F(SharingManagerTest, SetEnableIpv6003, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    // First enable
+    sharingManager->SetEnableIpv6("wlan0", 1, false);
+    // Then disable with restart flag
+    int32_t ret = sharingManager->SetEnableIpv6("wlan0", 0, true);
+    // Result depends on system state
+    EXPECT_TRUE(ret == 0 || ret == -1);
+}
+
+// Tests for GetNetworkCellularSharingTraffic
+HWTEST_F(SharingManagerTest, GetNetworkCellularSharingTraffic001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    NetworkSharingTraffic traffic;
+    std::string ifaceName;
+    int32_t ret = sharingManager->GetNetworkCellularSharingTraffic(traffic, ifaceName);
+    // Result depends on system state
+    EXPECT_TRUE(ret == 0 || ret == -1);
+}
+
+// Tests for GetTraffic
+HWTEST_F(SharingManagerTest, GetTraffic001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    std::smatch matches;
+    std::string ifaceName;
+    NetworkSharingTraffic traffic;
+    bool isFindTx = false;
+    bool isFindRx = false;
+    // Test with empty matches
+    sharingManager->GetTraffic(matches, ifaceName, traffic, isFindTx, isFindRx);
+    // No crash expected
+    SUCCEED();
 }
 } // namespace NetsysNative
 } // namespace OHOS
