@@ -136,7 +136,7 @@ int32_t DnsParamCache::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMse
         it->second.GetCache().Clear();
         it->second.ClearNodataCache();
     }
-    
+
     it->second.SetNetId(netId);
     it->second.SetServers(uniqueServers);
     it->second.SetDomains(domains);
