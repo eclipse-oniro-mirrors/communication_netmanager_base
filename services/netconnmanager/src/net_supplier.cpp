@@ -269,10 +269,10 @@ bool NetSupplier::IsAvailable() const
 
 bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps, const NetRequest &netRequest)
 {
-    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request connect, available=%{public}d", supplierId_,
-                 netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
-    if (!(netSupplierType_ == NetBearType::BEARER_WIFI && !netRequest.ident.empty())) {
-        UpdateNetConnState(NET_CONN_STATE_IDLE);
+    if (netSupplierType_ == BEARER_CELLULAR) {
+        NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request connect, available=%{public}d, "
+            "isInternet:%{public}d", supplierId_, netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_,
+            netCaps_.HasNetCap(NET_CAPABILITY_INTERNET));
     }
 
     if (netController_ == nullptr) {
@@ -301,8 +301,11 @@ bool NetSupplier::GetRestrictBackground() const
 
 bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps, const NetRequest &netrequest)
 {
-    NETMGR_LOG_D("Supplier[%{public}d, %{public}s] request disconnect, available=%{public}d", supplierId_,
-                 netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
+    if (netSupplierType_ == BEARER_CELLULAR) {
+        NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request disconnect, available=%{public}d, "
+            "isInternet:%{public}d", supplierId_, netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_,
+            netCaps_.HasNetCap(NET_CAPABILITY_INTERNET));
+    }
     if (netController_ == nullptr) {
         NETMGR_LOG_E("netController_ is nullptr");
         return false;
@@ -372,8 +375,9 @@ int32_t NetSupplier::SelectAsBestNetwork(const NetRequest &netrequest)
 
 void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const NetRequest &netrequest)
 {
-    NETMGR_LOG_D("Supplier[%{public}d, %{public}s] receive best score, bestSupplierId[%{public}d]", supplierId_,
-                 netSupplierIdent_.c_str(), supplierId);
+    NETMGR_LOG_D("Supplier[%{public}d, %{public}s] receive best score, bestSupplierId[%{public}d], "
+        "isInternet:%{public}d", supplierId_, netSupplierIdent_.c_str(), supplierId,
+        netCaps_.HasNetCap(NET_CAPABILITY_INTERNET));
     if (supplierId == supplierId_) {
         NETMGR_LOG_D("Same net supplier, no need to disconnect.");
         return;
@@ -395,12 +399,12 @@ void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const
 
 int32_t NetSupplier::CancelRequest(const NetRequest &netrequest)
 {
+    RemoveBestRequest(netrequest.requestId);
     int32_t ret = RemoveRequest(netrequest.requestId);
     if (!ret) {
         return NET_CONN_ERR_SERVICE_NO_REQUEST;
     }
     NETMGR_LOG_I("CancelRequest requestId:%{public}u", netrequest.requestId);
-    RemoveBestRequest(netrequest.requestId);
     return NETMANAGER_SUCCESS;
 }
 
@@ -412,7 +416,9 @@ bool NetSupplier::AddRequest(const NetRequest &netrequest)
         requestList_.insert(netrequest.requestId);
     }
     lock.unlock();
-    if (isEmpty) {
+    NETMGR_LOG_D("AddRequest, requestList.size:%{public}d, supplierId:%{public}d, isInternet:%{public}d",
+        requestList_.size(), supplierId_, netCaps_.HasNetCap(NET_CAPABILITY_INTERNET));
+    if (isEmpty || netSupplierType_ == BEARER_WIFI) {
         return SupplierConnection(netCaps_.ToSet(), netrequest);
     }
     return true;
@@ -428,7 +434,9 @@ bool NetSupplier::RemoveRequest(uint32_t reqId)
     requestList_.erase(reqId);
     bool isEmpty = requestList_.empty();
     lock.unlock();
-    if (isEmpty) {
+    NETMGR_LOG_D("RemoveRequest, requestList.size:%{public}d, supplierId:%{public}d, isInternet:%{public}d",
+        requestList_.size(), supplierId_, netCaps_.HasNetCap(NET_CAPABILITY_INTERNET));
+    if (isEmpty || netSupplierType_ == BEARER_WIFI) {
         SupplierDisconnection(netCaps_.ToSet(), NetRequest());
     }
     return true;

@@ -1488,10 +1488,8 @@ void NetConnService::FindBestNetworkForAllRequest()
 {
     std::shared_lock<std::shared_mutex> lock(uidActivateMutex_);
     NETMGR_LOG_I("FindBestNetworkForAllRequest Enter. netUidActivates_ size: [%{public}zu", netUidActivates_.size());
-    auto netActivatesBck = netUidActivates_;
-    lock.unlock();
     sptr<NetSupplier> bestSupplier = nullptr;
-    for (auto &uidIter : netActivatesBck) {
+    for (auto &uidIter : netUidActivates_) {
         for (auto &activate : uidIter.second) {
             if (!activate) {
                 continue;
@@ -1747,10 +1745,8 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
                  static_cast<int32_t>(type), supplier->GetSupplierId(), supplier->GetNetSupplierIdent().c_str(),
                  supplier->GetBestRequestSize());
     std::shared_lock<std::shared_mutex> lock(uidActivateMutex_);
-    auto netActivatesBck = netUidActivates_;
-    lock.unlock();
     int32_t netId = supplier->GetNetId();
-    for (const auto &uidIter : netActivatesBck) {
+    for (const auto &uidIter : netUidActivates_) {
         for (const auto &activate : uidIter.second) {
             if (!activate) {
                 continue;
