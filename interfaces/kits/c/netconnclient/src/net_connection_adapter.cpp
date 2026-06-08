@@ -354,7 +354,7 @@ void InvokeRefreshCallback(OH_NetConn_GlobalHttpProxyRefreshCallback callback, i
         return;
     }
     if (ret != NETMANAGER_SUCCESS || httpProxy.GetHost().empty()) {
-        callback(ret, nullptr, userContext);
+        callback(NETMANAGER_ERR_INTERNAL, nullptr, userContext);
         return;
     }
     NetConn_HttpProxy netHttpProxy;
