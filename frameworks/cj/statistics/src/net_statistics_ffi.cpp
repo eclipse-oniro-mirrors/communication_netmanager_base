@@ -22,7 +22,7 @@
 namespace OHOS::NetManagerStandard {
 
 EXTERN_C_START
-RetDataI64 FfiNetStatisticsGetUidRxBytes(uint32_t uid)
+FFI_EXPORT RetDataI64 FfiNetStatisticsGetUidRxBytes(uint32_t uid)
 {
     RetDataI64 ret = {.code = NETMANAGER_ERROR, .data = 0};
     NetStatisticsImpl impl;
@@ -38,7 +38,7 @@ RetDataI64 FfiNetStatisticsGetUidRxBytes(uint32_t uid)
     return ret;
 }
 
-RetDataI64 FfiNetStatisticsGetUidTxBytes(uint32_t uid)
+FFI_EXPORT RetDataI64 FfiNetStatisticsGetUidTxBytes(uint32_t uid)
 {
     RetDataI64 ret = {.code = NETMANAGER_ERROR, .data = 0};
     NetStatisticsImpl impl;
