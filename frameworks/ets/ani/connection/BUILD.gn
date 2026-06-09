@@ -21,19 +21,31 @@ rust_cxx("connection_ani_cxx") {
 
 ohos_static_library("connection_ani_static") {
   sanitize = {
-    integer_overflow = true
-    ubsan = true
-    boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
     debug = false
   }
 
+  cflags = [
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-O3",
+    "-flto",
+    "-fno-exceptions",
+    "-fno-rtti",
+  ]
+
   include_dirs = [
     "include",
     "${target_gen_dir}/src",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/connection/connection_helper/include",
+    "$NETMANAGER_BASE_ROOT/interfaces/kits/c/netconnclient/include",
   ]
-  sources = [ "src/cxx/connection_ani.cpp" ]
+  sources = [
+    "src/cxx/connection_ani.cpp",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/connection/connection_helper/src/icu_helper.cpp",
+    "$NETMANAGER_BASE_ROOT/interfaces/kits/c/netconnclient/src/net_probe.cpp",
+  ]
   sources += get_target_outputs(":connection_ani_cxx")
 
   deps = [
@@ -47,6 +59,7 @@ ohos_static_library("connection_ani_static") {
     "access_token:libtokenid_sdk",
     "c_utils:utils",
     "hilog:libhilog",
+    "icu:shared_icuuc",
     "ipc:ipc_core",
     "rust_cxx:cxx_cppdeps",
   ]
@@ -59,10 +72,27 @@ ohos_rust_shared_library("connection_ani") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    boundary_sanitize = true
-    all_ubsan = true
     debug = false
   }
+
+  ldflags = [
+    "-Wl,--exclude-libs=ALL",
+    "-Wl,--gc-sections",
+    "-Wl,--strip-all",
+    "-flto",
+  ]
+
+  rustflags = [
+    "-C", "opt-level=3",
+    "-C", "debuginfo=0",
+    "-C", "link-arg=-ffunction-sections",
+    "-C", "link-arg=-fdata-sections",
+    "-C", "link-arg=-Wl,--gc-sections",
+    "-C", "link-arg=-Wl,--strip-all",
+    "-Z", "dylib-lto",
+    "-Z", "stack-protector=all",
+    "-C", "codegen-units=1",
+  ]
 
   sources = [ "src/lib.rs" ]
 
@@ -89,7 +119,7 @@ ohos_rust_shared_library("connection_ani") {
 
 generate_static_abc("connection") {
   base_url = "./ets"
-  files = [ "ets/@ohos.net.connection.ets" ]
+  files = [ "ets/@ohos.net.connection.d.ets" ]
   is_boot_abc = "True"
   device_dst_file = "/system/framework/connection.abc"
 }

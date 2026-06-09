@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,18 @@
  * limitations under the License.
  */
 
+#include <cstdlib>
+#include <limits>
 #include <memory>
+#include <sstream>
 #include <string>
+#include <vector>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include "connection_ani.h"
+#include "wrapper.rs.h"
 #include "access_token.h"
 #include "accesstoken_kit.h"
-#include "cxx.h"
 #include "http_proxy.h"
 #include "inet_addr.h"
 #include "net_conn_client.h"
@@ -29,10 +33,14 @@
 #include "netmanager_secure_data.h"
 #include "refbase.h"
 #include "tokenid_kit.h"
-#include "wrapper.rs.h"
 #include "net_manager_constants.h"
 #include "netmanager_base_log.h"
 #include "errorcode_convertor.h"
+#include "icu_helper.h"
+#include "net_conn_info.h"
+#include "net_port_states_info.h"
+#include "net_ip_mac_info.h"
+#include "net_probe.h"
 
 namespace OHOS {
 namespace NetManagerAni {
@@ -106,8 +114,8 @@ HttpProxy GetDefaultHttpProxy(int32_t &ret)
     return HttpProxy{
         .host = nativeHttpProxy.GetHost(),
         .port = nativeHttpProxy.GetPort(),
-        .username = "Unknown",
-        .password = "Unknown",
+        .username = std::string(nativeHttpProxy.GetUsername()),
+        .password = std::string(nativeHttpProxy.GetPassword()),
         .exclusionList = exclusionList,
     };
 }
@@ -123,8 +131,8 @@ HttpProxy GetGlobalHttpProxy(int32_t &ret)
     return HttpProxy{
         .host = nativeHttpProxy.GetHost(),
         .port = nativeHttpProxy.GetPort(),
-        .username = "Unknown",
-        .password = "Unknown",
+        .username = std::string(nativeHttpProxy.GetUsername()),
+        .password = std::string(nativeHttpProxy.GetPassword()),
         .exclusionList = exclusionList,
     };
 }
@@ -172,7 +180,7 @@ NetManagerStandard::NetConnClient &GetNetConnClient(int32_t &nouse)
 int32_t IsDefaultNetMetered(bool &isMetered)
 {
     return NetManagerStandard::NetConnClient::GetInstance().IsDefaultNetMetered(isMetered);
-};
+}
 
 RouteInfo ConvertRouteInfo(NetManagerStandard::Route &route)
 {
@@ -196,6 +204,7 @@ RouteInfo ConvertRouteInfo(NetManagerStandard::Route &route)
             },
         .has_gateway = route.hasGateway_,
         .is_default_route = route.isDefaultRoute_,
+        .is_excluded_route = route.isExcludedRoute_,
     };
 }
 
@@ -236,6 +245,8 @@ ConnectionProperties ConvertConnectionProperties(NetManagerStandard::NetLinkInfo
         .dnses = dnses,
         .routes = routes,
         .mtu = info.mtu_,
+        .is_ipv6_link_valid = info.isIpv6LinkValid_,
+        .is_ipv4_link_valid = info.isIpv4LinkValid_,
     };
 }
 
@@ -471,6 +482,396 @@ UnregisterHandle::UnregisterHandle(sptr<NetCoonCallback> callback) : callback_(c
 int32_t UnregisterHandle::Unregister()
 {
     return NetManagerStandard::NetConnClient::GetInstance().UnregisterNetConnCallback(callback_);
+}
+
+HttpProxy RefreshGlobalHttpProxySync(int32_t &ret)
+{
+    HttpProxy resultProxy{};
+    std::mutex mtx;
+    std::condition_variable cv;
+    bool callbackCalled = false;
+
+    auto callback = [&mtx, &cv, &callbackCalled, &ret, &resultProxy](int32_t resultCode,
+                       const NetManagerStandard::HttpProxy &httpProxy) {
+        ret = resultCode;
+        if (resultCode == 0) {
+            auto exclusionList = rust::vec<rust::string>();
+            for (const auto &s : httpProxy.GetExclusionList()) {
+                exclusionList.push_back(rust::String(s));
+            }
+            resultProxy = HttpProxy{
+                .host = httpProxy.GetHost(),
+                .port = httpProxy.GetPort(),
+                .username = std::string(httpProxy.GetUsername()),
+                .password = std::string(httpProxy.GetPassword()),
+                .exclusionList = exclusionList,
+            };
+        }
+        {
+            std::lock_guard<std::mutex> lock(mtx);
+            callbackCalled = true;
+        }
+        cv.notify_one();
+    };
+
+    int32_t refreshRet = NetManagerStandard::NetConnClient::GetInstance().RefreshGlobalHttpProxy(callback);
+    if (refreshRet != 0) {
+        ret = refreshRet;
+        return HttpProxy{};
+    }
+
+    std::unique_lock<std::mutex> lock(mtx);
+    cv.wait(lock, [&callbackCalled] { return callbackCalled; });
+
+    return resultProxy;
+}
+
+int32_t SetPacFileUrl(const std::string &pacUrl)
+{
+    return NetManagerStandard::NetConnClient::GetInstance().SetPacFileUrl(pacUrl);
+}
+
+rust::String FindProxyForURL(const std::string &url, int32_t &ret)
+{
+    std::string proxy;
+    ret = NetManagerStandard::NetConnClient::GetInstance().FindProxyForURL(url, proxy);
+    return rust::String(proxy);
+}
+
+rust::vec<NetAddress> GetAddressesByNameWithOptions(const std::string &host, int32_t netId, int32_t family,
+    int32_t &ret)
+{
+    addrinfo *res = nullptr;
+    queryparam param;
+    param.qp_type = QEURY_TYPE_NORMAL;
+    param.qp_netid = netId;
+    rust::vec<NetAddress> addresses;
+    if (host.empty()) {
+        NETMANAGER_BASE_LOGE("host is empty!");
+        ret = NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
+        return addresses;
+    }
+    struct addrinfo hints = {};
+    hints.ai_family = AF_UNSPEC;
+    if (family == AF_INET) {
+        hints.ai_family = AF_INET;
+    } else if (family == AF_INET6) {
+        hints.ai_family = AF_INET6;
+    }
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+    int status = getaddrinfo_ext(host.c_str(), nullptr, &hints, &res, &param);
+    if (status < 0) {
+        NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s,  status: %{public}d", errno, strerror(errno),
+                             status);
+        ret = TransErrorCode(errno);
+        return addresses;
+    }
+
+    for (addrinfo *tmp = res; tmp != nullptr; tmp = tmp->ai_next) {
+        std::string addrHost;
+        if (tmp->ai_family == AF_INET) {
+            auto addr = reinterpret_cast<sockaddr_in *>(tmp->ai_addr);
+            char ip[MAX_IPV4_STR_LEN] = {0};
+            inet_ntop(AF_INET, &addr->sin_addr, ip, sizeof(ip));
+            addrHost = ip;
+        } else if (tmp->ai_family == AF_INET6) {
+            auto addr = reinterpret_cast<sockaddr_in6 *>(tmp->ai_addr);
+            char ip[MAX_IPV6_STR_LEN] = {0};
+            inet_ntop(AF_INET6, &addr->sin6_addr, ip, sizeof(ip));
+            addrHost = ip;
+        }
+
+        NetAddress address;
+        SetAddressInfo(addrHost, tmp, address);
+        addresses.push_back(address);
+    }
+    freeaddrinfo(res);
+    return addresses;
+}
+
+int32_t CreateVlanInterface(const std::string &ifName, uint32_t vlanId)
+{
+    return NetManagerStandard::NetConnClient::GetInstance().CreateVlan(ifName, vlanId);
+}
+
+int32_t DestroyVlanInterface(const std::string &ifName, uint32_t vlanId)
+{
+    return NetManagerStandard::NetConnClient::GetInstance().DestroyVlan(ifName, vlanId);
+}
+
+int32_t AddVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask)
+{
+    return NetManagerStandard::NetConnClient::GetInstance().AddVlanIp(ifName, vlanId, ip, mask);
+}
+
+int32_t DeleteVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask)
+{
+    return NetManagerStandard::NetConnClient::GetInstance().DeleteVlanIp(ifName, vlanId, ip, mask);
+}
+
+AniNetPortStatesInfo GetSystemNetPortStates(int32_t &ret)
+{
+    NetManagerStandard::NetPortStatesInfo info;
+    ret = NetManagerStandard::NetConnClient::GetInstance().GetSystemNetPortStates(info);
+    AniNetPortStatesInfo result;
+    for (const auto &tcp : info.tcpNetPortStatesInfo_) {
+        result.tcpPortStatesInfo.push_back(AniTcpNetPortStatesInfo{
+            .tcpLocalIp = tcp.tcpLocalIp_,
+            .tcpLocalPort = tcp.tcpLocalPort_,
+            .tcpRemoteIp = tcp.tcpRemoteIp_,
+            .tcpRemotePort = tcp.tcpRemotePort_,
+            .tcpUid = static_cast<int32_t>(tcp.tcpUid_),
+            .tcpPid = static_cast<int32_t>(tcp.tcpPid_),
+            .tcpState = static_cast<int32_t>(tcp.tcpState_),
+        });
+    }
+    for (const auto &udp : info.udpNetPortStatesInfo_) {
+        result.udpPortStatesInfo.push_back(AniUdpNetPortStatesInfo{
+            .udpLocalIp = udp.udpLocalIp_,
+            .udpLocalPort = udp.udpLocalPort_,
+            .udpUid = static_cast<int32_t>(udp.udpUid_),
+            .udpPid = static_cast<int32_t>(udp.udpPid_),
+        });
+    }
+    return result;
+}
+
+rust::vec<AniNetIpMacInfo> GetIpNeighTable(int32_t &ret)
+{
+    std::vector<NetManagerStandard::NetIpMacInfo> ipMacInfoList;
+    ret = NetManagerStandard::NetConnClient::GetInstance().GetIpNeighTable(ipMacInfoList);
+    rust::vec<AniNetIpMacInfo> result;
+    for (const auto &info : ipMacInfoList) {
+        result.push_back(AniNetIpMacInfo{
+            .ipAddress = info.ipAddress_,
+            .family = static_cast<int32_t>(info.family_),
+            .macAddress = info.macAddress_,
+            .iface = info.iface_,
+        });
+    }
+    return result;
+}
+
+int32_t GetConnectOwnerUid(const NetConnInfoParam &param, int32_t &ret)
+{
+    // Validate family value: must match FamilyType enum (0=ALL, 1=IPv4, 2=IPv6)
+    if (param.family < 0 || param.family > 2) {
+        ret = NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
+        return -1;
+    }
+    NetManagerStandard::NetConnInfo connInfo;
+    connInfo.protocolType_ = param.protocolType;
+    connInfo.family_ = static_cast<NetManagerStandard::NetConnInfo::Family>(param.family);
+    connInfo.localAddress_ = std::string(param.localAddress);
+    connInfo.localPort_ = param.localPort;
+    connInfo.remoteAddress_ = std::string(param.remoteAddress);
+    connInfo.remotePort_ = param.remotePort;
+    int32_t ownerUid = -1;
+    ret = NetManagerStandard::NetConnClient::GetInstance().GetConnectOwnerUid(connInfo, ownerUid);
+    return ownerUid;
+}
+
+rust::String GetDnsUnicode(const std::string &host, int32_t conversionProcess, int32_t &ret)
+{
+    std::string unicode;
+    ret = NetManagerStandard::ICUHelper::GetDnsUnicode(
+        host, static_cast<NetManagerStandard::ConversionProcess>(conversionProcess), unicode);
+    return rust::String(unicode);
+}
+
+rust::String GetDnsAscii(const std::string &host, int32_t conversionProcess, int32_t &ret)
+{
+    std::string ascii;
+    ret = NetManagerStandard::ICUHelper::GetDnsASCII(
+        host, static_cast<NetManagerStandard::ConversionProcess>(conversionProcess), ascii);
+    return rust::String(ascii);
+}
+
+int32_t SetInterfaceUp(const std::string &iface)
+{
+    return NetManagerStandard::NetConnClient::GetInstance().SetInterfaceUp(iface);
+}
+
+AniProbeResultInfo QueryProbeResult(const std::string &dest, int32_t duration, int32_t &ret)
+{
+    NetManagerStandard::NetProbe netProbe;
+    NetManagerStandard::NetConn_ProbeResultInfo probeResult = {0};
+    std::string tempDest = dest;
+    ret = netProbe.QueryProbeResult(tempDest, duration, probeResult);
+    AniProbeResultInfo result;
+    if (ret == 0) {
+        result.lossRate = static_cast<int32_t>(probeResult.lossRate);
+        for (int i = 0; i < NetManagerStandard::NETCONN_MAX_RTT_NUM; i++) {
+            result.rtt.push_back(static_cast<int32_t>(probeResult.rtt[i]));
+        }
+    }
+    return result;
+}
+
+// Parse one line of trace route output: "jumpNo address rtt1 rtt2 rtt3 rtt4".
+// The address may contain spaces, so tokens are split by whitespace.
+// jumpNo is the first token; RTT values are a contiguous block of up to
+// MAX_RTT_COUNT numeric tokens at the end of the line. Everything between
+// jumpNo and the RTT block is the address. This avoids misclassifying pure
+// numeric address tokens (e.g. "123") as RTT values.
+// RTT tokens may be floating-point numbers optionally followed by a unit
+// suffix such as "ms" (e.g. "1.23", "45.6ms"). The numeric portion is
+// extracted and stored as a double; any trailing non-digit suffix is stripped.
+
+// Extract the numeric portion from a token that may contain a unit suffix
+// (e.g. "123.45ms" -> 123.45). Returns true if a valid number was found.
+static bool ExtractNumericRtt(const std::string &token, double &out)
+{
+    if (token.empty()) {
+        return false;
+    }
+    char *end = nullptr;
+    double val = std::strtod(token.c_str(), &end);
+    if (end == token.c_str()) {
+        return false; // No digits consumed at all
+    }
+    // Allow trailing unit suffix (e.g. "ms", "s") — just skip it
+    // but the entire token must be consumed as numeric + optional unit
+    // Reject tokens like "123abc" where "abc" is not a known unit
+    std::string suffix(end);
+    if (suffix == "ms" || suffix == "s" || suffix.empty()) {
+        out = val;
+        return true;
+    }
+    return false;
+}
+
+static bool ExtractJumpNo(const std::string &token, int32_t &jumpNo)
+{
+    char *end = nullptr;
+    long val = std::strtol(token.c_str(), &end, 10);
+    if (end == token.c_str() || *end != '\0') {
+        return false;
+    }
+    if (val < std::numeric_limits<int32_t>::min() || val > std::numeric_limits<int32_t>::max()) {
+        return false;
+    }
+    jumpNo = static_cast<int32_t>(val);
+    return true;
+}
+
+// Collect contiguous RTT values from the end of tokens and build the address
+// from the remaining tokens between jumpNo and the RTT block.
+static void CollectRttAndAddress(const std::vector<std::string> &tokens,
+    std::string &address,
+    std::vector<double> &rttValues)
+{
+    size_t rttStart = tokens.size();
+    for (size_t i = tokens.size();
+         i > 1 && rttValues.size() < static_cast<size_t>(MAX_RTT_COUNT); --i) {
+        double rtt = 0.0;
+        if (ExtractNumericRtt(tokens[i - 1], rtt)) {
+            rttValues.push_back(rtt);
+            rttStart = i - 1;
+        } else {
+            break;
+        }
+    }
+    for (size_t i = 1; i < rttStart; ++i) {
+        if (!address.empty()) {
+            address += ' ';
+        }
+        address += tokens[i];
+    }
+}
+
+static bool ParseTraceRouteLine(const std::string &line, AniTraceRouteInfo &info)
+{
+    std::vector<std::string> tokens;
+    {
+        std::istringstream tokenStream(line);
+        std::string token;
+        while (tokenStream >> token) {
+            tokens.push_back(token);
+        }
+    }
+    if (tokens.size() < MIN_TRACE_ROUTE_TOKENS) {
+        return false;
+    }
+
+    if (!ExtractJumpNo(tokens[0], info.jumpNo)) {
+        return false;
+    }
+
+    std::vector<double> rttValues;
+    std::string address;
+    CollectRttAndAddress(tokens, address, rttValues);
+    info.address = address;
+
+    for (auto it = rttValues.rbegin(); it != rttValues.rend(); ++it) {
+        info.rtt.push_back(*it);
+    }
+    return true;
+}
+
+rust::vec<AniTraceRouteInfo> QueryTraceRoute(const std::string &destination, int32_t maxJumpNumber,
+    int32_t packetsType, int32_t &ret)
+{
+    std::string traceRouteInfoStr;
+    ret = NetManagerStandard::NetConnClient::GetInstance().QueryTraceRoute(
+        destination, maxJumpNumber, packetsType, traceRouteInfoStr, false);
+    rust::vec<AniTraceRouteInfo> result;
+    if (ret != 0) {
+        return result;
+    }
+    std::istringstream iss(traceRouteInfoStr);
+    std::string line;
+    while (std::getline(iss, line)) {
+        if (line.empty()) {
+            continue;
+        }
+        AniTraceRouteInfo info;
+        if (ParseTraceRouteLine(line, info)) {
+            result.push_back(std::move(info));
+        }
+    }
+    return result;
+}
+
+int32_t GetProxyMode(int32_t &mode)
+{
+    NetManagerStandard::ProxyModeType proxyMode;
+    int32_t ret = NetManagerStandard::NetConnClient::GetInstance().GetProxyMode(proxyMode);
+    if (ret == 0) {
+        mode = static_cast<int32_t>(proxyMode);
+    }
+    return ret;
+}
+
+int32_t SetProxyMode(int32_t mode)
+{
+    if (mode < 0 || mode > 1) {
+        return -1;
+    }
+    auto proxyMode = static_cast<NetManagerStandard::ProxyModeType>(mode);
+    return NetManagerStandard::NetConnClient::GetInstance().SetProxyMode(proxyMode);
+}
+
+rust::String GetPacFileUrl(int32_t &ret)
+{
+    std::string pacUrl;
+    ret = NetManagerStandard::NetConnClient::GetInstance().GetPacFileUrl(pacUrl);
+    return rust::String(pacUrl);
+}
+
+int32_t SetNetExtAttribute(int32_t netId, const std::string &netExtAttribute)
+{
+    NetManagerStandard::NetHandle netHandle(netId);
+    return NetManagerStandard::NetConnClient::GetInstance().SetNetExtAttribute(netHandle, netExtAttribute);
+}
+
+rust::String GetNetExtAttribute(int32_t netId, int32_t &ret)
+{
+    std::string netExtAttribute;
+    NetManagerStandard::NetHandle netHandle(netId);
+    ret = NetManagerStandard::NetConnClient::GetInstance().GetNetExtAttribute(netHandle, netExtAttribute);
+    return rust::String(netExtAttribute);
 }
 
 } // namespace NetManagerAni

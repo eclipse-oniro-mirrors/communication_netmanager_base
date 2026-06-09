@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Huawei Device Co., Ltd.
+// Copyright (C) 2026 Huawei Device Co., Ltd.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,8 +14,8 @@
 #[macro_export]
 macro_rules! connection_debug {
     ($fmt: literal $(, $args:expr)* $(,)?) => {{
-        use hilog_rust::hilog;
         use std::ffi::{c_char, CString};
+        use hilog_rust::hilog;
         use crate::LOG_LABEL;
         hilog_rust::debug!(LOG_LABEL, $fmt $(, @public($args))*);
     }}
@@ -24,20 +24,19 @@ macro_rules! connection_debug {
 #[macro_export]
 macro_rules! connection_info {
     ($fmt: literal $(, $args:expr)* $(,)?) => {{
-        use hilog_rust::hilog;
         use std::ffi::{c_char, CString};
+        use hilog_rust::hilog;
         use crate::LOG_LABEL;
-
         hilog_rust::info!(LOG_LABEL, $fmt $(, @public($args))*);
     }}
 }
+
 #[macro_export]
 macro_rules! connection_error {
     ($fmt: literal $(, $args:expr)* $(,)?) => {{
-        use hilog_rust::hilog;
         use std::ffi::{c_char, CString};
+        use hilog_rust::hilog;
         use crate::LOG_LABEL;
-
         hilog_rust::error!(LOG_LABEL, $fmt $(, @public($args))*);
     }}
 }

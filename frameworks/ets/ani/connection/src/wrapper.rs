@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Huawei Device Co., Ltd.
+// Copyright (C) 2026 Huawei Device Co., Ltd.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -158,6 +158,229 @@ impl NetConnClient {
             return Err(ret);
         }
         Ok(())
+    }
+
+    pub fn refresh_global_http_proxy() -> Result<bridge::HttpProxy, i32> {
+        let mut ret = 0;
+        let http_proxy = ffi::RefreshGlobalHttpProxySync(&mut ret);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(http_proxy.into())
+    }
+
+    pub fn set_pac_file_url(pac_url: &str) -> Result<(), i32> {
+        let_cxx_string!(pac_url = pac_url);
+        let ret = ffi::SetPacFileUrl(&pac_url);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(())
+    }
+
+    pub fn find_proxy_for_url(url: &str) -> Result<String, i32> {
+        let_cxx_string!(url = url);
+        let mut ret = 0;
+        let proxy = ffi::FindProxyForURL(&url, &mut ret);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(proxy)
+    }
+
+    pub fn get_addresses_by_name_with_options(
+        host: &str,
+        net_id: i32,
+        family: i32,
+    ) -> Result<Vec<bridge::NetAddress>, i32> {
+        let_cxx_string!(host = host);
+        let mut ret = 0;
+        let addresses = ffi::GetAddressesByNameWithOptions(&host, net_id, family, &mut ret);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(addresses.into_iter().map(Into::into).collect())
+    }
+
+    pub fn create_vlan_interface(if_name: &str, vlan_id: u32) -> Result<(), i32> {
+        let_cxx_string!(if_name = if_name);
+        let ret = ffi::CreateVlanInterface(&if_name, vlan_id);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(())
+    }
+
+    pub fn destroy_vlan_interface(if_name: &str, vlan_id: u32) -> Result<(), i32> {
+        let_cxx_string!(if_name = if_name);
+        let ret = ffi::DestroyVlanInterface(&if_name, vlan_id);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(())
+    }
+
+    pub fn add_vlan_ip(if_name: &str, vlan_id: u32, ip: &str, mask: u32) -> Result<(), i32> {
+        let_cxx_string!(if_name = if_name);
+        let_cxx_string!(ip = ip);
+        let ret = ffi::AddVlanIp(&if_name, vlan_id, &ip, mask);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(())
+    }
+
+    pub fn delete_vlan_ip(if_name: &str, vlan_id: u32, ip: &str, mask: u32) -> Result<(), i32> {
+        let_cxx_string!(if_name = if_name);
+        let_cxx_string!(ip = ip);
+        let ret = ffi::DeleteVlanIp(&if_name, vlan_id, &ip, mask);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(())
+    }
+
+    pub fn get_system_net_port_states() -> Result<bridge::NetPortStatesInfo, i32> {
+        let mut ret = 0;
+        let info = ffi::GetSystemNetPortStates(&mut ret);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(info.into())
+    }
+
+    pub fn get_ip_neigh_table() -> Result<Vec<bridge::NetIpMacInfo>, i32> {
+        let mut ret = 0;
+        let list = ffi::GetIpNeighTable(&mut ret);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(list.into_iter().map(Into::into).collect())
+    }
+
+    pub fn get_connect_owner_uid(
+        protocol_type: i32,
+        family: i32,
+        local_address: &str,
+        local_port: u16,
+        remote_address: &str,
+        remote_port: u16,
+    ) -> Result<i32, i32> {
+        let param = ffi::NetConnInfoParam {
+            protocol_type,
+            family,
+            local_address: local_address.to_string(),
+            local_port,
+            remote_address: remote_address.to_string(),
+            remote_port,
+        };
+        let mut ret: i32 = 0;
+        let uid = ffi::GetConnectOwnerUid(&param, &mut ret);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(uid)
+    }
+
+    pub fn get_dns_unicode(host: &str, conversion_process: i32) -> Result<String, i32> {
+        let_cxx_string!(host = host);
+        let mut ret = 0;
+        let unicode = ffi::GetDnsUnicode(&host, conversion_process, &mut ret);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(unicode)
+    }
+
+    pub fn get_dns_ascii(host: &str, conversion_process: i32) -> Result<String, i32> {
+        let_cxx_string!(host = host);
+        let mut ret = 0;
+        let ascii = ffi::GetDnsAscii(&host, conversion_process, &mut ret);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(ascii)
+    }
+
+    pub fn set_interface_up(iface: &str) -> Result<(), i32> {
+        let_cxx_string!(iface = iface);
+        let ret = ffi::SetInterfaceUp(&iface);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(())
+    }
+
+    pub fn query_probe_result(dest: &str, duration: i32) -> Result<bridge::ProbeResultInfo, i32> {
+        let_cxx_string!(dest = dest);
+        let mut ret = 0;
+        let info = ffi::QueryProbeResult(&dest, duration, &mut ret);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(info.into())
+    }
+
+    pub fn query_trace_route(
+        destination: &str,
+        max_jump_number: i32,
+        packets_type: i32,
+    ) -> Result<Vec<bridge::TraceRouteInfo>, i32> {
+        let_cxx_string!(destination = destination);
+        let mut ret = 0;
+        let list = ffi::QueryTraceRoute(&destination, max_jump_number, packets_type, &mut ret);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(list.into_iter().map(Into::into).collect())
+    }
+
+    pub fn get_proxy_mode() -> Result<bridge::ProxyMode, i32> {
+        let mut mode: i32 = 0;
+        let ret = ffi::GetProxyMode(&mut mode);
+        if ret != 0 {
+            return Err(ret);
+        }
+        match mode {
+            0 => Ok(bridge::ProxyMode::PROXY_MODE_OFF),
+            1 => Ok(bridge::ProxyMode::PROXY_MODE_AUTO),
+            _ => Err(-1),
+        }
+    }
+
+    pub fn set_proxy_mode(mode: crate::bridge::ProxyMode) -> Result<(), i32> {
+        let ret = ffi::SetProxyMode(mode as i32);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(())
+    }
+
+    pub fn get_pac_file_url() -> Result<String, i32> {
+        let mut ret = 0;
+        let url = ffi::GetPacFileUrl(&mut ret);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(url)
+    }
+
+    pub fn set_net_ext_attribute(net_id: i32, net_ext_attribute: &str) -> Result<(), i32> {
+        let_cxx_string!(net_ext_attribute = net_ext_attribute);
+        let ret = ffi::SetNetExtAttribute(net_id, &net_ext_attribute);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(())
+    }
+
+    pub fn get_net_ext_attribute(net_id: i32) -> Result<String, i32> {
+        let mut ret = 0;
+        let attr = ffi::GetNetExtAttribute(net_id, &mut ret);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(attr)
     }
 
     pub fn is_default_net_metered() -> Result<bool, i32> {
@@ -392,6 +615,8 @@ impl From<ffi::HttpProxy> for bridge::HttpProxy {
             username: Some(value.username),
             password: Some(value.password),
             exclusion_list: value.exclusionList,
+            // socks5_proxy is not supported by the native C++ HttpProxy class yet
+            socks5_proxy: None,
         }
     }
 }
@@ -427,6 +652,7 @@ impl From<ffi::RouteInfo> for bridge::RouteInfo {
             gateway: value.gateway.into(),
             has_gateway: value.has_gateway,
             is_default_route: value.is_default_route,
+            is_excluded_route: value.is_excluded_route,
         }
     }
 }
@@ -440,12 +666,15 @@ impl From<ffi::ConnectionProperties> for bridge::ConnectionProperties {
             dnses: value.dnses.into_iter().map(Into::into).collect(),
             routes: value.routes.into_iter().map(Into::into).collect(),
             mtu: value.mtu,
+            is_ipv6_link_valid: value.is_ipv6_link_valid,
+            is_ipv4_link_valid: value.is_ipv4_link_valid,
         }
     }
 }
 
 impl From<bridge::HttpProxy> for ffi::HttpProxy {
     fn from(value: bridge::HttpProxy) -> Self {
+        // socks5_proxy is not supported by the native C++ HttpProxy class yet
         ffi::HttpProxy {
             host: value.host,
             port: value.port,
@@ -479,6 +708,86 @@ impl From<ffi::NetConnectionPropertyInfo> for bridge::NetConnectionPropertyInfo 
         bridge::NetConnectionPropertyInfo {
             net_handle: value.net_handle.into(),
             connection_properties: value.connection_properties.into(),
+        }
+    }
+}
+
+impl From<ffi::AniTcpNetPortStatesInfo> for bridge::TcpNetPortStatesInfo {
+    fn from(value: ffi::AniTcpNetPortStatesInfo) -> Self {
+        bridge::TcpNetPortStatesInfo {
+            tcp_local_ip: value.tcpLocalIp,
+            tcp_local_port: value.tcpLocalPort as i32,
+            tcp_remote_ip: value.tcpRemoteIp,
+            tcp_remote_port: value.tcpRemotePort as i32,
+            tcp_uid: value.tcpUid,
+            tcp_pid: value.tcpPid,
+            tcp_state: match value.tcpState {
+                1 => bridge::TcpState::TCP_ESTABLISHED,
+                2 => bridge::TcpState::TCP_SYN_SENT,
+                3 => bridge::TcpState::TCP_SYN_RECV,
+                4 => bridge::TcpState::TCP_FIN_WAIT1,
+                5 => bridge::TcpState::TCP_FIN_WAIT2,
+                6 => bridge::TcpState::TCP_TIME_WAIT,
+                7 => bridge::TcpState::TCP_CLOSE,
+                8 => bridge::TcpState::TCP_CLOSE_WAIT,
+                9 => bridge::TcpState::TCP_LAST_ACK,
+                10 => bridge::TcpState::TCP_LISTEN,
+                11 => bridge::TcpState::TCP_CLOSING,
+                _ => bridge::TcpState::TCP_CLOSE,
+            },
+        }
+    }
+}
+
+impl From<ffi::AniUdpNetPortStatesInfo> for bridge::UdpNetPortStatesInfo {
+    fn from(value: ffi::AniUdpNetPortStatesInfo) -> Self {
+        bridge::UdpNetPortStatesInfo {
+            udp_local_ip: value.udpLocalIp,
+            udp_local_port: value.udpLocalPort as i32,
+            udp_uid: value.udpUid,
+            udp_pid: value.udpPid,
+        }
+    }
+}
+
+impl From<ffi::AniNetPortStatesInfo> for bridge::NetPortStatesInfo {
+    fn from(value: ffi::AniNetPortStatesInfo) -> Self {
+        bridge::NetPortStatesInfo {
+            tcp_port_states_info: Some(value.tcpPortStatesInfo.into_iter().map(Into::into).collect()),
+            udp_port_states_info: Some(value.udpPortStatesInfo.into_iter().map(Into::into).collect()),
+        }
+    }
+}
+
+impl From<ffi::AniNetIpMacInfo> for bridge::NetIpMacInfo {
+    fn from(value: ffi::AniNetIpMacInfo) -> Self {
+        bridge::NetIpMacInfo {
+            ip_address: bridge::NetAddress {
+                address: value.ipAddress,
+                family: Some(value.family),
+                port: Some(0),
+            },
+            mac_address: value.macAddress,
+            iface: value.iface,
+        }
+    }
+}
+
+impl From<ffi::AniProbeResultInfo> for bridge::ProbeResultInfo {
+    fn from(value: ffi::AniProbeResultInfo) -> Self {
+        bridge::ProbeResultInfo {
+            loss_rate: value.lossRate,
+            rtt: value.rtt,
+        }
+    }
+}
+
+impl From<ffi::AniTraceRouteInfo> for bridge::TraceRouteInfo {
+    fn from(value: ffi::AniTraceRouteInfo) -> Self {
+        bridge::TraceRouteInfo {
+            jump_no: value.jumpNo,
+            address: value.address,
+            rtt: value.rtt,
         }
     }
 }
@@ -563,6 +872,8 @@ pub mod ffi {
         pub has_gateway: bool,
 
         pub is_default_route: bool,
+
+        pub is_excluded_route: bool,
     }
 
     pub struct ConnectionProperties {
@@ -575,6 +886,19 @@ pub mod ffi {
         pub routes: Vec<RouteInfo>,
 
         pub mtu: i32,
+
+        pub is_ipv6_link_valid: bool,
+
+        pub is_ipv4_link_valid: bool,
+    }
+
+    pub struct NetConnInfoParam {
+        pub protocol_type: i32,
+        pub family: i32,
+        pub local_address: String,
+        pub local_port: u16,
+        pub remote_address: String,
+        pub remote_port: u16,
     }
 
     extern "Rust" {
@@ -648,6 +972,91 @@ pub mod ffi {
         ) -> UniquePtr<UnregisterHandle>;
 
         fn GetErrorCodeAndMessage(error_code: &mut i32) -> String;
+
+        fn RefreshGlobalHttpProxySync(ret: &mut i32) -> HttpProxy;
+
+        fn SetPacFileUrl(pac_url: &CxxString) -> i32;
+
+        fn FindProxyForURL(url: &CxxString, ret: &mut i32) -> String;
+
+        fn GetAddressesByNameWithOptions(host: &CxxString, net_id: i32, family: i32, ret: &mut i32) -> Vec<NetAddress>;
+
+        fn CreateVlanInterface(if_name: &CxxString, vlan_id: u32) -> i32;
+
+        fn DestroyVlanInterface(if_name: &CxxString, vlan_id: u32) -> i32;
+
+        fn AddVlanIp(if_name: &CxxString, vlan_id: u32, ip: &CxxString, mask: u32) -> i32;
+
+        fn DeleteVlanIp(if_name: &CxxString, vlan_id: u32, ip: &CxxString, mask: u32) -> i32;
+
+        fn GetSystemNetPortStates(ret: &mut i32) -> AniNetPortStatesInfo;
+
+        fn GetIpNeighTable(ret: &mut i32) -> Vec<AniNetIpMacInfo>;
+
+        type NetConnInfoParam;
+
+        fn GetConnectOwnerUid(param: &NetConnInfoParam, ret: &mut i32) -> i32;
+
+        fn GetDnsUnicode(host: &CxxString, conversion_process: i32, ret: &mut i32) -> String;
+
+        fn GetDnsAscii(host: &CxxString, conversion_process: i32, ret: &mut i32) -> String;
+
+        fn SetInterfaceUp(iface: &CxxString) -> i32;
+
+        fn QueryProbeResult(dest: &CxxString, duration: i32, ret: &mut i32) -> AniProbeResultInfo;
+
+        fn QueryTraceRoute(destination: &CxxString, max_jump_number: i32, packets_type: i32,
+                           ret: &mut i32) -> Vec<AniTraceRouteInfo>;
+
+        fn GetProxyMode(mode: &mut i32) -> i32;
+
+        fn SetProxyMode(mode: i32) -> i32;
+
+        fn GetPacFileUrl(ret: &mut i32) -> String;
+
+        fn SetNetExtAttribute(net_id: i32, net_ext_attribute: &CxxString) -> i32;
+
+        fn GetNetExtAttribute(net_id: i32, ret: &mut i32) -> String;
+    }
+
+    pub struct AniTcpNetPortStatesInfo {
+        pub tcpLocalIp: String,
+        pub tcpLocalPort: u16,
+        pub tcpRemoteIp: String,
+        pub tcpRemotePort: u16,
+        pub tcpUid: i32,
+        pub tcpPid: i32,
+        pub tcpState: i32,
+    }
+
+    pub struct AniUdpNetPortStatesInfo {
+        pub udpLocalIp: String,
+        pub udpLocalPort: u16,
+        pub udpUid: i32,
+        pub udpPid: i32,
+    }
+
+    pub struct AniNetPortStatesInfo {
+        pub tcpPortStatesInfo: Vec<AniTcpNetPortStatesInfo>,
+        pub udpPortStatesInfo: Vec<AniUdpNetPortStatesInfo>,
+    }
+
+    pub struct AniNetIpMacInfo {
+        pub ipAddress: String,
+        pub family: i32,
+        pub macAddress: String,
+        pub iface: String,
+    }
+
+    pub struct AniProbeResultInfo {
+        pub lossRate: i32,
+        pub rtt: Vec<i32>,
+    }
+
+    pub struct AniTraceRouteInfo {
+        pub jumpNo: i32,
+        pub address: String,
+        pub rtt: Vec<f64>,
     }
 }
 
