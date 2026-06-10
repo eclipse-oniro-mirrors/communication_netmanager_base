@@ -280,6 +280,10 @@ int32_t VpnManager::SendVpnInterfaceFdToClient(int32_t clientFd, int32_t tunFd)
     message.msg_control = cmsgu.cmsg;
     message.msg_controllen = sizeof(cmsgu.cmsg);
     cmsghdr *cmsgh = CMSG_FIRSTHDR(&message);
+    if (cmsgh == nullptr) {
+        NETNATIVE_LOGE("CMSG_FIRSTHDR return nullptr!");
+        return NETMANAGER_ERROR;
+    }
     cmsgh->cmsg_len = CMSG_LEN(sizeof(tunFd));
     cmsgh->cmsg_level = SOL_SOCKET;
     cmsgh->cmsg_type = SCM_RIGHTS;
@@ -298,6 +302,10 @@ void VpnManager::StartUnixSocketListen()
 {
     NETNATIVE_LOGI("StartUnixSocketListen...");
     int32_t serverfd = GetControlSocket("tunfd");
+    if (serverfd < 0) {
+        NETNATIVE_LOGE("get control socket error: %{public}d", errno);
+        return;
+    }
     if (listen(serverfd, MAX_UNIX_SOCKET_CLIENT) < 0) {
         close(serverfd);
         NETNATIVE_LOGE("listen socket error: %{public}d", errno);
