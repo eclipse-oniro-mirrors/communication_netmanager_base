@@ -107,6 +107,7 @@ int32_t VnicManager::CreateVnicInterface()
     if (net4Sock_ < 0 && net6Sock_ < 0) {
         close(tunfd);
         NETNATIVE_LOGE("create SOCK_DGRAM ip failed");
+        DestroyVnicInterface();
         return NETMANAGER_ERROR;
     }
     // LCOV_EXCL_STOP
