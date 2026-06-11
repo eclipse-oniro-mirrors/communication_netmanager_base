@@ -309,5 +309,23 @@ HWTEST_F(VpnManagerTest, InitIfreqTest001, TestSize.Level1)
     auto result = vpnmanager.InitIfreq(ifr, cardName);
     EXPECT_EQ(result, NETMANAGER_ERROR);
 }
+
+HWTEST_F(VpnManagerTest, SendVpnInterfaceFdToClientTest001, TestSize.Level1)
+{
+    VpnManager vpnmanager;
+    int32_t invalidFd = -1;
+    int32_t tunFd = 0;
+    auto result = vpnmanager.SendVpnInterfaceFdToClient(invalidFd, tunFd);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VpnManagerTest, SendVpnInterfaceFdToClientTest002, TestSize.Level1)
+{
+    VpnManager vpnmanager;
+    int32_t clientFd = 1;
+    int32_t tunFd = 0;
+    auto result = vpnmanager.SendVpnInterfaceFdToClient(clientFd, tunFd);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

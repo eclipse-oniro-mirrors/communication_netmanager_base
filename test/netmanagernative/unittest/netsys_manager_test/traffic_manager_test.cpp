@@ -59,10 +59,22 @@ HWTEST_F(TrafficManagerTest, GetAllTxTraffic001, TestSize.Level1)
     EXPECT_GE(allTxBytes, -1);
 }
 
+HWTEST_F(TrafficManagerTest, GetAllTxTraffic002, TestSize.Level1)
+{
+    long allTxBytes = TrafficManager::GetAllTxTraffic();
+    EXPECT_GE(allTxBytes, 0);
+}
+
 HWTEST_F(TrafficManagerTest, GetAllRxTraffic001, TestSize.Level1)
 {
     long allRxBytes = TrafficManager::GetAllRxTraffic();
     EXPECT_GE(allRxBytes, -1);
+}
+
+HWTEST_F(TrafficManagerTest, GetAllRxTraffic002, TestSize.Level1)
+{
+    long allRxBytes = TrafficManager::GetAllRxTraffic();
+    EXPECT_GE(allRxBytes, 0);
 }
 } // namespace nmd
 } // namespace OHOS
