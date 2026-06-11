@@ -67,6 +67,7 @@ int32_t VpnManager::CreateVpnInterface()
     int32_t tunfd = open(TUN_DEVICE_PATH, O_RDWR | O_NONBLOCK | O_CLOEXEC);
     if (tunfd <= 0) {
         NETNATIVE_LOGE("open virtual device failed: %{public}d", errno);
+        DestroyVpnInterface();
         return NETMANAGER_ERROR;
     }
 
@@ -88,6 +89,7 @@ int32_t VpnManager::CreateVpnInterface()
     if (net4Sock_ < 0 && net6Sock_ < 0) {
         close(tunfd);
         NETNATIVE_LOGE("create SOCK_DGRAM ip failed");
+        DestroyVpnInterface();
         return NETMANAGER_ERROR;
     }
 
