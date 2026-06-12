@@ -135,7 +135,7 @@ int32_t NetsysBpfStats::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard:
     stats.clear();
     char if_name[IFNAME_SIZE] = {0};
     auto keys = uidSimStatsMap.GetAllKeys();
-    NETNATIVE_LOGI("NetsysBpfStats::GetAllSimStatsInfo keys.size = %{public}lu", keys.size());
+    NETNATIVE_LOGI("NetsysBpfStats::GetAllSimStatsInfo keys.size = %{public}zu", keys.size());
     for (const auto &k : keys) {
         stats_value v = {};
         if (uidSimStatsMap.Read(k, v) < 0) {
