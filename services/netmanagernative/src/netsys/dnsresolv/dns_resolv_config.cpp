@@ -256,7 +256,7 @@ void DnsResolvConfig::SetIpv6UidBlackList(const uint32_t &uid)
     auto it = ipv6UidBlackList_.find(uid);
     if (it != ipv6UidBlackList_.end()) {
         ipv6UidBlackList_[uid] = now;
-        NETNATIVE_LOGI("SetIpv6UidBlackList uid:%{public}u is exists, update time:%{public}llu", uid, now);
+        NETNATIVE_LOGI("SetIpv6UidBlackList uid:%{public}u is exists", uid);
         return;
     }
  
@@ -275,7 +275,7 @@ void DnsResolvConfig::SetIpv6UidBlackList(const uint32_t &uid)
         NETNATIVE_LOGI("SetIpv6UidBlackList erase ipv6 black list of the oldest uid:%{public}u", oldestUid);
     }
     ipv6UidBlackList_.insert({uid, now});
-    NETNATIVE_LOGI("SetIpv6UidBlackList uid:%{public}u, time:%{public}llu", uid, now);
+    NETNATIVE_LOGI("SetIpv6UidBlackList uid:%{public}u", uid);
 }
  
 bool DnsResolvConfig::IsInIpv6UidBlackList(const uint32_t &uid)
