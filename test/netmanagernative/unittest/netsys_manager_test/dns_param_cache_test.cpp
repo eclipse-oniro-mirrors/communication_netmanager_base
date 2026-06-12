@@ -698,5 +698,280 @@ HWTEST_F(DNSParamCacheTest, GetDumpInfoTest001, TestSize.Level1)
     dnsParCache.DestroyNetworkCache(netId);
 }
 
+HWTEST_F(DNSParamCacheTest, AddUidRangeDedupTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("AddUidRangeDedupTest001 enter");
+    DnsParamCache dnsParCache;
+    uint32_t netId = 100;
+    std::vector<NetManagerStandard::UidRange> uidRanges;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, 0, netId);
+    uidRanges.push_back(uidrange1);
+    dnsParCache.AddUidRange(netId, uidRanges);
+    EXPECT_EQ(dnsParCache.vpnNetId_.size(), 1u);
+    EXPECT_EQ(dnsParCache.vpnUidRanges_.size(), 1u);
+    dnsParCache.AddUidRange(netId, uidRanges);
+    EXPECT_EQ(dnsParCache.vpnNetId_.size(), 1u);
+    EXPECT_EQ(dnsParCache.vpnUidRanges_.size(), 1u);
+}
+
+HWTEST_F(DNSParamCacheTest, AddUidRangeDedupTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("AddUidRangeDedupTest002 enter");
+    DnsParamCache dnsParCache;
+    uint32_t netId1 = 100;
+    uint32_t netId2 = 200;
+    std::vector<NetManagerStandard::UidRange> uidRanges1;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, 0, netId1);
+    uidRanges1.push_back(uidrange1);
+    std::vector<NetManagerStandard::UidRange> uidRanges2;
+    NetManagerStandard::UidRange uidrange2(30000, 40000, 0, netId2);
+    uidRanges2.push_back(uidrange2);
+    dnsParCache.AddUidRange(netId1, uidRanges1);
+    dnsParCache.AddUidRange(netId2, uidRanges2);
+    EXPECT_EQ(dnsParCache.vpnNetId_.size(), 2u);
+    EXPECT_EQ(dnsParCache.vpnUidRanges_.size(), 2u);
+}
+
+HWTEST_F(DNSParamCacheTest, AddUidRangeDedupTest003, TestSize.Level1)
+{
+    NETNATIVE_LOGI("AddUidRangeDedupTest003 enter");
+    DnsParamCache dnsParCache;
+    uint32_t netId = 100;
+    std::vector<NetManagerStandard::UidRange> uidRanges;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, 0, netId);
+    NetManagerStandard::UidRange uidrange2(30000, 40000, 0, netId);
+    uidRanges.push_back(uidrange1);
+    uidRanges.push_back(uidrange2);
+    dnsParCache.AddUidRange(netId, uidRanges);
+    EXPECT_EQ(dnsParCache.vpnUidRanges_.size(), 2u);
+    std::vector<NetManagerStandard::UidRange> uidRangesDup;
+    uidRangesDup.push_back(uidrange1);
+    dnsParCache.AddUidRange(netId, uidRangesDup);
+    EXPECT_EQ(dnsParCache.vpnNetId_.size(), 1u);
+    EXPECT_EQ(dnsParCache.vpnUidRanges_.size(), 2u);
+}
+
+HWTEST_F(DNSParamCacheTest, AddUidRangeDedupTest004, TestSize.Level1)
+{
+    NETNATIVE_LOGI("AddUidRangeDedupTest004 enter");
+    DnsParamCache dnsParCache;
+    uint32_t netId = 100;
+    std::vector<NetManagerStandard::UidRange> uidRanges;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, 0, netId);
+    uidRanges.push_back(uidrange1);
+    dnsParCache.AddUidRange(netId, uidRanges);
+    std::vector<NetManagerStandard::UidRange> emptyRanges;
+    dnsParCache.AddUidRange(netId, emptyRanges);
+    EXPECT_EQ(dnsParCache.vpnNetId_.size(), 1u);
+    EXPECT_EQ(dnsParCache.vpnUidRanges_.size(), 1u);
+}
+
+HWTEST_F(DNSParamCacheTest, DelUidRangeRemoveAllTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("DelUidRangeRemoveAllTest001 enter");
+    DnsParamCache dnsParCache;
+    uint32_t netId = 100;
+    std::vector<NetManagerStandard::UidRange> uidRanges;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, 0, netId);
+    uidRanges.push_back(uidrange1);
+    dnsParCache.AddUidRange(netId, uidRanges);
+    dnsParCache.AddUidRange(netId, uidRanges);
+    EXPECT_EQ(dnsParCache.vpnNetId_.size(), 1u);
+    EXPECT_EQ(dnsParCache.vpnUidRanges_.size(), 1u);
+    dnsParCache.DelUidRange(netId, uidRanges);
+    EXPECT_EQ(dnsParCache.vpnNetId_.size(), 0u);
+    EXPECT_EQ(dnsParCache.vpnUidRanges_.size(), 0u);
+}
+
+HWTEST_F(DNSParamCacheTest, DelUidRangeRemoveAllTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("DelUidRangeRemoveAllTest002 enter");
+    DnsParamCache dnsParCache;
+    uint32_t netId1 = 100;
+    uint32_t netId2 = 200;
+    std::vector<NetManagerStandard::UidRange> uidRanges1;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, 0, netId1);
+    uidRanges1.push_back(uidrange1);
+    std::vector<NetManagerStandard::UidRange> uidRanges2;
+    NetManagerStandard::UidRange uidrange2(30000, 40000, 0, netId2);
+    uidRanges2.push_back(uidrange2);
+    dnsParCache.AddUidRange(netId1, uidRanges1);
+    dnsParCache.AddUidRange(netId2, uidRanges2);
+    dnsParCache.DelUidRange(netId1, uidRanges1);
+    EXPECT_EQ(dnsParCache.vpnNetId_.size(), 1u);
+    EXPECT_EQ(dnsParCache.vpnNetId_.front(), netId2);
+    EXPECT_EQ(dnsParCache.vpnUidRanges_.size(), 1u);
+}
+
+HWTEST_F(DNSParamCacheTest, DelUidRangeRemoveAllTest003, TestSize.Level1)
+{
+    NETNATIVE_LOGI("DelUidRangeRemoveAllTest003 enter");
+    DnsParamCache dnsParCache;
+    uint32_t netId = 999;
+    std::vector<NetManagerStandard::UidRange> uidRanges;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, 0, netId);
+    uidRanges.push_back(uidrange1);
+    dnsParCache.DelUidRange(netId, uidRanges);
+    EXPECT_EQ(dnsParCache.vpnNetId_.size(), 0u);
+    EXPECT_EQ(dnsParCache.vpnUidRanges_.size(), 0u);
+}
+
+HWTEST_F(DNSParamCacheTest, GetVpnResolverConfigContinueTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("GetVpnResolverConfigContinueTest001 enter");
+    DnsParamCache dnsParCache;
+    uint32_t netId1 = 100;
+    uint32_t netId2 = 200;
+    dnsParCache.CreateCacheForNet(netId2, true);
+    std::vector<std::string> servers = {"8.8.8.8"};
+    std::vector<std::string> domains = {"vpn.example.com"};
+    dnsParCache.SetResolverConfig(netId2, 1000, 2, servers, domains);
+    std::vector<NetManagerStandard::UidRange> uidRanges1;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, 0, netId1);
+    uidRanges1.push_back(uidrange1);
+    dnsParCache.vpnNetId_.push_back(netId1);
+    dnsParCache.vpnNetId_.push_back(netId2);
+    dnsParCache.vpnUidRanges_.push_back(uidrange1);
+    std::vector<NetManagerStandard::UidRange> uidRanges2;
+    NetManagerStandard::UidRange uidrange2(10000, 20000, 0, netId2);
+    uidRanges2.push_back(uidrange2);
+    dnsParCache.vpnUidRanges_.push_back(uidrange2);
+    std::vector<std::string> outServers;
+    std::vector<std::string> outDomains;
+    uint16_t baseTimeoutMsec = 0;
+    uint8_t retryCount = 0;
+    int32_t ret = dnsParCache.GetVpnResolverConfig(15000, outServers, outDomains, baseTimeoutMsec, retryCount);
+    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(outServers.size(), 1u);
+    EXPECT_EQ(outServers[0], "8.8.8.8");
+}
+
+HWTEST_F(DNSParamCacheTest, GetVpnResolverConfigContinueTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("GetVpnResolverConfigContinueTest002 enter");
+    DnsParamCache dnsParCache;
+    uint32_t netId1 = 100;
+    std::vector<NetManagerStandard::UidRange> uidRanges1;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, 0, netId1);
+    uidRanges1.push_back(uidrange1);
+    dnsParCache.vpnNetId_.push_back(netId1);
+    dnsParCache.vpnUidRanges_.push_back(uidrange1);
+    std::vector<std::string> outServers;
+    std::vector<std::string> outDomains;
+    uint16_t baseTimeoutMsec = 0;
+    uint8_t retryCount = 0;
+    int32_t ret = dnsParCache.GetVpnResolverConfig(15000, outServers, outDomains, baseTimeoutMsec, retryCount);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(DNSParamCacheTest, GetUserDefinedVpnServerFlagContinueTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("GetUserDefinedVpnServerFlagContinueTest001 enter");
+    DnsParamCache dnsParCache;
+    uint32_t netId1 = 100;
+    uint32_t netId2 = 200;
+    dnsParCache.CreateCacheForNet(netId2, true);
+    dnsParCache.SetUserDefinedServerFlag(netId2, true);
+    std::vector<NetManagerStandard::UidRange> uidRanges1;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, 0, netId1);
+    uidRanges1.push_back(uidrange1);
+    dnsParCache.vpnNetId_.push_back(netId1);
+    dnsParCache.vpnNetId_.push_back(netId2);
+    dnsParCache.vpnUidRanges_.push_back(uidrange1);
+    std::vector<NetManagerStandard::UidRange> uidRanges2;
+    NetManagerStandard::UidRange uidrange2(10000, 20000, 0, netId2);
+    uidRanges2.push_back(uidrange2);
+    dnsParCache.vpnUidRanges_.push_back(uidrange2);
+    bool flag = false;
+    int32_t ret = dnsParCache.GetUserDefinedVpnServerFlag(15000, flag);
+    EXPECT_EQ(ret, 0);
+    EXPECT_TRUE(flag);
+}
+
+HWTEST_F(DNSParamCacheTest, GetUserDefinedVpnServerFlagContinueTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("GetUserDefinedVpnServerFlagContinueTest002 enter");
+    DnsParamCache dnsParCache;
+    uint32_t netId1 = 100;
+    std::vector<NetManagerStandard::UidRange> uidRanges1;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, 0, netId1);
+    uidRanges1.push_back(uidrange1);
+    dnsParCache.vpnNetId_.push_back(netId1);
+    dnsParCache.vpnUidRanges_.push_back(uidrange1);
+    bool flag = false;
+    int32_t ret = dnsParCache.GetUserDefinedVpnServerFlag(15000, flag);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(DNSParamCacheTest, IsUseVpnDnsContinueTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsUseVpnDnsContinueTest001 enter");
+    DnsParamCache dnsParCache;
+    uint32_t netId1 = 100;
+    uint32_t netId2 = 200;
+    dnsParCache.CreateCacheForNet(netId2, true);
+    std::vector<NetManagerStandard::UidRange> uidRanges1;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, 0, netId1);
+    uidRanges1.push_back(uidrange1);
+    dnsParCache.vpnUidRanges_.push_back(uidrange1);
+    std::vector<NetManagerStandard::UidRange> uidRanges2;
+    NetManagerStandard::UidRange uidrange2(10000, 20000, 0, netId2);
+    uidRanges2.push_back(uidrange2);
+    dnsParCache.vpnUidRanges_.push_back(uidrange2);
+    bool ret = dnsParCache.IsUseVpnDns(15000);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(DNSParamCacheTest, IsUseVpnDnsContinueTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsUseVpnDnsContinueTest002 enter");
+    DnsParamCache dnsParCache;
+    uint32_t netId1 = 100;
+    std::vector<NetManagerStandard::UidRange> uidRanges1;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, 0, netId1);
+    uidRanges1.push_back(uidrange1);
+    dnsParCache.vpnUidRanges_.push_back(uidrange1);
+    bool ret = dnsParCache.IsUseVpnDns(15000);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(DNSParamCacheTest, VpnDnsResidueScenarioTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("VpnDnsResidueScenarioTest001 enter");
+    DnsParamCache dnsParCache;
+    uint32_t netId1 = 100;
+    uint32_t netId2 = 200;
+    std::vector<NetManagerStandard::UidRange> uidRanges1;
+    NetManagerStandard::UidRange uidrange1(10000, 20000, 0, netId1);
+    uidRanges1.push_back(uidrange1);
+    dnsParCache.CreateCacheForNet(netId1, true);
+    std::vector<std::string> servers1 = {"1.1.1.1"};
+    std::vector<std::string> domains1 = {"vpn1.example.com"};
+    dnsParCache.SetResolverConfig(netId1, 500, 1, servers1, domains1);
+    dnsParCache.AddUidRange(netId1, uidRanges1);
+    dnsParCache.AddUidRange(netId1, uidRanges1);
+    EXPECT_EQ(dnsParCache.vpnNetId_.size(), 1u);
+    EXPECT_EQ(dnsParCache.vpnUidRanges_.size(), 1u);
+    dnsParCache.DestroyNetworkCache(netId1, true);
+    dnsParCache.DelUidRange(netId1, uidRanges1);
+    EXPECT_EQ(dnsParCache.vpnNetId_.size(), 0u);
+    EXPECT_EQ(dnsParCache.vpnUidRanges_.size(), 0u);
+    dnsParCache.CreateCacheForNet(netId2, true);
+    std::vector<std::string> servers2 = {"2.2.2.2"};
+    std::vector<std::string> domains2 = {"vpn2.example.com"};
+    dnsParCache.SetResolverConfig(netId2, 600, 2, servers2, domains2);
+    std::vector<NetManagerStandard::UidRange> uidRanges2;
+    NetManagerStandard::UidRange uidrange2(10000, 20000, 0, netId2);
+    uidRanges2.push_back(uidrange2);
+    dnsParCache.AddUidRange(netId2, uidRanges2);
+    std::vector<std::string> outServers;
+    std::vector<std::string> outDomains;
+    uint16_t baseTimeoutMsec = 0;
+    uint8_t retryCount = 0;
+    int32_t ret = dnsParCache.GetVpnResolverConfig(15000, outServers, outDomains, baseTimeoutMsec, retryCount);
+    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(outServers.size(), 1u);
+    EXPECT_EQ(outServers[0], "2.2.2.2");
+}
 } // namespace NetsysNative
 } // namespace OHOS
