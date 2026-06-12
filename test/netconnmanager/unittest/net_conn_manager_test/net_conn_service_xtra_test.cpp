@@ -20,6 +20,8 @@
 #define protected public
 #endif
 
+#include <curl/curl.h>
+
 #include "common_net_conn_callback_test.h"
 #include "http_proxy.h"
 #include "ipc_skeleton.h"
@@ -565,6 +567,39 @@ HWTEST_F(NetConnServiceExtTest, SetCurlOptionsTest001, TestSize.Level1)
     EXPECT_FALSE(netConnService->registerToService_);
     HttpProxy tempProxy;
     netConnService->SetCurlOptions(nullptr, tempProxy);
+}
+
+HWTEST_F(NetConnServiceExtTest, SetCurlOptionsTest002, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    CURL *curl = curl_easy_init();
+    ASSERT_NE(curl, nullptr);
+    HttpProxy tempProxy;
+    tempProxy.host_ = "http://127.0.0.1";
+    tempProxy.port_ = 8080;
+    SecureData username;
+    username.append("testuser", strlen("testuser"));
+    tempProxy.username_ = username;
+    SecureData password;
+    password.append("testpass", strlen("testpass"));
+    tempProxy.password_ = password;
+    netConnService->SetCurlOptions(curl, tempProxy);
+    curl_easy_cleanup(curl);
+}
+
+HWTEST_F(NetConnServiceExtTest, SetCurlOptionsTest003, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    CURL *curl = curl_easy_init();
+    ASSERT_NE(curl, nullptr);
+    HttpProxy tempProxy;
+    tempProxy.host_ = "http://127.0.0.1";
+    tempProxy.port_ = 8080;
+    SecureData username;
+    username.append("testuser", strlen("testuser"));
+    tempProxy.username_ = username;
+    netConnService->SetCurlOptions(curl, tempProxy);
+    curl_easy_cleanup(curl);
 }
 
 HWTEST_F(NetConnServiceExtTest, GetHttpUrlFromConfigTest001, TestSize.Level1)

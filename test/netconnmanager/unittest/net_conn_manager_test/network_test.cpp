@@ -32,6 +32,7 @@
 #include "net_connection_adapter.h"
 #include "net_probe_callback_test.h"
 #include "net_conn_service.h"
+#include "net_proxy_userinfo.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -1364,6 +1365,45 @@ HWTEST_F(NetworkTest, SetProxyInfoTest001, TestSize.Level1)
     EXPECT_NE(probe->httpCurl_, nullptr);
     ret = probe->SetProxyInfo(curlHandler, proxyHost, proxyPort);
     EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetworkTest, SetUserInfoTest001, TestSize.Level1)
+{
+    uint32_t netId = 1;
+    NetLinkInfo netLinkInfo;
+    ProbeType probeType = PROBE_HTTP;
+    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
+    CURL *curlHandler = curl_easy_init();
+    ASSERT_NE(curlHandler, nullptr);
+    HttpProxy httpProxy = {"127.0.0.1", 8080, {}};
+    SecureData username;
+    username.append("testuser", strlen("testuser"));
+    SecureData password;
+    password.append("testpass", strlen("testpass"));
+    httpProxy.SetUserName(username);
+    httpProxy.SetPassword(password);
+    NetProxyUserinfo::GetInstance().SaveHttpProxyHostPass(httpProxy);
+    auto ret = probe->SetUserInfo(curlHandler);
+    EXPECT_TRUE(ret);
+    curl_easy_cleanup(curlHandler);
+}
+
+HWTEST_F(NetworkTest, SetUserInfoTest002, TestSize.Level1)
+{
+    uint32_t netId = 1;
+    NetLinkInfo netLinkInfo;
+    ProbeType probeType = PROBE_HTTP;
+    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
+    CURL *curlHandler = curl_easy_init();
+    ASSERT_NE(curlHandler, nullptr);
+    HttpProxy httpProxy = {"127.0.0.1", 8080, {}};
+    SecureData username;
+    username.append("testuser", strlen("testuser"));
+    httpProxy.SetUserName(username);
+    NetProxyUserinfo::GetInstance().SaveHttpProxyHostPass(httpProxy);
+    auto ret = probe->SetUserInfo(curlHandler);
+    EXPECT_TRUE(ret);
+    curl_easy_cleanup(curlHandler);
 }
 
 HWTEST_F(NetworkTest, SetResolveOptionTest001, TestSize.Level1)

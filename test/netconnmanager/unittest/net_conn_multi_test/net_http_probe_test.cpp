@@ -22,6 +22,7 @@
 #include "net_http_probe_result.h"
 #include "net_link_info.h"
 #include "net_manager_constants.h"
+#include "net_proxy_userinfo.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -228,6 +229,37 @@ HWTEST_F(NetHttpProbeTest, LoadProxyTest001, TestSize.Level1)
     instance_->UpdateNetLinkInfo(netLinkInfo);
     ret = instance_->LoadProxy(proxyHost, proxyPort);
     ASSERT_TRUE(ret);
+}
+
+HWTEST_F(NetHttpProbeTest, SetUserInfoTest001, TestSize.Level1)
+{
+    CURL *curlHandler = curl_easy_init();
+    ASSERT_NE(curlHandler, nullptr);
+    HttpProxy httpProxy = {"127.0.0.1", 8080, {}};
+    SecureData username;
+    username.append("testuser", strlen("testuser"));
+    SecureData password;
+    password.append("testpass", strlen("testpass"));
+    httpProxy.SetUserName(username);
+    httpProxy.SetPassword(password);
+    NetProxyUserinfo::GetInstance().SaveHttpProxyHostPass(httpProxy);
+    bool ret = instance_->SetUserInfo(curlHandler);
+    EXPECT_TRUE(ret);
+    curl_easy_cleanup(curlHandler);
+}
+
+HWTEST_F(NetHttpProbeTest, SetUserInfoTest002, TestSize.Level1)
+{
+    CURL *curlHandler = curl_easy_init();
+    ASSERT_NE(curlHandler, nullptr);
+    HttpProxy httpProxy = {"127.0.0.1", 8080, {}};
+    SecureData username;
+    username.append("testuser", strlen("testuser"));
+    httpProxy.SetUserName(username);
+    NetProxyUserinfo::GetInstance().SaveHttpProxyHostPass(httpProxy);
+    bool ret = instance_->SetUserInfo(curlHandler);
+    EXPECT_TRUE(ret);
+    curl_easy_cleanup(curlHandler);
 }
 } // namespace
 } // namespace NetManagerStandard
