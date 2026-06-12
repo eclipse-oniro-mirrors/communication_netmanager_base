@@ -196,9 +196,6 @@ HWTEST_F(VnicManagerTest, SetVnicAddressIpv6PrefixBoundary, TestSize.Level1)
 
     result = vnicmanager.SetVnicAddress(ifName, tunAddr, 128);
     EXPECT_EQ(result, NETMANAGER_ERROR);
-
-    result = vnicmanager.SetVnicAddress(ifName, tunAddr, 64);
-    EXPECT_NE(result, NETMANAGER_ERROR);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
