@@ -274,7 +274,7 @@ int32_t DnsParamCache::GetVpnResolverConfig(uint32_t uid, std::vector<std::strin
             auto it = serverConfigMap_.find(mem.netId_);
             if (it == serverConfigMap_.end()) {
                 NETNATIVE_LOG_D("vpn get Config failed: not have vpnnetid:%{public}d,", mem.netId_);
-                return -1;
+                continue;
             }
             servers = it->second.GetServers();
 #ifdef FEATURE_NET_FIREWALL_ENABLE
@@ -411,14 +411,24 @@ int32_t DnsParamCache::AddUidRange(uint32_t netId, const std::vector<NetManagerS
 {
     std::lock_guard<ffrt::mutex> guard(uidRangeMutex_);
     NETNATIVE_LOG_D("DnsParamCache::AddUidRange size = [%{public}zu]", uidRanges.size());
-    vpnNetId_.push_back(netId);
+    if (std::find(vpnNetId_.begin(), vpnNetId_.end(), netId) == vpnNetId_.end()) {
+        vpnNetId_.push_back(netId);
+    }
     for (auto mem : uidRanges) {
         NETNATIVE_LOG_D(
             "GetResolverConfig AddUidRange begin %{public}d end %{public}d netId %{public}d priority %{public}d",
             mem.begin_, mem.end_, mem.netId_, mem.priorityId_);
     }
-    auto middle = vpnUidRanges_.insert(vpnUidRanges_.end(), uidRanges.begin(), uidRanges.end());
-    std::inplace_merge(vpnUidRanges_.begin(), middle, vpnUidRanges_.end());
+    std::vector<NetManagerStandard::UidRange> newRanges;
+    for (const auto &range : uidRanges) {
+        if (std::find(vpnUidRanges_.begin(), vpnUidRanges_.end(), range) == vpnUidRanges_.end()) {
+            newRanges.push_back(range);
+        }
+    }
+    if (!newRanges.empty()) {
+        auto middle = vpnUidRanges_.insert(vpnUidRanges_.end(), newRanges.begin(), newRanges.end());
+        std::inplace_merge(vpnUidRanges_.begin(), middle, vpnUidRanges_.end());
+    }
     return 0;
 }
 
@@ -675,7 +685,7 @@ int32_t DnsParamCache::GetUserDefinedVpnServerFlag(uint32_t uid, bool &flag)
             auto it = serverConfigMap_.find(mem.netId_);
             if (it == serverConfigMap_.end()) {
                 NETNATIVE_LOG_D("vpn get Config failed: not have vpnnetid:%{public}d,", mem.netId_);
-                return -1;
+                continue;
             }
             flag = it->second.IsUserDefinedServer();
             return 0;
@@ -705,7 +715,7 @@ bool DnsParamCache::IsUseVpnDns(uint32_t uid)
         if (static_cast<int32_t>(uid) >= mem.begin_ && static_cast<int32_t>(uid) <= mem.end_) {
             auto it = serverConfigMap_.find(mem.netId_);
             if (it == serverConfigMap_.end()) {
-                return false;
+                continue;
             }
             return true;
         }
