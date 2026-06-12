@@ -436,6 +436,11 @@ int32_t NetManagerNative::SetEnableIpv6(const std::string &interfaceName, const 
     return sharingManager_->SetEnableIpv6(interfaceName, on, needRestart);
 }
 
+int32_t NetManagerNative::SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid)
+{
+    return dnsManager_->SetIpv6UidBlackList(netIds, uid);
+}
+
 int32_t NetManagerNative::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
 {
     return InterfaceManager::SetIpv6AutoConf(interfaceName, on);

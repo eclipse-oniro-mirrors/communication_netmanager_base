@@ -67,7 +67,7 @@ private:
                                     uint32_t resNum);
     static void ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId);
     static void ProcSetNodataCacheCommand(const std::string &name, uint16_t netId);
-    static void ProcGetNodataCacheCommand(int clientSockFd, uint16_t netId, const std::string &name);
+    static void ProcGetNodataCacheCommand(int clientSockFd, uint16_t netId, const std::string &name, uint32_t uid);
     static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId);
     static void ProcJudgeIpv4Command(int clientSockFd, uint16_t netId);
     static void ProcGetDefaultNetworkCommand(int clientSockFd);
@@ -343,14 +343,17 @@ void DnsResolvListenInternal::ProcSetNodataCacheCommand(const std::string &name,
     DnsParamCache::GetInstance().SetNodataCache(netId, name);
 }
 
-void DnsResolvListenInternal::ProcGetNodataCacheCommand(int clientSockFd, uint16_t netId, const std::string &name)
+void DnsResolvListenInternal::ProcGetNodataCacheCommand(int clientSockFd, uint16_t netId, const std::string &name,
+    uint32_t uid)
 {
-    int enable = DnsParamCache::GetInstance().IsInNodataCache(netId, name) ? 1 : 0;
-    if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&enable), sizeof(int))) {
+    int isInNodataCache = DnsParamCache::GetInstance().IsInNodataCache(netId, name) ? 1 : 0;
+    int isInIpv6UidBlackList = DnsParamCache::GetInstance().IsInIpv6UidBlackList(netId, uid) ? 1 : 0;
+    int skipAAAA = (isInNodataCache != 0 || isInIpv6UidBlackList != 0) ? 1 : 0;
+    if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&skipAAAA), sizeof(int))) {
         DNS_CONFIG_PRINT("send failed");
     }
-    DNS_CONFIG_PRINT("ProcGetNodataCacheCommand end, netId: %{public}d, host: %{public}s, enable: %{public}d",
-        netId, name.c_str(), enable);
+    DNS_CONFIG_PRINT("ProcGetNodataCacheCommand end, netId: %{public}d, host: %{public}s, uid: %{public}d, "
+        "skipAAAA: %{public}d", netId, name.c_str(), uid, skipAAAA);
 }
 
 void DnsResolvListenInternal::ProcJudgeIpv6Command(int clientSockFd, uint16_t netId)
@@ -546,7 +549,7 @@ ReceiverRunner DnsResolvListenInternal::ProcGetKeyForCache(CommandType command, 
                 ProcSetNodataCacheCommand(data, netId);
                 return FixedLengthReceiverState::DATA_ENOUGH;
             case GET_NODATA_CACHE:
-                ProcGetNodataCacheCommand(fd, netId, data);
+                ProcGetNodataCacheCommand(fd, netId, data, uid);
                 return FixedLengthReceiverState::DATA_ENOUGH;
             case GET_CACHE:
 #ifdef FEATURE_NET_FIREWALL_ENABLE

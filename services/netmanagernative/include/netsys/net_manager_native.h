@@ -188,6 +188,7 @@ public:
     int32_t GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo, int32_t &ownerUid);
     int32_t GetSystemNetPortStates(NetManagerStandard::NetPortStatesInfo &netPortStatesInfo);
     void SetClatDnsEnableIpv4(int32_t netId, bool enable);
+    int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid);
 private:
     std::shared_ptr<BandwidthManager> bandwidthManager_ = nullptr;
     std::shared_ptr<ConnManager> connManager_ = nullptr;

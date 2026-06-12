@@ -137,6 +137,8 @@ void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdSetIpv6AutoConf;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_CONNECT_OWNER_UID)] =
         &NetsysNativeServiceStub::CmdGetConnectOwnerUid;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_UID_BLACK_LIST)] =
+        &NetsysNativeServiceStub::CmdSetIpv6UidBlackList;
 }
 
 void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
@@ -2467,6 +2469,42 @@ int32_t NetsysNativeServiceStub::CmdSetIpv6Enable(MessageParcel &data, MessagePa
     NETNATIVE_LOGI("SetIpv6Enable has recved result %{public}d", result);
 
     return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetIpv6UidBlackList(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t size = 0;
+    if (!data.ReadInt32(size)) {
+        NETNATIVE_LOGE("CmdSetIpv6UidBlackList read size failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    
+    std::vector<int32_t> netIds;
+    int32_t netId;
+    for (int32_t index = 0; index < size; index++) {
+        if (!data.ReadInt32(netId)) {
+            NETNATIVE_LOGE("CmdSetIpv6UidBlackList read netId failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+        if (netId == 0) {
+            NETNATIVE_LOGE("CmdSetIpv6UidBlackList netId is zero");
+            return ERR_FLATTEN_OBJECT;
+        }
+        netIds.emplace_back(netId);
+    }
+ 
+    int32_t uid = 0;
+    if (!data.ReadInt32(uid)) {
+        NETNATIVE_LOGE("CmdSetIpv6UidBlackList read uid failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+ 
+    int32_t result = SetIpv6UidBlackList(netIds, uid);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write CmdSetIpv6UidBlackList result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeServiceStub::CmdSetIpv6AutoConf(MessageParcel &data, MessageParcel &reply)

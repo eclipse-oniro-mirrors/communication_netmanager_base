@@ -196,5 +196,38 @@ HWTEST_F(DnsProxyListenTest, clearResourceTest01, TestSize.Level1)
     EXPECT_EQ(instance_->proxySockFd_, -1);
     EXPECT_EQ(instance_->proxySockFd6_, -1);
 }
+
+HWTEST_F(DnsResolvListenTest, DnsParamCacheInteractionTest011, TestSize.Level1)
+{
+    NETNATIVE_LOGI("DnsParamCacheInteractionTest011 enter");
+    DnsParamCache &cache = DnsParamCache::GetInstance();
+    uint16_t netId = 100;
+    std::vector<int32_t> netIds;
+    netIds.emplace_back(netId);
+    cache.CreateCacheForNet(netId);
+    cache.EnableIpv4(netId);
+    uint32_t uid = 1;
+    cache.SetIpv6UidBlackList(netIds, uid);
+    bool isInIpv6UidBlackList = cache.IsInIpv6UidBlackList(netId, uid);
+    EXPECT_TRUE(isInIpv6UidBlackList);
+    cache.DestroyNetworkCache(netId);
+}
+ 
+HWTEST_F(DnsResolvListenTest, DnsParamCacheInteractionTest012, TestSize.Level1)
+{
+    NETNATIVE_LOGI("DnsParamCacheInteractionTest012 enter");
+    DnsParamCache &cache = DnsParamCache::GetInstance();
+    uint16_t netId = 100;
+    std::vector<int32_t> netIds;
+    netIds.emplace_back(netId);
+    cache.CreateCacheForNet(netId);
+    cache.EnableIpv4(netId);
+    uint32_t uid = 1;
+    cache.SetIpv6UidBlackList(netIds, uid);
+    cache.FlushDnsCache(netId);
+    bool isInIpv6UidBlackList = cache.IsInIpv6UidBlackList(netId, uid);
+    EXPECT_FALSE(isInIpv6UidBlackList);
+    cache.DestroyNetworkCache(netId);
+}
 } // namespace NetsysNative
 } // namespace OHOS

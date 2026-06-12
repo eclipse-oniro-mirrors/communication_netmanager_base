@@ -198,6 +198,7 @@ public:
     int32_t GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo,
                                int32_t &ownerUid) override;
     int32_t GetSystemNetPortStates(NetManagerStandard::NetPortStatesInfo &netPortStatesInfo) override;
+    int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid) override;
 
 private:
     int32_t DealBandwidth(uint32_t uid, uint32_t code);
