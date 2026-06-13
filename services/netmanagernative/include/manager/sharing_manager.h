@@ -106,6 +106,7 @@ public:
      * @return NETMANAGER_ERROR code
      */
     int32_t GetNetworkCellularSharingTraffic(NetworkSharingTraffic &traffic, std::string &ifaceName);
+    int32_t SetDpaCellularSharingTraffic(NetworkDpaTrafficReport &sharingTrafficMsg);
 
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
     int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on, bool needRestart);
@@ -123,6 +124,7 @@ private:
     std::mutex forbidIpMutex_;
     std::mutex enableV6mutex_;
     std::string wifiShareInterface_ = "";
+    std::vector<DpaWifiTrafficReport> onDpaSharingTraffic_;
 
     std::map<std::string, std::string> sharingIfaceToIpMap_;
     std::mutex sharingIfaceToIpMutex_;
@@ -135,6 +137,8 @@ private:
     void CombineRestoreRules(const std::string &cmds, std::string &cmdSet);
     int32_t QueryCellularSharingTraffic(NetworkSharingTraffic &traffic,
         const std::string &result, std::string &ifaceName);
+    void QueryDpaCellularSharingTraffic(const std::vector<DpaWifiTrafficReport> &onSharingTraffic,
+        NetworkSharingTraffic &traffic, std::string &ifaceName);
     void GetTraffic(std::smatch &matches, std::string &ifaceName, NetworkSharingTraffic &traffic,
         bool &isFindTx, bool &isFindRx);
     int32_t EnableShareUnreachableRoute(RouteManager::TableType tableType);

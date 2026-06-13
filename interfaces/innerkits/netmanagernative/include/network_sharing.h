@@ -23,6 +23,20 @@ struct NetworkSharingTraffic {
     int64_t send = 0;
     int64_t all = 0;
 };
+
+struct NetworkDpaTrafficReport {
+    int32_t src_if_index = 0;
+    int32_t dst_if_index = 0;
+    int32_t pkts = 0;
+    int32_t bytes = 0;
+};
+
+struct DpaWifiTrafficReport {
+    std::string srcIface_;
+    std::string dstIface_;
+    int32_t pkts = 0;
+    int32_t bytes = 0;
+};
 } // namespace nmd
 } // namespace OHOS
 

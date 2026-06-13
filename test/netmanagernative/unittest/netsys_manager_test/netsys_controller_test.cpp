@@ -254,6 +254,10 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest010, TestSize.Level1)
     nmd::NetworkSharingTraffic traffic;
     int32_t ret = netsysController->GetNetworkSharingTraffic(ETH0, ETH0, traffic);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    nmd::NetworkDpaTrafficReport dpaTraffic = {};
+    ret = netsysController->SetDpaCellularSharingTraffic(dpaTraffic);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerTest, NetsysControllerTest011, TestSize.Level1)
@@ -629,6 +633,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerErr002, TestSize.Level1)
     AddrInfo hints = {0};
     std::vector<AddrInfo> res;
     nmd::NetworkSharingTraffic traffic;
+    nmd::NetworkDpaTrafficReport dpaTraffic;
     addrinfo *aihead = static_cast<addrinfo *>(malloc(sizeof(addrinfo)));
     if (aihead != nullptr) {
         aihead->ai_next = nullptr;
@@ -669,6 +674,9 @@ HWTEST_F(NetsysControllerTest, NetsysControllerErr002, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = netsysController->GetNetworkSharingTraffic(iface, iface, traffic);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = netsysController->SetDpaCellularSharingTraffic(dpaTraffic);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 

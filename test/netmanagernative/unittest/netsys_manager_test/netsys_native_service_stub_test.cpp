@@ -1477,5 +1477,32 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetSystemNetPortStatesTest001, TestSize
     int32_t ret = notifyStub_->CmdGetSystemNetPortStates(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetDpaCellularSharingTraffic001, TestSize.Level1)
+{
+    uint32_t srcIndex = 1;
+    uint32_t dstIndex = 2;
+    uint32_t pkts = 1234;
+    uint32_t bytes = 5678;
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    if (!data.WriteUint32(srcIndex)) {
+        return;
+    }
+    if (!data.WriteUint32(dstIndex)) {
+        return;
+    }
+    if (!data.WriteUint32(pkts)) {
+        return;
+    }
+    if (!data.WriteUint32(bytes)) {
+        return;
+    }
+
+    int32_t ret = notifyStub_->CmdSetDpaCellularSharingTraffic(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
 } // namespace NetsysNative
 } // namespace OHOS

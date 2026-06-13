@@ -19,6 +19,7 @@
 #include <initializer_list>
 #include <list>
 #include <pthread.h>
+#include <net/if.h>
 
 #include "net_conn_client.h"
 #include "net_mgr_log_wrapper.h"
@@ -222,6 +223,19 @@ void NetStatsCached::SetAppStats(const PushStatsInfo &info)
     stats.userId_ = info.userId_;
     NETMGR_LOG_D("SetAppStats info=%{public}s", stats.UidData().c_str());
     uidPushStatsInfo_.push_back(std::move(stats));
+}
+
+void NetStatsCached::SetDpaAppStats(const NetStatsInfo &info)
+{
+    std::lock_guard<ffrt::mutex> lock(lock_);
+    NetStatsInfo stats = info;
+    int32_t ifIndex = std::stoi(stats.iface_);
+    char src_if_name[32] = {0};
+    char *pSrcName = if_indextoname(ifIndex, src_if_name);
+    if (pSrcName != nullptr) {
+        stats.iface_ = pSrcName;
+    }
+    stats_.PushUidStats(stats);
 }
 
 void NetStatsCached::GetKernelStats(std::vector<NetStatsInfo> &statsInfo)

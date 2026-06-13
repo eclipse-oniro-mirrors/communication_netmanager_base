@@ -383,6 +383,13 @@ HWTEST_F(NetStatsServiceTest, SetAppStats001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetStatsServiceTest, SetDpaAppStats001, TestSize.Level1)
+{
+    NetStatsInfo info;
+    int32_t ret = NetStatsService::GetInstance()->SetDpaAppStats(info);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetStatsServiceTest, OnStartTest001, TestSize.Level1)
 {
     NetStatsService::GetInstance()->state_ =

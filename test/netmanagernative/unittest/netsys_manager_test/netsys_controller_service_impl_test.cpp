@@ -479,6 +479,10 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     ret = instance_->GetNetworkSharingTraffic(hostName, serverName, traffic);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
+    nmd::NetworkDpaTrafficReport dpaTraffic = {};
+    ret = instance_->SetDpaCellularSharingTraffic(dpaTraffic);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
     ret = instance_->NetworkAddInterface(netId, testName, BEARER_DEFAULT);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 

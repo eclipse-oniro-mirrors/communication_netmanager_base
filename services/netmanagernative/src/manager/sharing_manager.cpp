@@ -21,6 +21,7 @@
 #include <regex>
 #include <unistd.h>
 #include <charconv>
+#include <net/if.h>
 
 #include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
@@ -410,6 +411,7 @@ int32_t SharingManager::IpfwdRemoveInterfaceForward(const std::string &fromIface
 
     CombineRestoreRules(CMD_COMMIT, fwdCmdSet);
     iptablesWrapper_->RunRestoreCommands(IPTYPE_IPV4V6, fwdCmdSet);
+    onDpaSharingTraffic_.clear();
 
     RouteManager::DisableSharing(fromIface, toIface);
 
@@ -490,8 +492,67 @@ int32_t SharingManager::GetNetworkCellularSharingTraffic(NetworkSharingTraffic &
         traffic.all += traffic0.all;
         ifaceName = ifaceName0;
     }
+    // LCOV_EXCL_START
+    NetworkSharingTraffic traffic1;
+    std::string ifaceName1 = ifaceName;
+    QueryDpaCellularSharingTraffic(onDpaSharingTraffic_, traffic1, ifaceName1);
+    traffic.receive += traffic1.receive;
+    traffic.send += traffic1.send;
+    traffic.all += traffic1.all;
+    // LCOV_EXCL_STOP
     NETNATIVE_LOG_D("GetNetworkCellularSharingTraffic success");
     return NETMANAGER_SUCCESS;
+}
+
+int32_t SharingManager::SetDpaCellularSharingTraffic(NetworkDpaTrafficReport &sharingTrafficMsg)
+{
+    DpaWifiTrafficReport wifiSharingTrafficMsg;
+    char src_if_name[32] = {0};
+    char dst_if_name[32] = {0};
+    char *pSrcName = if_indextoname(sharingTrafficMsg.src_if_index, src_if_name);
+    char *pDstName = if_indextoname(sharingTrafficMsg.dst_if_index, dst_if_name);
+    // LCOV_EXCL_START
+    if (pSrcName != nullptr && pDstName != nullptr) {
+        wifiSharingTrafficMsg.srcIface_ = pSrcName;
+        wifiSharingTrafficMsg.dstIface_ = pDstName;
+    }
+    // LCOV_EXCL_STOP
+    wifiSharingTrafficMsg.pkts = sharingTrafficMsg.pkts;
+    wifiSharingTrafficMsg.bytes = sharingTrafficMsg.bytes;
+    onDpaSharingTraffic_.push_back(wifiSharingTrafficMsg);
+    return NETMANAGER_SUCCESS;
+}
+
+void SharingManager::QueryDpaCellularSharingTraffic(const std::vector<DpaWifiTrafficReport> &onSharingTraffic,
+    NetworkSharingTraffic &traffic, std::string &ifaceName)
+{
+    if (onSharingTraffic.empty()) {
+        traffic.send = 0;
+        traffic.receive = 0;
+        traffic.all = 0;
+        return;
+    }
+    for (auto sharing : onSharingTraffic) {
+        if (sharing.srcIface_.find(CELLULAR_IFACE_NAME) != std::string::npos
+            && sharing.dstIface_.find(WLAN_IFACE_NAME) != std::string::npos) {
+                traffic.send = sharing.bytes;
+                traffic.all += sharing.bytes;
+        } else if (sharing.srcIface_.find(WLAN_IFACE_NAME) != std::string::npos
+            && sharing.dstIface_.find(CELLULAR_IFACE_NAME) != std::string::npos) {
+                traffic.receive = sharing.bytes;
+                traffic.all += sharing.bytes;
+        } else if (sharing.srcIface_.find(WLAN_IFACE_NAME) != std::string::npos
+            && sharing.dstIface_.find(WLAN_IFACE_NAME) != std::string::npos
+            && sharing.srcIface_.find(ifaceName) != std::string::npos) {
+                traffic.send = sharing.bytes;
+                traffic.all += sharing.bytes;
+        } else if (sharing.srcIface_.find(WLAN_IFACE_NAME) != std::string::npos
+            && sharing.dstIface_.find(WLAN_IFACE_NAME) != std::string::npos
+            && sharing.dstIface_.find(ifaceName) != std::string::npos) {
+                traffic.receive = sharing.bytes;
+                traffic.all += sharing.bytes;
+        }
+    }
 }
 
 int32_t SharingManager::QueryCellularSharingTraffic(NetworkSharingTraffic &traffic,

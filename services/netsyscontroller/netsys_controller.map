@@ -70,6 +70,7 @@
       "OHOS::NetManagerStandard::NetsysController::GetInterfaceConfig(OHOS::nmd::InterfaceConfigurationParcel&)";
       "OHOS::NetManagerStandard::NetsysController::GetInterfaceMtu(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetsysController::GetNetworkCellularSharingTraffic(OHOS::nmd::NetworkSharingTraffic&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
+      "OHOS::NetManagerStandard::NetsysController::SetDpaCellularSharingTraffic(OHOS::nmd::NetworkDpaTrafficReport&)";
       "OHOS::NetManagerStandard::NetsysController::GetNetworkSharingTraffic(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::nmd::NetworkSharingTraffic&)";
       "OHOS::NetManagerStandard::NetsysController::GetNetworkSharingType(std::__h::set<unsigned int, std::__h::less<unsigned int>, std::__h::allocator<unsigned int>>&)";
       "OHOS::NetManagerStandard::NetsysController::GetNetStateTrafficMap(unsigned char, unsigned long&)";

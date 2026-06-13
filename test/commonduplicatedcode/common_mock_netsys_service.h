@@ -119,6 +119,7 @@ public:
         NetworkSharingTraffic &traffic), (override));
     MOCK_METHOD(int32_t, GetNetworkCellularSharingTraffic, (nmd::NetworkSharingTraffic &traffic,
         std::string &ifaceName), (override));
+    MOCK_METHOD(int32_t, SetDpaCellularSharingTraffic, (nmd::NetworkDpaTrafficReport &traffic), (override));
     MOCK_METHOD(int32_t, GetTotalStats, (uint64_t &stats, uint32_t type), (override));
     MOCK_METHOD(int32_t, GetUidStats, (uint64_t &stats, uint32_t type, uint32_t uid), (override));
     MOCK_METHOD(int32_t, GetIfaceStats, (uint64_t &stats, uint32_t type, const std::string &interfaceName), (override));

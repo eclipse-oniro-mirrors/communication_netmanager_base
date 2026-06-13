@@ -165,6 +165,10 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest002, TestSize.Level1)
     ret = nativeClient->GetNetworkSharingTraffic(ETH0, ETH0, traffic);
     EXPECT_NE(ret, 0);
 
+    nmd::NetworkDpaTrafficReport dpaTraffic = {};
+    ret = nativeClient->SetDpaCellularSharingTraffic(dpaTraffic);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
     ret = nativeClient->GetCellularRxBytes();
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 

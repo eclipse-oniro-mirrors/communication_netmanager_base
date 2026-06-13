@@ -869,6 +869,19 @@ HWTEST_F(NetStatsServiceProxyTest, SetAppStatsTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetDpaAppStatsTest001
+ * @tc.desc: Test NetStatsServiceProxy SetDpaAppStats.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceProxyTest, SetDpaAppStatsTest001, TestSize.Level1)
+{
+    remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
+    NetStatsServiceProxy instance_(remoteObj_);
+    NetStatsInfo info;
+    EXPECT_EQ(instance_.SetDpaAppStats(info), NETSYS_SUCCESS);
+}
+
+/**
  * @tc.name: UpdateIfacesStatsTest001
  * @tc.desc: Test NetStatsServiceProxy UpdateIfacesStats.
  * @tc.type: FUNC

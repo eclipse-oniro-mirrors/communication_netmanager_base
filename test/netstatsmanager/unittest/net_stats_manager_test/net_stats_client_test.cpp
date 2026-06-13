@@ -366,6 +366,18 @@ HWTEST_F(NetStatsClientTest, SetAppStats001, TestSize.Level1)
     EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetStatsClientTest, SetDpaAppStats001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    sptr<IRemoteObject::DeathRecipient> deathRecipient =
+        new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
+    sptr<IRemoteObject> remote = nullptr;
+    deathRecipient->OnRemoteDied(remote);
+    NetStatsInfo info;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->SetDpaAppStats(info);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetStatsClientTest, SaveSharingTraffic001, TestSize.Level1)
 {
     sptr<IRemoteObject::DeathRecipient> deathRecipient =

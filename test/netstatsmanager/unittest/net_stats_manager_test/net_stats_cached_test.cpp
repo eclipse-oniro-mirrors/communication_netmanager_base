@@ -179,6 +179,24 @@ HWTEST_F(NetStatsCachedTest, SetAppStatsTest001, TestSize.Level1)
     EXPECT_EQ(addedInfo.ident_, std::to_string(info.simId_));
 }
 
+HWTEST_F(NetStatsCachedTest, SetDpaAppStatsTest001, TestSize.Level1)
+{
+    NetStatsInfo info;
+    info.uid_ = 10;
+    info.rxBytes_ = 1024;
+    info.txBytes_ = 20480;
+    info.rxPackets_ = 10;
+    info.txPackets_ = 20;
+    instance_->SetDpaAppStats(info);
+    EXPECT_NE(instance_->stats_.GetUidStatsInfo().size(), 0);
+    const NetStatsInfo& addedInfo = instance_->stats_.GetUidStatsInfo().back();
+    EXPECT_EQ(addedInfo.uid_, info.uid_);
+    EXPECT_EQ(addedInfo.rxBytes_, info.rxBytes_);
+    EXPECT_EQ(addedInfo.txBytes_, info.txBytes_);
+    EXPECT_EQ(addedInfo.rxPackets_, info.rxPackets_);
+    EXPECT_EQ(addedInfo.txPackets_, info.txPackets_);
+}
+
 HWTEST_F(NetStatsCachedTest, GetKernelStatsTest001, TestSize.Level1)
 {
     std::vector<NetStatsInfo> infos;

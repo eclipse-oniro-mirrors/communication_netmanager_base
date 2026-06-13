@@ -182,6 +182,14 @@ HWTEST_F(SharingManagerTest, GetNetworkSharingTraffic001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
 
+HWTEST_F(SharingManagerTest, SetDpaCellularSharingTraffic001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    NetworkDpaTrafficReport dpaTraffic;
+    int32_t ret = sharingManager->SetDpaCellularSharingTraffic(dpaTraffic);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(SharingManagerTest, GetNetworkSharingTraffic002, TestSize.Level1)
 {
     auto sharingManager = std::make_shared<SharingManager>();
@@ -228,6 +236,31 @@ HWTEST_F(SharingManagerTest, IpfwdRemoveInterfaceForward003, TestSize.Level1)
     sharingManager->interfaceForwards_ = {"123"};
     auto result = sharingManager->IpfwdRemoveInterfaceForward(fromIface, toIface);
     EXPECT_EQ(result, 0);
+}
+
+HWTEST_F(SharingManagerTest, QueryDpaCellularSharingTraffic001, TestSize.Level1)
+{
+    auto sharingManager = std::make_shared<SharingManager>();
+    NetworkSharingTraffic traffic;
+    std::string ifaceName = "wlan0";
+    vector<DpaWifiTrafficReport> tmpSharingTraffic;
+    sharingManager->QueryDpaCellularSharingTraffic(tmpSharingTraffic, traffic, ifaceName);
+    vector<DpaWifiTrafficReport> onSharingTraffic(1);
+    onSharingTraffic[0].srcIface_ = "rmnet0";
+    onSharingTraffic[0].dstIface_ = "wlan1";
+    onSharingTraffic[0].pkts = 0;
+    onSharingTraffic[0].bytes = 0;
+    sharingManager->QueryDpaCellularSharingTraffic(onSharingTraffic, traffic, ifaceName);
+    onSharingTraffic[0].srcIface_ = "wlan1";
+    onSharingTraffic[0].dstIface_ = "rmnet0";
+    sharingManager->QueryDpaCellularSharingTraffic(onSharingTraffic, traffic, ifaceName);
+    onSharingTraffic[0].srcIface_ = "wlan1";
+    onSharingTraffic[0].dstIface_ = "wlan0";
+    sharingManager->QueryDpaCellularSharingTraffic(onSharingTraffic, traffic, ifaceName);
+    onSharingTraffic[0].srcIface_ = "wlan0";
+    onSharingTraffic[0].dstIface_ = "wlan1";
+    sharingManager->QueryDpaCellularSharingTraffic(onSharingTraffic, traffic, ifaceName);
+    ASSERT_STREQ("0", "0");
 }
 
 HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic001, TestSize.Level1)

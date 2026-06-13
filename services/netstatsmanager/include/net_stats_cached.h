@@ -76,6 +76,8 @@ public:
 
     void SetAppStats(const PushStatsInfo &info);
 
+    void SetDpaAppStats(const NetStatsInfo &info);
+
     void GetKernelStats(std::vector<NetStatsInfo> &statsInfo);
 
     void UpdateDefaultSimId(const std::string &simId);

@@ -518,6 +518,17 @@ int32_t NetsysController::GetNetworkCellularSharingTraffic(nmd::NetworkSharingTr
     return netsysService_->GetNetworkCellularSharingTraffic(traffic, ifaceName);
 }
 
+int32_t NetsysController::SetDpaCellularSharingTraffic(nmd::NetworkDpaTrafficReport &traffic)
+{
+    // LCOV_EXCL_START
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->SetDpaCellularSharingTraffic(traffic);
+}
+
 int64_t NetsysController::GetCellularRxBytes()
 {
     NETMGR_LOG_D("NetsysController GetCellularRxBytes");
