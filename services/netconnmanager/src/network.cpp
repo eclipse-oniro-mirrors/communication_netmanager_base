@@ -479,16 +479,21 @@ bool Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     NetLinkInfo netLinkInfoBck = netLinkInfo_;
     lock.unlock();
-    bool hasSameIpAddr = false;
+    bool hasSameIpv4Addr = false;
+    bool hasSameIpv6Addr = false;
     NETMGR_LOG_I("UpdateIpAddrs, old ip addrs size: [%{public}zu]", netLinkInfoBck.netAddrList_.size());
     for (const auto &inetAddr : netLinkInfoBck.netAddrList_) {
+        auto family = GetAddrFamily(inetAddr.address_);
         if (newNetLinkInfo.HasNetAddr(inetAddr)) {
-            hasSameIpAddr = true;
+            if (family == AF_INET) {
+                hasSameIpv4Addr = true;
+            } else if (family == AF_INET6) {
+                hasSameIpv6Addr = true;
+            }
             NETMGR_LOG_W("Same ip address:[%{public}s], there is not need to be deleted",
                 CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
             continue;
         }
-        auto family = GetAddrFamily(inetAddr.address_);
         auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_)
                                              : ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_)
                                                                      : Ipv4PrefixLen(inetAddr.netMask_));
@@ -498,18 +503,24 @@ bool Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
         if (NETMANAGER_SUCCESS != ret) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_DELETE_NET_IP_ADDR_FAILED);
         }
+    }
 
-        if ((ret == ERRNO_EADDRNOTAVAIL) || (ret == 0)) {
-            NETMGR_LOG_W("remove route info of ip address:[%{public}s]",
-                CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
-            std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-            INetAddr::IpType addrFamily = family == AF_INET ? INetAddr::IpType::IPV4 : INetAddr::IpType::IPV6;
-            RemoveRouteByFamily(addrFamily);
-        }
+    if (!hasSameIpv4Addr) {
+        NETMGR_LOG_W("No same IPv4 address found and route not removed, remove IPv4 route by family");
+        std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
+        RemoveRouteByFamily(INetAddr::IpType::IPV4);
+        lock.unlock();
+    }
+
+    if (!hasSameIpv6Addr) {
+        NETMGR_LOG_W("No same IPv6 address found and route not removed, remove IPv6 route by family");
+        std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
+        RemoveRouteByFamily(INetAddr::IpType::IPV6);
+        lock.unlock();
     }
 
     HandleUpdateIpAddrs(newNetLinkInfo);
-    return hasSameIpAddr;
+    return hasSameIpv4Addr || hasSameIpv6Addr;
 }
 
 void Network::HandleUpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
