@@ -973,5 +973,140 @@ HWTEST_F(DNSParamCacheTest, VpnDnsResidueScenarioTest001, TestSize.Level1)
     EXPECT_EQ(outServers.size(), 1u);
     EXPECT_EQ(outServers[0], "2.2.2.2");
 }
+
+HWTEST_F(DNSParamCacheTest, SetIpv6UidBlackListTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetIpv6UidBlackListTest001 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    std::vector<int32_t> netIds;
+    netIds.emplace_back(netId);
+    uint32_t uid = 1;
+    dnsParCache.CreateCacheForNet(netId);
+    dnsParCache.EnableIpv4(netId);
+    dnsParCache.SetIpv6UidBlackList(netIds, uid);
+    bool ret = dnsParCache.IsInIpv6UidBlackList(netId, uid);
+    EXPECT_TRUE(ret);
+    dnsParCache.DestroyNetworkCache(netId);
+}
+ 
+HWTEST_F(DNSParamCacheTest, SetIpv6UidBlackListTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetIpv6UidBlackListTest002 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    std::vector<int32_t> netIds;
+    netIds.emplace_back(netId);
+    uint32_t uid = 1;
+    dnsParCache.SetIpv6UidBlackList(netIds, uid);
+    bool ret = dnsParCache.IsInIpv6UidBlackList(netId, uid);
+    EXPECT_FALSE(ret);
+}
+ 
+HWTEST_F(DNSParamCacheTest, SetIpv6UidBlackListTest003, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetIpv6UidBlackListTest003 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    std::vector<int32_t> netIds;
+    netIds.emplace_back(netId);
+    uint32_t uid = 1;
+    dnsParCache.CreateCacheForNet(netId);
+    dnsParCache.EnableIpv4(netId);
+    // Set ipv6 uid black list first time
+    dnsParCache.SetIpv6UidBlackList(netIds, uid);
+    bool ret = dnsParCache.IsInIpv6UidBlackList(netId, uid);
+    EXPECT_TRUE(ret);
+    // Update existing uid - covers DnsResolvConfig::SetIpv6UidBlackList branch for updating existing entry
+    dnsParCache.SetIpv6UidBlackList(netIds, uid);
+    ret = dnsParCache.IsInIpv6UidBlackList(netId, uid);
+    EXPECT_TRUE(ret);
+    dnsParCache.DestroyNetworkCache(netId);
+}
+ 
+HWTEST_F(DNSParamCacheTest, SetIpv6UidBlackListTest004, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetIpv6UidBlackListTest004 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    dnsParCache.CreateCacheForNet(netId);
+    // Not enable IPv4, SetIpv6UidBlackList should return directly without setting Ipv6 uid black list
+    // This covers DnsResolvConfig::SetIpv6UidBlackList branch: if (!IsIpv4Enable()) return;
+    std::vector<int32_t> netIds;
+    netIds.emplace_back(netId);
+    uint32_t uid = 1;
+    dnsParCache.SetIpv6UidBlackList(netIds, uid);
+    bool ret = dnsParCache.IsInIpv6UidBlackList(netId, uid);
+    EXPECT_FALSE(ret);
+    dnsParCache.DestroyNetworkCache(netId);
+}
+ 
+HWTEST_F(DNSParamCacheTest, SetIpv6UidBlackListTest005, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetIpv6UidBlackListTest005 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    dnsParCache.CreateCacheForNet(netId);
+    dnsParCache.EnableIpv4(netId);
+    std::vector<int32_t> netIds;
+    netIds.emplace_back(netId);
+    // Fill uid black list to MAX_IPV6_UID_BLACK_LIST_SIZE (32) and verify oldest is removed
+    // This covers DnsResolvConfig::SetIpv6UidBlackList branch: ipv6UidBlackList_.size >= MAX_IPV6_UID_BLACK_LIST_SIZE
+    for (size_t i = 0; i < MAX_IPV6_UID_BLACK_LIST_SIZE + 1; ++i) {
+        uint32_t uid = i;
+        dnsParCache.SetIpv6UidBlackList(netIds, uid);
+    }
+    // The first entry should be removed due to Ipv6 black list size limit
+    uint32_t firstUid = 0;
+    EXPECT_FALSE(dnsParCache.IsInIpv6UidBlackList(netId, firstUid));
+    // The last entry should still exist
+    uint32_t lastUid = MAX_IPV6_UID_BLACK_LIST_SIZE;
+    EXPECT_TRUE(dnsParCache.IsInIpv6UidBlackList(netId, lastUid));
+    dnsParCache.DestroyNetworkCache(netId);
+}
+ 
+HWTEST_F(DNSParamCacheTest, IsInIpv6UidBlackListTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsInIpv6UidBlackListTest001 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    dnsParCache.CreateCacheForNet(netId);
+    dnsParCache.EnableIpv4(netId);
+    uint32_t uid = 1;
+    bool ret = dnsParCache.IsInIpv6UidBlackList(netId, uid);
+    EXPECT_FALSE(ret);
+    dnsParCache.DestroyNetworkCache(netId);
+}
+ 
+HWTEST_F(DNSParamCacheTest, IsInIpv6UidBlackListTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsInIpv6UidBlackListTest002 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    uint32_t uid = 1;
+    bool ret = dnsParCache.IsInIpv6UidBlackList(netId, uid);
+    EXPECT_FALSE(ret);
+}
+ 
+HWTEST_F(DNSParamCacheTest, IsInIpv6UidBlackListTest003, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsInIpv6UidBlackListTest003 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    std::vector<int32_t> netIds;
+    netIds.emplace_back(netId);
+    dnsParCache.CreateCacheForNet(netId);
+    dnsParCache.EnableIpv4(netId);
+    uint32_t uid = 1;
+    dnsParCache.SetIpv6UidBlackList(netIds, uid);
+    bool ret = dnsParCache.IsInIpv6UidBlackList(netId, uid);
+    EXPECT_TRUE(ret);
+    // Clear the cache to simulate expiration - covers DnsResolvConfig::IsInIpv6UidBlackList branch for cache not exist
+    dnsParCache.FlushDnsCache(netId);
+    ret = dnsParCache.IsInIpv6UidBlackList(netId, uid);
+    EXPECT_FALSE(ret);
+    dnsParCache.DestroyNetworkCache(netId);
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

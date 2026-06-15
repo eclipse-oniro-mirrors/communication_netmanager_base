@@ -166,6 +166,7 @@ enum class NetsysInterfaceCode {
     NETSYS_NETWORK_ENABLE_IPV4,
     NETSYS_GET_CONNECT_OWNER_UID,
     NETSYS_GET_SYSTEM_NET_PORT_STATES,
+    NETSYS_NETWORK_SET_IPV6_UID_BLACK_LIST,
 };
 
 enum class NotifyInterfaceCode {

@@ -1054,6 +1054,7 @@ public:
     virtual int32_t GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo,
                                        int32_t &ownerUid) = 0;
     virtual int32_t GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo) = 0;
+    virtual int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

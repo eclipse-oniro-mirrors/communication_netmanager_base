@@ -20,6 +20,7 @@
 #include <list>
 #include <memory>
 #include <vector>
+#include <map>
 
 #include "delayed_queue.h"
 #include "dns_config_client.h"
@@ -28,6 +29,7 @@
 namespace OHOS::nmd {
 
 static constexpr size_t MAX_NODATA_CACHE_SIZE = 100;
+static constexpr size_t MAX_IPV6_UID_BLACK_LIST_SIZE = 32;
 static constexpr uint64_t MILLIS_PER_SEC = 1000ULL;
 static constexpr uint64_t NANOS_PER_MILLI = 1000000ULL;
 
@@ -71,6 +73,11 @@ public:
     void ClearNodataCache();
     uint64_t GetNowMs();
 
+    // ipv6 uid black list methods
+    void SetIpv6UidBlackList(const uint32_t &uid);
+    bool IsInIpv6UidBlackList(const uint32_t &uid);
+    void ClearIpv6UidBlackList();
+
 private:
     uint64_t HashHostName(const std::string &hostName) const;
 
@@ -112,6 +119,10 @@ private:
     // NODATA cache: using vector for memory efficiency (100 elements max)
     // hash(hostName) -> timestamp in milliseconds (uint64_t)
     std::vector<std::pair<uint64_t, uint64_t>> nodataCache_;
+
+    // ipv6 uid black list: using map for memory efficiency (32 elements max)
+    // <uint32_t uid, uint64_t timestamp>
+    std::map<uint32_t, uint64_t> ipv6UidBlackList_;
 };
 } // namespace OHOS::nmd
 #endif // INCLUDE_DNSRESOLV_CONFIG_H

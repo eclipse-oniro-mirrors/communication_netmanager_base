@@ -1283,6 +1283,32 @@ HWTEST_F(NetsysControllerTest, SetEnableIpv6Test001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysControllerTest, SetIpv6UidBlackListTest001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+    netsysController->netsysService_ = netsysControllerServiceImpl;
+ 
+    int32_t uid = 0;
+    std::vector<int32_t> netIds = {};
+    int32_t ret = netsysController->SetIpv6UidBlackList(netIds, uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+ 
+HWTEST_F(NetsysControllerTest, SetIpv6UidBlackListTest002, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+    netsysController->netsysService_ = nullptr;
+ 
+    int32_t uid = 0;
+    std::vector<int32_t> netIds = {};
+    int32_t ret = netsysController->SetIpv6UidBlackList(netIds, uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
 HWTEST_F(NetsysControllerTest, SetIpv6AutoConfTest001, TestSize.Level1)
 {
     auto netsysController = std::make_shared<NetsysController>();
