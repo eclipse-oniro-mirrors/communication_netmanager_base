@@ -923,9 +923,9 @@ void OnDemandLoadManagerCallback::OnLoadSystemAbilityFail(int32_t systemAbilityI
     NETNATIVE_LOG_D("OnLoadSystemAbilityFail: [%{public}d]", systemAbilityId);
 }
 
-int32_t NetsysBpfNetFirewall::LoadSystemAbility(int32_t systemAbilityId)
+int32_t NetsysBpfNetFirewall::GetSystemAbility(int32_t systemAbilityId)
 {
-    NETNATIVE_LOG_D("LoadSystemAbility: [%{public}d]", systemAbilityId);
+    NETNATIVE_LOG_D("GetSystemAbility: [%{public}d]", systemAbilityId);
     auto saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saManager == nullptr) {
         NETNATIVE_LOGE("GetCmProxy registry is null");
@@ -943,7 +943,7 @@ int32_t NetsysBpfNetFirewall::LoadSystemAbility(int32_t systemAbilityId)
         return -1;
     }
 
-    int32_t ret = saManager->LoadSystemAbility(systemAbilityId, loadCallBack);
+    int32_t ret = saManager->GetSystemAbility(systemAbilityId, loadCallBack);
     if (ret != ERR_OK) {
         NETNATIVE_LOGE("systemAbilityId:%d load failed,result code:%d", systemAbilityId, ret);
         return -1;
