@@ -107,7 +107,9 @@ long TrafficManager::GetAllRxTraffic()
         if (*iter != "lo") {
             std::string baseTrafficPath = INTERFACE_LIST_DIR + (*iter) + "/" + STATISTICS + "/";
             long rxBytes = GetInterfaceTrafficByType(baseTrafficPath, RX_BYTES);
-            allRxBytes += rxBytes;
+            if (rxBytes >= 0) {
+                allRxBytes += rxBytes;
+            }
         }
     }
     return allRxBytes;
@@ -125,7 +127,9 @@ long TrafficManager::GetAllTxTraffic()
         if (*iter != "lo") {
             std::string baseTrafficPath = INTERFACE_LIST_DIR + (*iter) + "/" + STATISTICS + "/";
             long txBytes = GetInterfaceTrafficByType(baseTrafficPath, TX_BYTES);
-            allTxBytes = allTxBytes + txBytes;
+            if (txBytes >= 0) {
+                allTxBytes = allTxBytes + txBytes;
+            }
         }
     }
     return allTxBytes;

@@ -45,6 +45,7 @@ namespace {
 constexpr const char *VNIC_TUN_CARD_NAME = "vnic-tun";
 constexpr const char *VNIC_TUN_DEVICE_PATH = "/dev/tun";
 constexpr int32_t NET_MASK_MAX_LENGTH = 32;
+constexpr int32_t NET6_MASK_MAX_LENGTH = 128;
 constexpr uint32_t MAX_VNIC_UID_ARRAY_SIZE = 20;
 } // namespace
 
@@ -188,6 +189,10 @@ int32_t VnicManager::SetVnicAddress(const std::string &ifName, const std::string
         }
         if (inet_pton(AF_INET6, tunAddr.c_str(), &ifr6.ifr6_addr) == 0) {
             NETNATIVE_LOGE("inet_pton ipv6 address failed: %{public}d", errno);
+        }
+        if (prefix <= 0 || prefix >= NET6_MASK_MAX_LENGTH) {
+            NETNATIVE_LOGE("ipv6 prefix: %{public}d error", prefix);
+            return NETMANAGER_ERROR;
         }
         ifr6.ifr6_prefixlen = static_cast<uint32_t>(prefix);
         ifr6.ifr6_ifindex = ifr.ifr_ifindex;

@@ -181,5 +181,21 @@ HWTEST_F(VnicManagerTest, InitIfreq002, TestSize.Level1)
     auto result = VnicManager::GetInstance().InitIfreq(ifr, cardName);
     EXPECT_EQ(result, NETMANAGER_ERROR);
 }
+
+HWTEST_F(VnicManagerTest, SetVnicAddressIpv6PrefixBoundary, TestSize.Level1)
+{
+    VnicManager vnicmanager;
+    std::string ifName = "vnic-tun";
+    std::string tunAddr = "2001:db8:85a3::8a2e:370:7334";
+
+    auto result = vnicmanager.SetVnicAddress(ifName, tunAddr, 0);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+
+    result = vnicmanager.SetVnicAddress(ifName, tunAddr, -1);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+
+    result = vnicmanager.SetVnicAddress(ifName, tunAddr, 128);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
