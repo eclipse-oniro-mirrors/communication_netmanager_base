@@ -15,6 +15,7 @@
 
 #include <atomic>
 #include <functional>
+#include <shared_mutex>
 
 #include "net_activate.h"
 #include "net_caps.h"
@@ -196,11 +197,13 @@ void NetActivate::SetRequestId(uint32_t reqId)
 
 sptr<NetSupplier> NetActivate::GetServiceSupply() const
 {
+    std::shared_lock<std::shared_mutex> lock(mutex_);
     return netServiceSupplied_;
 }
 
 void NetActivate::SetServiceSupply(sptr<NetSupplier> netServiceSupplied)
 {
+    std::unique_lock<std::shared_mutex> lock(mutex_);
     netServiceSupplied_ = netServiceSupplied;
 }
 
