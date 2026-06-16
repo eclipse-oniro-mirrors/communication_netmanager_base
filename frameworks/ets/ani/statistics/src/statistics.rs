@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{bridge, error_code::convert_to_business_error, wrapper::NetStatsClient};
+use crate::{bridge, error_code::{convert_to_business_error, NETMANAGER_ERR_PARAMETER_ERROR}, wrapper::NetStatsClient};
 use ani_rs::business_error::BusinessError;
 use std::collections::HashMap;
 
@@ -123,5 +123,56 @@ pub fn get_traffic_stats_by_uid_network(
 ) -> Result<Vec<bridge::AniNetStatsInfoSequenceItem>, BusinessError> {
     NetStatsClient::get_traffic_stats_by_uid_network(uid, networkInfo.into())
         .map(|v| v as Vec<bridge::AniNetStatsInfoSequenceItem>)
+        .map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub fn update_stats_data() -> Result<(), BusinessError> {
+    NetStatsClient::update_stats_data()
+        .map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub fn get_self_traffic_stats(networkInfo: bridge::AniNetworkInfo)
+    -> Result<bridge::NetStatsInfo, BusinessError> {
+    NetStatsClient::get_self_traffic_stats(networkInfo)
+        .map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub fn update_ifaces_stats(iface: String, start: i32, end: i32,
+    stats: bridge::NetStatsInfo) -> Result<(), BusinessError> {
+    if start < 0 || end < 0 {
+        return Err(BusinessError::new(NETMANAGER_ERR_PARAMETER_ERROR, ("Parameter error: start and end must be non-negative").to_string()));
+    }
+    NetStatsClient::update_ifaces_stats(&iface, start as u64, end as u64, stats)
+        .map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub fn set_calibration_traffic(sim_id: i32, remain_traffic: i64,
+    total_traffic: i64) -> Result<(), BusinessError> {
+    let sim_id: u32 = sim_id.try_into().map_err(|_| {
+        BusinessError::new(NETMANAGER_ERR_PARAMETER_ERROR, ("Parameter error: sim_id must be non-negative").to_string())
+    })?;
+    if (remain_traffic < 0) {
+        return Err(BusinessError::new(NETMANAGER_ERR_PARAMETER_ERROR, ("Parameter error: remain_traffic must be non-negative").to_string()));
+    }
+    let total_traffic: u64 = total_traffic.try_into().map_err(|_| {
+        BusinessError::new(NETMANAGER_ERR_PARAMETER_ERROR, ("Parameter error: total_traffic must be non-negative").to_string())
+    })?;
+    NetStatsClient::set_calibration_traffic(sim_id, remain_traffic, total_traffic)
+        .map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub fn get_traffic_plan_info(sim_id: i32, param: i32) -> Result<i64, BusinessError> {
+    NetStatsClient::get_traffic_plan_info(sim_id, param)
+        .map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub fn set_traffic_plan_info(sim_id: i32, param: i32, value: i64) -> Result<(), BusinessError> {
+    NetStatsClient::set_traffic_plan_info(sim_id, param, value)
         .map_err(convert_to_business_error)
 }

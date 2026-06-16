@@ -13,6 +13,10 @@
 
 use ani_rs::business_error::BusinessError;
 
+/// Corresponds to C++ `NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR` (401)
+/// Defined in `interfaces/innerkits/include/net_manager_constants.h`
+pub const NETMANAGER_ERR_PARAMETER_ERROR: i32 = 401;
+
 pub fn convert_to_business_error(mut code: i32) -> BusinessError {
     let error_msg = crate::wrapper::ffi::GetErrorCodeAndMessage(&mut code);
     BusinessError::new(code, error_msg)
