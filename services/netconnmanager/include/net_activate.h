@@ -105,6 +105,7 @@ private:
     std::atomic<int32_t> notifyLostNetId_ = 0;
     std::atomic<bool> isFrozenedSkip_ = false;
     std::atomic<bool> NeedSkipLostDelay_ = false;
+    mutable std::shared_mutex mutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
