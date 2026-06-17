@@ -2,9 +2,9 @@
     "string":[
         {
             "name":"netstats_excess_daymark_notofication_title",
-            "value":"تجاوز الحد اليومي",
+            "value":"تنبيه تجاوز الحد اليومي",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {

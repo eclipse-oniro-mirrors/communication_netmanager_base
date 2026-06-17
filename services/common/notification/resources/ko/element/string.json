@@ -2,9 +2,9 @@
     "string":[
         {
             "name":"netstats_excess_daymark_notofication_title",
-            "value":"일일 표시량 초과",
+            "value":"일일 한도 초과",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {

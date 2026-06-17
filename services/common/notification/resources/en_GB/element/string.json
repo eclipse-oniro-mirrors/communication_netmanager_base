@@ -2,7 +2,7 @@
     "string":[
         {
             "name":"netstats_excess_daymark_notofication_title",
-            "value":"Over daily mark",
+            "value":"Over daily limit",
             "attr":{
                 "priority":"translate"
             }

@@ -2,9 +2,9 @@
     "string":[
         {
             "name":"netstats_excess_daymark_notofication_title",
-            "value":"Günlük hedef aşıldı",
+            "value":"Günlük limit aşıldı",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {

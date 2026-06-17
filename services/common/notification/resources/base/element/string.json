@@ -16,9 +16,9 @@
         },
         {
             "name":"netstats_excess_daymark_notofication_title",
-            "value":"Over daily mark",
+            "value":"Over daily limit",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {
@@ -44,7 +44,7 @@
         },
         {
             "name":"netstats_month_limit_message",
-            "value":"Monthly data limit reached %s",
+            "value":"Monthly data limit reached (%s)",
             "attr":{
                 "priority":"translate"
             }

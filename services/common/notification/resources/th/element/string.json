@@ -4,7 +4,7 @@
             "name":"netstats_excess_daymark_notofication_title",
             "value":"เกินขีดจำกัดรายวัน",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {

@@ -2,9 +2,9 @@
     "string":[
         {
             "name":"netstats_excess_daymark_notofication_title",
-            "value":"နေ့စဉ်သတ်မှတ်ချက်အထက်",
+            "value":"နေ့စဉ် ကန့်သတ်ချက်ထက် ကျော်နေသည်",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {
