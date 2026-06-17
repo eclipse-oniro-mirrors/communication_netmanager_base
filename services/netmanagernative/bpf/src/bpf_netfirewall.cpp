@@ -937,13 +937,7 @@ int32_t NetsysBpfNetFirewall::GetSystemAbility(int32_t systemAbilityId)
         return 0;
     }
 
-    sptr<OnDemandLoadManagerCallback> loadCallBack = new (std::nothrow) OnDemandLoadManagerCallback();
-    if (loadCallBack == nullptr) {
-        NETNATIVE_LOGE("new OnDemandLoadCertManagerCallback failed");
-        return -1;
-    }
-
-    int32_t ret = saManager->GetSystemAbility(systemAbilityId, loadCallBack);
+    int32_t ret = saManager->GetSystemAbility(systemAbilityId);
     if (ret != ERR_OK) {
         NETNATIVE_LOGE("systemAbilityId:%d load failed,result code:%d", systemAbilityId, ret);
         return -1;
