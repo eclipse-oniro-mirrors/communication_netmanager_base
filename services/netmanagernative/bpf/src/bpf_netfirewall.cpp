@@ -912,17 +912,6 @@ int NetsysBpfNetFirewall::HandleEvent(void *ctx, void *data, size_t len)
     return 0;
 }
 
-void OnDemandLoadManagerCallback::OnLoadSystemAbilitySuccess(int32_t systemAbilityId,
-    const sptr<IRemoteObject> &remoteObject)
-{
-    NETNATIVE_LOG_D("OnLoadSystemAbilitySuccess systemAbilityId: [%{public}d]", systemAbilityId);
-}
-
-void OnDemandLoadManagerCallback::OnLoadSystemAbilityFail(int32_t systemAbilityId)
-{
-    NETNATIVE_LOG_D("OnLoadSystemAbilityFail: [%{public}d]", systemAbilityId);
-}
-
 int32_t NetsysBpfNetFirewall::GetSystemAbility(int32_t systemAbilityId)
 {
     NETNATIVE_LOG_D("GetSystemAbility: [%{public}d]", systemAbilityId);
@@ -936,12 +925,8 @@ int32_t NetsysBpfNetFirewall::GetSystemAbility(int32_t systemAbilityId)
     if (object != nullptr) {
         return 0;
     }
+    sptr<OHOS::IRemoteObject> ret = saManager->GetSystemAbility(systemAbilityId);
 
-    int32_t ret = saManager->GetSystemAbility(systemAbilityId);
-    if (ret != ERR_OK) {
-        NETNATIVE_LOGE("systemAbilityId:%d load failed,result code:%d", systemAbilityId, ret);
-        return -1;
-    }
     return 0;
 }
 
