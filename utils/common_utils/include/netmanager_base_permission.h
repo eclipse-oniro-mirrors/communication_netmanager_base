@@ -16,7 +16,9 @@
 #ifndef NETMANAGER_PERMISSION_H
 #define NETMANAGER_PERMISSION_H
 
+#include <cstdint>
 #include <string>
+#include <vector>
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -37,6 +39,7 @@ static constexpr const char *GET_NETWORK_LOCATION = "ohos.permission.LOCATION";
 static constexpr const char *GET_NETWORK_APPROXIMATE_LOCATION = "ohos.permission.APPROXIMATELY_LOCATION";
 static constexpr const char *ACCESS_NET_TRACE_INFO = "ohos.permission.ACCESS_NET_TRACE_INFO";
 static constexpr const char *GET_IP_MAC_INFO = "ohos.permission.GET_IP_MAC_INFO";
+static constexpr const char *SEND_MESSAGE = "ohos.permission.SEND_MESSAGES";
 } // namespace Permission
 
 class NetManagerPermission {
@@ -45,6 +48,7 @@ public:
     static bool CheckPermissionWithCache(const std::string &permissionName);
     static bool IsSystemCaller();
     static bool CheckNetSysInternalPermission(const std::string &permissionName);
+    static bool CheckUidPermission(const std::vector<uint32_t> &allowedUids);
     static int32_t GetApiVersion();
 };
 } // namespace NetManagerStandard

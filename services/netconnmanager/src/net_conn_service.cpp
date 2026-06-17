@@ -111,6 +111,42 @@ constexpr const char *KEY_PAC_URL = "settings.netmanager.pac_url";
 const bool REGISTER_LOCAL_RESULT =
     SystemAbility::MakeAndRegisterAbility(NetConnService::GetInstance().get());
 
+namespace {
+struct NetCapPermissionEntry {
+    NetCap netCap;
+    const char *permission = nullptr;
+    std::vector<uint32_t> allowedUids;
+};
+
+const NetCapPermissionEntry NET_CAP_PERMISSION_TABLE[] = {
+    {NetCap::NET_CAPABILITY_INTERNAL_DEFAULT, Permission::CONNECTIVITY_INTERNAL, {}},
+    {NetCap::NET_CAPABILITY_MMS, nullptr, {1001}},
+};
+}
+
+bool NetConnService::CheckNetCapPermission(const std::set<NetCap> &netCaps)
+{
+    for (const auto &cap : netCaps) {
+        for (const auto &entry : NET_CAP_PERMISSION_TABLE) {
+            if (entry.netCap != cap) {
+                continue;
+            }
+            // LCOV_EXCL_START
+            if (entry.permission != nullptr && !NetManagerPermission::CheckPermission(entry.permission)) {
+                NETMGR_LOG_I("Permission deny: capability %{public}d requires %{public}s",
+                             static_cast<int32_t>(cap), entry.permission);
+                return false;
+            }
+            if (!entry.allowedUids.empty() && !NetManagerPermission::CheckUidPermission(entry.allowedUids)) {
+                NETMGR_LOG_I("UID permission deny for capability %{public}d", static_cast<int32_t>(cap));
+                return false;
+            }
+            // LCOV_EXCL_STOP
+        }
+    }
+    return true;
+}
+
 NetConnService::NetConnService()
     : SystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID, true), registerToService_(false), state_(STATE_STOPPED)
 {
@@ -342,6 +378,13 @@ int32_t NetConnService::RegisterNetConnCallback(const sptr<INetConnCallback> cal
 int32_t NetConnService::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
                                                 const sptr<INetConnCallback> callback, const uint32_t &timeoutMS)
 {
+    if (netSpecifier != nullptr) {
+        // LCOV_EXCL_START
+        if (!CheckNetCapPermission(netSpecifier->netCapabilities_.netCaps_)) {
+            return NETMANAGER_ERR_PERMISSION_DENIED;
+        }
+        // LCOV_EXCL_STOP
+    }
     uint32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
 
     int32_t result = NETMANAGER_ERROR;
@@ -362,18 +405,11 @@ int32_t NetConnService::RequestNetConnection(
     if (netSpecifier == nullptr) {
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    std::set<NetCap> &netCaps = netSpecifier->netCapabilities_.netCaps_;
-    if (netCaps.find(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT) != netCaps.end()) {
-        if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
-                NETMGR_LOG_I("Permission deny: Request with INTERNAL_DEFAULT But not has CONNECTIVITY_INTERNAL");
-                return NETMANAGER_ERR_PERMISSION_DENIED;
-        }
-    } else {
-        if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
-                NETMGR_LOG_I("Permission deny: request need GET_NETWORK_INFO permission");
-                return NETMANAGER_ERR_PERMISSION_DENIED;
-        }
+    // LCOV_EXCL_START
+    if (!CheckNetCapPermission(netSpecifier->netCapabilities_.netCaps_)) {
+        return NETMANAGER_ERR_PERMISSION_DENIED;
     }
+    // LCOV_EXCL_STOP
     if (netConnEventHandler_) {
         netConnEventHandler_->PostSyncTask([this, netSpecifier, callback, timeoutMS, &callingUid, &result]() {
             result = this->RequestNetConnectionAsync(netSpecifier, callback, timeoutMS, callingUid);

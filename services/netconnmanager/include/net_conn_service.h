@@ -642,6 +642,7 @@ private:
     void StartAllNetDetection();
 #endif
     void DecreaseNetActivates(const uint32_t callingUid, const sptr<INetConnCallback> &callback);
+    bool CheckNetCapPermission(const std::set<NetCap> &netCaps);
     sptr<NetSupplier> GetSupplierByNetId(int32_t netId);
     void RegisterNetDataShareObserver();
     void UnregisterNetDataShareObserver();

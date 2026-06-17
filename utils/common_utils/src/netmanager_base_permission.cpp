@@ -104,6 +104,20 @@ bool NetManagerPermission::CheckNetSysInternalPermission(const std::string &perm
     return true;
 }
 
+bool NetManagerPermission::CheckUidPermission(const std::vector<uint32_t> &allowedUids)
+{
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    // LCOV_EXCL_START
+    for (auto uid : allowedUids) {
+        if (uid == static_cast<uint32_t>(callingUid)) {
+            return true;
+        }
+    }
+    // LCOV_EXCL_STOP
+    NETMGR_LOG_I("UID %{public}d not in allowed list", callingUid);
+    return false;
+}
+
 // LCOV_EXCL_START
 int32_t NetManagerPermission::GetApiVersion()
 {
