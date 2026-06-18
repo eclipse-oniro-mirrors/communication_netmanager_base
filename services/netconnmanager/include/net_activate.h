@@ -92,7 +92,7 @@ private:
 private:
     sptr<NetSpecifier> netSpecifier_ = nullptr;
     sptr<INetConnCallback> netConnCallback_ = nullptr;
-    std::shared_mutex netServiceSuppliedMutex_;
+    mutable std::shared_mutex netServiceSuppliedMutex_;
     sptr<NetSupplier> netServiceSupplied_ = nullptr;
     uint32_t timeoutMS_ = 0;
     std::weak_ptr<INetActivateCallback> timeoutCallback_;
