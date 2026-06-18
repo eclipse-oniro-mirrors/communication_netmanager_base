@@ -409,6 +409,303 @@ HWTEST_F(NetworkTest, UpdateIpAddrsTest001, TestSize.Level1)
     network->UpdateIpAddrs(newNetLinkInfo);
 }
 
+HWTEST_F(NetworkTest, UpdateIpAddrsTest002, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
+    ASSERT_NE(network, nullptr);
+    INetAddr oldIpv4Addr;
+    oldIpv4Addr.address_ = "192.168.1.100";
+    oldIpv4Addr.prefixlen_ = 24;
+    network->netLinkInfo_.netAddrList_.push_back(oldIpv4Addr);
+    NetLinkInfo newNetLinkInfo;
+    newNetLinkInfo.netAddrList_.push_back(oldIpv4Addr);
+    auto ret = network->UpdateIpAddrs(newNetLinkInfo);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetworkTest, UpdateIpAddrsTest003, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
+    ASSERT_NE(network, nullptr);
+    INetAddr oldIpv6Addr;
+    oldIpv6Addr.address_ = "2001:db8::1";
+    oldIpv6Addr.prefixlen_ = 64;
+    network->netLinkInfo_.netAddrList_.push_back(oldIpv6Addr);
+    NetLinkInfo newNetLinkInfo;
+    newNetLinkInfo.netAddrList_.push_back(oldIpv6Addr);
+    auto ret = network->UpdateIpAddrs(newNetLinkInfo);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetworkTest, UpdateIpAddrsTest004, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
+    ASSERT_NE(network, nullptr);
+    INetAddr oldIpv4Addr;
+    oldIpv4Addr.address_ = "192.168.1.100";
+    oldIpv4Addr.prefixlen_ = 24;
+    network->netLinkInfo_.netAddrList_.push_back(oldIpv4Addr);
+    Route ipv4Route;
+    ipv4Route.destination_.type_ = INetAddr::IpType::IPV4;
+    ipv4Route.iface_ = "rmnet0";
+    ipv4Route.destination_.address_ = "192.168.1.0";
+    ipv4Route.destination_.prefixlen_ = 24;
+    ipv4Route.gateway_.address_ = "192.168.1.1";
+    network->netLinkInfo_.routeList_.push_back(ipv4Route);
+    NetLinkInfo newNetLinkInfo;
+    INetAddr newIpv4Addr;
+    newIpv4Addr.address_ = "10.0.0.2";
+    newIpv4Addr.prefixlen_ = 24;
+    newNetLinkInfo.netAddrList_.push_back(newIpv4Addr);
+    auto ret = network->UpdateIpAddrs(newNetLinkInfo);
+    EXPECT_FALSE(ret);
+    EXPECT_EQ(network->netLinkInfo_.routeList_.size(), 0);
+}
+
+HWTEST_F(NetworkTest, UpdateIpAddrsTest005, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
+    ASSERT_NE(network, nullptr);
+    INetAddr oldIpv6Addr;
+    oldIpv6Addr.address_ = "2001:db8::1";
+    oldIpv6Addr.prefixlen_ = 64;
+    network->netLinkInfo_.netAddrList_.push_back(oldIpv6Addr);
+    Route ipv6Route;
+    ipv6Route.destination_.type_ = INetAddr::IpType::IPV6;
+    ipv6Route.iface_ = "rmnet0";
+    ipv6Route.destination_.address_ = "2001:db8::";
+    ipv6Route.destination_.prefixlen_ = 64;
+    ipv6Route.gateway_.address_ = "fe80::1";
+    network->netLinkInfo_.routeList_.push_back(ipv6Route);
+    NetLinkInfo newNetLinkInfo;
+    INetAddr newIpv6Addr;
+    newIpv6Addr.address_ = "2001:4860::1";
+    newIpv6Addr.prefixlen_ = 64;
+    newNetLinkInfo.netAddrList_.push_back(newIpv6Addr);
+    auto ret = network->UpdateIpAddrs(newNetLinkInfo);
+    EXPECT_FALSE(ret);
+    EXPECT_EQ(network->netLinkInfo_.routeList_.size(), 0);
+}
+
+HWTEST_F(NetworkTest, UpdateIpAddrsTest006, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
+    ASSERT_NE(network, nullptr);
+    INetAddr oldIpv4Addr;
+    oldIpv4Addr.address_ = "192.168.1.100";
+    oldIpv4Addr.prefixlen_ = 24;
+    INetAddr oldIpv6Addr;
+    oldIpv6Addr.address_ = "2001:db8::1";
+    oldIpv6Addr.prefixlen_ = 64;
+    network->netLinkInfo_.netAddrList_.push_back(oldIpv4Addr);
+    network->netLinkInfo_.netAddrList_.push_back(oldIpv6Addr);
+    Route ipv4Route;
+    ipv4Route.destination_.type_ = INetAddr::IpType::IPV4;
+    ipv4Route.iface_ = "rmnet0";
+    ipv4Route.destination_.address_ = "192.168.1.0";
+    ipv4Route.destination_.prefixlen_ = 24;
+    ipv4Route.gateway_.address_ = "192.168.1.1";
+    Route ipv6Route;
+    ipv6Route.destination_.type_ = INetAddr::IpType::IPV6;
+    ipv6Route.iface_ = "rmnet0";
+    ipv6Route.destination_.address_ = "2001:db8::";
+    ipv6Route.destination_.prefixlen_ = 64;
+    ipv6Route.gateway_.address_ = "fe80::1";
+    network->netLinkInfo_.routeList_.push_back(ipv4Route);
+    network->netLinkInfo_.routeList_.push_back(ipv6Route);
+    NetLinkInfo newNetLinkInfo;
+    newNetLinkInfo.netAddrList_.push_back(oldIpv4Addr);
+    newNetLinkInfo.netAddrList_.push_back(oldIpv6Addr);
+    auto ret = network->UpdateIpAddrs(newNetLinkInfo);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(network->netLinkInfo_.routeList_.size(), 2);
+}
+
+HWTEST_F(NetworkTest, UpdateIpAddrsTest007, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
+    ASSERT_NE(network, nullptr);
+    EXPECT_TRUE(network->netLinkInfo_.netAddrList_.empty());
+    NetLinkInfo newNetLinkInfo;
+    INetAddr newAddr;
+    newAddr.address_ = "10.0.0.2";
+    newAddr.prefixlen_ = 24;
+    newNetLinkInfo.netAddrList_.push_back(newAddr);
+    auto ret = network->UpdateIpAddrs(newNetLinkInfo);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetworkTest, UpdateIpAddrsTest008, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
+    ASSERT_NE(network, nullptr);
+    INetAddr oldIpv4Addr;
+    oldIpv4Addr.address_ = "192.168.1.100";
+    oldIpv4Addr.prefixlen_ = 24;
+    INetAddr oldIpv6Addr;
+    oldIpv6Addr.address_ = "2001:db8::1";
+    oldIpv6Addr.prefixlen_ = 64;
+    network->netLinkInfo_.netAddrList_.push_back(oldIpv4Addr);
+    network->netLinkInfo_.netAddrList_.push_back(oldIpv6Addr);
+    Route ipv4Route;
+    ipv4Route.destination_.type_ = INetAddr::IpType::IPV4;
+    ipv4Route.iface_ = "rmnet0";
+    ipv4Route.destination_.address_ = "192.168.1.0";
+    ipv4Route.destination_.prefixlen_ = 24;
+    ipv4Route.gateway_.address_ = "192.168.1.1";
+    Route ipv6Route;
+    ipv6Route.destination_.type_ = INetAddr::IpType::IPV6;
+    ipv6Route.iface_ = "rmnet0";
+    ipv6Route.destination_.address_ = "2001:db8::";
+    ipv6Route.destination_.prefixlen_ = 64;
+    ipv6Route.gateway_.address_ = "fe80::1";
+    network->netLinkInfo_.routeList_.push_back(ipv4Route);
+    network->netLinkInfo_.routeList_.push_back(ipv6Route);
+    NetLinkInfo newNetLinkInfo;
+    EXPECT_TRUE(newNetLinkInfo.netAddrList_.empty());
+    auto ret = network->UpdateIpAddrs(newNetLinkInfo);
+    EXPECT_FALSE(ret);
+    EXPECT_EQ(network->netLinkInfo_.routeList_.size(), 0);
+}
+
+HWTEST_F(NetworkTest, UpdateIpAddrsTest009, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
+    ASSERT_NE(network, nullptr);
+    INetAddr oldIpv4Addr;
+    oldIpv4Addr.address_ = "192.168.1.100";
+    oldIpv4Addr.netMask_ = "255.255.255.0";
+    oldIpv4Addr.prefixlen_ = 0;
+    network->netLinkInfo_.netAddrList_.push_back(oldIpv4Addr);
+    NetLinkInfo newNetLinkInfo;
+    INetAddr newIpv4Addr;
+    newIpv4Addr.address_ = "10.0.0.2";
+    newIpv4Addr.prefixlen_ = 24;
+    newNetLinkInfo.netAddrList_.push_back(newIpv4Addr);
+    auto ret = network->UpdateIpAddrs(newNetLinkInfo);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetworkTest, UpdateIpAddrsTest010, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
+    ASSERT_NE(network, nullptr);
+    INetAddr oldIpv6Addr;
+    oldIpv6Addr.address_ = "2001:db8::1";
+    oldIpv6Addr.netMask_ = "ffff:ffff:ffff:ffff::";
+    oldIpv6Addr.prefixlen_ = 0;
+    network->netLinkInfo_.netAddrList_.push_back(oldIpv6Addr);
+    NetLinkInfo newNetLinkInfo;
+    INetAddr newIpv6Addr;
+    newIpv6Addr.address_ = "2001:4860::1";
+    newIpv6Addr.prefixlen_ = 64;
+    newNetLinkInfo.netAddrList_.push_back(newIpv6Addr);
+    auto ret = network->UpdateIpAddrs(newNetLinkInfo);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetworkTest, UpdateIpAddrsTest011, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
+    ASSERT_NE(network, nullptr);
+    INetAddr oldIpv4Addr;
+    oldIpv4Addr.address_ = "192.168.1.100";
+    oldIpv4Addr.prefixlen_ = 24;
+    INetAddr oldIpv6Addr;
+    oldIpv6Addr.address_ = "2001:db8::1";
+    oldIpv6Addr.prefixlen_ = 64;
+    network->netLinkInfo_.netAddrList_.push_back(oldIpv4Addr);
+    network->netLinkInfo_.netAddrList_.push_back(oldIpv6Addr);
+    Route ipv4Route;
+    ipv4Route.destination_.type_ = INetAddr::IpType::IPV4;
+    ipv4Route.iface_ = "rmnet0";
+    ipv4Route.destination_.address_ = "192.168.1.0";
+    ipv4Route.destination_.prefixlen_ = 24;
+    ipv4Route.gateway_.address_ = "192.168.1.1";
+    Route ipv6Route;
+    ipv6Route.destination_.type_ = INetAddr::IpType::IPV6;
+    ipv6Route.iface_ = "rmnet0";
+    ipv6Route.destination_.address_ = "2001:db8::";
+    ipv6Route.destination_.prefixlen_ = 64;
+    ipv6Route.gateway_.address_ = "fe80::1";
+    network->netLinkInfo_.routeList_.push_back(ipv4Route);
+    network->netLinkInfo_.routeList_.push_back(ipv6Route);
+    NetLinkInfo newNetLinkInfo;
+    newNetLinkInfo.netAddrList_.push_back(oldIpv4Addr);
+    auto ret = network->UpdateIpAddrs(newNetLinkInfo);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(network->netLinkInfo_.routeList_.size(), 1);
+    EXPECT_EQ(network->netLinkInfo_.routeList_.front().destination_.type_, INetAddr::IpType::IPV4);
+}
+
+HWTEST_F(NetworkTest, UpdateIpAddrsTest012, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
+    ASSERT_NE(network, nullptr);
+    INetAddr oldIpv4Addr;
+    oldIpv4Addr.address_ = "192.168.1.100";
+    oldIpv4Addr.prefixlen_ = 24;
+    INetAddr oldIpv6Addr;
+    oldIpv6Addr.address_ = "2001:db8::1";
+    oldIpv6Addr.prefixlen_ = 64;
+    network->netLinkInfo_.netAddrList_.push_back(oldIpv4Addr);
+    network->netLinkInfo_.netAddrList_.push_back(oldIpv6Addr);
+    Route ipv4Route;
+    ipv4Route.destination_.type_ = INetAddr::IpType::IPV4;
+    ipv4Route.iface_ = "rmnet0";
+    ipv4Route.destination_.address_ = "192.168.1.0";
+    ipv4Route.destination_.prefixlen_ = 24;
+    ipv4Route.gateway_.address_ = "192.168.1.1";
+    Route ipv6Route;
+    ipv6Route.destination_.type_ = INetAddr::IpType::IPV6;
+    ipv6Route.iface_ = "rmnet0";
+    ipv6Route.destination_.address_ = "2001:db8::";
+    ipv6Route.destination_.prefixlen_ = 64;
+    ipv6Route.gateway_.address_ = "fe80::1";
+    network->netLinkInfo_.routeList_.push_back(ipv4Route);
+    network->netLinkInfo_.routeList_.push_back(ipv6Route);
+    NetLinkInfo newNetLinkInfo;
+    newNetLinkInfo.netAddrList_.push_back(oldIpv6Addr);
+    auto ret = network->UpdateIpAddrs(newNetLinkInfo);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(network->netLinkInfo_.routeList_.size(), 1);
+    EXPECT_EQ(network->netLinkInfo_.routeList_.front().destination_.type_, INetAddr::IpType::IPV6);
+}
+
+HWTEST_F(NetworkTest, UpdateIpAddrsTest013, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
+    ASSERT_NE(network, nullptr);
+    INetAddr oldAddr1;
+    oldAddr1.address_ = "192.168.1.100";
+    oldAddr1.prefixlen_ = 24;
+    INetAddr oldAddr2;
+    oldAddr2.address_ = "192.168.2.100";
+    oldAddr2.prefixlen_ = 24;
+    network->netLinkInfo_.netAddrList_.push_back(oldAddr1);
+    network->netLinkInfo_.netAddrList_.push_back(oldAddr2);
+    NetLinkInfo newNetLinkInfo;
+    newNetLinkInfo.netAddrList_.push_back(oldAddr1);
+    INetAddr newAddr;
+    newAddr.address_ = "10.0.0.2";
+    newAddr.prefixlen_ = 24;
+    newNetLinkInfo.netAddrList_.push_back(newAddr);
+    auto ret = network->UpdateIpAddrs(newNetLinkInfo);
+    EXPECT_TRUE(ret);
+}
+
 HWTEST_F(NetworkTest, RemoveRouteByFamily001, TestSize.Level1)
 {
     int32_t netId = 1;
