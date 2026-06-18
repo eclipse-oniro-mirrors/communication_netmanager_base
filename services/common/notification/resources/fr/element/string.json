@@ -2,9 +2,9 @@
     "string":[
         {
             "name":"netstats_excess_daymark_notofication_title",
-            "value":"Au-dessus de la marque quotidienne",
+            "value":"Limite quotidienne dépassée",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {

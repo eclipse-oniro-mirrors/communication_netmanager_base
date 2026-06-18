@@ -2,9 +2,9 @@
     "string":[
         {
             "name":"netstats_excess_daymark_notofication_title",
-            "value":"1日の基準を超過",
+            "value":"一日の上限の超過",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {

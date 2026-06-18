@@ -2,9 +2,9 @@
     "string":[
         {
             "name":"netstats_excess_daymark_notofication_title",
-            "value":"Vượt vạch hàng ngày",
+            "value":"Vượt quá giới hạn hằng ngày",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {

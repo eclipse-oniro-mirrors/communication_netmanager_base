@@ -2,9 +2,9 @@
     "string":[
         {
             "name":"netstats_excess_daymark_notofication_title",
-            "value":"Превышен лимит на день",
+            "value":"Лимит превышен",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {

@@ -2,9 +2,9 @@
     "string":[
         {
             "name":"netstats_excess_daymark_notofication_title",
-            "value":"ເກີນ​ຂີດ​ໝາຍປະ​ຈຳ​ວັນ​ແລ້ວ",
+            "value":"ເກີນຂີດຈຳກັດປະຈຳວັນ",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {

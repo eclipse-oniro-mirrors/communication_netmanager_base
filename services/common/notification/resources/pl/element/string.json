@@ -2,9 +2,9 @@
     "string":[
         {
             "name":"netstats_excess_daymark_notofication_title",
-            "value":"Ponad dzienny limit",
+            "value":"Powyżej dziennego limitu",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {

@@ -2,7 +2,7 @@
     "string":[
         {
             "name":"netstats_excess_daymark_notofication_title",
-            "value":"Über Tagesmarkierung",
+            "value":"Über dem Tageslimit",
             "attr":{
                 "priority":"translate"
             }
@@ -51,7 +51,7 @@
         },
         {
             "name":"netstats_month_notify_message",
-            "value":"Das monatliche Datenlimit liegt bei %s des Limits",
+            "value":"Die monatliche Datennutzung liegt bei %s des Limits",
             "attr":{
                 "priority":"LT"
             }
