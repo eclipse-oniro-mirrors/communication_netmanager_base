@@ -69,9 +69,11 @@ NetActivate::~NetActivate()
 
 void NetActivate::TimeOutNetAvailable()
 {
+    std::shared_lock<std::shared_mutex> lock(netServiceSuppliedMutex_);
     if (netServiceSupplied_) {
         return;
     }
+    lock.unlock();
     if (netConnCallback_) {
         netConnCallback_->NetUnavailable();
     }
@@ -197,13 +199,13 @@ void NetActivate::SetRequestId(uint32_t reqId)
 
 sptr<NetSupplier> NetActivate::GetServiceSupply() const
 {
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    std::shared_lock<std::shared_mutex> lock(netServiceSuppliedMutex_);
     return netServiceSupplied_;
 }
 
 void NetActivate::SetServiceSupply(sptr<NetSupplier> netServiceSupplied)
 {
-    std::unique_lock<std::shared_mutex> lock(mutex_);
+    std::unique_lock<std::shared_mutex> lock(netServiceSuppliedMutex_);
     netServiceSupplied_ = netServiceSupplied;
 }
 
@@ -287,11 +289,13 @@ bool NetActivate::IsAllowCallback(CallbackType callbackType)
     bool isAppFrozened = isAppFrozened_.load();
     bool isForegroundApp = AppStateAwareManager::GetInstance().IsForegroundApp(netRequest_.uid);
     if (NetConnService::GetInstance()->IsAppFrozenedCallbackLimitation() && isAppFrozened && !isForegroundApp) {
+        std::shared_lock<std::shared_mutex> supplierLock(netServiceSuppliedMutex_);
         if (lastCallbackType_ != CALL_TYPE_LOST && callbackType == CALL_TYPE_LOST
             && lastNetId_ == 0 && netServiceSupplied_ != nullptr
             && netServiceSupplied_->GetNetHandle() != nullptr) {
                 lastNetId_ = netServiceSupplied_->GetNetHandle()->GetNetId();
         }
+        supplierLock.unlock();
         SetLastCallbackType(callbackType);
         NETMGR_LOG_I("UID[%{public}d] is AppFrozened, not Allow send callbackType[%{public}d]", netRequest_.uid,
                      callbackType);
