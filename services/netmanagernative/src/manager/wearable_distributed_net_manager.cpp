@@ -17,6 +17,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <securec.h>
 #include "errorcode_convertor.h"
 #include "iptables_wrapper.h"
 #include "netmanager_base_common_utils.h"
