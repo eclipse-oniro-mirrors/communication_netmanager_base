@@ -79,27 +79,6 @@ struct NetAddrInfo {
 };
 
 /**
- * @brief Callback impl for LoadSystemAbility
- */
-class OnDemandLoadManagerCallback : public SystemAbilityLoadCallbackStub {
-public:
-    /**
-     * called when load SA success
-     *
-     * @param systemAbilityId id of SA which was loaded
-     * @param remoteObject poniter of IRemoteObject
-     */
-    void OnLoadSystemAbilitySuccess(int32_t systemAbilityId, const sptr<IRemoteObject> &remoteObject) override;
-
-    /**
-     * called when load SA fail
-     *
-     * @param systemAbilityId id of SA which was loaded
-     */
-    void OnLoadSystemAbilityFail(int32_t systemAbilityId) override;
-};
-
-/**
  * Class for setup bpf maps and poll event from bpf ring buffer
  */
 class NetsysBpfNetFirewall : public NoCopyable {
