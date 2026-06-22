@@ -29,9 +29,7 @@
 #include "netsys_sock_client.h"
 #include "system_ability_status_change_stub.h"
 #include "netmanager_base_permission.h"
-#ifndef NETMANAGER_TEST
 #include "ffrt.h"
-#endif
 
 static constexpr const int32_t MIN_VALID_NETID = 100;
 static constexpr const int32_t MIN_VALID_INTERNAL_NETID = 1;
@@ -1447,9 +1445,12 @@ int32_t NetConnClient::NetConnCallbackManager::NetAvailable(sptr<NetHandle> &net
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
     lock.unlock();
-    for (auto& cb : tmpList) {
-        cb->NetAvailable(netHandle);
-    }
+    ffrt::submit([tmpList, netId = netHandle->GetNetId()]() {
+        auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
+        for (auto& cb : tmpList) {
+            cb->NetAvailable(tmpNetHandler);
+        }
+    });
     return NETMANAGER_SUCCESS;
 }
  
@@ -1464,9 +1465,16 @@ int32_t NetConnClient::NetConnCallbackManager::NetCapabilitiesChange(sptr<NetHan
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
     lock.unlock();
-    for (auto& cb : tmpList) {
-        cb->NetCapabilitiesChange(netHandle, netAllCap);
+    sptr<NetAllCapabilities> tmpNetAllCap = nullptr;
+    if (netAllCap != nullptr) {
+        tmpNetAllCap = sptr<NetAllCapabilities>::MakeSptr(*netAllCap);
     }
+    ffrt::submit([tmpList, netId = netHandle->GetNetId(), tmpNetAllCap]() {
+        auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
+        for (auto& cb : tmpList) {
+            cb->NetCapabilitiesChange(tmpNetHandler, tmpNetAllCap);
+        }
+    });
     return NETMANAGER_SUCCESS;
 }
  
@@ -1481,9 +1489,16 @@ int32_t NetConnClient::NetConnCallbackManager::NetConnectionPropertiesChange(spt
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
     lock.unlock();
-    for (auto& cb : tmpList) {
-        cb->NetConnectionPropertiesChange(netHandle, info);
+    sptr<NetLinkInfo> tmpInfo = nullptr;
+    if (info != nullptr) {
+        tmpInfo = sptr<NetLinkInfo>::MakeSptr(*info);
     }
+    ffrt::submit([tmpList, netId = netHandle->GetNetId(), tmpInfo]() {
+        auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
+        for (auto& cb : tmpList) {
+            cb->NetConnectionPropertiesChange(tmpNetHandler, tmpInfo);
+        }
+    });
     return NETMANAGER_SUCCESS;
 }
  
@@ -1500,9 +1515,12 @@ int32_t NetConnClient::NetConnCallbackManager::NetLost(sptr<NetHandle> &netHandl
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
     lock.unlock();
-    for (auto& cb : tmpList) {
-        cb->NetLost(netHandle);
-    }
+    ffrt::submit([tmpList, netId = netHandle->GetNetId()]() {
+        auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
+        for (auto& cb : tmpList) {
+            cb->NetLost(tmpNetHandler);
+        }
+    });
     return NETMANAGER_SUCCESS;
 }
  
@@ -1515,9 +1533,11 @@ int32_t NetConnClient::NetConnCallbackManager::NetUnavailable()
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
     lock.unlock();
-    for (auto& cb : tmpList) {
-        cb->NetUnavailable();
-    }
+    ffrt::submit([tmpList]() {
+        for (auto& cb : tmpList) {
+            cb->NetUnavailable();
+        }
+    });
     return NETMANAGER_SUCCESS;
 }
  
