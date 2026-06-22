@@ -200,6 +200,38 @@ int32_t CJ_GetNetCapabilities(int32_t netId, CNetCapabilities &ret)
     return code;
 }
 
+void FreeLinkAddresses(CConnectionProperties &ret)
+{
+    if (ret.linkAddresses == nullptr) {
+        return;
+    }
+    for (int64_t i = 0; i < ret.linkAddressSize; ++i) {
+        if (ret.linkAddresses[i].address.address == nullptr) {
+            continue;
+        }
+        free(ret.linkAddresses[i].address.address);
+        ret.linkAddresses[i].address.address = nullptr;
+    }
+    free(ret.linkAddresses);
+    ret.linkAddresses = nullptr;
+}
+
+void FreeDnses(CConnectionProperties &ret)
+{
+    if (ret.dnses == nullptr) {
+        return;
+    }
+    for (int64_t i = 0; i < ret.dnsSize; ++i) {
+        if (ret.dnses[i].address == nullptr) {
+            continue;
+        }
+        free(ret.dnses[i].address);
+        ret.dnses[i].address = nullptr;
+    }
+    free(ret.dnses);
+    ret.dnses = nullptr;
+}
+
 bool SetLinkAddr(NetLinkInfo &linkInfo, CConnectionProperties &ret)
 {
     if (ret.linkAddressSize > 0) {
@@ -221,8 +253,7 @@ bool SetDns(NetLinkInfo &linkInfo, CConnectionProperties &ret)
     if (ret.dnsSize > 0) {
         ret.dnses = static_cast<CNetAddress *>(malloc(sizeof(CNetAddress) * ret.dnsSize));
         if (ret.dnses == nullptr) {
-            free(ret.linkAddresses);
-            ret.linkAddresses = nullptr;
+            FreeLinkAddresses(ret);
             return false;
         }
         int i = 0;
@@ -239,10 +270,8 @@ bool SetRoute(NetLinkInfo &linkInfo, CConnectionProperties &ret)
     if (ret.routeSize > 0) {
         ret.routes = static_cast<CRouteInfo *>(malloc(sizeof(CRouteInfo) * ret.routeSize));
         if (ret.routes == nullptr) {
-            free(ret.linkAddresses);
-            free(ret.dnses);
-            ret.linkAddresses = nullptr;
-            ret.dnses = nullptr;
+            FreeLinkAddresses(ret);
+            FreeDnses(ret);
             return false;
         }
         int i = 0;
