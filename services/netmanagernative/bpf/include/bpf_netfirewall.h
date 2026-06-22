@@ -158,7 +158,7 @@ public:
      * @param systemAbilityId id of SA want to load
      * @return 0 if success or -1 if an error occurred
      */
-    int32_t GetSystemAbility(int32_t systemAbilityId);
+    int32_t LoadSystemAbility(int32_t systemAbilityId);
 
     /**
      * Set bpf prog load state
