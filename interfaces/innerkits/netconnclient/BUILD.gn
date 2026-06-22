@@ -269,6 +269,7 @@ ohos_static_library("net_conn_manager_if_static") {
     "c_utils:utils",
     "samgr:samgr_proxy",
     "ipc:ipc_single",
+    "ffrt:libffrt",
   ]
  
   defines = [
