@@ -912,7 +912,7 @@ int NetsysBpfNetFirewall::HandleEvent(void *ctx, void *data, size_t len)
     return 0;
 }
 
-int32_t NetsysBpfNetFirewall::GetSystemAbility(int32_t systemAbilityId)
+int32_t NetsysBpfNetFirewall::LoadSystemAbility(int32_t systemAbilityId)
 {
     NETNATIVE_LOG_D("GetSystemAbility: [%{public}d]", systemAbilityId);
     auto saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -926,6 +926,10 @@ int32_t NetsysBpfNetFirewall::GetSystemAbility(int32_t systemAbilityId)
         return 0;
     }
     sptr<OHOS::IRemoteObject> ret = saManager->GetSystemAbility(systemAbilityId);
+    if (ret == nullptr) {
+ 	        NETMGR_EXT_LOG_E("ret is nullptr");
+ 	        return -1;
+ 	    }
 
     return 0;
 }
