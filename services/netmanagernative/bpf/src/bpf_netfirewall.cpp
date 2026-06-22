@@ -927,9 +927,9 @@ int32_t NetsysBpfNetFirewall::LoadSystemAbility(int32_t systemAbilityId)
     }
     sptr<OHOS::IRemoteObject> ret = saManager->GetSystemAbility(systemAbilityId);
     if (ret == nullptr) {
- 	        NETMGR_EXT_LOG_E("ret is nullptr");
- 	        return -1;
- 	    }
+            NETMGR_EXT_LOG_E("ret is nullptr");
+            return -1;
+        }
 
     return 0;
 }
