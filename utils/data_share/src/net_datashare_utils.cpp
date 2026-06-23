@@ -213,6 +213,7 @@ int32_t NetDataShareHelperUtils::UnregisterObserver(const Uri &uri, int32_t call
         return NETMANAGER_ERROR;
     }
     dataShareHelper->UnregisterObserver(uri, it->second);
+    callbacks_.erase(it);
     return NETMANAGER_SUCCESS;
 }
 
