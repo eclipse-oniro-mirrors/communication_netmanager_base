@@ -397,19 +397,26 @@ HWTEST_F(NetMonitorTest, CreateProbeThreadTest001, TestSize.Level1)
     std::shared_ptr<ProbeThread> httpThread = nullptr;
     std::shared_ptr<ProbeThread> httpsThread = nullptr;
     instance_->netBearType_ = BEARER_CELLULAR;
-    EXPECT_NO_THROW(instance_->CreateProbeThread(httpThread, httpsThread, latch, latchAll, true));
-    EXPECT_NO_THROW(instance_->CreateProbeThread(httpThread, httpsThread, latch, latchAll, false));
+    instance_->CreateProbeThread(httpThread, httpsThread, latch, latchAll, true);
+    EXPECT_NE(httpThread, nullptr);
+    instance_->CreateProbeThread(httpThread, httpsThread, latch, latchAll, false);
     instance_->netBearType_ = BEARER_WIFI;
-    EXPECT_NO_THROW(instance_->CreateProbeThread(httpThread, httpsThread, latch, latchAll, true));
-    EXPECT_NO_THROW(instance_->CreateProbeThread(httpThread, httpsThread, latch, latchAll, false));
+    instance_->CreateProbeThread(httpThread, httpsThread, latch, latchAll, true);
+    EXPECT_NE(httpThread, nullptr);
+    instance_->CreateProbeThread(httpThread, httpsThread, latch, latchAll, false);
+    EXPECT_NE(httpThread, nullptr);
 }
 
 HWTEST_F(NetMonitorTest, StartProbeTest001, TestSize.Level1)
 {
     instance_->netBearType_ = BEARER_CELLULAR;
-    EXPECT_NO_THROW(instance_->Detection());
+    instance_->Detection();
+    bool ret = instance_->IsDetecting();
+    EXPECT_FALSE(ret);
     instance_->netBearType_ = BEARER_WIFI;
-    EXPECT_NO_THROW(instance_->Detection());
+    instance_->Detection();
+    ret = instance_->IsDetecting();
+    EXPECT_FALSE(ret);
 }
 
 HWTEST_F(NetMonitorTest, UpdateNetProbeTimeTest001, TestSize.Level1)
