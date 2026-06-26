@@ -1230,6 +1230,23 @@ int32_t NetStatsService::SetAppStats(const PushStatsInfo &info)
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetStatsService::SetDpaAppStats(const NetStatsInfo &info)
+{
+    NETMGR_LOG_D("Enter SetDpaAppStats.");
+    int32_t checkPermission = CheckNetManagerAvailable();
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        return checkPermission;
+    }
+    NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService SetDpaAppStats start");
+    if (netStatsCached_ == nullptr) {
+        NETMGR_LOG_E("Cached is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    netStatsCached_->SetDpaAppStats(info);
+    NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService SetDpaAppStats end");
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetStatsService::SaveSharingTraffic(const NetStatsInfo &infos)
 {
     NETMGR_LOG_D("Enter SaveSharingTraffic");

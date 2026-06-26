@@ -550,6 +550,27 @@ int32_t NetStatsServiceProxy::SetAppStats(const PushStatsInfo &info)
     return ret;
 }
 
+int32_t NetStatsServiceProxy::SetDpaAppStats(const NetStatsInfo &info)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!info.Marshalling(data)) {
+        NETMGR_LOG_E("pushStatsInfo marshalling failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    NETMGR_LOG_D("DpaAppStats Marshalling success");
+    MessageParcel reply;
+    int32_t ret = SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_DPA_APP_STATS), data, reply);
+    if (ret != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", ret);
+        return ret;
+    }
+    return ret;
+}
+
 int32_t NetStatsServiceProxy::SaveSharingTraffic(const NetStatsInfo &infos)
 {
     MessageParcel data;

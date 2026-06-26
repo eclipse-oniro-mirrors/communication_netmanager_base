@@ -54,6 +54,7 @@ enum class StatsInterfaceCode {
     CMD_SET_TRAFFIC_PLAN_INFO,
     CMD_GET_TRAFFIC_PLAN_INFO,
     CMD_GET_MONTH_TRAFFIC_STATS_BY_NETWORK,
+    CMD_SET_DPA_APP_STATS,
     CMD_END = 100,
 };
 } // namespace NetManagerStandard

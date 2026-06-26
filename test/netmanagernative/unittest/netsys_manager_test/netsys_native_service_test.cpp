@@ -430,6 +430,9 @@ HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceTest002, TestSize.Level1)
     NetworkSharingTraffic traffic;
     int ret = instance_->GetNetworkSharingTraffic(downIface, upIface, traffic);
     EXPECT_NE(ret, 0);
+    NetworkDpaTrafficReport dpaTraffic;
+    ret = instance_->SetDpaCellularSharingTraffic(dpaTraffic);
+    EXPECT_NE(ret, 0);
 }
 
 HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceState001, TestSize.Level1)
@@ -509,6 +512,16 @@ HWTEST_F(NetsysNativeServiceTest, GetNetworkSharingTrafficTest001, TestSize.Leve
     auto backup = std::move(instance_->sharingManager_);
     instance_->sharingManager_ = nullptr;
     auto ret = instance_->GetNetworkSharingTraffic(downIface, upIface, traffic);
+    instance_->sharingManager_ = std::move(backup);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetDpaCellularSharingTrafficTest001, TestSize.Level1)
+{
+    NetworkDpaTrafficReport dpaTraffic;
+    auto backup = std::move(instance_->sharingManager_);
+    instance_->sharingManager_ = nullptr;
+    auto ret = instance_->SetDpaCellularSharingTraffic(dpaTraffic);
     instance_->sharingManager_ = std::move(backup);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }

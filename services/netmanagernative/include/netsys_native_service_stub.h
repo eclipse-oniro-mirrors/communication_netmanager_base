@@ -51,6 +51,7 @@ private:
     void InitNetInfoOpToInterfaceMap();
     void InitNetInfoOpToInterfaceMapPart2();
     void InitBandwidthOpToInterfaceMap();
+    void InitBandwidthOpToInterfaceMapExt();
     void InitFirewallOpToInterfaceMap();
 #ifdef SUPPORT_SYSVPN
     void InitVpnOpToInterfaceMap();
@@ -165,6 +166,7 @@ private:
     int32_t CmdGetNetworkSharingType(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUpdateNetworkSharingType(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetNetworkCellularSharingTraffic(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetDpaCellularSharingTraffic(MessageParcel &data, MessageParcel &reply);
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     int32_t CmdSetFirewallRules(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetFirewallDefaultAction(MessageParcel &data, MessageParcel &reply);

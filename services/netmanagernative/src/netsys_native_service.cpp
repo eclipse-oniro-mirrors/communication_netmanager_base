@@ -695,6 +695,15 @@ int32_t NetsysNativeService::GetNetworkCellularSharingTraffic(NetworkSharingTraf
     return sharingManager_->GetNetworkCellularSharingTraffic(traffic, ifaceName);
 }
 
+int32_t NetsysNativeService::SetDpaCellularSharingTraffic(NetworkDpaTrafficReport &traffic)
+{
+    if (sharingManager_ == nullptr) {
+        NETNATIVE_LOGE("manager is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    return sharingManager_->SetDpaCellularSharingTraffic(traffic);
+}
+
 void NetsysNativeService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
     NETNATIVE_LOGI("OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);

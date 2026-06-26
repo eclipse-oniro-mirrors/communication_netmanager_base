@@ -50,6 +50,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
 {
     InitNetInfoOpToInterfaceMap();
     InitBandwidthOpToInterfaceMap();
+    InitBandwidthOpToInterfaceMapExt();
     InitFirewallOpToInterfaceMap();
     InitOpToInterfaceMapExt();
     InitVlanInterfaceMap();
@@ -191,6 +192,12 @@ void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdDelNetworkAccessPolicy;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NOTIFY_NETWORK_BEARER_TYPE_CHANGE)] =
         &NetsysNativeServiceStub::CmdNotifyNetBearerTypeChange;
+}
+
+void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMapExt()
+{
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_DPA_SHARING_NETWORK_TRAFFIC)] =
+        &NetsysNativeServiceStub::CmdSetDpaCellularSharingTraffic;
 }
 
 void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
@@ -1532,6 +1539,16 @@ int32_t NetsysNativeServiceStub::CmdGetNetworkCellularSharingTraffic(MessageParc
     reply.WriteString(ifaceName);
 
     return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetDpaCellularSharingTraffic(MessageParcel &data, MessageParcel &reply)
+{
+    NetworkDpaTrafficReport traffic;
+    traffic.src_if_index = data.ReadUint32();
+    traffic.dst_if_index = data.ReadUint32();
+    traffic.pkts = data.ReadUint32();
+    traffic.bytes = data.ReadUint32();
+    return SetDpaCellularSharingTraffic(traffic);
 }
 
 int32_t NetsysNativeServiceStub::CmdGetTotalStats(MessageParcel &data, MessageParcel &reply)

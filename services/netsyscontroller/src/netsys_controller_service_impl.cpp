@@ -325,6 +325,12 @@ int32_t NetsysControllerServiceImpl::GetNetworkCellularSharingTraffic(nmd::Netwo
     return netsysClient_->GetNetworkCellularSharingTraffic(traffic, ifaceName);
 }
 
+int32_t NetsysControllerServiceImpl::SetDpaCellularSharingTraffic(nmd::NetworkDpaTrafficReport &traffic)
+{
+    NETMGR_LOG_D("SetDpaCellularSharingTraffic");
+    return netsysClient_->SetDpaCellularSharingTraffic(traffic);
+}
+
 int64_t NetsysControllerServiceImpl::GetCellularRxBytes()
 {
     NETMGR_LOG_I("GetCellularRxBytes");

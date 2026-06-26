@@ -216,6 +216,16 @@ public:
     /**
      * set sharing traffic before hotspot stop
      *
+     * @param info traffic of the application
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t SetDpaAppStats(const NetStatsInfo &info);
+
+    /**
+     * set sharing traffic before hotspot stop
+     *
      * @param info traffic of the cellular
      * @return Returns 0 success. Otherwise fail.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL

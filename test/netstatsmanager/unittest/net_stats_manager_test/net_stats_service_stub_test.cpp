@@ -137,6 +137,11 @@ public:
         return 0;
     }
 
+    int32_t SetDpaAppStats(const NetStatsInfo &info) override
+    {
+        return 0;
+    }
+
     int32_t SaveSharingTraffic(const NetStatsInfo &infos) override
     {
         return 0;
@@ -721,6 +726,34 @@ HWTEST_F(TestNetStatsServiceStub, SetAppStats001, TestSize.Level1)
     int32_t ret =
         instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_APP_STATS), data, reply, option);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetDpaAppStats001
+ * @tc.desc: Test NetStatsServiceStub SetDpaAppStats.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TestNetStatsServiceStub, SetDpaAppStats001, TestSize.Level1)
+{
+    NetManagerBaseNoPermissionToken token;
+    MessageParcel data;
+    ASSERT_NE(data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor()), false);
+    if (!data.WriteString(TEST_STRING)) {
+        return;
+    }
+    if (!data.WriteUint64(TEST_UINT64_VALUE)) {
+        return;
+    }
+    if (!data.WriteUint64(TEST_UINT64_VALUE)) {
+        return;
+    }
+    NetStatsInfo stats;
+    stats.Marshalling(data);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_DPA_APP_STATS), data,
+                                            reply, option);
+    EXPECT_EQ(ret, 0);
 }
 
 /**

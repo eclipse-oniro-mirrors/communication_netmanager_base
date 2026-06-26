@@ -1959,6 +1959,36 @@ int32_t NetsysNativeServiceProxy::GetNetworkCellularSharingTraffic(NetworkSharin
     return ret;
 }
 
+int32_t NetsysNativeServiceProxy::SetDpaCellularSharingTraffic(NetworkDpaTrafficReport &traffic)
+{
+    MessageParcel data;
+    // LCOV_EXCL_START
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(traffic.src_if_index)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(traffic.dst_if_index)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(traffic.pkts)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(traffic.bytes)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (ERR_NONE != SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_DPA_SHARING_NETWORK_TRAFFIC),
+        data, reply, option)) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    //LCOV_EXCL_STOP
+    return ERR_NONE;
+}
+
 int32_t NetsysNativeServiceProxy::GetTotalStats(uint64_t &stats, uint32_t type)
 {
     MessageParcel data;

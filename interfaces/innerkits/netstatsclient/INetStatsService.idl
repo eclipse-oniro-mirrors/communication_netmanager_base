@@ -35,6 +35,7 @@ interface OHOS.NetManagerStandard.INetStatsService {
         [in] NetStatsNetwork network);
     void GetMonthTrafficStatsByNetwork([in] unsigned int simId, [out] unsigned long monthTrafficData);
     void SetAppStats([in] PushStatsInfo info);
+    void SetDpaAppStats([in] NetStatsInfo info);
     void RegisterNetStatsCallback([in] INetStatsCallback cb);
     void UnregisterNetStatsCallback([in] INetStatsCallback cb);
     void GetIfaceStatsDetail([in] String iface, [in] unsigned long start, [in] unsigned long end,

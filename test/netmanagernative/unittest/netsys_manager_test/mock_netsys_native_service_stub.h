@@ -373,6 +373,11 @@ public:
         return 0;
     }
 
+    int32_t SetDpaCellularSharingTraffic(NetworkDpaTrafficReport &traffic) override
+    {
+        return 0;
+    }
+
     int32_t GetNetworkCellularSharingTraffic(NetworkSharingTraffic &traffic, std::string &ifaceName) override
     {
         return 0;

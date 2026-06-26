@@ -395,6 +395,18 @@ int32_t NetStatsClient::SetAppStats(const PushStatsInfo &info)
     return proxy->SetAppStats(info);
 }
 
+int32_t NetStatsClient::SetDpaAppStats(const NetStatsInfo &info)
+{
+    sptr<INetStatsService> proxy = GetProxy();
+    // LCOV_EXCL_START
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    return proxy->SetDpaAppStats(info);
+}
+
 int32_t NetStatsClient::SaveSharingTraffic(const NetStatsInfo &infos)
 {
     sptr<INetStatsService> proxy = GetProxy();
