@@ -229,7 +229,7 @@ void NetStatsCached::SetDpaAppStats(const NetStatsInfo &info)
 {
     std::lock_guard<ffrt::mutex> lock(lock_);
     NetStatsInfo stats = info;
-    int32_t ifIndex = std::stoi(stats.iface_);
+    int32_t ifIndex = CommonUtils::StrToInt(stats.iface_);
     char src_if_name[32] = {0};
     char *pSrcName = if_indextoname(ifIndex, src_if_name);
     if (pSrcName != nullptr) {
