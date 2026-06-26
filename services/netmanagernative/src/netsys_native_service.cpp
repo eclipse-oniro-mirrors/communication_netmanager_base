@@ -1048,6 +1048,13 @@ int32_t NetsysNativeService::SetEnableIpv6(const std::string &interfaceName, con
     return result;
 }
 
+int32_t NetsysNativeService::SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid)
+{
+    int32_t result = netsysService_->SetIpv6UidBlackList(netIds, uid);
+    NETNATIVE_LOG_D("SetIpv6UidBlackList result=%{public}d", result);
+    return result;
+}
+
 int32_t NetsysNativeService::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
 {
     int32_t result = netsysService_->SetIpv6AutoConf(interfaceName, on);

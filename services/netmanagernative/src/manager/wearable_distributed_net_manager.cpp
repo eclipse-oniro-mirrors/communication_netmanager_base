@@ -17,6 +17,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <securec.h>
 #include "errorcode_convertor.h"
 #include "iptables_wrapper.h"
 #include "netmanager_base_common_utils.h"
@@ -132,7 +133,12 @@ bool WearableDistributedNet::ParseTcpOutputRule(const cJSON &json)
         NETNATIVE_LOGE("Failed to find tcpOutputJsonItem information");
         return false;
     }
-    tcpOutput_ = cJSON_GetStringValue(tcpOutputJsonItem);
+    const char *tcpOutputValue = cJSON_GetStringValue(tcpOutputJsonItem);
+    if (tcpOutputValue == nullptr) {
+        NETNATIVE_LOGE("tcpOutputJsonItem is not a string type");
+        return false;
+    }
+    tcpOutput_ = tcpOutputValue;
     return true;
 }
 
@@ -158,7 +164,12 @@ bool WearableDistributedNet::ParseUdpOutputRule(const cJSON &json)
         NETNATIVE_LOGE("Failed to find udpOutputItem information");
         return false;
     }
-    udpOutput_ = cJSON_GetStringValue(udpOutputItem);
+    const char *udpOutputValue = cJSON_GetStringValue(udpOutputItem);
+    if (udpOutputValue == nullptr) {
+        NETNATIVE_LOGE("udpOutputItem is not a string type");
+        return false;
+    }
+    udpOutput_ = udpOutputValue;
     return true;
 }
 

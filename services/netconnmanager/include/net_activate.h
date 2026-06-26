@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <shared_mutex>
 
 #include "i_net_conn_callback.h"
 #include "net_specifier.h"
@@ -91,6 +92,7 @@ private:
 private:
     sptr<NetSpecifier> netSpecifier_ = nullptr;
     sptr<INetConnCallback> netConnCallback_ = nullptr;
+    mutable std::shared_mutex netServiceSuppliedMutex_;
     sptr<NetSupplier> netServiceSupplied_ = nullptr;
     uint32_t timeoutMS_ = 0;
     std::weak_ptr<INetActivateCallback> timeoutCallback_;

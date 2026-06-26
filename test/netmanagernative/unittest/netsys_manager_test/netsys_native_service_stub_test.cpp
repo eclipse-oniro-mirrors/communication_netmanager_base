@@ -1478,6 +1478,72 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetSystemNetPortStatesTest001, TestSize
     EXPECT_EQ(ret, ERR_NONE);
 }
 
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetIpv6UidBlackList001, TestSize.Level1)
+{
+    uint32_t uid = 20000138;
+    std::vector<int32_t> netIds = {1, 2, 3};
+ 
+    MessageParcel data;
+    ASSERT_NE(data.WriteInt32(netIds.size()), false);
+ 
+    for (const int32_t& iter : netIds) {
+        if (!data.WriteInt32(iter)) {
+            return;
+        }
+    }
+ 
+    if (!data.WriteInt32(uid)) {
+        return;
+    }
+ 
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetIpv6UidBlackList(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+ 
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetIpv6UidBlackList002, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetIpv6UidBlackList(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+ 
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetIpv6UidBlackList003, TestSize.Level1)
+{
+    std::vector<int32_t> netIds = {1, 2, 3};
+ 
+    MessageParcel data;
+    ASSERT_NE(data.WriteInt32(netIds.size()), false);
+ 
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetIpv6UidBlackList(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+ 
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetIpv6UidBlackList004, TestSize.Level1)
+{
+    uint32_t uid = 20000138;
+    std::vector<int32_t> netIds = {0, 1, 2, 3};
+ 
+    MessageParcel data;
+    ASSERT_NE(data.WriteInt32(netIds.size()), false);
+ 
+    for (const int32_t& iter : netIds) {
+        if (!data.WriteInt32(iter)) {
+            return;
+        }
+    }
+ 
+    if (!data.WriteInt32(uid)) {
+        return;
+    }
+ 
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetIpv6UidBlackList(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
 HWTEST_F(NetsysNativeServiceStubTest, CmdSetDpaCellularSharingTraffic001, TestSize.Level1)
 {
     uint32_t srcIndex = 1;

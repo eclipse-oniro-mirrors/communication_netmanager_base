@@ -2029,6 +2029,16 @@ int32_t NetsysNativeClient::SetEnableIpv6(const std::string &interfaceName, cons
     return proxy->SetEnableIpv6(interfaceName, on, needRestart);
 }
 
+int32_t NetsysNativeClient::SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("SetIpv6UidBlackList proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetIpv6UidBlackList(netIds, uid);
+}
+
 int32_t NetsysNativeClient::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
 {
     auto proxy = GetProxy();

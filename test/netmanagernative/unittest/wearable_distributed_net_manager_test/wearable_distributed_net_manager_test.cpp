@@ -355,6 +355,24 @@ HWTEST_F(WearableDistributedNetManagerTest, ParseTcpOutputRule, TestSize.Level1)
     EXPECT_EQ(net.ParseTcpOutputRule(json), true);
 }
 
+HWTEST_F(WearableDistributedNetManagerTest, ParseTcpOutputRuleNotStringType, TestSize.Level1)
+{
+    WearableDistributedNet net;
+    cJSON json;
+    cJSON_AddNumberToObject(&json, TCP_OUTPUT.c_str(), 12345);
+    EXPECT_EQ(net.ParseTcpOutputRule(json), false);
+
+    cJSON json2;
+    cJSON_AddBoolToObject(&json2, TCP_OUTPUT.c_str(), 1);
+    EXPECT_EQ(net.ParseTcpOutputRule(json2), false);
+
+    cJSON json3;
+    cJSON *arr = cJSON_CreateArray();
+    cJSON_AddItemToArray(arr, cJSON_CreateString("item"));
+    cJSON_AddItemToObject(&json3, TCP_OUTPUT.c_str(), arr);
+    EXPECT_EQ(net.ParseTcpOutputRule(json3), false);
+}
+
 HWTEST_F(WearableDistributedNetManagerTest, ParseUdpOutputRule, TestSize.Level1)
 {
     WearableDistributedNet net;
@@ -364,6 +382,24 @@ HWTEST_F(WearableDistributedNetManagerTest, ParseUdpOutputRule, TestSize.Level1)
 
     cJSON_AddStringToObject(&json, UDP_OUTPUT.c_str(), "udpoutput");
     EXPECT_EQ(net.ParseUdpOutputRule(json), true);
+}
+
+HWTEST_F(WearableDistributedNetManagerTest, ParseUdpOutputRuleNotStringType, TestSize.Level1)
+{
+    WearableDistributedNet net;
+    cJSON json;
+    cJSON_AddNumberToObject(&json, UDP_OUTPUT.c_str(), 99999);
+    EXPECT_EQ(net.ParseUdpOutputRule(json), false);
+
+    cJSON json2;
+    cJSON_AddBoolToObject(&json2, UDP_OUTPUT.c_str(), 0);
+    EXPECT_EQ(net.ParseUdpOutputRule(json2), false);
+
+    cJSON json3;
+    cJSON *arr = cJSON_CreateArray();
+    cJSON_AddItemToArray(arr, cJSON_CreateString("item"));
+    cJSON_AddItemToObject(&json3, UDP_OUTPUT.c_str(), arr);
+    EXPECT_EQ(net.ParseUdpOutputRule(json3), false);
 }
 
 HWTEST_F(WearableDistributedNetManagerTest, ParseUdpIptables, TestSize.Level1)

@@ -984,6 +984,12 @@ int32_t NetsysControllerServiceImpl::SetEnableIpv6(const std::string &interfaceN
     return netsysClient_->SetEnableIpv6(interfaceName, on, needRestart);
 }
 
+int32_t NetsysControllerServiceImpl::SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid)
+{
+    NETMGR_LOG_I("SetIpv6UidBlackList: uid: %{public}d", uid);
+    return netsysClient_->SetIpv6UidBlackList(netIds, uid);
+}
+
 int32_t NetsysControllerServiceImpl::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
 {
     NETMGR_LOG_D("SetIpv6AutoConf: interfaceName=%{public}s on=%{public}d", interfaceName.c_str(), on);

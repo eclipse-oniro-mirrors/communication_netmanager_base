@@ -829,6 +829,14 @@ HWTEST_F(NetsysNativeServiceTest, SetEnableIpv6Test001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysNativeServiceTest, SetIpv6UidBlackListTest001, TestSize.Level1)
+{
+    int32_t uid = 0;
+    std::vector<int32_t> netIds = {};
+    int32_t ret = instance_->SetIpv6UidBlackList(netIds, uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysNativeServiceTest, SetIpv6AutoConfTest001, TestSize.Level1)
 {
     auto instance = std::make_shared<NetsysNativeService>(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);

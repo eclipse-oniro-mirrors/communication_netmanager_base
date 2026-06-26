@@ -1046,6 +1046,7 @@ public:
 #endif
     int32_t SetInternetAccessByIpForWifiShare(
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName);
+    int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid);
 
 private:
     NetsysController();

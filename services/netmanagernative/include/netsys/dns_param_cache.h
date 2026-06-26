@@ -20,6 +20,7 @@
 #include <map>
 
 #include "ffrt.h"
+#include "rwlock.h"
 #include "dns_resolv_config.h"
 #include "netnative_log_wrapper.h"
 #include "uid_range.h"
@@ -124,6 +125,10 @@ public:
     void SetNodataCache(uint16_t netId, const std::string &hostName);
     bool IsInNodataCache(uint16_t netId, const std::string &hostName);
 
+    // ipv6 uid black list methods
+    void SetIpv6UidBlackList(std::vector<int32_t> &netIds, uint32_t uid);
+    bool IsInIpv6UidBlackList(uint16_t netId, uint32_t uid);
+
 private:
     DnsParamCache();
 
@@ -134,6 +139,8 @@ private:
     ffrt::mutex cacheMutex_;
 
     ffrt::mutex uidRangeMutex_;
+
+    ffrt::shared_mutex uidBlackListMutex_;
 
     std::atomic_uint defaultNetId_;
 

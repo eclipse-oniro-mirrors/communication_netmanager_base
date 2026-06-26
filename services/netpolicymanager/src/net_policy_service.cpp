@@ -64,6 +64,7 @@ constexpr const char *EXTENSION_SUCCESS = "netpolicy extension success";
 constexpr const char *EXTENSION_FAIL = "netpolicy extension fail";
 constexpr uint64_t DELAY_US = 30 * 1000 * 1000;
 constexpr uint32_t DAY_MILLISECONDS = 24 * 60 * 60 * 1000;
+constexpr int32_t HMOS_FUSION_MANAGER_UID = 7558;
 
 sptr<AppExecFwk::IBundleMgr> GetBundleMgrProxy()
 {
@@ -201,12 +202,20 @@ void NetPolicyService::ListenCommonEvent()
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_RESTORE_START);
-    matchingSkills.AddEvent(COMMON_EVENT_STATUS_CHANGED);
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscribeInfo.SetPriority(1);
     std::shared_ptr<NetPolicyListener> subscriber = std::make_shared<NetPolicyListener>(
         subscribeInfo, std::static_pointer_cast<NetPolicyService>(shared_from_this()));
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber);
+
+    // Subscribe RGM status changed event with publisher UID control
+    EventFwk::MatchingSkills rgmMatchingSkills;
+    rgmMatchingSkills.AddEvent(COMMON_EVENT_STATUS_CHANGED);
+    EventFwk::CommonEventSubscribeInfo rgmSubscribeInfo(rgmMatchingSkills);
+    rgmSubscribeInfo.SetPublisherUid(HMOS_FUSION_MANAGER_UID);
+    std::shared_ptr<NetPolicyListener> rgmSubscriber = std::make_shared<NetPolicyListener>(
+        rgmSubscribeInfo, std::static_pointer_cast<NetPolicyService>(shared_from_this()));
+    EventFwk::CommonEventManager::SubscribeCommonEvent(rgmSubscriber);
 }
 // LCOV_EXCL_STOP
 

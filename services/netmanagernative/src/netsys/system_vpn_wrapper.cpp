@@ -54,7 +54,7 @@ bool SystemVpnWrapper::PrepareUpdate(SysVpnStageCode stage, const std::string &m
             break;
         case SysVpnStageCode::VPN_STAGE_L2TP_STOP:
             MultiVpnManager::GetInstance().ClearPppFd(message);
-            break;
+            return false;
         default:
             return false;
     }

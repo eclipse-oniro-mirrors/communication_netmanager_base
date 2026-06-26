@@ -224,6 +224,7 @@ public:
     int32_t GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo,
                                int32_t &ownerUid) override;
     int32_t GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo) override;
+    int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid) override;
 
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;

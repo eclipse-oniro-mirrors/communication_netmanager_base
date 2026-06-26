@@ -628,5 +628,10 @@ int32_t MockNetsysNativeClient::FlushDnsCache(uint16_t netId)
     NETMGR_LOG_D("FlushDnsCache: netId[%{public}d]", netId);
     return 0;
 }
+
+int32_t MockNetsysNativeClient::SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid)
+{
+    return 0;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

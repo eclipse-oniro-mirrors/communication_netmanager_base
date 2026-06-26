@@ -2,9 +2,9 @@
     "string":[
         {
             "name":"netstats_excess_daymark_notofication_title",
-            "value":"Melebihi tanda harian",
+            "value":"Lebihan had harian",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {

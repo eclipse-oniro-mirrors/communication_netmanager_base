@@ -15,6 +15,8 @@
 
 #include "dns_resolv_config.h"
 
+#include "netnative_log_wrapper.h"
+
 namespace OHOS::nmd {
 DnsResolvConfig::DelayedTaskWrapper::DelayedTaskWrapper(std::string hostName,
                                                         NetManagerStandard::LRUCache<AddrInfoWithTtl> &cache)
@@ -241,5 +243,61 @@ void DnsResolvConfig::ClearNodataCache()
 {
     nodataCache_.clear();
     nodataCache_.shrink_to_fit();  // Release unused memory
+}
+
+void DnsResolvConfig::SetIpv6UidBlackList(const uint32_t &uid)
+{
+    if (!IsIpv4Enable()) {
+        return;
+    }
+    uint64_t now = GetNowMs();
+ 
+    // Check if uid already exists and update it
+    auto it = ipv6UidBlackList_.find(uid);
+    if (it != ipv6UidBlackList_.end()) {
+        ipv6UidBlackList_[uid] = now;
+        NETNATIVE_LOGI("SetIpv6UidBlackList uid:%{public}u is exists", uid);
+        return;
+    }
+ 
+    // Limit ipv6 uid black list to MAX_IPV6_UID_BLACK_LIST_SIZE
+    if (ipv6UidBlackList_.size() >= MAX_IPV6_UID_BLACK_LIST_SIZE) {
+        // Find and remove the oldest uid
+        uint64_t oldestTime = UINT64_MAX;
+        uint32_t oldestUid = 0;
+        for (const auto& it : ipv6UidBlackList_) {
+            if (it.second < oldestTime) {
+                oldestTime = it.second;
+                oldestUid = it.first;
+            }
+        }
+        ipv6UidBlackList_.erase(oldestUid);
+        NETNATIVE_LOGI("SetIpv6UidBlackList erase ipv6 black list of the oldest uid:%{public}u", oldestUid);
+    }
+    ipv6UidBlackList_.insert({uid, now});
+    NETNATIVE_LOGI("SetIpv6UidBlackList uid:%{public}u", uid);
+}
+ 
+bool DnsResolvConfig::IsInIpv6UidBlackList(const uint32_t &uid)
+{
+    uint64_t now = GetNowMs();
+ 
+    for (const auto& it : ipv6UidBlackList_) {
+        if (it.first == uid) {
+            uint64_t diff = now - it.second;
+            if (diff > AAAA_SKIP_DURATION) {
+                ipv6UidBlackList_.erase(it.first);
+                NETNATIVE_LOG_D("skip AAAA time out, remove uid:%{public}u from ipv6UidBlackList", uid);
+                return false;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+ 
+void DnsResolvConfig::ClearIpv6UidBlackList()
+{
+    ipv6UidBlackList_.clear();
 }
 } // namespace OHOS::nmd

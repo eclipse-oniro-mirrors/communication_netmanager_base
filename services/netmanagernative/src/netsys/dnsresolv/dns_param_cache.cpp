@@ -81,6 +81,7 @@ int32_t DnsParamCache::CreateCacheForNet(uint16_t netId, bool isVpnNet)
         for (auto iterator = serverConfigMap_.begin(); iterator != serverConfigMap_.end(); iterator++) {
             iterator->second.GetCache().Clear();
             iterator->second.ClearNodataCache();
+            iterator->second.ClearIpv6UidBlackList();
         }
     }
     return 0;
@@ -103,6 +104,7 @@ int32_t DnsParamCache::DestroyNetworkCache(uint16_t netId, bool isVpnNet)
         for (auto it = serverConfigMap_.begin(); it != serverConfigMap_.end(); it++) {
             it->second.GetCache().Clear();
             it->second.ClearNodataCache();
+            it->second.ClearIpv6UidBlackList();
         }
     }
     return 0;
@@ -135,6 +137,7 @@ int32_t DnsParamCache::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMse
     if (oldDnsServers != newDnsServers) {
         it->second.GetCache().Clear();
         it->second.ClearNodataCache();
+        it->second.ClearIpv6UidBlackList();
     }
 
     it->second.SetNetId(netId);
@@ -615,6 +618,7 @@ void DnsParamCache::ClearAllDnsCache()
     for (auto it = serverConfigMap_.begin(); it != serverConfigMap_.end(); it++) {
         it->second.GetCache().Clear();
         it->second.ClearNodataCache();
+        it->second.ClearIpv6UidBlackList();
     }
 }
 #endif
@@ -733,6 +737,7 @@ int32_t DnsParamCache::FlushDnsCache(uint16_t netId)
     }
     it->second.GetCache().Clear();
     it->second.ClearNodataCache();
+    it->second.ClearIpv6UidBlackList();
     return 0;
 }
 
@@ -765,6 +770,48 @@ bool DnsParamCache::IsInNodataCache(uint16_t netId, const std::string &hostName)
     bool enable = it->second.IsInNodataCache(hostName);
     if (enable) {
         NETNATIVE_LOGI("IsInNodataCache netid:%{public}d", netId);
+    }
+    return enable;
+}
+
+void DnsParamCache::SetIpv6UidBlackList(std::vector<int32_t> &netIds, uint32_t uid)
+{
+    int32_t size = netIds.size();
+    if (size <= 0) {
+        return;
+    }
+ 
+    std::scoped_lock<ffrt::shared_mutex> writeLock(uidBlackListMutex_);
+    for (auto& netId : netIds) {
+        if (netId == 0) {
+            netId = defaultNetId_;
+        }
+ 
+        auto it = serverConfigMap_.find(netId);
+        if (it == serverConfigMap_.end()) {
+            DNS_CONFIG_PRINT("SetIpv6UidBlackList failed: is not have netid:%{public}d,", netId);
+            continue;
+        }
+        NETNATIVE_LOGI("SetIpv6UidBlackList netid:%{public}d, uid:%{public}d", netId, uid);
+        it->second.SetIpv6UidBlackList(uid);
+    }
+}
+ 
+bool DnsParamCache::IsInIpv6UidBlackList(uint16_t netId, uint32_t uid)
+{
+    if (netId == 0) {
+        netId = defaultNetId_;
+    }
+ 
+    std::scoped_lock<ffrt::shared_mutex> readLock(uidBlackListMutex_);
+    auto it = serverConfigMap_.find(netId);
+    if (it == serverConfigMap_.end()) {
+        DNS_CONFIG_PRINT("IsInIpv6UidBlackList failed: is not have netid:%{public}d,", netId);
+        return false;
+    }
+    bool enable = it->second.IsInIpv6UidBlackList(uid);
+    if (enable) {
+        NETNATIVE_LOGI("IsInIpv6UidBlackList netid:%{public}d, uid:%{public}d", netId, uid);
     }
     return enable;
 }

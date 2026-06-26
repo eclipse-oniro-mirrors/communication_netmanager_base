@@ -35,13 +35,7 @@ public:
     }
 
 public:
-    int32_t CreateDistributedNic(const std::string &virNicAddr, const std::string &ifName);
-    int32_t DestroyDistributedNic(const std::string &ifName);
-    int32_t CreateDistributedInterface(const std::string &ifName);
-    int32_t SetDistributedNicMtu(const std::string &ifName, int32_t mtu);
-    int32_t SetDistributedNicAddress(const std::string &ifName, const std::string &tunAddr);
     void SetServerNicInfo(const std::string &iif, const std::string &devIface);
-    void CloseDistributedTunFd();
     std::string GetServerIifNic();
     std::string GetServerDevIfaceNic();
     int32_t ConfigVirnicAndVeth(const std::string &virNicAddr, const std::string &virnicName,
@@ -55,15 +49,6 @@ private:
     DistributedManager &operator=(const DistributedManager &) = delete;
 
 private:
-    int32_t SetDistributedNicUp(const std::string &ifName);
-    int32_t SetDistributedNicDown(const std::string &ifName);
-    int32_t InitIfreq(ifreq &ifr, const std::string &cardName);
-    int32_t SetDistributedNicResult(std::atomic_int &fd, unsigned long cmd, ifreq &ifr);
-    void CloseDistributedSocket();
-
-private:
-    std::atomic_int tunFd_ = 0;
-    std::atomic_int net4Sock_ = 0;
     std::string serverIif_;
     std::string serverDevIface_;
 };

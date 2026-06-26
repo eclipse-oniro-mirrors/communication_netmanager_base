@@ -1642,6 +1642,17 @@ int32_t NetsysController::SetEnableIpv6(const std::string &interfaceName, const 
     return netsysService_->SetEnableIpv6(interfaceName, on, needRestart);
 }
 
+int32_t NetsysController::SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid)
+{
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("SetIpv6UidBlackList netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->SetIpv6UidBlackList(netIds, uid);
+}
+
 int32_t NetsysController::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
 {
     // LCOV_EXCL_START This will never happen.

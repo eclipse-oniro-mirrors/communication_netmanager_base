@@ -3574,6 +3574,36 @@ int32_t NetsysNativeServiceProxy::SetEnableIpv6(const std::string &interfaceName
     return reply.ReadInt32();
 }
 
+int32_t NetsysNativeServiceProxy::SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid)
+{
+    NETNATIVE_LOGI("Begin to SetIpv6UidBlackList");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(netIds.size())) {
+        NETNATIVE_LOGE("SetIpv6UidBlackList write netIds size return error");
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (const int32_t& iter : netIds) {
+        if (!data.WriteInt32(iter)) {
+            NETNATIVE_LOGE("SetIpv6UidBlackList write netId return error");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    if (!data.WriteInt32(uid)) {
+        NETNATIVE_LOGE("SetIpv6UidBlackList write uid return error");
+        return ERR_FLATTEN_OBJECT;
+    }
+ 
+    MessageParcel reply;
+    MessageOption option;
+    SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_UID_BLACK_LIST),
+        data, reply, option);
+ 
+    return reply.ReadInt32();
+}
+
 int32_t NetsysNativeServiceProxy::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
 {
     NETNATIVE_LOG_D("Begin to SetIpv6AutoConf");

@@ -2,7 +2,7 @@
     "string":[
         {
             "name":"netstats_excess_daymark_notofication_title",
-            "value":"[TS_1010604]_Over daily mark"
+            "value":"[TS_1010604]_Over daily limit"
         },
         {
             "name":"netstats_month_limit_message",

@@ -2,9 +2,9 @@
     "string":[
         {
             "name":"netstats_excess_daymark_notofication_title",
-            "value":"Uso máximo diario",
+            "value":"Límite diario superado",
             "attr":{
-                "priority":"LT"
+                "priority":"translate"
             }
         },
         {

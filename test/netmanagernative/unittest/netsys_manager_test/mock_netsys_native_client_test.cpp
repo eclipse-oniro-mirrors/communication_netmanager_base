@@ -250,6 +250,10 @@ HWTEST_F(MockNetsysNativeClientTest, MockNetsysNativeClientBranchTest005, TestSi
     uint32_t uid = 1000;
     ret = nativeClient_.CloseSocketsUid(ipAddr, uid);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    std::vector<int32_t> netIds = {};
+    ret = nativeClient_.SetIpv6UidBlackList(netIds, uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

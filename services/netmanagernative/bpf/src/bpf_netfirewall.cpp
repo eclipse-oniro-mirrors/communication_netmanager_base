@@ -912,20 +912,9 @@ int NetsysBpfNetFirewall::HandleEvent(void *ctx, void *data, size_t len)
     return 0;
 }
 
-void OnDemandLoadManagerCallback::OnLoadSystemAbilitySuccess(int32_t systemAbilityId,
-    const sptr<IRemoteObject> &remoteObject)
-{
-    NETNATIVE_LOG_D("OnLoadSystemAbilitySuccess systemAbilityId: [%{public}d]", systemAbilityId);
-}
-
-void OnDemandLoadManagerCallback::OnLoadSystemAbilityFail(int32_t systemAbilityId)
-{
-    NETNATIVE_LOG_D("OnLoadSystemAbilityFail: [%{public}d]", systemAbilityId);
-}
-
 int32_t NetsysBpfNetFirewall::LoadSystemAbility(int32_t systemAbilityId)
 {
-    NETNATIVE_LOG_D("LoadSystemAbility: [%{public}d]", systemAbilityId);
+    NETNATIVE_LOG_D("GetSystemAbility: [%{public}d]", systemAbilityId);
     auto saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saManager == nullptr) {
         NETNATIVE_LOGE("GetCmProxy registry is null");
@@ -936,18 +925,12 @@ int32_t NetsysBpfNetFirewall::LoadSystemAbility(int32_t systemAbilityId)
     if (object != nullptr) {
         return 0;
     }
-
-    sptr<OnDemandLoadManagerCallback> loadCallBack = new (std::nothrow) OnDemandLoadManagerCallback();
-    if (loadCallBack == nullptr) {
-        NETNATIVE_LOGE("new OnDemandLoadCertManagerCallback failed");
+    sptr<OHOS::IRemoteObject> ret = saManager->GetSystemAbility(systemAbilityId);
+    if (ret == nullptr || !ret->IsProxyObject()) {
+        NETNATIVE_LOGE("ret is nullptr");
         return -1;
     }
 
-    int32_t ret = saManager->LoadSystemAbility(systemAbilityId, loadCallBack);
-    if (ret != ERR_OK) {
-        NETNATIVE_LOGE("systemAbilityId:%d load failed,result code:%d", systemAbilityId, ret);
-        return -1;
-    }
     return 0;
 }
 

@@ -344,5 +344,12 @@ int32_t DnsManager::SetDnsCache(uint16_t netId, const std::string &hostName, con
     DnsParamCache::GetInstance().SetDnsCache(netId, hostName, addrInfo);
     return 0;
 }
+
+int32_t DnsManager::SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid)
+{
+    NETNATIVE_LOGI("manager_SetIpv6UidBlackList uid:%{public}d", uid);
+    DnsParamCache::GetInstance().SetIpv6UidBlackList(netIds, static_cast<uint32_t>(uid));
+    return 0;
+}
 } // namespace nmd
 } // namespace OHOS
