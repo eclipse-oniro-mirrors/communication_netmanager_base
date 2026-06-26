@@ -2104,11 +2104,6 @@ int32_t NetConnService::GetAllNetsAsync(std::list<int32_t> &netIdList)
                 NETMGR_LOG_D("Network inner channel, skips.");
                 continue;
             }
-#ifdef SUPPORT_SYSVPN
-            if (!IsCallingUserSupplier(curSupplier->GetSupplierId())) {
-                continue;
-            }
-#endif // SUPPORT_SYSVPN
             netIdList.push_back(netId);
         }
     }
@@ -2118,9 +2113,6 @@ int32_t NetConnService::GetAllNetsAsync(std::list<int32_t> &netIdList)
 
 int32_t NetConnService::GetAllNets(std::list<int32_t> &netIdList)
 {
-#ifdef SUPPORT_SYSVPN
-    realCallingUid_ = IPCSkeleton::GetCallingUid();
-#endif // SUPPORT_SYSVPN
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
         netConnEventHandler_->PostSyncTask([this, &netIdList, &result]() {
