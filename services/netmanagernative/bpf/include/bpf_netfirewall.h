@@ -293,6 +293,8 @@ private:
 
     int32_t WriteActionBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 
+    int32_t WriteInterfaceBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
+
     int32_t SetBpfFirewallRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList,
         NetFirewallRuleDirection direction);
 

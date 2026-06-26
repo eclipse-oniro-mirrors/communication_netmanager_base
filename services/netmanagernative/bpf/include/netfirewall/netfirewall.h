@@ -43,7 +43,7 @@ static __always_inline int send_sock_tcp_reset(struct match_tuple *tuple, struct
         if (dir == INGRESS) {
             bpf_sock_tcp_send_reset(skb);
         } else if (dir == EGRESS) {
-            bpf_sock_destroy(skb);
+            bpf_skb_sock_destroy(skb);
         }
         return 0;
     }
@@ -139,7 +139,7 @@ static __always_inline enum sk_action netfirewall_policy_ingress(struct __sk_buf
     }
 
     struct bitmap key = { 0 };
-    if (!match_action_key(&tuple, &key)) {
+    if (!match_action_key(skb, &tuple, &key)) {
         return SK_PASS;
     }
 
@@ -210,7 +210,7 @@ static __always_inline enum sk_action netfirewall_policy_egress(struct __sk_buff
     }
 
     struct bitmap key = { 0 };
-    if (!match_action_key(&tuple, &key)) {
+    if (!match_action_key(skb, &tuple, &key)) {
         return SK_PASS;
     }
     // Outbound DNS queries need to be released

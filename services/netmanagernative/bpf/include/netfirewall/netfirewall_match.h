@@ -357,6 +357,35 @@ static __always_inline bool match_uid(struct match_tuple *tuple, struct bitmap *
         log_dbg2(DBG_MATCH_UID, tuple->dir, tuple->uid, result->val[0]);
         bitmap_and(key->val, result->val);
     }
+    return true;
+}
+
+/**
+ * @brief lookup interface bitmap use the given tuple
+ *
+ * @param tuple struct match_tuple get from skb
+ * @param key out param for lookup result
+ * @return true if success or false if an error occurred
+ */
+static __always_inline bool match_interface(struct __sk_buff *skb, struct match_tuple *tuple, struct bitmap *key)
+{
+    if (!skb || !tuple || !key) {
+        return false;
+    }
+
+    bool ingress = tuple->dir == INGRESS;
+    interface_key iface_key = {};
+    interface_key other_iface_key = {};
+    long ret = bpf_skb_get_dev_name(skb, iface_key.name, sizeof(iface_key.name));
+    if (ret < 0) {
+        log_dbg(DBG_MATCH_INTERFACE, tuple->dir, ret);
+        return false;
+    }
+    struct bitmap *result = lookup_map(GET_MAP(ingress, iface), &iface_key, &other_iface_key);
+    if (result) {
+        log_dbg2(DBG_MATCH_INTERFACE, tuple->dir, iface_key.name, result->val[0]);
+        bitmap_and(key->val, result->val);
+    }
 
     return true;
 }
@@ -368,9 +397,9 @@ static __always_inline bool match_uid(struct match_tuple *tuple, struct bitmap *
  * @param key out param for lookup result
  * @return true if success or false if an error occurred
  */
-static __always_inline bool match_action_key(struct match_tuple *tuple, struct bitmap *key)
+static __always_inline bool match_action_key(struct __sk_buff *skb, struct match_tuple *tuple, struct bitmap *key)
 {
-    if (!tuple || !key) {
+    if (!skb || !tuple || !key) {
         return false;
     }
 
@@ -393,6 +422,10 @@ static __always_inline bool match_action_key(struct match_tuple *tuple, struct b
     }
 
     if (!match_uid(tuple, key)) {
+        return false;
+    }
+
+    if (!match_interface(skb, tuple, key)) {
         return false;
     }
 

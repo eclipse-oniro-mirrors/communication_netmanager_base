@@ -33,6 +33,7 @@
 #define INGRESS_APPUID_MAP in_appuid_map
 #define INGRESS_UID_MAP in_uid_map
 #define INGRESS_ACTION_MAP in_action_map
+#define INGRESS_INTERFACE_MAP in_iface_map
 
 #define EGRESS_SADDR_MAP out_saddr_map
 #define EGRESS_SADDR6_MAP out_saddr6_map
@@ -44,6 +45,7 @@
 #define EGRESS_APPUID_MAP out_appuid_map
 #define EGRESS_UID_MAP out_uid_map
 #define EGRESS_ACTION_MAP out_action_map
+#define EGRESS_INTERFACE_MAP out_iface_map
 
 #define EVENT_MAP event_map
 #define DEFAULT_ACTION_MAP def_act_map

@@ -1855,7 +1855,7 @@ int32_t NetsysNativeClient::UpdateNetworkSharingType(uint32_t type, bool isOpen)
 int32_t NetsysNativeClient::SetFirewallRules(NetFirewallRuleType type,
                                              const std::vector<sptr<NetFirewallBaseRule>> &ruleList, bool isFinish)
 {
-    NETMGR_LOG_D("NetsysNativeClient::SetFirewallRules");
+    NETMGR_LOG_E("NetsysNativeClient::SetFirewallRules");
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");

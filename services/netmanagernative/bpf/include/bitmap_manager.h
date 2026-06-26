@@ -670,6 +670,7 @@ using BpfProtoMap = BpfUnorderedMap<ProtoKey>;
 using BpfAppUidMap = BpfUnorderedMap<AppUidKey>;
 using BpfUidMap = BpfUnorderedMap<UidKey>;
 using BpfActionMap = BpfUnorderedMap<action_key>;
+using BpfInterfaceMap = BpfUnorderedMap<std::string>;
 
 class BitmapManager {
 public:
@@ -733,6 +734,11 @@ public:
     BpfActionMap &GetActionMap()
     {
         return actionMap_;
+    }
+
+    BpfInterfaceMap &GetInterfaceMap()
+    {
+        return interfaceMap_;
     }
 
     static uint16_t Hltons(uint32_t n);
@@ -836,6 +842,7 @@ private:
     BpfAppUidMap appUidMap_;
     BpfUidMap uidMap_;
     BpfActionMap actionMap_;
+    BpfInterfaceMap interfaceMap_;
     std::mutex mutex_;
 };
 } // namespace OHOS::NetManagerStandard

@@ -21,6 +21,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <net/if.h>
 
 #define private public
 #define protected public
@@ -652,4 +653,200 @@ HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap019, TestSize.Level0)
     EXPECT_EQ(segBitMap.segments_[4].start, 5001);
     EXPECT_EQ(segBitMap.segments_[4].end, 65535);
     EXPECT_EQ(segBitMap.segments_[4].bitmap, bitmap1);
+}
+
+HWTEST_F(NetsysNetFirewallTest, InterfaceBitmapBuild001, TestSize.Level0)
+{
+    std::vector<sptr<NetFirewallIpRule>> ruleList;
+    sptr<NetFirewallIpRule> rule = GeIpFirewallRule(NetFirewallRuleDirection::RULE_IN, "153.3.238.110");
+    rule->interface = "lo";
+    ruleList.push_back(rule);
+
+    BitmapManager manager;
+    int ret = manager.BuildBitmapMap(ruleList);
+    EXPECT_EQ(ret, 0);
+
+    BpfInterfaceMap &interfaceMap = manager.GetInterfaceMap();
+    EXPECT_FALSE(interfaceMap.Empty());
+}
+
+HWTEST_F(NetsysNetFirewallTest, InterfaceBitmapBuild002, TestSize.Level0)
+{
+    std::vector<sptr<NetFirewallIpRule>> ruleList;
+    sptr<NetFirewallIpRule> rule = GeIpFirewallRule(NetFirewallRuleDirection::RULE_IN, "153.3.238.110");
+    ruleList.push_back(rule);
+
+    BitmapManager manager;
+    int ret = manager.BuildBitmapMap(ruleList);
+    EXPECT_EQ(ret, 0);
+
+    BpfInterfaceMap &interfaceMap = manager.GetInterfaceMap();
+    EXPECT_FALSE(interfaceMap.Empty());
+}
+
+HWTEST_F(NetsysNetFirewallTest, InterfaceBitmapBuild003, TestSize.Level0)
+{
+    std::vector<sptr<NetFirewallIpRule>> ruleList;
+    sptr<NetFirewallIpRule> rule1 = GeIpFirewallRule(NetFirewallRuleDirection::RULE_IN, "153.3.238.110");
+    rule1->interface = "lo";
+    ruleList.push_back(rule1);
+    sptr<NetFirewallIpRule> rule2 = GeIpFirewallRule(NetFirewallRuleDirection::RULE_IN, "153.3.238.102");
+    rule2->interface = "lo";
+    ruleList.push_back(rule2);
+
+    BitmapManager manager;
+    int ret = manager.BuildBitmapMap(ruleList);
+    EXPECT_EQ(ret, 0);
+
+    BpfInterfaceMap &interfaceMap = manager.GetInterfaceMap();
+    EXPECT_FALSE(interfaceMap.Empty());
+    auto &map = interfaceMap.Get();
+    EXPECT_EQ(map.size(), 2u);
+    auto it = map.find("lo");
+    if (it != map.end()) {
+        EXPECT_NE(it->second.SpecialHash(), 0u);
+    }
+}
+
+HWTEST_F(NetsysNetFirewallTest, InterfaceBitmapBuild004, TestSize.Level0)
+{
+    BpfInterfaceMap interfaceMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    interfaceMap.OrInsert("wlan0", bitmap0);
+    interfaceMap.OrInsert("eth0", bitmap1);
+
+    EXPECT_FALSE(interfaceMap.Empty());
+    auto &map = interfaceMap.Get();
+    EXPECT_EQ(map.size(), 2u);
+
+    interfaceMap.Clear();
+    EXPECT_TRUE(interfaceMap.Empty());
+}
+
+HWTEST_F(NetsysNetFirewallTest, InterfaceBitmapBuild005, TestSize.Level0)
+{
+    std::vector<sptr<NetFirewallIpRule>> ruleList;
+    sptr<NetFirewallIpRule> rule1 = GeIpFirewallRule(NetFirewallRuleDirection::RULE_IN, "153.3.238.110");
+    rule1->interface = "wlan0";
+    ruleList.push_back(rule1);
+    sptr<NetFirewallIpRule> rule2 = GeIpFirewallRule(NetFirewallRuleDirection::RULE_IN, "153.3.238.102");
+    rule2->interface = "eth0";
+    ruleList.push_back(rule2);
+
+    BitmapManager manager;
+    int ret = manager.BuildBitmapMap(ruleList);
+    EXPECT_EQ(ret, 0);
+
+    BpfInterfaceMap &interfaceMap = manager.GetInterfaceMap();
+    EXPECT_FALSE(interfaceMap.Empty());
+    auto &map = interfaceMap.Get();
+    EXPECT_EQ(map.size(), 3u);
+    EXPECT_NE(map.find("wlan0"), map.end());
+    EXPECT_NE(map.find("eth0"), map.end());
+}
+
+HWTEST_F(NetsysNetFirewallTest, InterfaceBitmapBuild006, TestSize.Level0)
+{
+    std::vector<sptr<NetFirewallIpRule>> ruleList;
+    sptr<NetFirewallIpRule> rule1 = GeIpFirewallRule(NetFirewallRuleDirection::RULE_OUT, "153.3.238.110");
+    rule1->interface = "wlan0";
+    ruleList.push_back(rule1);
+    sptr<NetFirewallIpRule> rule2 = GeIpFirewallRule(NetFirewallRuleDirection::RULE_OUT, "153.3.238.102");
+    ruleList.push_back(rule2);
+
+    BitmapManager manager;
+    int ret = manager.BuildBitmapMap(ruleList);
+    EXPECT_EQ(ret, 0);
+
+    BpfInterfaceMap &interfaceMap = manager.GetInterfaceMap();
+    EXPECT_FALSE(interfaceMap.Empty());
+    auto &map = interfaceMap.Get();
+    EXPECT_EQ(map.size(), 2u);
+    EXPECT_NE(map.find("wlan0"), map.end());
+    EXPECT_NE(map.find(std::string("")), map.end());
+}
+
+HWTEST_F(NetsysNetFirewallTest, InterfaceBitmapBuild007, TestSize.Level0)
+{
+    std::vector<sptr<NetFirewallIpRule>> ruleList;
+    sptr<NetFirewallIpRule> rule = GeIpFirewallRule(NetFirewallRuleDirection::RULE_IN, "153.3.238.110");
+    rule->interface = "lo";
+    ruleList.push_back(rule);
+
+    BitmapManager manager;
+    int ret = manager.BuildBitmapMap(ruleList);
+    EXPECT_EQ(ret, 0);
+
+    BpfInterfaceMap &interfaceMap = manager.GetInterfaceMap();
+    EXPECT_FALSE(interfaceMap.Empty());
+
+    manager.Clear();
+    EXPECT_TRUE(interfaceMap.Empty());
+}
+
+HWTEST_F(NetsysNetFirewallTest, NetsysNetFirewallTest007, TestSize.Level0)
+{
+    std::vector<sptr<NetFirewallIpRule>> ruleList;
+    sptr<NetFirewallIpRule> rule = GeIpFirewallRule(NetFirewallRuleDirection::RULE_IN, "153.3.238.110");
+    rule->interface = "lo";
+    ruleList.push_back(rule);
+
+    shared_ptr<NetsysBpfNetFirewall> bpfNetFirewall = NetsysBpfNetFirewall::GetInstance();
+    int32_t ret = bpfNetFirewall->SetFirewallIpRules(ruleList);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NetsysNetFirewallTest, WriteInterfaceBpfMapEmptyTest, TestSize.Level0)
+{
+    shared_ptr<NetsysBpfNetFirewall> bpfNetFirewall = NetsysBpfNetFirewall::GetInstance();
+    BitmapManager manager;
+    manager.Clear();
+    int32_t ret = bpfNetFirewall->WriteInterfaceBpfMap(manager, NetFirewallRuleDirection::RULE_IN);
+    EXPECT_EQ(ret, 0);
+
+    ret = bpfNetFirewall->WriteInterfaceBpfMap(manager, NetFirewallRuleDirection::RULE_OUT);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NetsysNetFirewallTest, WriteInterfaceBpfMapLongNameTest, TestSize.Level0)
+{
+    shared_ptr<NetsysBpfNetFirewall> bpfNetFirewall = NetsysBpfNetFirewall::GetInstance();
+    std::vector<sptr<NetFirewallIpRule>> ruleList;
+    sptr<NetFirewallIpRule> rule = GeIpFirewallRule(NetFirewallRuleDirection::RULE_IN, "153.3.238.110");
+    rule->interface = "abcdefghijklmnopq";
+    ruleList.push_back(rule);
+
+    BitmapManager manager;
+    int ret = manager.BuildBitmapMap(ruleList);
+    EXPECT_EQ(ret, 0);
+
+    int32_t writeRet = bpfNetFirewall->WriteInterfaceBpfMap(manager, NetFirewallRuleDirection::RULE_IN);
+    EXPECT_EQ(writeRet, -1);
+}
+
+HWTEST_F(NetsysNetFirewallTest, WriteInterfaceBpfMapEgressTest, TestSize.Level0)
+{
+    std::vector<sptr<NetFirewallIpRule>> ruleList;
+    sptr<NetFirewallIpRule> rule = GeIpFirewallRule(NetFirewallRuleDirection::RULE_OUT, "153.3.238.110");
+    rule->interface = "eth0";
+    ruleList.push_back(rule);
+
+    shared_ptr<NetsysBpfNetFirewall> bpfNetFirewall = NetsysBpfNetFirewall::GetInstance();
+    int32_t ret = bpfNetFirewall->SetFirewallIpRules(ruleList);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NetsysNetFirewallTest, InterfaceRebuildTest, TestSize.Level0)
+{
+    std::vector<sptr<NetFirewallIpRule>> ruleList;
+    sptr<NetFirewallIpRule> rule = GeIpFirewallRule(NetFirewallRuleDirection::RULE_IN, "153.3.238.110");
+    ruleList.push_back(rule);
+
+    BitmapManager manager;
+    manager.BuildBitmapMap(ruleList);
+    manager.BuildBitmapMap(ruleList);
+
+    BpfInterfaceMap &interfaceMap = manager.GetInterfaceMap();
+    EXPECT_FALSE(interfaceMap.Empty());
 }

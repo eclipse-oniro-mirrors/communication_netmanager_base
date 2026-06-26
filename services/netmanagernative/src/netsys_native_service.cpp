@@ -1091,6 +1091,7 @@ int32_t NetsysNativeService::SetFirewallRules(NetFirewallRuleType type,
                    isFinish);
     int32_t ret = bpfNetFirewall_->SetFirewallRules(type, ruleList, isFinish);
     if (ret != NETSYS_SUCCESS) {
+        NETNATIVE_LOGI("NetsysNativeService::SetFirewallRules: error ret:%{public}d", ret);
         return ret;
     }
     ret = netsysService_->SetFirewallRules(type, ruleList, isFinish);

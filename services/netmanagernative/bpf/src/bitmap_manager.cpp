@@ -18,6 +18,7 @@
 #include <arpa/inet.h>
 #include <cstdio>
 #include <netdb.h>
+#include <net/if.h>
 #include <securec.h>
 #include <string>
 #include <sys/socket.h>
@@ -168,6 +169,7 @@ void BitmapManager::Insert()
     uidMap_.OrInsert(OTHER_UID_KEY, Bitmap());
     action_key Key = 1;
     actionMap_.OrInsert(Key, Bitmap());
+    interfaceMap_.OrInsert(std::string(""), Bitmap());
 }
 
 void BitmapManager::Clear()
@@ -183,6 +185,7 @@ void BitmapManager::Clear()
     appUidMap_.Clear();
     uidMap_.Clear();
     actionMap_.Clear();
+    interfaceMap_.Clear();
 }
 
 int32_t BitmapManager::InsertIp4SegBitmap(const NetFirewallIpParam &item, Bitmap &bitmap, Ip4RuleMap *ip4Map)
@@ -390,6 +393,10 @@ int32_t BitmapManager::BuildMarkBitmap(const std::vector<sptr<NetFirewallIpRule>
             action_key Key = 1;
             actionMap_.OrInsert(Key, bitmap);
         }
+
+        if (!rule->interface.empty()) {
+            interfaceMap_.OrInsert(rule->interface, bitmap);
+        }
         index++;
     }
 
@@ -425,6 +432,9 @@ void BitmapManager::BuildNoMarkBitmap(const std::vector<sptr<NetFirewallIpRule>>
         }
         if (rule->userId < 1) {
             uidMap_.OrForEach(bitmap);
+        }
+        if (rule->interface.empty()) {
+            interfaceMap_.OrForEach(bitmap);
         }
         index++;
     }

@@ -25,6 +25,6 @@ static const port_key_val OTHER_PORT_KEY = (port_key_val)0xffffffff;
 static const proto_key OTHER_PROTO_KEY = (proto_key)0xffffffff;
 static const appuid_key OTHER_APPUID_KEY = (appuid_key)0xffffffff;
 static const appuid_key OTHER_UID_KEY = (uid_key)0xffffffff;
-
+static const interface_key OTHER_INTERFACE_KEY = {};
 
 #endif // NET_FIREWALL_DEF_H

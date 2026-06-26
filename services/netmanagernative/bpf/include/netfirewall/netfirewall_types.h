@@ -42,6 +42,7 @@
 #define DNS_DOMAIN_LEN 128
 #define DNS_ANSWER_CNT 32
 #define PROTOCOL_SAT_EXPAK 64
+#define INTERFACE_NAME_MAX_LEN 16
 
 struct bitmap {
     __u32 val[BITMAP_LEN];
@@ -75,6 +76,7 @@ enum debug_type {
     DBG_CT_LOOKUP,
     DBG_MATCH_DOMAIN,
     DBG_MATCH_DOMAIN_ACTION,
+    DBG_MATCH_INTERFACE,
 };
 
 struct domain_hash_key {
@@ -146,7 +148,6 @@ struct match_tuple {
     __u32 ifindex;
 };
 
-
 struct event {
     enum event_type type;
     union {
@@ -166,6 +167,9 @@ typedef __be16 port_key_val;
 typedef __u8 proto_key;
 typedef __u32 appuid_key;
 typedef __u32 uid_key;
+typedef struct {
+    char name[INTERFACE_NAME_MAX_LEN];
+} interface_key;
 
 typedef enum {
     CURRENT_USER_ID_KEY = 1,
