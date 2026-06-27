@@ -258,11 +258,12 @@ int32_t NetConnClient::RegisterNetSupplierCallback(uint32_t supplierId, const sp
     }
     sptr<NetSupplierCallbackStub> ptr = std::make_unique<NetSupplierCallbackStub>().release();
     ptr->RegisterSupplierCallbackImpl(callback);
-    {
+    int32_t ret = proxy->RegisterNetSupplierCallback(supplierId, ptr);
+    if (ret == NETMANAGER_SUCCESS) {
         std::lock_guard<std::mutex> lock(netSupplierCallbackMutex_);
         netSupplierCallback_[supplierId] = ptr;
     }
-    return proxy->RegisterNetSupplierCallback(supplierId, ptr);
+    return ret;
 }
 
 int32_t NetConnClient::RegisterNetConnCallback(const sptr<INetConnCallback> callback)
@@ -274,6 +275,9 @@ sptr<NetConnClient::NetConnCallbackManager> NetConnClient::FindConnCallbackManag
     NetConnCallbackManagerMap &managerMap, const sptr<NetSpecifier> &netSpecifier)
 {
     for (const auto& pair : managerMap) {
+        if (pair.first == nullptr) {
+            continue;
+        }
         std::string ident_ = pair.first->ident_;
         sptr<NetConnCallbackManager> connCallbackManager = pair.second;
         NetAllCapabilities netAllCapabilities = pair.first->netCapabilities_;
