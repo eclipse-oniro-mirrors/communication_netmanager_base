@@ -29,6 +29,9 @@ int32_t StatisticsCallbackObserver::NetIfaceStatsChanged(const std::string &ifac
         return 0;
     }
     auto pair = new std::pair<std::string, uint32_t>;
+    if (pair == nullptr) {
+        return 0;
+    }
     pair->first = iface;
     pair->second = KEY_UID_ARG;
     StatisticsObserverWrapper::GetInstance().GetEventManager()->EmitByUv(EVENT_STATS_CHANGE, pair,
@@ -43,6 +46,10 @@ int32_t StatisticsCallbackObserver::NetUidStatsChanged(const std::string &iface,
         return 0;
     }
     auto pair = new std::pair<std::string, uint32_t>;
+    if (pair == nullptr) {
+        NETMANAGER_BASE_LOGE("new pair failed");
+        return 0;
+    }
     pair->first = iface;
     pair->second = uid;
     StatisticsObserverWrapper::GetInstance().GetEventManager()->EmitByUv(EVENT_STATS_CHANGE, pair,
