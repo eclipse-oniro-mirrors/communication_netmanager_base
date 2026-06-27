@@ -82,7 +82,7 @@ const std::string NET_FIREWALL_RECORD_LOCAL_PORT = "localPort";
 const std::string NET_FIREWALL_RECORD_REMOTE_PORT = "remotePort";
 const std::string NET_FIREWALL_RECORD_PROTOCOL = "protocol";
 const std::string NET_FIREWALL_RECORD_UID = "appUid";
-const std::string NET_FIREWALL_INTERFACE = "interface";
+constexpr const char* NET_FIREWALL_INTERFACE = "interface";
 
 const std::string EQUAL = "=";
 } // namespace
