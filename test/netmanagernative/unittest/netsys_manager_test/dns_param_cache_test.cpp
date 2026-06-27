@@ -748,7 +748,7 @@ HWTEST_F(DNSParamCacheTest, AddUidRangeDedupTest003, TestSize.Level1)
     uidRangesDup.push_back(uidrange1);
     dnsParCache.AddUidRange(netId, uidRangesDup);
     EXPECT_EQ(dnsParCache.vpnNetId_.size(), 1u);
-    EXPECT_EQ(dnsParCache.vpnUidRanges_.size(), 2u);
+    EXPECT_EQ(dnsParCache.vpnUidRanges_.size(), 1u);
 }
 
 HWTEST_F(DNSParamCacheTest, AddUidRangeDedupTest004, TestSize.Level1)
@@ -763,7 +763,7 @@ HWTEST_F(DNSParamCacheTest, AddUidRangeDedupTest004, TestSize.Level1)
     std::vector<NetManagerStandard::UidRange> emptyRanges;
     dnsParCache.AddUidRange(netId, emptyRanges);
     EXPECT_EQ(dnsParCache.vpnNetId_.size(), 1u);
-    EXPECT_EQ(dnsParCache.vpnUidRanges_.size(), 1u);
+    EXPECT_EQ(dnsParCache.vpnUidRanges_.size(), 0u);
 }
 
 HWTEST_F(DNSParamCacheTest, DelUidRangeRemoveAllTest001, TestSize.Level1)

@@ -273,7 +273,7 @@ int32_t DnsParamCache::GetVpnResolverConfig(uint32_t uid, std::vector<std::strin
             std::lock_guard<ffrt::mutex> lock(cacheMutex_);
             auto it = serverConfigMap_.find(mem.netId_);
             if (it == serverConfigMap_.end()) {
-                NETNATIVE_LOG_D("vpn get Config failed: not have vpnnetid:%{public}d,", mem.netId_);
+                NETNATIVE_LOGE("vpn get Config failed: not have vpnnetid:%{public}d,", mem.netId_);
                 continue;
             }
             servers = it->second.GetServers();
@@ -419,14 +419,13 @@ int32_t DnsParamCache::AddUidRange(uint32_t netId, const std::vector<NetManagerS
             "GetResolverConfig AddUidRange begin %{public}d end %{public}d netId %{public}d priority %{public}d",
             mem.begin_, mem.end_, mem.netId_, mem.priorityId_);
     }
-    std::vector<NetManagerStandard::UidRange> newRanges;
-    for (const auto &range : uidRanges) {
-        if (std::find(vpnUidRanges_.begin(), vpnUidRanges_.end(), range) == vpnUidRanges_.end()) {
-            newRanges.push_back(range);
-        }
-    }
-    if (!newRanges.empty()) {
-        auto middle = vpnUidRanges_.insert(vpnUidRanges_.end(), newRanges.begin(), newRanges.end());
+    vpnUidRanges_.erase(std::remove_if(vpnUidRanges_.begin(), vpnUidRanges_.end(),
+                                       [netId](const NetManagerStandard::UidRange &range) {
+                                           return range.netId_ == netId;
+                                       }),
+                        vpnUidRanges_.end());
+    if (!uidRanges.empty()) {
+        auto middle = vpnUidRanges_.insert(vpnUidRanges_.end(), uidRanges.begin(), uidRanges.end());
         std::inplace_merge(vpnUidRanges_.begin(), middle, vpnUidRanges_.end());
     }
     return 0;
