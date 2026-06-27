@@ -113,6 +113,10 @@ void NapiCommon::GetPropertyString(
     NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, object, propertyName.c_str(), &value));
     NAPI_CALL_RETURN_VOID(
         env, napi_get_value_string_utf8(env, value, propertyBuffer, PROPERTY_MAX_BYTE, &realByte));
+     if (realByte >= PROPERTY_MAX_BYTE) {
+        NETMGR_LOG_W("GetPropertyString: property %{public}s truncated, realByte=%{public}zu",
+            propertyName.c_str(), realByte);
+    }
     property = propertyBuffer;
 }
 
@@ -155,7 +159,7 @@ std::string NapiCommon::GetStringFromValue(napi_env env, napi_value value)
     char msgChars[MAX_TEXT_LENGTH] = {0};
     size_t msgLength = 0;
     NAPI_CALL_BASE(env, napi_get_value_string_utf8(env, value, msgChars, MAX_TEXT_LENGTH, &msgLength), "");
-    if (msgLength > 0) {
+    if (msgLength > 0 && msgLength <= MAX_TEXT_LENGTH) {
         return std::string(msgChars, 0, msgLength);
     } else {
         return "";
@@ -261,6 +265,7 @@ napi_value NapiCommon::HandleAsyncWork(napi_env env, BaseContext *baseContext, c
         context.release();
         NETMGR_LOG_I("NapiCommon HandleAsyncWork napi_queue_async_work_with_qos ok");
     } else {
+        napi_delete_async_work(env, context->work);
         std::string errorCode = std::to_string(queueWorkStatus);
         std::string errorMessage = "error at napi_queue_async_work_with_qos";
         NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
