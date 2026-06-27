@@ -385,6 +385,11 @@ int32_t NetPolicyServiceStub::OnIsUidNetAllowedIfaceName(MessageParcel &data, Me
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
+    if (ifaceName.size() > MAX_IFACENAMES_SIZE) {
+        NETMGR_LOG_E("ifaceName too long");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+
     bool isAllowed = false;
     int32_t result = IsUidNetAllowed(uid, ifaceName, isAllowed);
     if (!reply.WriteInt32(result)) {
