@@ -633,7 +633,7 @@ int32_t NetsysNativeServiceProxy::GetProcSysNet(int32_t family, int32_t which, c
     if (!data.WriteInt32(which)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (data.WriteString(ifname)) {
+    if (!data.WriteString(ifname)) {
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteString(parameter)) {
@@ -672,7 +672,7 @@ int32_t NetsysNativeServiceProxy::SetProcSysNet(int32_t family, int32_t which, c
     if (!data.WriteInt32(which)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (data.WriteString(ifname)) {
+    if (!data.WriteString(ifname)) {
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteString(parameter)) {
