@@ -418,7 +418,7 @@ bool NetSupplier::AddRequest(const NetRequest &netrequest)
     lock.unlock();
     NETMGR_LOG_D("AddRequest, requestList.size:%{public}d, supplierId:%{public}d, isInternet:%{public}d",
         requestList_.size(), supplierId_, netCaps_.HasNetCap(NET_CAPABILITY_INTERNET));
-    if (isEmpty || netSupplierType_ == BEARER_WIFI) {
+    if (isEmpty || netSupplierType_ == BEARER_WIFI || !IsAvailable()) {
         return SupplierConnection(netCaps_.ToSet(), netrequest);
     }
     return true;
