@@ -634,7 +634,7 @@ bool ClatdPacketConverter::IsTcpPacketValid(const tcphdr *tcpHeader, size_t pack
         return false;
     }
     // LCOV_EXCL_START
-    if (tcpHeader->doff * WORD_32BIT_IN_BYTE_UNIT > TCP_HDR_MAX_LEN) {
+    if (tcpHeader->doff * WORD_32BIT_IN_BYTE_UNIT >= TCP_HDR_MAX_LEN) {
         NETNATIVE_LOGW("Invalid tcp packet, tcp header length %{public}u larger than MAX_TCP_HDR", tcpHeader->doff);
         effectivePos_ = 0;
         return false;

@@ -327,6 +327,38 @@ HWTEST_F(DNSParamCacheTest, IsUseVpnDnsTest001, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
+HWTEST_F(DNSParamCacheTest, IsUseVpnDnsTest002, TestSize.Level1)
+{
+    DnsParamCache dnsParCache;
+    uint32_t vpnNetId = 100;
+    std::vector<OHOS::NetManagerStandard::UidRange> uidRanges = {{1000, 2000, vpnNetId, 1}};
+    dnsParCache.AddUidRange(vpnNetId, uidRanges);
+    dnsParCache.CreateCacheForNet(vpnNetId, true);
+    bool ret = dnsParCache.IsUseVpnDns(1500);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(DNSParamCacheTest, IsUseVpnDnsTest003, TestSize.Level1)
+{
+    DnsParamCache dnsParCache;
+    uint32_t vpnNetId = 100;
+    std::vector<OHOS::NetManagerStandard::UidRange> uidRanges = {{1000, 2000, vpnNetId, 1}};
+    dnsParCache.AddUidRange(vpnNetId, uidRanges);
+    bool ret = dnsParCache.IsUseVpnDns(1500);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(DNSParamCacheTest, IsUseVpnDnsTest004, TestSize.Level1)
+{
+    DnsParamCache dnsParCache;
+    uint32_t vpnNetId = 100;
+    std::vector<OHOS::NetManagerStandard::UidRange> uidRanges = {{1000, 2000, vpnNetId, 1}};
+    dnsParCache.AddUidRange(vpnNetId, uidRanges);
+    dnsParCache.CreateCacheForNet(vpnNetId, true);
+    bool ret = dnsParCache.IsUseVpnDns(500);
+    EXPECT_FALSE(ret);
+}
+
 HWTEST_F(DNSParamCacheTest, CreateCacheForNetTest001, TestSize.Level1)
 {
     NETNATIVE_LOGI("CreateCacheForNetTest001 enter");

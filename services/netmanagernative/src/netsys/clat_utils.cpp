@@ -67,7 +67,11 @@ bool IsIpv4AddressFree(const in_addr_t v4Addr)
                        len == static_cast<socklen_t>(sizeof(sin)) && sin.sin_addr.s_addr == v4Addr;
 
     close(s);
-    g_tunV4AddrInUse.emplace_back(v4Addr);
+    // LCOV_EXCL_START
+    if (!inuse) {
+        g_tunV4AddrInUse.emplace_back(v4Addr);
+    }
+    // LCOV_EXCL_STOP
     return !inuse;
 }
 
@@ -87,7 +91,8 @@ in_addr_t GetAvailableIpv4Address(const in_addr initV4Addr, const int16_t prefix
     if (prefixLen < 0 || prefixLen > V4ADDR_BIT_LEN) {
         return INADDR_NONE;
     }
-    const uint32_t mask = 0xffffffff >> (V4ADDR_BIT_LEN - prefixLen) << (V4ADDR_BIT_LEN - prefixLen);
+    const uint32_t mask =
+        (prefixLen == 0) ? 0 : (0xffffffffu >> (V4ADDR_BIT_LEN - prefixLen) << (V4ADDR_BIT_LEN - prefixLen));
     uint32_t v4Num = ntohl(initV4Addr.s_addr);
     const uint32_t initV4Num = v4Num;
     const uint32_t prefix = v4Num & mask;
@@ -196,7 +201,7 @@ int32_t GetSuitableIpv6Address(const std::string &v6IfaceStr, const in_addr v4Ad
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
 
-    sockaddr_in6 sin6;
+    sockaddr_in6 sin6 = {0};
     sin6.sin6_family = AF_INET6;
     sin6.sin6_addr = nat64Prefix;
     if (connect(s, reinterpret_cast<sockaddr *>(&sin6), sizeof(sin6))) {
@@ -333,7 +338,7 @@ int32_t ConfigureWriteSocket(int sockFd, const std::string &v6Iface)
     }
 
     int ret = setsockopt(sockFd, SOL_SOCKET, SO_BINDTODEVICE, v6Iface.c_str(),
-                         static_cast<socklen_t>(strlen(v6Iface.c_str())));
+                          static_cast<socklen_t>(v6Iface.length() + 1));
     if (ret) {
         NETNATIVE_LOGW("setsockopt SO_BINDTODEVICE failed: %{public}s", strerror(errno));
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -420,6 +425,12 @@ int32_t SetTunInterfaceAddress(const std::string &ifName, const std::string &tun
     }
 
     int socketfd = socket(AF_INET, SOCK_DGRAM, 0);
+    // LCOV_EXCL_START
+    if (socketfd < 0) {
+        NETNATIVE_LOGE("socket fd is invalid, errno: %{public}d", errno);
+        return NETMANAGER_ERROR;
+    }
+    // LCOV_EXCL_STOP
     auto sin = reinterpret_cast<sockaddr_in *>(&ifr.ifr_addr);
     sin->sin_family = AF_INET;
     sin->sin_addr = ipv4Addr;
