@@ -338,7 +338,7 @@ int32_t ConfigureWriteSocket(int sockFd, const std::string &v6Iface)
     }
 
     int ret = setsockopt(sockFd, SOL_SOCKET, SO_BINDTODEVICE, v6Iface.c_str(),
-                          static_cast<socklen_t>(v6Iface.length() + 1));
+                         static_cast<socklen_t>(v6Iface.length() + 1));
     if (ret) {
         NETNATIVE_LOGW("setsockopt SO_BINDTODEVICE failed: %{public}s", strerror(errno));
         return NETMANAGER_ERR_OPERATION_FAILED;
