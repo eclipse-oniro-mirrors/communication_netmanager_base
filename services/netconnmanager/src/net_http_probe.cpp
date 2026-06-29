@@ -422,6 +422,7 @@ bool NetHttpProbe::SetHttpOptions(ProbeType probeType, CURL *curl, const std::st
     NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_HEADERDATA, &respHeader_);
     NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_HEADER, 1L);
     NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_HTTPHEADER, list);
+    curl_slist_free_all(list);
     NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_ERRORBUFFER, errBuffer);
 
     CURLMcode code = curl_multi_add_handle(curlMulti_, curl);
