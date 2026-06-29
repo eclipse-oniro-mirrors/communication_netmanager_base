@@ -113,10 +113,6 @@ void NapiCommon::GetPropertyString(
     NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, object, propertyName.c_str(), &value));
     NAPI_CALL_RETURN_VOID(
         env, napi_get_value_string_utf8(env, value, propertyBuffer, PROPERTY_MAX_BYTE, &realByte));
-     if (realByte >= PROPERTY_MAX_BYTE) {
-        NETMGR_LOG_W("GetPropertyString: property %{public}s truncated, realByte=%{public}zu",
-            propertyName.c_str(), realByte);
-    }
     property = propertyBuffer;
 }
 
@@ -159,7 +155,7 @@ std::string NapiCommon::GetStringFromValue(napi_env env, napi_value value)
     char msgChars[MAX_TEXT_LENGTH] = {0};
     size_t msgLength = 0;
     NAPI_CALL_BASE(env, napi_get_value_string_utf8(env, value, msgChars, MAX_TEXT_LENGTH, &msgLength), "");
-    if (msgLength > 0 && msgLength <= MAX_TEXT_LENGTH) {
+    if (msgLength > 0) {
         return std::string(msgChars, 0, msgLength);
     } else {
         return "";
