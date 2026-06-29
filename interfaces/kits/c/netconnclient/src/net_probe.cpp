@@ -218,7 +218,8 @@ static int32_t DoPing(int32_t s, struct addrinfo *ai, uint32_t duration, NetConn
 
     result.rtt[NETCONN_RTT_AVG] = (totalRecv > 0) ? (static_cast<uint32_t>(sumDelay) / totalRecv) : 0u;
     result.rtt[NETCONN_RTT_STD] = CalcPingRttStd(timesTake, totalRecv, result.rtt[NETCONN_RTT_AVG]);
-    result.lossRate = static_cast<uint8_t>((totalSend > 0) ? ((totalSend - totalRecv) * PERCENTAGE / totalSend) : 0u);
+    result.lossRate = static_cast<uint8_t>(
+        (totalSend > 0 && totalSend >= totalRecv) ? ((totalSend - totalRecv) * PERCENTAGE / totalSend) : 0u);
 
     return rc;
 }
