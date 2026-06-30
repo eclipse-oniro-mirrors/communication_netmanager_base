@@ -38,6 +38,9 @@
 #include "refresh_http_proxy_callback_stub.h"
 #include "net_trace_route_info.h"
 
+namespace ffrt {
+class queue;
+};
 namespace OHOS {
 class ISystemAbilityStatusChange;
 namespace nmd {
@@ -569,6 +572,8 @@ private:
     class NetConnCallbackManager : public NetConnCallbackStub {
         friend NetConnClient;
     public:
+        NetConnCallbackManager();
+        ~NetConnCallbackManager() override = default;
         int32_t NetAvailable(sptr<NetHandle> &netHandle) override;
         int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap) override;
         int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info) override;
@@ -590,6 +595,7 @@ private:
         std::shared_mutex netConnCallbackListMutex_;
         std::list<sptr<INetConnCallback>> netConnCallbackList_;
         bool isNetStateUpdated_ = false;
+        std::shared_ptr<ffrt::queue> ffrtQueue_ = nullptr;
     };
 
 private:
