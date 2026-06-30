@@ -15,8 +15,6 @@
 
 #include "net_policy_service_stub.h"
 
-#include <arpa/inet.h>
-#include <sys/socket.h>
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_core.h"
 #include "net_quota_policy.h"
@@ -1037,24 +1035,6 @@ int32_t NetPolicyServiceStub::OnSetInternetAccessByIpForWifiShare(MessageParcel 
         NETMGR_LOG_E("OnSetInternetAccessByIpForWifiShare read clientNetIfName failed");
         return ERR_FLATTEN_OBJECT;
     }
-    if (clientNetIfName.length() > static_cast<size_t>(MAX_IFACENAMES_SIZE)) {
-        NETMGR_LOG_E("OnSetInternetAccessByIpForWifiShare clientNetIfName too long");
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    int ret = 0;
-    if (family == AF_INET) {
-        struct in_addr addr4;
-        ret = inet_pton(AF_INET, ipAddr.c_str(), &addr4);
-    } else if (family == AF_INET6) {
-        struct in6_addr addr6;
-        ret = inet_pton(AF_INET6, ipAddr.c_str(), &addr6);
-    }
-    if (ret != 1) {
-        NETMGR_LOG_E("OnSetInternetAccessByIpForWifiShare invalid ipAddr format");
-        return ERR_FLATTEN_OBJECT;
-    }
-
     int32_t result = SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write OnSetInternetAccessByIpForWifiShare result failed");
