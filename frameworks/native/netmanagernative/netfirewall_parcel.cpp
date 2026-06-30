@@ -273,6 +273,9 @@ bool NetFirewallRule::Marshalling(Parcel &parcel) const
     if (!parcel.WriteInt32(userId)) {
         return false;
     }
+    if (!parcel.WriteString(interface)) {
+        return false;
+    }
     return true;
 }
 
@@ -322,6 +325,7 @@ sptr<NetFirewallRule> NetFirewallRule::Unmarshalling(Parcel &parcel)
     if (!parcel.ReadInt32(ptr->userId)) {
         return nullptr;
     }
+    parcel.ReadString(ptr->interface);
     return ptr;
 }
 
@@ -338,7 +342,8 @@ std::string NetFirewallRule::ToString() const
         this->userId << COMMA << NET_FIREWALL_LOCAL_IP << size << this->localIps.size() << COMMA <<
         NET_FIREWALL_REMOTE_IP << size << this->remoteIps.size() << COMMA << NET_FIREWALL_LOCAL_PORT << size <<
         this->localPorts.size() << COMMA << NET_FIREWALL_DOMAIN << size << this->remotePorts.size() << COMMA <<
-        NET_FIREWALL_REMOTE_PORT << size << this->domains.size() << "}";
+        NET_FIREWALL_REMOTE_PORT << size << this->domains.size() << COMMA << NET_FIREWALL_INTERFACE << EQUAL <<
+        this->interface << "}";
     return ss.str();
 }
 
@@ -383,6 +388,7 @@ bool NetFirewallIpRule::Marshalling(Parcel &parcel) const
     NetFirewallUtils::MarshallingList(remoteIps, parcel);
     NetFirewallUtils::MarshallingList(localPorts, parcel);
     NetFirewallUtils::MarshallingList(remotePorts, parcel);
+    parcel.WriteString(interface);
     return true;
 }
 
@@ -412,6 +418,7 @@ sptr<NetFirewallIpRule> NetFirewallIpRule::Unmarshalling(Parcel &parcel)
     NetFirewallUtils::UnmarshallingList(parcel, ptr->remoteIps);
     NetFirewallUtils::UnmarshallingList(parcel, ptr->localPorts);
     NetFirewallUtils::UnmarshallingList(parcel, ptr->remotePorts);
+    parcel.ReadString(ptr->interface);
     return ptr;
 }
 

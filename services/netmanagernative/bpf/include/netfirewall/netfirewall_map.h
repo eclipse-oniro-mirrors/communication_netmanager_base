@@ -115,8 +115,16 @@ bpf_map_def SEC("maps") INGRESS_UID_MAP = {
     .inner_map_idx = 0,
     .numa_node = 0,
 };
-// ingress map end
-// egress map begin
+bpf_map_def SEC("maps") INGRESS_INTERFACE_MAP = {
+    .type = BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(interface_key),
+    .value_size = sizeof(struct bitmap),
+    .max_entries = MAP_MAX_ENTRIES,
+    .map_flags = BPF_F_NO_PREALLOC,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
 bpf_map_def SEC("maps") EGRESS_SADDR_MAP = {
     .type = BPF_MAP_TYPE_LPM_TRIE,
     .key_size = sizeof(struct ipv4_lpm_key),
@@ -202,6 +210,16 @@ bpf_map_def SEC("maps") EGRESS_APPUID_MAP = {
 bpf_map_def SEC("maps") EGRESS_UID_MAP = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(uid_key),
+    .value_size = sizeof(struct bitmap),
+    .max_entries = MAP_MAX_ENTRIES,
+    .map_flags = BPF_F_NO_PREALLOC,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
+bpf_map_def SEC("maps") EGRESS_INTERFACE_MAP = {
+    .type = BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(interface_key),
     .value_size = sizeof(struct bitmap),
     .max_entries = MAP_MAX_ENTRIES,
     .map_flags = BPF_F_NO_PREALLOC,

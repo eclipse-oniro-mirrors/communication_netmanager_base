@@ -76,5 +76,79 @@ HWTEST_F(NetFirewallRuleNativeHelperTest, SetFirewallRulesInner001, TestSize.Lev
         NetFirewallRuleNativeHelper::GetInstance().SetFirewallRulesInner(NetFirewallRuleType::RULE_IP, rules, true);
     EXPECT_EQ(ret, FIREWALL_SUCCESS);
 }
+
+HWTEST_F(NetFirewallRuleNativeHelperTest, SetFirewallRulesInnerWithInterface001, TestSize.Level1)
+{
+    NetManagerExtAccessToken token;
+    std::vector<sptr<NetFirewallBaseRule>> rules;
+    const int32_t userId = 100;
+    NetFirewallIpParam param;
+    param.family = FAMILY_IPV4;
+    param.type = SINGLE_IP;
+
+    sptr<NetFirewallIpRule> rule = new (std::nothrow) NetFirewallIpRule();
+    ASSERT_NE(rule, nullptr);
+    rule->userId = userId;
+    rule->ruleDirection = NetFirewallRuleDirection::RULE_OUT;
+    rule->ruleAction = FirewallRuleAction::RULE_DENY;
+    rule->protocol = NetworkProtocol::TCP;
+    inet_pton(AF_INET, "10.0.0.1", &param.ipv4.startIp);
+    rule->remoteIps.emplace_back(param);
+    rule->interface = "lo";
+    rules.emplace_back(rule);
+
+    int32_t ret =
+        NetFirewallRuleNativeHelper::GetInstance().SetFirewallRulesInner(NetFirewallRuleType::RULE_IP, rules, true);
+    EXPECT_EQ(ret, FIREWALL_SUCCESS);
+}
+
+HWTEST_F(NetFirewallRuleNativeHelperTest, SetFirewallRulesInnerWithInterface002, TestSize.Level1)
+{
+    NetManagerExtAccessToken token;
+    std::vector<sptr<NetFirewallBaseRule>> rules;
+    const int32_t userId = 100;
+    NetFirewallIpParam param;
+    param.family = FAMILY_IPV4;
+    param.type = SINGLE_IP;
+
+    sptr<NetFirewallIpRule> rule = new (std::nothrow) NetFirewallIpRule();
+    ASSERT_NE(rule, nullptr);
+    rule->userId = userId;
+    rule->ruleDirection = NetFirewallRuleDirection::RULE_OUT;
+    rule->ruleAction = FirewallRuleAction::RULE_DENY;
+    rule->protocol = NetworkProtocol::TCP;
+    inet_pton(AF_INET, "10.0.0.2", &param.ipv4.startIp);
+    rule->remoteIps.emplace_back(param);
+    rules.emplace_back(rule);
+
+    int32_t ret =
+        NetFirewallRuleNativeHelper::GetInstance().SetFirewallRulesInner(NetFirewallRuleType::RULE_IP, rules, true);
+    EXPECT_EQ(ret, FIREWALL_SUCCESS);
+}
+
+HWTEST_F(NetFirewallRuleNativeHelperTest, SetFirewallRulesInnerWithInterface003, TestSize.Level1)
+{
+    NetManagerExtAccessToken token;
+    std::vector<sptr<NetFirewallBaseRule>> rules;
+    const int32_t userId = 100;
+    NetFirewallIpParam param;
+    param.family = FAMILY_IPV4;
+    param.type = SINGLE_IP;
+
+    sptr<NetFirewallIpRule> rule = new (std::nothrow) NetFirewallIpRule();
+    ASSERT_NE(rule, nullptr);
+    rule->userId = userId;
+    rule->ruleDirection = NetFirewallRuleDirection::RULE_IN;
+    rule->ruleAction = FirewallRuleAction::RULE_DENY;
+    rule->protocol = NetworkProtocol::UDP;
+    inet_pton(AF_INET, "10.0.0.3", &param.ipv4.startIp);
+    rule->remoteIps.emplace_back(param);
+    rule->interface = "eth0";
+    rules.emplace_back(rule);
+
+    int32_t ret =
+        NetFirewallRuleNativeHelper::GetInstance().SetFirewallRulesInner(NetFirewallRuleType::RULE_IP, rules, true);
+    EXPECT_EQ(ret, FIREWALL_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

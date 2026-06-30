@@ -34,6 +34,7 @@ constexpr int32_t FIREWALL_RULE_SIZE_MAX = 1000;
 constexpr int32_t FIREWALL_DOMAIN_RULE_SIZE_MAX = 2000;
 constexpr int32_t FIREWALL_IPC_IP_RULE_PAGE_SIZE = 300;
 constexpr int32_t FIREWALL_IPC_DOMAIN_RULE_PAGE_SIZE = 2000;
+constexpr int32_t FIREWALL_IPC_IFACE_RULE_PAGE_SIZE = 300;
 constexpr uint8_t FAMILY_IPV4 = 1;
 constexpr uint8_t FAMILY_IPV6 = 2;
 constexpr uint8_t SINGLE_IP = 1;
@@ -81,6 +82,7 @@ const std::string NET_FIREWALL_RECORD_LOCAL_PORT = "localPort";
 const std::string NET_FIREWALL_RECORD_REMOTE_PORT = "remotePort";
 const std::string NET_FIREWALL_RECORD_PROTOCOL = "protocol";
 const std::string NET_FIREWALL_RECORD_UID = "appUid";
+constexpr const char* NET_FIREWALL_INTERFACE = "interface";
 
 const std::string EQUAL = "=";
 } // namespace
@@ -105,7 +107,7 @@ enum class NetFirewallRuleType {
     RULE_DOMAIN,           // TYPE Domain
     RULE_DNS,              // TYPE DNS
     RULE_DEFAULT_ACTION,   //TYPE DEFAULT ACTION
-    RULE_ALL               // TYPE ALL
+    RULE_ALL,              // TYPE ALL
 };
 
 // Network protocol, currently only supports the following enumeration. Please refer to the enumeration data for
@@ -195,6 +197,7 @@ struct NetFirewallIpRule : public NetFirewallBaseRule {
     std::vector<NetFirewallIpParam> remoteIps;
     std::vector<NetFirewallPortParam> localPorts;
     std::vector<NetFirewallPortParam> remotePorts;
+    std::string interface;
 
     static sptr<NetFirewallIpRule> Unmarshalling(Parcel &parcel);
     bool Marshalling(Parcel &parcel) const override;
@@ -231,6 +234,7 @@ struct NetFirewallRule : public Parcelable {
     std::vector<NetFirewallDomainParam> domains;   // Domain name list, optional
     NetFirewallDnsParam dns;                       // DNS, optional
     int32_t userId;                                // User ID, mandatory
+    std::string interface;                         // Network interface name, optional
 
     static sptr<NetFirewallRule> Unmarshalling(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

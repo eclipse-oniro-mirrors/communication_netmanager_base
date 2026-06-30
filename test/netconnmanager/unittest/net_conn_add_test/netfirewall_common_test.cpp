@@ -55,6 +55,14 @@ public:
     void TearDown() {};
 };
 
+class NetFirewallRuleInterfaceTest : public testing::Test {
+public:
+    static void SetUpTestCase() {};
+    static void TearDownTestCase() {};
+    void SetUp() {};
+    void TearDown() {};
+};
+
 HWTEST_F(NetFirewallPolicyTest, Unmarshalling001, TestSize.Level0)
 {
     Parcel parcel;
@@ -230,6 +238,111 @@ HWTEST_F(InterceptRecordPageTest, Unmarshalling005, TestSize.Level0)
     parcel.WriteUint32(size);
     sptr<InterceptRecordPage> ptr = InterceptRecordPage::Unmarshalling(parcel);
     EXPECT_EQ(ptr, nullptr);
+}
+
+HWTEST_F(NetFirewallRuleInterfaceTest, MarshallingAndUnmarshalling001, TestSize.Level0)
+{
+    NetFirewallRule rule;
+    rule.ruleId = 1;
+    rule.ruleName = "testInterfaceRule";
+    rule.ruleDescription = "test";
+    rule.ruleDirection = NetFirewallRuleDirection::RULE_OUT;
+    rule.ruleAction = FirewallRuleAction::RULE_DENY;
+    rule.ruleType = NetFirewallRuleType::RULE_IP;
+    rule.isEnabled = true;
+    rule.appUid = 0;
+    rule.userId = 100;
+    rule.protocol = NetworkProtocol::TCP;
+    rule.interface = "wlan0";
+
+    Parcel parcel;
+    bool ret = rule.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+
+    sptr<NetFirewallRule> ptr = NetFirewallRule::Unmarshalling(parcel);
+    ASSERT_NE(ptr, nullptr);
+    EXPECT_EQ(ptr->ruleId, 1);
+    EXPECT_EQ(ptr->interface, "wlan0");
+}
+
+HWTEST_F(NetFirewallRuleInterfaceTest, MarshallingAndUnmarshalling002, TestSize.Level0)
+{
+    NetFirewallRule rule;
+    rule.ruleId = 2;
+    rule.ruleName = "testNoInterfaceRule";
+    rule.ruleDescription = "test";
+    rule.ruleDirection = NetFirewallRuleDirection::RULE_IN;
+    rule.ruleAction = FirewallRuleAction::RULE_ALLOW;
+    rule.ruleType = NetFirewallRuleType::RULE_IP;
+    rule.isEnabled = true;
+    rule.appUid = 0;
+    rule.userId = 100;
+    rule.protocol = NetworkProtocol::UDP;
+
+    Parcel parcel;
+    bool ret = rule.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+
+    sptr<NetFirewallRule> ptr = NetFirewallRule::Unmarshalling(parcel);
+    ASSERT_NE(ptr, nullptr);
+    EXPECT_EQ(ptr->ruleId, 2);
+    EXPECT_TRUE(ptr->interface.empty());
+}
+
+HWTEST_F(NetFirewallRuleInterfaceTest, IpRuleMarshallingAndUnmarshalling001, TestSize.Level0)
+{
+    sptr<NetFirewallIpRule> rule = (std::make_unique<NetFirewallIpRule>()).release();
+    ASSERT_NE(rule, nullptr);
+    rule->userId = 100;
+    rule->ruleDirection = NetFirewallRuleDirection::RULE_OUT;
+    rule->ruleAction = FirewallRuleAction::RULE_DENY;
+    rule->protocol = NetworkProtocol::TCP;
+    rule->interface = "wlan0";
+
+    Parcel parcel;
+    bool ret = rule->Marshalling(parcel);
+    EXPECT_TRUE(ret);
+
+    sptr<NetFirewallIpRule> ptr = NetFirewallIpRule::Unmarshalling(parcel);
+    ASSERT_NE(ptr, nullptr);
+    EXPECT_EQ(ptr->userId, 100);
+    EXPECT_EQ(ptr->interface, "wlan0");
+}
+
+HWTEST_F(NetFirewallRuleInterfaceTest, IpRuleMarshallingAndUnmarshalling002, TestSize.Level0)
+{
+    sptr<NetFirewallIpRule> rule = (std::make_unique<NetFirewallIpRule>()).release();
+    ASSERT_NE(rule, nullptr);
+    rule->userId = 100;
+    rule->ruleDirection = NetFirewallRuleDirection::RULE_IN;
+    rule->ruleAction = FirewallRuleAction::RULE_ALLOW;
+    rule->protocol = NetworkProtocol::UDP;
+
+    Parcel parcel;
+    bool ret = rule->Marshalling(parcel);
+    EXPECT_TRUE(ret);
+
+    sptr<NetFirewallIpRule> ptr = NetFirewallIpRule::Unmarshalling(parcel);
+    ASSERT_NE(ptr, nullptr);
+    EXPECT_TRUE(ptr->interface.empty());
+}
+
+HWTEST_F(NetFirewallRuleInterfaceTest, ToStringTest, TestSize.Level0)
+{
+    NetFirewallRule rule;
+    rule.ruleId = 1;
+    rule.ruleName = "testInterface";
+    rule.ruleDescription = "desc";
+    rule.ruleDirection = NetFirewallRuleDirection::RULE_IN;
+    rule.ruleAction = FirewallRuleAction::RULE_DENY;
+    rule.ruleType = NetFirewallRuleType::RULE_IP;
+    rule.isEnabled = true;
+    rule.appUid = 0;
+    rule.userId = 100;
+    rule.protocol = NetworkProtocol::TCP;
+    rule.interface = "wlan0";
+    std::string str = rule.ToString();
+    EXPECT_NE(str.find("interface=wlan0"), std::string::npos);
 }
 }
 }

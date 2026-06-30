@@ -219,6 +219,7 @@ void NetsysBpfNetFirewall::ClearBpfFirewallRules(NetFirewallRuleDirection direct
     Ipv6LpmKey ip6Key = {};
     PortKey portKey = {};
     ProtoKey protoKey = 0;
+    interface_key ifaceKey = {};
     AppUidKey appIdKey = 0;
     UidKey uidKey = 0;
     ActionKey actKey = 1;
@@ -239,6 +240,7 @@ void NetsysBpfNetFirewall::ClearBpfFirewallRules(NetFirewallRuleDirection direct
     res += ClearBpfMap(GET_MAP_PATH(ingress, appuid), appIdKey, ruleCode);
     res += ClearBpfMap(GET_MAP_PATH(ingress, uid), uidKey, ruleCode);
     res += ClearBpfMap(GET_MAP_PATH(ingress, action), actKey, actVal);
+    res += ClearBpfMap(GET_MAP_PATH(ingress, iface), ifaceKey, ruleCode);
     res += ClearBpfMap(MAP_PATH(CT_MAP), ctKey, ctVal);
     if (res) {
         NETNATIVE_LOGE("ClearBpfFirewallRules: dir=%{public}d, res=%{public}d", direction, res);
@@ -299,6 +301,7 @@ int32_t NetsysBpfNetFirewall::SetBpfFirewallRules(const std::vector<sptr<NetFire
     res += WriteAppUidBpfMap(manager, direction);
     res += WriteUidBpfMap(manager, direction);
     res += WriteActionBpfMap(manager, direction);
+    res += WriteInterfaceBpfMap(manager, direction);
     if (res) {
         NETNATIVE_LOGE("SetBpfFirewallRules: dir=%{public}d, res=%{public}d", direction, res);
     }
@@ -712,6 +715,38 @@ int32_t NetsysBpfNetFirewall::WriteActionBpfMap(BitmapManager &manager, NetFirew
     return res;
 }
 
+int32_t NetsysBpfNetFirewall::WriteInterfaceBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction)
+{
+    BpfInterfaceMap &interfaceMap = manager.GetInterfaceMap();
+    int32_t res = 0;
+    if (interfaceMap.Empty()) {
+        NETNATIVE_LOGE("WriteInterfaceBpfMap: interfaceMap is empty");
+        return -1;
+    }
+
+    bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
+    for (const auto &pair : interfaceMap.Get()) {
+        const std::string &devName = pair.first;
+        Bitmap val = pair.second;
+        if (devName.length() > INTERFACE_NAME_MAX_LEN) {
+            NETNATIVE_LOGE("WriteInterfaceBpfMap: interface name too long: %{public}s, bitmap=%{public}u",
+                devName.c_str(), val.Get()[0]);
+            continue;
+        }
+        interface_key ifKey = {};
+        if (strncpy_s(ifKey.name, INTERFACE_NAME_MAX_LEN, devName.c_str(), devName.length()) != EOK) {
+            NETNATIVE_LOGE("WriteInterfaceBpfMap: devName: %{public}s, bitmap=%{public}u", devName.c_str(),
+                val.Get()[0]);
+            continue;
+        }
+
+        RuleCode rule;
+        memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
+        res += WriteBpfMap(GET_MAP_PATH(ingress, iface), ifKey, rule);
+    }
+    return res;
+}
+
 int32_t NetsysBpfNetFirewall::RegisterCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
 {
     if (!callback) {
@@ -881,6 +916,9 @@ void NetsysBpfNetFirewall::HandleDebugEvent(DebugEvent *ev)
         case DBG_MATCH_DOMAIN_ACTION:
             NETNATIVE_LOG_D("%{public}s match domain action: %{public}s", direction,
                 (ev->arg1 == SK_PASS ? "PASS" : "DROP"));
+            break;
+        case DBG_MATCH_INTERFACE:
+            NETNATIVE_LOG_D("%{public}s interface: %{public}u bitmap: %{public}x", direction, ev->arg1, ev->arg2);
             break;
         default:
             break;
