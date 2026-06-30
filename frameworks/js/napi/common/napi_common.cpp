@@ -261,6 +261,7 @@ napi_value NapiCommon::HandleAsyncWork(napi_env env, BaseContext *baseContext, c
         context.release();
         NETMGR_LOG_I("NapiCommon HandleAsyncWork napi_queue_async_work_with_qos ok");
     } else {
+        napi_delete_async_work(env, context->work);
         std::string errorCode = std::to_string(queueWorkStatus);
         std::string errorMessage = "error at napi_queue_async_work_with_qos";
         NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
