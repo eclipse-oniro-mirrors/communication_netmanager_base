@@ -1438,6 +1438,11 @@ int32_t NetConnClient::SetNetExtAttribute(const NetHandle &netHandle, const std:
     return proxy->SetNetExtAttribute(netHandle.GetNetId(), netExtAttribute);
 }
 
+NetConnClient::NetConnCallbackManager::NetConnCallbackManager()
+{
+    ffrtQueue_ = std::make_shared<ffrt::queue>("NetConnClient");
+}
+
 int32_t NetConnClient::NetConnCallbackManager::NetAvailable(sptr<NetHandle> &netHandle)
 {
     std::unique_lock<std::mutex> handlerLock(netHandlerMutex_);
@@ -1451,7 +1456,7 @@ int32_t NetConnClient::NetConnCallbackManager::NetAvailable(sptr<NetHandle> &net
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
     lock.unlock();
-    ffrt::submit([tmpList, netId = netHandle->GetNetId()]() {
+    ffrtQueue_->submit([tmpList, netId = netHandle->GetNetId()]() {
         auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
         for (auto& cb : tmpList) {
             cb->NetAvailable(tmpNetHandler);
@@ -1475,7 +1480,7 @@ int32_t NetConnClient::NetConnCallbackManager::NetCapabilitiesChange(sptr<NetHan
     if (netAllCap != nullptr) {
         tmpNetAllCap = sptr<NetAllCapabilities>::MakeSptr(*netAllCap);
     }
-    ffrt::submit([tmpList, netId = netHandle->GetNetId(), tmpNetAllCap]() {
+    ffrtQueue_->submit([tmpList, netId = netHandle->GetNetId(), tmpNetAllCap]() {
         auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
         for (auto& cb : tmpList) {
             cb->NetCapabilitiesChange(tmpNetHandler, tmpNetAllCap);
@@ -1499,7 +1504,7 @@ int32_t NetConnClient::NetConnCallbackManager::NetConnectionPropertiesChange(spt
     if (info != nullptr) {
         tmpInfo = sptr<NetLinkInfo>::MakeSptr(*info);
     }
-    ffrt::submit([tmpList, netId = netHandle->GetNetId(), tmpInfo]() {
+    ffrtQueue_->submit([tmpList, netId = netHandle->GetNetId(), tmpInfo]() {
         auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
         for (auto& cb : tmpList) {
             cb->NetConnectionPropertiesChange(tmpNetHandler, tmpInfo);
@@ -1521,7 +1526,7 @@ int32_t NetConnClient::NetConnCallbackManager::NetLost(sptr<NetHandle> &netHandl
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
     lock.unlock();
-    ffrt::submit([tmpList, netId = netHandle->GetNetId()]() {
+    ffrtQueue_->submit([tmpList, netId = netHandle->GetNetId()]() {
         auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
         for (auto& cb : tmpList) {
             cb->NetLost(tmpNetHandler);
@@ -1539,7 +1544,7 @@ int32_t NetConnClient::NetConnCallbackManager::NetUnavailable()
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
     lock.unlock();
-    ffrt::submit([tmpList]() {
+    ffrtQueue_->submit([tmpList]() {
         for (auto& cb : tmpList) {
             cb->NetUnavailable();
         }
@@ -1552,9 +1557,12 @@ int32_t NetConnClient::NetConnCallbackManager::NetBlockStatusChange(sptr<NetHand
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
     lock.unlock();
-    for (auto& cb : tmpList) {
-        cb->NetBlockStatusChange(netHandle, blocked);
-    }
+    ffrtQueue_->submit([tmpList, netId = netHandle->GetNetId(), blocked]() {
+        auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
+        for (auto& cb : tmpList) {
+            cb->NetBlockStatusChange(tmpNetHandler, blocked);
+        }
+    });
     return NETMANAGER_SUCCESS;
 }
 
@@ -1600,12 +1608,11 @@ int32_t NetConnClient::NetConnCallbackManager::AddNetConnCallback(const sptr<INe
 // LCOV_EXCL_START
 #ifndef NETMANAGER_TEST
     auto wp = wptr<NetConnClient::NetConnCallbackManager>(this);
-    ffrt::submit([wp, callback, tempNetHandler, tempNetAllCap, tempNetLinkInfo] () {
-            if (auto sharedClient = wp.promote()) {
-                sharedClient->PostTriggerNetChange(callback, tempNetHandler, tempNetAllCap, tempNetLinkInfo);
-            }
-        },
-        {}, {}, ffrt::task_attr().name("AddNetConnCallback"));
+    ffrtQueue_->submit([wp, callback, tempNetHandler, tempNetAllCap, tempNetLinkInfo]() {
+        if (auto sharedClient = wp.promote()) {
+            sharedClient->PostTriggerNetChange(callback, tempNetHandler, tempNetAllCap, tempNetLinkInfo);
+        }
+    });
 #endif
 // LCOV_EXCL_STOP
     return NETMANAGER_SUCCESS;
