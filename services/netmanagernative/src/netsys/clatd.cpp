@@ -65,13 +65,12 @@ Clatd::~Clatd()
 // LCOV_EXCL_START
 void Clatd::Start()
 {
-    std::unique_lock<ffrt::mutex> lck(mutex_);
-    if (!stopStatus_) {
+    bool expectedStop = true;
+    if (!stopStatus_.compare_exchange_strong(expectedStop, false)) {
         NETNATIVE_LOGW("fail to start clatd, clatd for %{public}s is already running", v6Iface_.c_str());
         return;
     }
     SendDadPacket();
-    stopStatus_ = false;
     std::thread([this]() { RunLoop(); }).detach();
 }
 
