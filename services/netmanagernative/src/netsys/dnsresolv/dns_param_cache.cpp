@@ -522,7 +522,7 @@ int32_t DnsParamCache::SetFirewallDnsRules(const std::vector<sptr<NetFirewallDns
         if (it != netFirewallDnsRuleMap_.end()) {
             rules = it->second;
         }
-        rules.emplace_back(std::move(rule));
+        rules.emplace_back(rule);
         netFirewallDnsRuleMap_.emplace(rule->appUid, std::move(rules));
     }
     return 0;
@@ -711,7 +711,7 @@ bool DnsParamCache::IsUseVpnDns(uint32_t uid)
 {
     std::lock_guard<ffrt::mutex> uidLock(uidRangeMutex_);
     for (auto mem : vpnUidRanges_) {
-        if (static_cast<int32_t>(uid) >= mem.begin_ && static_cast<int32_t>(uid) <= mem.end_) {
+        if (static_cast<int64_t>(uid) >= mem.begin_ && static_cast<int64_t>(uid) <= mem.end_) {
             auto it = serverConfigMap_.find(mem.netId_);
             if (it == serverConfigMap_.end()) {
                 continue;

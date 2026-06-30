@@ -65,6 +65,22 @@ HWTEST_F(ClatdTest, IsIpv4AddressFreeTest001, TestSize.Level1)
     FreeTunV4Addr(v4AddrStr);
 }
 
+HWTEST_F(ClatdTest, IsIpv4AddressFreeTest002, TestSize.Level1)
+{
+    std::string v4AddrStr;
+    FreeTunV4Addr(v4AddrStr);
+
+    v4AddrStr = "192.168.1.2";
+    in_addr v4Addr;
+    inet_pton(AF_INET, v4AddrStr.c_str(), &v4Addr);
+    auto ret = IsIpv4AddressFree(v4Addr.s_addr);
+    EXPECT_TRUE(ret);
+
+    ret = IsIpv4AddressFree(v4Addr.s_addr);
+    EXPECT_FALSE(ret);
+    FreeTunV4Addr(v4AddrStr);
+}
+
 HWTEST_F(ClatdTest, GetAvailableIpv4AddressTest001, TestSize.Level1)
 {
     in_addr initV4Addr;
@@ -102,6 +118,18 @@ HWTEST_F(ClatdTest, GetSuitableIpv6AddressTest001, TestSize.Level1)
     in6_addr nat64Prefix, v6Addr;
     uint32_t mark = 100;
     inet_pton(AF_INET, "192.0.2.1", &v4Addr);
+    inet_pton(AF_INET6, "64:ff9b::", &nat64Prefix);
+    auto ret = GetSuitableIpv6Address(v6IfaceStr, v4Addr, nat64Prefix, v6Addr, mark);
+    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+HWTEST_F(ClatdTest, GetSuitableIpv6AddressTest002, TestSize.Level1)
+{
+    std::string v6IfaceStr = "lo";
+    in_addr v4Addr;
+    in6_addr nat64Prefix, v6Addr;
+    uint32_t mark = 0;
+    v4Addr.s_addr = 0;
     inet_pton(AF_INET6, "64:ff9b::", &nat64Prefix);
     auto ret = GetSuitableIpv6Address(v6IfaceStr, v4Addr, nat64Prefix, v6Addr, mark);
     EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
@@ -221,6 +249,15 @@ HWTEST_F(ClatdTest, SetTunInterfaceAddressTest002, TestSize.Level1)
     prefix = V4ADDR_BIT_LEN;
     ret = SetTunInterfaceAddress(ifName, tunAddr, prefix);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(ClatdTest, SetTunInterfaceAddressTest003, TestSize.Level1)
+{
+    std::string ifName = "";
+    std::string tunAddr = "192.168.1.1";
+    int32_t prefix = V4ADDR_BIT_LEN;
+    auto ret = SetTunInterfaceAddress(ifName, tunAddr, prefix);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 } // namespace nmd

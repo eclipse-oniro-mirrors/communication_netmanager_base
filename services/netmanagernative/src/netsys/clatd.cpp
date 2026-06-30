@@ -65,12 +65,12 @@ Clatd::~Clatd()
 // LCOV_EXCL_START
 void Clatd::Start()
 {
-    if (!stopStatus_) {
+    bool expectedStop = true;
+    if (!stopStatus_.compare_exchange_strong(expectedStop, false)) {
         NETNATIVE_LOGW("fail to start clatd, clatd for %{public}s is already running", v6Iface_.c_str());
         return;
     }
     SendDadPacket();
-    stopStatus_ = false;
     std::thread([this]() { RunLoop(); }).detach();
 }
 
@@ -166,7 +166,7 @@ int32_t Clatd::MaybeCalculateL4Checksum(int packetLen, ClatdReadV6Buf &readBuf)
 {
     const int csumStart = readBuf.vnet.csumStart;
     const int csumOffset = csumStart + readBuf.vnet.csumOffset;
-    if (csumOffset > packetLen) {
+    if (csumOffset > packetLen - 1) {
         NETNATIVE_LOGW("csum offset %{public}d larger than packet length %{public}d", csumOffset, packetLen);
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
@@ -298,7 +298,7 @@ int32_t Clatd::ReadV6Packet(msghdr &msgHdr, ssize_t &readLen)
 
 int32_t Clatd::ReadV4Packet(ClatdReadTunBuf &readBuf, ssize_t &readLen)
 {
-    readLen = read(tunFd_, reinterpret_cast<iovec *>(&readBuf), sizeof(readBuf));
+    readLen = read(tunFd_, &readBuf, sizeof(readBuf));
     if (readLen < 0) {
         NETNATIVE_LOGW("read failed: %{public}s", strerror(errno));
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -315,15 +315,24 @@ int32_t Clatd::ReadV4Packet(ClatdReadTunBuf &readBuf, ssize_t &readLen)
 
 void Clatd::SendV6OnRawSocket(int fd, std::vector<iovec> &iovPackets, int effectivePos)
 {
-    static sockaddr_in6 sin6 = {AF_INET6, 0, 0, {{{0, 0, 0, 0}}}, 0};
-    static msghdr msgHeader;
+    if (effectivePos <= static_cast<int>(CLATD_TPHDR)) {
+        NETNATIVE_LOGW("SendV6OnRawSocket: effectivePos %{public}d is invalid", effectivePos);
+        return;
+    }
+
+    sockaddr_in6 sin6 = {AF_INET6, 0, 0, {{{0, 0, 0, 0}}}, 0};
+    msghdr msgHeader;
     msgHeader.msg_name = &sin6;
     msgHeader.msg_namelen = sizeof(sin6);
 
     msgHeader.msg_iov = &iovPackets[0];
     msgHeader.msg_iovlen = effectivePos;
     sin6.sin6_addr = reinterpret_cast<struct ip6_hdr *>(iovPackets[CLATD_TPHDR].iov_base)->ip6_dst;
-    sendmsg(fd, &msgHeader, 0);
+    
+    ssize_t sendLen = sendmsg(fd, &msgHeader, 0);
+    if (sendLen < 0) {
+        NETNATIVE_LOGW("SendV6OnRawSocket: sendmsg failed: %{public}s", strerror(errno));
+    }
 }
 // LCOV_EXCL_STOP
 } // namespace nmd
