@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "netmanager_base_permission.h"
+#include <ipc_skeleton.h>
 #include "netmanager_base_test_security.h"
 
 namespace OHOS {
@@ -96,6 +97,30 @@ HWTEST_F(NetManagerPermissionTest, GetApiVersionTest001, TestSize.Level1)
 {
     auto ret = NetManagerPermission::GetApiVersion();
     EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetManagerPermissionTest, CheckUidPermission001, TestSize.Level1)
+{
+    std::vector<uint32_t> allowedUids;
+    bool ret = NetManagerPermission::CheckUidPermission(allowedUids);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetManagerPermissionTest, CheckUidPermission002, TestSize.Level1)
+{
+    std::vector<uint32_t> allowedUids;
+    allowedUids.push_back(IPCSkeleton::GetCallingUid());
+    bool ret = NetManagerPermission::CheckUidPermission(allowedUids);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetManagerPermissionTest, CheckUidPermission003, TestSize.Level1)
+{
+    std::vector<uint32_t> allowedUids;
+    allowedUids.push_back(0);
+    allowedUids.push_back(IPCSkeleton::GetCallingUid());
+    bool ret = NetManagerPermission::CheckUidPermission(allowedUids);
+    EXPECT_TRUE(ret);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
