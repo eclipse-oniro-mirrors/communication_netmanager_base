@@ -386,6 +386,10 @@ std::string MaskIpMiddle(std::string &maskedResult, const std::string &delimiter
 {
     size_t start = maskedResult.find(delimiter);
     size_t end = maskedResult.rfind(delimiter);
+    if (start == std::string::npos || end <= start + delimiter.size()) {
+        start = 0;
+        end = maskedResult.size();
+    }
     for (size_t i = start; i < end; i++) {
         if (maskedResult[i] != delimiter[0] && maskedResult[i] != '/') {
             maskedResult[i] = '*';
