@@ -424,6 +424,27 @@ HWTEST_F(UtNetmanagerBaseCommon, ToAnonymousIpTest004, TestSize.Level1)
     EXPECT_NE(result2, "ab:**:**:**:***:***:***:8902/64");
 }
 
+/*
+ * @tc.name: MaskIpMiddleTest001
+ * @tc.desc: Test UtNetmanagerBaseCommon MaskIpMiddle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetmanagerBaseCommon, MaskIpMiddleTest001, TestSize.Level1)
+{
+    std::string testIpv1 = "fe80::1";
+    std::string delimiter = ":";
+    auto result1 = CommonUtils::MaskIpMiddle(testIpv1, delimiter);
+    EXPECT_EQ(result1, "****::*");
+
+    std::string testIpv2 = "::1";
+    auto result2 = CommonUtils::MaskIpMiddle(testIpv2, delimiter);
+    EXPECT_EQ(result2, "::*");
+
+    std::string testIpv3 = "2001::";
+    auto result3 = CommonUtils::MaskIpMiddle(testIpv3, delimiter);
+    EXPECT_EQ(result3, "****::");
+}
+
 /**
  * @tc.name: StrToIntTest001
  * @tc.desc: Test UtNetmanagerBaseCommon StrToInt.
