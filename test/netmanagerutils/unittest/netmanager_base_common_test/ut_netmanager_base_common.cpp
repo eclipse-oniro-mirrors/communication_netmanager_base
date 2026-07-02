@@ -1441,5 +1441,14 @@ HWTEST_F(UtNetmanagerBaseCommon, RemoveDeleteControlFlag001, TestSize.Level0)
     std::string emptyAddr = "";
     EXPECT_FALSE(CommonUtils::IsIPv6LinkLocal(emptyAddr));
 }
+
+HWTEST_F(UtNetmanagerBaseCommon, SerializeStringVector001, TestSize.Level0)
+{
+    std::vector<std::string> testStrVec;
+    testStrVec.push_back("111");
+    testStrVec.push_back("222");
+    std::string result = CommonUtils::SerializeStringVector(testStrVec);
+    EXPECT_FALSE(result.empty());
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
