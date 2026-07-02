@@ -1196,4 +1196,16 @@ void RemoveDeleteControlFlag(int fd)
     flags &= ~HMFS_MONITOR_FL;
     ioctl(fd, HMFS_IOCTL_HW_SET_FLAGS, &flags);
 }
+
+std::string SerializeStringVector(const std::vector<std::string>& vec)
+{
+    std::stringstream ss;
+    ss << "\"";
+    for (size_t i = 0; i < vec.size(); ++i) {
+        ss << vec[i];
+        if (i + 1 < vec.size()) ss << ",";
+    }
+    ss << "\"";
+    return ss.str();
+}
 } // namespace OHOS::NetManagerStandard::CommonUtils
