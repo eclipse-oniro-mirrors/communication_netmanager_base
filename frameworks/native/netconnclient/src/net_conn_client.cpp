@@ -262,8 +262,6 @@ int32_t NetConnClient::RegisterNetSupplierCallback(uint32_t supplierId, const sp
     if (ret == NETMANAGER_SUCCESS) {
         std::lock_guard<std::mutex> lock(netSupplierCallbackMutex_);
         netSupplierCallback_[supplierId] = ptr;
-    } else {
-        delete ptr;
     }
     return ret;
 }
