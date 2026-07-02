@@ -126,6 +126,7 @@ bool IsValidAddress(const std::string &ipStrAddr);
 bool IsIPv6LinkLocal(const std::string& ipv6Addr);
 void RemoveDeleteControlFromPath(const char *path);
 void RemoveDeleteControlFlag(int fd);
+std::string SerializeStringVector(const std::vector<std::string>& vec);
 } // namespace OHOS::NetManagerStandard::CommonUtils
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H */
