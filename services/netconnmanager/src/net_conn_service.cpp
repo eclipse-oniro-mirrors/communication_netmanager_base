@@ -381,7 +381,11 @@ int32_t NetConnService::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpe
     if (netSpecifier != nullptr) {
         // LCOV_EXCL_START
         if (!CheckNetCapPermission(netSpecifier->netCapabilities_.netCaps_)) {
-            return NETMANAGER_ERR_PERMISSION_DENIED;
+            if (!netSpecifier->netCapabilities_.netCaps_.count(NET_CAPABILITY_MMS)) {
+                return NETMANAGER_ERR_PERMISSION_DENIED;
+            }
+            netSpecifier->netCapabilities_.netCaps_.erase(NET_CAPABILITY_MMS);
+            netSpecifier->netCapabilities_.netCaps_.insert(NET_CAPABILITY_INTERNET);
         }
         // LCOV_EXCL_STOP
     }
