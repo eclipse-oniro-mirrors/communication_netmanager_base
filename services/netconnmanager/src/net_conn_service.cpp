@@ -4403,6 +4403,7 @@ int32_t NetConnService::SetAppIsFrozenedAsync(uint32_t uid, bool isFrozened)
     }
     std::vector<std::shared_ptr<NetActivate>> activates = it->second;
     lock.unlock();
+    bool isSkipReqFindNet = false;
     NETMGR_LOG_I("SetAppIsFrozenedAsync uid[%{public}d], isFrozened=[%{public}d].", uid, isFrozened);
     for (auto iter = activates.begin(); iter != activates.end();++iter) {
         auto curNetAct = (*iter);
@@ -4418,13 +4419,22 @@ int32_t NetConnService::SetAppIsFrozenedAsync(uint32_t uid, bool isFrozened)
             continue;
         }
         if (curNetAct->IsFrozenedSkip()) {
-            FindBestNetworkForAllRequest();
-            curNetAct->SetIsFrozenedSkip(false);
-            curNetAct->SetLastNetid(0);
-            curNetAct->SetLastCallbackType(CALL_TYPE_UNKNOWN);
+            isSkipReqFindNet = true;
             continue;
         }
         HandleUnfrozenCallback(uid, curNetAct);
+    }
+    if (isSkipReqFindNet) {
+        FindBestNetworkForAllRequest();
+        for (auto iter = activates.begin(); iter != activates.end(); ++iter) {
+            auto skipNetAct = (*iter);
+            if (skipNetAct == nullptr || !skipNetAct->IsFrozenedSkip()) {
+                continue;
+            }
+            skipNetAct->SetIsFrozenedSkip(false);
+            skipNetAct->SetLastNetid(0);
+            skipNetAct->SetLastCallbackType(CALL_TYPE_UNKNOWN);
+        }
     }
     return NETMANAGER_SUCCESS;
 }
