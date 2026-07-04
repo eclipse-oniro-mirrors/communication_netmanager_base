@@ -776,7 +776,7 @@ bool DnsParamCache::IsInNodataCache(uint16_t netId, const std::string &hostName)
 
 void DnsParamCache::SetIpv6UidBlackList(std::vector<int32_t> &netIds, uint32_t uid)
 {
-    int32_t size = netIds.size();
+    size_t size = netIds.size();
     if (size <= 0) {
         return;
     }
@@ -784,7 +784,7 @@ void DnsParamCache::SetIpv6UidBlackList(std::vector<int32_t> &netIds, uint32_t u
     std::scoped_lock<ffrt::shared_mutex> writeLock(uidBlackListMutex_);
     for (auto& netId : netIds) {
         if (netId == 0) {
-            netId = defaultNetId_;
+            netId = static_cast<int32_t>(defaultNetId_);
         }
  
         auto it = serverConfigMap_.find(netId);

@@ -2478,6 +2478,10 @@ int32_t NetsysNativeServiceStub::CmdSetIpv6UidBlackList(MessageParcel &data, Mes
         NETNATIVE_LOGE("CmdSetIpv6UidBlackList read size failed");
         return ERR_FLATTEN_OBJECT;
     }
+
+    if (size < 0) {
+        return ERR_FLATTEN_OBJECT;
+    }
     
     std::vector<int32_t> netIds;
     int32_t netId;
