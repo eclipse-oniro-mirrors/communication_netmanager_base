@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef NET_SYS_CLIENT_FUZZER_H
-#define NET_SYS_CLIENT_FUZZER_H
+#ifndef ENABLE_VNIC_NETWORK_FUZZER_H
+#define ENABLE_VNIC_NETWORK_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "netstsclient_fuzzer"
+#define FUZZ_PROJECT_NAME "enablevnicnetwork_fuzzer"
 
-#endif // NET_SYS_CLIENT_FUZZER_H
+#endif // UPDATE_NETCAPS_FUZZER_H
