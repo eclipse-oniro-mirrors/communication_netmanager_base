@@ -84,7 +84,6 @@ bpf_map_def SEC("maps") INGRESS_PROTO_MAP = {
     .key_size = sizeof(proto_key),
     .value_size = sizeof(struct bitmap),
     .max_entries = MAP_MAX_ENTRIES,
-    .map_flags = BPF_F_NO_PREALLOC,
     .inner_map_idx = 0,
     .numa_node = 0,
 };
@@ -93,7 +92,6 @@ bpf_map_def SEC("maps") INGRESS_ACTION_MAP = {
     .key_size = sizeof(action_key),
     .value_size = sizeof(action_val),
     .max_entries = MAP_MAX_ENTRIES,
-    .map_flags = BPF_F_NO_PREALLOC,
     .inner_map_idx = 0,
     .numa_node = 0,
 };
@@ -102,7 +100,6 @@ bpf_map_def SEC("maps") INGRESS_APPUID_MAP = {
     .key_size = sizeof(appuid_key),
     .value_size = sizeof(struct bitmap),
     .max_entries = MAP_MAX_ENTRIES,
-    .map_flags = BPF_F_NO_PREALLOC,
     .inner_map_idx = 0,
     .numa_node = 0,
 };
@@ -111,7 +108,6 @@ bpf_map_def SEC("maps") INGRESS_UID_MAP = {
     .key_size = sizeof(uid_key),
     .value_size = sizeof(struct bitmap),
     .max_entries = MAP_MAX_ENTRIES,
-    .map_flags = BPF_F_NO_PREALLOC,
     .inner_map_idx = 0,
     .numa_node = 0,
 };
@@ -120,7 +116,6 @@ bpf_map_def SEC("maps") INGRESS_INTERFACE_MAP = {
     .key_size = sizeof(interface_key),
     .value_size = sizeof(struct bitmap),
     .max_entries = MAP_MAX_ENTRIES,
-    .map_flags = BPF_F_NO_PREALLOC,
     .inner_map_idx = 0,
     .numa_node = 0,
 };
@@ -185,7 +180,6 @@ bpf_map_def SEC("maps") EGRESS_PROTO_MAP = {
     .key_size = sizeof(proto_key),
     .value_size = sizeof(struct bitmap),
     .max_entries = MAP_MAX_ENTRIES,
-    .map_flags = BPF_F_NO_PREALLOC,
     .inner_map_idx = 0,
     .numa_node = 0,
 };
@@ -194,7 +188,6 @@ bpf_map_def SEC("maps") EGRESS_ACTION_MAP = {
     .key_size = sizeof(action_key),
     .value_size = sizeof(action_val),
     .max_entries = MAP_MAX_ENTRIES,
-    .map_flags = BPF_F_NO_PREALLOC,
     .inner_map_idx = 0,
     .numa_node = 0,
 };
@@ -203,7 +196,6 @@ bpf_map_def SEC("maps") EGRESS_APPUID_MAP = {
     .key_size = sizeof(appuid_key),
     .value_size = sizeof(struct bitmap),
     .max_entries = MAP_MAX_ENTRIES,
-    .map_flags = BPF_F_NO_PREALLOC,
     .inner_map_idx = 0,
     .numa_node = 0,
 };
@@ -212,7 +204,6 @@ bpf_map_def SEC("maps") EGRESS_UID_MAP = {
     .key_size = sizeof(uid_key),
     .value_size = sizeof(struct bitmap),
     .max_entries = MAP_MAX_ENTRIES,
-    .map_flags = BPF_F_NO_PREALLOC,
     .inner_map_idx = 0,
     .numa_node = 0,
 };
@@ -222,7 +213,6 @@ bpf_map_def SEC("maps") EGRESS_INTERFACE_MAP = {
     .key_size = sizeof(interface_key),
     .value_size = sizeof(struct bitmap),
     .max_entries = MAP_MAX_ENTRIES,
-    .map_flags = BPF_F_NO_PREALLOC,
     .inner_map_idx = 0,
     .numa_node = 0,
 };
@@ -231,7 +221,6 @@ bpf_map_def SEC("maps") DEFAULT_ACTION_MAP = {
     .key_size = sizeof(uid_key),
     .value_size = sizeof(struct defalut_action_value),
     .max_entries = MAP_MAX_ENTRIES,
-    .map_flags = BPF_F_NO_PREALLOC,
     .inner_map_idx = 0,
     .numa_node = 0,
 };
@@ -299,7 +288,6 @@ bpf_map_def SEC("maps") DOMAIN_DATA_KEY_MAP = {
     .key_size = sizeof(__u64),
     .value_size = sizeof(struct domain_hash_key),
     .max_entries = MAP_MAX_ENTRIES,
-    .map_flags = BPF_F_NO_PREALLOC,
     .inner_map_idx = 0,
     .numa_node = 0,
 };
