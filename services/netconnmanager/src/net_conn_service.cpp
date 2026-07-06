@@ -4682,7 +4682,7 @@ int32_t NetConnService::IsDeadFlowResetTargetBundle(const std::string &bundleNam
     std::shared_lock<ffrt::shared_mutex> lock(deadFlowResetVecMutex_);
     if (std::find(deadFlowResetBundleNameVec_.begin(), deadFlowResetBundleNameVec_.end(), bundleName)
         != deadFlowResetBundleNameVec_.end()) {
-        NETMGR_LOG_I("FindDeadFlowReset Bundle [%{public}s].", bundleName.c_str());
+        NETMGR_LOG_D("FindDeadFlowReset Bundle [%{public}s].", bundleName.c_str());
         flag = true;
     }
     return NETMANAGER_SUCCESS;

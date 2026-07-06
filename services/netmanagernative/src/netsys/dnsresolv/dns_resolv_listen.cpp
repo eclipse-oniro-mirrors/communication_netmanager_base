@@ -376,7 +376,7 @@ void DnsResolvListenInternal::ProcGetDefaultNetworkCommand(int clientSockFd)
 {
     NetHandle netHandle;
     int netId = DnsParamCache::GetInstance().GetDefaultNetwork();
-    NETNATIVE_LOGE("ProcGetDefaultNetworkCommand %{public}d", netId);
+    NETNATIVE_LOG_D("ProcGetDefaultNetworkCommand %{public}d", netId);
     if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&netId), sizeof(int))) {
         NETNATIVE_LOGE("send failed");
     }
