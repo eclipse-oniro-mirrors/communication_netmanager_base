@@ -1441,6 +1441,11 @@ NetConnClient::NetConnCallbackManager::NetConnCallbackManager()
     ffrtQueue_ = std::make_shared<ffrt::queue>("NetConnClient");
 }
 
+NetConnClient::NetConnCallbackManager::~NetConnCallbackManager()
+{
+    ffrtQueue_ = nullptr;
+}
+
 int32_t NetConnClient::NetConnCallbackManager::NetAvailable(sptr<NetHandle> &netHandle)
 {
     std::unique_lock<std::mutex> handlerLock(netHandlerMutex_);
