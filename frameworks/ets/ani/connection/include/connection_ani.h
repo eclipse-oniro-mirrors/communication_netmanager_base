@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,8 @@ static constexpr size_t MAX_IPV6_STR_LEN = 64;
 static constexpr int32_t NO_PERMISSION_CODE = 1;
 static constexpr int32_t PERMISSION_DENIED_CODE = 13;
 static constexpr int32_t NET_UNREACHABLE_CODE = 101;
+static constexpr int32_t MAX_RTT_COUNT = 4;
+static constexpr size_t MIN_TRACE_ROUTE_TOKENS = 2; // jumpNo + at least one field
 
 enum Family {
     IPv4 = 1,
@@ -110,6 +112,65 @@ private:
 std::unique_ptr<UnregisterHandle> RegisterNetConnCallback(rust::Box<ConnCallback> Connection, int32_t &ret);
 
 rust::String GetErrorCodeAndMessage(int32_t &errorCode);
+
+HttpProxy RefreshGlobalHttpProxySync(int32_t &ret);
+
+int32_t SetPacFileUrl(const std::string &pacUrl);
+
+rust::String FindProxyForURL(const std::string &url, int32_t &ret);
+
+rust::vec<NetAddress> GetAddressesByNameWithOptions(const std::string &host, int32_t netId, int32_t family,
+    int32_t &ret);
+
+int32_t CreateVlanInterface(const std::string &ifName, uint32_t vlanId);
+
+int32_t DestroyVlanInterface(const std::string &ifName, uint32_t vlanId);
+
+int32_t AddVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask);
+
+int32_t DeleteVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask);
+
+struct AniNetPortStatesInfo;
+struct AniNetIpMacInfo;
+
+AniNetPortStatesInfo GetSystemNetPortStates(int32_t &ret);
+
+rust::vec<AniNetIpMacInfo> GetIpNeighTable(int32_t &ret);
+
+struct NetConnInfoParam {
+    int32_t protocolType;
+    int32_t family;
+    rust::String localAddress;
+    uint16_t localPort;
+    rust::String remoteAddress;
+    uint16_t remotePort;
+};
+
+int32_t GetConnectOwnerUid(const NetConnInfoParam &param, int32_t &ret);
+
+rust::String GetDnsUnicode(const std::string &host, int32_t conversionProcess, int32_t &ret);
+
+rust::String GetDnsAscii(const std::string &host, int32_t conversionProcess, int32_t &ret);
+
+int32_t SetInterfaceUp(const std::string &iface);
+
+struct AniProbeResultInfo;
+struct AniTraceRouteInfo;
+
+AniProbeResultInfo QueryProbeResult(const std::string &dest, int32_t duration, int32_t &ret);
+
+rust::vec<AniTraceRouteInfo> QueryTraceRoute(const std::string &destination, int32_t maxJumpNumber,
+    int32_t packetsType, int32_t &ret);
+
+int32_t GetProxyMode(int32_t &mode);
+
+int32_t SetProxyMode(int32_t mode);
+
+rust::String GetPacFileUrl(int32_t &ret);
+
+int32_t SetNetExtAttribute(int32_t netId, const std::string &netExtAttribute);
+
+rust::String GetNetExtAttribute(int32_t netId, int32_t &ret);
 
 } // namespace NetManagerAni
 } // namespace OHOS

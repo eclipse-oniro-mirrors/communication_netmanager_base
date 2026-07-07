@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Huawei Device Co., Ltd.
+// Copyright (C) 2026 Huawei Device Co., Ltd.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{ffi::CStr, mem};
+use std::{ffi::CStr, mem, net::IpAddr};
 
 use ani_rs::{
     business_error::BusinessError,
@@ -92,6 +92,7 @@ pub(crate) fn get_pac_url() -> Result<String, BusinessError> {
 
 #[ani_rs::native]
 pub(crate) fn set_pac_url(pac_url: String) -> Result<(), BusinessError> {
+    validate_pac_file_url(&pac_url)?;
     NetConnClient::set_pac_url(&pac_url).map_err(convert_to_business_error)
 }
 
@@ -177,6 +178,203 @@ pub(crate) fn remove_custom_dns_rule(host: String) -> Result<(), BusinessError> 
     NetConnClient::remove_custom_dns_rule(host).map_err(convert_to_business_error)
 }
 
+#[ani_rs::native]
+pub(crate) fn refresh_global_http_proxy() -> Result<HttpProxy, BusinessError> {
+    NetConnClient::refresh_global_http_proxy().map_err(convert_to_business_error)
+}
+
+/// Validates that pac_url is a well-formed URL with a recognized scheme.
+/// Accepts http, https, ftp, file, and data schemes. Rejects empty strings
+/// and strings that lack a proper scheme separator (://).
+fn validate_pac_file_url(pac_url: &str) -> Result<(), BusinessError> {
+    if pac_url.is_empty() {
+        return Err(BusinessError::new(401, "pac_url must not be empty".to_string()));
+    }
+    // Check for scheme:// separation; must have at least "x://x"
+    if let Some(scheme_end) = pac_url.find("://") {
+        let original_scheme = &pac_url[..scheme_end];
+        // RFC 3986: scheme is case-insensitive, normalize to lowercase for comparison
+        let scheme = original_scheme.to_lowercase();
+        let valid_schemes = ["http", "https", "ftp", "file", "data"];
+        if scheme.is_empty() || !valid_schemes.contains(&scheme.as_str()) {
+            return Err(BusinessError::new(401,
+                format!("pac_url has unsupported scheme '{}'. Supported: http, https, ftp, file, data", original_scheme)));
+        }
+        // Must have something after ://
+        if pac_url.len() <= scheme_end + 3 {
+            return Err(BusinessError::new(401, "pac_url is missing host part after scheme://".to_string()));
+        }
+        Ok(())
+    } else {
+        Err(BusinessError::new(401, "pac_url must be a valid URL with scheme:// (e.g. http://example.com)".to_string()))
+    }
+}
+
+#[ani_rs::native]
+pub(crate) fn set_pac_file_url(pac_url: String) -> Result<(), BusinessError> {
+    validate_pac_file_url(&pac_url)?;
+    NetConnClient::set_pac_file_url(&pac_url).map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn find_proxy_for_url(url: String) -> Result<String, BusinessError> {
+    NetConnClient::find_proxy_for_url(&url).map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn get_addresses_by_name_with_options(
+    host: String,
+    option: crate::bridge::QueryOptions,
+) -> Result<Vec<NetAddress>, BusinessError> {
+    // Default to FAMILY_TYPE_ALL (0) which maps to AF_UNSPEC on the C++ side,
+    // requesting both IPv4 and IPv6 addresses.
+    let family = option.family.map(|f| f as i32)
+        .unwrap_or(crate::bridge::FamilyType::FAMILY_TYPE_ALL as i32);
+    // net_id 0 means "use the default network"
+    NetConnClient::get_addresses_by_name_with_options(&host, 0, family).map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn get_addresses_by_name_with_options_with_handle(
+    this: NetHandle,
+    host: String,
+    option: crate::bridge::QueryOptions,
+) -> Result<Vec<NetAddress>, BusinessError> {
+    let family = option.family.map(|f| f as i32)
+        .unwrap_or(crate::bridge::FamilyType::FAMILY_TYPE_ALL as i32);
+    NetConnClient::get_addresses_by_name_with_options(&host, this.net_id, family).map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn create_vlan_interface(if_name: String, vlan_id: u32) -> Result<(), BusinessError> {
+    NetConnClient::create_vlan_interface(&if_name, vlan_id).map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn destroy_vlan_interface(if_name: String, vlan_id: u32) -> Result<(), BusinessError> {
+    NetConnClient::destroy_vlan_interface(&if_name, vlan_id).map_err(convert_to_business_error)
+}
+
+/// Validates that the prefix-length mask is within the valid range for the given IP address type.
+/// IPv4 allows 0-32, IPv6 allows 0-128. Uses std::net::IpAddr parsing for accurate detection.
+const MAX_IPV4_PREFIX_LENGTH: u32 = 32;
+const MAX_IPV6_PREFIX_LENGTH: u32 = 128;
+
+fn validate_vlan_mask(mask: u32, ip: &str) -> Result<(), BusinessError> {
+    let addr = ip.parse::<IpAddr>()
+        .map_err(|_| BusinessError::new(401, format!("Invalid IP address '{}'", ip)))?;
+    let max_mask = if addr.is_ipv6() { MAX_IPV6_PREFIX_LENGTH } else { MAX_IPV4_PREFIX_LENGTH };
+    if mask > max_mask {
+        return Err(BusinessError::new(401,
+            format!("Invalid mask value {} for this address type. IPv4 allows 0-32, IPv6 allows 0-128", mask)));
+    }
+    Ok(())
+}
+
+#[ani_rs::native]
+pub(crate) fn add_vlan_ip(if_name: String, vlan_id: u32, ip: String, mask: u32) -> Result<(), BusinessError> {
+    ip.parse::<IpAddr>()
+        .map_err(|_| BusinessError::new(401, format!("Invalid IP address '{}'", ip)))?;
+    validate_vlan_mask(mask, &ip)?;
+    NetConnClient::add_vlan_ip(&if_name, vlan_id, &ip, mask).map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn delete_vlan_ip(if_name: String, vlan_id: u32, ip: String, mask: u32) -> Result<(), BusinessError> {
+    ip.parse::<IpAddr>()
+        .map_err(|_| BusinessError::new(401, format!("Invalid IP address '{}'", ip)))?;
+    validate_vlan_mask(mask, &ip)?;
+    NetConnClient::delete_vlan_ip(&if_name, vlan_id, &ip, mask).map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn get_system_net_port_states() -> Result<crate::bridge::NetPortStatesInfo, BusinessError> {
+    NetConnClient::get_system_net_port_states().map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn get_ip_neigh_table() -> Result<Vec<crate::bridge::NetIpMacInfo>, BusinessError> {
+    NetConnClient::get_ip_neigh_table().map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn get_connect_owner_uid(
+    param: crate::bridge::NetConnInfoParam,
+) -> Result<i32, BusinessError> {
+    NetConnClient::get_connect_owner_uid(
+        param.protocol_type as i32,
+        param.family as i32,
+        &param.local_address,
+        param.local_port as u16,
+        &param.remote_address,
+        param.remote_port as u16,
+    ).map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn get_dns_unicode(
+    host: String,
+    conversion_process: crate::bridge::ConversionProcess,
+) -> Result<String, BusinessError> {
+    NetConnClient::get_dns_unicode(&host, conversion_process as i32).map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn get_dns_ascii(
+    host: String,
+    conversion_process: crate::bridge::ConversionProcess,
+) -> Result<String, BusinessError> {
+    NetConnClient::get_dns_ascii(&host, conversion_process as i32).map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn set_interface_up(iface: String) -> Result<(), BusinessError> {
+    NetConnClient::set_interface_up(&iface).map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn query_probe_result(
+    dest: String,
+    duration: i32,
+) -> Result<crate::bridge::ProbeResultInfo, BusinessError> {
+    NetConnClient::query_probe_result(&dest, duration).map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn query_trace_route(
+    destination: String,
+    max_jump_number: i32,
+    packets_type: crate::bridge::PacketsType,
+) -> Result<Vec<crate::bridge::TraceRouteInfo>, BusinessError> {
+    NetConnClient::query_trace_route(&destination, max_jump_number, packets_type as i32)
+        .map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn get_proxy_mode() -> Result<crate::bridge::ProxyMode, BusinessError> {
+    NetConnClient::get_proxy_mode().map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn set_proxy_mode(mode: crate::bridge::ProxyMode) -> Result<(), BusinessError> {
+    NetConnClient::set_proxy_mode(mode).map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn get_pac_file_url() -> Result<String, BusinessError> {
+    NetConnClient::get_pac_file_url().map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn set_net_ext_attribute(net_handle: crate::bridge::NetHandle, net_ext_attribute: String) -> Result<(), BusinessError> {
+    NetConnClient::set_net_ext_attribute(net_handle.net_id, &net_ext_attribute).map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn get_net_ext_attribute(net_handle: crate::bridge::NetHandle) -> Result<String, BusinessError> {
+    NetConnClient::get_net_ext_attribute(net_handle.net_id).map_err(convert_to_business_error)
+}
+
 pub struct Connection {
     pub net_specifier: Option<NetSpecifier>,
     pub timeout: Option<i32>,
@@ -231,7 +429,7 @@ pub(crate) fn create_net_connection<'local>(
     };
     static CTOR_SIGNATURE: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"l:\0") };
 
-    let connection = Box::new(Connection::new(None, None));
+    let connection = Box::new(Connection::new(net_specifier, timeout));
 
     let ptr = Box::into_raw(connection);
     let class = env.find_class(CONNECTION_CLASS).unwrap();
@@ -347,6 +545,13 @@ pub(crate) fn unregister_network_change(this: NetConnection) -> Result<(), Busin
 
 #[ani_rs::native]
 pub(crate) fn connection_clean(this: Cleaner) -> Result<(), BusinessError> {
-    let _ = unsafe { Box::from_raw(this.ptr as *mut Connection) };
+    let mut connection = unsafe { Box::from_raw(this.ptr as *mut Connection) };
+    // Explicitly unregister the network change callback before dropping Connection,
+    // to ensure resources held by the callback registration are released promptly
+    // rather than relying solely on Drop which may not be timely enough.
+    if let Some(mut unregister) = connection.unregister.take() {
+        let _ = unregister.unregister();
+    }
+    drop(connection);
     Ok(())
 }
