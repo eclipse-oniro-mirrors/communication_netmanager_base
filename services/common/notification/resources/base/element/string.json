@@ -43,6 +43,27 @@
             }
         },
         {
+            "name":"netstats_excess_monthlimit_notofication_title_sub_esim",
+            "value":"eSIM %d data usage alert",
+            "attr":{
+                "priority":"LT"
+            }
+        },
+        {
+            "name":"netstats_excess_monthmark_notofication_title_sub_esim",
+            "value":"eSIM %d data usage alert",
+            "attr":{
+                "priority":"LT"
+            }
+        },
+        {
+            "name":"netstats_excess_daymark_notofication_title_sub_esim",
+            "value":"eSIM %d data usage alert",
+            "attr":{
+                "priority":"LT"
+            }
+        },
+        {
             "name":"netstats_month_limit_message",
             "value":"Monthly data limit reached (%s)",
             "attr":{
