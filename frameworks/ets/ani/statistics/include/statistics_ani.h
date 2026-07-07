@@ -49,6 +49,9 @@ NetStatsInfoInner GetTrafficStatsByUid(UidInfo &info, int32_t &ret);
 int32_t GetTrafficStatsByNetworkVec(AniNetworkInfo &networkInfo, rust::Vec<AniUidNetStatsInfoPair> &netStatsInfos);
 int32_t GetTrafficStatsByUidNetworkVec(rust::Vec<AniNetStatsInfoSequenceItem> &netStatsInfosSequence, uint32_t uid,
                                        AniNetworkInfo &networkInfo);
+
+uint32_t GetCallingUid();
+int32_t UpdateIfacesStatsCxx(const std::string &iface, uint64_t start, uint64_t end, const NetStatsInfoInner &stats);
 } // namespace NetManagerAni
 } // namespace OHOS
 

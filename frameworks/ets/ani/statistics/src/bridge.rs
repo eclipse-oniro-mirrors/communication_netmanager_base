@@ -37,6 +37,7 @@ pub struct AniNetworkInfo {
     pub sim_id: Option<i32>,
 }
 
+#[ani_rs::ani(path = "@ohos.net.statistics.statistics.UidNetStatsInfo")]
 pub struct AniUidNetStatsInfoPair {
     pub uid: i32,
     pub net_stats_info: NetStatsInfo,

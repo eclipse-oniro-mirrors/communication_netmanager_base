@@ -391,6 +391,16 @@ export default namespace statistics {
 
   export type UidNetStatsInfo = Record<int, NetStatsInfo>;
 
+  export enum TrafficPlanParam {
+    DISPLAY_TRAFFIC_SWITCH = 1,
+    UNLIMIT_TRAFFIC_SWITCH = 2,
+    TRAFFIC_LIMIT = 3,
+    START_DATE = 4,
+    OVER_LIMIT_BEHAVIOR = 5,
+    MONTHLY_LIMIT_PERCENTAGE = 6,
+    DAILY_LIMIT_PERCENTAGE = 7,
+  }
+
   export interface NetworkInfo {
     type: NetBearType;
     startTime: int;
@@ -422,6 +432,118 @@ export default namespace statistics {
           resolve(content as NetStatsInfoSequence);
       }, (err: Error): void => {
           reject(err as BusinessError);
+      });
+    });
+  }
+
+  // ==================== New Interfaces Below ====================
+
+  // ==================== updateStatsData ====================
+
+  export native function updateStatsDataSync(): void;
+
+  export function updateStatsData(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      taskpool.execute(() => {
+        updateStatsDataSync();
+      }).then(() => {
+        resolve(undefined);
+      }, (err: Error): void => {
+        reject(err as BusinessError);
+      });
+    });
+  }
+
+  // ==================== getSelfTrafficStats ====================
+
+  export native function getSelfTrafficStatsSync(networkInfo: NetworkInfo): NetStatsInfo;
+
+  export function getSelfTrafficStats(networkInfo: NetworkInfo): Promise<NetStatsInfo> {
+    return new Promise<NetStatsInfo>((resolve, reject) => {
+      taskpool.execute((): NetStatsInfo => {
+        return getSelfTrafficStatsSync(networkInfo);
+      }).then((content: Any) => {
+        resolve(content as NetStatsInfo);
+      }, (err: Error): void => {
+        reject(err as BusinessError);
+      });
+    });
+  }
+
+  // ==================== updateIfacesStats ====================
+
+  export native function updateIfacesStatsSync(iface: string, start: int, end: int,
+      stats: NetStatsInfo): void;
+
+  export function updateIfacesStats(iface: string, start: int, end: int, stats: NetStatsInfo): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      taskpool.execute(() => {
+        updateIfacesStatsSync(iface, start, end, stats);
+      }).then(() => {
+        resolve(undefined);
+      }, (err: Error): void => {
+        reject(err as BusinessError);
+      });
+    });
+  }
+
+  // ==================== setCalibrationTraffic ====================
+
+  export native function setCalibrationTrafficSync(simId: int, remainTraffic: long, totalTraffic: long): void;
+
+  export function setCalibrationTraffic(simId: int, remainTraffic: long, totalTraffic?: long): Promise<void> {
+    let tt: long = totalTraffic ?? 0;
+    return new Promise<void>((resolve, reject) => {
+      taskpool.execute(() => {
+        setCalibrationTrafficSync(simId, remainTraffic, tt);
+      }).then(() => {
+        resolve(undefined);
+      }, (err: Error): void => {
+        if (err instanceof BusinessError) {
+          reject(err);
+        } else {
+          reject(new BusinessError(err.code, err.message));
+        }
+      });
+    });
+  }
+
+  // ==================== getTrafficPlanInfo ====================
+
+  export native function getTrafficPlanInfoSync(simId: int, param: int): long;
+
+  export function getTrafficPlanInfo(simId: int, param: int): Promise<long> {
+    return new Promise<long>((resolve, reject) => {
+      taskpool.execute((): long => {
+        return getTrafficPlanInfoSync(simId, param);
+      }).then((content: Any) => {
+        resolve(content as long);
+      }, (err: Error): void => {
+         if (err instanceof BusinessError) {
+          reject(err);
+        } else {
+          reject(new BusinessError(err.code, err.message));
+        }
+      });
+    });
+  }
+
+  // ==================== setTrafficPlanInfo ====================
+
+  export native function setTrafficPlanInfoSync(simId: int, param: int, value: long): void;
+
+  export function setTrafficPlanInfo(simId: int, param: int, value: long): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      taskpool.execute(() => {
+        setTrafficPlanInfoSync(simId, param, value);
+      }).then(() => {
+        resolve(undefined);
+      }, (err: Error): void => {
+         if (err instanceof BusinessError) {
+          reject(err);
+        } else {
+          reject(new BusinessError(err.code, err.message));
+        }
       });
     });
   }

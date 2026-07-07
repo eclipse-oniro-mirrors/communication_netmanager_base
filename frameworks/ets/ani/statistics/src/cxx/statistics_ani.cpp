@@ -15,7 +15,9 @@
 
 #include "statistics_ani.h"
 #include "errorcode_convertor.h"
+#include "ipc_skeleton.h"
 #include "net_manager_constants.h"
+#include "net_mgr_log_wrapper.h"
 #include "wrapper.rs.h"
 
 namespace OHOS {
@@ -98,7 +100,7 @@ NetStatsInfoInner GetTrafficStatsByIface(IfaceInfo &info, int32_t &ret)
     return NetStatsInfoInner{.rx_bytes = netStatsInfo.rxBytes_,
                              .tx_bytes = netStatsInfo.txBytes_,
                              .rx_packets = netStatsInfo.rxPackets_,
-                             .tx_packets = netStatsInfo.rxPackets_};
+                             .tx_packets = netStatsInfo.txPackets_};
 }
 
 NetStatsInfoInner GetTrafficStatsByUid(UidInfo &info, int32_t &ret)
@@ -113,7 +115,7 @@ NetStatsInfoInner GetTrafficStatsByUid(UidInfo &info, int32_t &ret)
     return NetStatsInfoInner{.rx_bytes = netStatsInfo.rxBytes_,
                              .tx_bytes = netStatsInfo.txBytes_,
                              .rx_packets = netStatsInfo.rxPackets_,
-                             .tx_packets = netStatsInfo.rxPackets_};
+                             .tx_packets = netStatsInfo.txPackets_};
 }
 
 int32_t GetTrafficStatsByNetworkVec(AniNetworkInfo &networkInfo, rust::Vec<AniUidNetStatsInfoPair> &netStatsInfos)
@@ -134,8 +136,8 @@ int32_t GetTrafficStatsByNetworkVec(AniNetworkInfo &networkInfo, rust::Vec<AniUi
             .uid = static_cast<int32_t>(item.first),
             .net_stats_info = NetStatsInfoInner{.rx_bytes = item.second.rxBytes_,
                                                 .tx_bytes = item.second.txBytes_,
-                                                .rx_packets = item.second.rxPackets_,
-                                                .tx_packets = item.second.rxPackets_}});
+                                                 .rx_packets = item.second.rxPackets_,
+                                                .tx_packets = item.second.txPackets_}});
     }
 
     return NetManagerStandard::NETMANAGER_SUCCESS;
@@ -166,6 +168,21 @@ int32_t GetTrafficStatsByUidNetworkVec(rust::Vec<AniNetStatsInfoSequenceItem> &n
                                                                   .tx_packets = item.info_.txPackets_}});
     }
     return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+uint32_t GetCallingUid()
+{
+    return static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
+}
+
+int32_t UpdateIfacesStatsCxx(const std::string &iface, uint64_t start, uint64_t end, const NetStatsInfoInner &stats)
+{
+    NetManagerStandard::NetStatsInfo info;
+    info.rxBytes_ = stats.rx_bytes;
+    info.txBytes_ = stats.tx_bytes;
+    info.rxPackets_ = stats.rx_packets;
+    info.txPackets_ = stats.tx_packets;
+    return NetManagerStandard::NetStatsClient::GetInstance().UpdateIfacesStats(iface, start, end, info);
 }
 } // namespace NetManagerAni
 } // namespace OHOS

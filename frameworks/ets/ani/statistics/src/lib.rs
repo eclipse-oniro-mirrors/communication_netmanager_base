@@ -39,6 +39,12 @@ ani_constructor! {
         "getTrafficStatsByUidSync": statistics::get_traffic_stats_by_uid,
         "getTrafficStatsByNetworkSync" : statistics::get_traffic_stats_by_network,
         "getTrafficStatsByUidNetworkSync" : statistics::get_traffic_stats_by_uid_network,
+        "updateStatsDataSync": statistics::update_stats_data,
+        "getSelfTrafficStatsSync": statistics::get_self_traffic_stats,
+        "updateIfacesStatsSync": statistics::update_ifaces_stats,
+        "setCalibrationTrafficSync": statistics::set_calibration_traffic,
+        "getTrafficPlanInfoSync": statistics::get_traffic_plan_info,
+        "setTrafficPlanInfoSync": statistics::set_traffic_plan_info,
     ]
 }
 
