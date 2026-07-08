@@ -86,8 +86,6 @@ pub struct ConnectionProperties {
     pub dnses: Vec<NetAddress>,
     pub routes: Vec<RouteInfo>,
     pub mtu: i32,
-    pub is_ipv6_link_valid: bool,
-    pub is_ipv4_link_valid: bool,
 }
 
 #[ani_rs::ani(path = "@ohos.net.connection.connection.RouteInfoInner")]
@@ -97,7 +95,6 @@ pub struct RouteInfo {
     pub gateway: NetAddress,
     pub has_gateway: bool,
     pub is_default_route: bool,
-    pub is_excluded_route: bool,
 }
 
 #[ani_rs::ani(path = "@ohos.net.connection.connection.LinkAddressInner")]
@@ -124,7 +121,6 @@ pub struct Socks5Proxy {
     pub host: String,
     pub port: i32,
     pub username: Option<String>,
-    /// WARNING: stored in plaintext, do not log or expose
     pub password: Option<String>,
     pub dns_strategy: Option<Socks5DnsStrategy>,
     pub exclusion_list: Option<Vec<String>>,
@@ -135,10 +131,8 @@ pub struct HttpProxy {
     pub host: String,
     pub port: i32,
     pub username: Option<String>,
-    /// WARNING: stored in plaintext, do not log or expose
     pub password: Option<String>,
     pub exclusion_list: Vec<String>,
-    pub socks5_proxy: Option<Socks5Proxy>,
 }
 
 #[ani_rs::ani(path = "@ohos.net.connection.connection.FamilyType")]
@@ -245,15 +239,11 @@ pub struct TraceRouteOptions {
 }
 
 #[ani_rs::ani(path = "@ohos.net.connection.connection.UDPSocket")]
-/// NOTE: socket_fd ownership belongs to the C++ side. Do NOT implement Drop here,
-/// as closing the fd from Rust would cause double-close or use-after-close on the C++ side.
 pub struct UDPSocket {
     pub socket_fd: i32,
 }
 
 #[ani_rs::ani(path = "@ohos.net.connection.connection.TCPSocket")]
-/// NOTE: socket_fd ownership belongs to the C++ side. Do NOT implement Drop here,
-/// as closing the fd from Rust would cause double-close or use-after-close on the C++ side.
 pub struct TCPSocket {
     pub socket_fd: i32,
 }
@@ -272,8 +262,6 @@ pub struct NetConnInfoParam {
 pub struct HttpRequest {
     pub url: String,
     pub method: String,
-    /// Each header must be in "Key: Value" format. The caller is responsible
-    /// for ensuring well-formed header strings before passing them to FFI.
     pub headers: Vec<String>,
     pub body: Option<String>,
 }

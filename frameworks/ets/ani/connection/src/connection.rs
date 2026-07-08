@@ -183,24 +183,18 @@ pub(crate) fn refresh_global_http_proxy() -> Result<HttpProxy, BusinessError> {
     NetConnClient::refresh_global_http_proxy().map_err(convert_to_business_error)
 }
 
-/// Validates that pac_url is a well-formed URL with a recognized scheme.
-/// Accepts http, https, ftp, file, and data schemes. Rejects empty strings
-/// and strings that lack a proper scheme separator (://).
 fn validate_pac_file_url(pac_url: &str) -> Result<(), BusinessError> {
     if pac_url.is_empty() {
         return Err(BusinessError::new(401, "pac_url must not be empty".to_string()));
     }
-    // Check for scheme:// separation; must have at least "x://x"
     if let Some(scheme_end) = pac_url.find("://") {
         let original_scheme = &pac_url[..scheme_end];
-        // RFC 3986: scheme is case-insensitive, normalize to lowercase for comparison
         let scheme = original_scheme.to_lowercase();
         let valid_schemes = ["http", "https", "ftp", "file", "data"];
         if scheme.is_empty() || !valid_schemes.contains(&scheme.as_str()) {
             return Err(BusinessError::new(401,
                 format!("pac_url has unsupported scheme '{}'. Supported: http, https, ftp, file, data", original_scheme)));
         }
-        // Must have something after ://
         if pac_url.len() <= scheme_end + 3 {
             return Err(BusinessError::new(401, "pac_url is missing host part after scheme://".to_string()));
         }
@@ -226,11 +220,8 @@ pub(crate) fn get_addresses_by_name_with_options(
     host: String,
     option: crate::bridge::QueryOptions,
 ) -> Result<Vec<NetAddress>, BusinessError> {
-    // Default to FAMILY_TYPE_ALL (0) which maps to AF_UNSPEC on the C++ side,
-    // requesting both IPv4 and IPv6 addresses.
     let family = option.family.map(|f| f as i32)
         .unwrap_or(crate::bridge::FamilyType::FAMILY_TYPE_ALL as i32);
-    // net_id 0 means "use the default network"
     NetConnClient::get_addresses_by_name_with_options(&host, 0, family).map_err(convert_to_business_error)
 }
 
@@ -255,8 +246,6 @@ pub(crate) fn destroy_vlan_interface(if_name: String, vlan_id: u32) -> Result<()
     NetConnClient::destroy_vlan_interface(&if_name, vlan_id).map_err(convert_to_business_error)
 }
 
-/// Validates that the prefix-length mask is within the valid range for the given IP address type.
-/// IPv4 allows 0-32, IPv6 allows 0-128. Uses std::net::IpAddr parsing for accurate detection.
 const MAX_IPV4_PREFIX_LENGTH: u32 = 32;
 const MAX_IPV6_PREFIX_LENGTH: u32 = 128;
 
@@ -546,9 +535,6 @@ pub(crate) fn unregister_network_change(this: NetConnection) -> Result<(), Busin
 #[ani_rs::native]
 pub(crate) fn connection_clean(this: Cleaner) -> Result<(), BusinessError> {
     let mut connection = unsafe { Box::from_raw(this.ptr as *mut Connection) };
-    // Explicitly unregister the network change callback before dropping Connection,
-    // to ensure resources held by the callback registration are released promptly
-    // rather than relying solely on Drop which may not be timely enough.
     if let Some(mut unregister) = connection.unregister.take() {
         let _ = unregister.unregister();
     }

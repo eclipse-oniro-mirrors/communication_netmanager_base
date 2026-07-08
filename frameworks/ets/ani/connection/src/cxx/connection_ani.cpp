@@ -114,8 +114,8 @@ HttpProxy GetDefaultHttpProxy(int32_t &ret)
     return HttpProxy{
         .host = nativeHttpProxy.GetHost(),
         .port = nativeHttpProxy.GetPort(),
-        .username = std::string(nativeHttpProxy.GetUsername()),
-        .password = std::string(nativeHttpProxy.GetPassword()),
+        .username = "Unknown",
+        .password = "Unknown",
         .exclusionList = exclusionList,
     };
 }
@@ -131,8 +131,8 @@ HttpProxy GetGlobalHttpProxy(int32_t &ret)
     return HttpProxy{
         .host = nativeHttpProxy.GetHost(),
         .port = nativeHttpProxy.GetPort(),
-        .username = std::string(nativeHttpProxy.GetUsername()),
-        .password = std::string(nativeHttpProxy.GetPassword()),
+        .username = "Unknown",
+        .password = "Unknown",
         .exclusionList = exclusionList,
     };
 }
@@ -171,7 +171,6 @@ int32_t SetAppHttpProxy(const HttpProxy &httpProxy)
     return NetManagerStandard::NetConnClient::GetInstance().SetAppHttpProxy(nativeHttpProxy);
 }
 
-// Cxx has to have a &mut argument to return a &mut type
 NetManagerStandard::NetConnClient &GetNetConnClient(int32_t &nouse)
 {
     return NetManagerStandard::NetConnClient::GetInstance();
@@ -204,7 +203,6 @@ RouteInfo ConvertRouteInfo(NetManagerStandard::Route &route)
             },
         .has_gateway = route.hasGateway_,
         .is_default_route = route.isDefaultRoute_,
-        .is_excluded_route = route.isExcludedRoute_,
     };
 }
 
@@ -245,8 +243,6 @@ ConnectionProperties ConvertConnectionProperties(NetManagerStandard::NetLinkInfo
         .dnses = dnses,
         .routes = routes,
         .mtu = info.mtu_,
-        .is_ipv6_link_valid = info.isIpv6LinkValid_,
-        .is_ipv4_link_valid = info.isIpv4LinkValid_,
     };
 }
 
@@ -655,8 +651,7 @@ rust::vec<AniNetIpMacInfo> GetIpNeighTable(int32_t &ret)
 
 int32_t GetConnectOwnerUid(const NetConnInfoParam &param, int32_t &ret)
 {
-    // Validate family value: must match FamilyType enum (0=ALL, 1=IPv4, 2=IPv6)
-    if (param.family < 0 || param.family > 2) {
+    if (param.family < 0 || param.family > Family::IPv6) {
         ret = NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
         return -1;
     }
@@ -709,18 +704,6 @@ AniProbeResultInfo QueryProbeResult(const std::string &dest, int32_t duration, i
     return result;
 }
 
-// Parse one line of trace route output: "jumpNo address rtt1 rtt2 rtt3 rtt4".
-// The address may contain spaces, so tokens are split by whitespace.
-// jumpNo is the first token; RTT values are a contiguous block of up to
-// MAX_RTT_COUNT numeric tokens at the end of the line. Everything between
-// jumpNo and the RTT block is the address. This avoids misclassifying pure
-// numeric address tokens (e.g. "123") as RTT values.
-// RTT tokens may be floating-point numbers optionally followed by a unit
-// suffix such as "ms" (e.g. "1.23", "45.6ms"). The numeric portion is
-// extracted and stored as a double; any trailing non-digit suffix is stripped.
-
-// Extract the numeric portion from a token that may contain a unit suffix
-// (e.g. "123.45ms" -> 123.45). Returns true if a valid number was found.
 static bool ExtractNumericRtt(const std::string &token, double &out)
 {
     if (token.empty()) {
@@ -729,11 +712,8 @@ static bool ExtractNumericRtt(const std::string &token, double &out)
     char *end = nullptr;
     double val = std::strtod(token.c_str(), &end);
     if (end == token.c_str()) {
-        return false; // No digits consumed at all
+        return false;
     }
-    // Allow trailing unit suffix (e.g. "ms", "s") — just skip it
-    // but the entire token must be consumed as numeric + optional unit
-    // Reject tokens like "123abc" where "abc" is not a known unit
     std::string suffix(end);
     if (suffix == "ms" || suffix == "s" || suffix.empty()) {
         out = val;
@@ -756,11 +736,9 @@ static bool ExtractJumpNo(const std::string &token, int32_t &jumpNo)
     return true;
 }
 
-// Collect contiguous RTT values from the end of tokens and build the address
-// from the remaining tokens between jumpNo and the RTT block.
 static void CollectRttAndAddress(const std::vector<std::string> &tokens,
-    std::string &address,
-    std::vector<double> &rttValues)
+                                 std::string &address,
+                                 std::vector<double> &rttValues)
 {
     size_t rttStart = tokens.size();
     for (size_t i = tokens.size();

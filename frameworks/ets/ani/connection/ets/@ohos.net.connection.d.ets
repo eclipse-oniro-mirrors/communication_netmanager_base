@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-
 import type { AsyncCallback, Callback } from '@ohos.base';
 import { BusinessError } from '@ohos.base';
 
 export default namespace connection {
-  loadLibrary("connection_ani")
+  loadLibrary("connection_ani");
 
   // NOTE: ArkTS forbids 'any' type annotations (ESE153545), so err must remain
   // typed as Error. In practice, taskpool.execute wraps all throwables in Error
@@ -36,7 +35,7 @@ export default namespace connection {
 
   export class Cleaner {
     private ptr: long = 0
-    constructor(ptr:long) {
+    constructor(ptr: long) {
         this.ptr = ptr
     }
     native clean(): void
@@ -52,22 +51,22 @@ export default namespace connection {
         return getDefaultNetSync();
     })
     p1.then((content: Any) => {
-        callback(null, content as NetHandle);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), content as NetHandle);
+    }, (err: Error): void => {
+        callback(err as BusinessError, new NetHandleInner);
     });
   }
 
   export function getDefaultNet(): Promise<NetHandle> {
-      return new Promise<NetHandle>((resolve, reject) => {
-          taskpool.execute((): NetHandle => {
-              return getDefaultNetSync();
-          }).then((content: Any) => {
-              resolve(content as NetHandle);
-          }).catch((err: Error) => {
-              reject(toBusinessError(err));
-          });
-      });
+    return new Promise<NetHandle>((resolve, reject) => {
+        taskpool.execute((): NetHandle => {
+            return getDefaultNetSync();
+        }).then((content: Any) => {
+            resolve(content as NetHandle);
+        }, (err: Error): void => {
+            reject(err as BusinessError);
+        });
+    });
   }
 
   export native function getDefaultNetSync(): NetHandle;
@@ -77,9 +76,9 @@ export default namespace connection {
         return getAllNetsSync();
     })
     p1.then((content: Any) => {
-        callback(null, content as Array<NetHandle>);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), content as Array<NetHandle>);
+    }, (err: Error): void => {
+        callback(err as BusinessError, new Array<NetHandle>());
     });
   }
 
@@ -89,8 +88,8 @@ export default namespace connection {
             return getAllNetsSync();
         }).then((content: Any) => {
             resolve(content as Array<NetHandle>);
-        }).catch((err: Error) => {
-            reject(toBusinessError(err));
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
@@ -102,9 +101,9 @@ export default namespace connection {
         return getConnectionPropertiesSync(netHandle);
     })
     p1.then((content: Any) => {
-        callback(null, content as ConnectionProperties);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), content as ConnectionProperties);
+    }, (err: Error): void => {
+        callback(err as BusinessError, new ConnectionPropertiesInner());
     });
   }
 
@@ -114,8 +113,8 @@ export default namespace connection {
             return getConnectionPropertiesSync(netHandle);
         }).then((content: Any) => {
             resolve(content as ConnectionProperties);
-        }).catch((err: Error) => {
-            reject(toBusinessError(err));
+        }, (err: Error): void => {
+             reject(err as BusinessError);
         });
     });
   }
@@ -127,9 +126,9 @@ export default namespace connection {
         return getNetCapabilitiesSync(netHandle);
     })
     p1.then((content: Any) => {
-        callback(null, content as NetCapabilities);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), content as NetCapabilities);
+    }, (err: Error): void => {
+        callback(err as BusinessError, new NetCapabilitiesInner);
     });
   }
 
@@ -139,8 +138,8 @@ export default namespace connection {
             return getNetCapabilitiesSync(netHandle);
         }).then((content: Any) => {
             resolve(content as NetCapabilities);
-        }).catch((err: Error) => {
-            reject(toBusinessError(err));
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
@@ -152,20 +151,20 @@ export default namespace connection {
         return isDefaultNetMeteredSync();
     })
     p1.then((content: Any) => {
-        callback(null, content as boolean);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), content as boolean);
+    }, (err: Error): void => {
+        callback(err as BusinessError, false);
     });
   }
 
   export function isDefaultNetMetered(): Promise<boolean> {
-      return new Promise<boolean>((resolve, reject) => {
+    return new Promise<boolean>((resolve, reject) => {
         taskpool.execute((): boolean => {
             return isDefaultNetMeteredSync();
         }).then((content: Any) => {
             resolve(content as boolean);
-        }).catch((err: Error) => {
-            reject(toBusinessError(err));
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
@@ -177,9 +176,9 @@ export default namespace connection {
         return hasDefaultNetSync();
     })
     p1.then((content: Any) => {
-        callback(null, content as boolean);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), content as boolean);
+    }, (err: Error): void => {
+        callback(err as BusinessError, false);
     });
   }
 
@@ -189,24 +188,24 @@ export default namespace connection {
             return hasDefaultNetSync();
         }).then((content: Any) => {
             resolve(content as boolean);
-        }).catch((err: Error) => {
-            reject(toBusinessError(err));
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
 
   export native function hasDefaultNetSync(): boolean;
 
-  export native function enableAirplaneModeSync():void;
+  export native function enableAirplaneModeSync(): void;
 
   export function enableAirplaneMode(callback: AsyncCallback<void>): void {
     let p1 = taskpool.execute(() => {
         enableAirplaneModeSync();
     })
     p1.then(() => {
-        callback(null, undefined);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), undefined);
+    }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -216,22 +215,22 @@ export default namespace connection {
             enableAirplaneModeSync();
         }).then(() => {
             resolve(undefined);
-        }).catch((err: Error) => {
-            reject(toBusinessError(err));
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
 
-  export native function disableAirplaneModeSync():void;
+  export native function disableAirplaneModeSync(): void;
 
   export function disableAirplaneMode(callback: AsyncCallback<void>): void {
     let p1 = taskpool.execute(() => {
         disableAirplaneModeSync();
     })
     p1.then(() => {
-        callback(null, undefined);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), undefined);
+    }, (err: Error): void => {
+         callback(err as BusinessError, undefined);
     });
   }
 
@@ -241,8 +240,8 @@ export default namespace connection {
             disableAirplaneModeSync();
         }).then((content: Any) => {
             resolve(undefined);
-        }).catch((err: Error) => {
-            reject(toBusinessError(err));
+        }, (err: Error): void => {
+             reject(err as BusinessError);
         });
     });
   }
@@ -252,9 +251,9 @@ export default namespace connection {
         reportNetConnectedSync(netHandle);
     })
     p1.then(() => {
-        callback(null, undefined);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), undefined);
+    }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -264,8 +263,8 @@ export default namespace connection {
             reportNetConnectedSync(netHandle);
         }).then((content: Any) => {
             resolve(undefined);
-        }).catch((err: Error) => {
-            reject(toBusinessError(err));
+        }, (err: Error): void => {
+             reject(err as BusinessError);
         });
     });
   }
@@ -274,12 +273,12 @@ export default namespace connection {
 
   export function reportNetDisconnected(netHandle: NetHandle, callback: AsyncCallback<void>): void {
     let p1 = taskpool.execute(() => {
-        reportNetDisconnectedSync(netHandle)
+        reportNetDisconnectedSync(netHandle);
     })
     p1.then(() => {
-        callback(null, undefined);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), undefined);
+    }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -289,8 +288,8 @@ export default namespace connection {
             reportNetDisconnectedSync(netHandle);
         }).then((content: Any) => {
             resolve(undefined);
-        }).catch((err: Error) => {
-            reject(toBusinessError(err));
+        }, (err: Error): void => {
+             reject(err as BusinessError);
         });
     });
   }
@@ -302,9 +301,9 @@ export default namespace connection {
         return getAddressesByNameSync(host);
     })
     p1.then((content: Any) => {
-        callback(null, content as Array<NetAddress>);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), content as Array<NetAddress>);
+    }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -314,8 +313,8 @@ export default namespace connection {
             return getAddressesByNameSync(host);
         }).then((content: Any) => {
             resolve(content as Array<NetAddress>);
-        }).catch((err: Error) => {
-            reject(toBusinessError(err));
+        }, (err: Error): void => {
+             reject(err as BusinessError);
         });
     });
   }
@@ -342,9 +341,9 @@ export default namespace connection {
         return getAppNetSync();
     })
     p1.then((content: Any) => {
-        callback(null, content as NetHandle );
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), content as NetHandle);
+    }, (err: Error): void => {
+        callback(err as BusinessError, new NetHandleInner);
     });
   }
 
@@ -354,8 +353,8 @@ export default namespace connection {
           return getAppNetSync();
       }).then((content: Any) => {
           resolve(content as NetHandle);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
@@ -367,9 +366,9 @@ export default namespace connection {
         setAppNetSync(netHandle);
     })
     p1.then(() => {
-        callback(null, undefined);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), undefined);
+    }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -379,33 +378,33 @@ export default namespace connection {
           setAppNetSync(netHandle);
       }).then(() => {
           resolve(undefined);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
 
   export native function setAppNetSync(netHandle: NetHandle): void;
 
-  export function getDefaultHttpProxy(callback: AsyncCallback<HttpProxy>): void {
+  function getDefaultHttpProxy(callback: AsyncCallback<HttpProxy>): void {
     let p1 = taskpool.execute((): HttpProxy => {
         return getDefaultHttpProxySync();
     })
     p1.then((content: Any) => {
-        callback(null, content as HttpProxy);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), content as HttpProxy);
+    }, (err: Error): void => {
+        callback(err as BusinessError, new HttpProxyInner);
     });
   }
 
-  export function getDefaultHttpProxy(): Promise<HttpProxy> {
+  function getDefaultHttpProxy(): Promise<HttpProxy> {
     return new Promise<HttpProxy>((resolve, reject) => {
         taskpool.execute((): HttpProxy => {
             return getDefaultHttpProxySync();
         }).then((content: Any) => {
             resolve(content as HttpProxy);
-        }).catch((err: Error) => {
-            reject(toBusinessError(err));
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
@@ -417,9 +416,9 @@ export default namespace connection {
         return getGlobalHttpProxySync();
     })
     p1.then((content: Any) => {
-        callback(null, content as HttpProxy);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), content as HttpProxy);
+    }, (err: Error): void => {
+        callback(err as BusinessError, new HttpProxyInner);
     });
   }
 
@@ -429,8 +428,8 @@ export default namespace connection {
             return getGlobalHttpProxySync();
         }).then((content: Any) => {
             resolve(content as HttpProxy);
-        }).catch((err: Error) => {
-            reject(toBusinessError(err));
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
@@ -444,9 +443,9 @@ export default namespace connection {
         setGlobalHttpProxySync(httpProxy);
     })
     p1.then(() => {
-        callback(null, undefined);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), undefined);
+    }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -456,8 +455,8 @@ export default namespace connection {
           setGlobalHttpProxySync(httpProxy);
       }).then(() => {
           resolve(undefined);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
@@ -509,12 +508,12 @@ export default namespace connection {
 
   export function addCustomDnsRule(host: string, ip: Array<string>, callback: AsyncCallback<void>): void {
     let p1 = taskpool.execute(() => {
-        addCustomDnsRuleSync(host ,ip);
+        addCustomDnsRuleSync(host, ip);
     })
     p1.then(() => {
-        callback(null, undefined);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), undefined);
+    }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -524,8 +523,8 @@ export default namespace connection {
           addCustomDnsRuleSync(host, ip);
       }).then(() => {
           resolve(undefined);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
@@ -537,34 +536,34 @@ export default namespace connection {
         removeCustomDnsRuleSync(host);
     })
     p1.then(() => {
-        callback(null, undefined);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), undefined);
+    }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
     });
   }
 
   export function removeCustomDnsRule(host: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       taskpool.execute(() => {
-          removeCustomDnsRuleSync(host)
+          removeCustomDnsRuleSync(host);
       }).then(() => {
           resolve(undefined);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
 
-  export native function removeCustomDnsRuleSync(host:string): void;
+  export native function removeCustomDnsRuleSync(host: string): void;
 
   export function clearCustomDnsRules(callback: AsyncCallback<void>): void {
     let p1 = taskpool.execute(() => {
         clearCustomDnsRulesSync();
     })
     p1.then(() => {
-        callback(null, undefined);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
+        callback(new BusinessError(), undefined);
+    }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -574,8 +573,8 @@ export default namespace connection {
           clearCustomDnsRulesSync();
       }).then(() => {
           resolve(undefined);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
@@ -994,7 +993,7 @@ export default namespace connection {
 
   export native function getNetExtAttributeSync(netHandle: NetHandle): string;
 
-  export native function factoryResetSync():void;
+  export native function factoryResetSync(): void;
 
   export function factoryReset(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -1002,8 +1001,8 @@ export default namespace connection {
           factoryResetSync();
       }).then(() => {
           resolve(undefined);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
@@ -1026,31 +1025,31 @@ export default namespace connection {
       unregister(callback: AsyncCallback<void>): void;
   }
 
-  class NetConnectionInner implements NetConnection{
-    private  nativePtr:long = 0;
+  class NetConnectionInner implements NetConnection {
+    private nativePtr: long = 0;
     private cleaner: Cleaner | null = null;
 
-    constructor(context:long) {
-        if(this.nativePtr == 0){
-             this.nativePtr = context;
+    constructor(context: long) {
+        if (this.nativePtr == 0) {
+            this.nativePtr = context;
         }
-        this.registerCleaner(this.nativePtr)
+        this.registerCleaner(this.nativePtr);
     }
 
     registerCleaner(ptr: long): void {
-        this.cleaner = new Cleaner(ptr)
+        this.cleaner = new Cleaner(ptr);
         destroyRegister.register(this, this.cleaner!, unregisterToken);
     }
     unregisterCleaner(): void {
         destroyRegister.unregister(unregisterToken);
     }
 
-    native onNetAvailableInner(callback: Callback<NetHandle>):void;
-    native onNetBlockStatusChangeInner(callback: Callback<NetBlockStatusInfo>):void;
-    native onNetCapabilitiesChangeInner(callback: Callback<NetCapabilityInfo>):void;
-    native onNetConnectionPropertiesChangeInner(callback: Callback<NetConnectionPropertyInfo>):void;
-    native onNetLostInner(callback: Callback<NetHandle>):void;
-    native onNetUnavailableInner(callback: Callback<void>):void;
+    native onNetAvailableInner(callback: Callback<NetHandle>): void;
+    native onNetBlockStatusChangeInner(callback: Callback<NetBlockStatusInfo>): void;
+    native onNetCapabilitiesChangeInner(callback: Callback<NetCapabilityInfo>): void;
+    native onNetConnectionPropertiesChangeInner(callback: Callback<NetConnectionPropertyInfo>): void;
+    native onNetLostInner(callback: Callback<NetHandle>): void;
+    native onNetUnavailableInner(callback: Callback<void>): void;
 
     onNetLost(callback: Callback<NetHandle>): void {
       this.onNetLostInner(callback)
@@ -1076,28 +1075,28 @@ export default namespace connection {
       this.onNetConnectionPropertiesChangeInner(callback)
     }
 
-    native registerSync():void;
+    native registerSync(): void;
     register(callback: AsyncCallback<void>): void {
       let p1 = taskpool.execute(() => {
           this.registerSync();
       })
       p1.then(() => {
-          callback(null, undefined);
-      }).catch((err: Error) => {
-          callback(toBusinessError(err), undefined);
+          callback(new BusinessError(), undefined);
+      }, (err: Error): void => {
+          callback(err as BusinessError, undefined);
       });
     }
 
-    native unregisterSync():void;
+    native unregisterSync(): void;
 
     unregister(callback: AsyncCallback<void>): void {
       let p1 = taskpool.execute(() => {
           this.unregisterSync();
       })
       p1.then(() => {
-          callback(null, undefined);
-      }).catch((err: Error) => {
-          callback(toBusinessError(err), undefined);
+          callback(new BusinessError(), undefined);
+      }, (err: Error): void => {
+          callback(err as BusinessError, undefined);
       });
     }
   }
@@ -1132,20 +1131,20 @@ export default namespace connection {
     getAddressByName(host: string): Promise<NetAddress>;
   }
 
-  export class NetHandleInner implements NetHandle{
+  export class NetHandleInner implements NetHandle {
     netId: int;
-    static { loadLibrary("connection_ani") }
+    static { loadLibrary("connection_ani"); }
 
-    native getAddressByNameSyncWithHandle(host:string): NetAddress;
+    native getAddressByNameSyncWithHandle(host: string): NetAddress;
 
     getAddressByName(host: string, callback: AsyncCallback<NetAddress>): void {
       let p1 = taskpool.execute((): NetAddress => {
         return this.getAddressByNameSyncWithHandle(host);
       })
       p1.then((content: Any) => {
-          callback(null, content as NetAddress);
-      }).catch((err: Error) => {
-          callback(toBusinessError(err), undefined);
+          callback(new BusinessError(), content as NetAddress);
+      }, (err: Error): void => {
+          callback(err as BusinessError, new NetAddressInner);
       });
     }
 
@@ -1155,22 +1154,22 @@ export default namespace connection {
             return this.getAddressByNameSyncWithHandle(host);
         }).then((content: Any) => {
             resolve(content as NetAddress);
-        }).catch((err: Error) => {
-            reject(toBusinessError(err));
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
       });
     }
 
-    native getAddressesByNameSyncWithHandle(host:string): Array<NetAddress>;
+    native getAddressesByNameSyncWithHandle(host: string): Array<NetAddress>;
 
     getAddressesByName(host: string, callback: AsyncCallback<Array<NetAddress>>): void {
       let p1 = taskpool.execute((): Array<NetAddress> => {
         return this.getAddressesByNameSyncWithHandle(host);
       })
       p1.then((content: Any) => {
-          callback(null, content as Array<NetAddress>);
-      }).catch((err: Error) => {
-          callback(toBusinessError(err), undefined);
+          callback(new BusinessError(), content as Array<NetAddress>);
+      }, (err: Error): void => {
+          callback(err as BusinessError, undefined);
       });
     }
 
@@ -1180,8 +1179,8 @@ export default namespace connection {
             return this.getAddressesByNameSyncWithHandle(host);
         }).then((content: Any) => {
             resolve(content as Array<NetAddress>);
-        }).catch((err: Error) => {
-            reject(toBusinessError(err));
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
       });
     }
@@ -1212,7 +1211,7 @@ export default namespace connection {
     bearerTypes: Array<NetBearType>;
   }
 
-  export class NetCapabilitiesInner implements NetCapabilities{
+  export class NetCapabilitiesInner implements NetCapabilities {
     linkUpBandwidthKbps?: int;
 
     linkDownBandwidthKbps?: int;
@@ -1237,7 +1236,7 @@ export default namespace connection {
     blocked: boolean;
   }
 
-  export class NetBlockStatusInfoInner implements NetBlockStatusInfo{
+  export class NetBlockStatusInfoInner implements NetBlockStatusInfo {
     netHandle: NetHandle;
     blocked: boolean;
   }
@@ -1461,13 +1460,9 @@ export default namespace connection {
     routes: Array<RouteInfo>;
 
     mtu: int;
-
-    isIPv6LinkValid: boolean;
-
-    isIPv4LinkValid: boolean;
   }
 
-  class ConnectionPropertiesInner implements ConnectionProperties{
+  class ConnectionPropertiesInner implements ConnectionProperties {
     interfaceName: string;
     domains: string;
     linkAddresses: Array<LinkAddress>;
@@ -1477,10 +1472,6 @@ export default namespace connection {
     routes: Array<RouteInfo>;
 
     mtu: int;
-
-    isIPv6LinkValid: boolean;
-
-    isIPv4LinkValid: boolean;
   }
 
   export interface RouteInfo {
@@ -1493,8 +1484,6 @@ export default namespace connection {
     hasGateway: boolean;
 
     isDefaultRoute: boolean;
-
-    isExcludedRoute?: boolean;
   }
 
   class RouteInfoInner implements RouteInfo {
@@ -1507,8 +1496,6 @@ export default namespace connection {
     hasGateway: boolean;
 
     isDefaultRoute: boolean;
-
-    isExcludedRoute?: boolean;
   }
 
   export interface LinkAddress {
@@ -1583,11 +1570,9 @@ export default namespace connection {
     password?: string;
 
     exclusionList: Array<string>;
-
-    socks5Proxy?: Socks5Proxy;
   }
 
-  export class HttpProxyInner implements HttpProxy{
+  export class HttpProxyInner implements HttpProxy {
     host: string;
 
     port: int;
@@ -1597,7 +1582,5 @@ export default namespace connection {
     password?: string;
 
     exclusionList: Array<string>;
-
-    socks5Proxy?: Socks5Proxy;
   }
 }
