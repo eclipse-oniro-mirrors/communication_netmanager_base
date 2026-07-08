@@ -68,8 +68,10 @@ static constexpr const char *KEY_NETWORK_MONTH_MARK_DUAL_TITLE = "netstats_exces
 static constexpr const char *KEY_NETWORK_DAY_MARK_DUAL_TITLE = "netstats_excess_daymark_notofication_title_sub";
 
 // eSIM related title keys
-static constexpr const char *KEY_NETWORK_MONTH_LIMIT_ESIM_TITLE = "netstats_excess_monthlimit_notofication_title_sub_esim";
-static constexpr const char *KEY_NETWORK_MONTH_MARK_ESIM_TITLE = "netstats_excess_monthmark_notofication_title_sub_esim";
+static constexpr const char *KEY_NETWORK_MONTH_LIMIT_ESIM_TITLE =
+    "netstats_excess_monthlimit_notofication_title_sub_esim";
+static constexpr const char *KEY_NETWORK_MONTH_MARK_ESIM_TITLE =
+    "netstats_excess_monthmark_notofication_title_sub_esim";
 static constexpr const char *KEY_NETWORK_DAY_MARK_ESIM_TITLE = "netstats_excess_daymark_notofication_title_sub_esim";
 
 static constexpr const char *KEY_MONTH_LIMIT_TEXT = "netstats_month_limit_message";
