@@ -67,6 +67,13 @@ static constexpr const char *KEY_NETWORK_MONTH_LIMIT_DUAL_TITLE = "netstats_exce
 static constexpr const char *KEY_NETWORK_MONTH_MARK_DUAL_TITLE = "netstats_excess_monthmark_notofication_title_sub";
 static constexpr const char *KEY_NETWORK_DAY_MARK_DUAL_TITLE = "netstats_excess_daymark_notofication_title_sub";
 
+// eSIM related title keys
+static constexpr const char *KEY_NETWORK_MONTH_LIMIT_ESIM_TITLE =
+    "netstats_excess_monthlimit_notofication_title_sub_esim";
+static constexpr const char *KEY_NETWORK_MONTH_MARK_ESIM_TITLE =
+    "netstats_excess_monthmark_notofication_title_sub_esim";
+static constexpr const char *KEY_NETWORK_DAY_MARK_ESIM_TITLE = "netstats_excess_daymark_notofication_title_sub_esim";
+
 static constexpr const char *KEY_MONTH_LIMIT_TEXT = "netstats_month_limit_message";
 static constexpr const char *KEY_MONTH_NOTIFY_TEXT = "netstats_month_notify_message";
 static constexpr const char *KEY_DAILY_NOTIFY_TEXT = "netstats_daily_notify_message";
@@ -244,16 +251,60 @@ std::string NetMgrNetStatsLimitNotification::GetMonthAlertText()
 std::string NetMgrNetStatsLimitNotification::GetNotificationTitle(std::string &notificationType)
 {
     NETMGR_LOG_I("start NetMgrNetStatsLimitNotification::GetNotificationTitle");
-    std::string outText = resourceMap[notificationType];
+    
+    // Get all SIM account info list
+    std::vector<Telephony::IccAccountInfo> iccAccountInfoList;
+    int32_t ret = Telephony::CoreServiceClient::GetInstance().GetAllSimAccountInfoList(iccAccountInfoList);
+    
+    int32_t simId = simId_;
+    bool isEsim = false;
+    int32_t simLabelIndex = 0;
+    
+    // LCOV_EXCL_START
+    if (ret == 0 && !iccAccountInfoList.empty()) {
+        // Find the matching IccAccountInfo by simId
+        for (const auto &info : iccAccountInfoList) {
+            if (info.simId == simId) {
+                isEsim = info.isEsim;
+                simLabelIndex = info.simLabelIndex;
+                break;
+            }
+        }
+    } else {
+        // Fallback to original logic if GetAllSimAccountInfoList fails
+        int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(simId);
+        NETMGR_LOG_I("GetNotificationTitle fallback. simId:%{public}d, slotId:%{public}d", simId, slotId);
+        simLabelIndex = slotId + 1;
+    }
+    
+    NETMGR_LOG_I("GetNotificationTitle. simId:%{public}d, isEsim:%{public}d, simLabelIndex:%{public}d",
+                 simId, isEsim, simLabelIndex);
+    
+    // Select title template based on isEsim
+    std::string titleKey = notificationType;
+    if (isEsim) {
+        if (notificationType == KEY_NETWORK_MONTH_LIMIT_DUAL_TITLE) {
+            titleKey = KEY_NETWORK_MONTH_LIMIT_ESIM_TITLE;
+        } else if (notificationType == KEY_NETWORK_MONTH_MARK_DUAL_TITLE) {
+            titleKey = KEY_NETWORK_MONTH_MARK_ESIM_TITLE;
+        } else if (notificationType == KEY_NETWORK_DAY_MARK_DUAL_TITLE) {
+            titleKey = KEY_NETWORK_DAY_MARK_ESIM_TITLE;
+        }
+    }
+    // LCOV_EXCL_STOP
+    
+    if (resourceMap.find(titleKey) == resourceMap.end()) {
+        NETMGR_LOG_E("cannot get title from resources, titleKey: %{public}s", titleKey.c_str());
+        return "";
+    }
+    
+    std::string outText = resourceMap[titleKey];
     if (outText.find("%d") == std::string::npos) {
         NETMGR_LOG_I("incorrect format %{public}s", outText.c_str());
         return "";
     }
-
-    int32_t simId = simId_;
-    int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(simId);
-    NETMGR_LOG_I("GetNotificationTitle. simId:%{public}d, slotId:%{public}d", simId, slotId);
-    outText = outText.replace(outText.find("%d"), TWO_CHAR, std::to_string(slotId + 1));
+    
+    outText = outText.replace(outText.find("%d"), TWO_CHAR, std::to_string(simLabelIndex));
     return outText;
 }
 

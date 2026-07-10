@@ -32,6 +32,12 @@ using namespace testing::ext;
 constexpr const char *KEY_MONTH_LIMIT_TEXT = "netstats_month_limit_message";
 constexpr const char *KEY_MONTH_NOTIFY_TEXT = "netstats_month_notify_message";
 constexpr const char *KEY_DAILY_NOTIFY_TEXT = "netstats_daily_notify_message";
+constexpr const char *KEY_NETWORK_MONTH_LIMIT_SINGLE_TITLE = "netstats_excess_monthlimit_notofication_title";
+constexpr const char *KEY_NETWORK_MONTH_MARK_SINGLE_TITLE = "netstats_excess_monthmark_notofication_title";
+constexpr const char *KEY_NETWORK_DAY_MARK_SINGLE_TITLE = "netstats_excess_daymark_notofication_title";
+constexpr const char *KEY_NETWORK_MONTH_LIMIT_DUAL_TITLE = "netstats_excess_monthlimit_notofication_title_sub";
+constexpr const char *KEY_NETWORK_MONTH_MARK_DUAL_TITLE = "netstats_excess_monthmark_notofication_title_sub";
+constexpr const char *KEY_NETWORK_DAY_MARK_DUAL_TITLE = "netstats_excess_daymark_notofication_title_sub";
 const int32_t UNIT_CONVERT_1024 = 1024;
 
 class MockRdbStore : public NativeRdb::RdbStore {
@@ -409,6 +415,67 @@ HWTEST_F(NetStatsNotificationTest, BackUpNetStatsFreqDBTest002, TestSize.Level1)
 
     ret = rdb.BackUpNetStatsFreqDB("./xxx.db", "./xxx.db");
     EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetStatsNotificationTest, GetNotificationTitleTest001, TestSize.Level1)
+{
+    auto notification = NetMgrNetStatsLimitNotification::GetInstance();
+    std::string notificationType = KEY_NETWORK_MONTH_LIMIT_DUAL_TITLE;
+    
+    notification->resourceMap[KEY_NETWORK_MONTH_LIMIT_DUAL_TITLE] = "Month limit %d";
+    
+    auto ret = notification->GetNotificationTitle(notificationType);
+    EXPECT_FALSE(ret.empty());
+    
+    notification->resourceMap.erase(KEY_NETWORK_MONTH_LIMIT_DUAL_TITLE);
+}
+
+HWTEST_F(NetStatsNotificationTest, GetNotificationTitleTest002, TestSize.Level1)
+{
+    auto notification = NetMgrNetStatsLimitNotification::GetInstance();
+    std::string notificationType = KEY_NETWORK_MONTH_MARK_DUAL_TITLE;
+    
+    notification->resourceMap[KEY_NETWORK_MONTH_MARK_DUAL_TITLE] = "Month mark %d";
+    
+    auto ret = notification->GetNotificationTitle(notificationType);
+    EXPECT_FALSE(ret.empty());
+    
+    notification->resourceMap.erase(KEY_NETWORK_MONTH_MARK_DUAL_TITLE);
+}
+
+HWTEST_F(NetStatsNotificationTest, GetNotificationTitleTest003, TestSize.Level1)
+{
+    auto notification = NetMgrNetStatsLimitNotification::GetInstance();
+    std::string notificationType = KEY_NETWORK_DAY_MARK_DUAL_TITLE;
+    
+    notification->resourceMap[KEY_NETWORK_DAY_MARK_DUAL_TITLE] = "Day mark %d";
+    
+    auto ret = notification->GetNotificationTitle(notificationType);
+    EXPECT_FALSE(ret.empty());
+    
+    notification->resourceMap.erase(KEY_NETWORK_DAY_MARK_DUAL_TITLE);
+}
+
+HWTEST_F(NetStatsNotificationTest, GetNotificationTitleTest007, TestSize.Level1)
+{
+    auto notification = NetMgrNetStatsLimitNotification::GetInstance();
+    std::string notificationType = "nonexistent_key";
+    
+    auto ret = notification->GetNotificationTitle(notificationType);
+    EXPECT_TRUE(ret.empty());
+}
+
+HWTEST_F(NetStatsNotificationTest, GetNotificationTitleTest008, TestSize.Level1)
+{
+    auto notification = NetMgrNetStatsLimitNotification::GetInstance();
+    std::string notificationType = KEY_NETWORK_MONTH_LIMIT_DUAL_TITLE;
+    
+    notification->resourceMap[KEY_NETWORK_MONTH_LIMIT_DUAL_TITLE] = "Month limit no format";
+    
+    auto ret = notification->GetNotificationTitle(notificationType);
+    EXPECT_TRUE(ret.empty());
+    
+    notification->resourceMap.erase(KEY_NETWORK_MONTH_LIMIT_DUAL_TITLE);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
