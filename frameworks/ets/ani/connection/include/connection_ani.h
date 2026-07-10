@@ -44,7 +44,7 @@ static constexpr int32_t NO_PERMISSION_CODE = 1;
 static constexpr int32_t PERMISSION_DENIED_CODE = 13;
 static constexpr int32_t NET_UNREACHABLE_CODE = 101;
 static constexpr int32_t MAX_RTT_COUNT = 4;
-static constexpr size_t MIN_TRACE_ROUTE_TOKENS = 2; // jumpNo + at least one field
+static constexpr size_t MIN_TRACE_ROUTE_TOKENS = 2;
 
 enum Family {
     IPv4 = 1,

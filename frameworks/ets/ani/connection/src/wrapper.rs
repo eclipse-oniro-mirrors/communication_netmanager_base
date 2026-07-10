@@ -615,8 +615,6 @@ impl From<ffi::HttpProxy> for bridge::HttpProxy {
             username: Some(value.username),
             password: Some(value.password),
             exclusion_list: value.exclusionList,
-            // socks5_proxy is not supported by the native C++ HttpProxy class yet
-            socks5_proxy: None,
         }
     }
 }
@@ -652,7 +650,6 @@ impl From<ffi::RouteInfo> for bridge::RouteInfo {
             gateway: value.gateway.into(),
             has_gateway: value.has_gateway,
             is_default_route: value.is_default_route,
-            is_excluded_route: value.is_excluded_route,
         }
     }
 }
@@ -666,15 +663,12 @@ impl From<ffi::ConnectionProperties> for bridge::ConnectionProperties {
             dnses: value.dnses.into_iter().map(Into::into).collect(),
             routes: value.routes.into_iter().map(Into::into).collect(),
             mtu: value.mtu,
-            is_ipv6_link_valid: value.is_ipv6_link_valid,
-            is_ipv4_link_valid: value.is_ipv4_link_valid,
         }
     }
 }
 
 impl From<bridge::HttpProxy> for ffi::HttpProxy {
     fn from(value: bridge::HttpProxy) -> Self {
-        // socks5_proxy is not supported by the native C++ HttpProxy class yet
         ffi::HttpProxy {
             host: value.host,
             port: value.port,
