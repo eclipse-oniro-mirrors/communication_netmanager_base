@@ -41,9 +41,9 @@ using namespace OHOS::NetsysNative;
 namespace OHOS {
 namespace NetManagerStandard {
 std::shared_ptr<NetsysBpfNetFirewall> NetsysBpfNetFirewall::instance_ = nullptr;
-bool NetsysBpfNetFirewall::keepListen_ = false;
-bool NetsysBpfNetFirewall::keepGc_ = false;
-bool NetsysBpfNetFirewall::isBpfLoaded_ = false;
+std::atomic<bool> NetsysBpfNetFirewall::keepListen_{false};
+std::atomic<bool> NetsysBpfNetFirewall::keepGc_{false};
+std::atomic<bool> NetsysBpfNetFirewall::isBpfLoaded_{false};
 std::unique_ptr<BpfMapper<CtKey, CtVaule>> NetsysBpfNetFirewall::ctRdMap_ = nullptr;
 std::unique_ptr<BpfMapper<CtKey, CtVaule>> NetsysBpfNetFirewall::ctWrMap_ = nullptr;
 
@@ -205,11 +205,17 @@ int32_t NetsysBpfNetFirewall::WriteLoopBackBpfMap()
     LoopbackValue loopbackVal = 1;
     ip4Key.prefixlen = LOOP_BACK_IPV4_PREFIXLEN;
     inet_pton(AF_INET, LOOP_BACK_IPV4, &ip4Key.data);
-    WriteBpfMap(MAP_PATH(LOOP_BACK_IPV4_MAP), ip4Key, loopbackVal);
+    if (WriteBpfMap(MAP_PATH(LOOP_BACK_IPV4_MAP), ip4Key, loopbackVal) != 0) {
+        NETNATIVE_LOGE("WriteLoopBackBpfMap: ipv4 failed");
+        return NETFIREWALL_ERR;
+    }
     Ipv6LpmKey ip6Key = {};
     ip6Key.prefixlen = LOOP_BACK_IPV6_PREFIXLEN;
     inet_pton(AF_INET6, LOOP_BACK_IPV6, &ip6Key.data);
-    WriteBpfMap(MAP_PATH(LOOP_BACK_IPV6_MAP), ip6Key, loopbackVal);
+    if (WriteBpfMap(MAP_PATH(LOOP_BACK_IPV6_MAP), ip6Key, loopbackVal) != 0) {
+        NETNATIVE_LOGE("WriteLoopBackBpfMap: ipv6 failed");
+        return NETFIREWALL_ERR;
+    }
     return NETFIREWALL_SUCCESS;
 }
 
@@ -249,35 +255,55 @@ void NetsysBpfNetFirewall::ClearBpfFirewallRules(NetFirewallRuleDirection direct
 
 int32_t NetsysBpfNetFirewall::ClearFirewallRules(NetFirewallRuleType type)
 {
+    std::lock_guard<std::mutex> guard(rulesMutex_);
+    int32_t ret = NETFIREWALL_SUCCESS;
     switch (type) {
         case NetFirewallRuleType::RULE_IP: {
             firewallIpRules_.clear();
-            ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_IN);
-            ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_OUT);
+            if (ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_IN) != 0) {
+                NETNATIVE_LOGE("ClearFirewallRules: clear RULE_IN failed");
+                ret = NETFIREWALL_ERR;
+            }
+            if (ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_OUT) != 0) {
+                NETNATIVE_LOGE("ClearFirewallRules: clear RULE_OUT failed");
+                ret = NETFIREWALL_ERR;
+            }
             break;
         }
         case NetFirewallRuleType::RULE_DOMAIN: {
             firewallDomainRules_.clear();
-            ClearDomainRules();
+            if (ClearDomainRules() != NETFIREWALL_SUCCESS) {
+                NETNATIVE_LOGE("ClearFirewallRules: clear RULE_DOMAIN failed");
+                ret = NETFIREWALL_ERR;
+            }
             break;
         }
         case NetFirewallRuleType::RULE_DEFAULT_ACTION: {
-            ClearFirewallDefaultAction();
+            if (ClearFirewallDefaultAction() != NETFIREWALL_SUCCESS) {
+                NETNATIVE_LOGE("ClearFirewallRules: clear RULE_DEFAULT_ACTION failed");
+                ret = NETFIREWALL_ERR;
+            }
             break;
         }
         case NetFirewallRuleType::RULE_ALL: {
             firewallIpRules_.clear();
-            ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_IN);
-            ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_OUT);
+            if (ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_IN) != 0 ||
+                ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_OUT) != 0) {
+                ret = NETFIREWALL_ERR;
+            }
             firewallDomainRules_.clear();
-            ClearDomainRules();
-            ClearFirewallDefaultAction();
+            if (ClearDomainRules() != NETFIREWALL_SUCCESS) {
+                ret = NETFIREWALL_ERR;
+            }
+            if (ClearFirewallDefaultAction() != NETFIREWALL_SUCCESS) {
+                ret = NETFIREWALL_ERR;
+            }
             break;
         }
         default:
             break;
     }
-    return NETFIREWALL_SUCCESS;
+    return ret;
 }
 
 int32_t NetsysBpfNetFirewall::SetBpfFirewallRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList,
@@ -319,6 +345,7 @@ int32_t NetsysBpfNetFirewall::SetFirewallRules(NetFirewallRuleType type,
         NETNATIVE_LOGE("SetFirewallRules: rules is empty");
         return NETFIREWALL_ERR;
     }
+    std::lock_guard<std::mutex> guard(rulesMutex_);
     int32_t ret = NETFIREWALL_SUCCESS;
     switch (type) {
         case NetFirewallRuleType::RULE_IP: {
@@ -363,6 +390,10 @@ int32_t NetsysBpfNetFirewall::SetFirewallDomainRules(const std::vector<sptr<NetF
         domainVaule.uid = static_cast<uint32_t>(rule->userId);
         domainVaule.appuid = static_cast<uint32_t>(rule->appUid);
         for (const auto &param : rule->domains) {
+            if (param.domain.empty()) {
+                NETNATIVE_LOGE("SetFirewallDomainRules: domain is empty, skip");
+                continue;
+            }
             if (param.isWildcard) {
                 isWildcard = true;
             } else {
@@ -463,11 +494,19 @@ int32_t NetsysBpfNetFirewall::SetFirewallIpRules(const std::vector<sptr<NetFirew
     return ret;
 }
 
-void NetsysBpfNetFirewall::ClearFirewallDefaultAction()
+int32_t NetsysBpfNetFirewall::ClearFirewallDefaultAction()
 {
+    if (!isBpfLoaded_) {
+        NETNATIVE_LOGE("ClearFirewallDefaultAction: bpf not loaded");
+        return NETFIREWALL_ERR;
+    }
     defalut_action_value val = { SK_PASS };
     int32_t userId = -1;
-    ClearBpfMap(MAP_PATH(DEFAULT_ACTION_MAP), (uid_key)userId, val);
+    if (ClearBpfMap(MAP_PATH(DEFAULT_ACTION_MAP), (uid_key)userId, val) != 0) {
+        NETNATIVE_LOGE("ClearFirewallDefaultAction: clear failed");
+        return NETFIREWALL_ERR;
+    }
+    return NETFIREWALL_SUCCESS;
 }
 
 int32_t NetsysBpfNetFirewall::SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
@@ -480,10 +519,15 @@ int32_t NetsysBpfNetFirewall::SetFirewallDefaultAction(int32_t userId, FirewallR
     defalut_action_value val = { SK_PASS };
     val.inaction = (inDefault == FirewallRuleAction::RULE_ALLOW) ? SK_PASS : SK_DROP;
     val.outaction = (outDefault == FirewallRuleAction::RULE_ALLOW) ? SK_PASS : SK_DROP;
-    WriteBpfMap(MAP_PATH(DEFAULT_ACTION_MAP), (uid_key)userId, val);
+    if (WriteBpfMap(MAP_PATH(DEFAULT_ACTION_MAP), (uid_key)userId, val) != 0) {
+        NETNATIVE_LOGE("SetFirewallDefaultAction: write failed");
+        return NETFIREWALL_ERR;
+    }
     CtKey ctKey;
     CtVaule ctVal;
-    ClearBpfMap(MAP_PATH(CT_MAP), ctKey, ctVal);
+    if (ClearBpfMap(MAP_PATH(CT_MAP), ctKey, ctVal) != 0) {
+        NETNATIVE_LOGE("SetFirewallDefaultAction: clear ct map failed");
+    }
     return NETFIREWALL_SUCCESS;
 }
 
@@ -496,7 +540,10 @@ int32_t NetsysBpfNetFirewall::SetFirewallCurrentUserId(int32_t userId)
 
     CurrentUserIdKey key = CURRENT_USER_ID_KEY;
     UidKey val = (UidKey)userId;
-    WriteBpfMap(MAP_PATH(CURRENT_UID_MAP), key, val);
+    if (WriteBpfMap(MAP_PATH(CURRENT_UID_MAP), key, val) != 0) {
+        NETNATIVE_LOGE("SetFirewallCurrentUserId: write bpf map failed");
+        return NETFIREWALL_ERR;
+    }
     return NETFIREWALL_SUCCESS;
 }
 
@@ -511,8 +558,11 @@ int32_t NetsysBpfNetFirewall::WriteSrcIpv4BpfMap(BitmapManager &manager, NetFire
     int32_t res = 0;
     for (const auto &node : srcIp4Map) {
         Bitmap val = node.bitmap;
-        RuleCode rule;
-        memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
+        RuleCode rule = {0};
+        if (memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode)) != EOK) {
+            NETNATIVE_LOGE("WriteSrcIpv4BpfMap: memcpy_s failed");
+            return -1;
+        }
 
         Ipv4LpmKey key = { 0 };
         key.prefixlen = node.mask;
@@ -533,8 +583,11 @@ int32_t NetsysBpfNetFirewall::WriteSrcIpv6BpfMap(BitmapManager &manager, NetFire
     int32_t res = 0;
     for (const auto &node : srcIp6Map) {
         Bitmap val = node.bitmap;
-        RuleCode rule;
-        memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
+        RuleCode rule = {0};
+        if (memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode)) != EOK) {
+            NETNATIVE_LOGE("WriteSrcIpv6BpfMap: memcpy_s failed");
+            return -1;
+        }
 
         Ipv6LpmKey key = { 0 };
         key.prefixlen = node.prefixlen;
@@ -555,8 +608,11 @@ int32_t NetsysBpfNetFirewall::WriteDstIpv4BpfMap(BitmapManager &manager, NetFire
         bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
         for (const auto &node : dstIp4Map) {
             Bitmap val = node.bitmap;
-            RuleCode rule;
-            memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
+            RuleCode rule = {0};
+            if (memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode)) != EOK) {
+                NETNATIVE_LOGE("WriteDstIpv4BpfMap: memcpy_s failed");
+                return -1;
+            }
 
             Ipv4LpmKey key = { 0 };
             key.prefixlen = node.mask;
@@ -578,8 +634,11 @@ int32_t NetsysBpfNetFirewall::WriteDstIpv6BpfMap(BitmapManager &manager, NetFire
         bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
         for (const auto &node : dstIp6Map) {
             Bitmap val = node.bitmap;
-            RuleCode rule;
-            memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
+            RuleCode rule = {0};
+            if (memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode)) != EOK) {
+                NETNATIVE_LOGE("WriteDstIpv6BpfMap: memcpy_s failed");
+                return -1;
+            }
 
             Ipv6LpmKey key = { 0 };
             key.prefixlen = node.prefixlen;
@@ -753,6 +812,7 @@ int32_t NetsysBpfNetFirewall::RegisterCallback(const sptr<NetsysNative::INetFire
         return -1;
     }
 
+    std::lock_guard<std::mutex> guard(callbackMutex_);
     callbacks_.emplace_back(callback);
 
     return 0;
@@ -763,6 +823,7 @@ int32_t NetsysBpfNetFirewall::UnregisterCallback(const sptr<NetsysNative::INetFi
         return -1;
     }
 
+    std::lock_guard<std::mutex> guard(callbackMutex_);
     for (auto it = callbacks_.begin(); it != callbacks_.end(); ++it) {
         if (*it == callback) {
             callbacks_.erase(it);
@@ -808,6 +869,7 @@ void NetsysBpfNetFirewall::NotifyInterceptEvent(InterceptEvent *info)
         record->remoteIp = srcIp;
     }
     record->domain = DecodeDomainFromKey(info->domainData);
+    std::lock_guard<std::mutex> guard(callbackMutex_);
     for (auto callback : callbacks_) {
         callback->OnIntercept(record);
     }
@@ -981,11 +1043,13 @@ void NetsysBpfNetFirewall::AddDomainCache(const NetAddrInfo &addrInfo)
         key.prefixlen = IPV4_MAX_PREFIXLEN;
         key.data = addrInfo.aiAddr.sin.s_addr;
         WriteBpfMap(MAP_PATH(DOMAIN_IPV4_MAP), key, value);
-    } else {
+    } else if (addrInfo.aiFamily == AF_INET6) {
         Ipv6LpmKey key = { 0 };
         key.prefixlen = IPV6_MAX_PREFIXLEN;
         key.data = addrInfo.aiAddr.sin6;
         WriteBpfMap(MAP_PATH(DOMAIN_IPV6_MAP), key, value);
+    } else {
+        NETNATIVE_LOGE("AddDomainCache: unsupported family %{public}d", addrInfo.aiFamily);
     }
 }
 
