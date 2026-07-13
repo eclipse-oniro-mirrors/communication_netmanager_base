@@ -2189,26 +2189,6 @@ HWTEST_F(NetConnClientTest, GetSystemNetPortStatesTest001, TestSize.Level1)
     EXPECT_NE(ret, 0);
 }
 
-HWTEST_F(NetConnClientTest, PostTriggerNetChange001, TestSize.Level1)
-{
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
-    sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
-    auto netHandle = sptr<NetHandle>::MakeSptr();
-    netHandle->SetNetId(100);
-    auto netAllCap = sptr<NetAllCapabilities>::MakeSptr();
-    auto info = sptr<NetLinkInfo>::MakeSptr();
-    netConnCallbackManager->PostTriggerNetChange(callback, netHandle, netAllCap, info);
-    EXPECT_EQ(netConnCallbackManager->netHandle_, nullptr);
-}
-
-HWTEST_F(NetConnClientTest, PostTriggerNetChange002, TestSize.Level1)
-{
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
-    sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
-    netConnCallbackManager->PostTriggerNetChange(callback, nullptr, nullptr, nullptr);
-    EXPECT_EQ(netConnCallbackManager->netHandle_, nullptr);
-}
-
 HWTEST_F(NetConnClientTest, RefreshGlobalHttpProxy001, TestSize.Level1)
 {
     auto ret = NetConnClient::GetInstance().RefreshGlobalHttpProxy(nullptr);

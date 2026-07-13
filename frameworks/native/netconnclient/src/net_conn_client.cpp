@@ -1569,24 +1569,6 @@ int32_t NetConnClient::NetConnCallbackManager::NetBlockStatusChange(sptr<NetHand
     return NETMANAGER_SUCCESS;
 }
 
-void NetConnClient::NetConnCallbackManager::PostTriggerNetChange(const sptr<INetConnCallback>& callback,
-    const sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap,
-    const sptr<NetLinkInfo> &netLinkInfo)
-{
-    if (netHandle != nullptr) {
-        sptr<NetHandle> tempNetHandler = sptr<NetHandle>::MakeSptr(netHandle->GetNetId());
-        callback->NetAvailable(tempNetHandler);
-        if (netAllCap != nullptr) {
-            callback->NetCapabilitiesChange(tempNetHandler, netAllCap);
-        }
-        if (netLinkInfo != nullptr) {
-            callback->NetConnectionPropertiesChange(tempNetHandler, netLinkInfo);
-        }
-    } else {
-        callback->NetUnavailable();
-    }
-}
- 
 int32_t NetConnClient::NetConnCallbackManager::AddNetConnCallback(const sptr<INetConnCallback>& callback)
 {
     if (callback == nullptr) {
@@ -1610,10 +1592,18 @@ int32_t NetConnClient::NetConnCallbackManager::AddNetConnCallback(const sptr<INe
     handlerLock.unlock();
 // LCOV_EXCL_START
 #ifndef NETMANAGER_TEST
-    auto wp = wptr<NetConnClient::NetConnCallbackManager>(this);
-    ffrtQueue_->submit([wp, callback, tempNetHandler, tempNetAllCap, tempNetLinkInfo]() {
-        if (auto sharedClient = wp.promote()) {
-            sharedClient->PostTriggerNetChange(callback, tempNetHandler, tempNetAllCap, tempNetLinkInfo);
+    ffrtQueue_->submit([callback, tempNetHandler, tempNetAllCap, tempNetLinkInfo]() {
+        if (tempNetHandler != nullptr) {
+            sptr<NetHandle> netHandler = sptr<NetHandle>::MakeSptr(tempNetHandler->GetNetId());
+            callback->NetAvailable(netHandler);
+            if (tempNetAllCap != nullptr) {
+                callback->NetCapabilitiesChange(netHandler, tempNetAllCap);
+            }
+            if (tempNetLinkInfo != nullptr) {
+                callback->NetConnectionPropertiesChange(netHandler, tempNetLinkInfo);
+            }
+        } else {
+            callback->NetUnavailable();
         }
     });
 #endif
