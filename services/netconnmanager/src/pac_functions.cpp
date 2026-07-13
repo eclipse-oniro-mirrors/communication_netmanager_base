@@ -917,12 +917,23 @@ jerry_value_t PacFunctions::JsWeekdayRange(const jerry_value_t funcObjVal, const
 
 static bool CheckIpv4InNet(const char *ip, const char *cidr, int prefixLen)
 {
+    const int ipv4Bits = 32;
     struct in_addr ip4;
     struct in_addr net4;
     if (inet_pton(AF_INET, ip, &ip4) != 1 || inet_pton(AF_INET, cidr, &net4) != 1) {
         return false;
     }
-    uint32_t mask = (prefixLen == 32) ? 0xffffffff : ~((1 << (32 - prefixLen)) - 1);
+    if (prefixLen < 0 || prefixLen > ipv4Bits) {
+        return false;
+    }
+    uint32_t mask;
+    if (prefixLen == 0) {
+        mask = 0x00000000;
+    } else if (prefixLen == ipv4Bits) {
+        mask = 0xffffffff;
+    } else {
+        mask = ~((1 << (ipv4Bits - prefixLen)) - 1);
+    }
     return (ip4.s_addr & htonl(mask)) == (net4.s_addr & htonl(mask));
 }
 
