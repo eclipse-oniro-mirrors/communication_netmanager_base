@@ -53,6 +53,7 @@ void NetSupplier::RegisterSupplierCallback(const sptr<INetSupplierCallback> &cal
     netController_ = callback;
     std::shared_lock<std::shared_mutex> rLock(requestListMutex_);
     if (netController_!= nullptr && !requestList_.empty()) {
+        rLock.unlock();
         SupplierConnection(netCaps_.ToSet(), netRequest_);
     }
 }
@@ -277,7 +278,6 @@ bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps, const NetR
 
     if (netController_ == nullptr) {
         NETMGR_LOG_E("netController_ is nullptr");
-        netRequest_ = netRequest;
         return false;
     }
     NETMGR_LOG_D("execute RequestNetwork");
@@ -414,6 +414,9 @@ bool NetSupplier::AddRequest(const NetRequest &netrequest)
     bool isEmpty = requestList_.empty();
     if (requestList_.find(netrequest.requestId) == requestList_.end()) {
         requestList_.insert(netrequest.requestId);
+    }
+    if (netController_ == nullptr) {
+        netRequest_ = netrequest;
     }
     lock.unlock();
     NETMGR_LOG_D("AddRequest, requestList.size:%{public}d, supplierId:%{public}d, isInternet:%{public}d",
