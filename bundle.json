@@ -87,6 +87,7 @@
                 "core_service",
                 "distributed_notification_service",
                 "i18n",
+                "image_framework",
                 "netmanager_ext",
                 "jsoncpp",
                 "qos_manager",
