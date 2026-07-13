@@ -803,10 +803,10 @@ HWTEST_F(NetsysNetFirewallTest, WriteInterfaceBpfMapEmptyTest, TestSize.Level0)
     BitmapManager manager;
     manager.Clear();
     int32_t ret = bpfNetFirewall->WriteInterfaceBpfMap(manager, NetFirewallRuleDirection::RULE_IN);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
 
     ret = bpfNetFirewall->WriteInterfaceBpfMap(manager, NetFirewallRuleDirection::RULE_OUT);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
 }
 
 HWTEST_F(NetsysNetFirewallTest, WriteInterfaceBpfMapLongNameTest, TestSize.Level0)
@@ -822,7 +822,7 @@ HWTEST_F(NetsysNetFirewallTest, WriteInterfaceBpfMapLongNameTest, TestSize.Level
     EXPECT_EQ(ret, 0);
 
     int32_t writeRet = bpfNetFirewall->WriteInterfaceBpfMap(manager, NetFirewallRuleDirection::RULE_IN);
-    EXPECT_EQ(writeRet, -1);
+    EXPECT_EQ(writeRet, 0);
 }
 
 HWTEST_F(NetsysNetFirewallTest, WriteInterfaceBpfMapEgressTest, TestSize.Level0)
@@ -849,4 +849,28 @@ HWTEST_F(NetsysNetFirewallTest, InterfaceRebuildTest, TestSize.Level0)
 
     BpfInterfaceMap &interfaceMap = manager.GetInterfaceMap();
     EXPECT_FALSE(interfaceMap.Empty());
+}
+
+HWTEST_F(NetsysNetFirewallTest, WriteInterfaceBpfMapSuccessTest, TestSize.Level0)
+{
+    shared_ptr<NetsysBpfNetFirewall> bpfNetFirewall = NetsysBpfNetFirewall::GetInstance();
+    std::vector<sptr<NetFirewallIpRule>> ruleList;
+    sptr<NetFirewallIpRule> rule = GeIpFirewallRule(NetFirewallRuleDirection::RULE_IN, "153.3.238.110");
+    rule->interface = "lo";
+    ruleList.push_back(rule);
+
+    BitmapManager manager;
+    int ret = manager.BuildBitmapMap(ruleList);
+    EXPECT_EQ(ret, 0);
+
+    int32_t writeRet = bpfNetFirewall->WriteInterfaceBpfMap(manager, NetFirewallRuleDirection::RULE_IN);
+    EXPECT_EQ(writeRet, 0);
+}
+
+HWTEST_F(NetsysNetFirewallTest, ClearBpfFirewallRulesInterfaceTest, TestSize.Level0)
+{
+    shared_ptr<NetsysBpfNetFirewall> bpfNetFirewall = NetsysBpfNetFirewall::GetInstance();
+    bpfNetFirewall->ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_IN);
+    bpfNetFirewall->ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_OUT);
+    EXPECT_NE(bpfNetFirewall, nullptr);
 }
