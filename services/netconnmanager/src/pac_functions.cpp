@@ -922,7 +922,17 @@ static bool CheckIpv4InNet(const char *ip, const char *cidr, int prefixLen)
     if (inet_pton(AF_INET, ip, &ip4) != 1 || inet_pton(AF_INET, cidr, &net4) != 1) {
         return false;
     }
-    uint32_t mask = (prefixLen == 32) ? 0xffffffff : ~((1 << (32 - prefixLen)) - 1);
+    if (prefixLen < 0 || prefixLen > 32) {
+        return false;
+    }
+    uint32_t mask;
+    if (prefixLen == 0) {
+        mask = 0x00000000;
+    } else if (prefixLen == 32) {
+        mask = 0xffffffff;
+    } else {
+        mask = ~((1 << (32 - prefixLen)) - 1);
+    }
     return (ip4.s_addr & htonl(mask)) == (net4.s_addr & htonl(mask));
 }
 
