@@ -367,7 +367,7 @@ int32_t NetSupplier::SelectAsBestNetwork(const NetRequest &netrequest)
     if (netSupplierType_ != BEARER_CELLULAR || !netrequest.isControlled) {
         AddRequest(netrequest);
     } else {
-        RemoveRequest(netrequest.requestId);
+        RemoveRequest(netrequest);
     }
     AddBestRequest(netrequest.requestId);
     return NETMANAGER_SUCCESS;
@@ -392,7 +392,7 @@ void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const
         NETMGR_LOG_D("High priority network, no need to disconnect");
         return;
     }
-    RemoveRequest(netrequest.requestId);
+    RemoveRequest(netrequest);
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] remaining request list size[%{public}zd]", supplierId_,
                  netSupplierIdent_.c_str(), requestList_.size());
 }
@@ -400,7 +400,7 @@ void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const
 int32_t NetSupplier::CancelRequest(const NetRequest &netrequest)
 {
     RemoveBestRequest(netrequest.requestId);
-    int32_t ret = RemoveRequest(netrequest.requestId);
+    int32_t ret = RemoveRequest(netrequest);
     if (!ret) {
         return NET_CONN_ERR_SERVICE_NO_REQUEST;
     }
@@ -427,20 +427,20 @@ bool NetSupplier::AddRequest(const NetRequest &netrequest)
     return true;
 }
 
-bool NetSupplier::RemoveRequest(uint32_t reqId)
+bool NetSupplier::RemoveRequest(NetRequest netRequest)
 {
     std::unique_lock<std::shared_mutex> lock(requestListMutex_);
-    auto iter = requestList_.find(reqId);
+    auto iter = requestList_.find(netRequest.requestId);
     if (iter == requestList_.end()) {
         return false;
     }
-    requestList_.erase(reqId);
+    requestList_.erase(netRequest.requestId);
     bool isEmpty = requestList_.empty();
     lock.unlock();
     NETMGR_LOG_D("RemoveRequest, requestList.size:%{public}d, supplierId:%{public}d, isInternet:%{public}d",
         requestList_.size(), supplierId_, netCaps_.HasNetCap(NET_CAPABILITY_INTERNET));
     if (isEmpty || netSupplierType_ == BEARER_WIFI) {
-        SupplierDisconnection(netCaps_.ToSet(), NetRequest());
+        SupplierDisconnection(netCaps_.ToSet(), netRequest);
     }
     return true;
 }

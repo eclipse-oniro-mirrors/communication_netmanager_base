@@ -129,7 +129,7 @@ public:
     bool GetRestrictBackground() const;
     bool RequestToConnect(const NetRequest &netrequest = {});
     bool AddRequest(const NetRequest &netrequest);
-    bool RemoveRequest(uint32_t reqId);
+    bool RemoveRequest(NetRequest netRequest);
     int32_t SelectAsBestNetwork(const NetRequest &netrequest);
     void ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const NetRequest &netrequest);
     int32_t CancelRequest(const NetRequest &netrequest);
