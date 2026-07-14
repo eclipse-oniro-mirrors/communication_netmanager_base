@@ -73,6 +73,7 @@
                 "ability_runtime",
                 "data_share",
                 "napi",
+                "node",
                 "bundle_framework",
                 "relational_store",
                 "openssl",
