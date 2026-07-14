@@ -427,7 +427,7 @@ bool NetSupplier::AddRequest(const NetRequest &netrequest)
     return true;
 }
 
-bool NetSupplier::RemoveRequest(NetRequest netRequest)
+bool NetSupplier::RemoveRequest(const NetRequest &netRequest)
 {
     std::unique_lock<std::shared_mutex> lock(requestListMutex_);
     auto iter = requestList_.find(netRequest.requestId);
