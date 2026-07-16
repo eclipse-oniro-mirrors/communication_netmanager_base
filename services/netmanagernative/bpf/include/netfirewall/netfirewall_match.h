@@ -171,7 +171,7 @@ static __always_inline bool match_loopback(struct match_tuple match_tpl)
             result = bpf_map_lookup_elem(&LOOP_BACK_IPV6_MAP, &lpm_key);
             if (result != NULL) {
                 memcpy(&(lpm_key.data), &(match_tpl.ipv6.daddr), sizeof(lpm_key.data));
-                result = bpf_map_lookup_elem(&LOOP_BACK_IPV4_MAP, &lpm_key);
+                result = bpf_map_lookup_elem(&LOOP_BACK_IPV6_MAP, &lpm_key);
             }
         }
         if (result != NULL) {
