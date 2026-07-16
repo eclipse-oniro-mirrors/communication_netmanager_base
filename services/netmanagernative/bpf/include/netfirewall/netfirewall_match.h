@@ -178,7 +178,7 @@ static __always_inline bool match_loopback(struct match_tuple match_tpl)
             is_loopback = true;
         }
     }
-    return true;
+    return is_loopback;
 }
 
 /**
