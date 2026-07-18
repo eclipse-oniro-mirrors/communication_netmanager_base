@@ -50,8 +50,9 @@ int32_t GetTrafficStatsByNetworkVec(AniNetworkInfo &networkInfo, rust::Vec<AniUi
 int32_t GetTrafficStatsByUidNetworkVec(rust::Vec<AniNetStatsInfoSequenceItem> &netStatsInfosSequence, uint32_t uid,
                                        AniNetworkInfo &networkInfo);
 
-uint32_t GetCallingUid();
-int32_t UpdateIfacesStatsCxx(const std::string &iface, uint64_t start, uint64_t end, const NetStatsInfoInner &stats);
+int32_t UpdateIfacesStats(const std::string &iface, uint32_t start, uint32_t end, const NetStatsInfoInner &stats);
+int32_t SetCalibrationTraffic(uint32_t simId, int64_t remainingData, int64_t totalData, bool hasTotalData);
+int32_t GetSelfTrafficStats(const AniNetworkInfo &networkInfo, bool hasSimId, NetStatsInfoInner &result);
 } // namespace NetManagerAni
 } // namespace OHOS
 

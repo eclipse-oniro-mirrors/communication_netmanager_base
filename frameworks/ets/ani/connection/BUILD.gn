@@ -21,6 +21,9 @@ rust_cxx("connection_ani_cxx") {
 
 ohos_static_library("connection_ani_static") {
   sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
     debug = false
@@ -34,6 +37,8 @@ ohos_static_library("connection_ani_static") {
     "-fno-exceptions",
     "-fno-rtti",
   ]
+
+  branch_protector_ret = "pac_ret"
 
   include_dirs = [
     "include",
@@ -72,6 +77,8 @@ ohos_rust_shared_library("connection_ani") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    boundary_sanitize = true
+    all_ubsan = true
     debug = false
   }
 
@@ -84,17 +91,17 @@ ohos_rust_shared_library("connection_ani") {
 
   rustflags = [
     "-C", "opt-level=z",
+    "-C", "debuginfo=0",
     "-C", "link-arg=-ffunction-sections",
     "-C", "link-arg=-fdata-sections",
     "-C", "link-arg=-Wl,--gc-sections",
     "-C", "link-arg=-Wl,--strip-all",
+    "-Z", "dylib-lto",
+    "-Z", "stack-protector=all",
     "-C", "codegen-units=1",
-    "-C", "lto=thin",
     "-C", "link-arg=-flto",
     "-C", "overflow-checks=no",
     "-C", "code-model=small",
-    "-Z", "dylib-lto",
-    "-Z", "stack-protector=all",
     "-Z", "location-detail=none",
     "-Z", "dump-mir=deadcode",
   ]

@@ -436,16 +436,12 @@ export default namespace statistics {
     });
   }
 
-  // ==================== New Interfaces Below ====================
-
-  // ==================== updateStatsData ====================
-
   export native function updateStatsDataSync(): void;
 
   export function updateStatsData(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      taskpool.execute(() => {
-        updateStatsDataSync();
+      taskpool.execute((): void => {
+        return updateStatsDataSync();
       }).then(() => {
         resolve(undefined);
       }, (err: Error): void => {
@@ -453,8 +449,6 @@ export default namespace statistics {
       });
     });
   }
-
-  // ==================== getSelfTrafficStats ====================
 
   export native function getSelfTrafficStatsSync(networkInfo: NetworkInfo): NetStatsInfo;
 
@@ -470,15 +464,12 @@ export default namespace statistics {
     });
   }
 
-  // ==================== updateIfacesStats ====================
-
-  export native function updateIfacesStatsSync(iface: string, start: int, end: int,
-      stats: NetStatsInfo): void;
+  export native function updateIfacesStatsSync(iface: string, start: int, end: int, stats: NetStatsInfo): void;
 
   export function updateIfacesStats(iface: string, start: int, end: int, stats: NetStatsInfo): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      taskpool.execute(() => {
-        updateIfacesStatsSync(iface, start, end, stats);
+      taskpool.execute((): void => {
+        return updateIfacesStatsSync(iface, start, end, stats);
       }).then(() => {
         resolve(undefined);
       }, (err: Error): void => {
@@ -487,28 +478,19 @@ export default namespace statistics {
     });
   }
 
-  // ==================== setCalibrationTraffic ====================
-
-  export native function setCalibrationTrafficSync(simId: int, remainTraffic: long, totalTraffic: long): void;
+  export native function setCalibrationTrafficSync(simId: int, remainTraffic: long, totalTraffic?: long): void;
 
   export function setCalibrationTraffic(simId: int, remainTraffic: long, totalTraffic?: long): Promise<void> {
-    let tt: long = totalTraffic ?? 0;
     return new Promise<void>((resolve, reject) => {
-      taskpool.execute(() => {
-        setCalibrationTrafficSync(simId, remainTraffic, tt);
+      taskpool.execute((): void => {
+        return setCalibrationTrafficSync(simId, remainTraffic, totalTraffic);
       }).then(() => {
         resolve(undefined);
       }, (err: Error): void => {
-        if (err instanceof BusinessError) {
-          reject(err);
-        } else {
-          reject(new BusinessError(err.code, err.message));
-        }
+        reject(err as BusinessError);
       });
     });
   }
-
-  // ==================== getTrafficPlanInfo ====================
 
   export native function getTrafficPlanInfoSync(simId: int, param: int): long;
 
@@ -519,31 +501,21 @@ export default namespace statistics {
       }).then((content: Any) => {
         resolve(content as long);
       }, (err: Error): void => {
-         if (err instanceof BusinessError) {
-          reject(err);
-        } else {
-          reject(new BusinessError(err.code, err.message));
-        }
+        reject(err as BusinessError);
       });
     });
   }
-
-  // ==================== setTrafficPlanInfo ====================
 
   export native function setTrafficPlanInfoSync(simId: int, param: int, value: long): void;
 
   export function setTrafficPlanInfo(simId: int, param: int, value: long): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      taskpool.execute(() => {
-        setTrafficPlanInfoSync(simId, param, value);
+      taskpool.execute((): void => {
+        return setTrafficPlanInfoSync(simId, param, value);
       }).then(() => {
         resolve(undefined);
       }, (err: Error): void => {
-         if (err instanceof BusinessError) {
-          reject(err);
-        } else {
-          reject(new BusinessError(err.code, err.message));
-        }
+        reject(err as BusinessError);
       });
     });
   }

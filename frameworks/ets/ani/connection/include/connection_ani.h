@@ -29,6 +29,7 @@ namespace NetManagerAni {
 
 struct NetHandle;
 struct NetCapabilities;
+struct NetSpecifier;
 struct HttpProxy;
 struct ConnectionProperties;
 struct LinkAddress;
@@ -43,10 +44,11 @@ static constexpr size_t MAX_IPV6_STR_LEN = 64;
 static constexpr int32_t NO_PERMISSION_CODE = 1;
 static constexpr int32_t PERMISSION_DENIED_CODE = 13;
 static constexpr int32_t NET_UNREACHABLE_CODE = 101;
-static constexpr int32_t MAX_RTT_COUNT = 4;
-static constexpr size_t MIN_TRACE_ROUTE_TOKENS = 2;
+static constexpr int32_t MAX_PING_DURATION = 1000;
+static constexpr size_t MAX_HOST_LENGTH = 255;
 
 enum Family {
+    All = 0,
     IPv4 = 1,
     IPv6 = 2,
 };
@@ -78,7 +80,7 @@ NetAddress GetAddressByName(const std::string &host, int32_t netId, int32_t &ret
 
 void NetDetection(int32_t net_id, int32_t &ret);
 
-bool CheckPermission(uint64_t tokenId, rust::str permission);
+int32_t BindSocket(int32_t socketFd, int32_t netId);
 
 class NetCoonCallback : public NetManagerStandard::NetConnCallbackStub {
 public:
@@ -111,9 +113,20 @@ private:
 
 std::unique_ptr<UnregisterHandle> RegisterNetConnCallback(rust::Box<ConnCallback> Connection, int32_t &ret);
 
+std::unique_ptr<UnregisterHandle> RegisterNetConnCallbackWithSpecifier(rust::Box<ConnCallback> Connection,
+    const NetSpecifier &netSpecifier, int32_t timeout, int32_t &ret);
+
+int32_t SetCustomDnsRule(const std::string &host, const rust::Vec<rust::String> &ips);
+
+int32_t RemoveCustomDnsRule(const std::string &host);
+
+int32_t ClearCustomDnsRules();
+
 rust::String GetErrorCodeAndMessage(int32_t &errorCode);
 
 HttpProxy RefreshGlobalHttpProxySync(int32_t &ret);
+
+int32_t SetPacUrl(const std::string &pacUrl);
 
 int32_t SetPacFileUrl(const std::string &pacUrl);
 
@@ -137,16 +150,8 @@ AniNetPortStatesInfo GetSystemNetPortStates(int32_t &ret);
 
 rust::vec<AniNetIpMacInfo> GetIpNeighTable(int32_t &ret);
 
-struct NetConnInfoParam {
-    int32_t protocolType;
-    int32_t family;
-    rust::String localAddress;
-    uint16_t localPort;
-    rust::String remoteAddress;
-    uint16_t remotePort;
-};
-
-int32_t GetConnectOwnerUid(const NetConnInfoParam &param, int32_t &ret);
+int32_t GetConnectOwnerUid(int32_t protocolType, const NetAddress &localAddress,
+    const NetAddress &remoteAddress, int32_t &ret);
 
 rust::String GetDnsUnicode(const std::string &host, int32_t conversionProcess, int32_t &ret);
 

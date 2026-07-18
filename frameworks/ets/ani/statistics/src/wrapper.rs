@@ -201,7 +201,7 @@ impl NetStatsClient {
         Ok(())
     }
 
-    pub fn update_ifaces_stats(iface: &str, start: u64, end: u64, stats: bridge::NetStatsInfo) -> Result<(), i32> {
+    pub fn update_ifaces_stats(iface: &str, start: u32, end: u32, stats: bridge::NetStatsInfo) -> Result<(), i32> {
         let cxx_stats = ffi::NetStatsInfoInner {
             rx_bytes: stats.rx_bytes,
             tx_bytes: stats.tx_bytes,
@@ -209,14 +209,18 @@ impl NetStatsClient {
             tx_packets: stats.tx_packets,
         };
         let_cxx_string!(cxx_iface = iface);
-        let ret = ffi::UpdateIfacesStatsCxx(&cxx_iface, start, end, &cxx_stats);
+        let ret = ffi::UpdateIfacesStats(&cxx_iface, start, end, &cxx_stats);
         if ret != 0 { return Err(ret); }
         Ok(())
     }
 
-    pub fn set_calibration_traffic(sim_id: u32, remain_traffic: i64, total_traffic: u64) -> Result<(), i32> {
-        let client = ffi::GetNetStatsClient(&mut 0);
-        let ret = client.SetCalibrationTraffic(sim_id, remain_traffic, total_traffic);
+    pub fn set_calibration_traffic(sim_id: u32, remain_traffic: i64,
+        total_traffic: Option<i64>) -> Result<(), i32> {
+        let (total_traffic, has_total_traffic) = match total_traffic {
+            Some(value) => (value, true),
+            None => (0, false),
+        };
+        let ret = ffi::SetCalibrationTraffic(sim_id, remain_traffic, total_traffic, has_total_traffic);
         if ret != 0 { return Err(ret); }
         Ok(())
     }
@@ -237,19 +241,17 @@ impl NetStatsClient {
     }
 
     pub fn get_self_traffic_stats(network_info: bridge::AniNetworkInfo) -> Result<bridge::NetStatsInfo, i32> {
+        let has_sim_id = network_info.sim_id.is_some();
         let mut ffi_info: ffi::AniNetworkInfo = network_info.into();
-        let uid: u32 = ffi::GetCallingUid();
-        let mut sequence: Vec<ffi::AniNetStatsInfoSequenceItem> = Vec::new();
-        let ret = ffi::GetTrafficStatsByUidNetworkVec(&mut sequence, uid, &mut ffi_info);
+        let mut result = ffi::NetStatsInfoInner {
+            rx_bytes: 0,
+            tx_bytes: 0,
+            rx_packets: 0,
+            tx_packets: 0,
+        };
+        let ret = ffi::GetSelfTrafficStats(&ffi_info, has_sim_id, &mut result);
         if ret != 0 { return Err(ret); }
-        let mut result = bridge::NetStatsInfo { rx_bytes: 0, tx_bytes: 0, rx_packets: 0, tx_packets: 0 };
-        for item in &sequence {
-            result.rx_bytes += item.info.rx_bytes;
-            result.tx_bytes += item.info.tx_bytes;
-            result.rx_packets += item.info.rx_packets;
-            result.tx_packets += item.info.tx_packets;
-        }
-        Ok(result)
+        Ok(result.into())
     }
 
 }
@@ -486,15 +488,10 @@ pub mod ffi {
         fn UnRegisterNetStatisObserver() -> i32;
 
         fn UpdateStatsData(self: Pin<&mut NetStatsClient>) -> i32;
-        fn UpdateIfacesStatsCxx(iface: &CxxString, start: u64, end: u64,
-            stats: &NetStatsInfoInner) -> i32;
-        fn SetCalibrationTraffic(self: Pin<&mut NetStatsClient>, simId: u32,
-            remainTraffic: i64, totalTraffic: u64) -> i32;
-        fn SetTrafficPlanInfo(self: Pin<&mut NetStatsClient>, simId: i32,
-            param: i32, value: i64) -> i32;
-        fn GetTrafficPlanInfo(self: Pin<&mut NetStatsClient>, simId: i32,
-            param: i32, value: &mut i64) -> i32;
-
-        fn GetCallingUid() -> u32;
+        fn UpdateIfacesStats(iface: &CxxString, start: u32, end: u32, stats: &NetStatsInfoInner) -> i32;
+        fn SetCalibrationTraffic(simId: u32, remainTraffic: i64, totalTraffic: i64, hasTotalTraffic: bool) -> i32;
+        fn SetTrafficPlanInfo(self: Pin<&mut NetStatsClient>, simId: i32, param: i32, value: i64) -> i32;
+        fn GetTrafficPlanInfo(self: Pin<&mut NetStatsClient>, simId: i32, param: i32, value: &mut i64) -> i32;
+        fn GetSelfTrafficStats(networkInfo: &AniNetworkInfo, hasSimId: bool, result: &mut NetStatsInfoInner) -> i32;
     }
 }

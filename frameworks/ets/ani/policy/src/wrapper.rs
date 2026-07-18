@@ -12,18 +12,8 @@
 // limitations under the License.
 
 use crate::bridge;
-use ffi::NetAccessPolicyInner;
-
-// Re-export execute callbacks implemented in `register.rs` so cxxbridge's
-// generated extern "Rust" references (which expect symbols in this module)
-// can resolve them.
-pub use crate::register::execute_net_quota_policy_changed;
-pub use crate::register::execute_net_background_policy_changed;
-pub use crate::register::execute_net_metered_ifaces_changed;
-pub use crate::register::execute_net_uid_rule_changed;
-pub use crate::register::execute_net_uid_policy_changed;
-
-pub struct NetPolicyClient;
+use crate::register::*;
+use std::collections::HashMap;
 
 #[repr(transparent)]
 pub struct AniEnv {
@@ -35,36 +25,175 @@ pub struct AniObject {
     pub inner: ani_rs::objects::AniObject<'static>,
 }
 
+pub struct NetPolicyClient;
+
 impl NetPolicyClient {
-    pub fn get_self_network_access_policy() -> Result<bridge::NetAccessPolicyInner, i32> {
-        let mut ret = 0;
-        let policy = ffi::GetSelfNetworkAccessPolicy(&mut ret);
-        if ret != 0 {
-            return Err(ret);
-        }
-        let result = policy.into();
-        Ok(result)
-    }
-
-    pub fn register_policy_observer() -> Result<(), i32> {
-        let res = ffi::RegisterNetQuotaPolicyChangeCallback();
-        if res != 0 {
-            return Err(res);
-        }
+    pub fn set_background_allowed(allowed: bool) -> Result<(), i32> {
+        let res = ffi::SetBackgroundAllowed(allowed);
+        if res != 0 { return Err(res); }
         Ok(())
     }
 
-    pub fn unregister_policy_observer() -> Result<(), i32> {
-        let res = ffi::UnregisterNetQuotaPolicyChangeCallback();
-        if res != 0 {
-            return Err(res);
-        }
+    pub fn get_background_policy() -> Result<bool, i32> {
+        let mut out: bool = false;
+        let res = ffi::GetBackgroundPolicy(&mut out);
+        if res != 0 { return Err(res); }
+        Ok(out)
+    }
+
+    pub fn get_background_policy_by_uid(uid: i32) -> Result<bridge::NetBackgroundPolicy, i32> {
+        let mut out: u32 = 0;
+        let res = ffi::GetBackgroundPolicyByUid(uid, &mut out);
+        if res != 0 { return Err(res); }
+        Ok(bridge::NetBackgroundPolicy::from(out as i32))
+    }
+
+    pub fn set_policy_by_uid(uid: i32, policy: bridge::NetUidPolicy) -> Result<(), i32> {
+        let res = ffi::SetPolicyByUid(uid, policy as u32);
+        if res != 0 { return Err(res); }
         Ok(())
     }
 
-    pub fn show_app_net_policy_settings(native_context: i64) -> Result<(), i32> {
-        crate::policy_info!("wrapper::show_app_net_policy_settings enter, native_context={}", native_context);
-        let ret = ffi::ShowAppNetPolicySettings(native_context);
+    pub fn get_policy_by_uid(uid: i32) -> Result<bridge::NetUidPolicy, i32> {
+        let mut out: u32 = 0;
+        let res = ffi::GetPolicyByUid(uid, &mut out);
+        if res != 0 { return Err(res); }
+        Ok(bridge::NetUidPolicy::from(out as i32))
+    }
+
+    pub fn get_uids_by_policy(policy: bridge::NetUidPolicy) -> Result<Vec<i32>, i32> {
+        let mut out = Vec::new();
+        let res = ffi::GetUidsByPolicy(policy as u32, &mut out);
+        if res != 0 { return Err(res); }
+        Ok(out.into_iter().map(|v| v as i32).collect())
+    }
+
+    pub fn is_uid_net_allowed(uid: i32, metered: bool) -> Result<bool, i32> {
+        let mut out: bool = false;
+        let res = ffi::IsUidNetAllowed(uid, metered, &mut out);
+        if res != 0 { return Err(res); }
+        Ok(out)
+    }
+
+    pub fn is_uid_net_allowed_by_iface(uid: i32, iface: String) -> Result<bool, i32> {
+        let mut out: bool = false;
+        let res = ffi::IsUidNetAllowedByIface(uid, iface, &mut out);
+        if res != 0 { return Err(res); }
+        Ok(out)
+    }
+
+    pub fn set_net_quota_policies(policies: Vec<bridge::NetQuotaPolicy>) -> Result<(), i32> {
+        let ani_policies: Vec<ffi::NetQuotaPolicyAni> =
+            policies.into_iter().map(|p| p.into()).collect();
+        let res = ffi::SetNetQuotaPolicies(ani_policies);
+        if res != 0 { return Err(res); }
+        Ok(())
+    }
+
+    pub fn restore_all_policies(iccid: String) -> Result<(), i32> {
+        let res = ffi::RestoreAllPolicies(iccid);
+        if res != 0 { return Err(res); }
+        Ok(())
+    }
+
+    pub fn get_net_quota_policies() -> Result<Vec<bridge::NetQuotaPolicy>, i32> {
+        let mut policies = Vec::new();
+        let res = ffi::GetNetQuotaPolicies(&mut policies);
+        if res != 0 { return Err(res); }
+        Ok(policies.into_iter().map(|p| p.into()).collect())
+    }
+
+    pub fn update_remind_policy(
+        net_type: bridge::NetBearType,
+        iccid: String,
+        remind_type: bridge::RemindType,
+    ) -> Result<(), i32> {
+        let res = ffi::UpdateRemindPolicy(net_type as i32, iccid, remind_type as u32);
+        if res != 0 { return Err(res); }
+        Ok(())
+    }
+
+    pub fn set_device_idle_trustlist(uids: Vec<i32>, is_allowed: bool) -> Result<(), i32> {
+        let res = ffi::SetDeviceIdleTrustlist(uids, is_allowed);
+        if res != 0 { return Err(res); }
+        Ok(())
+    }
+
+    pub fn get_device_idle_trustlist() -> Result<Vec<i32>, i32> {
+        let mut result = Vec::new();
+        let res = ffi::GetDeviceIdleTrustlist(&mut result);
+        if res != 0 { return Err(res); }
+        Ok(result.into_iter().map(|v| v as i32).collect())
+    }
+
+    pub fn set_power_save_trustlist(uids: Vec<i32>, is_allowed: bool) -> Result<(), i32> {
+        let res = ffi::SetPowerTrustlist(uids, is_allowed);
+        if res != 0 { return Err(res); }
+        Ok(())
+    }
+
+    pub fn get_power_save_trustlist() -> Result<Vec<i32>, i32> {
+        let mut result = Vec::new();
+        let res = ffi::GetPowerSaveTrustlist(&mut result);
+        if res != 0 { return Err(res); }
+        Ok(result.into_iter().map(|v| v as i32).collect())
+    }
+
+    pub fn reset_policies(iccid: String) -> Result<(), i32> {
+        let res = ffi::RestoreAllPolicies(iccid.to_owned());
+        if res != 0 { return Err(res); }
+        Ok(())
+    }
+
+    pub fn set_network_access_policy(uid: i32,
+        policy: bridge::NetworkAccessPolicy, reconfirm_flag: bool) -> Result<(), i32> {
+        let ani_policy: ffi::NetworkAccessPolicyAni = policy.into();
+        let res = ffi::SetNetworkAccessPolicyTyped(uid, ani_policy, reconfirm_flag);
+        if res != 0 { return Err(res); }
+        Ok(())
+    }
+
+    pub fn get_network_access_policy(uid: i32) -> Result<bridge::NetworkAccessPolicy, i32> {
+        let mut policy = ffi::NetworkAccessPolicyAni {
+            allow_wi_fi: false,
+            allow_cellular: false,
+            always_allow_wi_fi: false,
+            always_allow_cellular: false,
+        };
+        let res = ffi::GetNetworkAccessPolicyByUid(uid, &mut policy);
+        if res != 0 { return Err(res); }
+        Ok(policy.into())
+    }
+
+    pub fn get_all_network_access_policies() -> Result<bridge::UidNetworkAccessPolicy, i32> {
+        let mut items = Vec::new();
+        let res = ffi::GetAllNetworkAccessPolicies(&mut items);
+        if res != 0 { return Err(res); }
+        let mut result = HashMap::new();
+        for item in items {
+            result.insert(item.uid.to_string(), item.policy.into());
+        }
+        Ok(bridge::UidNetworkAccessPolicy::MapNetworkAccessPolicy(result))
+    }
+
+    pub fn get_self_network_access_policy() -> Result<bridge::NetAccessPolicy, i32> {
+        let mut policy = ffi::NetAccessPolicyAni {
+            allow_wi_fi: false,
+            allow_cellular: false,
+        };
+        let res = ffi::GetSelfNetworkAccessPolicy(&mut policy);
+        if res != 0 { return Err(res); }
+        Ok(policy.into())
+    }
+
+    pub fn show_app_net_policy_settings<'local>(
+        env: &ani_rs::AniEnv<'local>,
+        context_object: &ani_rs::objects::AniObject<'local>,
+    ) -> Result<(), i32> {
+        let env = env as *const ani_rs::AniEnv as *mut ani_rs::AniEnv as *mut *mut AniEnv;
+        let context_object = context_object as *const ani_rs::objects::AniObject as *mut ani_rs::objects::AniObject
+            as *mut AniObject;
+        let ret = unsafe { ffi::ShowAppNetPolicySettings(env, context_object) };
         if ret != 0 {
             crate::policy_error!("wrapper::show_app_net_policy_settings failed, ret={}", ret);
             return Err(ret);
@@ -72,152 +201,126 @@ impl NetPolicyClient {
         crate::policy_info!("wrapper::show_app_net_policy_settings success");
         Ok(())
     }
-}
 
-impl From<ffi::NetAccessPolicyInner> for bridge::NetAccessPolicyInner {
-    fn from(policy: ffi::NetAccessPolicyInner) -> Self {
-        bridge::NetAccessPolicyInner {
-            allow_wiFi: policy.allowWiFi,
-            allow_cellular: policy.allowCellular,
+    pub fn register_policy_observer() -> Result<(), i32> {
+        let res = ffi::RegisterNetPolicyChangeCallback();
+        if res != 0 {
+            return Err(res);
         }
+        Ok(())
+    }
+
+    pub fn unregister_policy_observer() -> Result<(), i32> {
+        let res = ffi::UnregisterNetPolicyChangeCallback();
+        if res != 0 {
+            return Err(res);
+        }
+        Ok(())
+    }
+
+    pub fn check_policy_permission() -> Result<(), i32> {
+        let res = ffi::CheckPolicyPermission();
+        if res != 0 {
+            return Err(res);
+        }
+        Ok(())
     }
 }
 
-impl From<ffi::NetUidRuleInfo> for bridge::NetUidRuleInfo {
-    fn from(info: ffi::NetUidRuleInfo) -> Self {
-        bridge::NetUidRuleInfo { uid: info.uid, rule: info.rule }
-    }
-}
-
-impl From<ffi::NetUidPolicyInfo> for bridge::NetUidPolicyInfo {
-    fn from(info: ffi::NetUidPolicyInfo) -> Self {
-        bridge::NetUidPolicyInfo { uid: info.uid, policy: info.policy }
-    }
-}
-
-impl From<bridge::NetQuotaPolicyInput> for ffi::NetQuotaPolicyAni {
-    fn from(input: bridge::NetQuotaPolicyInput) -> Self {
+impl From<bridge::NetQuotaPolicy> for ffi::NetQuotaPolicyAni {
+    fn from(policy: bridge::NetQuotaPolicy) -> Self {
         ffi::NetQuotaPolicyAni {
             network_match_rule: ffi::NetworkMatchRuleAni {
-                net_type: input.networkMatchRule.netType,
-                identity: input.networkMatchRule.identity,
-                sim_id: input.networkMatchRule.simId,
+                net_type: policy.network_match_rule.net_type as i32,
+                identity: policy.network_match_rule.identity,
+                sim_id: policy.network_match_rule.sim_id,
             },
             quota_policy: ffi::QuotaPolicyAni {
-                period_duration: input.quotaPolicy.periodDuration,
-                warning_bytes: input.quotaPolicy.warningBytes,
-                limit_bytes: input.quotaPolicy.limitBytes,
-                metered: input.quotaPolicy.metered,
-                limit_action: input.quotaPolicy.limitAction,
-                last_warning_remind: input.quotaPolicy.lastWarningRemind,
-                last_limit_remind: input.quotaPolicy.lastLimitRemind,
+                period_duration: policy.quota_policy.period_duration,
+                warning_bytes: policy.quota_policy.warning_bytes,
+                limit_bytes: policy.quota_policy.limit_bytes,
+                metered: policy.quota_policy.metered,
+                limit_action: policy.quota_policy.limit_action as i32,
+                last_warning_remind: policy.quota_policy.last_warning_remind.unwrap_or(0),
+                last_limit_remind: policy.quota_policy.last_limit_remind.unwrap_or(0),
             },
         }
     }
 }
 
-impl From<bridge::NetworkAccessPolicyInput> for ffi::NetworkAccessPolicyAni {
-    fn from(input: bridge::NetworkAccessPolicyInput) -> Self {
+impl From<ffi::NetQuotaPolicyAni> for bridge::NetQuotaPolicy {
+    fn from(policy: ffi::NetQuotaPolicyAni) -> Self {
+        bridge::NetQuotaPolicy {
+            network_match_rule: bridge::NetworkMatchRule {
+                net_type: bridge::NetBearType::from(policy.network_match_rule.net_type),
+                identity: policy.network_match_rule.identity,
+                sim_id: policy.network_match_rule.sim_id,
+            },
+            quota_policy: bridge::QuotaPolicy {
+                period_duration: policy.quota_policy.period_duration,
+                warning_bytes: policy.quota_policy.warning_bytes,
+                limit_bytes: policy.quota_policy.limit_bytes,
+                metered: policy.quota_policy.metered,
+                limit_action: bridge::LimitAction::from(policy.quota_policy.limit_action),
+                last_warning_remind: Some(policy.quota_policy.last_warning_remind),
+                last_limit_remind: Some(policy.quota_policy.last_limit_remind),
+            },
+        }
+    }
+}
+
+impl From<bridge::NetworkAccessPolicy> for ffi::NetworkAccessPolicyAni {
+    fn from(policy: bridge::NetworkAccessPolicy) -> Self {
         ffi::NetworkAccessPolicyAni {
-            wifiAllow: input.allowWiFi,
-            cellularAllow: input.allowCellular,
-            wifiSwitchDisable: input.alwaysAllowWiFi,
-            cellularSwitchDisable: input.alwaysAllowCellular,
+            allow_wi_fi: policy.allow_wi_fi.unwrap_or(false),
+            allow_cellular: policy.allow_cellular.unwrap_or(false),
+            always_allow_wi_fi: policy.always_allow_wi_fi.unwrap_or(false),
+            always_allow_cellular: policy.always_allow_cellular.unwrap_or(false),
         }
     }
 }
 
-impl From<ffi::NetworkAccessPolicyAni> for bridge::NetworkAccessPolicyOutput {
+impl From<ffi::NetworkAccessPolicyAni> for bridge::NetworkAccessPolicy {
     fn from(policy: ffi::NetworkAccessPolicyAni) -> Self {
-        bridge::NetworkAccessPolicyOutput {
-            allowWiFi: policy.wifiAllow,
-            allowCellular: policy.cellularAllow,
-            alwaysAllowWiFi: policy.wifiSwitchDisable,
-            alwaysAllowCellular: policy.cellularSwitchDisable,
+        bridge::NetworkAccessPolicy {
+            allow_wi_fi: Some(policy.allow_wi_fi),
+            allow_cellular: Some(policy.allow_cellular),
+            always_allow_wi_fi: if policy.always_allow_wi_fi { Some(true) } else { None },
+            always_allow_cellular: if policy.always_allow_cellular { Some(true) } else { None },
         }
     }
 }
 
-impl From<ffi::UidNetworkPolicyAni> for bridge::UidNetworkPolicyItem {
-    fn from(item: ffi::UidNetworkPolicyAni) -> Self {
-        bridge::UidNetworkPolicyItem {
-            uid: item.uid,
-            allowWiFi: item.policy.wifiAllow,
-            allowCellular: item.policy.cellularAllow,
-            alwaysAllowWiFi: item.policy.wifiSwitchDisable,
-            alwaysAllowCellular: item.policy.cellularSwitchDisable,
+impl From<ffi::NetAccessPolicyAni> for bridge::NetAccessPolicy {
+    fn from(policy: ffi::NetAccessPolicyAni) -> Self {
+        bridge::NetAccessPolicy {
+            allow_wi_fi: policy.allow_wi_fi,
+            allow_cellular: policy.allow_cellular,
         }
     }
 }
 
-impl From<ffi::NetQuotaPolicyAni> for bridge::NetQuotaPolicyOutput {
-    fn from(p: ffi::NetQuotaPolicyAni) -> Self {
-        bridge::NetQuotaPolicyOutput {
-            networkMatchRule: bridge::NetworkMatchRuleOutput {
-                netType: p.network_match_rule.net_type,
-                identity: p.network_match_rule.identity,
-                simId: p.network_match_rule.sim_id,
-            },
-            quotaPolicy: bridge::QuotaPolicyOutput {
-                periodDuration: p.quota_policy.period_duration,
-                warningBytes: p.quota_policy.warning_bytes,
-                limitBytes: p.quota_policy.limit_bytes,
-                metered: p.quota_policy.metered,
-                limitAction: p.quota_policy.limit_action,
-                lastWarningRemind: p.quota_policy.last_warning_remind,
-                lastLimitRemind: p.quota_policy.last_limit_remind,
-            },
+impl From<ffi::NetUidRuleInfoAni> for bridge::NetUidRuleInfo {
+    fn from(info: ffi::NetUidRuleInfoAni) -> Self {
+        bridge::NetUidRuleInfo {
+            uid: info.uid,
+            rule: bridge::NetUidRule::from(info.rule),
+        }
+    }
+}
+
+impl From<ffi::NetUidPolicyInfoAni> for bridge::NetUidPolicyInfo {
+    fn from(info: ffi::NetUidPolicyInfoAni) -> Self {
+        bridge::NetUidPolicyInfo {
+            uid: info.uid,
+            policy: bridge::NetUidPolicy::from(info.policy),
         }
     }
 }
 
 #[cxx::bridge(namespace = "OHOS::NetManagerAni")]
-pub mod ffi {
-    pub struct NetAccessPolicyInner {
-        pub allowWiFi: bool,
-        pub allowCellular: bool,
-    }
-    extern "Rust" {
-        pub fn execute_net_quota_policy_changed(policies: Vec<NetQuotaPolicyAni>);
-        pub fn execute_net_background_policy_changed(allow: bool);
-        pub fn execute_net_metered_ifaces_changed(info: MeteredIfaces);
-        pub fn execute_net_uid_rule_changed(info: NetUidRuleInfo);
-        pub fn execute_net_uid_policy_changed(info: NetUidPolicyInfo);
-    }
-
-    pub struct NetUidRuleInfo {
-        pub uid: i32,
-        pub rule: i32,
-    }
-
-    pub struct NetUidPolicyInfo {
-        pub uid: i32,
-        pub policy: i32,
-    }
-
-    pub struct MeteredIfaces {
-        pub ifaces: Vec<String>,
-    }
-
-    // Typed structs mirroring native NetworkAccessPolicy and quota policy
-    pub struct NetworkAccessPolicyAni {
-        pub wifiAllow: bool,
-        pub cellularAllow: bool,
-        pub wifiSwitchDisable: bool,
-        pub cellularSwitchDisable: bool,
-    }
-
-    pub struct UidNetworkPolicyAni {
-        pub uid: i32,
-        pub policy: NetworkAccessPolicyAni,
-    }
-
-    pub struct AccessPolicySaveAni {
-        pub policy: NetworkAccessPolicyAni,
-        pub uidPolicies: Vec<UidNetworkPolicyAni>,
-    }
-
-    pub struct NetworkMatchRuleAni {
+    pub mod ffi {
+        pub struct NetworkMatchRuleAni {
         pub net_type: i32,
         pub identity: String,
         pub sim_id: String,
@@ -238,181 +341,76 @@ pub mod ffi {
         pub quota_policy: QuotaPolicyAni,
     }
 
-    unsafe extern "C++" {
-        include!("policy_ani.h");
+    pub struct NetAccessPolicyAni {
+        pub allow_wi_fi: bool,
+        pub allow_cellular: bool,
+    }
 
-        fn GetSelfNetworkAccessPolicy(ret: &mut i32) -> NetAccessPolicyInner;
-        fn GetErrorCodeAndMessage(error_code: &mut i32) -> String;
-        fn RegisterNetQuotaPolicyChangeCallback() -> i32;
-        fn UnregisterNetQuotaPolicyChangeCallback() -> i32;
-        fn ShowAppNetPolicySettings(context: i64) -> i32;
-        fn SetBackgroundAllowed(allowed: bool) -> i32;
-        fn RestoreAllPolicies(iccid: String) -> i32;
-        fn SetPowerTrustlist(uids: Vec<u32>, isAllowed: bool) -> i32;
-        fn UpdateRemindPolicy(netType: i32, iccid: String, remindType: u32) -> i32;
-        fn GetPolicyByUid(uid: u32, policy: &mut u32) -> i32;
-        fn GetBackgroundPolicy(backgroundPolicy: &mut bool) -> i32;
-        fn GetPowerSaveTrustlist(result: &mut Vec<u32>) -> i32;
-        fn GetDeviceIdleTrustlist(result: &mut Vec<u32>) -> i32;
-        fn IsUidNetAllowed(uid: u32, metered: bool, isAllowed: &mut bool) -> i32;
-        fn IsUidNetAllowedByIface(uid: u32, iface: String, isAllowed: &mut bool) -> i32;
-        fn SetPolicyByUid(uid: u32, policy: u32) -> i32;
-        fn GetBackgroundPolicyByUid(uid: u32, backgroundPolicyOfUid: &mut u32) -> i32;
-        fn SetDeviceIdleTrustlist(uids: Vec<u32>, isAllowed: bool) -> i32;
-        fn GetUidsByPolicy(policy: u32, result: &mut Vec<u32>) -> i32;
-        fn GetNetworkAccessPolicyByUid(uid: u32, result: &mut NetworkAccessPolicyAni) -> i32;
-        fn GetAllNetworkAccessPolicies(result: &mut Vec<UidNetworkPolicyAni>) -> i32;
-        fn GetNetQuotaPoliciesTyped(result: &mut Vec<NetQuotaPolicyAni>) -> i32;
-        fn SetNetworkAccessPolicyTyped(uid: u32, policy: NetworkAccessPolicyAni,
-            reconfirmFlag: bool) -> i32;
-        fn SetNetQuotaPolicies(policies: Vec<NetQuotaPolicyAni>) -> i32;
+    pub struct NetUidRuleInfoAni {
+        pub uid: i32,
+        pub rule: i32,
+    }
+    pub struct NetUidPolicyInfoAni {
+        pub uid: i32,
+        pub policy: i32,
+    }
+    pub struct MeteredIfacesAni {
+        pub ifaces: Vec<String>,
+    }
+
+    pub struct NetworkAccessPolicyAni {
+        pub allow_wi_fi: bool,
+        pub allow_cellular: bool,
+        pub always_allow_wi_fi: bool,
+        pub always_allow_cellular: bool,
+    }
+
+    pub struct UidNetworkPolicyAni {
+        pub uid: i32,
+        pub policy: NetworkAccessPolicyAni,
     }
 
     extern "Rust" {
         type AniEnv;
-
         type AniObject;
-    }
-}
 
-impl NetPolicyClient {
-    pub fn set_background_allowed(allowed: bool) -> Result<(), i32> {
-        let res = ffi::SetBackgroundAllowed(allowed);
-        if res != 0 { return Err(res); }
-        Ok(())
+        pub fn execute_net_quota_policy_changed(policies: Vec<NetQuotaPolicyAni>);
+        pub fn execute_net_background_policy_changed(allow: bool);
+        pub fn execute_net_metered_ifaces_changed(info: MeteredIfacesAni);
+        pub fn execute_net_uid_rule_changed(info: NetUidRuleInfoAni);
+        pub fn execute_net_uid_policy_changed(info: NetUidPolicyInfoAni);
     }
 
-    pub fn restore_all_policies(iccid: &str) -> Result<(), i32> {
-        let res = ffi::RestoreAllPolicies(iccid.to_owned());
-        if res != 0 { return Err(res); }
-        Ok(())
-    }
+    unsafe extern "C++" {
+        include!("policy_ani.h");
 
-    pub fn set_power_save_trustlist(uids: Vec<u32>, is_allowed: bool) -> Result<(), i32> {
-        let res = ffi::SetPowerTrustlist(uids, is_allowed);
-        if res != 0 { return Err(res); }
-        Ok(())
-    }
+        fn SetBackgroundAllowed(allowed: bool) -> i32;
+        fn GetBackgroundPolicy(backgroundPolicy: &mut bool) -> i32;
+        fn GetBackgroundPolicyByUid(uid: i32, backgroundPolicyOfUid: &mut u32) -> i32;
+        fn SetPolicyByUid(uid: i32, policy: u32) -> i32;
+        fn GetPolicyByUid(uid: i32, policy: &mut u32) -> i32;
+        fn GetUidsByPolicy(policy: u32, result: &mut Vec<u32>) -> i32;
+        fn IsUidNetAllowed(uid: i32, metered: bool, isAllowed: &mut bool) -> i32;
+        fn IsUidNetAllowedByIface(uid: i32, iface: String, isAllowed: &mut bool) -> i32;
+        fn SetNetQuotaPolicies(policies: Vec<NetQuotaPolicyAni>) -> i32;
+        fn RestoreAllPolicies(iccid: String) -> i32;
+        fn GetNetQuotaPolicies(result: &mut Vec<NetQuotaPolicyAni>) -> i32;
+        fn UpdateRemindPolicy(netType: i32, iccid: String, remindType: u32) -> i32;
+        fn SetDeviceIdleTrustlist(uids: Vec<i32>, isAllowed: bool) -> i32;
+        fn GetDeviceIdleTrustlist(result: &mut Vec<u32>) -> i32;
+        fn SetPowerTrustlist(uids: Vec<i32>, isAllowed: bool) -> i32;
+        fn GetPowerSaveTrustlist(result: &mut Vec<u32>) -> i32;
+        fn SetNetworkAccessPolicyTyped(uid: i32, policy: NetworkAccessPolicyAni,
+            reconfirmFlag: bool) -> i32;
+        fn GetNetworkAccessPolicyByUid(uid: i32, result: &mut NetworkAccessPolicyAni) -> i32;
+        fn GetAllNetworkAccessPolicies(result: &mut Vec<UidNetworkPolicyAni>) -> i32;
+        fn GetSelfNetworkAccessPolicy(result: &mut NetAccessPolicyAni) -> i32;
+        unsafe fn ShowAppNetPolicySettings(env: *mut *mut AniEnv, context: *mut AniObject) -> i32;
 
-    pub fn update_remind_policy(net_type: i32, iccid: &str, remind_type: u32) -> Result<(), i32> {
-        let res = ffi::UpdateRemindPolicy(net_type, iccid.to_owned(), remind_type);
-        if res != 0 { return Err(res); }
-        Ok(())
-    }
+        fn RegisterNetPolicyChangeCallback() -> i32;
+        fn UnregisterNetPolicyChangeCallback() -> i32;
+        fn CheckPolicyPermission() -> i32;
 
-    pub fn get_policy_by_uid(uid: u32) -> Result<u32, i32> {
-        let mut out: u32 = 0;
-        let res = ffi::GetPolicyByUid(uid, &mut out);
-        if res != 0 { return Err(res); }
-        Ok(out)
-    }
-
-    pub fn get_background_policy() -> Result<bool, i32> {
-        let mut out: bool = false;
-        let res = ffi::GetBackgroundPolicy(&mut out);
-        if res != 0 { return Err(res); }
-        Ok(out)
-    }
-
-    pub fn reset_policies(iccid: &str) -> Result<(), i32> {
-        let res = ffi::RestoreAllPolicies(iccid.to_owned());
-        if res != 0 { return Err(res); }
-        Ok(())
-    }
-
-    pub fn get_power_save_trustlist() -> Result<Vec<u32>, i32> {
-        let mut result = Vec::new();
-        let res = ffi::GetPowerSaveTrustlist(&mut result);
-        if res != 0 { return Err(res); }
-        Ok(result)
-    }
-
-    pub fn get_device_idle_trustlist() -> Result<Vec<u32>, i32> {
-        let mut result = Vec::new();
-        let res = ffi::GetDeviceIdleTrustlist(&mut result);
-        if res != 0 { return Err(res); }
-        Ok(result)
-    }
-
-    pub fn is_uid_net_allowed(uid: u32, metered: bool) -> Result<bool, i32> {
-        let mut out: bool = false;
-        let res = ffi::IsUidNetAllowed(uid, metered, &mut out);
-        if res != 0 { return Err(res); }
-        Ok(out)
-    }
-
-    pub fn is_uid_net_allowed_by_iface(uid: u32, iface: &str) -> Result<bool, i32> {
-        let mut out: bool = false;
-        let res = ffi::IsUidNetAllowedByIface(uid, iface.to_owned(), &mut out);
-        if res != 0 { return Err(res); }
-        Ok(out)
-    }
-
-    pub fn set_policy_by_uid(uid: u32, policy: u32) -> Result<(), i32> {
-        let res = ffi::SetPolicyByUid(uid, policy);
-        if res != 0 { return Err(res); }
-        Ok(())
-    }
-
-    pub fn get_background_policy_by_uid(uid: u32) -> Result<u32, i32> {
-        let mut out: u32 = 0;
-        let res = ffi::GetBackgroundPolicyByUid(uid, &mut out);
-        if res != 0 { return Err(res); }
-        Ok(out)
-    }
-
-    pub fn set_device_idle_trustlist(uids: Vec<u32>, is_allowed: bool) -> Result<(), i32> {
-        let res = ffi::SetDeviceIdleTrustlist(uids, is_allowed);
-        if res != 0 { return Err(res); }
-        Ok(())
-    }
-
-    pub fn get_uids_by_policy(policy: u32) -> Result<Vec<u32>, i32> {
-        let mut result = Vec::new();
-        let res = ffi::GetUidsByPolicy(policy, &mut result);
-        if res != 0 { return Err(res); }
-        Ok(result)
-    }
-
-    pub fn get_network_access_policy(uid: u32) -> Result<bridge::NetworkAccessPolicyOutput, i32> {
-        let mut policy = ffi::NetworkAccessPolicyAni {
-            wifiAllow: false,
-            cellularAllow: false,
-            wifiSwitchDisable: false,
-            cellularSwitchDisable: false,
-        };
-        let res = ffi::GetNetworkAccessPolicyByUid(uid, &mut policy);
-        if res != 0 { return Err(res); }
-        Ok(policy.into())
-    }
-
-    pub fn get_all_network_access_policies() -> Result<Vec<bridge::UidNetworkPolicyItem>, i32> {
-        let mut items = Vec::new();
-        let res = ffi::GetAllNetworkAccessPolicies(&mut items);
-        if res != 0 { return Err(res); }
-        Ok(items.into_iter().map(|item| item.into()).collect())
-    }
-
-    pub fn get_net_quota_policies() -> Result<Vec<bridge::NetQuotaPolicyOutput>, i32> {
-        let mut policies = Vec::new();
-        let res = ffi::GetNetQuotaPoliciesTyped(&mut policies);
-        if res != 0 { return Err(res); }
-        Ok(policies.into_iter().map(|p| p.into()).collect())
-    }
-
-    pub fn set_network_access_policy(uid: u32,
-        policy: bridge::NetworkAccessPolicyInput, reconfirm_flag: bool) -> Result<(), i32> {
-        let ani_policy: ffi::NetworkAccessPolicyAni = policy.into();
-        let res = ffi::SetNetworkAccessPolicyTyped(uid, ani_policy, reconfirm_flag);
-        if res != 0 { return Err(res); }
-        Ok(())
-    }
-
-    pub fn set_net_quota_policies(policies: Vec<bridge::NetQuotaPolicyInput>) -> Result<(), i32> {
-        let ani_policies: Vec<ffi::NetQuotaPolicyAni> =
-            policies.into_iter().map(|p| p.into()).collect();
-        let res = ffi::SetNetQuotaPolicies(ani_policies);
-        if res != 0 { return Err(res); }
-        Ok(())
+        fn GetErrorCodeAndMessage(error_code: &mut i32) -> String;
     }
 }

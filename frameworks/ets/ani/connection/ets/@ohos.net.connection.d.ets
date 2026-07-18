@@ -15,23 +15,17 @@
 
 import type { AsyncCallback, Callback } from '@ohos.base';
 import { BusinessError } from '@ohos.base';
+import type socket from '@ohos.net.socket';
+import type http from '@ohos.net.http';
 
 export default namespace connection {
   loadLibrary("connection_ani");
 
-  // NOTE: ArkTS forbids 'any' type annotations (ESE153545), so err must remain
-  // typed as Error. In practice, taskpool.execute wraps all throwables in Error
-  // instances, so non-Error throws are not expected at runtime in the ArkTS env.
-  function toBusinessError(err: Error): BusinessError {
-    let businessErr = new BusinessError();
-    businessErr.message = err.message;
-    businessErr.stack = err.stack ?? '';
-    businessErr.cause = err;
-    if (err instanceof BusinessError) {
-      businessErr.code = err.code;
-    }
-    return businessErr;
-  }
+  export type HttpRequest = http.HttpRequest;
+
+  export type TCPSocket = socket.TCPSocket;
+
+  export type UDPSocket = socket.UDPSocket;
 
   export class Cleaner {
     private ptr: long = 0
@@ -114,7 +108,7 @@ export default namespace connection {
         }).then((content: Any) => {
             resolve(content as ConnectionProperties);
         }, (err: Error): void => {
-             reject(err as BusinessError);
+            reject(err as BusinessError);
         });
     });
   }
@@ -230,7 +224,7 @@ export default namespace connection {
     p1.then(() => {
         callback(new BusinessError(), undefined);
     }, (err: Error): void => {
-         callback(err as BusinessError, undefined);
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -241,7 +235,7 @@ export default namespace connection {
         }).then((content: Any) => {
             resolve(undefined);
         }, (err: Error): void => {
-             reject(err as BusinessError);
+            reject(err as BusinessError);
         });
     });
   }
@@ -264,7 +258,7 @@ export default namespace connection {
         }).then((content: Any) => {
             resolve(undefined);
         }, (err: Error): void => {
-             reject(err as BusinessError);
+            reject(err as BusinessError);
         });
     });
   }
@@ -289,7 +283,7 @@ export default namespace connection {
         }).then((content: Any) => {
             resolve(undefined);
         }, (err: Error): void => {
-             reject(err as BusinessError);
+            reject(err as BusinessError);
         });
     });
   }
@@ -314,7 +308,7 @@ export default namespace connection {
         }).then((content: Any) => {
             resolve(content as Array<NetAddress>);
         }, (err: Error): void => {
-             reject(err as BusinessError);
+            reject(err as BusinessError);
         });
     });
   }
@@ -328,8 +322,8 @@ export default namespace connection {
           return getAddressesByNameWithOptionsSync(host, opt);
       }).then((content: Any) => {
           resolve(content as Array<NetAddress>);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
@@ -386,7 +380,7 @@ export default namespace connection {
 
   export native function setAppNetSync(netHandle: NetHandle): void;
 
-  function getDefaultHttpProxy(callback: AsyncCallback<HttpProxy>): void {
+  export function getDefaultHttpProxy(callback: AsyncCallback<HttpProxy>): void {
     let p1 = taskpool.execute((): HttpProxy => {
         return getDefaultHttpProxySync();
     })
@@ -397,7 +391,7 @@ export default namespace connection {
     });
   }
 
-  function getDefaultHttpProxy(): Promise<HttpProxy> {
+  export function getDefaultHttpProxy(): Promise<HttpProxy> {
     return new Promise<HttpProxy>((resolve, reject) => {
         taskpool.execute((): HttpProxy => {
             return getDefaultHttpProxySync();
@@ -436,7 +430,11 @@ export default namespace connection {
 
   export native function getGlobalHttpProxySync(): HttpProxy;
 
-  export native function setAppHttpProxy(httpProxy: HttpProxy): void;
+  export function setAppHttpProxy(httpProxy: HttpProxy): void {
+    setAppHttpProxySync(httpProxy);
+  }
+
+  export native function setAppHttpProxySync(httpProxy: HttpProxy): void;
 
   export function setGlobalHttpProxy(httpProxy: HttpProxy, callback: AsyncCallback<void>): void {
     let p1 = taskpool.execute(() => {
@@ -463,45 +461,26 @@ export default namespace connection {
 
   export native function setGlobalHttpProxySync(httpProxy: HttpProxy): void;
 
-  export native function setPacUrl(pacUrl: string): void;
+  export function setPacUrl(pacUrl: string): void {
+    return setPacUrlSync(pacUrl);
+  }
 
-  export native function getPacUrl(): string;
+  export native function setPacUrlSync(pacUrl: string): void;
 
-  export function setPacFileUrl(pacFileUrl: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      taskpool.execute(() => {
-        setPacFileUrlSync(pacFileUrl);
-      }).then(() => {
-        resolve(undefined);
-      }).catch((err: Error) => {
-        reject(toBusinessError(err));
-      });
-    });
+  export function getPacUrl(): string {
+    return getPacUrlSync();
+  }
+
+  export native function getPacUrlSync(): string;
+
+  export function setPacFileUrl(pacFileUrl: string): void {
+    return setPacFileUrlSync(pacFileUrl);
   }
 
   export native function setPacFileUrlSync(pacFileUrl: string): void;
 
-  export function findProxyForUrl(url: string, callback: AsyncCallback<string>): void {
-    let p1 = taskpool.execute((): string => {
-        return findProxyForUrlSync(url);
-    })
-    p1.then((content: Any) => {
-        callback(null, content as string);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
-    });
-  }
-
-  export function findProxyForUrl(url: string): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      taskpool.execute((): string => {
-          return findProxyForUrlSync(url);
-      }).then((content: Any) => {
-          resolve(content as string);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
-      });
-    });
+  export function findProxyForUrl(url: string): string {
+    return findProxyForUrlSync(url);
   }
 
   export native function findProxyForUrlSync(url: string): string;
@@ -581,41 +560,19 @@ export default namespace connection {
 
   export native function clearCustomDnsRulesSync(): void;
 
-  export function refreshGlobalHttpProxy(callback: AsyncCallback<HttpProxy>): void {
-    let p1 = taskpool.execute((): HttpProxy => {
-        return refreshGlobalHttpProxySync();
-    })
-    p1.then((content: Any) => {
-        callback(null, content as HttpProxy);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
-    });
-  }
-
   export function refreshGlobalHttpProxy(): Promise<HttpProxy> {
     return new Promise<HttpProxy>((resolve, reject) => {
       taskpool.execute((): HttpProxy => {
           return refreshGlobalHttpProxySync();
       }).then((content: Any) => {
           resolve(content as HttpProxy);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
 
   export native function refreshGlobalHttpProxySync(): HttpProxy;
-
-  export function createVlanInterface(ifName: string, vlanId: int, callback: AsyncCallback<void>): void {
-    let p1 = taskpool.execute(() => {
-        createVlanInterfaceSync(ifName, vlanId);
-    })
-    p1.then(() => {
-        callback(null, undefined);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
-    });
-  }
 
   export function createVlanInterface(ifName: string, vlanId: int): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -623,24 +580,13 @@ export default namespace connection {
           createVlanInterfaceSync(ifName, vlanId);
       }).then(() => {
           resolve(undefined);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
 
   export native function createVlanInterfaceSync(ifName: string, vlanId: int): void;
-
-  export function destroyVlanInterface(ifName: string, vlanId: int, callback: AsyncCallback<void>): void {
-    let p1 = taskpool.execute(() => {
-        destroyVlanInterfaceSync(ifName, vlanId);
-    })
-    p1.then(() => {
-        callback(null, undefined);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
-    });
-  }
 
   export function destroyVlanInterface(ifName: string, vlanId: int): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -648,24 +594,13 @@ export default namespace connection {
           destroyVlanInterfaceSync(ifName, vlanId);
       }).then(() => {
           resolve(undefined);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
 
   export native function destroyVlanInterfaceSync(ifName: string, vlanId: int): void;
-
-  export function addVlanIp(ifName: string, vlanId: int, address: LinkAddress, callback: AsyncCallback<void>): void {
-    let p1 = taskpool.execute(() => {
-        addVlanIpSync(ifName, vlanId, address.address.address, address.prefixLength);
-    })
-    p1.then(() => {
-        callback(null, undefined);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
-    });
-  }
 
   export function addVlanIp(ifName: string, vlanId: int, address: LinkAddress): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -673,24 +608,13 @@ export default namespace connection {
           addVlanIpSync(ifName, vlanId, address.address.address, address.prefixLength);
       }).then(() => {
           resolve(undefined);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
 
   export native function addVlanIpSync(ifName: string, vlanId: int, ip: string, mask: int): void;
-
-  export function deleteVlanIp(ifName: string, vlanId: int, address: LinkAddress, callback: AsyncCallback<void>): void {
-    let p1 = taskpool.execute(() => {
-        deleteVlanIpSync(ifName, vlanId, address.address.address, address.prefixLength);
-    })
-    p1.then(() => {
-        callback(null, undefined);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
-    });
-  }
 
   export function deleteVlanIp(ifName: string, vlanId: int, address: LinkAddress): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -698,24 +622,13 @@ export default namespace connection {
           deleteVlanIpSync(ifName, vlanId, address.address.address, address.prefixLength);
       }).then(() => {
           resolve(undefined);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
 
   export native function deleteVlanIpSync(ifName: string, vlanId: int, ip: string, mask: int): void;
-
-  export function getSystemNetPortStates(callback: AsyncCallback<NetPortStatesInfo>): void {
-    let p1 = taskpool.execute((): NetPortStatesInfo => {
-        return getSystemNetPortStatesSync();
-    })
-    p1.then((content: Any) => {
-        callback(null, content as NetPortStatesInfo);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
-    });
-  }
 
   export function getSystemNetPortStates(): Promise<NetPortStatesInfo> {
     return new Promise<NetPortStatesInfo>((resolve, reject) => {
@@ -723,24 +636,13 @@ export default namespace connection {
           return getSystemNetPortStatesSync();
       }).then((content: Any) => {
           resolve(content as NetPortStatesInfo);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
 
   export native function getSystemNetPortStatesSync(): NetPortStatesInfo;
-
-  export function getIpNeighTable(callback: AsyncCallback<Array<NetIpMacInfo>>): void {
-    let p1 = taskpool.execute((): Array<NetIpMacInfo> => {
-        return getIpNeighTableSync();
-    })
-    p1.then((content: Any) => {
-        callback(null, content as Array<NetIpMacInfo>);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
-    });
-  }
 
   export function getIpNeighTable(): Promise<Array<NetIpMacInfo>> {
     return new Promise<Array<NetIpMacInfo>>((resolve, reject) => {
@@ -748,75 +650,39 @@ export default namespace connection {
           return getIpNeighTableSync();
       }).then((content: Any) => {
           resolve(content as Array<NetIpMacInfo>);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
 
   export native function getIpNeighTableSync(): Array<NetIpMacInfo>;
 
-  export function getConnectOwnerUid(protocol: ProtocolType, local: NetAddress, remote: NetAddress,
-    callback: AsyncCallback<int>): void {
-    let family: FamilyType = FamilyType.fromValue(local.family ?? 1);
-    let param = new NetConnInfoParamInner(protocol, family, local.address, local.port ?? 0,
-      remote.address, remote.port ?? 0);
-    let p1 = taskpool.execute((): int => {
-        return getConnectOwnerUidSyncImpl(param);
-    })
-    p1.then((content: Any) => {
-        callback(null, content as int);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
-    });
-  }
-
   export function getConnectOwnerUid(protocol: ProtocolType, local: NetAddress, remote: NetAddress): Promise<int> {
-    let family: FamilyType = FamilyType.fromValue(local.family ?? 1);
-    let param = new NetConnInfoParamInner(protocol, family, local.address, local.port ?? 0,
-      remote.address, remote.port ?? 0);
     return new Promise<int>((resolve, reject) => {
       taskpool.execute((): int => {
-          return getConnectOwnerUidSyncImpl(param);
+          return getConnectOwnerUidSync(protocol, local, remote);
       }).then((content: Any) => {
           resolve(content as int);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
 
-  export function getConnectOwnerUidSync(protocol: ProtocolType, local: NetAddress, remote: NetAddress): int {
-    let family: FamilyType = FamilyType.fromValue(local.family ?? 1);
-    let param = new NetConnInfoParamInner(protocol, family, local.address, local.port ?? 0,
-      remote.address, remote.port ?? 0);
-    return getConnectOwnerUidSyncImpl(param);
-  }
-
-  export native function getConnectOwnerUidSyncImpl(param: NetConnInfoParamInner): int;
+  export native function getConnectOwnerUidSync(protocol: ProtocolType, local: NetAddress, remote: NetAddress): int;
 
   export function getDnsUnicode(host: string, flag?: ConversionProcess): string {
-    return getDnsUnicodeSync(host, flag ?? ConversionProcess.NO_CONFIGURATION);
+    return getDnsUnicodeSync(host, flag);
   }
 
-  export native function getDnsUnicodeSync(host: string, conversionProcess: ConversionProcess): string;
+  export native function getDnsUnicodeSync(host: string, flag?: ConversionProcess): string;
 
   export function getDnsAscii(host: string, flag?: ConversionProcess): string {
-    return getDnsAsciiSync(host, flag ?? ConversionProcess.NO_CONFIGURATION);
+    return getDnsAsciiSync(host, flag);
   }
 
-  export native function getDnsAsciiSync(host: string, conversionProcess: ConversionProcess): string;
-
-  export function setInterfaceUp(iface: string, callback: AsyncCallback<void>): void {
-    let p1 = taskpool.execute(() => {
-        setInterfaceUpSync(iface);
-    })
-    p1.then(() => {
-        callback(null, undefined);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
-    });
-  }
+  export native function getDnsAsciiSync(host: string, flag?: ConversionProcess): string;
 
   export function setInterfaceUp(iface: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -824,24 +690,13 @@ export default namespace connection {
           setInterfaceUpSync(iface);
       }).then(() => {
           resolve(undefined);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
 
   export native function setInterfaceUpSync(iface: string): void;
-
-  export function queryProbeResult(destination: string, duration: int, callback: AsyncCallback<ProbeResultInfo>): void {
-    let p1 = taskpool.execute((): ProbeResultInfo => {
-        return queryProbeResultSync(destination, duration);
-    })
-    p1.then((content: Any) => {
-        callback(null, content as ProbeResultInfo);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
-    });
-  }
 
   export function queryProbeResult(destination: string, duration: int): Promise<ProbeResultInfo> {
     return new Promise<ProbeResultInfo>((resolve, reject) => {
@@ -849,54 +704,27 @@ export default namespace connection {
           return queryProbeResultSync(destination, duration);
       }).then((content: Any) => {
           resolve(content as ProbeResultInfo);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
 
   export native function queryProbeResultSync(destination: string, duration: int): ProbeResultInfo;
 
-  export function queryTraceRoute(destination: string, callback: AsyncCallback<Array<TraceRouteInfo>>,
-    option?: TraceRouteOptions): void {
-    let maxJump = option?.maxJumpNumber ?? 30;
-    let pktType = option?.packetsType ?? PacketsType.NETCONN_PACKETS_ICMP;
-    let p1 = taskpool.execute((): Array<TraceRouteInfo> => {
-        return queryTraceRouteSync(destination, maxJump, pktType);
-    })
-    p1.then((content: Any) => {
-        callback(null, content as Array<TraceRouteInfo>);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
-    });
-  }
-
   export function queryTraceRoute(destination: string, option?: TraceRouteOptions): Promise<Array<TraceRouteInfo>> {
     return new Promise<Array<TraceRouteInfo>>((resolve, reject) => {
-      let maxJump = option?.maxJumpNumber ?? 30;
-      let pktType = option?.packetsType ?? PacketsType.NETCONN_PACKETS_ICMP;
       taskpool.execute((): Array<TraceRouteInfo> => {
-          return queryTraceRouteSync(destination, maxJump, pktType);
+          return queryTraceRouteSync(destination, option);
       }).then((content: Any) => {
           resolve(content as Array<TraceRouteInfo>);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
 
-  export native function queryTraceRouteSync(destination: string, maxJumpNumber: int, packetsType: PacketsType): Array<TraceRouteInfo>;
-
-  export function getProxyMode(callback: AsyncCallback<ProxyMode>): void {
-    let p1 = taskpool.execute((): ProxyMode => {
-        return getProxyModeSync();
-    })
-    p1.then((content: Any) => {
-        callback(null, content as ProxyMode);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
-    });
-  }
+  export native function queryTraceRouteSync(destination: string, option?: TraceRouteOptions): Array<TraceRouteInfo>;
 
   export function getProxyMode(): Promise<ProxyMode> {
     return new Promise<ProxyMode>((resolve, reject) => {
@@ -904,24 +732,13 @@ export default namespace connection {
           return getProxyModeSync();
       }).then((content: Any) => {
           resolve(content as ProxyMode);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
 
   export native function getProxyModeSync(): ProxyMode;
-
-  export function setProxyMode(mode: ProxyMode, callback: AsyncCallback<void>): void {
-    let p1 = taskpool.execute(() => {
-        setProxyModeSync(mode);
-    })
-    p1.then(() => {
-        callback(null, undefined);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
-    });
-  }
 
   export function setProxyMode(mode: ProxyMode): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -929,8 +746,8 @@ export default namespace connection {
           setProxyModeSync(mode);
       }).then(() => {
           resolve(undefined);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
@@ -943,41 +760,19 @@ export default namespace connection {
 
   export native function getPacFileUrlSync(): string;
 
-  export function setNetExtAttribute(netHandle: NetHandle, netExtAttribute: string, callback: AsyncCallback<void>): void {
-    let p1 = taskpool.execute(() => {
-        setNetExtAttributeSync(netHandle, netExtAttribute);
-    })
-    p1.then(() => {
-        callback(null, undefined);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
-    });
-  }
-
   export function setNetExtAttribute(netHandle: NetHandle, netExtAttribute: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       taskpool.execute(() => {
           setNetExtAttributeSync(netHandle, netExtAttribute);
       }).then(() => {
           resolve(undefined);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
 
   export native function setNetExtAttributeSync(netHandle: NetHandle, netExtAttribute: string): void;
-
-  export function getNetExtAttribute(netHandle: NetHandle, callback: AsyncCallback<string>): void {
-    let p1 = taskpool.execute((): string => {
-        return getNetExtAttributeSync(netHandle);
-    })
-    p1.then((content: Any) => {
-        callback(null, content as string);
-    }).catch((err: Error) => {
-        callback(toBusinessError(err), undefined);
-    });
-  }
 
   export function getNetExtAttribute(netHandle: NetHandle): Promise<string> {
     return new Promise<string>((resolve, reject) => {
@@ -985,8 +780,8 @@ export default namespace connection {
           return getNetExtAttributeSync(netHandle);
       }).then((content: Any) => {
           resolve(content as string);
-      }).catch((err: Error) => {
-          reject(toBusinessError(err));
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
@@ -1010,6 +805,8 @@ export default namespace connection {
   export interface NetConnection {
       onNetAvailable(callback: Callback<NetHandle>): void;
 
+      onNetBlockStatusChange(callback: Callback<NetBlockStatusInfo>): void;
+
       onNetCapabilitiesChange(callback: Callback<NetCapabilityInfo>): void;
 
       onNetConnectionPropertiesChange(callback: Callback<NetConnectionPropertyInfo>): void;
@@ -1017,8 +814,6 @@ export default namespace connection {
       onNetLost(callback: Callback<NetHandle>): void;
 
       onNetUnavailable(callback: Callback<void>): void;
-
-      onNetBlockStatusChange(callback: Callback<NetBlockStatusInfo>): void;
 
       register(callback: AsyncCallback<void>): void;
 
@@ -1107,6 +902,12 @@ export default namespace connection {
     bearerPrivateIdentifier?: string;
   }
 
+  export class NetSpecifierInner implements NetSpecifier {
+    netCapabilities: NetCapabilities;
+
+    bearerPrivateIdentifier?: string;
+  }
+
   export interface NetCapabilityInfo {
     netHandle: NetHandle;
 
@@ -1122,9 +923,15 @@ export default namespace connection {
   export interface NetHandle {
     netId: int;
 
+    bindSocket(socketParam: TCPSocket | UDPSocket, callback: AsyncCallback<void>): void;
+
+    bindSocket(socketParam: TCPSocket | UDPSocket): Promise<void>;
+
     getAddressesByName(host: string, callback: AsyncCallback<Array<NetAddress>>): void;
 
     getAddressesByName(host: string): Promise<Array<NetAddress>>;
+
+    getAddressesByNameWithOptions(host: string, option?: QueryOptions): Promise<Array<NetAddress>>;
 
     getAddressByName(host: string, callback: AsyncCallback<NetAddress>): void;
 
@@ -1134,6 +941,31 @@ export default namespace connection {
   export class NetHandleInner implements NetHandle {
     netId: int;
     static { loadLibrary("connection_ani"); }
+
+    native bindSocketSyncWithHandle(socketParam: TCPSocket | UDPSocket): void;
+
+    bindSocket(socketParam: TCPSocket | UDPSocket, callback: AsyncCallback<void>): void {
+      let p1 = taskpool.execute(() => {
+        this.bindSocketSyncWithHandle(socketParam);
+      })
+      p1.then(() => {
+        callback(new BusinessError(), undefined);
+      }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
+      });
+    }
+
+    bindSocket(socketParam: TCPSocket | UDPSocket): Promise<void> {
+      return new Promise<void>((resolve, reject) => {
+        taskpool.execute(() => {
+          this.bindSocketSyncWithHandle(socketParam);
+        }).then(() => {
+          resolve(undefined);
+        }, (err: Error): void => {
+          reject(err as BusinessError);
+        });
+      });
+    }
 
     native getAddressByNameSyncWithHandle(host: string): NetAddress;
 
@@ -1194,8 +1026,8 @@ export default namespace connection {
             return this.getAddressesByNameWithOptionsSyncWithHandle(host, opt);
         }).then((content: Any) => {
             resolve(content as Array<NetAddress>);
-        }).catch((err: Error) => {
-            reject(toBusinessError(err));
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
       });
     }
@@ -1243,28 +1075,19 @@ export default namespace connection {
 
   export enum NetCap {
     NET_CAPABILITY_MMS = 0,
-
     NET_CAPABILITY_NOT_METERED = 11,
-
     NET_CAPABILITY_INTERNET = 12,
-
     NET_CAPABILITY_NOT_VPN = 15,
-
     NET_CAPABILITY_VALIDATED = 16,
     NET_CAPABILITY_PORTAL = 17,
-
     NET_CAPABILITY_CHECKING_CONNECTIVITY = 31
   }
 
   export enum NetBearType {
     BEARER_CELLULAR = 0,
-
     BEARER_WIFI = 1,
-
     BEARER_BLUETOOTH = 2,
-
     BEARER_ETHERNET = 3,
-
     BEARER_VPN = 4,
   }
 
@@ -1388,36 +1211,6 @@ export default namespace connection {
     exclusionList?: Array<string>;
   }
 
-  export interface UDPSocket {
-    socketFd: int;
-  }
-
-  class UDPSocketInner implements UDPSocket {
-    socketFd: int;
-  }
-
-  export interface TCPSocket {
-    socketFd: int;
-  }
-
-  class TCPSocketInner implements TCPSocket {
-    socketFd: int;
-  }
-
-  export interface HttpRequest {
-    url: string;
-    method: string;
-    headers: Array<string>;
-    body?: string;
-  }
-
-  class HttpRequestInner implements HttpRequest {
-    url: string;
-    method: string;
-    headers: Array<string>;
-    body?: string;
-  }
-
   export interface ProbeResultInfo {
     lossRate: int;
     rtt: Array<int>;
@@ -1431,13 +1224,13 @@ export default namespace connection {
   export interface TraceRouteInfo {
     jumpNo: int;
     address: string;
-    rtt: Array<number>;
+    rtt: Array<int>;
   }
 
   class TraceRouteInfoInner implements TraceRouteInfo {
     jumpNo: int;
     address: string;
-    rtt: Array<number>;
+    rtt: Array<int>;
   }
 
   export interface TraceRouteOptions {
@@ -1460,6 +1253,10 @@ export default namespace connection {
     routes: Array<RouteInfo>;
 
     mtu: int;
+
+    isIPv4LinkValid?: boolean;
+
+    isIPv6LinkValid?: boolean;
   }
 
   class ConnectionPropertiesInner implements ConnectionProperties {
@@ -1472,6 +1269,10 @@ export default namespace connection {
     routes: Array<RouteInfo>;
 
     mtu: int;
+
+    isIPv4LinkValid?: boolean;
+
+    isIPv6LinkValid?: boolean;
   }
 
   export interface RouteInfo {
@@ -1484,6 +1285,8 @@ export default namespace connection {
     hasGateway: boolean;
 
     isDefaultRoute: boolean;
+
+    isExcludedRoute?: boolean;
   }
 
   class RouteInfoInner implements RouteInfo {
@@ -1496,6 +1299,8 @@ export default namespace connection {
     hasGateway: boolean;
 
     isDefaultRoute: boolean;
+
+    isExcludedRoute?: boolean;
   }
 
   export interface LinkAddress {
@@ -1530,34 +1335,6 @@ export default namespace connection {
 
   class QueryOptionsInner implements QueryOptions {
     family?: FamilyType;
-  }
-
-  export interface NetConnInfoParam {
-    protocolType: ProtocolType;
-    family: FamilyType;
-    localAddress: string;
-    localPort: int;
-    remoteAddress: string;
-    remotePort: int;
-  }
-
-  export class NetConnInfoParamInner implements NetConnInfoParam {
-    protocolType: ProtocolType;
-    family: FamilyType;
-    localAddress: string;
-    localPort: int;
-    remoteAddress: string;
-    remotePort: int;
-
-    constructor(protocolType: ProtocolType, family: FamilyType, localAddress: string,
-      localPort: int, remoteAddress: string, remotePort: int) {
-      this.protocolType = protocolType;
-      this.family = family;
-      this.localAddress = localAddress;
-      this.localPort = localPort;
-      this.remoteAddress = remoteAddress;
-      this.remotePort = remotePort;
-    }
   }
 
   export interface HttpProxy {

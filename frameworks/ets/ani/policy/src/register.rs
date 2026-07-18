@@ -24,7 +24,7 @@ use crate::{
     error_code::convert_to_business_error,
     policy_error,
     policy_info,
-    wrapper::{self, NetPolicyClient},
+    wrapper::{ffi, NetPolicyClient},
 };
 
 fn callback_error(e: impl std::fmt::Display) -> BusinessError {
@@ -32,28 +32,27 @@ fn callback_error(e: impl std::fmt::Display) -> BusinessError {
     BusinessError::new(401, format!("Parameter error: {}", e))
 }
 
-struct Registar {
+struct Register {
     inner: Mutex<Vec<CallbackFlavor>>,
 }
 
-impl Registar {
+impl Register {
     fn new() -> Self {
         Self { inner: Mutex::new(Vec::new()) }
     }
 
     pub fn get_instance() -> &'static Self {
-        static INSTANCE: OnceLock<Registar> = OnceLock::new();
-        INSTANCE.get_or_init(Registar::new)
+        static INSTANCE: OnceLock<Register> = OnceLock::new();
+        INSTANCE.get_or_init(Register::new)
     }
 
     pub fn register(&self, callback: CallbackFlavor) -> Result<(), i32> {
-        let mut inner = self.inner.lock().unwrap_or_else(|e| e.into_inner());
-        let was_empty = inner.is_empty();
-        if was_empty {
+        NetPolicyClient::check_policy_permission()?;
+        let mut inner = self.inner.lock().unwrap();
+        if inner.is_empty() {
             NetPolicyClient::register_policy_observer()?;
         }
-
-        inner.retain(|c| *c != callback);
+        inner.retain(|c| std::mem::discriminant(c) != std::mem::discriminant(&callback));
         inner.push(callback);
         Ok(())
     }
@@ -62,22 +61,23 @@ impl Registar {
     where
         F: Fn(&CallbackFlavor) -> bool,
     {
-        let mut inner = self.inner.lock().unwrap_or_else(|e| e.into_inner());
+        NetPolicyClient::check_policy_permission()?;
+        let mut inner = self.inner.lock().unwrap();
+        if inner.len() <= 1 {
+            NetPolicyClient::unregister_policy_observer()?;
+        }
         if let Some(callback) = callback_ref {
             inner.retain(|c| *c != callback);
         } else {
             inner.retain(|c| !is_same_variant(c));
         }
 
-        if inner.is_empty() {
-            NetPolicyClient::unregister_policy_observer()?;
-        }
-
         Ok(())
     }
 
-    pub fn on_net_quota_policy_changed(&self, policies: Vec<bridge::NetQuotaPolicyOutput>) {
-        let inner = self.inner.lock().unwrap_or_else(|e| e.into_inner());
+    pub fn on_net_quota_policy_changed(&self, policies: Vec<ffi::NetQuotaPolicyAni>) {
+        let inner = self.inner.lock().unwrap();
+        let policies: Vec<bridge::NetQuotaPolicy> = policies.into_iter().map(|p| p.into()).collect();
         for listen in inner.deref() {
             if let CallbackFlavor::NetQuotaPolicyChange(callback) = listen {
                 callback.execute((policies.clone(),));
@@ -86,7 +86,7 @@ impl Registar {
     }
 
     pub fn on_net_background_policy_changed(&self, allow: bool) {
-        let inner = self.inner.lock().unwrap_or_else(|e| e.into_inner());
+        let inner = self.inner.lock().unwrap();
         for listen in inner.deref() {
             if let CallbackFlavor::NetBackgroundPolicyChange(callback) = listen {
                 callback.execute((allow,));
@@ -95,7 +95,7 @@ impl Registar {
     }
 
     pub fn on_net_metered_ifaces_changed(&self, info: Vec<String>) {
-        let inner = self.inner.lock().unwrap_or_else(|e| e.into_inner());
+        let inner = self.inner.lock().unwrap();
         for listen in inner.deref() {
             if let CallbackFlavor::NetMeteredIfacesChange(callback) = listen {
                 callback.execute((info.clone(),));
@@ -103,8 +103,9 @@ impl Registar {
         }
     }
 
-    pub fn on_net_uid_rule_changed(&self, info: bridge::NetUidRuleInfo) {
-        let inner = self.inner.lock().unwrap_or_else(|e| e.into_inner());
+    pub fn on_net_uid_rule_changed(&self, info: ffi::NetUidRuleInfoAni) {
+        let inner = self.inner.lock().unwrap();
+        let info = bridge::NetUidRuleInfo::from(info);
         for listen in inner.deref() {
             if let CallbackFlavor::NetUidRuleChange(callback) = listen {
                 callback.execute((info.clone(),));
@@ -112,8 +113,9 @@ impl Registar {
         }
     }
 
-    pub fn on_net_uid_policy_changed(&self, info: bridge::NetUidPolicyInfo) {
-        let inner = self.inner.lock().unwrap_or_else(|e| e.into_inner());
+    pub fn on_net_uid_policy_changed(&self, info: ffi::NetUidPolicyInfoAni) {
+        let inner = self.inner.lock().unwrap();
+        let info = bridge::NetUidPolicyInfo::from(info);
         for listen in inner.deref() {
             if let CallbackFlavor::NetUidPolicyChange(callback) = listen {
                 callback.execute((info.clone(),));
@@ -128,12 +130,7 @@ pub fn on_net_quota_policy_change(env: &AniEnv, callback: AniFnObject) -> Result
     let callback = callback.into_global_callback(env)
         .map_err(callback_error)?;
     let flavor = CallbackFlavor::NetQuotaPolicyChange(callback);
-    let result = Registar::get_instance().register(flavor).map_err(convert_to_business_error);
-    match &result {
-        Ok(_) => policy_info!("on_net_quota_policy_change success"),
-        Err(e) => policy_error!("on_net_quota_policy_change failed, code={}, msg={}", e.code(), e.message()),
-    }
-    result
+    Register::get_instance().register(flavor).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
@@ -149,11 +146,9 @@ pub fn off_net_quota_policy_change(env: &AniEnv, callback: AniFnObject) -> Resul
         Some(CallbackFlavor::NetQuotaPolicyChange(callback_global))
     };
 
-    Registar::get_instance()
+    Register::get_instance()
         .unregister(callback_flavor, |c| matches!(c, CallbackFlavor::NetQuotaPolicyChange(_)))
-        .map_err(convert_to_business_error)?;
-
-    Ok(())
+        .map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
@@ -162,12 +157,7 @@ pub fn on_net_background_policy_change(env: &AniEnv, callback: AniFnObject) -> R
     let callback = callback.into_global_callback(env)
         .map_err(callback_error)?;
     let flavor = CallbackFlavor::NetBackgroundPolicyChange(callback);
-    let result = Registar::get_instance().register(flavor).map_err(convert_to_business_error);
-    match &result {
-        Ok(_) => policy_info!("on_net_background_policy_change success"),
-        Err(e) => policy_error!("on_net_background_policy_change failed, code={}, msg={}", e.code(), e.message()),
-    }
-    result
+    Register::get_instance().register(flavor).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
@@ -183,11 +173,9 @@ pub fn off_net_background_policy_change(env: &AniEnv, callback: AniFnObject) -> 
         Some(CallbackFlavor::NetBackgroundPolicyChange(callback_global))
     };
 
-    Registar::get_instance()
+    Register::get_instance()
         .unregister(callback_flavor, |c| matches!(c, CallbackFlavor::NetBackgroundPolicyChange(_)))
-        .map_err(convert_to_business_error)?;
-
-    Ok(())
+        .map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
@@ -196,12 +184,7 @@ pub fn on_net_metered_ifaces_change(env: &AniEnv, callback: AniFnObject) -> Resu
     let callback = callback.into_global_callback(env)
         .map_err(callback_error)?;
     let flavor = CallbackFlavor::NetMeteredIfacesChange(callback);
-    let result = Registar::get_instance().register(flavor).map_err(convert_to_business_error);
-    match &result {
-        Ok(_) => policy_info!("on_net_metered_ifaces_change success"),
-        Err(e) => policy_error!("on_net_metered_ifaces_change failed, code={}, msg={}", e.code(), e.message()),
-    }
-    result
+    Register::get_instance().register(flavor).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
@@ -217,11 +200,9 @@ pub fn off_net_metered_ifaces_change(env: &AniEnv, callback: AniFnObject) -> Res
         Some(CallbackFlavor::NetMeteredIfacesChange(callback_global))
     };
 
-    Registar::get_instance()
+    Register::get_instance()
         .unregister(callback_flavor, |c| matches!(c, CallbackFlavor::NetMeteredIfacesChange(_)))
-        .map_err(convert_to_business_error)?;
-
-    Ok(())
+        .map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
@@ -230,12 +211,7 @@ pub fn on_net_uid_rule_change(env: &AniEnv, callback: AniFnObject) -> Result<(),
     let callback = callback.into_global_callback(env)
         .map_err(callback_error)?;
     let flavor = CallbackFlavor::NetUidRuleChange(callback);
-    let result = Registar::get_instance().register(flavor).map_err(convert_to_business_error);
-    match &result {
-        Ok(_) => policy_info!("on_net_uid_rule_change success"),
-        Err(e) => policy_error!("on_net_uid_rule_change failed, code={}, msg={}", e.code(), e.message()),
-    }
-    result
+    Register::get_instance().register(flavor).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
@@ -251,11 +227,9 @@ pub fn off_net_uid_rule_change(env: &AniEnv, callback: AniFnObject) -> Result<()
         Some(CallbackFlavor::NetUidRuleChange(callback_global))
     };
 
-    Registar::get_instance()
+    Register::get_instance()
         .unregister(callback_flavor, |c| matches!(c, CallbackFlavor::NetUidRuleChange(_)))
-        .map_err(convert_to_business_error)?;
-
-    Ok(())
+        .map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
@@ -264,12 +238,7 @@ pub fn on_net_uid_policy_change(env: &AniEnv, callback: AniFnObject) -> Result<(
     let callback = callback.into_global_callback(env)
         .map_err(callback_error)?;
     let flavor = CallbackFlavor::NetUidPolicyChange(callback);
-    let result = Registar::get_instance().register(flavor).map_err(convert_to_business_error);
-    match &result {
-        Ok(_) => policy_info!("on_net_uid_policy_change success"),
-        Err(e) => policy_error!("on_net_uid_policy_change failed, code={}, msg={}", e.code(), e.message()),
-    }
-    result
+    Register::get_instance().register(flavor).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
@@ -285,16 +254,14 @@ pub fn off_net_uid_policy_change(env: &AniEnv, callback: AniFnObject) -> Result<
         Some(CallbackFlavor::NetUidPolicyChange(callback_global))
     };
 
-    Registar::get_instance()
+    Register::get_instance()
         .unregister(callback_flavor, |c| matches!(c, CallbackFlavor::NetUidPolicyChange(_)))
-        .map_err(convert_to_business_error)?;
-
-    Ok(())
+        .map_err(convert_to_business_error)
 }
 
 #[derive(PartialEq, Eq)]
 pub enum CallbackFlavor {
-    NetQuotaPolicyChange(GlobalRefCallback<(Vec<bridge::NetQuotaPolicyOutput>,)>),
+    NetQuotaPolicyChange(GlobalRefCallback<(Vec<bridge::NetQuotaPolicy>,)>),
     NetBackgroundPolicyChange(GlobalRefCallback<(bool,)>),
     NetMeteredIfacesChange(GlobalRefCallback<(Vec<String>,)>),
     NetUidRuleChange(GlobalRefCallback<(bridge::NetUidRuleInfo,)>),
@@ -302,30 +269,21 @@ pub enum CallbackFlavor {
 }
 
 pub fn execute_net_quota_policy_changed(policies: Vec<crate::wrapper::ffi::NetQuotaPolicyAni>) {
-    policy_info!("execute_net_quota_policy_changed enter, count={}", policies.len());
-    let bridge_policies: Vec<bridge::NetQuotaPolicyOutput> =
-        policies.into_iter().map(|p| p.into()).collect();
-    Registar::get_instance().on_net_quota_policy_changed(bridge_policies);
+    Register::get_instance().on_net_quota_policy_changed(policies);
 }
 
 pub fn execute_net_background_policy_changed(allow: bool) {
-    policy_info!("execute_net_background_policy_changed enter, allow={}", allow);
-    Registar::get_instance().on_net_background_policy_changed(allow);
+    Register::get_instance().on_net_background_policy_changed(allow);
 }
 
-pub fn execute_net_metered_ifaces_changed(info: crate::wrapper::ffi::MeteredIfaces) {
-    policy_info!("execute_net_metered_ifaces_changed enter, iface_count={}", info.ifaces.len());
-    Registar::get_instance().on_net_metered_ifaces_changed(info.ifaces);
+pub fn execute_net_metered_ifaces_changed(info: crate::wrapper::ffi::MeteredIfacesAni) {
+    Register::get_instance().on_net_metered_ifaces_changed(info.ifaces);
 }
 
-pub fn execute_net_uid_rule_changed(info: crate::wrapper::ffi::NetUidRuleInfo) {
-    policy_info!("execute_net_uid_rule_changed enter, uid={}, rule={}", info.uid, info.rule);
-    let bridge_info = bridge::NetUidRuleInfo { uid: info.uid, rule: info.rule };
-    Registar::get_instance().on_net_uid_rule_changed(bridge_info);
+pub fn execute_net_uid_rule_changed(info: crate::wrapper::ffi::NetUidRuleInfoAni) {
+    Register::get_instance().on_net_uid_rule_changed(info);
 }
 
-pub fn execute_net_uid_policy_changed(info: crate::wrapper::ffi::NetUidPolicyInfo) {
-    policy_info!("execute_net_uid_policy_changed enter, uid={}, policy={}", info.uid, info.policy);
-    let bridge_info = bridge::NetUidPolicyInfo { uid: info.uid, policy: info.policy };
-    Registar::get_instance().on_net_uid_policy_changed(bridge_info);
+pub fn execute_net_uid_policy_changed(info: crate::wrapper::ffi::NetUidPolicyInfoAni) {
+    Register::get_instance().on_net_uid_policy_changed(info);
 }
