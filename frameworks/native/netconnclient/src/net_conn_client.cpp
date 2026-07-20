@@ -50,6 +50,7 @@ NetConnClient::NetConnClient() : NetConnService_(nullptr), deathRecipient_(nullp
     buffer_[RESERVED_BUFFER_SIZE-1] = '\0';
     defaultNetSpecifier_ = sptr<NetSpecifier>::MakeSptr();
     defaultNetSpecifier_->SetCapabilities({NET_CAPABILITY_INTERNET, NET_CAPABILITY_NOT_VPN});
+    ffrtQueue_ = std::make_shared<ffrt::queue>("NetConnClient");
 }
 
 NetConnClient::~NetConnClient()
@@ -310,7 +311,7 @@ int32_t NetConnClient::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpec
     if (connCallbackManager != nullptr) {
         ret = connCallbackManager->AddNetConnCallback(callback);
     } else {
-        auto cb = sptr<NetConnCallbackManager>::MakeSptr();
+        auto cb = sptr<NetConnCallbackManager>::MakeSptr(ffrtQueue_);
         cb->AddNetConnCallback(callback);
         ret = proxy->RegisterNetConnCallback(netSpecifier, cb, timeoutMS);
         if (ret == NETMANAGER_SUCCESS) {
@@ -342,7 +343,7 @@ int32_t NetConnClient::RequestNetConnection(const sptr<NetSpecifier> netSpecifie
     if (connCallbackManager != nullptr) {
         ret = connCallbackManager->AddNetConnCallback(callback);
     } else {
-        auto cb = sptr<NetConnCallbackManager>::MakeSptr();
+        auto cb = sptr<NetConnCallbackManager>::MakeSptr(ffrtQueue_);
         cb->AddNetConnCallback(callback);
         ret = proxy->RequestNetConnection(netSpecifier, cb, timeoutMS);
         if (ret == NETMANAGER_SUCCESS) {
@@ -1436,15 +1437,8 @@ int32_t NetConnClient::SetNetExtAttribute(const NetHandle &netHandle, const std:
     return proxy->SetNetExtAttribute(netHandle.GetNetId(), netExtAttribute);
 }
 
-NetConnClient::NetConnCallbackManager::NetConnCallbackManager()
-{
-    ffrtQueue_ = std::make_shared<ffrt::queue>("NetConnClient");
-}
-
-NetConnClient::NetConnCallbackManager::~NetConnCallbackManager()
-{
-    ffrtQueue_ = nullptr;
-}
+NetConnClient::NetConnCallbackManager::NetConnCallbackManager(std::shared_ptr<ffrt::queue>& ffrtQueue)
+    : ffrtQueue_(ffrtQueue) {}
 
 int32_t NetConnClient::NetConnCallbackManager::NetAvailable(sptr<NetHandle> &netHandle)
 {

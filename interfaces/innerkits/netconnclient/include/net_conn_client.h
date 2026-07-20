@@ -572,8 +572,8 @@ private:
     class NetConnCallbackManager : public NetConnCallbackStub {
         friend NetConnClient;
     public:
-        NetConnCallbackManager();
-        ~NetConnCallbackManager() override;
+        NetConnCallbackManager(std::shared_ptr<ffrt::queue>& ffrtQueue);
+        ~NetConnCallbackManager() override = default;
         int32_t NetAvailable(sptr<NetHandle> &netHandle) override;
         int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap) override;
         int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info) override;
@@ -641,6 +641,7 @@ private:
     std::vector<std::function<void(int32_t, const HttpProxy &)>> pendingRefreshCallbacks_;
     static inline std::mutex instanceMtx_;
     static inline std::shared_ptr<NetConnClient> instance_ = nullptr;
+    std::shared_ptr<ffrt::queue> ffrtQueue_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
