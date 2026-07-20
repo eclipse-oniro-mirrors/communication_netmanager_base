@@ -97,7 +97,6 @@ ohos_shared_library("net_stats_manager") {
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hitrace:hitrace_meter",
-    "image_framework:image_native",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
