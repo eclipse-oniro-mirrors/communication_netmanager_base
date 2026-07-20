@@ -55,7 +55,6 @@ if (netmanager_base_enable_traffic_statistic) {
     ]
 
     external_deps = [
-      "ability_runtime:wantagent_innerkits",
       "cJSON:cjson",
       "c_utils:utils",
       "ffrt:libffrt",
