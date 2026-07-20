@@ -34,6 +34,7 @@
 #include "network_security_config.h"
 #include "refresh_http_proxy_callback_stub.h"
 #include "common_mock_net_conn_service.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -1863,7 +1864,8 @@ HWTEST_F(NetConnClientTest, RecoverCallbackAndGlobalProxy006, TestSize.Level1)
 {
     auto netConnClient = std::make_shared<NetConnClient>();
     NetConnClient::NetConnCallbackManagerMap netConnCallbackManagerMap;
-    auto cb = sptr<NetConnClient::NetConnCallbackManager>::MakeSptr();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto cb = sptr<NetConnClient::NetConnCallbackManager>::MakeSptr(ffrtQueue);
     auto specifier1 = sptr<NetSpecifier>::MakeSptr();
     specifier1->SetCapabilities({NET_CAPABILITY_INTERNET, NET_CAPABILITY_NOT_VPN});
     EXPECT_FALSE(specifier1->netCapabilities_.netCaps_.count(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0);
@@ -1878,7 +1880,8 @@ HWTEST_F(NetConnClientTest, RecoverCallbackAndGlobalProxy006, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, NetAvailable001, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     auto netHandle = sptr<NetHandle>::MakeSptr();
     netHandle->SetNetId(100);
     netConnCallbackManager->NetAvailable(netHandle);
@@ -1887,7 +1890,8 @@ HWTEST_F(NetConnClientTest, NetAvailable001, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, NetAvailable002, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
     netConnCallbackManager->AddNetConnCallback(callback);
     auto netHandle = sptr<NetHandle>::MakeSptr();
@@ -1898,7 +1902,8 @@ HWTEST_F(NetConnClientTest, NetAvailable002, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, NetCapabilitiesChange001, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     auto netHandle = sptr<NetHandle>::MakeSptr();
     netHandle->SetNetId(100);
     auto netAllCap = sptr<NetAllCapabilities>::MakeSptr();
@@ -1908,7 +1913,8 @@ HWTEST_F(NetConnClientTest, NetCapabilitiesChange001, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, NetCapabilitiesChange002, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     auto netHandle = sptr<NetHandle>::MakeSptr();
     netHandle->SetNetId(100);
     netConnCallbackManager->NetAvailable(netHandle);
@@ -1920,7 +1926,8 @@ HWTEST_F(NetConnClientTest, NetCapabilitiesChange002, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, NetCapabilitiesChange003, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
     netConnCallbackManager->AddNetConnCallback(callback);
     netConnCallbackManager->netHandle_ = sptr<NetHandle>::MakeSptr();
@@ -1934,7 +1941,8 @@ HWTEST_F(NetConnClientTest, NetCapabilitiesChange003, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, NetConnectionPropertiesChange001, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     auto netHandle = sptr<NetHandle>::MakeSptr();
     netHandle->SetNetId(100);
     auto info = sptr<NetLinkInfo>::MakeSptr();
@@ -1944,7 +1952,8 @@ HWTEST_F(NetConnClientTest, NetConnectionPropertiesChange001, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, NetConnectionPropertiesChange002, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     auto netHandle = sptr<NetHandle>::MakeSptr();
     netHandle->SetNetId(100);
     netConnCallbackManager->NetAvailable(netHandle);
@@ -1956,7 +1965,8 @@ HWTEST_F(NetConnClientTest, NetConnectionPropertiesChange002, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, NetConnectionPropertiesChange003, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
     netConnCallbackManager->netHandle_ = sptr<NetHandle>::MakeSptr();
     netConnCallbackManager->netHandle_->SetNetId(101);
@@ -1970,7 +1980,8 @@ HWTEST_F(NetConnClientTest, NetConnectionPropertiesChange003, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, NetLost001, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     auto netHandle = sptr<NetHandle>::MakeSptr();
     netHandle->SetNetId(100);
     EXPECT_EQ(netConnCallbackManager->netHandle_, nullptr);
@@ -1980,7 +1991,8 @@ HWTEST_F(NetConnClientTest, NetLost001, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, NetLost002, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     auto netHandle = sptr<NetHandle>::MakeSptr();
     netHandle->SetNetId(100);
     netConnCallbackManager->NetAvailable(netHandle);
@@ -1992,7 +2004,8 @@ HWTEST_F(NetConnClientTest, NetLost002, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, NetLost003, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
     netConnCallbackManager->netHandle_ = sptr<NetHandle>::MakeSptr();
     netConnCallbackManager->netHandle_->SetNetId(101);
@@ -2007,7 +2020,8 @@ HWTEST_F(NetConnClientTest, NetLost003, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, NetUnavailable001, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     netConnCallbackManager->NetUnavailable();
     EXPECT_EQ(netConnCallbackManager->netHandle_, nullptr);
     EXPECT_EQ(netConnCallbackManager->netConnCallbackList_.size(), 0);
@@ -2015,7 +2029,8 @@ HWTEST_F(NetConnClientTest, NetUnavailable001, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, NetUnavailable002, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
     netConnCallbackManager->AddNetConnCallback(callback);
     netConnCallbackManager->NetUnavailable();
@@ -2025,7 +2040,8 @@ HWTEST_F(NetConnClientTest, NetUnavailable002, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, NetBlockStatusChange001, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     auto netHandle = sptr<NetHandle>::MakeSptr();
     netHandle->SetNetId(100);
     netConnCallbackManager->NetBlockStatusChange(netHandle, true);
@@ -2034,7 +2050,8 @@ HWTEST_F(NetConnClientTest, NetBlockStatusChange001, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, NetBlockStatusChange002, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
     netConnCallbackManager->AddNetConnCallback(callback);
     auto netHandle = sptr<NetHandle>::MakeSptr();
@@ -2045,7 +2062,8 @@ HWTEST_F(NetConnClientTest, NetBlockStatusChange002, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, AddNetConnCallback001, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
     netConnCallbackManager->AddNetConnCallback(callback);
     netConnCallbackManager->AddNetConnCallback(callback);
@@ -2055,7 +2073,8 @@ HWTEST_F(NetConnClientTest, AddNetConnCallback001, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, AddNetConnCallback002, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
     netConnCallbackManager->AddNetConnCallback(callback);
     EXPECT_EQ(netConnCallbackManager->netConnCallbackList_.size(), 1);
@@ -2064,7 +2083,8 @@ HWTEST_F(NetConnClientTest, AddNetConnCallback002, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, AddNetConnCallback003, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     auto netHandle = sptr<NetHandle>::MakeSptr();
     netHandle->SetNetId(100);
     netConnCallbackManager->NetAvailable(netHandle);
@@ -2078,7 +2098,8 @@ HWTEST_F(NetConnClientTest, AddNetConnCallback003, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, AddNetConnCallback004, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     auto netHandle = sptr<NetHandle>::MakeSptr();
     netHandle->SetNetId(100);
     netConnCallbackManager->NetAvailable(netHandle);
@@ -2094,7 +2115,8 @@ HWTEST_F(NetConnClientTest, AddNetConnCallback004, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, AddNetConnCallback005, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     auto netHandle = sptr<NetHandle>::MakeSptr();
     netHandle->SetNetId(100);
     netConnCallbackManager->NetAvailable(netHandle);
@@ -2112,14 +2134,16 @@ HWTEST_F(NetConnClientTest, AddNetConnCallback005, TestSize.Level1)
 
 HWTEST_F(NetConnClientTest, AddNetConnCallback006, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     sptr<INetConnCallbackTest> callback = nullptr;
     EXPECT_EQ(netConnCallbackManager->AddNetConnCallback(callback), 2100105);
 }
 
 HWTEST_F(NetConnClientTest, AddNetConnCallback007, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     sptr<INetConnCallbackTest> callback1 = sptr<INetConnCallbackTest>::MakeSptr();
     sptr<INetConnCallbackTest> callback2 = sptr<INetConnCallbackTest>::MakeSptr();
     netConnCallbackManager->isNetStateUpdated_ = false;
@@ -2131,7 +2155,8 @@ HWTEST_F(NetConnClientTest, AddNetConnCallback007, TestSize.Level1)
  
 HWTEST_F(NetConnClientTest, RemoveNetConnCallback001, TestSize.Level1)
 {
-    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    std::shared_ptr<ffrt::queue> ffrtQueue = std::make_shared<ffrt::queue>("NetConnClientTest");
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>(ffrtQueue);
     sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
     netConnCallbackManager->AddNetConnCallback(callback);
     EXPECT_NE(netConnCallbackManager->netConnCallbackList_.size(), 0);
