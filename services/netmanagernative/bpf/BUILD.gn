@@ -109,6 +109,10 @@ ohos_shared_library("netsys_bpf_utils") {
     ]
   }
 
+  if (netmanager_base_enable_automotive_traffic_stat) {
+    defines += [ "FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT" ]
+  }
+
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"

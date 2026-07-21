@@ -200,7 +200,7 @@ int32_t NetsysBpfStats::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::Ne
         if (pName != nullptr) {
             tempStats.iface_ = pName;
         }
-#ifndef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+#if !defined(FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE) && !defined(FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT)
         if (IFACE_NAME_SET.find(tempStats.iface_) == IFACE_NAME_SET.end()) {
             continue;
         }

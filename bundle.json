@@ -38,7 +38,8 @@
             "netmanager_base_enable_set_app_frozened",
             "netmanager_base_feature_enterprise_route_custom",
             "netmanager_base_fpga_mode_enable",
-            "netmanager_base_update_netcap"
+            "netmanager_base_update_netcap",
+            "netmanager_base_enable_automotive_traffic_stat"
         ],
         "adapted_system_type": [
             "standard"
