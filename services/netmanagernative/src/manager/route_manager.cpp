@@ -361,13 +361,14 @@ int32_t RouteManager::UpdateVpnRules(uint16_t netId, const std::string &interfac
         NETNATIVE_LOGE("UpdateVpnRules err, vpn name is empty");
         return ROUTEMANAGER_ERROR;
     }
-    
+
     if (defauleNetWorkName_.empty()) {
         NETNATIVE_LOGE("UpdateVpnRules err, default network name is not configured");
         return ROUTEMANAGER_ERROR;
     }
     
     NETNATIVE_LOG_D("update vpn rules on interface, %{public}s.", interface.c_str());
+    bool isSysVpn = CheckSysVpnCall();
     bool isTunVpn = CheckTunVpnCall(interface);
 
     for (const auto& msg : extMessages) {
@@ -375,18 +376,15 @@ int32_t RouteManager::UpdateVpnRules(uint16_t netId, const std::string &interfac
             NETNATIVE_LOGE("failed to add update vpn rules on interface of netId, %{public}u.", netId);
             return ROUTEMANAGER_ERROR;
         }
-        
         if (isTunVpn) {
             NETNATIVE_LOGI("TUN mode, skipping update for interface: %{public}s", interface.c_str());
             continue;
         }
-        
         ret = UpdateVpnOutPutPenetrationRule(netId, defauleNetWorkName_, msg, add);
         if (ret != ROUTEMANAGER_SUCCESS) {
             return ret;
         }
     }
-    
     return ret;
 }
 
