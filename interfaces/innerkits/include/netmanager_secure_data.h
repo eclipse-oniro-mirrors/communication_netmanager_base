@@ -26,9 +26,9 @@ struct SecureData : public std::string {
     {
         // Clear Data, to keep the memory safe
         size_t dataSize = size();
-        if(dataSize > 0){
+        if (dataSize > 0) {
             (void)memset_s(data(), dataSize, 0, dataSize);
-        }       
+        }
     }
 };
 } // namespace NetManagerStandard
