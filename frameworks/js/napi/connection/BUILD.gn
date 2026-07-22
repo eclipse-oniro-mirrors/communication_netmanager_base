@@ -58,7 +58,9 @@ ohos_shared_library("connection") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "libuv:uv",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   if (product_name != "qemu-arm-linux-min") {
@@ -156,8 +158,12 @@ ohos_shared_library("connection_if") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "icu:shared_icui18n",
+    "icu:shared_icuuc",
     "ipc:ipc_core",
+    "libuv:uv",
     "napi:ace_napi",
+    "node:node_header_notice",
     "samgr:samgr_proxy",
   ]
 
