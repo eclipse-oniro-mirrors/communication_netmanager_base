@@ -255,55 +255,35 @@ void NetsysBpfNetFirewall::ClearBpfFirewallRules(NetFirewallRuleDirection direct
 
 int32_t NetsysBpfNetFirewall::ClearFirewallRules(NetFirewallRuleType type)
 {
-    std::lock_guard<std::mutex> guard(rulesMutex_);
-    int32_t ret = NETFIREWALL_SUCCESS;
     switch (type) {
         case NetFirewallRuleType::RULE_IP: {
             firewallIpRules_.clear();
-            if (ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_IN) != 0) {
-                NETNATIVE_LOGE("ClearFirewallRules: clear RULE_IN failed");
-                ret = NETFIREWALL_ERR;
-            }
-            if (ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_OUT) != 0) {
-                NETNATIVE_LOGE("ClearFirewallRules: clear RULE_OUT failed");
-                ret = NETFIREWALL_ERR;
-            }
+            ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_IN);
+            ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_OUT);
             break;
         }
         case NetFirewallRuleType::RULE_DOMAIN: {
             firewallDomainRules_.clear();
-            if (ClearDomainRules() != NETFIREWALL_SUCCESS) {
-                NETNATIVE_LOGE("ClearFirewallRules: clear RULE_DOMAIN failed");
-                ret = NETFIREWALL_ERR;
-            }
+            ClearDomainRules();
             break;
         }
         case NetFirewallRuleType::RULE_DEFAULT_ACTION: {
-            if (ClearFirewallDefaultAction() != NETFIREWALL_SUCCESS) {
-                NETNATIVE_LOGE("ClearFirewallRules: clear RULE_DEFAULT_ACTION failed");
-                ret = NETFIREWALL_ERR;
-            }
+            ClearFirewallDefaultAction();
             break;
         }
         case NetFirewallRuleType::RULE_ALL: {
             firewallIpRules_.clear();
-            if (ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_IN) != 0 ||
-                ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_OUT) != 0) {
-                ret = NETFIREWALL_ERR;
-            }
+            ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_IN);
+            ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_OUT);
             firewallDomainRules_.clear();
-            if (ClearDomainRules() != NETFIREWALL_SUCCESS) {
-                ret = NETFIREWALL_ERR;
-            }
-            if (ClearFirewallDefaultAction() != NETFIREWALL_SUCCESS) {
-                ret = NETFIREWALL_ERR;
-            }
+            ClearDomainRules();
+            ClearFirewallDefaultAction();
             break;
         }
         default:
             break;
     }
-    return ret;
+    return NETFIREWALL_SUCCESS;
 }
 
 int32_t NetsysBpfNetFirewall::SetBpfFirewallRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList,
