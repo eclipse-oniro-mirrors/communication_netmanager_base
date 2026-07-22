@@ -92,16 +92,10 @@ static __always_inline bool get_match_tuple(struct __sk_buff *skb, struct match_
     __u32 l3_nhoff = get_l3_nhoff(skb);
     __u32 l4_nhoff = get_l4_nhoff(skb);
     __u8 protocol = 0;
-    if (skb->family == AF_INET) {
-        if (!load_l3_v4_addrs(skb, l3_nhoff, &(tuple->ipv4.saddr), &(tuple->ipv4.daddr))) {
-            return false;
-        }
-    } else if (skb->family == AF_INET6) {
-        if (!load_l3_v6_addrs(skb, l3_nhoff, &(tuple->ipv6.saddr), &(tuple->ipv6.daddr))) {
-            return false;
-        }
+    if (is_ipv4_format_skb(skb)) {
+        load_l3_v4_addrs(skb, l3_nhoff, &(tuple->ipv4.saddr), &(tuple->ipv4.daddr));
     } else {
-        return false;
+        load_l3_v6_addrs(skb, l3_nhoff, &(tuple->ipv6.saddr), &(tuple->ipv6.daddr));
     }
     if (!load_l4_protocol(skb, l3_nhoff, &protocol)) {
         return false;
