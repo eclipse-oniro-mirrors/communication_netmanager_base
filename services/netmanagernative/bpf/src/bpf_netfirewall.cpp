@@ -255,6 +255,7 @@ void NetsysBpfNetFirewall::ClearBpfFirewallRules(NetFirewallRuleDirection direct
 
 int32_t NetsysBpfNetFirewall::ClearFirewallRules(NetFirewallRuleType type)
 {
+    std::lock_guard<std::mutex> guard(rulesMutex_);
     switch (type) {
         case NetFirewallRuleType::RULE_IP: {
             firewallIpRules_.clear();
