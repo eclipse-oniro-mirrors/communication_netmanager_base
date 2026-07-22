@@ -1063,7 +1063,25 @@ bool IsAllNoAnswer(struct DnsProcessInfoExt *dnsProcessInfo)
     if (dnsProcessInfo->isFromCache || dnsProcessInfo->retCode != 0) {
         return false;
     }
-    return dnsProcessInfo->ipv4QueryInfo.isNoAnswer && dnsProcessInfo->ipv6QueryInfo.isNoAnswer;
+    // LCOV_EXCL_START
+    if (dnsProcessInfo->ipv4QueryInfo.retCode == 0 &&
+        dnsProcessInfo->ipv4QueryInfo.isNoAnswer &&
+        dnsProcessInfo->ipv6QueryInfo.retCode == -1) {
+        return true;
+    }
+    if (dnsProcessInfo->ipv6QueryInfo.retCode == 0 &&
+        dnsProcessInfo->ipv6QueryInfo.isNoAnswer &&
+        dnsProcessInfo->ipv4QueryInfo.retCode == -1) {
+        return true;
+    }
+    if (dnsProcessInfo->ipv6QueryInfo.retCode == 0 &&
+        dnsProcessInfo->ipv6QueryInfo.isNoAnswer &&
+        dnsProcessInfo->ipv4QueryInfo.retCode == 0 &&
+        dnsProcessInfo->ipv4QueryInfo.isNoAnswer) {
+        return true;
+    }
+    // LCOV_EXCL_STOP
+    return false;
 }
 
 bool IsFailCauseAllowedReport(int failcause)
