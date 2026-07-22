@@ -1031,8 +1031,7 @@ int32_t RouteManager::ReadAddr(const std::string &addr, InetAddr *res)
 int32_t RouteManager::Init()
 {
     NETNATIVE_LOGI("Init");
-    
-    // TODO: need to call IptablesWrapper's RunCommand function for mangle table setup.
+    // need to call IptablesWrapper's RunCommand function.
     std::string commandNew;
     commandNew.append(" -t mangle -N ");
     commandNew.append(LOCAL_MANGLE_INPUT);
@@ -1162,7 +1161,7 @@ int32_t RouteManager::UpdateIncomingPacketMark(uint16_t netId, const std::string
     std::stringstream ss;
     ss << action << LOCAL_MANGLE_INPUT << " -i " << interfaceName << " -j MARK --set-mark 0x" << std::nouppercase
        << std::hex << fwmark.intValue << "/0x" << std::nouppercase << std::hex << mask;
-    // TODO: need to call IptablesWrapper's RunCommand function.
+    // need to call IptablesWrapper's RunCommand function.
 
     return ROUTEMANAGER_SUCCESS;
 }
