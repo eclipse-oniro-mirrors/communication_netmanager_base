@@ -253,15 +253,41 @@ HWTEST_F(NetsysClientTest, IsAllNoAnswerTest001, TestSize.Level1)
     dnsProcessInfo.isFromCache = true;
     auto ret = IsAllNoAnswer(&dnsProcessInfo);
     EXPECT_FALSE(ret);
-
+ 
     dnsProcessInfo.isFromCache = false;
     dnsProcessInfo.retCode = 1;
     ret = IsAllNoAnswer(&dnsProcessInfo);
     EXPECT_FALSE(ret);
-
+ 
     dnsProcessInfo.retCode = 0;
+    dnsProcessInfo.ipv4QueryInfo.retCode = 0;
     dnsProcessInfo.ipv4QueryInfo.isNoAnswer = 1;
+    dnsProcessInfo.ipv6QueryInfo.retCode = 0;
     dnsProcessInfo.ipv6QueryInfo.isNoAnswer = 1;
+    ret = IsAllNoAnswer(&dnsProcessInfo);
+    EXPECT_TRUE(ret);
+ 
+    dnsProcessInfo.retCode = 0;
+    dnsProcessInfo.ipv4QueryInfo.retCode = 0;
+    dnsProcessInfo.ipv4QueryInfo.isNoAnswer = 1;
+    dnsProcessInfo.ipv6QueryInfo.retCode = -1;
+    dnsProcessInfo.ipv6QueryInfo.isNoAnswer = 0;
+    ret = IsAllNoAnswer(&dnsProcessInfo);
+    EXPECT_TRUE(ret);
+ 
+    dnsProcessInfo.retCode = 0;
+    dnsProcessInfo.ipv4QueryInfo.retCode = -1;
+    dnsProcessInfo.ipv4QueryInfo.isNoAnswer = 0;
+    dnsProcessInfo.ipv6QueryInfo.retCode = 0;
+    dnsProcessInfo.ipv6QueryInfo.isNoAnswer = 1;
+    ret = IsAllNoAnswer(&dnsProcessInfo);
+    EXPECT_TRUE(ret);
+ 
+    dnsProcessInfo.retCode = 0;
+    dnsProcessInfo.ipv4QueryInfo.retCode = 0;
+    dnsProcessInfo.ipv4QueryInfo.isNoAnswer = 0;
+    dnsProcessInfo.ipv6QueryInfo.retCode = 0;
+    dnsProcessInfo.ipv6QueryInfo.isNoAnswer = 0;
     ret = IsAllNoAnswer(&dnsProcessInfo);
     EXPECT_TRUE(ret);
 }
