@@ -49,7 +49,6 @@
 
 namespace OHOS::NetManagerStandard::CommonUtils {
 constexpr int32_t INET_OPTION_SUC = 1;
-constexpr int32_t DECIMAL_SYSTEM = 10;
 constexpr uint32_t CONST_MASK = 0x80000000;
 constexpr size_t MAX_DISPLAY_NUM = 2;
 constexpr uint32_t IPV4_DOT_NUM = 3;
@@ -369,13 +368,13 @@ int32_t Ipv6PrefixLen(const std::string &ip)
 
 bool ParseInt(const std::string &str, int32_t *value)
 {
-    char *end;
-    long long v = strtoll(str.c_str(), &end, 10);
-    if (std::string(end) == str || *end != '\0' || v < INT_MIN || v > INT_MAX) {
+    // LCOV_EXCL_START
+    if (str.empty()) {
         return false;
     }
-    *value = v;
-    return true;
+    // LCOV_EXCL_STOP
+    auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
+    return ec == std::errc{} && ptr == str.data() + str.size();
 }
 
 int64_t ConvertToInt64(const std::string &str)
