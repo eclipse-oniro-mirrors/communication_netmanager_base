@@ -21,6 +21,8 @@
 #include "i_net_conn_service.h"
 #include "i_net_detection_callback.h"
 #include "i_net_factoryreset_callback.h"
+#include "net_interface_callback_stub.h"
+#include "net_specifier.h"
 #include "refresh_http_proxy_callback_stub.h"
 #include "net_all_capabilities.h"
 #include "net_conn_service_proxy.h"
@@ -36,6 +38,9 @@ constexpr const char *TEST_HOST = "testHost";
 constexpr int32_t TEST_NETID = 3;
 constexpr int32_t TEST_SOCKETFD = 2;
 constexpr int32_t TEST_SUPPLIERID = 1021;
+constexpr size_t PARCEL_FILL_STRING_SIZE = 204691;
+constexpr size_t PARCEL_OVERFLOW_STRING_SIZE = 204800;
+constexpr int32_t UID_COUNT_FOR_PARCEL_OVERFLOW = 51200;
 
 uint32_t g_supplierId = 0;
 enum DeadFlowReplyMode {
@@ -43,6 +48,8 @@ enum DeadFlowReplyMode {
     DEAD_FLOW_REPLY_SKIP_RESULT,
     DEAD_FLOW_REPLY_SKIP_BOOL,
     DEAD_FLOW_REPLY_RESULT_ERROR,
+    DEAD_FLOW_REPLY_EMPTY_NETLINK,
+    DEAD_FLOW_REPLY_INVALID_BEARER,
 };
 
 class MockNetIRemoteObject : public IRemoteObject {
@@ -85,6 +92,14 @@ public:
     void HandleGetNetCapabilitiesReply(MessageParcel &reply)
     {
         NetAllCapabilities netCap;
+        netCap.Marshalling(reply);
+    }
+
+    void HandleGetNetCapabilitiesInvalidBearerReply(MessageParcel &reply)
+    {
+        NetAllCapabilities netCap;
+        netCap.bearerTypes_.insert(static_cast<NetBearType>(BEARER_DEFAULT));
+        netCap.bearerTypes_.insert(NetBearType::BEARER_WIFI);
         netCap.Marshalling(reply);
     }
 
@@ -141,11 +156,17 @@ public:
                 break;
             case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_CONNECTION_PROPERTIES):
                 reply.WriteInt32(NETMANAGER_SUCCESS);
-                HandleGetConnectionPropertiesReply(reply);
+                if (deadFlowReplyMode_ != DEAD_FLOW_REPLY_EMPTY_NETLINK) {
+                    HandleGetConnectionPropertiesReply(reply);
+                }
                 break;
             case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_CAPABILITIES):
                 reply.WriteInt32(NETMANAGER_SUCCESS);
-                HandleGetNetCapabilitiesReply(reply);
+                if (deadFlowReplyMode_ == DEAD_FLOW_REPLY_INVALID_BEARER) {
+                    HandleGetNetCapabilitiesInvalidBearerReply(reply);
+                } else {
+                    HandleGetNetCapabilitiesReply(reply);
+                }
                 break;
             case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY):
             case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_DEFAULT_HTTP_PROXY):
@@ -164,6 +185,9 @@ public:
                 HandleDeadFlowResetTargetBundleReply(reply);
                 break;
             default:
+                if (deadFlowReplyMode_ == DEAD_FLOW_REPLY_SKIP_RESULT) {
+                    break;
+                }
                 reply.WriteInt32(NETMANAGER_SUCCESS);
                 reply.WriteUint32(TEST_SUPPLIERID);
                 break;
@@ -241,6 +265,46 @@ public:
     int32_t OnNetFactoryReset() override
     {
         return 0;
+    }
+};
+
+class NullObjectNetConnCallback : public NetConnCallbackStubCb {
+public:
+    sptr<IRemoteObject> AsObject() override
+    {
+        return nullptr;
+    }
+};
+
+class NullObjectSupplierCallback : public NetSupplierCallbackStubTestCb {
+public:
+    sptr<IRemoteObject> AsObject() override
+    {
+        return nullptr;
+    }
+};
+
+class NullObjectDetectionCallback : public NetDetectionTestCallback {
+public:
+    sptr<IRemoteObject> AsObject() override
+    {
+        return nullptr;
+    }
+};
+
+class NullObjectInterfaceCallback : public NetInterfaceStateCallbackStub {
+public:
+    sptr<IRemoteObject> AsObject() override
+    {
+        return nullptr;
+    }
+};
+
+class NullObjectPreAirplaneCallback : public PreAirplaneCallbackTest {
+public:
+    sptr<IRemoteObject> AsObject() override
+    {
+        return nullptr;
     }
 };
 
@@ -974,6 +1038,254 @@ HWTEST_F(NetConnServiceProxyTest, IsDeadFlowResetTargetBundleTest006, TestSize.L
     bool flag = false;
     int32_t ret = instance_->IsDeadFlowResetTargetBundle(bundleName, flag);
     EXPECT_EQ(ret, NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RegisterNetSupplierCallbackWriteRemoteObjectFail, TestSize.Level1)
+{
+    sptr<INetSupplierCallback> callback = new (std::nothrow) NullObjectSupplierCallback();
+    ASSERT_NE(callback, nullptr);
+    int32_t ret = instance_->RegisterNetSupplierCallback(g_supplierId, callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_WRITE_DATA_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RegisterNetConnCallbackWriteRemoteObjectFail, TestSize.Level1)
+{
+    sptr<INetConnCallback> callback = new (std::nothrow) NullObjectNetConnCallback();
+    ASSERT_NE(callback, nullptr);
+    int32_t ret = instance_->RegisterNetConnCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_WRITE_DATA_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RegisterNetConnCallbackWithSpecWriteRemoteObjectFail, TestSize.Level1)
+{
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    ASSERT_NE(netSpecifier, nullptr);
+    sptr<INetConnCallback> callback = new (std::nothrow) NullObjectNetConnCallback();
+    ASSERT_NE(callback, nullptr);
+    int32_t ret = instance_->RegisterNetConnCallback(netSpecifier, callback, TEST_TIMEOUTMS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_WRITE_DATA_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RequestNetConnectionWriteRemoteObjectFail, TestSize.Level1)
+{
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    ASSERT_NE(netSpecifier, nullptr);
+    sptr<INetConnCallback> callback = new (std::nothrow) NullObjectNetConnCallback();
+    ASSERT_NE(callback, nullptr);
+    int32_t ret = instance_->RequestNetConnection(netSpecifier, callback, TEST_TIMEOUTMS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_WRITE_DATA_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, UnRegisterNetDetectionCallbackWriteRemoteObjectFail, TestSize.Level1)
+{
+    sptr<INetDetectionCallback> callback = new (std::nothrow) NullObjectDetectionCallback();
+    ASSERT_NE(callback, nullptr);
+    int32_t ret = instance_->UnRegisterNetDetectionCallback(TEST_NETID, callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_WRITE_DATA_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RegisterNetInterfaceCallbackWriteRemoteObjectFail, TestSize.Level1)
+{
+    sptr<INetInterfaceStateCallback> callback = new (std::nothrow) NullObjectInterfaceCallback();
+    ASSERT_NE(callback, nullptr);
+    int32_t ret = instance_->RegisterNetInterfaceCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_WRITE_DATA_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RegisterPreAirplaneCallbackWriteRemoteObjectFail, TestSize.Level1)
+{
+    sptr<IPreAirplaneCallback> callback = new (std::nothrow) NullObjectPreAirplaneCallback();
+    ASSERT_NE(callback, nullptr);
+    int32_t ret = instance_->RegisterPreAirplaneCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_WRITE_DATA_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, UnregisterPreAirplaneCallbackWriteRemoteObjectFail, TestSize.Level1)
+{
+    sptr<IPreAirplaneCallback> callback = new (std::nothrow) NullObjectPreAirplaneCallback();
+    ASSERT_NE(callback, nullptr);
+    int32_t ret = instance_->UnregisterPreAirplaneCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_WRITE_DATA_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RegisterNetConnCallbackWithSpecReadReplyFail, TestSize.Level1)
+{
+    remoteObj_->SetDeadFlowReplyMode(DEAD_FLOW_REPLY_SKIP_RESULT);
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    ASSERT_NE(netSpecifier, nullptr);
+    int32_t ret = instance_->RegisterNetConnCallback(netSpecifier, netConnCallback_, TEST_TIMEOUTMS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RequestNetConnectionReadReplyFail, TestSize.Level1)
+{
+    remoteObj_->SetDeadFlowReplyMode(DEAD_FLOW_REPLY_SKIP_RESULT);
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    ASSERT_NE(netSpecifier, nullptr);
+    int32_t ret = instance_->RequestNetConnection(netSpecifier, netConnCallback_, TEST_TIMEOUTMS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, UpdateNetSupplierInfoReadReplyFail, TestSize.Level1)
+{
+    remoteObj_->SetDeadFlowReplyMode(DEAD_FLOW_REPLY_SKIP_RESULT);
+    sptr<NetSupplierInfo> netSupplierInfo = new (std::nothrow) NetSupplierInfo();
+    ASSERT_NE(netSupplierInfo, nullptr);
+    int32_t ret = instance_->UpdateNetSupplierInfo(g_supplierId, netSupplierInfo);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RegisterNetInterfaceCallbackReadReplyFail, TestSize.Level1)
+{
+    remoteObj_->SetDeadFlowReplyMode(DEAD_FLOW_REPLY_SKIP_RESULT);
+    sptr<INetInterfaceStateCallback> callback = new (std::nothrow) NetInterfaceStateCallbackStub();
+    ASSERT_NE(callback, nullptr);
+    int32_t ret = instance_->RegisterNetInterfaceCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, AddNetworkRouteReadReplyFail, TestSize.Level1)
+{
+    remoteObj_->SetDeadFlowReplyMode(DEAD_FLOW_REPLY_SKIP_RESULT);
+    int32_t ret = instance_->AddNetworkRoute(TEST_NETID, "wlan0", "0.0.0.0", "0.0.0.0");
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RemoveNetworkRouteReadReplyFail, TestSize.Level1)
+{
+    remoteObj_->SetDeadFlowReplyMode(DEAD_FLOW_REPLY_SKIP_RESULT);
+    int32_t ret = instance_->RemoveNetworkRoute(TEST_NETID, "wlan0", "0.0.0.0", "0.0.0.0");
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, DelInterfaceAddressReadReplyFail, TestSize.Level1)
+{
+    remoteObj_->SetDeadFlowReplyMode(DEAD_FLOW_REPLY_SKIP_RESULT);
+    int32_t ret = instance_->DelInterfaceAddress("wlan0", "192.168.1.1", 24);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, GetSlotTypeReadReplyFail, TestSize.Level1)
+{
+    remoteObj_->SetDeadFlowReplyMode(DEAD_FLOW_REPLY_SKIP_RESULT);
+    std::string type;
+    int32_t ret = instance_->GetSlotType(type);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RegisterPreAirplaneCallbackReadReplyFail, TestSize.Level1)
+{
+    remoteObj_->SetDeadFlowReplyMode(DEAD_FLOW_REPLY_SKIP_RESULT);
+    sptr<IPreAirplaneCallback> callback = new (std::nothrow) PreAirplaneCallbackTest();
+    ASSERT_NE(callback, nullptr);
+    int32_t ret = instance_->RegisterPreAirplaneCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, UnregisterPreAirplaneCallbackReadReplyFail, TestSize.Level1)
+{
+    remoteObj_->SetDeadFlowReplyMode(DEAD_FLOW_REPLY_SKIP_RESULT);
+    sptr<IPreAirplaneCallback> callback = new (std::nothrow) PreAirplaneCallbackTest();
+    ASSERT_NE(callback, nullptr);
+    int32_t ret = instance_->UnregisterPreAirplaneCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, SetAppIsFrozenedReadReplyFail, TestSize.Level1)
+{
+    remoteObj_->SetDeadFlowReplyMode(DEAD_FLOW_REPLY_SKIP_RESULT);
+    int32_t ret = instance_->SetAppIsFrozened(TEST_UID, true);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, GetIfaceNameByTypeInvalidBearerTest, TestSize.Level1)
+{
+    std::string ifaceName;
+    int32_t ret = instance_->GetIfaceNameByType(static_cast<NetBearType>(-1), TEST_IDENT, ifaceName);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, GetIfaceNameIdentMapsInvalidBearerTest, TestSize.Level1)
+{
+    SafeMap<std::string, std::string> data;
+    int32_t ret = instance_->GetIfaceNameIdentMaps(static_cast<NetBearType>(-1), data);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, GetConnectionPropertiesNullptrTest, TestSize.Level1)
+{
+    remoteObj_->SetDeadFlowReplyMode(DEAD_FLOW_REPLY_EMPTY_NETLINK);
+    NetLinkInfo info;
+    int32_t ret = instance_->GetConnectionProperties(TEST_NETID, info);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, GetNetCapabilitiesInvalidBearerTest, TestSize.Level1)
+{
+    remoteObj_->SetDeadFlowReplyMode(DEAD_FLOW_REPLY_INVALID_BEARER);
+    NetAllCapabilities netAllCap;
+    int32_t ret = instance_->GetNetCapabilities(TEST_NETID, netAllCap);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(netAllCap.bearerTypes_.count(NetBearType::BEARER_WIFI), 1U);
+    EXPECT_EQ(netAllCap.bearerTypes_.count(static_cast<NetBearType>(BEARER_DEFAULT)), 0U);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RegisterNetConnCallbackWithSpecMarshallingFail, TestSize.Level1)
+{
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    ASSERT_NE(netSpecifier, nullptr);
+    netSpecifier->ident_ = std::string(PARCEL_OVERFLOW_STRING_SIZE, 'x');
+    int32_t ret = instance_->RegisterNetConnCallback(netSpecifier, netConnCallback_, TEST_TIMEOUTMS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_WRITE_DATA_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RequestNetConnectionMarshallingFail, TestSize.Level1)
+{
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    ASSERT_NE(netSpecifier, nullptr);
+    netSpecifier->ident_ = std::string(PARCEL_OVERFLOW_STRING_SIZE, 'x');
+    int32_t ret = instance_->RequestNetConnection(netSpecifier, netConnCallback_, TEST_TIMEOUTMS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_WRITE_DATA_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, UpdateNetStateForTestMarshallingFail, TestSize.Level1)
+{
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    ASSERT_NE(netSpecifier, nullptr);
+    netSpecifier->ident_ = std::string(PARCEL_OVERFLOW_STRING_SIZE, 'x');
+    int32_t netState = 0;
+    int32_t ret = instance_->UpdateNetStateForTest(netSpecifier, netState);
+    EXPECT_EQ(ret, NETMANAGER_ERR_WRITE_DATA_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RegisterNetConnCallbackWithSpecWriteUint32Fail, TestSize.Level1)
+{
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    ASSERT_NE(netSpecifier, nullptr);
+    netSpecifier->ident_ = std::string(PARCEL_FILL_STRING_SIZE, 'x');
+    int32_t ret = instance_->RegisterNetConnCallback(netSpecifier, netConnCallback_, TEST_TIMEOUTMS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_WRITE_DATA_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RequestNetConnectionWriteUint32Fail, TestSize.Level1)
+{
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    ASSERT_NE(netSpecifier, nullptr);
+    netSpecifier->ident_ = std::string(PARCEL_FILL_STRING_SIZE, 'x');
+    int32_t ret = instance_->RequestNetConnection(netSpecifier, netConnCallback_, TEST_TIMEOUTMS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_WRITE_DATA_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, EnableVnicNetworkWriteInt32Fail, TestSize.Level1)
+{
+    sptr<NetLinkInfo> linkInfo = new (std::nothrow) NetLinkInfo();
+    ASSERT_NE(linkInfo, nullptr);
+    std::set<int32_t> uids;
+    for (int32_t i = 0; i < UID_COUNT_FOR_PARCEL_OVERFLOW; ++i) {
+        uids.insert(i);
+    }
+    int32_t ret = instance_->EnableVnicNetwork(linkInfo, uids);
+    EXPECT_EQ(ret, NETMANAGER_ERR_WRITE_DATA_FAIL);
 }
 }
 } // namespace NetManagerStandard
