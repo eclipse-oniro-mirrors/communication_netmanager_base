@@ -86,8 +86,8 @@ int32_t NetConnServiceProxy::EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkI
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
-    uint32_t size = static_cast<uint32_t>(uids.size());
-    if (!data.WriteUint32(size)) {
+    int32_t size = static_cast<int32_t>(uids.size());
+    if (!data.WriteInt32(size)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
