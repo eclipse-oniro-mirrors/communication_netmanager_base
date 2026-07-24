@@ -1295,7 +1295,7 @@ int32_t RouteManager::SetSharingUnreachableIpRule(uint16_t action, const std::st
     ruleInfo.ruleDstIp = forbidIp;
     int32_t ret2 = SendSharingForbidIpRuleToKernel(action, family, FR_ACT_TO_TBL, ruleInfo);
     // LCOV_EXCL_START
-    if (ret1 < 0 || ret2 < 0) {
+    if (ret1 < 0 && ret2 < 0) {
         NETNATIVE_LOGE("SetSharingUnreachableIpRule for ip %{public}s failed, ret1 = %{public}d, ret2 = %{public}d",
             ToAnonymousIp(forbidIp, true).c_str(), ret1, ret2);
         return ROUTEMANAGER_ERROR;
