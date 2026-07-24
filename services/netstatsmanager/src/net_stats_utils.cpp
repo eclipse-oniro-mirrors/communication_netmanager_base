@@ -79,9 +79,11 @@ int32_t NetStatsUtils::GetStartTimestamp(int32_t startdate)
  
     // 转换为 time_t
     time_t last_month_xth_time_t = mktime(&last_month_xth_tm);
+    // LCOV_EXCL_START
     if (last_month_xth_time_t == -1) {
         return INT32_MAX;
     }
+    // LCOV_EXCL_STOP
     int32_t timestamp = static_cast<int32_t>(last_month_xth_time_t);
     NETMGR_LOG_I("timestamp: %{public}d", timestamp);
  
