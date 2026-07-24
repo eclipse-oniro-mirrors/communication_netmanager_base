@@ -167,7 +167,7 @@ int32_t NetStatsTrafficPlanService::GetTrafficPlanInfo(int32_t simId, TrafficPla
 
     std::lock_guard<std::mutex> lock(mutex_);
     auto it = trafficPlanInfoMap_.find(simId);
-    if (it != trafficPlanInfoMap_.end()) {
+    if (it != trafficPlanInfoMap_.end() && it->second != nullptr) {
         TrafficPlanInfo info = *(it->second);
         value = GetFieldValueByParam(info, param);
         NETMGR_LOG_I("GetTrafficPlanInfo success from cache, value: %{public}" PRId64, value);

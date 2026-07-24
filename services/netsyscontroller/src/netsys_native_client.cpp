@@ -1064,6 +1064,12 @@ __attribute__((no_sanitize("cfi"))) sptr<OHOS::NetsysNative::INetsysService> Net
         return nullptr;
     }
 
+    netsysNativeService_ = iface_cast<NetsysNative::INetsysService>(remote);
+    if (netsysNativeService_ == nullptr) {
+        NETMGR_LOG_E("Get remote service proxy failed");
+        return nullptr;
+    }
+
     deathRecipient_ = sptr<NetNativeConnDeathRecipient>::MakeSptr(shared_from_this());
     if (deathRecipient_ == nullptr) {
         NETMGR_LOG_E("Recipient new failed!");
@@ -1072,12 +1078,6 @@ __attribute__((no_sanitize("cfi"))) sptr<OHOS::NetsysNative::INetsysService> Net
 
     if ((remote->IsProxyObject()) && (!remote->AddDeathRecipient(deathRecipient_))) {
         NETMGR_LOG_E("add death recipient failed");
-        return nullptr;
-    }
-
-    netsysNativeService_ = iface_cast<NetsysNative::INetsysService>(remote);
-    if (netsysNativeService_ == nullptr) {
-        NETMGR_LOG_E("Get remote service proxy failed");
         return nullptr;
     }
 
@@ -1240,7 +1240,7 @@ int32_t NetsysNativeClient::SetIpAddress(int32_t socketFd, const std::string &ip
         NETMGR_LOG_E("The SIOCSIFADDR of ioctl failed.");
         return NETSYS_ERR_VPN;
     }
-    in_addr_t addressPrefixLength = prefixLen ? (~0 << (IPV4_MAX_LENGTH - prefixLen)) : 0;
+    in_addr_t addressPrefixLength = prefixLen ? (~0U << (IPV4_MAX_LENGTH - prefixLen)) : 0;
     *AsInAddr(&ifRequest.ifr_netmask) = htonl(addressPrefixLength);
     if (ioctl(socketFd, SIOCSIFNETMASK, &ifRequest)) {
         NETMGR_LOG_E("The SIOCSIFNETMASK of ioctl failed.");
@@ -1310,6 +1310,9 @@ int32_t NetsysNativeClient::RegisterCallback(const sptr<NetsysControllerCallback
 void NetsysNativeClient::ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult)
 {
     NETMGR_LOG_I("NetsysNativeClient::ProcessDhcpResult");
+    if (dhcpResult == nullptr) {
+        return;
+    }
     std::lock_guard lock(cbObjMutex_);
     NetsysControllerCallback::DhcpResult result;
     for (auto cb = cbObjects_.begin(); cb != cbObjects_.end();) {

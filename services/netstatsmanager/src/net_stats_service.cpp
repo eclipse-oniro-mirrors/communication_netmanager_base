@@ -870,6 +870,7 @@ int32_t NetStatsService::UpdateIfacesStats(const std::string &iface, uint64_t st
     ret = handler->WriteStatsData(infos, IFACE_TABLE);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Update ifaces stats failed");
+        NetmanagerHiTrace::NetmanagerFinishSyncTrace("NetStatsService UpdateIfacesStats end");
         return STATS_ERR_WRITE_DATA_FAIL;
     }
     // End of update traffic data by date.
@@ -1370,16 +1371,20 @@ SampleBundleInfo NetStatsService::GetSampleBundleInfoForUid(uint32_t uid)
 
 void NetStatsService::RefreshUidStatsFlag(uint64_t delay)
 {
-    std::function<void()> uidInstallSourceFunc = [this]() {
-        auto tmp = GetSampleBundleInfosForActiveUser();
+    std::shared_ptr<NetStatsService> selfPtr = shared_from_this();
+    std::function<void()> uidInstallSourceFunc = [selfPtr]() {
+        if (selfPtr->netStatsCached_ == nullptr) {
+            return;
+        }
+        auto tmp = selfPtr->GetSampleBundleInfosForActiveUser();
         for (auto iter = tmp.begin(); iter != tmp.end(); ++iter) {
             if (CommonUtils::IsSim(iter->second.bundleName_) ||
                 CommonUtils::IsSim2(iter->second.bundleName_)) {
-                netStatsCached_->SetUidSimSampleBundle(iter->first, iter->second);
+                selfPtr->netStatsCached_->SetUidSimSampleBundle(iter->first, iter->second);
             }
         }
-        netStatsCached_->ClearUidStatsFlag();
-        netStatsCached_->SetUidStatsFlag(tmp);
+        selfPtr->netStatsCached_->ClearUidStatsFlag();
+        selfPtr->netStatsCached_->SetUidStatsFlag(tmp);
     };
     ffrt::submit(std::move(uidInstallSourceFunc), {}, {}, ffrt::task_attr().name("RefreshUidStatsFlag").delay(delay));
 }

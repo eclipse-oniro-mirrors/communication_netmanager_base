@@ -188,11 +188,13 @@ int32_t NetDataShareHelperUtils::RegisterObserver(const Uri &uri, const std::fun
     static std::atomic<int32_t> callbackId;
     auto dataShareHelper = CreateDataShareHelper();
     if (dataShareHelper == nullptr) {
+        dataShareHelper->Release();
         NETMGR_LOG_E("dataShareHelper is nullptr");
         return NETMANAGER_ERROR;
     }
     sptr<AAFwk::IDataAbilityObserver> observer = new (std::nothrow) NetDataAbilityObserver(onChange);
     if (observer == nullptr) {
+        dataShareHelper->Release();
         return NETMANAGER_ERROR;
     }
     dataShareHelper->RegisterObserver(uri, observer);
@@ -223,6 +225,7 @@ int32_t NetDataShareHelperUtils::UnRegisterSettingsObserver(const Uri &uri,
     NETMGR_LOG_I("NetDataShareHelperUtils::UnRegisterSettingsObserver");
     auto settingHelper = CreateDataShareHelper();
     if (settingHelper == nullptr) {
+        settingHelper->Release();
         NETMGR_LOG_E("settingHelper is nullptr");
         return NETMANAGER_ERROR;
     }

@@ -615,7 +615,7 @@ void NetStatsCached::SetCycleThreshold(uint32_t threshold)
     cycleThreshold_ = threshold;
 #ifndef UNITTEST_FORBID_FFRT
     cacheTimer_ = std::make_unique<FfrtTimer>();
-    cacheTimer_->Start(cycleThreshold_, [this]() { CacheStats(); });
+    cacheTimer_->Start(static_cast<int>(cycleThreshold_), [this]() { CacheStats(); });
 #endif
 }
 

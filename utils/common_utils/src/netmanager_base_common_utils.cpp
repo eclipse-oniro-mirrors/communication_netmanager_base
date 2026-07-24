@@ -728,6 +728,8 @@ int32_t ForkExec(const std::string &command, std::string *out)
     NETMGR_LOG_D("ForkExec");
     pid_t pid = fork();
     if (pid < 0) {
+        close(pipeFd[0]);
+        close(pipeFd[1]);
         return NETMANAGER_ERROR;
     }
     if (pid == 0) {
