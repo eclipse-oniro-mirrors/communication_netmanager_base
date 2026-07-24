@@ -368,13 +368,13 @@ int32_t Ipv6PrefixLen(const std::string &ip)
 
 bool ParseInt(const std::string &str, int32_t *value)
 {
-    // LCOV_EXCL_START
-    if (str.empty()) {
+    char *end;
+    long long v = strtoll(str.c_str(), &end, 10);
+    if (std::string(end) == str || *end != '\0' || v < INT_MIN || v > INT_MAX) {
         return false;
     }
-    // LCOV_EXCL_STOP
-    auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
-    return ec == std::errc{} && ptr == str.data() + str.size();
+    *value = v;
+    return true;
 }
 
 int64_t ConvertToInt64(const std::string &str)
