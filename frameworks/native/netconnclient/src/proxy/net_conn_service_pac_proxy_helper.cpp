@@ -31,8 +31,8 @@ std::shared_ptr<NetConnServicePacProxyHelper> NetConnServicePacProxyHelper::GetI
     std::lock_guard<std::mutex> lock(mutex);
     if (instance == nullptr) {
         instance = std::make_shared<NetConnServicePacProxyHelper>();
-        instance->requestFunction_ = fun;
     }
+    instance->requestFunction_ = fun;
     return instance;
 }
 
@@ -87,7 +87,10 @@ int32_t NetConnServicePacProxyHelper::GetPacFileUrl(std::string &pacUrl)
         return error;
     }
 
-    int32_t ret = reply.ReadInt32();
+    int32_t ret = NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
     if (ret == NETMANAGER_SUCCESS) {
         if (!reply.ReadString(pacUrl)) {
             return NETMANAGER_ERR_READ_REPLY_FAIL;

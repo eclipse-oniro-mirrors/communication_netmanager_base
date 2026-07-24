@@ -116,8 +116,12 @@ bool HttpProxy::Marshalling(Parcel &parcel) const
             break;
         }
     }
-    parcel.WriteString(username_);
-    parcel.WriteString(password_);
+    if (!parcel.WriteString(username_)) {
+        return false;
+    }
+    if (!parcel.WriteString(password_)) {
+        return false;
+    }
     return true;
 }
 

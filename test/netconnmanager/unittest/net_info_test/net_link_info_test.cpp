@@ -26,6 +26,7 @@ using namespace testing::ext;
 constexpr const char *LOCAL_ROUTE_NEXT_HOP = "0.0.0.0";
 constexpr const char *LOCAL_ROUTE_IPV6_DESTINATION = "::";
 constexpr const char *TEST_IPV4_ADDR = "127.0.0.1";
+constexpr size_t PARCEL_OVERFLOW_STRING_SIZE = 204800;
 } // namespace
 class NetLinkInfoTest : public testing::Test {
 public:
@@ -606,6 +607,61 @@ HWTEST_F(NetLinkInfoTest, EqualTestHttpProxy, TestSize.Level1)
     ASSERT_NE(netLinkInfo1, nullptr);
     netLinkInfo1->httpProxy_ = {TEST_IPV4_ADDR, 8010, {"localhost"}};
     ASSERT_TRUE(*netLinkInfo1 != *netLinkInfo);
+}
+
+/**
+ * @tc.name: HttpProxyMarshallingUsernameWriteFailTest
+ * @tc.desc: Test HttpProxy::Marshalling returns false when WriteString(username_) fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetLinkInfoTest, HttpProxyMarshallingUsernameWriteFailTest, TestSize.Level1)
+{
+    HttpProxy httpProxy(TEST_IPV4_ADDR, 80, {"localhost"});
+    SecureData largeUsername;
+    largeUsername.assign(PARCEL_OVERFLOW_STRING_SIZE, 'x');
+    httpProxy.SetUserName(largeUsername);
+    MessageParcel data;
+    ASSERT_FALSE(httpProxy.Marshalling(data));
+}
+
+/**
+ * @tc.name: HttpProxyMarshallingPasswordWriteFailTest
+ * @tc.desc: Test HttpProxy::Marshalling returns false when WriteString(password_) fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetLinkInfoTest, HttpProxyMarshallingPasswordWriteFailTest, TestSize.Level1)
+{
+    HttpProxy httpProxy(TEST_IPV4_ADDR, 80, {"localhost"});
+    SecureData largePassword;
+    largePassword.assign(PARCEL_OVERFLOW_STRING_SIZE, 'x');
+    httpProxy.SetPassword(largePassword);
+    MessageParcel data;
+    ASSERT_FALSE(httpProxy.Marshalling(data));
+}
+
+/**
+ * @tc.name: HttpProxyMarshallingWithCredentialsTest
+ * @tc.desc: Test HttpProxy::Marshalling succeeds with username and password set
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetLinkInfoTest, HttpProxyMarshallingWithCredentialsTest, TestSize.Level1)
+{
+    HttpProxy httpProxy(TEST_IPV4_ADDR, 80, {"localhost"});
+    SecureData username;
+    username.assign("user123");
+    SecureData password;
+    password.assign("pass456");
+    httpProxy.SetUserName(username);
+    httpProxy.SetPassword(password);
+    MessageParcel data;
+    ASSERT_TRUE(httpProxy.Marshalling(data));
+
+    HttpProxy unmarshalledProxy;
+    ASSERT_TRUE(HttpProxy::Unmarshalling(data, unmarshalledProxy));
+    ASSERT_EQ(unmarshalledProxy.GetHost(), TEST_IPV4_ADDR);
+    ASSERT_EQ(unmarshalledProxy.GetPort(), 80);
+    ASSERT_EQ(unmarshalledProxy.GetUsername(), "user123");
+    ASSERT_EQ(unmarshalledProxy.GetPassword(), "pass456");
 }
 
 /**
