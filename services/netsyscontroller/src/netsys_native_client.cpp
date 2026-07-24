@@ -1195,7 +1195,7 @@ int32_t NetsysNativeClient::EnableVirtualNetIfaceCard(int32_t socketFd, struct i
 {
     NETMGR_LOG_D("NetsysNativeClient::EnableVirtualNetIfaceCard: socketFd[%{public}d]", socketFd);
     int32_t ifaceFdTemp = 0;
-     if ((ifaceFdTemp = open(DEV_NET_TUN_PATH, O_RDWR | O_CLOEXEC)) < 0) {
+    if ((ifaceFdTemp = open(DEV_NET_TUN_PATH, O_RDWR | O_CLOEXEC)) < 0) {
         NETMGR_LOG_E("VPN tunnel device open was failed.");
         return NETSYS_ERR_VPN;
     }
