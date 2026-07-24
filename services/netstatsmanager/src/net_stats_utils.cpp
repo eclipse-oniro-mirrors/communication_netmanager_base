@@ -317,7 +317,7 @@ std::string NetStatsUtils::GetIccIdBySimId(int32_t simId)
     int32_t ret = Telephony::CoreServiceClient::GetInstance().GetSimIccId(slotId, u16Hplmn);
     if (ret != 0) {
         NETMGR_LOG_E("GetSimIccId error. slot:%{public}d, ret:%{public}d", slotId, ret);
-        return OHOS::Str16ToStr8(u16Hplmn);
+        return "";
     }
     return OHOS::Str16ToStr8(u16Hplmn);
 }
