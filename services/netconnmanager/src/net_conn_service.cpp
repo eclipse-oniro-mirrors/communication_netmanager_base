@@ -3476,7 +3476,11 @@ void NetConnService::NetInterfaceStateCallback::OnNetIfaceStateRemoteDied(const 
         return;
     }
     sptr<INetInterfaceStateCallback> callback = iface_cast<INetInterfaceStateCallback>(diedRemoted);
-    
+    if (callback == nullptr) {
+        NETMGR_LOG_E("iface_cast INetInterfaceStateCallback failed, callback is null");
+        return;
+    }
+
     int32_t ret = UnregisterInterfaceCallback(callback);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("UnregisterInterfaceCallback failed with code %{public}d", ret);

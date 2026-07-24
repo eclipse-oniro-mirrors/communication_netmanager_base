@@ -101,7 +101,7 @@ private:
     NetRequest netRequest_;
     std::atomic<bool> isAppFrozened_ = false;
     std::atomic<int32_t> lastCallbackType_ = 0;
-    int32_t lastNetId_ = 0;
+    std::atomic<int32_t> lastNetId_ = 0;
     std::recursive_mutex notifyLostMutex_;
     std::atomic<bool> isNotifyLostDelay_ = false;
     std::atomic<int32_t> notifyLostNetId_ = 0;
