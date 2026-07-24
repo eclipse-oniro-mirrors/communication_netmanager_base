@@ -344,11 +344,12 @@ static long GetUidTrafficFromBpf(int uid, int cgroupType)
         return -1;
     }
     bzero(buf, sizeof(buf));
-    ssize_t readRet = read(sock, buf, sizeof(buf));
+    ssize_t readRet = read(sock, buf, sizeof(buf) - 1);
     if (readRet < 0) {
         close(sock);
         return -1;
     }
+    buf[readRet] = '\0';
     close(sock);
     return atol(buf);
 }

@@ -118,7 +118,7 @@ inline uint64_t GetCurrentMilliSecond()
 bool IsSameNaturalDay(uint32_t current, uint32_t another);
 bool WriteFile(const std::string &filePath, const std::string &fileContent);
 std::string GetHostnameFromURL(const std::string &url);
-int32_t GetTodayMidnightTimestamp(int hour, int min, int sec);
+uint64_t GetTodayMidnightTimestamp(int hour, int min, int sec);
 void DeleteFile(const std::string &filePath);
 std::string ExtractDomainFormUrl(const std::string &url);
 bool IsUsableGlobalIpv6Addr(const std::string &ipv6Addr);

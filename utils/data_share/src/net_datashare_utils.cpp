@@ -91,9 +91,21 @@ int32_t NetDataShareHelperUtils::Query(Uri &uri, const std::string &key, std::st
         return NETMANAGER_ERROR;
     }
 
-    int columnIndex;
-    result->GetColumnIndex(SETTINGS_DATA_COLUMN_VALUE, columnIndex);
-    result->GetString(columnIndex, value);
+    int32_t columnIndex = -1;
+    int32_t ret = result->GetColumnIndex(SETTINGS_DATA_COLUMN_VALUE, columnIndex);
+    // LCOV_EXCL_START
+    if (ret != DataShare::E_OK) {
+        result->Close();
+        dataShareHelper->Release();
+        return NETMANAGER_ERROR;
+    }
+    ret = result->GetString(columnIndex, value);
+    if (ret != DataShare::E_OK) {
+        result->Close();
+        dataShareHelper->Release();
+        return NETMANAGER_ERROR;
+    }
+    // LCOV_EXCL_STOP
     result->Close();
     dataShareHelper->Release();
     NETMGR_LOG_D("query success,value[%{public}s]", value.c_str());

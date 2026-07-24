@@ -541,7 +541,13 @@ int32_t NetsysNativeClient::SetInterfaceDown(const std::string &iface)
     }
     OHOS::nmd::InterfaceConfigurationParcel ifCfg;
     ifCfg.ifName = iface;
-    proxy->GetInterfaceConfig(ifCfg);
+    int32_t ret = proxy->GetInterfaceConfig(ifCfg);
+    // LCOV_EXCL_START
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("GetInterfaceConfig fail %{public}d", ret);
+        return ret;
+    }
+    // LCOV_EXCL_STOP
     auto fit = std::find(ifCfg.flags.begin(), ifCfg.flags.end(), IF_CFG_UP);
     if (fit != ifCfg.flags.end()) {
         ifCfg.flags.erase(fit);
@@ -560,7 +566,13 @@ int32_t NetsysNativeClient::SetInterfaceUp(const std::string &iface)
     }
     OHOS::nmd::InterfaceConfigurationParcel ifCfg;
     ifCfg.ifName = iface;
-    proxy->GetInterfaceConfig(ifCfg);
+    int32_t ret = proxy->GetInterfaceConfig(ifCfg);
+    // LCOV_EXCL_START
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("GetInterfaceConfig fail %{public}d", ret);
+        return ret;
+    }
+    // LCOV_EXCL_STOP
     auto fit = std::find(ifCfg.flags.begin(), ifCfg.flags.end(), IF_CFG_DOWN);
     if (fit != ifCfg.flags.end()) {
         ifCfg.flags.erase(fit);
@@ -1183,7 +1195,7 @@ int32_t NetsysNativeClient::EnableVirtualNetIfaceCard(int32_t socketFd, struct i
 {
     NETMGR_LOG_D("NetsysNativeClient::EnableVirtualNetIfaceCard: socketFd[%{public}d]", socketFd);
     int32_t ifaceFdTemp = 0;
-    if ((ifaceFdTemp = open(DEV_NET_TUN_PATH, O_RDWR)) < 0) {
+     if ((ifaceFdTemp = open(DEV_NET_TUN_PATH, O_RDWR | O_CLOEXEC)) < 0) {
         NETMGR_LOG_E("VPN tunnel device open was failed.");
         return NETSYS_ERR_VPN;
     }
