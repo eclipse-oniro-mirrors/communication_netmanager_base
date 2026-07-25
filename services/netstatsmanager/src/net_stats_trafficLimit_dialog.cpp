@@ -178,6 +178,8 @@ bool TrafficLimitDialog::UnShowTrafficLimitDialog()
         NETMGR_LOG_E("DisconnectAbility failed %{public}d", ret);
         return false;
     }
+    trafficlimitAbilityConn_ = nullptr;
+    isDialogOpen_ = false;
     NETMGR_LOG_I("Unshow TrafficLimit Dialog success");
     return true;
 }

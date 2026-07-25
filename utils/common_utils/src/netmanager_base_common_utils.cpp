@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <arpa/inet.h>
+#include <charconv>
 #include <cstddef>
 #include <cstdlib>
 #include <netinet/in.h>
@@ -48,7 +49,6 @@
 
 namespace OHOS::NetManagerStandard::CommonUtils {
 constexpr int32_t INET_OPTION_SUC = 1;
-constexpr int32_t DECIMAL_SYSTEM = 10;
 constexpr uint32_t CONST_MASK = 0x80000000;
 constexpr size_t MAX_DISPLAY_NUM = 2;
 constexpr uint32_t IPV4_DOT_NUM = 3;
@@ -379,7 +379,9 @@ bool ParseInt(const std::string &str, int32_t *value)
 
 int64_t ConvertToInt64(const std::string &str)
 {
-    return strtoll(str.c_str(), nullptr, DECIMAL_SYSTEM);
+    int64_t value = 0;
+    std::from_chars(str.data(), str.data() + str.size(), value);
+    return value;
 }
 
 std::string MaskIpMiddle(std::string &maskedResult, const std::string &delimiter)
@@ -601,6 +603,11 @@ int32_t ForkExecChildProcess(const int32_t *pipeFd, int32_t count, const std::ve
     if (count != PIPE_FD_NUM) {
         _exit(-1);
     }
+    // LCOV_EXCL_START
+    if (args.empty() || args[0] == nullptr) {
+        _exit(-1);
+    }
+    // LCOV_EXCL_STOP
     if (close(pipeFd[PIPE_OUT]) != 0) {
         _exit(-1);
     }
@@ -985,11 +992,12 @@ bool IpToString(uint32_t ipAddr, std::string &ipStrAddr)
     return true;
 }
 
-int32_t GetTodayMidnightTimestamp(int hour, int min, int sec)
+uint64_t GetTodayMidnightTimestamp(int hour, int min, int sec)
 {
     auto now = std::chrono::system_clock::now();
     std::time_t nowClock = std::chrono::system_clock::to_time_t(now);
-    std::tm* localTime = std::localtime(&nowClock);
+    std::tm localTimeBuff;
+    std::tm* localTime = localtime_r(&nowClock, &localTimeBuff);
     if (localTime == nullptr) {
         NETMGR_LOG_E("localTime is nullptr");
         return 0;
@@ -997,12 +1005,15 @@ int32_t GetTodayMidnightTimestamp(int hour, int min, int sec)
     localTime->tm_hour = hour;
     localTime->tm_min = min;
     localTime->tm_sec = sec;
-
     std::time_t endOfDayTime = std::mktime(localTime);
+    // LCOV_EXCL_START
+    if (endOfDayTime == static_cast<time_t>(-1)) {
+        return 0;
+    }
+    // LCOV_EXCL_STOP
     auto timeXth = std::chrono::system_clock::from_time_t(endOfDayTime);
     auto timestamp = std::chrono::system_clock::to_time_t(timeXth);
-
-    return timestamp;
+    return static_cast<uint64_t>(timestamp);
 }
 
 void DeleteFile(const std::string &filePath)

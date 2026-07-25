@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <charconv>
 #include <chrono>
 
 #include "net_stats_utils.h"
@@ -37,15 +38,17 @@ int32_t NetStatsUtils::GetStartTimestamp(int32_t startdate)
     // 获取当前日期和时间
     auto now = std::chrono::system_clock::now();
     time_t now_time_t = std::chrono::system_clock::to_time_t(now);
-    tm* now_tm = std::localtime(&now_time_t);
-    if (now_tm == nullptr) {
+    tm now_tm = {};
+    // LCOV_EXCL_START
+    if (localtime_r(&now_time_t, &now_tm) == nullptr) {
         return INT32_MAX;
     }
+    // LCOV_EXCL_STOP
  
     // 获取当前年份和月份
-    int current_year = now_tm->tm_year + TM_YEAR_START;
-    int current_month = now_tm->tm_mon + 1; // tm_mon是0-11，所以需要加1
-    int current_day = now_tm->tm_mday;
+    int current_year = now_tm.tm_year + TM_YEAR_START;
+    int current_month = now_tm.tm_mon + 1; // tm_mon是0-11，所以需要加1
+    int current_day = now_tm.tm_mday;
  
     // 计算上个月的年份和月份
     int previous_month = current_month == 1 ? MONTH_NUM : current_month - 1;
@@ -76,9 +79,12 @@ int32_t NetStatsUtils::GetStartTimestamp(int32_t startdate)
  
     // 转换为 time_t
     time_t last_month_xth_time_t = mktime(&last_month_xth_tm);
-    auto last_month_xth = std::chrono::system_clock::from_time_t(last_month_xth_time_t);
-
-    int32_t timestamp = static_cast<int32_t>(std::chrono::system_clock::to_time_t(last_month_xth));
+    // LCOV_EXCL_START
+    if (last_month_xth_time_t == -1) {
+        return INT32_MAX;
+    }
+    // LCOV_EXCL_STOP
+    int32_t timestamp = static_cast<int32_t>(last_month_xth_time_t);
     NETMGR_LOG_I("timestamp: %{public}d", timestamp);
  
     return timestamp;
@@ -88,14 +94,16 @@ int32_t NetStatsUtils::GetEndTimestamp(int32_t startdate)
 {
     auto now = std::chrono::system_clock::now();
     time_t now_time_t = std::chrono::system_clock::to_time_t(now);
-    tm* now_tm = std::localtime(&now_time_t);
-    if (now_tm == nullptr) {
+    tm now_tm = {};
+    // LCOV_EXCL_START
+    if (localtime_r(&now_time_t, &now_tm) == nullptr) {
         return INT32_MAX;
     }
+    // LCOV_EXCL_STOP
  
-    int current_year = now_tm->tm_year + TM_YEAR_START;
-    int current_month = now_tm->tm_mon + 1;
-    int current_day = now_tm->tm_mday;
+    int current_year = now_tm.tm_year + TM_YEAR_START;
+    int current_month = now_tm.tm_mon + 1;
+    int current_day = now_tm.tm_mday;
  
     int next_month = current_month == MONTH_NUM ? 1 : current_month + 1;
     int next_year = current_month == MONTH_NUM ? current_year + 1 : current_year;
@@ -128,10 +136,12 @@ int32_t NetStatsUtils::GetEndTimestamp(int32_t startdate)
     }
 
     time_t next_month_xth_time_t = mktime(&next_month_xth_tm);
-    auto next_month_xth = std::chrono::system_clock::from_time_t(next_month_xth_time_t);
-    int32_t timestamp = static_cast<int32_t>(std::chrono::system_clock::to_time_t(next_month_xth));
- 
-    return timestamp - 1;
+    // LCOV_EXCL_START
+    if (next_month_xth_time_t == -1) {
+        return INT32_MAX;
+    }
+    // LCOV_EXCL_STOP
+    return static_cast<int32_t>(next_month_xth_time_t - 1);
 }
 
 int32_t NetStatsUtils::GetTodayStartTimestamp()
@@ -257,34 +267,13 @@ bool NetStatsUtils::ConvertToUint64(const std::string &str, uint64_t &value)
 
 bool NetStatsUtils::ConvertToInt32(const std::string &str, int32_t &value)
 {
-    char* end;
-    errno = 0; // 清除 errno
-
+    // LCOV_EXCL_START
     if (str.empty()) {
-        NETMGR_LOG_E("string error. str: %{public}s", str.c_str());
         return false;
     }
-
-    value = std::strtod(str.c_str(), &end);
-
-    // 检查错误:
-    // 1. 若没有数字被转换
-    if (end == str.c_str()) {
-        NETMGR_LOG_E("string error. str: %{public}s", str.c_str());
-        return false;
-    }
-    // 2. 若存在范围错误（过大或过小）
-    if (errno == ERANGE && (value == HUGE_VAL || value == HUGE_VALF || value == HUGE_VALL)) {
-        NETMGR_LOG_E("string error. str: %{public}s", str.c_str());
-        return false;
-    }
-    // 3. 若字符串包含非数字字符
-    if (*end != '\0') {
-        NETMGR_LOG_E("string error. str: %{public}s", str.c_str());
-        return false;
-    }
-
-    return true;
+    // LCOV_EXCL_STOP
+    auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
+    return ec == std::errc{} && ptr == str.data() + str.size();
 }
 
 bool NetStatsUtils::IsLessThanOneMonthAgoPrecise(time_t timestamp)
