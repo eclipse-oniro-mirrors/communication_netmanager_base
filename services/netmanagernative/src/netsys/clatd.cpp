@@ -54,7 +54,7 @@ Clatd::Clatd(int tunFd, int readSock6, int writeSock6, const std::string &v6Ifac
         return;
     }
     tunIface_ = std::string(CLAT_PREFIX) + v6Iface;
-    if (inet_pton(AF_INET6, v6AddrStr.c_str(), &v6Addr_) != 1 || 
+    if (inet_pton(AF_INET6, v6AddrStr.c_str(), &v6Addr_) != 1 ||
         inet_pton(AF_INET, v4AddrStr.c_str(), &v4Addr_.s_addr) != 1 ||
         inet_pton(AF_INET6, prefixAddrStr.c_str(), &prefixAddr_) != 1) {
         NETNATIVE_LOGE("inet_pton failed");
