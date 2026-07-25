@@ -72,7 +72,7 @@ std::atomic_int& VnicManager::GetNetSock(bool ipv4)
 int32_t VnicManager::CreateVnicInterface()
 {
     // LCOV_EXCL_START
-    if (tunFd_ != 0) {
+    if (tunFd_ >= 0) {
         return NETMANAGER_SUCCESS;
     }
     // LCOV_EXCL_STOP
@@ -84,7 +84,7 @@ int32_t VnicManager::CreateVnicInterface()
 
     int32_t tunfd = open(VNIC_TUN_DEVICE_PATH, O_RDWR | O_NONBLOCK);
     // LCOV_EXCL_START
-    if (tunfd <= 0) {
+    if (tunfd < 0) {
         NETNATIVE_LOGE("open virtual device failed: %{public}d", errno);
         return NETMANAGER_ERROR;
     }
@@ -115,32 +115,36 @@ int32_t VnicManager::CreateVnicInterface()
 
     NETNATIVE_LOGI("open virtual device successfully, [%{public}d]", tunfd);
     tunFd_ = tunfd;
-    SetVnicUp();
+    if (SetVnicUp() != NETMANAGER_SUCCESS) {
+        DestroyVnicInterface();
+        return NETMANAGER_ERROR;
+    }
     return NETMANAGER_SUCCESS;
 }
 
 void VnicManager::DestroyVnicInterface()
 {
     SetVnicDown();
-    if (net4Sock_ != 0) {
+    if (net4Sock_ >= 0) {
         close(net4Sock_);
-        net4Sock_ = 0;
+        net4Sock_ = -1;
     }
-    if (net6Sock_ != 0) {
+    if (net6Sock_ >= 0) {
         close(net6Sock_);
-        net6Sock_ = 0;
+        net6Sock_ = -1;
     }
-    if (tunFd_ != 0) {
+    if (tunFd_ >= 0) {
         close(tunFd_);
-        tunFd_ = 0;
+        tunFd_ = -1;
     }
 }
 
 int32_t VnicManager::SetVnicResult(std::atomic_int &fd, unsigned long cmd, ifreq &ifr)
 {
-    if (fd > 0) {
+    int32_t fdval = fd.load();
+    if (fdval >= 0) {
         // LCOV_EXCL_START
-        if (ioctl(fd, cmd, &ifr) < 0) {
+        if (ioctl(fdval, cmd, &ifr) < 0) {
             NETNATIVE_LOGE("set vnic error, errno:%{public}d", errno);
             return NETMANAGER_ERROR;
         }
@@ -187,8 +191,9 @@ int32_t VnicManager::SetVnicAddress(const std::string &ifName, const std::string
             NETNATIVE_LOGE(" get network interface ipv6 failed: %{public}d", errno);
             return NETMANAGER_ERROR;
         }
-        if (inet_pton(AF_INET6, tunAddr.c_str(), &ifr6.ifr6_addr) == 0) {
+        if (inet_pton(AF_INET6, tunAddr.c_str(), &ifr6.ifr6_addr) <= 0) {
             NETNATIVE_LOGE("inet_pton ipv6 address failed: %{public}d", errno);
+            return NETMANAGER_ERROR;
         }
         if (prefix <= 0 || prefix >= NET6_MASK_MAX_LENGTH) {
             NETNATIVE_LOGE("ipv6 prefix: %{public}d error", prefix);
@@ -315,12 +320,14 @@ int32_t VnicManager::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_
     }
 
     if (CreateVnicInterface() != NETMANAGER_SUCCESS) {
+        uidRanges.clear();
         return NETMANAGER_ERROR;
     }
     if (SetVnicMtu(VNIC_TUN_CARD_NAME, mtu) != NETMANAGER_SUCCESS ||
         SetVnicAddress(VNIC_TUN_CARD_NAME, tunAddr, prefix) != NETMANAGER_SUCCESS ||
         AddDefaultRoute() != NETMANAGER_SUCCESS) {
         DestroyVnicInterface();
+        uidRanges.clear();
         return NETMANAGER_ERROR;
     }
 
@@ -345,14 +352,16 @@ int32_t VnicManager::DestroyVnic()
 {
     std::unique_lock<std::mutex> lock(vnicMutex_);
     nmd::NetLinkSocketDiag socketDiag;
-    nmd::RouteManager::UpdateVnicUidRangesRule(uidRanges, false);
+    int ret = nmd::RouteManager::UpdateVnicUidRangesRule(uidRanges, false);
     DelDefaultRoute();
     DestroyVnicInterface();
     for (auto const &uid : uidRanges) {
         NETNATIVE_LOG_D("DestroyVnic uid %{public}d", (uint32_t)uid.begin_);
         socketDiag.DestroyLiveSocketsWithUid("", (uint32_t)uid.begin_);
     }
-    uidRanges.clear();
+    if (ret == NETMANAGER_SUCCESS) {
+        uidRanges.clear();
+    }
     return NETMANAGER_SUCCESS;
 }
 
