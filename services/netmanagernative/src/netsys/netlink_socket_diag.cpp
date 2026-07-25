@@ -134,7 +134,7 @@ int32_t NetLinkSocketDiag::ExecuteDestroySocket(uint8_t proto, const inet_diag_m
     request.nlh_.nlmsg_flags = NLM_F_REQUEST;
     request.nlh_.nlmsg_len = sizeof(request);
 
-    if (msg->idiag_state >= 32) {
+    if (msg->idiag_state >= sizeof(int) * 8) {
         NETNATIVE_LOGE("invalid idiag_state");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
