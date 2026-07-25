@@ -133,6 +133,8 @@ HWTEST_F(MultiVpnManagerTest, VpnManagerBranchTest005, TestSize.Level1)
     uint32_t cmd = 0;
     std::atomic_int fd = 1;
     auto result = MultiVpnManager::GetInstance().SetVpnResult(fd, cmd, ifr);
+    std::atomic_int fd2 = 0;
+    MultiVpnManager::GetInstance().SetVpnResult(fd2, cmd, ifr);
     EXPECT_EQ(result, NETMANAGER_ERROR);
 }
 

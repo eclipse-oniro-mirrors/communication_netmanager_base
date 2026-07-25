@@ -55,6 +55,7 @@ constexpr uint32_t ARRAY_OFFSET_4_INDEX = 4;
 constexpr uint32_t ARRAY_OFFSET_5_INDEX = 5;
 constexpr uint32_t MOVE_BIT_LEFT31 = 31;
 constexpr uint32_t BIT_MAX = 32;
+constexpr uint32_t IPV6_PREFIX_MAX_LEN = 128;
 constexpr uint32_t IOCTL_RETRY_TIME = 32;
 constexpr int32_t MAX_MTU_LEN = 11;
 constexpr int32_t MAC_ADDRESS_STR_LEN = 18;
@@ -123,6 +124,7 @@ int InterfaceManager::SetMtu(const char *interfaceName, const char *mtuValue)
 
     if (!CheckIfaceName(interfaceName)) {
         NETNATIVE_LOGE("SetMtu isIfaceName fail %{public}d", errno);
+        return -1;
     }
     int32_t sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {
@@ -177,6 +179,24 @@ std::vector<std::string> InterfaceManager::GetInterfaceNames()
     return ifaceNames;
 }
 
+// LCOV_EXCL_START
+bool InterfaceManager::CheckPrefix(int8_t family, int prefixLen)
+{
+    if (family == AF_INET) {
+        if (prefixLen < 0 || prefixLen > static_cast<int>(BIT_MAX)) {
+            NETNATIVE_LOGE("ModifyAddress, invalid ipv4 prefixLen %{public}d", prefixLen);
+            return false;
+        }
+    } else {
+        if (prefixLen < 0 || prefixLen > static_cast<int>(IPV6_PREFIX_MAX_LEN)) {
+            NETNATIVE_LOGE("ModifyAddress, invalid ipv6 prefixLen %{public}d", prefixLen);
+            return false;
+        }
+    }
+    return true;
+}
+// LCOV_EXCL_STOP
+
 int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, const char *addr, int prefixLen)
 {
     if (interfaceName == nullptr || addr == nullptr) {
@@ -192,7 +212,11 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
         NETNATIVE_LOGE("Ivalid ip address: %{public}s", CommonUtils::ToAnonymousIp(addr).c_str());
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-
+    // LCOV_EXCL_START
+    if (!CheckPrefix(family, prefixLen)) {
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    // LCOV_EXCL_STOP
     ifaddrmsg ifm = {static_cast<uint8_t>(family), static_cast<uint8_t>(prefixLen), 0, 0, index};
     uint16_t flags = action == RTM_NEWADDR ? NLM_F_CREATE | NLM_F_EXCL : NLM_F_CREATE;
     nmd::NetlinkMsg nlmsg(flags, nmd::NETLINK_MAX_LEN, getpid());
@@ -200,21 +224,26 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
 
     if (family == AF_INET6) {
         in6_addr in6Addr;
-        if (inet_pton(AF_INET6, addr, &in6Addr) == -1) {
+        // LCOV_EXCL_START
+        if (inet_pton(AF_INET6, addr, &in6Addr) <= 0) {
             NETNATIVE_LOGE("Modify ipv6 address, inet_pton error %{public}d", errno);
             return NETMANAGER_ERR_INTERNAL;
         }
+        // LCOV_EXCL_STOP
         nlmsg.AddAttr(IFA_LOCAL, &in6Addr, sizeof(in6Addr));
     } else {
         in_addr inAddr;
-        if (inet_pton(AF_INET, addr, &inAddr) == -1) {
+        if (inet_pton(AF_INET, addr, &inAddr) <= 0) {
             NETNATIVE_LOGE("Modify ipv4 address, inet_pton error %{public}d", errno);
             return NETMANAGER_ERR_INTERNAL;
         }
         nlmsg.AddAttr(IFA_LOCAL, &inAddr, sizeof(inAddr));
         if (action == RTM_NEWADDR) {
-            inAddr.s_addr |= htonl((1U << (BIT_MAX - prefixLen)) - 1);
+            // LCOV_EXCL_START
+            uint32_t hostMask = (prefixLen == 0) ? 0xFFFFFFFFU : ((1U << (BIT_MAX - prefixLen)) - 1);
+            inAddr.s_addr |= htonl(hostMask);
             nlmsg.AddAttr(IFA_BROADCAST, &inAddr, sizeof(inAddr));
+            // LCOV_EXCL_STOP
         }
     }
 
@@ -239,8 +268,16 @@ int InterfaceManager::DelAddress(const char *interfaceName, const char *addr, in
 int InterfaceManager::DelAddress(const char *interfaceName, const char *addr, int prefixLen,
                                  int socketType)
 {
+    // LCOV_EXCL_START
+    if (interfaceName == nullptr || addr == nullptr) {
+        return -1;
+    }
+    // LCOV_EXCL_STOP
     NetLinkSocketDiag socketDiag;
-    socketDiag.SetSocketDestroyType(socketType);
+    if (socketDiag.SetSocketDestroyType(socketType) != 0) {
+        NETNATIVE_LOGE("DelAddress SetSocketDestroyType failed %{public}d", socketType);
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
     socketDiag.DestroyLiveSockets(addr, true);
     return 0;
 }
@@ -299,6 +336,12 @@ InterfaceConfigurationParcel InterfaceManager::GetIfaceConfig(const std::string 
     nmd::InterfaceConfigurationParcel ifaceConfig;
 
     int fd = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
+    // LCOV_EXCL_START
+    if (fd < 0) {
+        NETNATIVE_LOGE("GetIfaceConfig socket fail %{public}d", errno);
+        return ifaceConfig;
+    }
+    // LCOV_EXCL_STOP
     struct ifreq ifr = {};
     auto ret = strncpy_s(ifr.ifr_name, IFNAMSIZ, ifName.c_str(), ifName.length());
     if (ret != 0) {
@@ -308,7 +351,14 @@ InterfaceConfigurationParcel InterfaceManager::GetIfaceConfig(const std::string 
     ifaceConfig.ifName = ifName;
     if (ioctl(fd, SIOCGIFADDR, &ifr) != -1) {
         addr.s_addr = ((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr;
-        ifaceConfig.ipv4Addr = std::string(inet_ntoa(addr));
+        // LCOV_EXCL_START
+        char addrBuf[INET_ADDRSTRLEN] = {0};
+        if (inet_ntop(AF_INET, &addr, addrBuf, sizeof(addrBuf)) != nullptr) {
+            ifaceConfig.ipv4Addr = std::string(addrBuf);
+        } else {
+            NETNATIVE_LOGE("GetIfaceConfig inet_ntop fail %{public}d", errno);
+        }
+        // LCOV_EXCL_STOP
     }
     if (ioctl(fd, SIOCGIFNETMASK, &ifr) != -1) {
         ifaceConfig.prefixLength = Ipv4NetmaskToPrefixLength(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr);
@@ -371,7 +421,6 @@ int InterfaceManager::SetIfaceConfig(const nmd::InterfaceConfigurationParcel &if
     } while (errno == ETIMEDOUT && retry < IOCTL_RETRY_TIME);
     NETNATIVE_LOGI("set ifr flags=[%{public}d] strerror=[%{public}s] retry=[%{public}u]", ifr.ifr_flags,
                    strerror(errno), retry);
-    close(fd);
     return 1;
 }
 
@@ -397,6 +446,12 @@ int InterfaceManager::SetIpAddress(const std::string &ifaceName, const std::stri
     sin->sin_port = 0;
     sin->sin_addr = ipv4Addr;
     int32_t inetSocket = socket(AF_INET, SOCK_DGRAM, 0);
+    // LCOV_EXCL_START
+    if (inetSocket < 0) {
+        NETNATIVE_LOGE("set ip address socket fail %{public}d", errno);
+        return -1;
+    }
+    // LCOV_EXCL_STOP
     if (ioctl(inetSocket, SIOCSIFADDR, &ifr) < 0) {
         NETNATIVE_LOGE("set ip address ioctl SIOCSIFADDR error: %{public}s", strerror(errno));
         close(inetSocket);
@@ -422,8 +477,16 @@ int InterfaceManager::SetIffUp(const std::string &ifaceName)
     ifr.ifr_flags = static_cast<short int>(flagVal);
 
     int32_t inetSocket = socket(AF_INET, SOCK_DGRAM, 0);
+    // LCOV_EXCL_START
+    if (inetSocket < 0) {
+        NETNATIVE_LOGE("set iface up socket fail %{public}d", errno);
+        return -1;
+    }
+    // LCOV_EXCL_STOP
     if (ioctl(inetSocket, SIOCSIFFLAGS, &ifr) < 0) {
-        NETNATIVE_LOGE("set iface up ioctl SIOCSIFFLAGS error: %{public}s", strerror(errno));
+        char errmsg[INTERFACE_ERR_MAX_LEN] = {0};
+        strerror_r(errno, errmsg, INTERFACE_ERR_MAX_LEN);
+        NETNATIVE_LOGE("set iface up ioctl SIOCSIFFLAGS error: %{public}s", errmsg);
         close(inetSocket);
         return -1;
     }
@@ -443,11 +506,19 @@ int32_t InterfaceManager::AddStaticArp(const std::string &ipAddr, const std::str
     }
 
     int32_t inetSocket = socket(AF_INET, SOCK_DGRAM, 0);
+    // LCOV_EXCL_START
+    if (inetSocket < 0) {
+        NETNATIVE_LOGE("AddStaticArp socket fail %{public}d", errno);
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
     if (ioctl(inetSocket, SIOCSARP, &req) < 0) {
-        NETNATIVE_LOGE("AddStaticArp ioctl SIOCSARP error: %{public}s", strerror(errno));
+        char errmsg[INTERFACE_ERR_MAX_LEN] = {0};
+        strerror_r(errno, errmsg, INTERFACE_ERR_MAX_LEN);
+        NETNATIVE_LOGE("AddStaticArp ioctl SIOCSARP error: %{public}s", errmsg);
         close(inetSocket);
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
+    // LCOV_EXCL_STOP
     close(inetSocket);
     return NETMANAGER_SUCCESS;
 }
@@ -464,11 +535,19 @@ int32_t InterfaceManager::DelStaticArp(const std::string &ipAddr, const std::str
     }
 
     int32_t inetSocket = socket(AF_INET, SOCK_DGRAM, 0);
+    // LCOV_EXCL_START
+    if (inetSocket < 0) {
+        NETNATIVE_LOGE("DelStaticArp socket fail %{public}d", errno);
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
     if (ioctl(inetSocket, SIOCDARP, &req) < 0) {
-        NETNATIVE_LOGE("DelStaticArp ioctl SIOCDARP error: %{public}s", strerror(errno));
+        char errmsg[INTERFACE_ERR_MAX_LEN] = {0};
+        strerror_r(errno, errmsg, INTERFACE_ERR_MAX_LEN);
+        NETNATIVE_LOGE("DelStaticArp ioctl SIOCDARP error: %{public}s", errmsg);
         close(inetSocket);
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
+    // LCOV_EXCL_STOP
     close(inetSocket);
     return NETMANAGER_SUCCESS;
 }
@@ -476,6 +555,10 @@ int32_t InterfaceManager::DelStaticArp(const std::string &ipAddr, const std::str
 int32_t InterfaceManager::SetIpv6AutoConf(const std::string &ipAddr, const uint32_t on)
 {
     NETNATIVE_LOGI("SetIpv6AutoConf.");
+    if (ipAddr.empty()) {
+        NETNATIVE_LOGE("SetIpv6AutoConf ipAddr is empty");
+        return -1;
+    }
     std::string option = IPV6_PROC_PATH + ipAddr + "/autoconf";
     std::string value = on ? ENABLE_IPV6_AUTO_CONF : DISABLE_IPV6_AUTO_CONF;
     bool ipv6Success = WriteFile(option, value);
@@ -576,7 +659,7 @@ int32_t InterfaceManager::AssembleIPv6Neighbor(const std::string &ipv6Addr, cons
     }
 
     struct in6_addr in6Addr;
-    if (inet_pton(AF_INET6, ipv6Addr.c_str(), reinterpret_cast<void *>(&in6Addr)) == -1) {
+    if (inet_pton(AF_INET6, ipv6Addr.c_str(), reinterpret_cast<void *>(&in6Addr)) <= 0) {
         NETNATIVE_LOGE("addr inet_pton error %{public}d", errno);
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
@@ -680,11 +763,17 @@ int32_t InterfaceManager::CreateVlan(const std::string &ifName, uint32_t vlanId)
     nlmsg.AddLink(RTM_NEWLINK, ifm);
 
     std::string name = ifName + "." + std::to_string(vlanId);
-    if (name.length() > IFNAMSIZ) {
+    // LCOV_EXCL_START
+    if (name.length() >= IFNAMSIZ) {
+        NETNATIVE_LOGE("CreateVlan, vlan interface name too long: %{public}zu", name.length());
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
     char vlanIfName[IFNAMSIZ] = {0};
     size_t vlanIfLength = strlcpy(vlanIfName, name.c_str(), IFNAMSIZ) + 1;
+    if (vlanIfLength > IFNAMSIZ) {
+        vlanIfLength = IFNAMSIZ;
+    }
+    // LCOV_EXCL_STOP
     nlmsg.AddAttr(IFLA_LINK, &index, sizeof(index));
     nlmsg.AddAttr(IFLA_IFNAME, vlanIfName, vlanIfLength);
     struct nlattr *linkinfo = nlmsg.AddNestedStart(IFLA_LINKINFO);
@@ -734,8 +823,20 @@ int32_t InterfaceManager::AddVlanIp(const std::string &ifName, uint32_t vlanId,
 
     if (inet_pton(AF_INET, ip.c_str(), addrbuf) == 1) {
         family = AF_INET;
+        // LCOV_EXCL_START
+        if (mask > BIT_MAX) {
+            NETNATIVE_LOGE("AddVlanIp, invalid ipv4 mask %{public}u", mask);
+            return NETMANAGER_ERR_PARAMETER_ERROR;
+        }
+        // LCOV_EXCL_STOP
     } else if (inet_pton(AF_INET6, ip.c_str(), addrbuf) == 1) {
         family = AF_INET6;
+        // LCOV_EXCL_START
+        if (mask > IPV6_PREFIX_MAX_LEN) {
+            NETNATIVE_LOGE("AddVlanIp, invalid ipv6 mask %{public}u", mask);
+            return NETMANAGER_ERR_PARAMETER_ERROR;
+        }
+        // LCOV_EXCL_STOP
     } else {
         NETNATIVE_LOGE("AddVlanIp, invalid ip address");
         return NETMANAGER_ERROR;

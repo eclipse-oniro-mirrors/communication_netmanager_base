@@ -86,7 +86,7 @@ int32_t ConnManager::SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t 
 
 int32_t ConnManager::CreatePhysicalNetwork(uint16_t netId, NetworkPermission permission)
 {
-    if (needReinitRouteFlag_) {
+    if (needReinitRouteFlag_.load()) {
         std::set<int32_t> netIds;
         networks_.Iterate([&netIds](int32_t id, std::shared_ptr<NetsysNetwork> &NetsysNetworkPtr) {
             if (id == LOCAL_NET_ID || NetsysNetworkPtr == nullptr) {
@@ -126,7 +126,7 @@ int32_t ConnManager::DestroyNetwork(int32_t netId)
     const auto &net = FindNetworkById(netId);
     if (std::get<0>(net)) {
         std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
-        if (defaultNetId_ == netId) {
+        if (defaultNetId_.load() == netId) {
             if (nw->IsPhysical()) {
                 static_cast<PhysicalNetwork *>(nw.get())->RemoveDefault();
             }
@@ -140,7 +140,7 @@ int32_t ConnManager::DestroyNetwork(int32_t netId)
 
 int32_t ConnManager::SetDefaultNetwork(int32_t netId)
 {
-    if (defaultNetId_ == netId) {
+    if (defaultNetId_.load() == netId) {
         return NETMANAGER_SUCCESS;
     }
 
@@ -155,12 +155,13 @@ int32_t ConnManager::SetDefaultNetwork(int32_t netId)
         static_cast<PhysicalNetwork *>(nw.get())->AddDefault();
     }
 
-    if (defaultNetId_ != 0) {
-        const auto &defaultNet = FindNetworkById(defaultNetId_);
+    int32_t oldDefaultNetId = defaultNetId_.load();
+    if (oldDefaultNetId != 0) {
+        const auto &defaultNet = FindNetworkById(oldDefaultNetId);
         if (std::get<0>(defaultNet)) {
             std::shared_ptr<NetsysNetwork> nw = std::get<1>(defaultNet);
             if (!nw->IsPhysical()) {
-                NETNATIVE_LOGE("SetDefaultNetwork fail, defaultNetId_ :%{public}d is not physical", defaultNetId_);
+                NETNATIVE_LOGE("SetDefaultNetwork fail, defaultNetId_ :%{public}d is not physical", oldDefaultNetId);
                 return NETMANAGER_ERROR;
             }
             static_cast<PhysicalNetwork *>(nw.get())->RemoveDefault();
@@ -172,12 +173,13 @@ int32_t ConnManager::SetDefaultNetwork(int32_t netId)
 
 int32_t ConnManager::ClearDefaultNetwork()
 {
-    if (defaultNetId_ != 0) {
-        const auto &net = FindNetworkById(defaultNetId_);
+    int32_t curDefaultNetId = defaultNetId_.load();
+    if (curDefaultNetId != 0) {
+        const auto &net = FindNetworkById(curDefaultNetId);
         if (std::get<0>(net)) {
             std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
             if (!nw->IsPhysical()) {
-                NETNATIVE_LOGE("ClearDefaultNetwork fail, defaultNetId_ :%{public}d is not physical", defaultNetId_);
+                NETNATIVE_LOGE("ClearDefaultNetwork fail, defaultNetId_ :%{public}d is not physical", curDefaultNetId);
                 return NETMANAGER_ERROR;
             }
             static_cast<PhysicalNetwork *>(nw.get())->RemoveDefault();
@@ -200,7 +202,7 @@ std::tuple<bool, std::shared_ptr<NetsysNetwork>> ConnManager::FindNetworkById(in
 
 int32_t ConnManager::GetDefaultNetwork() const
 {
-    return defaultNetId_;
+    return defaultNetId_.load();
 }
 
 int32_t ConnManager::GetNetIdByInterface(const std::string &interfaceName)
@@ -439,7 +441,7 @@ void ConnManager::GetDumpInfos(std::string &infos)
 {
     static const std::string TAB = "  ";
     infos.append("Netsys connect manager :\n");
-    infos.append(TAB + "default NetId: " + std::to_string(defaultNetId_) + "\n");
+    infos.append(TAB + "default NetId: " + std::to_string(defaultNetId_.load()) + "\n");
     networks_.Iterate([&infos](int32_t id, std::shared_ptr<NetsysNetwork> &NetsysNetworkPtr) {
         infos.append(TAB + "NetId:" + std::to_string(id));
         std::string interfaces = TAB + "interfaces: {";

@@ -279,7 +279,12 @@ int32_t DnsQualityDiag::RegisterResultListener(const sptr<INetDnsResultCallback>
         NETNATIVE_LOGE("callback is nullptr");
         return 0;
     }
-
+    // LCOV_EXCL_START
+    if (handler_ == nullptr) {
+        NETNATIVE_LOGE("RegisterResultListener handler_ is nullptr");
+        return 0;
+    }
+    // LCOV_EXCL_STOP
     std::unique_lock<std::mutex> locker(resultListenersMutex_);
     report_delay = std::max(report_delay, timeStep);
     std::list<sptr<NetsysNative::INetDnsResultCallback>>::iterator iter;

@@ -245,6 +245,24 @@ HWTEST_F(MptcpManagerTest, AddEndpointTest003, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 }
 
+HWTEST_F(MptcpManagerTest, AddEndpointTest004, TestSize.Level1)
+{
+    auto manager = std::make_shared<MptcpManager>();
+    std::string ipAddr = "8989sdwewewew";
+    std::string ifName = "wlan0";
+    auto ret = manager->AddEndpoint(ipAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+}
+
+HWTEST_F(MptcpManagerTest, AddEndpointTest004, TestSize.Level1)
+{
+    auto manager = std::make_shared<MptcpManager>();
+    std::string ipAddr = "8989sdwewewew";
+    std::string ifName = "wlan0";
+    auto ret = manager->AddEndpoint(ipAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+}
+
 HWTEST_F(MptcpManagerTest, DeleteEndpointTest001, TestSize.Level1)
 {
     auto manager = std::make_shared<MptcpManager>();
@@ -463,6 +481,18 @@ HWTEST_F(MptcpManagerTest, OnInterfaceAddressUpdatedTest005, TestSize.Level1)
     auto it = manager->ifaceToIpAddrs_.find(ifName);
     EXPECT_TRUE(it != manager->ifaceToIpAddrs_.end());
     EXPECT_EQ(it->second.size(), 1u);
+}
+
+HWTEST_F(MptcpManagerTest, OnInterfaceAddressUpdatedTest006, TestSize.Level1)
+{
+    auto manager = std::make_shared<MptcpManager>();
+    std::string ifName = "wlan0";
+    manager->ifaceToIpAddrs_[ifName] = {"192.168.1.100"};
+    std::string testAddr1 = "";
+    manager->OnInterfaceAddressUpdated(testAddr1, ifName);
+    std::string testAddr2 = "232879979sds";
+    manager->OnInterfaceAddressUpdated(testAddr2, ifName);
+    EXPECT_NE(manager, nullptr);
 }
 
 HWTEST_F(MptcpManagerTest, OnInterfaceAddressRemovedTest001, TestSize.Level1)

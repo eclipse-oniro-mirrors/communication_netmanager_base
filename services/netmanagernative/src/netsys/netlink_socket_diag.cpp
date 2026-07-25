@@ -526,6 +526,10 @@ int32_t NetLinkSocketDiag::GetSystemNetPortStates(NetManagerStandard::NetPortSta
 
 int32_t NetLinkSocketDiag::SetSocketDestroyType(int socketType)
 {
+    if (socketType < 0) {
+        NETNATIVE_LOGE("SetSocketDestroyType invalid socketType %{public}d", socketType);
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
     if (socketType >= static_cast<int>(SocketDestroyType::DESTROY_DEFAULT)) {
         socketDestroyType_ = SocketDestroyType::DESTROY_DEFAULT;
     } else {
