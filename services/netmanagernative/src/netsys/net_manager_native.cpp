@@ -566,7 +566,7 @@ int32_t NetManagerNative::FirewallEnableChain(uint32_t chain, bool enable)
 
 int32_t NetManagerNative::FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule)
 {
-    if (chain > static_cast<uint32_t>(NetManagerStandard::ChainType:: CHAIN_OHFW_ALLOWED_LIST_BOX)) {
+    if (chain > static_cast<uint32_t>(NetManagerStandard::ChainType::CHAIN_OHFW_ALLOWED_LIST_BOX)) {
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     if (firewallRule != static_cast<uint32_t>(NetManagerStandard::FirewallRule::RULE_ALLOW) &&
