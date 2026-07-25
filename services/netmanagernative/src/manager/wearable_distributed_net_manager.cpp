@@ -106,7 +106,7 @@ std::string WearableDistributedNet::ReadJsonFile()
         return "";
     }
     struct stat filestat;
-    if (stat(configPath_.c_str(), filestat) != 0 || file.st_size > MAX_FILE_LEN) {
+    if (stat(configPath_.c_str(), filestat) != 0 || filestat.st_size > MAX_FILE_LEN) {
         NETNATIVE_LOGE("ReadJsonFile config file invalid or too large");
         return "";
     }
