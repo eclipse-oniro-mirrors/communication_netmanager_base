@@ -56,6 +56,13 @@ public:
      */
     void SetParseNetId(uint16_t netId);
 
+    /**
+     * Check whether dns proxy listen is active
+     *
+     * @return true if listening, false otherwise
+     */
+    bool IsListening() const;
+
     using DnsSocketHolderBase = std::map<int32_t, DnsProxyRequestSocket>;
 
 private:

@@ -70,6 +70,8 @@ HWTEST_F(DnsManagerTest, InterfaceTest001, TestSize.Level1)
 
     dnsManager.StartDnsProxyListen();
 
+    dnsManager.StartDnsProxyListen();
+
     dnsManager.StopDnsProxyListen();
 
     dnsManager.GetDumpInfo(INFO);
@@ -186,6 +188,15 @@ HWTEST_F(DnsManagerTest, SetDnsCacheTest001, TestSize.Level1)
     AddrInfo info;
     auto result = dnsManager.SetDnsCache(netId, testHost, info);
     EXPECT_EQ(result, 0);
+}
+
+HWTEST_F(DnsManagerTest, SetIpv6UidBlackList001, TestSize.Level1)
+{
+    DnsManager dnsManager;
+    std::vector<int32_t> netIds;
+    int32_t uid = -1;
+    auto result = dnsManager.SetIpv6UidBlackList(netIds, uid);
+    EXPECT_EQ(result, 401);
 }
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE

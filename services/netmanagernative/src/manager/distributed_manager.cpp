@@ -122,6 +122,12 @@ int32_t DistributedManager::ConfigVirnicAndVeth(const std::string &virNicAddr, c
  
 void DistributedManager::DisableVirnic(const std::string &virnicName)
 {
+    // LCOV_EXCL_START
+    if (virnicName.empty() || !CommonUtils::CheckIfaceName(virnicName)) {
+        NETNATIVE_LOGE("DisableVirnic virnicName is invalid");
+        return;
+    }
+    // LCOV_EXCL_STOP
     std::string out;
     std::string delVirnic = std::string(IP_CMD_PATH) + " link del " + virnicName;
     NETNATIVE_LOGI("del virnic: %{public}s", delVirnic.c_str());

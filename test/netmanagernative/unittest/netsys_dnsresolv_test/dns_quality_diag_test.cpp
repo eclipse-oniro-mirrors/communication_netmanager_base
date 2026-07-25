@@ -285,7 +285,9 @@ HWTEST_F(DnsQualityDiagTest, UnregisterResultListener_Unreg_After_Reg, TestSize.
     sptr<NetsysNative::INetDnsResultCallback> callback = new NetsysNative::DnsResultCallbackTest();
     uint32_t timeStep = 1;
     EXPECT_EQ(dnsQualityDiag.RegisterResultListener(callback, timeStep), 0);
-    
+    dnsQualityDiag.handler_started = true;
+    EXPECT_EQ(dnsQualityDiag.RegisterResultListener(callback, timeStep), 0);
+    dnsQualityDiag.handler_started = false;
     EXPECT_EQ(dnsQualityDiag.UnregisterResultListener(callback), 0);
 }
 
