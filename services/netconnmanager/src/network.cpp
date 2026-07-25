@@ -127,6 +127,7 @@ bool Network::CreateBasicNetwork()
         if (NetsysController::GetInstance().NetworkCreatePhysical(netId_, 0) != NETMANAGER_SUCCESS) {
             std::string errMsg = std::string(ERROR_MSG_CREATE_PHYSICAL_NETWORK_FAILED).append(std::to_string(netId_));
             SendSupplierFaultHiSysEvent(FAULT_CREATE_PHYSICAL_NETWORK_FAILED, errMsg);
+            return false;
         }
         NetsysController::GetInstance().CreateNetworkCache(netId_);
         isPhyNetCreated_ = true;
@@ -145,6 +146,7 @@ bool Network::CreateVirtualNetwork()
         if (NetsysController::GetInstance().NetworkCreateVirtual(netId_, hasDns) != NETMANAGER_SUCCESS) {
             std::string errMsg = std::string(ERROR_MSG_CREATE_VIRTUAL_NETWORK_FAILED).append(std::to_string(netId_));
             SendSupplierFaultHiSysEvent(FAULT_CREATE_VIRTUAL_NETWORK_FAILED, errMsg);
+            return false;
         }
         NetsysController::GetInstance().CreateNetworkCache(netId_, true);
         isVirtualCreated_ = true;
@@ -462,6 +464,7 @@ void Network::RemoveRouteByFamily(INetAddr::IpType addrFamily)
             continue;
         }
         if (!IsAddressValid(*route)) {
+            route++;
             continue;
         }
         std::string destAddress =
@@ -911,10 +914,6 @@ void Network::InitNetMonitor()
     std::unique_lock<std::shared_mutex> lockMonitor2(netMonitorMutex_);
     netMonitor_ = std::make_shared<NetMonitor>(
         netId_, netSupplierType_, netLinkInfoBck, monitorCallback, netMonitorInfo);
-    if (netMonitor_ == nullptr) {
-        NETMGR_LOG_E("new NetMonitor failed,netMonitor_ is null!");
-        return;
-    }
     netMonitor_->UpdateDualStackProbeTime(dualStackProbeTime_);
     netMonitor_->Start();
 }
@@ -960,6 +959,7 @@ void Network::SetDefaultNetWork()
     int32_t ret = NetsysController::GetInstance().SetDefaultNetWork(netId_);
     if (ret != NETMANAGER_SUCCESS) {
         SendSupplierFaultHiSysEvent(FAULT_SET_DEFAULT_NETWORK_FAILED, ERROR_MSG_SET_DEFAULT_NETWORK_FAILED);
+        return;
     }
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     StartNetDetection(false);
