@@ -40,6 +40,7 @@ constexpr int32_t DOMAIN_IP_ADDR_MAX_LEN = 128;
 constexpr uint32_t LOCKBACK_MASK = 0xff000000;
 constexpr uint32_t LOCKBACK_DEFINE = 0x7f000000;
 constexpr uid_t PUSH_UID = 7023;
+constexpr int MAX_IDIAGSTATE_BITS = 32;
 constexpr uint32_t INET_DIAG_REQ_V2_STATES_ALL = 0xffffffff;
 constexpr int32_t INVALID_OWNER_UID = -1;
 constexpr int32_t IDIAG_ARRAY_LEN = 4;
@@ -134,7 +135,7 @@ int32_t NetLinkSocketDiag::ExecuteDestroySocket(uint8_t proto, const inet_diag_m
     request.nlh_.nlmsg_flags = NLM_F_REQUEST;
     request.nlh_.nlmsg_len = sizeof(request);
 
-    if (msg->idiag_state >= sizeof(int) * 8) {
+    if (msg->idiag_state >= MAX_IDIAGSTATE_BITS) {
         NETNATIVE_LOGE("invalid idiag_state");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
