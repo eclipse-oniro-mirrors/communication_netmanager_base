@@ -30,6 +30,7 @@ namespace nmd {
 using namespace NetManagerStandard;
 const int32_t MAX_CMD_LENGTH = 256;
 const int32_t MAX_PORT_ID = 65535;
+const int32_t MAX_FILE_LEN = 1024 * 1024;
 
 const std::string TCP_IPTABLES = "tcpiptables";
 const std::string TCP_OUTPUT = "tcpoutput";
@@ -105,7 +106,7 @@ std::string WearableDistributedNet::ReadJsonFile()
         return "";
     }
     struct stat filestat;
-    if (stat(configPath_.c_str(), filestat) != 0 || file.st_size > 1024 * 1024) {
+    if (stat(configPath_.c_str(), filestat) != 0 || file.st_size > MAX_FILE_LEN) {
         NETNATIVE_LOGE("ReadJsonFile config file invalid or too large");
         return "";
     }
