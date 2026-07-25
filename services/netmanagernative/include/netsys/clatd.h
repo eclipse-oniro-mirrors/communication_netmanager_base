@@ -51,13 +51,13 @@ private:
     int tunFd_;
     int readSock6_;
     int writeSock6_;
-    int stopFd_;
+    int stopFd_ = -1;
     std::string v6Iface_;
     std::string tunIface_;
-    in6_addr v6Addr_;
-    in_addr v4Addr_;
-    in6_addr prefixAddr_;
-    bool isSocketClosed_;
+    in6_addr v6Addr_ = IN6ADDR_ANY_INIT;
+    in_addr v4Addr_ = {};
+    in6_addr prefixAddr_ = IN6ADDR_ANY_INIT;
+    bool isSocketClosed_ = false;
     ffrt::mutex mutex_;
     ffrt::condition_variable cv_;
     std::atomic<bool> stopStatus_;
