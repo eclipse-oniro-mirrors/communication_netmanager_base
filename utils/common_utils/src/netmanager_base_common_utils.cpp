@@ -718,6 +718,7 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
         // child process abnormal exit
         NETMGR_LOG_E("child process abnormal exit, status:%{public}d", status);
+        return NETMANAGER_ERROR;
     }
     NETMGR_LOG_I("waitpid %{public}d done", childPid);
     return NETMANAGER_SUCCESS;

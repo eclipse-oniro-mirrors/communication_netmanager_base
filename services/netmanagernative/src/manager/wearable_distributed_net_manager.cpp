@@ -39,26 +39,31 @@ const std::string IPTABLES_DELETE_CMDS = "iptablesdeletecmds";
 
 std::vector<std::string> WearableDistributedNet::GetTcpIptables()
 {
+    std::lock_guard<std::mutex> lock(iptablesParseMutex_);
     return tcpIptables_;
 }
 
 std::string WearableDistributedNet::GetOutputAddTcp()
 {
+    std::lock_guard<std::mutex> lock(iptablesParseMutex_);
     return tcpOutput_;
 }
 
 std::vector<std::string> WearableDistributedNet::GetUdpIptables()
 {
+    std::lock_guard<std::mutex> lock(iptablesParseMutex_);
     return udpIptables_;
 }
 
 std::string WearableDistributedNet::GetUdpoutput()
 {
+    std::lock_guard<std::mutex> lock(iptablesParseMutex_);
     return udpOutput_;
 }
 
 std::vector<std::string> WearableDistributedNet::GetIptablesDeleteCmds()
 {
+    std::lock_guard<std::mutex> lock(iptablesParseMutex_);
     return iptablesDeleteCmds_;
 }
 
@@ -97,6 +102,11 @@ std::string WearableDistributedNet::ReadJsonFile()
     std::string allConfigInfo;
     if (configPath_.empty()) {
         NETNATIVE_LOGE("Config file path is empty");
+        return "";
+    }
+    struct stat filestat;
+    if (stat(configPath_.c_str(), filestat) != 0 || file.st_size > 1024 * 1024) {
+        NETNATIVE_LOGE("ReadJsonFile config file invalid or too large");
         return "";
     }
     infile.open(configPath_, std::ios::in);
@@ -266,6 +276,7 @@ int32_t WearableDistributedNet::EnableWearableDistributedNetForward(const int32_
     }
     ret = EstablishUdpIpRules(udpPortId);
     if (ret != NETMANAGER_SUCCESS) {
+        DisableWearableDistributedNetForward();
         NETNATIVE_LOGE("Failed to establish UDP IP rules for network distribution");
         return ret;
     }

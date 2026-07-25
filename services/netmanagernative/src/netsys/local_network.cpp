@@ -26,8 +26,9 @@ LocalNetwork::LocalNetwork(uint16_t netId) : NetsysNetwork(netId) {}
 
 int32_t LocalNetwork::AddInterface(std::string &interfaceName)
 {
+    std::lock_guard locker(mutex_);
     NETNATIVE_LOGI("Entry LocalNetwork::AddInterface %{public}s", interfaceName.c_str());
-    if (ExistInterface(interfaceName)) {
+    if (interfaces_.find(interfaceName) != interfaces_.end()) {
         return NETMANAGER_SUCCESS;
     }
 
@@ -36,7 +37,6 @@ int32_t LocalNetwork::AddInterface(std::string &interfaceName)
         return NETMANAGER_ERROR;
     }
 
-    std::lock_guard locker(mutex_);
     interfaces_.insert(interfaceName);
     return NETMANAGER_SUCCESS;
 }
@@ -44,7 +44,8 @@ int32_t LocalNetwork::AddInterface(std::string &interfaceName)
 int32_t LocalNetwork::RemoveInterface(std::string &interfaceName)
 {
     NETNATIVE_LOGI("Entry LocalNetwork::RemoveInterface %{public}s", interfaceName.c_str());
-    if (!ExistInterface(interfaceName)) {
+    std::lock_guard locker(mutex_);
+    if (interfaces_.find(interfaceName) == interfaces_.end()) {
         return NETMANAGER_SUCCESS;
     }
 
@@ -53,7 +54,6 @@ int32_t LocalNetwork::RemoveInterface(std::string &interfaceName)
         return NETMANAGER_ERROR;
     }
 
-    std::lock_guard locker(mutex_);
     interfaces_.erase(interfaceName);
     return NETMANAGER_SUCCESS;
 }
