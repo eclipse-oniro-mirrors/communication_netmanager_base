@@ -59,9 +59,9 @@ private:
     int32_t SetVnicResult(std::atomic_int &fd, unsigned long cmd, ifreq &ifr);
 
 private:
-    std::atomic_int tunFd_ = 0;
-    std::atomic_int net4Sock_ = 0;
-    std::atomic_int net6Sock_ = 0;
+    std::atomic_int tunFd_ = -1;
+    std::atomic_int net4Sock_ = -1;
+    std::atomic_int net6Sock_ = -1;
     std::vector<NetManagerStandard::UidRange> uidRanges;
     std::mutex vnicMutex_;
 };

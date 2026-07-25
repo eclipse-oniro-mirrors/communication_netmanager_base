@@ -54,9 +54,9 @@ private:
     void StartVpnInterfaceFdListen();
 
 private:
-    std::atomic_int tunFd_ = 0;
-    std::atomic_int net4Sock_ = 0;
-    std::atomic_int net6Sock_ = 0;
+    std::atomic_int tunFd_ = -1;
+    std::atomic_int net4Sock_ = -1;
+    std::atomic_int net6Sock_ = -1;
     std::atomic_bool listeningFlag_ = false;
 };
 } // namespace NetManagerStandard
