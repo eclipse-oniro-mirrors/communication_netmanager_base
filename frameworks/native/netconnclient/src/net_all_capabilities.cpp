@@ -26,11 +26,10 @@ static constexpr uint32_t MAX_NET_CAP_NUM = 32;
 
 NetAllCapabilities::NetAllCapabilities(const NetAllCapabilities &cap)
 {
+    std::shared_lock<std::shared_mutex> lock(cap.netCapsMutex_);
     linkUpBandwidthKbps_ = cap.linkUpBandwidthKbps_;
     linkDownBandwidthKbps_ = cap.linkDownBandwidthKbps_;
-    std::shared_lock<std::shared_mutex> lock(cap.netCapsMutex_);
     netCaps_ = cap.netCaps_;
-    lock.unlock();
     bearerTypes_ = cap.bearerTypes_;
 }
 
@@ -95,7 +94,6 @@ bool NetAllCapabilities::Marshalling(Parcel &parcel) const
             return false;
         }
     }
-    lock.unlock();
     uint32_t typeSize = bearerTypes_.size();
     typeSize = typeSize > MAX_NET_CAP_NUM ? MAX_NET_CAP_NUM : typeSize;
     if (!parcel.WriteUint32(typeSize)) {
@@ -127,6 +125,7 @@ bool NetAllCapabilities::Unmarshalling(Parcel &parcel)
     }
     size = size > MAX_NET_CAP_NUM ? MAX_NET_CAP_NUM : size;
     uint32_t cap = 0;
+    std::unique_lock<std::shared_mutex> lock(netCapsMutex_);
     for (uint32_t i = 0; i < size; i++) {
         if (!parcel.ReadUint32(cap)) {
             return false;
@@ -134,7 +133,6 @@ bool NetAllCapabilities::Unmarshalling(Parcel &parcel)
         if (cap >= NET_CAPABILITY_END) {
             continue;
         }
-        std::unique_lock<std::shared_mutex> lock(netCapsMutex_);
         netCaps_.insert(static_cast<NetCap>(cap));
     }
     if (!parcel.ReadUint32(size)) {
@@ -171,7 +169,6 @@ std::string NetAllCapabilities::ToString(const std::string &tab) const
     str.append(tab);
     std::shared_lock<std::shared_mutex> lock(netCapsMutex_);
     ToStrNetCaps(netCaps_, str);
-    lock.unlock();
 
     str.append(tab);
     ToStrNetBearTypes(bearerTypes_, str);
