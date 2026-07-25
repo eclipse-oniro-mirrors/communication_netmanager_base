@@ -47,7 +47,7 @@ public:
 
     int32_t CreateCacheForNet(uint16_t netId, bool isVpnNet = false);
 
-    void SetDefaultNetwork(uint16_t netId);
+    void SetDefaultNetwork(int32_t netId);
 
     // for client
     void SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo);
