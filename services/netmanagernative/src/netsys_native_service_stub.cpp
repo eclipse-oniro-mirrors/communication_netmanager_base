@@ -844,7 +844,6 @@ int32_t NetsysNativeServiceStub::CmdNetworkRemoveRouteParcel(MessageParcel &data
 int32_t NetsysNativeServiceStub::CmdNetworkSetDefault(MessageParcel &data, MessageParcel &reply)
 {
     int32_t netId = data.ReadInt32();
-
     if (netId <= 0 || netId > UINT16_MAX) {
         NETNATIVE_LOGE("netId is invalid, netId = %d", netId);
         reply.WriteInt32(-1);
