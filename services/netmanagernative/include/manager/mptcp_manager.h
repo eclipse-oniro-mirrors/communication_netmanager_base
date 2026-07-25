@@ -37,14 +37,16 @@ public:
     MptcpManager();
     ~MptcpManager();
 
-    int32_t AddEndpoint(const std::string &ipAddr, const std::string &ifName);
-    int32_t DeleteEndpoint(const std::string &ipAddr, const std::string &ifName);
     int32_t SetLimits(int32_t subflows, int32_t addAddrAccepted);
 
     void OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName);
     void OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName);
 
     bool IsMonitoredInterface(const std::string &ifName);
+
+private:
+    int32_t AddEndpoint(const std::string &ipAddr, const std::string &ifName);
+    int32_t DeleteEndpoint(const std::string &ipAddr, const std::string &ifName);
 
 private:
     std::mutex mptcpMutex_;
@@ -60,6 +62,7 @@ private:
     std::string BuildLimitsSetCommand(int32_t subflows, int32_t addAddrAccepted);
     std::string BuildEndpointShowCommand();
     int32_t GetEndpointId(const std::string &ipAddr, const std::string &ifName);
+    int32_t GetResultId(std::string &result, const std::string &ipAddr, const std::string &ifName);
     void UpdateMptcpLimits();
 };
 

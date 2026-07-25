@@ -379,8 +379,12 @@ void DnsProxyListen::InitListenForIpv6()
 
 bool DnsProxyListen::InitExitFdforListening()
 {
-    exitFd_ = eventfd(0, EFD_NONBLOCK);
     // LCOV_EXCL_START
+    if (exitFd_ >= 0) {
+        close(exitFd_);
+        exitFd_ = -1;
+    }
+    exitFd_ = eventfd(0, EFD_NONBLOCK);
     if (exitFd_ < 0) {
         NETNATIVE_LOGE("eventfd errno %{public}d: %{public}s", errno, strerror(errno));
         return false;
@@ -401,8 +405,12 @@ bool DnsProxyListen::InitForListening(epoll_event &proxyEvent, epoll_event &prox
 {
     InitListenForIpv4();
     InitListenForIpv6();
-    epollFd_ = epoll_create1(0);
     // LCOV_EXCL_START
+    if (epollFd_ >= 0) {
+        close(epollFd_);
+        epollFd_ = -1;
+    }
+    epollFd_ = epoll_create1(0);
     if (epollFd_ < 0) {
         NETNATIVE_LOGE("epoll_create1 errno %{public}d: %{public}s", errno, strerror(errno));
         clearResource();
@@ -531,6 +539,11 @@ void DnsProxyListen::SetParseNetId(uint16_t netId)
 {
     DnsProxyListen::netId_ = netId;
     NETNATIVE_LOGI("SetParseNetId");
+}
+
+bool DnsProxyListen::IsListening() const
+{
+    return DnsProxyListen::proxyListenSwitch_.load();
 }
 
 void DnsProxyListen::clearResource()

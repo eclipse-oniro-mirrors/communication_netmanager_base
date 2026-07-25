@@ -17,6 +17,8 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cerrno>
+#include <climits>
 #include <cstdlib>
 #include <sstream>
 #include "net_manager_constants.h"
@@ -60,6 +62,12 @@ int32_t MptcpManager::AddEndpoint(const std::string &ipAddr, const std::string &
 {
     if (ipAddr.empty() || ifName.empty()) {
         NETNATIVE_LOGE("AddEndpoint: ipAddr or ifName is empty");
+        return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+
+    if (!NetManagerStandard::CommonUtils::IsValidIPV4(ipAddr) &&
+        !NetManagerStandard::CommonUtils::IsValidIPV6(ipAddr)) {
+        NETNATIVE_LOGE("AddEndpoint: invalid ip address format");
         return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
     }
 
@@ -175,6 +183,17 @@ void MptcpManager::OnInterfaceAddressUpdated(const std::string &addr, const std:
         return;
     }
 
+    if (addr.empty()) {
+        NETNATIVE_LOGE("OnInterfaceAddressUpdated: addr is empty");
+        return;
+    }
+
+    if (!NetManagerStandard::CommonUtils::IsValidIPV4(addr) &&
+        !NetManagerStandard::CommonUtils::IsValidIPV6(addr)) {
+        NETNATIVE_LOGE("OnInterfaceAddressUpdated: invalid ip address format");
+        return;
+    }
+
     std::lock_guard<std::mutex> lock(mptcpMutex_);
     auto it = ifaceToIpAddrs_.find(ifName);
     if (it == ifaceToIpAddrs_.end()) {
@@ -276,20 +295,25 @@ std::string MptcpManager::BuildEndpointShowCommand()
     return std::string(IP_CMD_PATH) + OPTION_SPACE + MPTCP_ENDPOINT_SHOW;
 }
 
-int32_t MptcpManager::GetEndpointId(const std::string &ipAddr, const std::string &ifName)
+// LCOV_EXCL_START
+int32_t MptcpManager::GetResultId(std::string &result, const std::string &ipAddr, const std::string &ifName)
 {
-    std::string command = BuildEndpointShowCommand();
-    std::string result;
-    int32_t ret = ExecuteMptcpCommand(command, result);
-    if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
-        NETNATIVE_LOGE("GetEndpointId: execute show command failed");
-        return INVALID_ENDPOINT_ID;
-    }
-
     std::istringstream iss(result);
     std::string line;
     while (std::getline(iss, line)) {
-        if (line.find(ipAddr) == std::string::npos || line.find(ifName) == std::string::npos) {
+        std::istringstream lineStream(line);
+        std::string token;
+        bool ipMatched = false;
+        bool ifNameMatched = false;
+        while (lineStream >> token) {
+            if (token == ipAddr) {
+                ipMatched = true;
+            }
+            if (token == ifName) {
+                ifNameMatched = true;
+            }
+        }
+        if (!ipMatched || !ifNameMatched) {
             continue;
         }
 
@@ -315,16 +339,33 @@ int32_t MptcpManager::GetEndpointId(const std::string &ipAddr, const std::string
         }
 
         std::string idStr = line.substr(idStart, idEnd - idStart);
-        int32_t id = static_cast<int32_t>(std::strtol(idStr.c_str(), nullptr, STRTOL_BASE));
+        int32_t id = NetManagerStandard::CommonUtils::StrToInt(idStr, INVALID_ENDPOINT_ID);
         NETNATIVE_LOG_D("GetEndpointId: found id=%{public}d for ip=%{public}s, ifName=%{public}s",
                         id, NetManagerStandard::CommonUtils::ToAnonymousIp(ipAddr).c_str(), ifName.c_str());
         return id;
     }
+    return INVALID_ENDPOINT_ID;
+}
 
+int32_t MptcpManager::GetEndpointId(const std::string &ipAddr, const std::string &ifName)
+{
+    std::string command = BuildEndpointShowCommand();
+    std::string result;
+    int32_t ret = ExecuteMptcpCommand(command, result);
+    if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("GetEndpointId: execute show command failed");
+        return INVALID_ENDPOINT_ID;
+    }
+
+    int32_t resultId = GetResultId(result, ipAddr, ifName);
+    if (resultId != INVALID_ENDPOINT_ID) {
+        return resultId;
+    }
     NETNATIVE_LOGW("GetEndpointId: endpoint not found for ip=%{public}s, ifName=%{public}s",
                    NetManagerStandard::CommonUtils::ToAnonymousIp(ipAddr).c_str(), ifName.c_str());
     return INVALID_ENDPOINT_ID;
 }
+// LCOV_EXCL_STOP
 
 void MptcpManager::UpdateMptcpLimits()
 {

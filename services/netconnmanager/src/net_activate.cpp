@@ -119,6 +119,9 @@ bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier, bool skipCh
 
 bool NetActivate::CompareByNetworkIdent(const std::string &ident, NetBearType bearerType, bool skipCheckIdent)
 {
+    if (netSpecifier_ == nullptr) {
+        return false;
+    }
     if (ident.empty() || netSpecifier_->ident_.empty()) {
         return true;
     }
@@ -164,6 +167,9 @@ bool NetActivate::CompareByNetworkNetType(NetBearType bearerType)
 
 bool NetActivate::CompareByNetworkBand(uint32_t netLinkUpBand, uint32_t netLinkDownBand)
 {
+    if (netSpecifier_ == nullptr) {
+        return false;
+    }
     uint32_t reqLinkUpBand = netSpecifier_->netCapabilities_.linkUpBandwidthKbps_;
     uint32_t reqLinkDownBand = netSpecifier_->netCapabilities_.linkDownBandwidthKbps_;
     if ((netLinkUpBand >= reqLinkUpBand) && (netLinkDownBand >= reqLinkDownBand)) {
@@ -184,6 +190,9 @@ uint32_t NetActivate::GetRequestId() const
 
 std::set<NetBearType> NetActivate::GetBearType() const
 {
+    if (netSpecifier_ == nullptr) {
+        return {};
+    }
     return netSpecifier_->netCapabilities_.bearerTypes_;
 }
 

@@ -54,7 +54,7 @@ constexpr uint8_t IPV6_LEN = 128;
 
 int32_t VpnManager::CreateVpnInterface()
 {
-    if (tunFd_ != 0) {
+    if (tunFd_ >= 0) {
         StartVpnInterfaceFdListen();
         return NETMANAGER_SUCCESS;
     }
@@ -65,7 +65,7 @@ int32_t VpnManager::CreateVpnInterface()
     }
 
     int32_t tunfd = open(TUN_DEVICE_PATH, O_RDWR | O_NONBLOCK | O_CLOEXEC);
-    if (tunfd <= 0) {
+    if (tunfd < 0) {
         NETNATIVE_LOGE("open virtual device failed: %{public}d", errno);
         DestroyVpnInterface();
         return NETMANAGER_ERROR;
@@ -103,24 +103,26 @@ int32_t VpnManager::CreateVpnInterface()
 void VpnManager::DestroyVpnInterface()
 {
     SetVpnDown();
-    if (net4Sock_ != 0) {
+    if (net4Sock_ >= 0) {
         close(net4Sock_);
-        net4Sock_ = 0;
+        net4Sock_ = -1;
     }
-    if (net6Sock_ != 0) {
+    if (net6Sock_ >= 0) {
         close(net6Sock_);
-        net6Sock_ = 0;
+        net6Sock_ = -1;
     }
-    if (tunFd_ != 0) {
+    if (tunFd_ >= 0) {
         close(tunFd_);
-        tunFd_ = 0;
+        tunFd_ = -1;
     }
+    listeningFlag_ = false;
 }
 
 int32_t VpnManager::SetVpnResult(std::atomic_int &fd, unsigned long cmd, ifreq &ifr)
 {
-    if (fd > 0) {
-        if (ioctl(fd, cmd, &ifr) < 0) {
+    int32_t fdval = fd.load();
+    if (fdval >= 0) {
+        if (ioctl(fdval, cmd, &ifr) < 0) {
             NETNATIVE_LOGE("set vpn error, errno:%{public}d", errno);
             return NETMANAGER_ERROR;
         }
@@ -259,6 +261,9 @@ int32_t VpnManager::InitIfreq(ifreq &ifr, const std::string &cardName)
 
 int32_t VpnManager::SendVpnInterfaceFdToClient(int32_t clientFd, int32_t tunFd)
 {
+    if (tunFd < 0) {
+        return NETMANAGER_ERROR;
+    }
     char buf[1] = {0};
     iovec iov;
     iov.iov_base = buf;
@@ -306,11 +311,13 @@ void VpnManager::StartUnixSocketListen()
     int32_t serverfd = GetControlSocket("tunfd");
     if (serverfd < 0) {
         NETNATIVE_LOGE("get control socket error: %{public}d", errno);
+        listeningFlag_ = false;
         return;
     }
     if (listen(serverfd, MAX_UNIX_SOCKET_CLIENT) < 0) {
         close(serverfd);
         NETNATIVE_LOGE("listen socket error: %{public}d", errno);
+        listeningFlag_ = false;
         return;
     }
 
@@ -326,9 +333,6 @@ void VpnManager::StartUnixSocketListen()
         SendVpnInterfaceFdToClient(clientFd, tunFd_);
         close(clientFd);
     }
-
-    close(serverfd);
-    listeningFlag_ = false;
 }
 
 void VpnManager::StartVpnInterfaceFdListen()
@@ -337,12 +341,12 @@ void VpnManager::StartVpnInterfaceFdListen()
         NETNATIVE_LOGI("VpnInterface fd is listening...");
         return;
     }
+    listeningFlag_ = true;
 
     NETNATIVE_LOGI("StartVpnInterfaceFdListen...");
     std::thread t([sp = shared_from_this()]() { sp->StartUnixSocketListen(); });
-    t.detach();
     pthread_setname_np(t.native_handle(), "unix_socket_tunfd");
-    listeningFlag_ = true;
+    t.detach();
 }
 
 } // namespace NetManagerStandard

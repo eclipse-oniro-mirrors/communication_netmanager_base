@@ -18,6 +18,7 @@
 #include <charconv>
 
 #include "dns_resolv_listen.h"
+#include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "singleton.h"
@@ -145,6 +146,10 @@ void DnsManager::ShareDnsSet(uint16_t netId)
 
 void DnsManager::StartDnsProxyListen()
 {
+    if (dnsProxyListen_->IsListening()) {
+        NETNATIVE_LOGI("StartDnsProxyListen already listening, skip");
+        return;
+    }
     dnsProxyListen_->OnListen();
     std::shared_ptr<DnsProxyListen> proxy = dnsProxyListen_;
     std::thread t([proxy] () {
@@ -236,13 +241,22 @@ int32_t DnsManager::FillAddrInfo(std::vector<AddrInfo> &addrInfo, addrinfo *res)
         info.aiSockType = static_cast<int32_t>(tmp->ai_socktype);
         info.aiProtocol = static_cast<int32_t>(tmp->ai_protocol);
         info.aiAddrLen = tmp->ai_addrlen;
-        if (memcpy_s(&info.aiAddr, sizeof(info.aiAddr), tmp->ai_addr, tmp->ai_addrlen) != 0) {
-            NETNATIVE_LOGE("memcpy_s failed");
+        // LCOV_EXCL_START
+        if (tmp->ai_addr != nullptr) {
+            if (memcpy_s(&info.aiAddr, sizeof(info.aiAddr), tmp->ai_addr, tmp->ai_addrlen) != 0) {
+                NETNATIVE_LOGE("memcpy_s failed");
+                return -1;
+            }
+        } else {
+            info.aiAddrLen = 0;
         }
-        if (strcpy_s(info.aiCanonName, sizeof(info.aiCanonName), tmp->ai_canonname) != 0) {
-            NETNATIVE_LOGE("strcpy_s failed");
+        if (tmp->ai_canonname != nullptr) {
+            if (strcpy_s(info.aiCanonName, sizeof(info.aiCanonName), tmp->ai_canonname) != 0) {
+                NETNATIVE_LOGE("strcpy_s failed");
+                return -1;
+            }
         }
-
+        // LCOV_EXCL_STOP
         ++resNum;
         addrInfo.emplace_back(info);
         tmp = tmp->ai_next;
@@ -347,6 +361,10 @@ int32_t DnsManager::SetDnsCache(uint16_t netId, const std::string &hostName, con
 
 int32_t DnsManager::SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid)
 {
+    if (uid < 0) {
+        NETNATIVE_LOGE("manager_SetIpv6UidBlackList invalid uid:%{public}d", uid);
+        return NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR;
+    }
     NETNATIVE_LOGI("manager_SetIpv6UidBlackList uid:%{public}d", uid);
     DnsParamCache::GetInstance().SetIpv6UidBlackList(netIds, static_cast<uint32_t>(uid));
     return 0;
