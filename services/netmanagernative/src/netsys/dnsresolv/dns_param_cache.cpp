@@ -780,7 +780,7 @@ void DnsParamCache::SetIpv6UidBlackList(std::vector<int32_t> &netIds, uint32_t u
         return;
     }
  
-    std::scoped_lock<ffrt::shared_mutex> writeLock(uidBlackListMutex_);
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     for (auto& netId : netIds) {
         if (netId == 0) {
             netId = static_cast<int32_t>(defaultNetId_);
@@ -802,7 +802,7 @@ bool DnsParamCache::IsInIpv6UidBlackList(uint16_t netId, uint32_t uid)
         netId = defaultNetId_;
     }
  
-    std::scoped_lock<ffrt::shared_mutex> readLock(uidBlackListMutex_);
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     auto it = serverConfigMap_.find(netId);
     if (it == serverConfigMap_.end()) {
         DNS_CONFIG_PRINT("IsInIpv6UidBlackList failed: is not have netid:%{public}d,", netId);

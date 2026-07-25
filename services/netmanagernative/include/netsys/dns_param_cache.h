@@ -140,8 +140,6 @@ private:
 
     ffrt::mutex uidRangeMutex_;
 
-    ffrt::shared_mutex uidBlackListMutex_;
-
     std::atomic_uint defaultNetId_;
 
     std::map<uint16_t, DnsResolvConfig> serverConfigMap_;
