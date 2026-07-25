@@ -133,7 +133,7 @@ int32_t DnsManager::DestroyNetworkCache(uint16_t netId, bool isVpnNet)
     return DnsParamCache::GetInstance().DestroyNetworkCache(netId, isVpnNet);
 }
 
-void DnsManager::SetDefaultNetwork(uint16_t netId)
+void DnsManager::SetDefaultNetwork(int32_t netId)
 {
     DnsParamCache::GetInstance().SetDefaultNetwork(netId);
 }

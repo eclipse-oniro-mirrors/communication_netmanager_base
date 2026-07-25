@@ -72,7 +72,7 @@ public:
      *
      * @param netId network ID
      */
-    void SetDefaultNetwork(uint16_t netId);
+    void SetDefaultNetwork(int32_t netId);
 
     /**
      * Network share set netId

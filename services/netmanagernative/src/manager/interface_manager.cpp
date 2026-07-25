@@ -123,6 +123,7 @@ int InterfaceManager::SetMtu(const char *interfaceName, const char *mtuValue)
 
     if (!CheckIfaceName(interfaceName)) {
         NETNATIVE_LOGE("SetMtu isIfaceName fail %{public}d", errno);
+        return -1;
     }
     int32_t sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {
@@ -299,6 +300,10 @@ InterfaceConfigurationParcel InterfaceManager::GetIfaceConfig(const std::string 
     nmd::InterfaceConfigurationParcel ifaceConfig;
 
     int fd = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
+    if (fd < 0) {
+        NETNATIVE_LOGE("GetIfaceConfig socket failed, errno %d", errno);
+        return ifaceConfig;
+    }
     struct ifreq ifr = {};
     auto ret = strncpy_s(ifr.ifr_name, IFNAMSIZ, ifName.c_str(), ifName.length());
     if (ret != 0) {
@@ -476,6 +481,10 @@ int32_t InterfaceManager::DelStaticArp(const std::string &ipAddr, const std::str
 int32_t InterfaceManager::SetIpv6AutoConf(const std::string &ipAddr, const uint32_t on)
 {
     NETNATIVE_LOGI("SetIpv6AutoConf.");
+    if (!CheckIfaceName(ipAddr)) {
+        NETNATIVE_LOGE("SetIpv6AutoConf isIfaceName fail %{public}d", errno);
+        return -1;
+    }
     std::string option = IPV6_PROC_PATH + ipAddr + "/autoconf";
     std::string value = on ? ENABLE_IPV6_AUTO_CONF : DISABLE_IPV6_AUTO_CONF;
     bool ipv6Success = WriteFile(option, value);

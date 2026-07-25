@@ -845,6 +845,11 @@ int32_t NetsysNativeServiceStub::CmdNetworkSetDefault(MessageParcel &data, Messa
 {
     int32_t netId = data.ReadInt32();
 
+    if (netId <= 0 || netId > UINT16_MAX) {
+        NETNATIVE_LOGE("netId is invalid, netId = %d", netId);
+        reply.WriteInt32(-1);
+        return IPC_STUB_ERR;
+    }
     int32_t result = NetworkSetDefault(netId);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("NetworkSetDefault has recved result %{public}d", result);

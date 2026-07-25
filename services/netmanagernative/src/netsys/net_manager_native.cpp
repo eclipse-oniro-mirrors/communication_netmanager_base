@@ -66,7 +66,9 @@ void NetManagerNative::GetOriginInterfaceIndex()
     interfaceIdex_.clear();
     for (auto iter = ifNameList.begin(); iter != ifNameList.end(); ++iter) {
         uint32_t infIndex = if_nametoindex((*iter).c_str());
-        interfaceIdex_.push_back(infIndex);
+        if (infIndex != 0) {
+            interfaceIdex_.push_back(infIndex);
+        }
     }
 }
 
@@ -103,7 +105,7 @@ int32_t NetManagerNative::NetworkCreatePhysical(int32_t netId, int32_t permissio
 
 int32_t NetManagerNative::NetworkCreateVirtual(int32_t netId, bool hasDns)
 {
-    return connManager_->CreateVirtualNetwork(netId, hasDns);
+    return connManager_->CreateVirtualNetwork(static_cast<uint16_t>(netId), hasDns);
 }
 
 int32_t NetManagerNative::NetworkDestroy(int32_t netId, bool isVpnNet)
@@ -249,6 +251,9 @@ int32_t NetManagerNative::NetworkGetDefault()
 
 int32_t NetManagerNative::NetworkSetDefault(int32_t netId)
 {
+    if (netId <= 0 || netId >= UINT16_MAX) {
+        return -1;
+    }
     dnsManager_->SetDefaultNetwork(netId);
     return connManager_->SetDefaultNetwork(netId);
 }
@@ -312,7 +317,12 @@ int32_t NetManagerNative::SetTcpBufferSizes(const std::string &tcpBufferSizes)
     std::string tcp_rwmem[TCP_BUFFER_SIZES_TYPE];
     for (size_t i = 0; i < TCP_BUFFER_SIZES_TYPE; i++) {
         for (size_t j = 0; j < MAX_TCP_BUFFER_SIZES_COUNT / TCP_BUFFER_SIZES_TYPE; j++) {
-            tcp_rwmem[i] += Strip(vTcpBufferSizes[i * (MAX_TCP_BUFFER_SIZES_COUNT / TCP_BUFFER_SIZES_TYPE) + j]);
+            std::string token = Trim(vTcpBufferSizes[i * (MAX_TCP_BUFFER_SIZES_COUNT / TCP_BUFFER_SIZES_TYPE) + j]);
+            if (token.empty() || !std::all_of(token.begin(), token.end(),
+                [](unsigned char c) {return std::isdigit(c); })) {
+                return -1;
+            }
+            tcp_rwmem[i] += token;
             tcp_rwmem[i] += ' ';
         }
     }
@@ -556,6 +566,16 @@ int32_t NetManagerNative::FirewallEnableChain(uint32_t chain, bool enable)
 
 int32_t NetManagerNative::FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule)
 {
+    if (chain > static_cast<uint32_t>(NetManagerStandard::ChainType:: CHAIN_OHFW_ALLOWED_LIST_BOX)){
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    if (firewallRule != static_cast<uint32_t>(NetManagerStandard::FirewallRule::RULE_ALLOW) &&
+        firewallRule != static_cast<uint32_t>(NetManagerStandard::FirewallRule::RULE_DENY)) {
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    if (firewallManager_ == nullptr) {
+        return -1;
+    }
     auto chainType = static_cast<NetManagerStandard::ChainType>(chain);
     auto rule = static_cast<NetManagerStandard::FirewallRule>(firewallRule);
     for (auto &uid : uids) {

@@ -156,7 +156,7 @@ int32_t DnsParamCache::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMse
     return 0;
 }
 
-void DnsParamCache::SetDefaultNetwork(uint16_t netId)
+void DnsParamCache::SetDefaultNetwork(int32_t netId)
 {
     defaultNetId_ = netId;
 }
@@ -439,9 +439,10 @@ int32_t DnsParamCache::DelUidRange(uint32_t netId, const std::vector<NetManagerS
     if (it != vpnNetId_.end()) {
         vpnNetId_.erase(it);
     }
+    std::vector<NetManagerStandard::UidRange> result;
     auto end = std::set_difference(vpnUidRanges_.begin(), vpnUidRanges_.end(), uidRanges.begin(),
-                                   uidRanges.end(), vpnUidRanges_.begin());
-    vpnUidRanges_.erase(end, vpnUidRanges_.end());
+                                   uidRanges.end(), std::back_inserter(result));
+    vpnUidRanges_ = result;
     return 0;
 }
 
@@ -486,7 +487,6 @@ bool DnsParamCache::GetDnsServersByAppUid(int32_t appUid, std::vector<std::strin
 int32_t DnsParamCache::SetFirewallRules(NetFirewallRuleType type,
                                         const std::vector<sptr<NetFirewallBaseRule>> &ruleList, bool isFinish)
 {
-    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     NETNATIVE_LOGI("SetFirewallRules: size=%{public}zu isFinish=%{public}" PRId32, ruleList.size(), isFinish);
     if (ruleList.empty()) {
         NETNATIVE_LOGE("SetFirewallRules: rules is empty");
@@ -613,6 +613,7 @@ int32_t DnsParamCache::SetFirewallCurrentUserId(int32_t userId)
 
 void DnsParamCache::ClearAllDnsCache()
 {
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     NETNATIVE_LOGI("ClearAllDnsCache");
     for (auto it = serverConfigMap_.begin(); it != serverConfigMap_.end(); it++) {
         it->second.GetCache().Clear();
