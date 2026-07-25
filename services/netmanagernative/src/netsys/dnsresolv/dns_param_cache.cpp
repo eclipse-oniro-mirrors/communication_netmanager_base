@@ -487,6 +487,7 @@ bool DnsParamCache::GetDnsServersByAppUid(int32_t appUid, std::vector<std::strin
 int32_t DnsParamCache::SetFirewallRules(NetFirewallRuleType type,
                                         const std::vector<sptr<NetFirewallBaseRule>> &ruleList, bool isFinish)
 {
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     NETNATIVE_LOGI("SetFirewallRules: size=%{public}zu isFinish=%{public}" PRId32, ruleList.size(), isFinish);
     if (ruleList.empty()) {
         NETNATIVE_LOGE("SetFirewallRules: rules is empty");
@@ -613,7 +614,6 @@ int32_t DnsParamCache::SetFirewallCurrentUserId(int32_t userId)
 
 void DnsParamCache::ClearAllDnsCache()
 {
-    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     NETNATIVE_LOGI("ClearAllDnsCache");
     for (auto it = serverConfigMap_.begin(); it != serverConfigMap_.end(); it++) {
         it->second.GetCache().Clear();
