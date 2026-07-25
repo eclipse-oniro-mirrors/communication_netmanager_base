@@ -708,7 +708,9 @@ void NetConnClient::DlCloseRemoveDeathRecipient()
         return;
     }
 
-    serviceRemote->RemoveDeathRecipient(deathRecipient_);
+    if (deathRecipient_) {
+        serviceRemote->RemoveDeathRecipient(deathRecipient_);
+    }
     NETMGR_LOG_I("RemoveDeathRecipient success");
 }
 
