@@ -144,6 +144,7 @@ private:
         const std::string &ifName, nmd::NetlinkMsg &nlmsg, uint16_t action);
     static int32_t MacStringToArray(const std::string &macAddr, sockaddr &macSock);
     static int32_t MacStringToBinary(const std::string &macAddr, uint8_t (&macBin)[MAC_ADDRESS_INT_LEN]);
+    static bool CheckPrefix(int8_t family, int prefixLen);
 };
 } // namespace nmd
 } // namespace OHOS

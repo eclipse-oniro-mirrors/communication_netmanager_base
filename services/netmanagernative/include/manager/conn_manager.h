@@ -16,6 +16,7 @@
 #ifndef INCLUDE_CONN_MANAGER_H
 #define INCLUDE_CONN_MANAGER_H
 
+#include <atomic>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -277,8 +278,8 @@ public:
 private:
     bool IsVirtualInterface(const std::string &interfaceName);
 private:
-    int32_t defaultNetId_;
-    bool needReinitRouteFlag_;
+    std::atomic<int32_t> defaultNetId_;
+    std::atomic<bool> needReinitRouteFlag_;
     std::map<int32_t, std::string> physicalInterfaceName_;
     SafeMap<int32_t, std::shared_ptr<NetsysNetwork>> networks_;
     std::mutex interfaceNameMutex_;

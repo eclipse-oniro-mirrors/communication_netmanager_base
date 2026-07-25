@@ -66,6 +66,12 @@ int32_t MultiVpnManager::SendVpnInterfaceFdToClient(int32_t clientFd, int32_t tu
     message.msg_control = cmsgu.cmsg;
     message.msg_controllen = sizeof(cmsgu.cmsg);
     cmsghdr *cmsgh = CMSG_FIRSTHDR(&message);
+    // LCOV_EXCL_START
+    if (cmsgh == nullptr) {
+        NETNATIVE_LOGE("CMSG_FIRSTHDR return nullptr!");
+        return NETMANAGER_ERROR;
+    }
+    // LCOV_EXCL_STOP
     cmsgh->cmsg_len = CMSG_LEN(sizeof(tunFd));
     cmsgh->cmsg_level = SOL_SOCKET;
     cmsgh->cmsg_type = SCM_RIGHTS;
@@ -95,7 +101,7 @@ int32_t MultiVpnManager::InitIfreq(ifreq &ifr, const std::string &ifName)
 
 int32_t MultiVpnManager::SetVpnResult(std::atomic_int &fd, unsigned long cmd, ifreq &ifr)
 {
-    if (fd > 0) {
+    if (fd >= 0) {
         if (ioctl(fd, cmd, &ifr) < 0) {
             NETNATIVE_LOGE("set vpn error, errno:%{public}d", errno);
             return NETMANAGER_ERROR;
@@ -157,8 +163,13 @@ int32_t MultiVpnManager::AddVpnRemoteAddress(const std::string &ifName, std::ato
 {
     /* ppp need set dst ip */
     if (strstr(ifName.c_str(), PPP_CARD_NAME) != NULL) {
+        std::string remoteIpv4AddrCopy;
+        {
+            std::lock_guard<std::mutex> autoLock(mutex_);
+            remoteIpv4AddrCopy = remoteIpv4Addr_;
+        }
         in_addr remoteIpv4Addr = {};
-        if (inet_aton(remoteIpv4Addr_.c_str(), &remoteIpv4Addr) == 0) {
+        if (inet_aton(remoteIpv4AddrCopy.c_str(), &remoteIpv4Addr) == 0) {
             NETNATIVE_LOGE("addr inet_aton error");
             return NETMANAGER_ERROR;
         }
@@ -262,7 +273,12 @@ int32_t MultiVpnManager::CreateVpnInterface(const std::string &ifName)
     int32_t ret = NETMANAGER_SUCCESS;
     if (strstr(ifName.c_str(), XFRM_CARD_NAME) != NULL) {
         uint32_t ifNameId = CommonUtils::StrToUint(ifName.substr(strlen(XFRM_CARD_NAME)));
-        ret = nmd::CreateVpnIfByNetlink(ifName.c_str(), ifNameId, phyName_.c_str(), DEFAULT_MTU);
+        std::string phyNameCopy;
+        {
+            std::lock_guard<std::mutex> autoLock(mutex_);
+            phyNameCopy = phyName_;
+        }
+        ret = nmd::CreateVpnIfByNetlink(ifName.c_str(), ifNameId, phyNameCopy.c_str(), DEFAULT_MTU);
     } else if (strstr(ifName.c_str(), PPP_CARD_NAME) != NULL) {
         ret = CreatePppInterface(ifName);
     } else if ((strstr(ifName.c_str(), MULTI_TUN_CARD_NAME) != NULL) ||
@@ -296,19 +312,25 @@ int32_t MultiVpnManager::DestroyVpnInterface(const std::string &ifName)
 
 int32_t MultiVpnManager::CreatePppInterface(const std::string &ifName)
 {
-    auto it = multiVpnFdMap_.find(ifName);
-    if (it == multiVpnFdMap_.end()) {
-        NETNATIVE_LOGE("ifName not exist");
-        return NETMANAGER_ERROR;
-    }
-    ifreq ifr = {};
-    if (memset_s(&ifr, sizeof(ifr), 0, sizeof(ifr)) != EOK) {
-        NETNATIVE_LOGE("memset_s ifr failed!");
-        return NETMANAGER_ERROR;
-    }
     int32_t currentIfunit = 0;
-    if (ioctl(multiVpnFdMap_[ifName], PPPIOCGUNIT, &currentIfunit) < 0) {
-        NETNATIVE_LOGE("ioctl PPPIOCDISCONN failed errno: %{public}d", errno);
+    ifreq ifr = {};
+    {
+        std::lock_guard<std::mutex> autoLock(mutex_);
+        auto it = multiVpnFdMap_.find(ifName);
+        if (it == multiVpnFdMap_.end()) {
+            NETNATIVE_LOGE("ifName not exist");
+            return NETMANAGER_ERROR;
+        }
+        // LCOV_EXCL_START
+        if (memset_s(&ifr, sizeof(ifr), 0, sizeof(ifr)) != EOK) {
+            NETNATIVE_LOGE("memset_s ifr failed!");
+            return NETMANAGER_ERROR;
+        }
+        if (ioctl(multiVpnFdMap_[ifName], PPPIOCGUNIT, &currentIfunit) < 0) {
+            NETNATIVE_LOGE("ioctl PPPIOCGUNIT failed errno: %{public}d", errno);
+            return NETMANAGER_ERROR;
+        }
+        // LCOV_EXCL_STOP
     }
     NETNATIVE_LOGI("Created PPP interface: currentIfunit:%{public}d\n", currentIfunit);
     std::string oldName = "ppp" + std::to_string(currentIfunit);
@@ -344,7 +366,10 @@ void MultiVpnManager::CreatePppFd(const std::string &ifName)
         NETNATIVE_LOGE("CreatePppFd failed");
         return;
     }
-    multiVpnListeningName_ = ifName;
+    {
+        std::lock_guard<std::mutex> autoLock(mutex_);
+        multiVpnListeningName_ = ifName;
+    }
     StartMultiVpnInterfaceFdListen();
 }
 
@@ -372,29 +397,33 @@ void MultiVpnManager::ClearPppFd(const std::string &connectName)
 
 int32_t MultiVpnManager::CreateMultiTunInterface(const std::string &ifName)
 {
-    int32_t multiVpnFd = 0;
+    std::unique_lock<std::mutex> autoLock(mutex_);
+    int32_t multiVpnFd = -1;
     if (GetMultiVpnFd(ifName, multiVpnFd) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERROR;
     }
-
     ifreq ifr = {};
     if (InitIfreq(ifr, ifName) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERROR;
     }
 
     ifr.ifr_flags = IFF_TUN | IFF_NO_PI;
+    // LCOV_EXCL_START
     if (ioctl(multiVpnFd, TUNSETIFF, &ifr) < 0) {
         NETNATIVE_LOGE("multi tun set iff error: %{public}d", errno);
+        close(multiVpnFd);
+        multiVpnFdMap_.erase(ifName);
         return NETMANAGER_ERROR;
     }
+    // LCOV_EXCL_STOP
     multiVpnListeningName_ = ifName;
+    autoLock.unlock();
     StartMultiVpnInterfaceFdListen();
     return NETMANAGER_SUCCESS;
 }
 
 int32_t MultiVpnManager::GetMultiVpnFd(const std::string &ifName, int32_t &multiVpnFd)
 {
-    std::lock_guard<std::mutex> autoLock(mutex_);
     auto it = multiVpnFdMap_.find(ifName);
     if (it != multiVpnFdMap_.end()) {
         NETNATIVE_LOGE("ifName already exist");
@@ -410,16 +439,19 @@ int32_t MultiVpnManager::GetMultiVpnFd(const std::string &ifName, int32_t &multi
         NETNATIVE_LOGE("GetMultiVpnFd faild, IfName err");
         return NETMANAGER_ERROR;
     }
-    if (multiVpnFd <= 0) {
+    // LCOV_EXCL_START
+    if (multiVpnFd < 0) {
         NETNATIVE_LOGE("open virtual device failed: %{public}d", errno);
         return NETMANAGER_ERROR;
     }
+    // LCOV_EXCL_STOP
     multiVpnFdMap_[ifName] = multiVpnFd;
     return NETMANAGER_SUCCESS;
 }
 
 void MultiVpnManager::SetVpnRemoteAddress(const std::string &remoteIp)
 {
+    std::lock_guard<std::mutex> autoLock(mutex_);
     remoteIpv4Addr_ = remoteIp;
 }
 
@@ -447,24 +479,30 @@ int32_t MultiVpnManager::DestroyMultiVpnFd(const std::string &ifName)
 
 void MultiVpnManager::StartMultiVpnInterfaceFdListen()
 {
-    if (multiVpnListeningFlag_) {
+    if (multiVpnListeningFlag_.exchange(true)) {
         NETNATIVE_LOGI("MultiVpnInterface fd is listening...");
         return;
     }
     NETNATIVE_LOGI("StartMultiVpnInterfaceFdListen...");
-    multiVpnListeningFlag_ = true;
     std::thread t([sp = shared_from_this()]() { sp->StartMultiVpnSocketListen(); });
-    t.detach();
     pthread_setname_np(t.native_handle(), "unix_socket_multivpnfd");
+    t.detach();
 }
 
 void MultiVpnManager::StartMultiVpnSocketListen()
 {
     NETNATIVE_LOGI("StartMultiVpnSocketListen...");
     int32_t serverfd = GetControlSocket("multivpnfd");
+    // LCOV_EXCL_START
+    if (serverfd < 0) {
+        NETNATIVE_LOGE("get control socket error: %{public}d", errno);
+        multiVpnListeningFlag_ = false;
+        return;
+    }
     if (listen(serverfd, MAX_UNIX_SOCKET_CLIENT) < 0) {
         multiVpnListeningFlag_ = false;
         NETNATIVE_LOGE("listen socket error: %{public}d", errno);
+        close(serverfd);
         return;
     }
 
@@ -474,18 +512,25 @@ void MultiVpnManager::StartMultiVpnSocketListen()
     if (clientFd < 0) {
         NETNATIVE_LOGE("accept socket error: %{public}d", errno);
         multiVpnListeningFlag_ = false;
+        close(serverfd);
         return;
     }
-    int32_t multiVpnFd = -1;
-    if (GetMultiVpnFd(multiVpnListeningName_, multiVpnFd) == NETMANAGER_SUCCESS) {
-        SendVpnInterfaceFdToClient(clientFd, multiVpnFd);
+    {
+        std::lock_guard<std::mutex> autoLock(mutex_);
+        int32_t multiVpnFd = -1;
+        if (GetMultiVpnFd(multiVpnListeningName_, multiVpnFd) == NETMANAGER_SUCCESS) {
+            SendVpnInterfaceFdToClient(clientFd, multiVpnFd);
+        }
     }
     multiVpnListeningFlag_ = false;
     close(clientFd);
+    close(serverfd);
+    // LCOV_EXCL_STOP
 }
 
 void MultiVpnManager::SetXfrmPhyIfName(const std::string &phyName)
 {
+    std::lock_guard<std::mutex> autoLock(mutex_);
     phyName_ = phyName;
 }
 
@@ -557,6 +602,10 @@ int32_t MultiVpnManager::SetVpnAddressIPv6(const std::string &ifName, const std:
 
 int32_t MultiVpnManager::SetVpnAddressIPv4(const std::string &ifName, const std::string &vpnAddr, int32_t prefix)
 {
+    if (prefix <= 0 || prefix > NET_MASK_MAX_LENGTH) {
+        NETNATIVE_LOGE("ipv4 prefix: %{public}d error", prefix);
+        return NETMANAGER_ERROR;
+    }
     ifreq ifr = {};
     if (InitIfreq(ifr, ifName) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERROR;
@@ -589,10 +638,6 @@ int32_t MultiVpnManager::SetVpnAddressIPv4(const std::string &ifName, const std:
         return NETMANAGER_ERROR;
     }
 
-    if (prefix <= 0 || prefix > NET_MASK_MAX_LENGTH) {
-        close(sock);
-        return NETMANAGER_ERROR;
-    }
     in_addr_t mask = prefix ? (~0 << (NET_MASK_MAX_LENGTH - prefix)) : 0;
     sin = reinterpret_cast<sockaddr_in *>(&ifr.ifr_netmask);
     sin->sin_family = AF_INET;
