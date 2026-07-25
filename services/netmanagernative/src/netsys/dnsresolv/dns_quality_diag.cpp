@@ -69,11 +69,16 @@ int32_t DnsQualityDiag::InitHandler()
 
 int32_t DnsQualityDiag::ParseReportAddr(uint32_t size, AddrInfo* addrinfo, NetsysNative::NetDnsResultReport &report)
 {
-    for (uint8_t i = 0; i < size; i++) {
+    if (addrinfo == nullptr) {
+        NETNATIVE_LOGE("addrinfo is nullptr");
+        return -1;
+    }
+    uint32_t maxIter = std::min(size, MAX_RESULT_SIZE);
+    for (uint32_t i = 0; i < maxIter; i++) {
         NetsysNative::NetDnsResultAddrInfo ai;
         AddrInfo *tmp = &(addrinfo[i]);
         void* addr = NULL;
-        char c_addr[INET6_ADDRSTRLEN];
+        char c_addr[INET6_ADDRSTRLEN] = {0};
         switch (tmp->aiFamily) {
             case AF_INET:
                 ai.type_ = NetsysNative::ADDR_TYPE_IPV4;
@@ -83,8 +88,14 @@ int32_t DnsQualityDiag::ParseReportAddr(uint32_t size, AddrInfo* addrinfo, Netsy
                 ai.type_ = NetsysNative::ADDR_TYPE_IPV6;
                 addr = &(tmp->aiAddr.sin6.sin6_addr);
                 break;
+            default:
+                NETNATIVE_LOGE("aiFamily is invalid");
+                continue;
         }
-        inet_ntop(tmp->aiFamily, addr, c_addr, sizeof(c_addr));
+        if (inet_ntop(tmp->aiFamily, addr, c_addr, sizeof(c_addr)) == nullptr) {
+            NETNATIVE_LOGE("inet_ntop failed");
+            continue;
+        }
         ai.addr_ = c_addr;
         if (report.addrlist_.size() < MAX_RESULT_SIZE) {
             report.addrlist_.push_back(ai);
@@ -98,7 +109,11 @@ int32_t DnsQualityDiag::ParseReportAddr(uint32_t size, AddrInfo* addrinfo, Netsy
 void DnsQualityDiag::ParseDnsSever(uint32_t size, DnsServerInfo* serverInfo,
     NetsysNative::NetDnsResultReport &report)
 {
-    for (uint8_t i = 0; i < size; i++) {
+    if (serverInfo == nullptr) {
+        return;
+    }
+    uint32_t maxIter = std::min(size, MAX_RESULT_SIZE);
+    for (uint32_t i = 0; i < maxIter; i++) {
         NetsysNative::NetDnsResultServerInfo ai;
         DnsServerInfo *tmp = &(serverInfo[i]);
         switch (tmp->aiFamily) {
@@ -108,10 +123,14 @@ void DnsQualityDiag::ParseDnsSever(uint32_t size, DnsServerInfo* serverInfo,
             case AF_INET6:
                 ai.type_ = static_cast<uint32_t>(NetsysNative::ADDR_TYPE_IPV6);
                 break;
+            default:
+                NETNATIVE_LOGE("aiFamily is invalid");
+                continue;
         }
         ai.protocol_ = tmp->queryProtocol == SOCK_STREAM ? NetsysNative::SERVER_PROTOCOL_TCP :
             NetsysNative::SERVER_PROTOCOL_UDP;
-        ai.addr_ = tmp->addr;
+        size_t addrLen = strnlen(tmp->addr, sizeof(tmp->addr));
+        ai.addr_ = std::string(tmp->addr, addrLen);
         report.serverlist_.push_back(ai);
     }
 }
@@ -123,9 +142,6 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
     if (failreason == DNS_FAIL_REASON_FIREWALL) {
         return 0;
     }
-    std::unique_lock<std::mutex> locker(dnsReportResultMutex_);
-    bool reportSizeReachLimit = (report_.size() >= MAX_RESULT_SIZE);
-    locker.unlock();
     NETNATIVE_LOG_D("ReportDnsResult: %{public}d, %{public}d, %{public}d, %{public}d, %{public}d, %{public}d",
                     netId, uid, pid, usedtime, size, failreason);
 
@@ -133,25 +149,28 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
         // query from Netmanager ignore report
         return 0;
     }
-
-    if (!reportSizeReachLimit) {
-        NetsysNative::NetDnsResultReport report;
-        report.netid_ = netId;
-        report.uid_ = uid;
-        report.pid_ = pid;
-        report.timeused_ = static_cast<uint32_t>(usedtime);
-        report.queryresult_ = static_cast<uint32_t>(failreason);
-        report.host_ = name;
-        report.querytime_ = static_cast<uint64_t>(queryParam.queryTime);
-        if (failreason == 0) {
-            ParseReportAddr(size, addrinfo, report);
-            ParseDnsSever(serverSize, dnsserverinfo, report);
-        }
-        std::shared_ptr<NetsysNative::NetDnsResultReport> rpt =
-            std::make_shared<NetsysNative::NetDnsResultReport>(report);
-        auto event = AppExecFwk::InnerEvent::Get(DnsQualityEventHandler::MSG_DNS_NEW_REPORT, rpt);
-        handler_->SendEvent(event);
+    if (handler_ == nullptr) {
+        NETNATIVE_LOGE("handler_ is nullptr");
+        return -1;
     }
+
+    NetsysNative::NetDnsResultReport report;
+    report.netid_ = netId;
+    report.uid_ = uid;
+    report.pid_ = pid;
+    report.timeused_ = static_cast<uint32_t>(usedtime);
+    report.queryresult_ = static_cast<uint32_t>(failreason);
+    report.host_ = name;
+    report.querytime_ = static_cast<uint64_t>(queryParam.queryTime);
+    if (failreason == 0) {
+        ParseReportAddr(size, addrinfo, report);
+        ParseDnsSever(serverSize, dnsserverinfo, report);
+    }
+    std::shared_ptr<NetsysNative::NetDnsResultReport> rpt =
+        std::make_shared<NetsysNative::NetDnsResultReport>(report);
+    auto event = AppExecFwk::InnerEvent::Get(DnsQualityEventHandler::MSG_DNS_NEW_REPORT, rpt);
+    handler_->SendEvent(event);
+
     return 0;
 }
 
@@ -174,22 +193,26 @@ void DnsQualityDiag::FillDnsQueryResultReport(NetsysNative::NetDnsQueryResultRep
     report.addrSize_ = queryParam.addrSize;
     DnsProcessInfoExt processInfo = queryParam.processInfo;
     report.sourceFrom_ = processInfo.sourceFrom;
-    std::string srcAddr(processInfo.srcAddr);
+    size_t len = strnlen(processInfo.srcAddr, sizeof(processInfo.srcAddr));
+    std::string srcAddr(processInfo.srcAddr, len);
     report.srcAddr_ = srcAddr;
     std::vector<std::string> serverList;
     GetDefaultDnsServerList(queryParam.uid, serverList);
     report.dnsServerSize_ = static_cast<uint8_t>(serverList.size());
     report.dnsServerList_ = serverList;
     report.queryTime_ = static_cast<uint64_t>(processInfo.queryTime);
-    report.host_ = processInfo.hostname;
+    len = strnlen(processInfo.hostname, sizeof(processInfo.hostname));
+    report.host_ = std::string(processInfo.hostname, len);
     report.retCode_ = processInfo.retCode;
     report.firstQueryEndDuration_ = processInfo.firstQueryEndDuration;
     report.firstQueryEnd2AppDuration_ = processInfo.firstQueryEnd2AppDuration;
     report.ipv4RetCode_ = processInfo.ipv4QueryInfo.retCode;
-    std::string ipv4ServerName(processInfo.ipv4QueryInfo.serverAddr);
+    len = strnlen(processInfo.ipv4QueryInfo.serverAddr, sizeof(processInfo.ipv4QueryInfo.serverAddr));
+    std::string ipv4ServerName(processInfo.ipv4QueryInfo.serverAddr, len);
     report.ipv4ServerName_ = ipv4ServerName;
     report.ipv6RetCode_ = processInfo.ipv6QueryInfo.retCode;
-    std::string ipv6ServerName(processInfo.ipv6QueryInfo.serverAddr);
+    len = strnlen(processInfo.ipv6QueryInfo.serverAddr, sizeof(processInfo.ipv6QueryInfo.serverAddr));
+    std::string ipv6ServerName(processInfo.ipv6QueryInfo.serverAddr, len);
     report.ipv6ServerName_ = ipv6ServerName;
     resBitInfo |= (DnsParamCache::GetInstance().IsUseVpnDns(queryParam.uid) ? VPN_NET_FLAG : 0);
     resBitInfo |= (processInfo.isFromCache ? FROM_CACHE_FLAG : 0);
@@ -203,11 +226,14 @@ void DnsQualityDiag::FillDnsQueryResultReport(NetsysNative::NetDnsQueryResultRep
 int32_t DnsQualityDiag::ParseDnsQueryReportAddr(uint8_t size,
     AddrInfo* addrinfo, NetsysNative::NetDnsQueryResultReport &report)
 {
+    if (addrinfo == nullptr) {
+        return -1;
+    }
     for (uint8_t i = 0; i < size; i++) {
         NetsysNative::NetDnsQueryResultAddrInfo ai;
         AddrInfo *tmp = &(addrinfo[i]);
         void* addr = NULL;
-        char c_addr[INET6_ADDRSTRLEN];
+        char c_addr[INET6_ADDRSTRLEN] = {0};
         switch (tmp->aiFamily) {
             case AF_INET:
                 ai.type_ = NetsysNative::ADDR_TYPE_IPV4;
@@ -217,8 +243,14 @@ int32_t DnsQualityDiag::ParseDnsQueryReportAddr(uint8_t size,
                 ai.type_ = NetsysNative::ADDR_TYPE_IPV6;
                 addr = &(tmp->aiAddr.sin6.sin6_addr);
                 break;
+            default:
+                NETNATIVE_LOGE("aiFamily is invalid");
+                continue;
         }
-        inet_ntop(tmp->aiFamily, addr, c_addr, sizeof(c_addr));
+        if (inet_ntop(tmp->aiFamily, addr, c_addr, sizeof(c_addr)) == nullptr) {
+            NETNATIVE_LOGE("inet_ntop failed");
+            continue;
+        }
         ai.addr_ = c_addr;
         if (report.addrlist_.size() < MAX_RESULT_SIZE) {
             report.addrlist_.push_back(ai);
@@ -243,6 +275,10 @@ int32_t DnsQualityDiag::ReportDnsQueryResult(PostDnsQueryParam queryParam, AddrI
         std::shared_ptr<NetsysNative::NetDnsQueryResultReport> rpt =
             std::make_shared<NetsysNative::NetDnsQueryResultReport>(report);
         auto event = AppExecFwk::InnerEvent::Get(DnsQualityEventHandler::MSG_DNS_QUERY_RESULT_REPORT, rpt);
+        if (handler_ == nullptr) {
+            NETNATIVE_LOGE("handler_ is nullptr");
+            return -1;
+        }
         handler_->SendEvent(event);
     }
 
@@ -269,6 +305,10 @@ int32_t DnsQualityDiag::ReportDnsQueryAbnormal(uint32_t eventfailcause, PostDnsQ
     rpt->eventfailcause = eventfailcause;
     rpt->report = report;
     auto event = AppExecFwk::InnerEvent::Get(DnsQualityEventHandler::MSG_DNS_QUERY_ABNORMAL_REPORT, rpt);
+    if (handler_ == nullptr) {
+        NETNATIVE_LOGE("handler_ is nullptr");
+        return -1;
+    }
     handler_->SendEvent(event);
     return 0;
 }
@@ -296,6 +336,10 @@ int32_t DnsQualityDiag::RegisterResultListener(const sptr<INetDnsResultCallback>
 
     if (handler_started != true) {
         handler_started = true;
+        if (handler_ == nullptr) {
+            NETNATIVE_LOGE("handler_ is nullptr");
+            return -1;
+        }
         handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_REPORT_LOOP, report_delay);
 #if NETSYS_DNS_MONITOR
         handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_MONITOR_LOOP, monitor_loop_delay);
@@ -332,6 +376,10 @@ int32_t DnsQualityDiag::UnregisterResultListener(const sptr<INetDnsResultCallbac
 
 int32_t DnsQualityDiag::SetLoopDelay(int32_t delay)
 {
+    if (delay < 0) {
+        NETNATIVE_LOGE("delay is invalid");
+        return -1;
+    }
     monitor_loop_delay = static_cast<uint32_t>(delay);
     return 0;
 }
@@ -339,8 +387,8 @@ int32_t DnsQualityDiag::SetLoopDelay(int32_t delay)
 int32_t DnsQualityDiag::query_default_host()
 {
 #if NETSYS_DNS_MONITOR
-    struct addrinfo *res;
-    struct queryparam param;
+    struct addrinfo *res = nullptr;
+    struct queryparam param = {0};
     param.qp_type = 1;
 #endif
 
@@ -352,7 +400,11 @@ int32_t DnsQualityDiag::query_default_host()
 
 #if NETSYS_DNS_MONITOR
     param.qp_netid = netid;
-    getaddrinfo_ext(queryAddr.c_str(), NULL, NULL, &res, &param);
+    int ret = getaddrinfo_ext(queryAddr.c_str(), NULL, NULL, &res, &param);
+    if (ret != 0 || res == nullptr) {
+        NETNATIVE_LOGE("getaddrinfo_ext failed ret=%{public}d", ret);
+        return ret;
+    }
     freeaddrinfo(res);
 #endif
 
@@ -367,6 +419,10 @@ int32_t DnsQualityDiag::handle_dns_loop()
             query_default_host();
         }
         locker.unlock();
+        if (handler_ == nullptr) {
+            NETNATIVE_LOGE("handler_ is nullptr");
+            return -1;
+        }
         handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_MONITOR_LOOP, monitor_loop_delay);
     }
     return 0;
@@ -382,6 +438,11 @@ int32_t DnsQualityDiag::handle_dns_fail()
 
 int32_t DnsQualityDiag::send_dns_report()
 {
+    std::list<sptr<NetsysNative::INetDnsResultCallback>> cbs;
+    {
+        std::unique_lock<std::mutex> locker(resultListenersMutex_);
+        cbs = resultListeners_;
+    }
     std::unique_lock<std::mutex> locker(dnsReportResultMutex_);
     if (!handler_started) {
         report_.clear();
@@ -392,7 +453,7 @@ int32_t DnsQualityDiag::send_dns_report()
         std::list<NetsysNative::NetDnsResultReport> reportSend(report_);
         report_.clear();
         locker.unlock();
-        for (auto cb: resultListeners_) {
+        for (auto cb: cbs) {
             cb->OnDnsResultReport(reportSend.size(), reportSend);
         }
     }
@@ -402,9 +463,13 @@ int32_t DnsQualityDiag::send_dns_report()
     dnsQueryReport_.clear();
 
     if (reportSend.size() > 0) {
-        for (auto cb: resultListeners_) {
+        for (auto cb: cbs) {
             cb->OnDnsQueryResultReport(reportSend.size(), reportSend);
         }
+    }
+    if (handler_ == nullptr) {
+        NETNATIVE_LOGE("handler_ is nullptr");
+        return -1;
     }
     handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_REPORT_LOOP, report_delay);
     return 0;
@@ -427,8 +492,12 @@ int32_t DnsQualityDiag::handle_dns_abnormal(std::shared_ptr<DnsAbnormalInfo> abn
     if (!abnormalInfo) {
         return 0;
     }
-    std::unique_lock<std::mutex> locker(resultListenersMutex_);
-    for (auto cb: resultListeners_) {
+    std::list<sptr<NetsysNative::INetDnsResultCallback>> cbs;
+    {
+        std::lock_guard<std::mutex> locker(resultListenersMutex_);
+        cbs = resultListeners_;
+    }
+    for (auto cb: cbs) {
         cb->OnDnsQueryAbnormalReport(abnormalInfo->eventfailcause, abnormalInfo->report);
     }
     return 0;
