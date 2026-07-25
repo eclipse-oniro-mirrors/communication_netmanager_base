@@ -74,7 +74,6 @@ void IptablesWrapper::ExecuteCommandForRes(const std::string &command)
     std::string cmdWithWait = command + " -w 5 ";
     NETNATIVE_LOGI("ExecuteCommandForRes %{public}s", CommonUtils::AnonymousIpInStr(cmdWithWait).c_str());
     setpriority(PRIO_PROCESS, syscall(SYS_gettid), IPTABLES_PROCESS_PRIORITY);
-    result_.clear();
     if (CommonUtils::ForkExec(cmdWithWait, &result_) == NETMANAGER_ERROR) {
         NETNATIVE_LOGE("run exec faild");
     }
