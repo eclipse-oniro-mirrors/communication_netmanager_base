@@ -53,6 +53,7 @@ constexpr const char *V4_MAPPED_PREFIX = "::ffff:";
 NetLinkSocketDiag::~NetLinkSocketDiag()
 {
     CloseNetlinkSocket();
+    
 }
 
 std::string NetLinkSocketDiag::StripV4MappedPrefix(const std::string &addr)

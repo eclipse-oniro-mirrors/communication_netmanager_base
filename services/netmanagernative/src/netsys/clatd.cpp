@@ -55,6 +55,7 @@ Clatd::Clatd(int tunFd, int readSock6, int writeSock6, const std::string &v6Ifac
     inet_pton(AF_INET6, prefixAddrStr.c_str(), &prefixAddr_);
     isSocketClosed_ = false;
     stopStatus_ = true;
+    
 }
 
 Clatd::~Clatd()
