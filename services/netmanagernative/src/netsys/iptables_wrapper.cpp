@@ -74,7 +74,6 @@ void IptablesWrapper::ExecuteCommandForRes(const std::string &command)
     std::string cmdWithWait = command + " -w 5 ";
     NETNATIVE_LOGI("ExecuteCommandForRes %{public}s", CommonUtils::AnonymousIpInStr(cmdWithWait).c_str());
     setpriority(PRIO_PROCESS, syscall(SYS_gettid), IPTABLES_PROCESS_PRIORITY);
-    std::lock_guard<std::mutex> lock(iptablesMutex_);
     result_.clear();
     if (CommonUtils::ForkExec(cmdWithWait, &result_) == NETMANAGER_ERROR) {
         NETNATIVE_LOGE("run exec faild");
@@ -149,7 +148,6 @@ int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &com
 
 std::string IptablesWrapper::RunCommandForRes(const IpType &ipType, const std::string &command)
 {
-    std::lock_guard<std::mutex> lock(iptablesMutex_);
     NETNATIVE_LOGI("IptablesWrapper::RunCommandForRes, ipType:%{public}d", ipType);
     if (!iptablesWrapperFfrtQueue_) {
         NETNATIVE_LOGE("FFRT Init Fail");
