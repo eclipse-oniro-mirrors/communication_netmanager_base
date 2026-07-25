@@ -30,6 +30,9 @@ constexpr uint32_t MAX_IFACE_NUM = 16;
 constexpr uint32_t MAX_NET_CAP_NUM = 32;
 constexpr uint32_t UID_FOUNDATION = 5523;
 constexpr int32_t INVALID_UID = -1;
+constexpr int32_t MAX_IPV6_PREFIX_LENGTH = 128;
+constexpr int32_t MAX_TRACE_JUMP_NUM = 30;
+constexpr uint32_t MAX_VLAN_ID = 4094;
 const std::vector<uint32_t> SYSTEM_CODE{static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_AIRPLANE_MODE),
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_GLOBAL_HTTP_PROXY),
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY),
@@ -825,9 +828,6 @@ int32_t NetConnServiceStub::OnUpdateNetLinkInfo(MessageParcel &data, MessageParc
 
 int32_t NetConnServiceStub::OnRegisterNetDetectionCallback(MessageParcel &data, MessageParcel &reply)
 {
-    if (!data.ContainFileDescriptors()) {
-        NETMGR_LOG_E("Execute ContainFileDescriptors failed");
-    }
     int32_t netId = 0;
     if (!data.ReadInt32(netId)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
@@ -860,9 +860,6 @@ int32_t NetConnServiceStub::OnRegisterNetDetectionCallback(MessageParcel &data, 
 
 int32_t NetConnServiceStub::OnUnRegisterNetDetectionCallback(MessageParcel &data, MessageParcel &reply)
 {
-    if (!data.ContainFileDescriptors()) {
-        NETMGR_LOG_E("Execute ContainFileDescriptors failed");
-    }
     int32_t netId = 0;
     if (!data.ReadInt32(netId)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
@@ -1023,7 +1020,7 @@ int32_t NetConnServiceStub::OnGetIfaceNameIdentMaps(MessageParcel &data, Message
 int32_t NetConnServiceStub::OnGetDefaultNet(MessageParcel &data, MessageParcel &reply)
 {
     NETMGR_LOG_D("OnGetDefaultNet Begin...");
-    int32_t netId;
+    int32_t netId = 0;
     int32_t result = GetDefaultNet(netId);
     NETMGR_LOG_D("GetDefaultNet result is: [%{public}d]", result);
     if (!reply.WriteInt32(result)) {
@@ -1404,6 +1401,9 @@ int32_t NetConnServiceStub::OnQueryTraceRoute(MessageParcel &data, MessageParcel
     if (!data.ReadInt32(packetsType)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
+    if (maxJumpNumber <= 0 || maxJumpNumber > MAX_TRACE_JUMP_NUM) {
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     int32_t result = QueryTraceRoute(destination, maxJumpNumber, packetsType, traceRouteInfo, true);
     if (!reply.WriteInt32(result)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -1778,6 +1778,10 @@ int32_t NetConnServiceStub::OnAddInterfaceAddress(MessageParcel &data, MessagePa
     int32_t prefixLength = 0;
     if (!data.ReadInt32(prefixLength)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    if (prefixLength < 0 || prefixLength > MAX_IPV6_PREFIX_LENGTH) {
+        return NETMANAGER_ERR_INVALID_PARAMETER;
     }
 
     int32_t ret = AddInterfaceAddress(ifName, ipAddr, prefixLength);
@@ -2264,6 +2268,9 @@ int32_t NetConnServiceStub::OnCreateVlan(MessageParcel &data, MessageParcel &rep
     if (!data.ReadUint32(vlanId)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
+    if (vlanId > MAX_VLAN_ID) {
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     int32_t ret = CreateVlan(ifName, vlanId);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -2281,6 +2288,9 @@ int32_t NetConnServiceStub::OnDestroyVlan(MessageParcel &data, MessageParcel &re
     }
     if (!data.ReadUint32(vlanId)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (vlanId > MAX_VLAN_ID) {
+        return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     int32_t ret = DestroyVlan(ifName, vlanId);
     if (!reply.WriteInt32(ret)) {

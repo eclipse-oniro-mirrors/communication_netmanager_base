@@ -551,8 +551,12 @@ static void HandleDeleteIpv6Route(const NetLinkInfo &netLinkInfoBck,
     bool lostIPv6Router = netLinkInfoBck.HasIpv6DefaultRoute() && !newNetLinkInfo.HasIpv6DefaultRoute();
     if (lostIPv6Router && newNetLinkInfo.IsIpv4Provisioned()) {
         NETMGR_LOG_I("UpdateRoutes, Restart IPV6");
-        NetsysController::GetInstance().SetEnableIpv6(newNetLinkInfo.ifaceName_, 0, true);
-        NetsysController::GetInstance().FlushDnsCache(netId);
+        if (NetsysController::GetInstance().SetEnableIpv6(newNetLinkInfo.ifaceName_, 0, true) != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("SetEnableIpv6 failed");
+        }
+        if (NetsysController::GetInstance().FlushDnsCache(static_cast<uint16_t>(netId)) != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("FlushDnsCache failed");
+        }
     }
 }
 
@@ -1053,11 +1057,6 @@ void Network::ResetNetlinkInfo()
 
 void Network::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
 {
-    std::shared_lock<std::shared_mutex> lockMonitor(netMonitorMutex_);
-    if (netMonitor_ == nullptr) {
-        return;
-    }
-    lockMonitor.unlock();
     StartNetDetection(true);
 }
 
@@ -1168,6 +1167,7 @@ int32_t Network::RegisterDualStackProbeCallback(std::shared_ptr<IDualStackProbeC
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
+    std::unique_lock<std::shared_mutex> lock(dualStackProbeMutex_);
     for (const auto &iter : dualStackProbeCallback_) {
         if (callback == iter) {
             NETMGR_LOG_D("dualStackProbeCallback_ had this callback");
@@ -1187,6 +1187,7 @@ int32_t Network::UnRegisterDualStackProbeCallback(std::shared_ptr<IDualStackProb
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
+    std::unique_lock<std::shared_mutex> lock(dualStackProbeMutex_);
     for (auto iter = dualStackProbeCallback_.begin(); iter != dualStackProbeCallback_.end(); ++iter) {
         if (callback == *iter) {
             dualStackProbeCallback_.erase(iter);
@@ -1204,6 +1205,7 @@ void Network::SetNetDetectionHandler(const NetDetectionHandler &handler)
 
 void Network::HandleNetProbeResult(DualStackProbeResultCode DualStackProbeResultCode)
 {
+    std::shared_lock<std::shared_mutex> lock(dualStackProbeMutex_);
     for (const auto &callback : dualStackProbeCallback_) {
         NETMGR_LOG_D("start DualStackProbe callback!");
         if (callback) {
@@ -1214,8 +1216,8 @@ void Network::HandleNetProbeResult(DualStackProbeResultCode DualStackProbeResult
 
 void Network::UpdateDualStackProbeTime(int32_t dualStackProbeTime)
 {
-    dualStackProbeTime_ = dualStackProbeTime;
     std::shared_lock<std::shared_mutex> lockMonitor(netMonitorMutex_);
+    dualStackProbeTime_ = dualStackProbeTime;
     if (netMonitor_) {
         netMonitor_->UpdateDualStackProbeTime(dualStackProbeTime);
     }

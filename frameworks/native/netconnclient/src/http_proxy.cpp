@@ -168,8 +168,9 @@ bool HttpProxy::Unmarshalling(Parcel &parcel, HttpProxy &httpProxy)
 
     httpProxy = {host, port, exclusionList};
     httpProxy.SetUserId(userId);
-    parcel.ReadString(httpProxy.username_);
-    parcel.ReadString(httpProxy.password_);
+    if (!parcel.ReadString(httpProxy.username_) || !parcel.ReadString(httpProxy.password_)) {
+        return false;
+    }
     return true;
 }
 

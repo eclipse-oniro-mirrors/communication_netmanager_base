@@ -24,6 +24,54 @@ NetSupplierCallbackProxy::NetSupplierCallbackProxy(const sptr<IRemoteObject> &im
 
 NetSupplierCallbackProxy::~NetSupplierCallbackProxy() {}
 
+static bool WriteRequestNetworkData(MessageParcel &data, const std::string &ident,
+    const std::set<NetCap> &netCaps, const NetRequest &netrequest)
+{
+    if (!data.WriteString(ident)) {
+        NETMGR_LOG_E("Write ident failed");
+        return false;
+    }
+    uint32_t size = static_cast<uint32_t>(netCaps.size());
+    if (!data.WriteUint32(size)) {
+        NETMGR_LOG_E("Write netCaps size failed");
+        return false;
+    }
+    for (auto netCap : netCaps) {
+        if (!data.WriteUint32(static_cast<uint32_t>(netCap))) {
+            NETMGR_LOG_E("Write netCap failed");
+            return false;
+        }
+    }
+    if (!data.WriteUint32(netrequest.registerType)) {
+        NETMGR_LOG_E("Write registerType failed");
+        return false;
+    }
+    uint32_t bearTypeSize = static_cast<uint32_t>(netrequest.bearTypes.size());
+    if (!data.WriteUint32(bearTypeSize)) {
+        NETMGR_LOG_E("Write bearTypes size failed");
+        return false;
+    }
+    for (auto bearType : netrequest.bearTypes) {
+        if (!data.WriteUint32(static_cast<uint32_t>(bearType))) {
+            NETMGR_LOG_E("Write bearType failed");
+            return false;
+        }
+    }
+    if (!data.WriteUint32(netrequest.uid)) {
+        NETMGR_LOG_E("Write uid failed");
+        return false;
+    }
+    if (!data.WriteUint32(netrequest.requestId)) {
+        NETMGR_LOG_E("Write requestId failed");
+        return false;
+    }
+    if (!data.WriteString(netrequest.ident)) {
+        NETMGR_LOG_E("Write ident failed");
+        return false;
+    }
+    return true;
+}
+
 int32_t NetSupplierCallbackProxy::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
                                                  const NetRequest &netrequest)
 {
@@ -32,27 +80,14 @@ int32_t NetSupplierCallbackProxy::RequestNetwork(const std::string &ident, const
         NETMGR_LOG_E("WriteInterfaceToken failed");
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
-    data.WriteString(ident);
-    uint32_t size = static_cast<uint32_t>(netCaps.size());
-    data.WriteUint32(size);
-    for (auto netCap : netCaps) {
-        data.WriteUint32(static_cast<uint32_t>(netCap));
+    if (!WriteRequestNetworkData(data, ident, netCaps, netrequest)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
-    data.WriteInt32(netrequest.registerType);
-    uint32_t bearTypeSize = static_cast<uint32_t>(netrequest.bearTypes.size());
-    data.WriteUint32(bearTypeSize);
-    for (auto bearType : netrequest.bearTypes) {
-        data.WriteUint32(static_cast<uint32_t>(bearType));
-    }
-    data.WriteUint32(netrequest.uid);
-    data.WriteUint32(netrequest.requestId);
-    data.WriteString(netrequest.ident);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
-
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(
@@ -63,6 +98,39 @@ int32_t NetSupplierCallbackProxy::RequestNetwork(const std::string &ident, const
     return ret;
 }
 
+static bool WriteReleaseParcelData(MessageParcel &data, const NetRequest &netRequest)
+{
+    bool result = data.WriteUint32(netRequest.uid) && data.WriteUint32(netRequest.requestId) &&
+                  data.WriteUint32(netRequest.registerType) && data.WriteString(netRequest.ident);
+    if (!result) {
+        NETMGR_LOG_E("Write uid, requestId, registerType or ident failed");
+        return false;
+    }
+    uint32_t size = static_cast<uint32_t>(netRequest.bearTypes.size());
+    if (!data.WriteUint32(size)) {
+        NETMGR_LOG_E("Write bearTypes size failed");
+        return false;
+    }
+    for (auto netBearType : netRequest.bearTypes) {
+        if (!data.WriteUint32(static_cast<uint32_t>(netBearType))) {
+            NETMGR_LOG_E("Write net BearType failed");
+            return false;
+        }
+    }
+    size = static_cast<uint32_t>(netRequest.netCaps.size());
+    if (!data.WriteUint32(size)) {
+        NETMGR_LOG_E("Write net caps size failed");
+        return false;
+    }
+    for (auto netCap : netRequest.netCaps) {
+        if (!data.WriteUint32(static_cast<uint32_t>(netCap))) {
+            NETMGR_LOG_E("Write net cap failed");
+            return false;
+        }
+    }
+    return true;
+}
+
 int32_t NetSupplierCallbackProxy::ReleaseNetwork(const NetRequest &netRequest)
 {
     MessageParcel data;
@@ -70,42 +138,14 @@ int32_t NetSupplierCallbackProxy::ReleaseNetwork(const NetRequest &netRequest)
         NETMGR_LOG_E("WriteInterfaceToken failed");
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
-    bool result = data.WriteUint32(netRequest.uid) && data.WriteUint32(netRequest.requestId) &&
-                  data.WriteUint32(netRequest.registerType) && data.WriteString(netRequest.ident);
-    if (!result) {
-        NETMGR_LOG_E("Write uid, requestId, registerType or ident failed");
+    if (!WriteReleaseParcelData(data, netRequest)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
-    }
-
-    uint32_t size = static_cast<uint32_t>(netRequest.bearTypes.size());
-    if (!data.WriteUint32(size)) {
-        NETMGR_LOG_E("Write bearTypes size failed");
-        return NETMANAGER_ERR_WRITE_DATA_FAIL;
-    }
-    for (auto netBearType : netRequest.bearTypes) {
-        if (!data.WriteInt32(netBearType)) {
-            NETMGR_LOG_E("Write net BearType failed");
-            return NETMANAGER_ERR_WRITE_DATA_FAIL;
-        }
-    }
-
-    size = static_cast<uint32_t>(netRequest.netCaps.size());
-    if (!data.WriteUint32(size)) {
-        NETMGR_LOG_E("Write net caps size failed");
-        return NETMANAGER_ERR_WRITE_DATA_FAIL;
-    }
-    for (auto netCap : netRequest.netCaps) {
-        if (!data.WriteInt32(netCap)) {
-            NETMGR_LOG_E("Write net cap failed");
-            return NETMANAGER_ERR_WRITE_DATA_FAIL;
-        }
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
-
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(

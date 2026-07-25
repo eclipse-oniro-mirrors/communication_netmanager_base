@@ -4473,7 +4473,7 @@ int32_t NetConnService::SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSu
         supplierId, reuseSupplierId, isReused);
     {
         sptr<NetSupplier> supplier = nullptr;
-        NetCap reuseCap;
+        NetCap reuseCap = NetCap::NET_CAPABILITY_INTERNET;
         std::shared_lock<ffrt::shared_mutex> lock(netSuppliersMutex_);
         for (const auto& pNetSupplier : netSuppliers_) {
             if (pNetSupplier.second == nullptr) {
@@ -4483,7 +4483,9 @@ int32_t NetConnService::SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSu
                 supplier = pNetSupplier.second;
             } else if (pNetSupplier.second->GetSupplierId() == reuseSupplierId) {
                 std::set<NetCap> netCaps = pNetSupplier.second->GetNetCaps().ToSet();
-                reuseCap = *netCaps.begin();
+                if (!netCaps.empty()) {
+                    reuseCap = *netCaps.begin();
+                }
             }
         }
         if (supplier != nullptr) {

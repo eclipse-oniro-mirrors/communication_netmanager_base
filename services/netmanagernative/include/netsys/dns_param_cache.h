@@ -83,7 +83,7 @@ public:
 
     int32_t DelUidRange(uint32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges);
 
-    bool IsVpnOpen() const;
+    bool IsVpnOpen();
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
@@ -140,8 +140,6 @@ private:
 
     ffrt::mutex uidRangeMutex_;
 
-    ffrt::shared_mutex uidBlackListMutex_;
-
     std::atomic_uint defaultNetId_;
 
     std::map<uint16_t, DnsResolvConfig> serverConfigMap_;
@@ -170,7 +168,7 @@ private:
 
     uint32_t callingUid_;
 
-    int32_t currentUserId_ = 0;
+    std::atomic<int32_t> currentUserId_ = 0;
 
     std::vector<sptr<NetsysNative::INetFirewallCallback>> callbacks_;
 

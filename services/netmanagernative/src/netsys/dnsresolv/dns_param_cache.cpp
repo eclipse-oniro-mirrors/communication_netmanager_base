@@ -445,8 +445,9 @@ int32_t DnsParamCache::DelUidRange(uint32_t netId, const std::vector<NetManagerS
     return 0;
 }
 
-bool DnsParamCache::IsVpnOpen() const
+bool DnsParamCache::IsVpnOpen()
 {
+    std::lock_guard<ffrt::mutex> guard(uidRangeMutex_);
     return vpnUidRanges_.size();
 }
 
@@ -454,7 +455,7 @@ bool DnsParamCache::IsVpnOpen() const
 int32_t DnsParamCache::GetUserId(int32_t appUid)
 {
     int32_t userId = appUid / USER_ID_DIVIDOR;
-    return userId > 0 ? userId : currentUserId_;
+    return userId > 0 ? userId : currentUserId_.load();
 }
 
 bool DnsParamCache::GetDnsServersByAppUid(int32_t appUid, std::vector<std::string> &servers)
@@ -607,6 +608,7 @@ int32_t DnsParamCache::UnRegisterNetFirewallCallback(const sptr<NetsysNative::IN
 int32_t DnsParamCache::SetFirewallCurrentUserId(int32_t userId)
 {
     currentUserId_ = userId;
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     ClearAllDnsCache();
     return 0;
 }
@@ -712,6 +714,7 @@ bool DnsParamCache::IsUseVpnDns(uint32_t uid)
     std::lock_guard<ffrt::mutex> uidLock(uidRangeMutex_);
     for (auto mem : vpnUidRanges_) {
         if (static_cast<int64_t>(uid) >= mem.begin_ && static_cast<int64_t>(uid) <= mem.end_) {
+            std::lock_guard<ffrt::mutex> lock(cacheMutex_);
             auto it = serverConfigMap_.find(mem.netId_);
             if (it == serverConfigMap_.end()) {
                 continue;
@@ -780,7 +783,7 @@ void DnsParamCache::SetIpv6UidBlackList(std::vector<int32_t> &netIds, uint32_t u
         return;
     }
  
-    std::scoped_lock<ffrt::shared_mutex> writeLock(uidBlackListMutex_);
+    std::lock_guard<ffrt::mutex> cacheLock(cacheMutex_);
     for (auto& netId : netIds) {
         if (netId == 0) {
             netId = static_cast<int32_t>(defaultNetId_);
@@ -802,7 +805,7 @@ bool DnsParamCache::IsInIpv6UidBlackList(uint16_t netId, uint32_t uid)
         netId = defaultNetId_;
     }
  
-    std::scoped_lock<ffrt::shared_mutex> readLock(uidBlackListMutex_);
+    std::lock_guard<ffrt::mutex> cacheLock(cacheMutex_);
     auto it = serverConfigMap_.find(netId);
     if (it == serverConfigMap_.end()) {
         DNS_CONFIG_PRINT("IsInIpv6UidBlackList failed: is not have netid:%{public}d,", netId);
