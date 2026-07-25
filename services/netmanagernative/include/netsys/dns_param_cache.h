@@ -168,7 +168,7 @@ private:
 
     std::unordered_map<int32_t, std::vector<sptr<NetFirewallDnsRule>>> netFirewallDnsRuleMap_;
 
-    uint32_t callingUid_;
+    uint32_t callingUid_ = 0;
 
     int32_t currentUserId_ = 0;
 
