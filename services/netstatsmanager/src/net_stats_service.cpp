@@ -1412,6 +1412,10 @@ void NetStatsService::AddUidStatsFlag(uint64_t delay)
 
 bool NetStatsService::CommonEventPackageAdded(uint32_t uid)
 {
+    if (netStatsCached_ == nullptr) {
+        NETMGR_LOG_E("netStatsCached_ is nullptr");
+        return false;
+    }
     SampleBundleInfo sampleBundleInfo = GetSampleBundleInfoForUid(uid);
     if (CommonUtils::IsSim(sampleBundleInfo.bundleName_) ||
         CommonUtils::IsSim2(sampleBundleInfo.bundleName_)) {
@@ -1707,7 +1711,7 @@ bool NetStatsService::CommonEventSimStateChangedFfrt(int32_t slotId, int32_t sim
     int32_t simId = Telephony::CoreServiceClient::GetInstance().GetSimId(slotId);
 
     if (simState == static_cast<int32_t>(Telephony::SimState::SIM_STATE_LOADED)) {
-        if (netStatsCalibrate_->InitCalibrationInfo(simId)) {
+        if (netStatsCalibrate_ != nullptr && netStatsCalibrate_->InitCalibrationInfo(simId)) {
             UpdateHistoryData(simId);
         }
 
@@ -1788,10 +1792,19 @@ bool NetStatsService::CellularDataStateChangedFfrt(int32_t slotId, int32_t dataS
     uint64_t ifIndex = UINT64_MAX;
     ifaceNameIdentMap_.Iterate([this, simId, &ifIndex](const std::string &k, const std::string &v) {
         if (v == std::to_string(simId)) {
-            ifIndex = if_nametoindex(k.c_str());
+            unsigned int idx = if_nametoindex(k.c_str());
+            if (idx == 0) {
+                NETMGR_LOG_E("invalid iface name: %{public}s", k.c_str());
+                return;
+            }
+            ifIndex = static_cast<uint64_t>(idx);
             NETMGR_LOG_E("curIfIndex_:%{public}" PRIu64, ifIndex);
         }
     });
+    if (ifIndex == UINT64_MAX) {
+        NETMGR_LOG_E("ifIndex not found or invalid for simId:%{public}d", simId);
+        return false;
+    }
     uint64_t ifIndexRecords = UINT64_MAX;
     if (GetIfIndex(simId, ifIndexRecords) && ifIndexRecords == ifIndex) {
         NETMGR_LOG_E("not need process");
@@ -1914,6 +1927,10 @@ endTime: %{public}" PRIu64 ", allUsedTraffic: %{public}" PRIu64,
 void NetStatsService::GetDailyTrafficStatsByNetwork(const sptr<NetStatsNetwork> &network,
     std::vector<NetStatsInfoSequence> &infos)
 {
+    if (network == nullptr) {
+        NETMGR_LOG_E("GetDailyTrafficStatsByNetwork network is nullptr");
+        return;
+    }
     std::vector<NetStatsInfo> netStatsInfos;
     GetHistoryTrafficInfo(network, netStatsInfos, false);
     netStatsCached_->GetIfaceStatsCached(netStatsInfos);
@@ -1928,6 +1945,12 @@ void NetStatsService::GetHistoryTrafficInfo(const sptr<NetStatsNetwork> &network
     std::vector<NetStatsInfo> &infos, bool isNeedCalibrate)
 {
     if (network == nullptr) {
+        return;
+    }
+
+    if (netStatsCalibrate_ == nullptr) {
+        NETMGR_LOG_E("netStatsCalibrate_ is nullptr, not support traffic calibrate");
+        GetHitstoryTrafficInIfaceTable(*network, infos);
         return;
     }
 
@@ -2232,6 +2255,10 @@ void NetStatsService::ProcessSettingsDataUpdate(int32_t simId)
 
 void NetStatsService::ProcessUpdateBeginDate(int32_t simId, uint32_t beginDate)
 {
+    if (netStatsCalibrate_ == nullptr) {
+        NETMGR_LOG_E("netStatsCalibrate_ is nullptr, not support traffic calibrate");
+        return;
+    }
     CalibrateInfo info;
     netStatsCalibrate_->ReadCalibrationTrafficInfo(simId, info);
     uint64_t startTime = static_cast<uint64_t>(NetStatsUtils::GetStartTimestamp(beginDate));
@@ -2410,10 +2437,10 @@ bool NetStatsService::GetMonNotifyStatus(int32_t simId)
         return true;
     }
 
-    int32_t currentTime = NetStatsUtils::GetNowTimestamp();
+    int64_t currentTime = NetStatsUtils::GetNowTimestamp();
     int32_t currentStartTime =
         NetStatsUtils::GetStartTimestamp(trafficPlaninfoPtr->startDate);
-    NETMGR_LOG_I("Enter currentTime:%{public}d, currentDayStartTime:%{public}d, lastMonNotifyTime: %{public}d",
+    NETMGR_LOG_I("Enter currentTime:%{public}" PRId64 ", currentDayStartTime:%{public}d, lastMonNotifyTime: %{public}d",
         currentTime, currentStartTime, trafficPlaninfoPtr->lastMonNotifyTime);
     if (trafficPlaninfoPtr->lastMonNotifyTime < currentStartTime) {
         return true;
@@ -2459,9 +2486,9 @@ bool NetStatsService::GetMonAlertStatus(int32_t simId)
         return true;
     }
  
-    int currentTime = NetStatsUtils::GetNowTimestamp();
-    int currentStartTime = NetStatsUtils::GetStartTimestamp(trafficPlaninfoPtr->startDate);
-    NETMGR_LOG_I("Enter currentTime:%{public}d, currentDayStartTime:%{public}d, lastMonAlertTime: %{public}d",
+    int64_t currentTime = NetStatsUtils::GetNowTimestamp();
+    int32_t currentStartTime = NetStatsUtils::GetStartTimestamp(trafficPlaninfoPtr->startDate);
+    NETMGR_LOG_I("Enter currentTime:%{public}" PRId64 ", currentDayStartTime:%{public}d, lastMonAlertTime: %{public}d",
         currentTime, currentStartTime, trafficPlaninfoPtr->lastMonAlertTime);
     if (trafficPlaninfoPtr->lastMonAlertTime < currentStartTime) {
         return true;
@@ -2503,7 +2530,7 @@ void NetStatsService::DealDayNotification(int32_t simId, bool isDualCard)
     if (g_registerNotificationOps(gNetmgrStatsLmtNtf_)) {
         gNetmgrStatsLmtNtf_->PublishNetStatsLimitNotification(NETMGR_STATS_LIMIT_DAY, simId, isDualCard);
     }
-    trafficPlaninfoPtr->lastDayNotifyTime = NetStatsUtils::GetNowTimestamp();
+    trafficPlaninfoPtr->lastDayNotifyTime = static_cast<int32_t>(NetStatsUtils::GetNowTimestamp());
     trafficPlanService_->UpdateTrafficLimitDate(simId);
     NETMGR_LOG_I("update DayNotification time:%{public}d", trafficPlaninfoPtr->lastDayNotifyTime);
 }
@@ -2518,7 +2545,7 @@ void NetStatsService::DealMonNotification(int32_t simId, bool isDualCard)
     if (g_registerNotificationOps(gNetmgrStatsLmtNtf_)) {
         gNetmgrStatsLmtNtf_->PublishNetStatsLimitNotification(NETMGR_STATS_LIMIT_MONTH, simId, isDualCard);
     }
-    trafficPlaninfoPtr->lastMonNotifyTime = NetStatsUtils::GetNowTimestamp();
+    trafficPlaninfoPtr->lastMonNotifyTime = static_cast<int32_t>(NetStatsUtils::GetNowTimestamp());
     trafficPlanService_->UpdateTrafficLimitDate(simId);
     NETMGR_LOG_I("update MonNotification time:%{public}d", trafficPlaninfoPtr->lastMonNotifyTime);
 }
@@ -2541,7 +2568,7 @@ void NetStatsService::DealMonAlert(int32_t simId, bool isDualCard)
     if (trafficPlaninfoPtr->overLimitBehavior) {
         dialog_->PopUpTrafficLimitDialog(simId);
     }
-    trafficPlaninfoPtr->lastMonAlertTime = NetStatsUtils::GetNowTimestamp();
+    trafficPlaninfoPtr->lastMonAlertTime = static_cast<int32_t>(NetStatsUtils::GetNowTimestamp());
     trafficPlanService_->UpdateTrafficLimitDate(simId);
     NETMGR_LOG_I("update MonAlert time:%{public}d", trafficPlaninfoPtr->lastMonAlertTime);
 }

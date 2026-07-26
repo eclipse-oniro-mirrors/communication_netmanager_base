@@ -31,7 +31,7 @@ public:
     static int32_t GetStartTimestamp(int32_t startdate);
     static int32_t GetEndTimestamp(int32_t startdate);
     static int32_t GetTodayStartTimestamp();
-    static int32_t GetNowTimestamp();
+    static int64_t GetNowTimestamp();
     static bool IsLeapYear(int32_t year);
     static int32_t GetDaysInMonth(int32_t year, int32_t month);
     static bool IsMobileDataEnabled();

@@ -170,10 +170,10 @@ int32_t NetStatsUtils::GetTodayStartTimestamp()
     return timestamp;
 }
 
-int32_t NetStatsUtils::GetNowTimestamp()
+int64_t NetStatsUtils::GetNowTimestamp()
 {
     auto now = std::chrono::system_clock::now();
-    return std::chrono::system_clock::to_time_t(now);
+    return std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
 }
 
 bool NetStatsUtils::IsLeapYear(int32_t year)
@@ -236,28 +236,13 @@ int32_t NetStatsUtils::GetPrimarySlotId()
 
 bool NetStatsUtils::ConvertToUint64(const std::string &str, uint64_t &value)
 {
-    char* end;
-    errno = 0; // 清除 errno
     if (str.empty()) {
         NETMGR_LOG_E("string error. str: %{public}s", str.c_str());
         return false;
     }
 
-    value = std::strtoull(str.c_str(), &end, 10);  // 10:十进制
-
-    // 检查错误:
-    // 1. 若没有数字被转换
-    if (end == str.c_str()) {
-        NETMGR_LOG_E("string error. str: %{public}s", str.c_str());
-        return false;
-    }
-    // 2. 若存在范围错误（过大或过小）
-    if (errno == ERANGE && (value == HUGE_VAL || value == HUGE_VALF || value == HUGE_VALL)) {
-        NETMGR_LOG_E("string error. str: %{public}s", str.c_str());
-        return false;
-    }
-    // 3. 若字符串包含非数字字符
-    if (end != nullptr && *end != '\0') {
+    auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
+    if (ec != std::errc{} || ptr != str.data() + str.size()) {
         NETMGR_LOG_E("string error. str: %{public}s", str.c_str());
         return false;
     }

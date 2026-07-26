@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <netinet/in.h>
 #include <regex>
+#include <signal.h>
 #include <sstream>
 #include <set>
 #include <string>
@@ -482,21 +483,25 @@ std::string AnonymizeIptablesCommand(const std::string &command)
 
 int32_t StrToInt(const std::string &value, int32_t defaultErr)
 {
-    errno = 0;
-    char *pEnd = nullptr;
-    int64_t result = std::strtol(value.c_str(), &pEnd, 0);
-    if (pEnd == value.c_str() || (result < INT_MIN || result > INT_MAX) || errno == ERANGE) {
+    if (value.empty()) {
         return defaultErr;
     }
-    return static_cast<int32_t>(result);
+    int32_t result = 0;
+    auto [ptr, ec] = std::from_chars(value.data(), value.data() + value.size(), result);
+    if (ec != std::errc{} || ptr != value.data() + value.size()) {
+        return defaultErr;
+    }
+    return result;
 }
 
 uint32_t StrToUint(const std::string &value, uint32_t defaultErr)
 {
-    errno = 0;
-    char *pEnd = nullptr;
-    uint64_t result = std::strtoul(value.c_str(), &pEnd, 0);
-    if (pEnd == value.c_str() || result > UINT32_MAX || errno == ERANGE) {
+    if (value.empty()) {
+        return defaultErr;
+    }
+    uint32_t result = 0;
+    auto [ptr, ec] = std::from_chars(value.data(), value.data() + value.size(), result);
+    if (ec != std::errc{} || ptr != value.data() + value.size()) {
         return defaultErr;
     }
     return result;
@@ -526,10 +531,12 @@ int64_t StrToLong(const std::string &value, int64_t defaultErr)
 
 uint64_t StrToUint64(const std::string &value, uint64_t defaultErr)
 {
-    errno = 0;
-    char *pEnd = nullptr;
-    uint64_t result = std::strtoull(value.c_str(), &pEnd, 0);
-    if (pEnd == value.c_str() || errno == ERANGE) {
+    if (value.empty()) {
+        return defaultErr;
+    }
+    uint64_t result = 0;
+    auto [ptr, ec] = std::from_chars(value.data(), value.data() + value.size(), result);
+    if (ec != std::errc{} || ptr != value.data() + value.size()) {
         return defaultErr;
     }
     return result;
@@ -546,11 +553,11 @@ bool CheckIfaceName(const std::string &name)
         return false;
     }
     while (index < len) {
-        if ((index == 0) && !isalnum(name[index])) {
+        if ((index == 0) && !isalnum(static_cast<unsigned char>(name[index]))) {
             return false;
         }
-        if (!isalnum(name[index]) && (name[index] != '-') && (name[index] != '_') && (name[index] != '.') &&
-            (name[index] != ':')) {
+        if (!isalnum(static_cast<unsigned char>(name[index])) && (name[index] != '-') && (name[index] != '_') &&
+            (name[index] != '.') && (name[index] != ':')) {
             return false;
         }
         index++;
@@ -958,6 +965,10 @@ std::string GetGatewayAddr(const std::string& ipAddr, const std::string& subnetM
     }
 
     uint32_t networkAddr = ipIntAddr & maskIntAddr;
+    if (networkAddr == 0xFFFFFFFF) {
+        NETMGR_LOG_E("network address is broadcast, cannot compute gateway");
+        return "";
+    }
     uint32_t gatewayAddr = networkAddr + 1;
     std::string gatewayStrAddr;
     if (!IpToString(gatewayAddr, gatewayStrAddr)) {
@@ -1019,13 +1030,17 @@ uint64_t GetTodayMidnightTimestamp(int hour, int min, int sec)
 void DeleteFile(const std::string &filePath)
 {
 #ifndef CROSS_PLATFORM
+    std::error_code ec;
     std::filesystem::path path = filePath;
-    if (std::filesystem::exists(path)) {
-        std::filesystem::remove(path);
-        NETMGR_LOG_I("file deleted success.");
-    } else {
-        NETMGR_LOG_E("file does not exist.");
+    if (!std::filesystem::exists(path, ec)) {
+        NETMGR_LOG_E("file does not exist, err: %{public}s", ec.message().c_str());
+        return;
     }
+    if (!std::filesystem::remove(path, ec)) {
+        NETMGR_LOG_E("file deleted failed, err: %{public}s", ec.message().c_str());
+        return;
+    }
+    NETMGR_LOG_I("file deleted success.");
 #else
     NETMGR_LOG_E("CROSS_PLATFORM not support");
 #endif
