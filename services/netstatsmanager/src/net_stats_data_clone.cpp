@@ -121,9 +121,10 @@ bool NetStatsDataClone::FdClone(UniqueFd &fd)
         NETMGR_LOG_E("OnRestore open file fail.");
         return false;
     }
-    if (sendfile(destFd, fd.Get(), nullptr, statBuf.st_size) < 0) {
-        NETMGR_LOG_E("OnRestore fd sendfile(size: %{public}d) to destFd fail.",
-            static_cast<int>(statBuf.st_size));
+    ssize_t sent = sendfile(destFd, fd.Get(), nullptr, static_cast<size_t>(statBuf.st_size));
+    if (sent < 0 || static_cast<off_t>(sent) != statBuf.st_size) {
+        NETMGR_LOG_E("OnRestore fd sendfile(size: %{public}d, sent: %{public}d) to destFd fail.",
+            static_cast<int>(statBuf.st_size), static_cast<int>(sent));
         close(destFd);
         return false;
     }
