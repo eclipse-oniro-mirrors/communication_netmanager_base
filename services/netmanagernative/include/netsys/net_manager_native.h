@@ -153,13 +153,10 @@ public:
     int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on, bool needRestart);
     int32_t SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on);
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-    int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
     int32_t SetFirewallCurrentUserId(int32_t userId);
     int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
                              bool isFinish);
     int32_t ClearFirewallRules(NetFirewallRuleType type);
-    int32_t RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
-    int32_t UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
 #endif
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
     int32_t EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId);

@@ -1111,8 +1111,7 @@ int32_t NetsysNativeService::SetFirewallDefaultAction(int32_t userId, FirewallRu
     FirewallRuleAction outDefault)
 {
     NETNATIVE_LOGI("NetsysNativeService::SetFirewallDefaultAction");
-    int32_t ret = netsysService_->SetFirewallDefaultAction(inDefault, outDefault);
-    ret += bpfNetFirewall_->SetFirewallDefaultAction(userId, inDefault, outDefault);
+    int32_t ret = bpfNetFirewall_->SetFirewallDefaultAction(userId, inDefault, outDefault);
     return ret;
 }
 
@@ -1149,16 +1148,14 @@ int32_t NetsysNativeService::ClearFirewallRules(NetFirewallRuleType type)
 int32_t NetsysNativeService::RegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback)
 {
     NETNATIVE_LOGI("NetsysNativeService::RegisterNetFirewallCallback");
-    int32_t ret = netsysService_->RegisterNetFirewallCallback(callback);
-    ret += bpfNetFirewall_->RegisterCallback(callback);
+    int32_t ret = bpfNetFirewall_->RegisterCallback(callback);
     return ret;
 }
 
 int32_t NetsysNativeService::UnRegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback)
 {
     NETNATIVE_LOGI("NetsysNativeService::UnRegisterNetFirewallCallback");
-    int32_t ret = netsysService_->UnRegisterNetFirewallCallback(callback);
-    ret += bpfNetFirewall_->UnregisterCallback(callback);
+    int32_t ret = bpfNetFirewall_->UnregisterCallback(callback);
     return ret;
 }
 #endif

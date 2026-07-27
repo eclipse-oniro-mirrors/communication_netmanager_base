@@ -588,12 +588,6 @@ int32_t NetManagerNative::FirewallSetUidRule(uint32_t chain, const std::vector<u
 }
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-int32_t NetManagerNative::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
-{
-    NETNATIVE_LOG_D("NetManagerNative, SetFirewallDefaultAction");
-    return dnsManager_->SetFirewallDefaultAction(inDefault, outDefault);
-}
-
 int32_t NetManagerNative::SetFirewallCurrentUserId(int32_t userId)
 {
     NETNATIVE_LOG_D("NetManagerNative, SetFirewallCurrentUserId");
@@ -610,18 +604,6 @@ int32_t NetManagerNative::ClearFirewallRules(NetFirewallRuleType type)
 {
     NETNATIVE_LOG_D("NetManagerNative, ClearFirewallRules");
     return dnsManager_->ClearFirewallRules(type);
-}
-
-int32_t NetManagerNative::RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
-{
-    NETNATIVE_LOG_D("NetManagerNative, RegisterNetFirewallCallback");
-    return dnsManager_->RegisterNetFirewallCallback(callback);
-}
-
-int32_t NetManagerNative::UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
-{
-    NETNATIVE_LOG_D("NetManagerNative, UnRegisterNetFirewallCallback");
-    return dnsManager_->UnRegisterNetFirewallCallback(callback);
 }
 #endif
 

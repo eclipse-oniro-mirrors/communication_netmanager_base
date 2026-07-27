@@ -204,7 +204,11 @@ void DnsParamCache::EnableIpv4(uint16_t netId)
 void DnsParamCache::SetClatDnsEnableIpv4(int32_t netId, bool enable)
 {
     std::lock_guard<ffrt::mutex> guard(cacheMutex_);
-    auto it = serverConfigMap_.find(netId);
+    if (netId < 0 || netId > UINT16_MAX) {
+        NETNATIVE_LOGI("SetClatDnsEnableIpv4 invalid netId");
+        return;
+    }
+    auto it = serverConfigMap_.find(static_cast<uint16_t>(netId));
     if (it == serverConfigMap_.end()) {
         DNS_CONFIG_PRINT("SetClatDnsEnableIpv4 netid:%{public}d,", netId);
         return;
@@ -250,6 +254,9 @@ int32_t DnsParamCache::GetResolverConfig(uint16_t netId, std::vector<std::string
     std::vector<std::string> dns;
     if (GetDnsServersByAppUid(GetCallingUid(), dns)) {
         DNS_CONFIG_PRINT("GetResolverConfig hit netfirewall");
+        if (dns.empty()) {
+            DNS_CONFIG_PRINT("GetResolverConfig get empty list");
+        }
         servers.assign(dns.begin(), dns.end());
     }
 #endif
@@ -425,7 +432,9 @@ int32_t DnsParamCache::AddUidRange(uint32_t netId, const std::vector<NetManagerS
                                        }),
                         vpnUidRanges_.end());
     if (!uidRanges.empty()) {
-        auto middle = vpnUidRanges_.insert(vpnUidRanges_.end(), uidRanges.begin(), uidRanges.end());
+        std::vector<NetManagerStandard::UidRange> sortedRanges = uidRanges;
+        std::sort(sortedRanges.begin(), sortedRanges.end());
+        auto middle = vpnUidRanges_.insert(vpnUidRanges_.end(), sortedRanges.begin(), sortedRanges.end());
         std::inplace_merge(vpnUidRanges_.begin(), middle, vpnUidRanges_.end());
     }
     return 0;
@@ -439,9 +448,11 @@ int32_t DnsParamCache::DelUidRange(uint32_t netId, const std::vector<NetManagerS
     if (it != vpnNetId_.end()) {
         vpnNetId_.erase(it);
     }
+    std::vector<NetManagerStandard::UidRange> sortedRanges = uidRanges;
+    std::sort(sortedRanges.begin(), sortedRanges.end());
     std::vector<NetManagerStandard::UidRange> result;
-    auto end = std::set_difference(vpnUidRanges_.begin(), vpnUidRanges_.end(), uidRanges.begin(),
-                                   uidRanges.end(), std::back_inserter(result));
+    std::set_difference(vpnUidRanges_.begin(), vpnUidRanges_.end(), sortedRanges.begin(),
+                        sortedRanges.end(), std::back_inserter(result));
     vpnUidRanges_ = result;
     return 0;
 }
@@ -519,13 +530,16 @@ int32_t DnsParamCache::SetFirewallRules(NetFirewallRuleType type,
 int32_t DnsParamCache::SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList)
 {
     for (const auto &rule : ruleList) {
+        if (rule == nullptr) {
+            continue;
+        }
         std::vector<sptr<NetFirewallDnsRule>> rules;
         auto it = netFirewallDnsRuleMap_.find(rule->appUid);
         if (it != netFirewallDnsRuleMap_.end()) {
             rules = it->second;
         }
         rules.emplace_back(rule);
-        netFirewallDnsRuleMap_.emplace(rule->appUid, std::move(rules));
+        netFirewallDnsRuleMap_[rule->appUid] = std::move(rules);
     }
     return 0;
 }
@@ -544,14 +558,6 @@ FirewallRuleAction DnsParamCache::GetFirewallRuleAction(int32_t appUid,
     }
 
     return FirewallRuleAction::RULE_INVALID;
-}
-
-int32_t DnsParamCache::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
-{
-    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
-    DNS_CONFIG_PRINT("SetFirewallDefaultAction: firewallDefaultAction_: %{public}d", (int)outDefault);
-    firewallDefaultAction_ = outDefault;
-    return 0;
 }
 
 int32_t DnsParamCache::ClearFirewallRules(NetFirewallRuleType type)
@@ -576,34 +582,6 @@ int32_t DnsParamCache::ClearFirewallRules(NetFirewallRuleType type)
             break;
     }
     return 0;
-}
-
-int32_t DnsParamCache::RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
-{
-    if (!callback) {
-        return -1;
-    }
-
-    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
-    callbacks_.emplace_back(callback);
-
-    return 0;
-}
-
-int32_t DnsParamCache::UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
-{
-    if (!callback) {
-        return -1;
-    }
-
-    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
-    for (auto it = callbacks_.begin(); it != callbacks_.end(); ++it) {
-        if (*it == callback) {
-            callbacks_.erase(it);
-            return 0;
-        }
-    }
-    return -1;
 }
 
 int32_t DnsParamCache::SetFirewallCurrentUserId(int32_t userId)
@@ -779,8 +757,7 @@ bool DnsParamCache::IsInNodataCache(uint16_t netId, const std::string &hostName)
 
 void DnsParamCache::SetIpv6UidBlackList(std::vector<int32_t> &netIds, uint32_t uid)
 {
-    size_t size = netIds.size();
-    if (size <= 0) {
+    if (netIds.empty()) {
         return;
     }
  
