@@ -137,6 +137,7 @@ private:
     bool isNeedResume_ = false;
     bool isScreenOn_ = true;
     int32_t dualStackProbeTime_ = 0;
+    std::shared_mutex dualStackProbeMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

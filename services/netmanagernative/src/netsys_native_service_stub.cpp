@@ -43,6 +43,7 @@ constexpr uint32_t MAX_ROUTE_TABLE_SIZE = 128;
 constexpr uint32_t MAX_ROUTES_ARRAY_SIZE = 1024;
 constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
 constexpr uint32_t MAX_SHARING_TYPE_SIZE = 32;
+constexpr int32_t MAX_NETID_ARRAY_SIZE = 6;
 constexpr int32_t INVALID_UID = -1;
 } // namespace
 
@@ -2500,7 +2501,7 @@ int32_t NetsysNativeServiceStub::CmdSetIpv6UidBlackList(MessageParcel &data, Mes
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (size < 0) {
+    if (size < 0 || size > MAX_NETID_ARRAY_SIZE) {
         return ERR_FLATTEN_OBJECT;
     }
     

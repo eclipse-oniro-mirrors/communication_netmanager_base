@@ -337,6 +337,9 @@ public:
      */
     void OrInsert(uint32_t addr, uint32_t mask, Bitmap &bitmap)
     {
+        if (mask > IPV4_MAX_PREFIXLEN) {
+            mask =  IPV4_MAX_PREFIXLEN;
+        }
         uint32_t netOrderAddr = htonl(addr);
         uint32_t networkAddr = GetNetworkAddress(addr, mask);
         bool shouldInsert = true;
@@ -396,6 +399,9 @@ private:
      */
     inline uint32_t GetNetworkAddress(uint32_t addr, uint32_t mask)
     {
+        if (mask > IPV4_MAX_PREFIXLEN) {
+            mask =  IPV4_MAX_PREFIXLEN;
+        }
         return addr & (0xFFFFFFFF << (IPV4_MAX_PREFIXLEN - mask));
     }
 
@@ -502,6 +508,12 @@ public:
      */
     void OrInsert(uint16_t start, uint32_t mask, Bitmap &bitmap)
     {
+        for (auto it = ruleBitmapVec_.begin(); it != ruleBitmapVec_.end(); ++it) {
+            if (it->data == start && it->prefixlen == mask) {
+                it->bitmap.Or(bitmap);
+                return;
+            }
+        }
         portRuleBitmap tmp;
         tmp.prefixlen = mask;
         tmp.data = start;
