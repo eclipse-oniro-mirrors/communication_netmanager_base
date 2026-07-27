@@ -27,8 +27,7 @@ int32_t NetStatsServiceCommon::GetIfaceStatsDetail(const std::string &iface, uin
 
 int32_t NetStatsServiceCommon::ResetStatsFactory()
 {
-    NetStatsService::GetInstance()->ResetFactory();
-    return 0;
+    return NetStatsService::GetInstance()->ResetFactory();
 }
 #ifdef SUPPORT_TRAFFIC_STATISTIC
 bool NetStatsServiceCommon::GetDailyMarkBySimId(int32_t simId, uint16_t &dailyMark)

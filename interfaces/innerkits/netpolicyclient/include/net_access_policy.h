@@ -35,8 +35,8 @@ public:
 class NetworkAccessPolicy {
 public:
     NetworkAccessPolicy() = default;
-    bool wifiAllow;     // true means allow. false means deny.
-    bool cellularAllow;  // true means allow. false means deny.
+    bool wifiAllow = true;     // true means allow. false means deny.
+    bool cellularAllow = true;  // true means allow. false means deny.
 
     // true means can't switch status of wifiAllow and value is true, false means can be switched.
     bool wifiSwitchDisable = false;

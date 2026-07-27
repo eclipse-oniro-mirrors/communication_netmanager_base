@@ -67,7 +67,10 @@ int32_t NetStatsServiceProxy::RegisterNetStatsCallback(const sptr<INetStatsCallb
         NETMGR_LOG_E("WriteInterfaceToken failed");
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
-    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+    if (!dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        NETMGR_LOG_E("WriteRemoteObject failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
 
     MessageParcel replyParcel;
     return SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_REGISTER_NET_STATS_CALLBACK),
@@ -86,7 +89,10 @@ int32_t NetStatsServiceProxy::UnregisterNetStatsCallback(const sptr<INetStatsCal
         NETMGR_LOG_E("WriteInterfaceToken failed");
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
-    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+    if (!dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        NETMGR_LOG_E("WriteRemoteObject failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
 
     MessageParcel replyParcel;
     return SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_UNREGISTER_NET_STATS_CALLBACK),

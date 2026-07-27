@@ -64,7 +64,7 @@ public:
     int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info);
     int32_t RegisterDualStackProbeCallback(int32_t netId, std::shared_ptr<IDualStackProbeCallback>& callback);
     int32_t UnRegisterDualStackProbeCallback(int32_t netId, std::shared_ptr<IDualStackProbeCallback>& callback);
-    int32_t DualStackProbe(int32_t netId);
+    int32_t DualStackProbe(uint32_t netId);
     int32_t UpdateDualStackProbeTime(int32_t dualStackProbeTimeOut);
 
     bool IsVpnApplication(int32_t uid);
