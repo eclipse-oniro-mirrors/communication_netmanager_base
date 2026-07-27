@@ -194,6 +194,10 @@ int32_t BitmapManager::InsertIp4SegBitmap(const NetFirewallIpParam &item, Bitmap
         return NETFIREWALL_ERR;
     }
     if (item.type == SINGLE_IP) {
+        if (item.mask > IPV4_MAX_PREFIXLEN) {
+            NETNATIVE_LOGE("InsertIp4SegBitmap: invalid mask %{public}u", item.mask);
+            return NETFIREWALL_ERR;
+        }
         uint32_t ipInt = item.ipv4.startIp.s_addr;
         ip4Map->OrInsert(ntohl(ipInt), static_cast<uint32_t>(item.mask), bitmap);
         NETNATIVE_LOG_D("InsertIpBitmap ipp[%{public}u] ipn[%{public}s] mask[%{public}u]", ipInt,

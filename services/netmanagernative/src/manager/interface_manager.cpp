@@ -555,8 +555,8 @@ int32_t InterfaceManager::DelStaticArp(const std::string &ipAddr, const std::str
 int32_t InterfaceManager::SetIpv6AutoConf(const std::string &ipAddr, const uint32_t on)
 {
     NETNATIVE_LOGI("SetIpv6AutoConf.");
-    if (ipAddr.empty()) {
-        NETNATIVE_LOGE("SetIpv6AutoConf ipAddr is empty");
+    if (!CheckIfaceName(ipAddr)) {
+        NETNATIVE_LOGE("SetIpv6AutoConf isIfaceName fail %{public}d", errno);
         return -1;
     }
     std::string option = IPV6_PROC_PATH + ipAddr + "/autoconf";

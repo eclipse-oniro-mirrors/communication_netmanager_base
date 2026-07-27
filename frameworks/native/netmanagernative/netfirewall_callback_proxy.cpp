@@ -40,6 +40,7 @@ int32_t NetFirewallCallbackProxy::OnIntercept(sptr<NetManagerStandard::Intercept
     }
     MessageParcel reply;
     MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(NetFirewallfaceCode::ON_INTERCEPT), data, reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("Proxy SendRequest failed, ret code:[%{public}d]", ret);

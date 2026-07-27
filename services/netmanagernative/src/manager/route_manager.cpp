@@ -361,6 +361,12 @@ int32_t RouteManager::UpdateVpnRules(uint16_t netId, const std::string &interfac
         NETNATIVE_LOGE("UpdateVpnRules err, vpn name is empty");
         return ROUTEMANAGER_ERROR;
     }
+
+    if (defauleNetWorkName_.empty()) {
+        NETNATIVE_LOGE("UpdateVpnRules err, default network name is not configured");
+        return ROUTEMANAGER_ERROR;
+    }
+    
     NETNATIVE_LOG_D("update vpn rules on interface, %{public}s.", interface.c_str());
     bool isSysVpn = CheckSysVpnCall();
     bool isTunVpn = CheckTunVpnCall(interface);
@@ -375,6 +381,9 @@ int32_t RouteManager::UpdateVpnRules(uint16_t netId, const std::string &interfac
             continue;
         }
         ret = UpdateVpnOutPutPenetrationRule(netId, defauleNetWorkName_, msg, add);
+        if (ret != ROUTEMANAGER_SUCCESS) {
+            return ret;
+        }
     }
     return ret;
 }
@@ -412,7 +421,7 @@ bool RouteManager::CheckSysVpnCall()
 bool RouteManager::CheckMultiVpnCall(const std::string &vpnName)
 {
     if (vpnName.empty()) {
-        NETNATIVE_LOGE("CheckTunVpnCall err, vpn name is empty");
+        NETNATIVE_LOGE("CheckMultiVpnCall err, vpn name is empty");
         return false;
     }
     if (CheckTunVpnCall(vpnName)) {
@@ -420,18 +429,17 @@ bool RouteManager::CheckMultiVpnCall(const std::string &vpnName)
     } else {
         return !CheckSysVpnCall();
     }
-    return false;
 }
 
 uint32_t RouteManager::GetVpnInterffaceToId(const std::string &ifName)
 {
-    if (ifName.find(XFRM_CARD_NAME) != std::string::npos) {
+    if (ifName.rfind(XFRM_CARD_NAME, 0) == 0) {
         return CommonUtils::StrToUint(ifName.substr(strlen(XFRM_CARD_NAME)));
-    } else if (ifName.find(PPP_CARD_NAME) != std::string::npos) {
+    } else if (ifName.rfind(PPP_CARD_NAME, 0) == 0) {
         return CommonUtils::StrToUint(ifName.substr(strlen(PPP_CARD_NAME)));
-    } else if (ifName.find(MULTI_TUN_CARD_NAME) != std::string::npos) {
+    } else if (ifName.rfind(MULTI_TUN_CARD_NAME, 0) == 0) {
         return CommonUtils::StrToUint(ifName.substr(strlen(MULTI_TUN_CARD_NAME)));
-    } else if (ifName.find(INNER_CHL_NAME) != std::string::npos) {
+    } else if (ifName.rfind(INNER_CHL_NAME, 0) == 0) {
         return CommonUtils::StrToUint(ifName.substr(strlen(INNER_CHL_NAME)));
     }
     return 0;
@@ -1131,6 +1139,13 @@ int32_t RouteManager::UpdateIncomingPacketMark(uint16_t netId, const std::string
                                                NetworkPermission permission, bool add)
 {
     NETNATIVE_LOGI("UpdateIncomingPacketMark");
+    
+    // Validate interfaceName to prevent potential issues
+    if (interfaceName.empty()) {
+        NETNATIVE_LOGE("interfaceName is empty");
+        return ROUTEMANAGER_ERROR;
+    }
+    
     Fwmark fwmark;
     fwmark.netId = netId;
     fwmark.explicitlySelected = true;
@@ -1148,7 +1163,7 @@ int32_t RouteManager::UpdateIncomingPacketMark(uint16_t netId, const std::string
        << std::hex << fwmark.intValue << "/0x" << std::nouppercase << std::hex << mask;
     // need to call IptablesWrapper's RunCommand function.
 
-    return 0;
+    return ROUTEMANAGER_SUCCESS;
 }
 
 int32_t RouteManager::UpdateExplicitNetworkRule(uint16_t netId, uint32_t table, NetworkPermission permission, bool add)
@@ -1401,6 +1416,10 @@ int32_t RouteManager::SetRuleMsgUidRange(NetlinkMsg &nlmsg, uid_t uidStart, uid_
 int32_t RouteManager::SetRuleMsgIfName(NetlinkMsg &nlmsg, std::string &ifName, uint16_t type)
 {
     if (ifName != RULEIIF_NULL) {
+        if (ifName.length() >= IFNAMSIZ) {
+            NETNATIVE_LOGE("ifName length exceeds IFNAMSIZ-1: %{public}s", ifName.c_str());
+            return ROUTEMANAGER_ERROR;
+        }
         char ruleIfName[IFNAMSIZ] = {0};
         size_t ruleIfLength = strlcpy(ruleIfName, ifName.c_str(), IFNAMSIZ) + 1;
         if (int32_t ret = nlmsg.AddAttr(type, ruleIfName, ruleIfLength)) {

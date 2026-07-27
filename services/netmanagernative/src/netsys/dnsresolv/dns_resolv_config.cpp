@@ -284,8 +284,7 @@ bool DnsResolvConfig::IsInIpv6UidBlackList(const uint32_t &uid)
  
     for (const auto& it : ipv6UidBlackList_) {
         if (it.first == uid) {
-            uint64_t diff = now - it.second;
-            if (diff > AAAA_SKIP_DURATION) {
+            if (now < it.second || (now - it.second) > AAAA_SKIP_DURATION) {
                 ipv6UidBlackList_.erase(it.first);
                 NETNATIVE_LOG_D("skip AAAA time out, remove uid:%{public}u from ipv6UidBlackList", uid);
                 return false;

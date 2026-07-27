@@ -43,16 +43,25 @@
 
 namespace OHOS {
 namespace nmd {
+constexpr uint32_t MAX_WAIT_TIME_SECONDS = 5;
 using namespace OHOS::NetManagerStandard;
 Clatd::Clatd(int tunFd, int readSock6, int writeSock6, const std::string &v6Iface, const std::string &prefixAddrStr,
              const std::string &v4AddrStr, const std::string &v6AddrStr)
     : tunFd_(tunFd), readSock6_(readSock6), writeSock6_(writeSock6), v6Iface_(v6Iface)
 {
     stopFd_ = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+    if (stopFd_ < 0) {
+        return;
+    }
     tunIface_ = std::string(CLAT_PREFIX) + v6Iface;
-    inet_pton(AF_INET6, v6AddrStr.c_str(), &v6Addr_);
-    inet_pton(AF_INET, v4AddrStr.c_str(), &v4Addr_.s_addr);
-    inet_pton(AF_INET6, prefixAddrStr.c_str(), &prefixAddr_);
+    if (inet_pton(AF_INET6, v6AddrStr.c_str(), &v6Addr_) != 1 ||
+        inet_pton(AF_INET, v4AddrStr.c_str(), &v4Addr_.s_addr) != 1 ||
+        inet_pton(AF_INET6, prefixAddrStr.c_str(), &prefixAddr_) != 1) {
+        NETNATIVE_LOGE("inet_pton failed");
+        close(stopFd_);
+        stopFd_ = -1;
+        return;
+    }
     isSocketClosed_ = false;
     stopStatus_ = true;
 }
@@ -81,15 +90,19 @@ void Clatd::Stop()
         return;
     }
     uint64_t one = 1;
-    write(stopFd_, &one, sizeof(one));
+    int ret = write(stopFd_, &one, sizeof(one));
+    if (ret < 0) {
+        NETNATIVE_LOGE("write failed");
+        return;
+    }
 
     std::unique_lock<ffrt::mutex> lck(mutex_);
-    cv_.wait(lck, [this] { return stopStatus_ == true; });
+    cv_.wait_for(lck, std::chrono::seconds(MAX_WAIT_TIME_SECONDS), [this] { return stopStatus_ == true; });
 };
 
 void Clatd::SendDadPacket()
 {
-    ClatdDadPacket dadPacket;
+    ClatdDadPacket dadPacket = {};
 
     dadPacket.v6Header.ip6_vfc = IPV6_VERSION_FLAG;
     dadPacket.v6Header.ip6_plen = htons(sizeof(ClatdDadPacket) - sizeof(ip6_hdr));
@@ -106,13 +119,13 @@ void Clatd::SendDadPacket()
     dadPacket.ns.nd_ns_code = 0;
     dadPacket.ns.nd_ns_reserved = 0;
     dadPacket.ns.nd_ns_target = v6Addr_;
-    uint32_t checkSum = dadPacket.v6Header.ip6_plen + htons(dadPacket.v6Header.ip6_nxt);
-    checkSum = AddChecksum(checkSum, &dadPacket.v6Header.ip6_src, sizeof(dadPacket) - IPV6_SRC_OFFSET);
-    dadPacket.ns.nd_ns_cksum = ~Checksum32To16(checkSum);
-
+    
     dadPacket.nonceOptType = NDP_NOUNCE_OPT;
     dadPacket.nonceOptLen = 1;
     arc4random_buf(&dadPacket.nonce, sizeof(dadPacket.nonce));
+    uint32_t checkSum = dadPacket.v6Header.ip6_plen + htons(dadPacket.v6Header.ip6_nxt);
+    checkSum = AddChecksum(checkSum, &dadPacket.v6Header.ip6_src, sizeof(dadPacket) - IPV6_SRC_OFFSET);
+    dadPacket.ns.nd_ns_cksum = ~Checksum32To16(checkSum);
 
     sockaddr_in6 dstAddr;
     dstAddr.sin6_family = AF_INET6;
@@ -187,7 +200,7 @@ void Clatd::ProcessV6Packet()
     iov.iov_len = sizeof(readBuf);
 
     char cmsgBuf[CMSG_SPACE(sizeof(tpacket_auxdata))];
-    msghdr msgHdr;
+    msghdr msgHdr = {};
     msgHdr.msg_iov = &iov;
     msgHdr.msg_iovlen = 1;
     msgHdr.msg_control = cmsgBuf;
@@ -321,13 +334,13 @@ void Clatd::SendV6OnRawSocket(int fd, std::vector<iovec> &iovPackets, int effect
     }
 
     sockaddr_in6 sin6 = {AF_INET6, 0, 0, {{{0, 0, 0, 0}}}, 0};
-    msghdr msgHeader;
+    msghdr msgHeader = {};
     msgHeader.msg_name = &sin6;
     msgHeader.msg_namelen = sizeof(sin6);
 
     msgHeader.msg_iov = &iovPackets[0];
     msgHeader.msg_iovlen = effectivePos;
-    sin6.sin6_addr = reinterpret_cast<struct ip6_hdr *>(iovPackets[CLATD_TPHDR].iov_base)->ip6_dst;
+    sin6.sin6_addr = reinterpret_cast<struct ip6_hdr *>(iovPackets[CLATD_IPHDR].iov_base)->ip6_dst;
     
     ssize_t sendLen = sendmsg(fd, &msgHeader, 0);
     if (sendLen < 0) {

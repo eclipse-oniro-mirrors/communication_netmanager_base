@@ -22,6 +22,8 @@
 #include <unordered_map>
 #include <chrono>
 #include <functional>
+#include <atomic>
+#include <mutex>
 
 #include "bitmap_manager.h"
 #include "bpf_mapper.h"
@@ -181,8 +183,9 @@ public:
     /**
      * clear firewall default action
      *
+     * @return 0 if success or -1 if an error occurred
      */
-    void ClearFirewallDefaultAction();
+    int32_t ClearFirewallDefaultAction();
 
 private:
     template <typename Key, typename Value> int ClearBpfMap(const char *path, const Key &key, Value &val)
@@ -293,15 +296,17 @@ private:
     std::string DecodeDomainFromKey(const DomainHashKey &key);
 
     static std::shared_ptr<NetsysBpfNetFirewall> instance_;
-    static bool isBpfLoaded_;
-    static bool keepListen_;
+    static std::atomic<bool> isBpfLoaded_;
+    static std::atomic<bool> keepListen_;
     std::unique_ptr<std::thread> thread_;
     std::vector<sptr<NetsysNative::INetFirewallCallback>> callbacks_;
-    static bool keepGc_;
+    std::mutex callbackMutex_;
+    static std::atomic<bool> keepGc_;
     std::unique_ptr<std::thread> gcThread_;
     static std::unique_ptr<BpfMapper<CtKey, CtVaule>> ctRdMap_, ctWrMap_;
     std::vector<sptr<NetFirewallIpRule>> firewallIpRules_;
     std::vector<sptr<NetFirewallDomainRule>> firewallDomainRules_;
+    std::mutex rulesMutex_;
 };
 } // namespace OHOS::NetManagerStandard
 #endif /* NETMANAGER_EXT_BPF_NET_FIREWALL_H */

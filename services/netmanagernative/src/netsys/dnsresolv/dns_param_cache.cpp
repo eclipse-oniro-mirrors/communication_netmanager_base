@@ -156,7 +156,7 @@ int32_t DnsParamCache::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMse
     return 0;
 }
 
-void DnsParamCache::SetDefaultNetwork(uint16_t netId)
+void DnsParamCache::SetDefaultNetwork(int32_t netId)
 {
     defaultNetId_ = netId;
 }
@@ -439,9 +439,10 @@ int32_t DnsParamCache::DelUidRange(uint32_t netId, const std::vector<NetManagerS
     if (it != vpnNetId_.end()) {
         vpnNetId_.erase(it);
     }
+    std::vector<NetManagerStandard::UidRange> result;
     auto end = std::set_difference(vpnUidRanges_.begin(), vpnUidRanges_.end(), uidRanges.begin(),
-                                   uidRanges.end(), vpnUidRanges_.begin());
-    vpnUidRanges_.erase(end, vpnUidRanges_.end());
+                                   uidRanges.end(), std::back_inserter(result));
+    vpnUidRanges_ = result;
     return 0;
 }
 

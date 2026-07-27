@@ -630,7 +630,9 @@ private:
     NetConnCallbackManagerMap netConnCallbackManagerMap_;
     NetConnCallbackManagerMap systemNetConnCallbackManagerMap_;
     SafeMap<uint32_t, uint8_t> netPermissionMap_;
+    std::mutex permissionMutex_;
     sptr<IPreAirplaneCallback> preAirplaneCallback_;
+    std::shared_mutex preAirplaneCallbackMutex_;
     std::mutex registerConnTupleListMutex_;
     std::mutex netSupplierCallbackMutex_;
     std::string pacUrl_;
