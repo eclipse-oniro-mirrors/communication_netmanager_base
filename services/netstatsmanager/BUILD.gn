@@ -88,6 +88,7 @@ ohos_shared_library("net_stats_manager") {
   ]
 
   external_deps = [
+    "ability_runtime:ability_connect_callback_stub",
     "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
