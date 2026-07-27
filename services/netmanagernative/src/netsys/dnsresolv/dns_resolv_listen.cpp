@@ -114,9 +114,10 @@ private:
 
 void DnsResolvListenInternal::AddPublicDnsServers(ResolvConfig &sendData, size_t serverSize)
 {
+    size_t limit = (serverSize > MAX_SERVER_NUM) ? MAX_SERVER_NUM : serverSize;
     std::string publicDnsServer = OHOS::system::GetParameter(PUBLIC_DNS_SERVER, "");
     size_t i = 0;
-    for (; i < serverSize; i++) {
+    for (; i < limit; i++) {
         if (strcmp(sendData.nameservers[i], publicDnsServer.c_str()) == 0) {
             return;
         }

@@ -156,7 +156,7 @@ int32_t DnsParamCache::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMse
     return 0;
 }
 
-void DnsParamCache::SetDefaultNetwork(uint16_t netId)
+void DnsParamCache::SetDefaultNetwork(int32_t netId)
 {
     defaultNetId_ = netId;
 }
@@ -450,9 +450,10 @@ int32_t DnsParamCache::DelUidRange(uint32_t netId, const std::vector<NetManagerS
     }
     std::vector<NetManagerStandard::UidRange> sortedRanges = uidRanges;
     std::sort(sortedRanges.begin(), sortedRanges.end());
-    auto end = std::set_difference(vpnUidRanges_.begin(), vpnUidRanges_.end(), sortedRanges.begin(),
-                                   sortedRanges.end(), vpnUidRanges_.begin());
-    vpnUidRanges_.erase(end, vpnUidRanges_.end());
+    std::vector<NetManagerStandard::UidRange> result;
+    std::set_difference(vpnUidRanges_.begin(), vpnUidRanges_.end(), sortedRanges.begin(),
+                        sortedRanges.end(), std::back_inserter(result));
+    vpnUidRanges_ = result;
     return 0;
 }
 
@@ -757,7 +758,7 @@ void DnsParamCache::SetIpv6UidBlackList(std::vector<int32_t> &netIds, uint32_t u
         return;
     }
  
-    std::scoped_lock<ffrt::shared_mutex> writeLock(uidBlackListMutex_);
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     for (auto& netId : netIds) {
         if (netId == 0) {
             netId = static_cast<int32_t>(defaultNetId_);
@@ -779,7 +780,7 @@ bool DnsParamCache::IsInIpv6UidBlackList(uint16_t netId, uint32_t uid)
         netId = defaultNetId_;
     }
  
-    std::scoped_lock<ffrt::shared_mutex> readLock(uidBlackListMutex_);
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     auto it = serverConfigMap_.find(netId);
     if (it == serverConfigMap_.end()) {
         DNS_CONFIG_PRINT("IsInIpv6UidBlackList failed: is not have netid:%{public}d,", netId);

@@ -255,6 +255,10 @@ int32_t SharingManager::DisableNat(const std::string &downstreamIface, const std
 }
 int32_t SharingManager::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
 {
+    if (!CommonUtils::CheckIfaceName(interfaceName)) {
+        NETNATIVE_LOGE("iface name valid check fail: %{public}s", interfaceName.c_str());
+        return -1;
+    }
     std::string option = IPV6_PROC_PATH + interfaceName + "/use_tempaddr";
     const char *value = on ? OPEN_IPV6_PRIVACY_EXTENSIONS : CLOSE_IPV6_PRIVACY_EXTENSIONS;
     bool ipv6Success = WriteToFile(option.c_str(), value);
@@ -263,6 +267,10 @@ int32_t SharingManager::SetIpv6PrivacyExtensions(const std::string &interfaceNam
 
 int32_t SharingManager::SetEnableIpv6(const std::string &interfaceName, const uint32_t on, bool needRestart)
 {
+    if (!CommonUtils::CheckIfaceName(interfaceName)) {
+        NETNATIVE_LOGE("iface name valid check fail: %{public}s", interfaceName.c_str());
+        return -1;
+    }
     std::string option = IPV6_PROC_PATH + interfaceName + "/disable_ipv6";
     const char *value = on ? ENABLE_IPV6_VALUE : DISABLE_IPV6_VALUE;
     bool ipv6Success = WriteToFile(option.c_str(), value);
