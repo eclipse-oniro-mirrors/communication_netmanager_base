@@ -122,15 +122,6 @@ public:
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     /**
-     * Set firewall default action
-     *
-     * @param inDefault Default action of NetFirewallRuleDirection:RULE_IN
-     * @param outDefault Default action of NetFirewallRuleDirection:RULE_OUT
-     * @return 0 if success or-1 if an error occurred
-     */
-    int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
-
-    /**
      * Set firewall current user id
      *
      * @param userId current user id
@@ -155,22 +146,6 @@ public:
      * @return 0 if success or-1 if an error occurred
      */
     int32_t ClearFirewallRules(NetFirewallRuleType type);
-
-    /**
-     * Register callback for recevie intercept event
-     *
-     * @param callback implement of INetFirewallCallback
-     * @return 0 if success or -1 if an error occurred
-     */
-    int32_t RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
-
-    /**
-     * Unregister callback for recevie intercept event
-     *
-     * @param callback register callback for recevie intercept event
-     * @return 0 if success or -1 if an error occurred
-     */
-    int32_t UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
 #endif
 
     void EnableIpv6(uint16_t netId, std::string &destination, const std::string &nextHop, bool enable = true);
