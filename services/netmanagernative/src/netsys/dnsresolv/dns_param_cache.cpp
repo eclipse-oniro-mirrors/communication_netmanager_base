@@ -558,11 +558,6 @@ FirewallRuleAction DnsParamCache::GetFirewallRuleAction(int32_t appUid,
     return FirewallRuleAction::RULE_INVALID;
 }
 
-int32_t DnsParamCache::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
-{
-    return 0;
-}
-
 int32_t DnsParamCache::ClearFirewallRules(NetFirewallRuleType type)
 {
     std::lock_guard<ffrt::mutex> guard(cacheMutex_);
@@ -585,40 +580,6 @@ int32_t DnsParamCache::ClearFirewallRules(NetFirewallRuleType type)
             break;
     }
     return 0;
-}
-
-int32_t DnsParamCache::RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
-{
-    if (!callback) {
-        return -1;
-    }
-
-    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
-    for (auto it = callbacks_.begin(); it != callbacks_.end(); ++it) {
-        if (*it == callback) {
-            NETNATIVE_LOGI("RegisterNetFirewallCallback: callback already registered");
-            return 0;
-        }
-    }
-    callbacks_.emplace_back(callback);
-
-    return 0;
-}
-
-int32_t DnsParamCache::UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
-{
-    if (!callback) {
-        return -1;
-    }
-
-    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
-    for (auto it = callbacks_.begin(); it != callbacks_.end(); ++it) {
-        if (*it == callback) {
-            callbacks_.erase(it);
-            return 0;
-        }
-    }
-    return -1;
 }
 
 int32_t DnsParamCache::SetFirewallCurrentUserId(int32_t userId)
