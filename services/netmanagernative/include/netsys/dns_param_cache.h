@@ -86,8 +86,6 @@ public:
     bool IsVpnOpen() const;
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-    int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
-
     int32_t SetFirewallCurrentUserId(int32_t userId);
 
     void ClearAllDnsCache();
@@ -106,10 +104,6 @@ public:
     {
         return callingUid_;
     }
-
-    int32_t RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
-
-    int32_t UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
 #endif
     int32_t SetUserDefinedServerFlag(uint16_t netId, bool flag);
 
@@ -173,8 +167,6 @@ private:
     int32_t currentUserId_ = 0;
 
     std::vector<sptr<NetsysNative::INetFirewallCallback>> callbacks_;
-
-    FirewallRuleAction firewallDefaultAction_ = FirewallRuleAction::RULE_INVALID;
 #endif
 };
 } // namespace OHOS::nmd
