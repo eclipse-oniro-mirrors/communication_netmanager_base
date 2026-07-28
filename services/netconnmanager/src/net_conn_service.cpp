@@ -4744,7 +4744,12 @@ bool NetConnService::UpdateNetRequestControlState(const std::vector<NetRequest> 
         }
     }
     lock.unlock();
-    FindBestNetworkForAllRequest();
+    std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock(defaultNetSupplierMutex_);
+    auto bearerType = defaultNetSupplier_ == nullptr ? BEARER_DEFAULT : defaultNetSupplier_->GetNetSupplierType();
+    defaultNetSupplierLock.unlock();
+    if (!isDelayHandleFindBestNetwork_ || bearerType != BEARER_CELLULAR) {
+        FindBestNetworkForAllRequest();
+    }
     return true;
 }
 } // namespace NetManagerStandard
