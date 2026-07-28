@@ -505,17 +505,15 @@ int32_t NetConnCallbackManager::RegisterNetConnCallback(NetConn_NetSpecifier *sp
 
 int32_t NetConnCallbackManager::UnregisterNetConnCallback(uint32_t callbackId)
 {
-    sptr<INetConnCallback> callback;
-    {
-        std::lock_guard<std::mutex> lock(this->callbackMapMutex_);
-        auto it = this->callbackMap_.find(callbackId);
-        if (it == this->callbackMap_.end()) {
-            return NET_CONN_ERR_CALLBACK_NOT_FOUND;
-        }
-        callback = it->second;
+    std::lock_guard<std::mutex> lock(this->callbackMapMutex_);
+    auto it = this->callbackMap_.find(callbackId);
+    if (it != this->callbackMap_.end()) {
+        int32_t ret = NetConnClient::GetInstance().UnregisterNetConnCallback(it->second);
         this->callbackMap_.erase(it);
+        return ret;
+    } else {
+        return NET_CONN_ERR_CALLBACK_NOT_FOUND;
     }
-    return NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
 }
 // LCOV_EXCL_STOP
 } // namespace OHOS::NetManagerStandard
