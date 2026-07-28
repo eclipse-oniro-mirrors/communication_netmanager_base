@@ -41,8 +41,6 @@
 #include <netdb.h>
 
 #include "net_all_capabilities.h"
-
-#define NETCONN_PAC_URL_MAX_LEN 1024
 #include "net_connection_type.h"
 #include "net_trace_route_info.h"
 
