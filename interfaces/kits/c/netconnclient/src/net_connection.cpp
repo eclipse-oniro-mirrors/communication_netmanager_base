@@ -27,6 +27,7 @@
 using namespace OHOS::NetManagerStandard;
 
 constexpr int32_t VALID_NETID_START = 100;
+constexpr int32_t PAC_URL_MAX_LEN = 1024;
 
 static int32_t ErrorCodeTrans(int status)
 {
@@ -409,7 +410,7 @@ int32_t OH_NetConn_GetPacUrl(char *pacUrl)
     }
     std::string pacUrlstr = "";
     int32_t ret = NetConnClient::GetInstance().GetPacUrl(pacUrlstr);
-    if (strcpy_s(pacUrl, NETCONN_PAC_URL_MAX_LEN, pacUrlstr.c_str()) != 0) {
+    if (strcpy_s(pacUrl, PAC_URL_MAX_LEN, pacUrlstr.c_str()) != 0) {
         NETMGR_LOG_E("OH_NetConn_GetPacUrl string copy failed");
         return NETMANAGER_ERR_INTERNAL;
     }
@@ -456,7 +457,7 @@ int32_t OH_NetConn_GetPacFileUrl(char *pacUrl)
     }
     std::string pacUrlstr = "";
     int32_t ret = NetConnClient::GetInstance().GetPacFileUrl(pacUrlstr);
-    if (strcpy_s(pacUrl, NETCONN_PAC_URL_MAX_LEN, pacUrlstr.c_str()) != 0) {
+    if (strcpy_s(pacUrl, PAC_URL_MAX_LEN, pacUrlstr.c_str()) != 0) {
         NETMGR_LOG_E("OH_NetConn_GetPacUrl string copy failed");
         return NETMANAGER_ERR_INTERNAL;
     }
@@ -475,7 +476,7 @@ int32_t OH_NetConn_FindProxyForURL(const char *url, const char *host, char *prox
         hostStr.append(host);
     }
     int32_t ret = NetConnClient::GetInstance().FindProxyForURL(url, pacProxyStr, hostStr);
-    if (strcpy_s(proxy, NETCONN_PAC_URL_MAX_LEN, pacProxyStr.c_str()) != 0) {
+    if (strcpy_s(proxy, PAC_URL_MAX_LEN, pacProxyStr.c_str()) != 0) {
         NETMGR_LOG_E("OH_NetConn_GetPacUrl string copy failed");
         return NETMANAGER_ERR_INTERNAL;
     }
