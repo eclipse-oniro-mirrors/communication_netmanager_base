@@ -220,7 +220,7 @@ int32_t NetManagerCenter::UnRegisterDualStackProbeCallback(
     return connService_->UnRegisterDualStackProbeCallback(netId, callback);
 }
 
-int32_t NetManagerCenter::DualStackProbe(int32_t netId)
+int32_t NetManagerCenter::DualStackProbe(uint32_t netId)
 {
     if (connService_ == nullptr) {
         return NETMANAGER_ERROR;

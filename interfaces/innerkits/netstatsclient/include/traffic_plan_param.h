@@ -71,10 +71,28 @@ struct TrafficPlanInfo {
           dailyLimitPercentage(10)   // 10%
     {}
 
+    std::string ToAnonymousIccid(const std::string &input) const
+    {
+        if (input.empty()) {
+            return input;
+        }
+        constexpr size_t MIN_ICCID_LEN = 6;
+        constexpr size_t MAX_DISPLAY_TAIL = 4;
+        std::string result{input};
+        if (result.size() > MIN_ICCID_LEN) {
+            size_t startMask = MIN_ICCID_LEN;
+            size_t endMask = result.size() - MAX_DISPLAY_TAIL;
+            for (size_t i = startMask; i < endMask; ++i) {
+                result[i] = '*';
+            }
+        }
+        return result;
+    }
+
     inline const std::string ToString() const
     {
         std::ostringstream oss;
-        oss << iccid << "," << simId << "," << slotId << ","
+        oss << ToAnonymousIccid(iccid) << "," << simId << "," << slotId << ","
             << displayTrafficSwitch << "," << unlimitTrafficSwitch << "," << trafficLimit << ","
             << startDate << "," << overLimitBehavior << "," << monthlyLimitPercentage << "," << dailyLimitPercentage;
         return oss.str();

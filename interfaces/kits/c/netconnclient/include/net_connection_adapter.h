@@ -28,9 +28,9 @@
 
 namespace OHOS::NetManagerStandard {
 
-int32_t Conv2NetHandle(NetHandle &netHandleObj, NetConn_NetHandle *netHandle);
+void Conv2NetHandle(NetHandle &netHandleObj, NetConn_NetHandle *netHandle);
 
-int32_t Conv2NetHandleObj(NetConn_NetHandle *netHandle, NetHandle &netHandleObj);
+void Conv2NetHandleObj(NetConn_NetHandle *netHandle, NetHandle &netHandleObj);
 
 int32_t Conv2NetHandleList(const std::list<sptr<NetHandle>> &netHandleObjList, NetConn_NetHandleList *netHandleList);
 

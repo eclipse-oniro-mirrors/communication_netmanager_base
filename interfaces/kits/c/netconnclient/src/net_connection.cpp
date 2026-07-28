@@ -136,10 +136,7 @@ int32_t OH_NetConn_GetDefaultNet(NetConn_NetHandle *netHandle)
 
     NetHandle netHandleObj = NetHandle();
     int32_t ret = NetConnClient::GetInstance().GetDefaultNet(netHandleObj);
-    int32_t retConv = Conv2NetHandle(netHandleObj, netHandle);
-    if (retConv != NETMANAGER_SUCCESS) {
-        return retConv;
-    }
+    Conv2NetHandle(netHandleObj, netHandle);
     return ret;
 }
 
@@ -164,13 +161,10 @@ int32_t OH_NetConn_GetConnectionProperties(NetConn_NetHandle *netHandle, NetConn
     }
 
     NetHandle netHandleObj = NetHandle();
-    int32_t retConv = Conv2NetHandleObj(netHandle, netHandleObj);
-    if (retConv != NETMANAGER_SUCCESS) {
-        return retConv;
-    }
+    Conv2NetHandleObj(netHandle, netHandleObj);
     NetLinkInfo infoObj = NetLinkInfo();
     int32_t ret = NetConnClient::GetInstance().GetConnectionProperties(netHandleObj, infoObj);
-    retConv = Conv2NetLinkInfo(infoObj, prop);
+    int32_t retConv = Conv2NetLinkInfo(infoObj, prop);
     if (retConv != NETMANAGER_SUCCESS) {
         return retConv;
     }
@@ -185,13 +179,14 @@ int32_t OH_NetConn_GetNetCapabilities(NetConn_NetHandle *netHandle, NetConn_NetC
     }
 
     NetHandle netHandleObj = NetHandle();
-    int32_t retConv = Conv2NetHandleObj(netHandle, netHandleObj);
-    if (retConv != NETMANAGER_SUCCESS) {
-        return retConv;
-    }
+    Conv2NetHandleObj(netHandle, netHandleObj);
     NetAllCapabilities netAllCapsObj = NetAllCapabilities();
     int32_t ret = NetConnClient::GetInstance().GetNetCapabilities(netHandleObj, netAllCapsObj);
-    retConv = Conv2NetAllCapabilities(netAllCapsObj, netAllCapabilities);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("OH_NetConn_GetNetCapabilities GetNetCapabilities failed, ret:%{public}d", ret);
+        return ret;
+    }
+    int32_t retConv = Conv2NetAllCapabilities(netAllCapsObj, netAllCapabilities);
     if (retConv != NETMANAGER_SUCCESS) {
         return retConv;
     }
@@ -471,8 +466,8 @@ int32_t OH_NetConn_GetPacFileUrl(char *pacUrl)
 
 int32_t OH_NetConn_FindProxyForURL(const char *url, const char *host, char *proxy)
 {
-    if (url == nullptr) {
-        NETMGR_LOG_E("OH_NetConn_GetPacUrl received invalid parameters");
+    if (url == nullptr || proxy == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_FindProxyForURL received invalid parameters");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     std::string pacProxyStr = "";

@@ -111,16 +111,14 @@ int32_t Conv2NetHandleList(const std::list<sptr<NetHandle>> &netHandleObjList, N
     return NETMANAGER_SUCCESS;
 }
 
-int32_t Conv2NetHandle(NetHandle &netHandleObj, NetConn_NetHandle *netHandle)
+void Conv2NetHandle(NetHandle &netHandleObj, NetConn_NetHandle *netHandle)
 {
     netHandle->netId = netHandleObj.GetNetId();
-    return NETMANAGER_SUCCESS;
 }
 
-int32_t Conv2NetHandleObj(NetConn_NetHandle *netHandle, NetHandle &netHandleObj)
+void Conv2NetHandleObj(NetConn_NetHandle *netHandle, NetHandle &netHandleObj)
 {
     netHandleObj.SetNetId(netHandle->netId);
-    return NETMANAGER_SUCCESS;
 }
 
 int32_t Conv2HttpProxy(const HttpProxy &httpProxyObj, NetConn_HttpProxy *httpProxy)
@@ -150,11 +148,12 @@ int32_t Conv2HttpProxy(const HttpProxy &httpProxyObj, NetConn_HttpProxy *httpPro
 
 void ConvertNetConn2HttpProxy(const NetConn_HttpProxy &netConn, HttpProxy &httpProxyObj)
 {
-    httpProxyObj.SetHost(std::string(netConn.host));
+    httpProxyObj.SetHost(std::string(netConn.host, strnlen(netConn.host, NETCONN_MAX_STR_LEN)));
     httpProxyObj.SetPort(netConn.port);
     std::list<std::string> exclusionList;
-    for (int32_t i = 0; i < netConn.exclusionListSize; i++) {
-        exclusionList.emplace_back(netConn.exclusionList[i]);
+    int32_t maxSize = std::min(netConn.exclusionListSize, NETCONN_MAX_EXCLUSION_SIZE);
+    for (int32_t i = 0; i < maxSize && i >= 0; i++) {
+        exclusionList.emplace_back(netConn.exclusionList[i], strnlen(netConn.exclusionList[i], NETCONN_MAX_STR_LEN));
     }
     httpProxyObj.SetExclusionList(exclusionList);
 }
@@ -329,7 +328,7 @@ int32_t Conv2TraceRouteInfo(const std::string &traceRouteInfoStr, NetConn_TraceR
     const uint32_t pos3 = 3;
     std::vector<std::string> tokens = splitStr(traceRouteInfoStr, ' ');
     uint32_t tokensSize = static_cast<uint32_t>(tokens.size());
-    for (uint32_t i = 0; i * pos3 < tokensSize; i++) {
+    for (uint32_t i = 0; i * pos3 + pos2 < tokensSize; i++) {
         if (i >= maxJumpNumber) {
             return NETMANAGER_SUCCESS;
         }
@@ -384,10 +383,7 @@ int32_t NetConnCallbackStubAdapter::NetAvailable(sptr<NetHandle> &netHandle)
         return NETMANAGER_SUCCESS;
     }
     NetConn_NetHandle netHandleInner;
-    int32_t ret = Conv2NetHandle(*netHandle, &netHandleInner);
-    if (ret != NETMANAGER_SUCCESS) {
-        return ret;
-    }
+    Conv2NetHandle(*netHandle, &netHandleInner);
 
     this->callback_.onNetworkAvailable(&netHandleInner);
     return NETMANAGER_SUCCESS;
@@ -401,11 +397,8 @@ int32_t NetConnCallbackStubAdapter::NetCapabilitiesChange(sptr<NetHandle> &netHa
     }
     NetConn_NetHandle netHandleInner;
     NetConn_NetCapabilities netAllCapsInner;
-    int32_t ret = Conv2NetHandle(*netHandle, &netHandleInner);
-    if (ret != NETMANAGER_SUCCESS) {
-        return ret;
-    }
-    ret = Conv2NetAllCapabilities(*netAllCap, &netAllCapsInner);
+    Conv2NetHandle(*netHandle, &netHandleInner);
+    int32_t ret = Conv2NetAllCapabilities(*netAllCap, &netAllCapsInner);
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
@@ -427,11 +420,8 @@ int32_t NetConnCallbackStubAdapter::NetConnectionPropertiesChange(sptr<NetHandle
         NETMGR_LOG_E("NetConn_ConnectionProperties alloc failed");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    int32_t ret = Conv2NetHandle(*netHandle, &netHandleInner);
-    if (ret != NETMANAGER_SUCCESS) {
-        return ret;
-    }
-    ret = Conv2NetLinkInfo(*info, netInfoInner.get());
+    Conv2NetHandle(*netHandle, &netHandleInner);
+    int32_t ret = Conv2NetLinkInfo(*info, netInfoInner.get());
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
@@ -446,10 +436,7 @@ int32_t NetConnCallbackStubAdapter::NetLost(sptr<NetHandle> &netHandle)
         return NETMANAGER_SUCCESS;
     }
     NetConn_NetHandle netHandleInner;
-    int32_t ret = Conv2NetHandle(*netHandle, &netHandleInner);
-    if (ret != NETMANAGER_SUCCESS) {
-        return ret;
-    }
+    Conv2NetHandle(*netHandle, &netHandleInner);
 
     this->callback_.onNetLost(&netHandleInner);
     return NETMANAGER_SUCCESS;
@@ -470,10 +457,7 @@ int32_t NetConnCallbackStubAdapter::NetBlockStatusChange(sptr<NetHandle> &netHan
         return NETMANAGER_SUCCESS;
     }
     NetConn_NetHandle netHandleInner;
-    int32_t ret = Conv2NetHandle(*netHandle, &netHandleInner);
-    if (ret != NETMANAGER_SUCCESS) {
-        return ret;
-    }
+    Conv2NetHandle(*netHandle, &netHandleInner);
     this->callback_.onNetBlockStatusChange(&netHandleInner, blocked);
     return NETMANAGER_SUCCESS;
 }
