@@ -172,11 +172,6 @@ NetHttpProbeResult NetHttpProbe::GetHttpsProbeResult() const
     return httpsProbeResult_;
 }
 
-void NetHttpProbe::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
-{
-    netLinkInfo_ = netLinkInfo;
-}
-
 void NetHttpProbe::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
 {
     std::lock_guard<std::mutex> locker(proxyMtx_);

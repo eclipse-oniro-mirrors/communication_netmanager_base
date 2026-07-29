@@ -45,7 +45,6 @@ public:
     int32_t SendProbe(ProbeType probeType, const std::string &httpUrl, const std::string &httpsUrl);
     NetHttpProbeResult GetHttpProbeResult() const;
     NetHttpProbeResult GetHttpsProbeResult() const;
-    void UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
     bool IsHttpDetect(ProbeType probeType);
     bool IsHttpsDetect(ProbeType probeType);
