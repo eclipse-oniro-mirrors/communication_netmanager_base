@@ -4285,6 +4285,11 @@ int32_t NetConnService::EnableDistributedServerNetAsync(const std::string &iif, 
         return NET_CONN_ERR_INVALID_NETWORK;
     }
 
+    if (!CommonUtils::IsValidIPV4(gw)) {
+        NETMGR_LOG_E("the gw is not valid");
+        return NET_CONN_ERR_INVALID_NETWORK;
+    }
+
     if (NetsysController::GetInstance().EnableDistributedServerNet(iif, devIface, dstAddr, gw) != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("EnableDistributedServerNet failed");
         return NETMANAGER_ERR_OPERATION_FAILED;

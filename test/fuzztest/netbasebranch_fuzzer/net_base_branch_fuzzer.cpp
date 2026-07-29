@@ -88,7 +88,7 @@ void NetHttpProbeBranchFuzzTest(const uint8_t *data, size_t size)
     NetLinkInfo info;
     std::string ifaceName = std::string(reinterpret_cast<const char*>(data), size);
     info.ifaceName_ = ifaceName;
-    instance_->UpdateNetLinkInfo(info);
+    instance_->netLinkInfo_ = info;
     instance_->UpdateGlobalHttpProxy(httpProxy);
     std::string httpUrl = GetStringFromData(STR_LEN);
     std::string httpsUrl = GetStringFromData(STR_LEN);
