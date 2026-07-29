@@ -160,6 +160,7 @@ ohos_unittest("net_stats_manager_test") {
     "distributed_notification_service:ans_innerkits",
     "ffrt:libffrt",
     "i18n:intl_util",
+    "image_framework:image_native",
     "ipc:ipc_core",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",

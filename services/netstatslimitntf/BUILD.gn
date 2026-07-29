@@ -58,6 +58,7 @@ if (netmanager_base_enable_traffic_statistic) {
       "cJSON:cjson",
       "c_utils:utils",
       "ffrt:libffrt",
+      "image_framework:image_native",
       "os_account:os_account_innerkits",
     ]
 
@@ -69,9 +70,11 @@ if (netmanager_base_enable_traffic_statistic) {
 
     external_deps += [
       "ability_runtime:dataobs_manager",
+      "ability_runtime:wantagent_innerkits",
       "core_service:tel_core_service_api",
       "distributed_notification_service:ans_innerkits",
       "i18n:intl_util",
+      "image_framework:image_native",
       "state_registry:tel_state_registry_api",
     ]
     defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
