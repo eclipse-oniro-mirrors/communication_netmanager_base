@@ -402,6 +402,9 @@ private:
         if (mask > IPV4_MAX_PREFIXLEN) {
             mask =  IPV4_MAX_PREFIXLEN;
         }
+        if (mask == 0) {
+            return 0;
+        }        
         return addr & (0xFFFFFFFF << (IPV4_MAX_PREFIXLEN - mask));
     }
 
