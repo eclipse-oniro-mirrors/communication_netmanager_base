@@ -17,6 +17,7 @@
 
 #include <ctime>
 #include <dirent.h>
+#include <memory>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -450,6 +451,7 @@ std::vector<std::string> MockNetsysNativeClient::InterfaceGetList()
     if ((dir = opendir(INTERFACE_LIST_DIR.c_str())) == nullptr) {
         return ifList;
     }
+    auto dirGuard = std::unique_ptr<DIR, decltype(&closedir)>(dir, closedir);
     struct dirent *ptr(nullptr);
     while ((ptr = readdir(dir)) != nullptr) {
         if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0) {
@@ -457,7 +459,6 @@ std::vector<std::string> MockNetsysNativeClient::InterfaceGetList()
         }
         ifList.push_back(ptr->d_name);
     }
-    closedir(dir);
     return ifList;
 }
 
@@ -469,6 +470,7 @@ std::vector<std::string> MockNetsysNativeClient::UidGetList()
     if ((dir = opendir(UID_LIST_DIR.c_str())) == nullptr) {
         return uidList;
     }
+    auto dirGuard = std::unique_ptr<DIR, decltype(&closedir)>(dir, closedir);
     struct dirent *ptr(nullptr);
     while ((ptr = readdir(dir)) != nullptr) {
         if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0) {
@@ -476,7 +478,6 @@ std::vector<std::string> MockNetsysNativeClient::UidGetList()
         }
         uidList.push_back(ptr->d_name);
     }
-    closedir(dir);
     return uidList;
 }
 
@@ -489,25 +490,29 @@ int32_t MockNetsysNativeClient::AddRoute(const std::string &ip, const std::strin
     bzero(&_sin, sizeof(struct sockaddr_in));
     _sin.sin_family = AF_INET;
     _sin.sin_port = 0;
-    if (inet_aton(gateWay.c_str(), &(_sin.sin_addr)) < 0) {
+    if (inet_aton(gateWay.c_str(), &(_sin.sin_addr)) == 0) {
         NETMGR_LOG_E("inet_aton gateWay[%{private}s]", gateWay.c_str());
         return -1;
     }
     int copyRet = memcpy_s(&rt.rt_gateway, sizeof(rt.rt_gateway), &_sin, sizeof(struct sockaddr_in));
-    NETMGR_LOG_I("copyRet = %{public}d", copyRet);
+    if (copyRet != 0) {
+        NETMGR_LOG_E("memcpy_s gateway failed, copyRet = %{public}d", copyRet);
+        return -1;
+    }
     (reinterpret_cast<struct sockaddr_in *>(&rt.rt_dst))->sin_family = AF_INET;
-    if (inet_aton(ip.c_str(), &((struct sockaddr_in *)&rt.rt_dst)->sin_addr) < 0) {
+    if (inet_aton(ip.c_str(), &((struct sockaddr_in *)&rt.rt_dst)->sin_addr) == 0) {
         NETMGR_LOG_E("inet_aton ip[%{public}s]", ToAnonymousIp(ip).c_str());
         return -1;
     }
     (reinterpret_cast<struct sockaddr_in *>(&rt.rt_genmask))->sin_family = AF_INET;
-    if (inet_aton(mask.c_str(), &(reinterpret_cast<struct sockaddr_in *>(&rt.rt_genmask))->sin_addr) < 0) {
+    if (inet_aton(mask.c_str(), &(reinterpret_cast<struct sockaddr_in *>(&rt.rt_genmask))->sin_addr) == 0) {
         NETMGR_LOG_E("inet_aton mask[%{public}s]", mask.c_str());
         return -1;
     }
-    auto name = std::make_unique<char[]>(devName.size());
+    auto name = std::make_unique<char[]>(devName.size() + 1);
     if (!devName.empty()) {
-        if (strcpy_s(name.get(), devName.size(), devName.c_str()) != 0) {
+        if (strcpy_s(name.get(), devName.size() + 1, devName.c_str()) != 0) {
+            NETMGR_LOG_E("strcpy_s devName failed");
             return -1;
         }
         rt.rt_dev = name.get();

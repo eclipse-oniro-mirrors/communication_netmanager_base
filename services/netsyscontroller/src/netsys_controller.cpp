@@ -158,8 +158,17 @@ int32_t NetsysController::NetworkAddUids(int32_t netId, const std::vector<int32_
         NETMGR_LOG_E("beginUids and endUids size is mismatch");
         return NETMANAGER_ERR_INTERNAL;
     }
+    constexpr size_t MAX_UID_RANGE_COUNT = 1024;
+    if (beginUids.size() > MAX_UID_RANGE_COUNT) {
+        NETMGR_LOG_E("uid range count exceeds max limit: %{public}zu", beginUids.size());
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     std::vector<UidRange> uidRanges;
     for (size_t i = 0; i < beginUids.size(); i++) {
+        if (beginUids[i] > endUids[i]) {
+            NETMGR_LOG_E("invalid uid range: begin[%{public}d] > end[%{public}d]", beginUids[i], endUids[i]);
+            return NETMANAGER_ERR_INVALID_PARAMETER;
+        }
         uidRanges.emplace_back(UidRange(beginUids[i], endUids[i], priorityId, netId));
     }
     return netsysService_->NetworkAddUids(netId, uidRanges);

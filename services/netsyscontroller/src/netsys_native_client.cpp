@@ -36,6 +36,7 @@
 #include "netsys_native_client.h"
 #include "netsys_native_service_proxy.h"
 #include "ipc_skeleton.h"
+#include "data_flow_statistics.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
@@ -221,6 +222,10 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit(const 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterceptRecord(sptr<NetManagerStandard::InterceptRecord> &record)
 {
     NETMGR_LOG_I("OnInterceptRecord");
+    if (record == nullptr) {
+        NETMGR_LOG_E("OnInterceptRecord record is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     auto netsysNativeClient = netsysNativeClient_.lock();
     if (netsysNativeClient == nullptr) {
         NETMGR_LOG_E("NetsysNativeClient has destory");
@@ -228,7 +233,9 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterceptRecord(sptr<NetMana
     }
     std::lock_guard<std::shared_mutex> lock(netsysNativeClient->firewallCallbackMutex_);
     for (auto callback : netsysNativeClient->firewallCallbacks_) {
-        callback->OnIntercept(record);
+        if (callback != nullptr) {
+            callback->OnIntercept(record);
+        }
     }
     return NETMANAGER_SUCCESS;
 }

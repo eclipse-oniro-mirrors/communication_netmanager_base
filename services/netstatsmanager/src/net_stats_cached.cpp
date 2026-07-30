@@ -534,8 +534,16 @@ void NetStatsCached::WriteIfaceStats()
         return;
     }
     auto handler = std::make_unique<NetStatsDataHandler>();
-    handler->WriteStatsData(stats_.GetIfaceStatsInfo(), NetStatsDatabaseDefines::IFACE_TABLE);
-    handler->DeleteByDate(NetStatsDatabaseDefines::IFACE_TABLE, 0, CommonUtils::GetCurrentSecond() - dateCycle_);
+    int32_t writeRet = handler->WriteStatsData(stats_.GetIfaceStatsInfo(), NetStatsDatabaseDefines::IFACE_TABLE);
+    if (writeRet != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("WriteIfaceStats failed to persist data, keep cache, ret: %{public}d", writeRet);
+        return;
+    }
+    int32_t delRet = handler->DeleteByDate(NetStatsDatabaseDefines::IFACE_TABLE, 0,
+                                            CommonUtils::GetCurrentSecond() - dateCycle_);
+    if (delRet != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("WriteIfaceStats DeleteByDate failed, ret: %{public}d", delRet);
+    }
     stats_.ResetIfaceStats();
 }
 
@@ -555,8 +563,16 @@ void NetStatsCached::WriteUidStats()
         }
     });
     auto handler = std::make_unique<NetStatsDataHandler>();
-    handler->WriteStatsData(stats_.GetUidStatsInfo(), NetStatsDatabaseDefines::UID_TABLE);
-    handler->DeleteByDate(NetStatsDatabaseDefines::UID_TABLE, 0, CommonUtils::GetCurrentSecond() - dateCycle_);
+    int32_t writeRet = handler->WriteStatsData(stats_.GetUidStatsInfo(), NetStatsDatabaseDefines::UID_TABLE);
+    if (writeRet != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("WriteUidStats failed to persist data, keep cache, ret: %{public}d", writeRet);
+        return;
+    }
+    int32_t delRet = handler->DeleteByDate(NetStatsDatabaseDefines::UID_TABLE, 0,
+                                            CommonUtils::GetCurrentSecond() - dateCycle_);
+    if (delRet != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("WriteUidStats DeleteByDate failed, ret: %{public}d", delRet);
+    }
     stats_.ResetUidStats();
 }
 
@@ -893,8 +909,13 @@ void NetStatsCached::DeleteUidSimStats(uint32_t uid)
 void NetStatsCached::DeleteUidSimStatsWithFlag(uint32_t uid, uint32_t flag)
 {
     auto handler = std::make_unique<NetStatsDataHandler>();
-    if (handler == nullptr || handler->UpdateSimDataFlag(flag, STATS_DATA_FLAG_UNINSTALLED) != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("DeleteUidSimStats updateFlag failed. uid:[%{public}d], flag[%{public}u]", uid, flag);
+    if (handler == nullptr) {
+        NETMGR_LOG_E("DeleteUidSimStats handler is null. uid:[%{public}u], flag[%{public}u]", uid, flag);
+        return;
+    }
+    if (handler->UpdateSimDataFlag(flag, STATS_DATA_FLAG_UNINSTALLED) != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("DeleteUidSimStats updateFlag failed. uid:[%{public}u], flag[%{public}u]", uid, flag);
+        return;
     }
     std::lock_guard<ffrt::mutex> lock(lock_);
     lastUidSimStatsInfo_.erase(std::remove_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
