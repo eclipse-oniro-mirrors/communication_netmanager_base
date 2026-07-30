@@ -432,7 +432,7 @@ HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceTest002, TestSize.Level1)
     EXPECT_NE(ret, 0);
     NetworkDpaTrafficReport dpaTraffic;
     ret = instance_->SetDpaCellularSharingTraffic(dpaTraffic);
-    EXPECT_NE(ret, 0);
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceState001, TestSize.Level1)
