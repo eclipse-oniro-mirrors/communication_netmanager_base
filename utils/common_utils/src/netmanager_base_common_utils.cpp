@@ -145,7 +145,9 @@ std::string Strip(const std::string &str, char ch)
 std::string ToLower(const std::string &s)
 {
     std::string res = s;
-    std::transform(res.begin(), res.end(), res.begin(), tolower);
+    std::transform(res.begin(), res.end(), res.begin(), [](unsigned char c) {
+        return tolower(c);
+    });
     return res;
 }
 

@@ -60,7 +60,7 @@ HWTEST_F(NetHttpProbeTest, SendProbeTest001, TestSize.Level1)
     instance_->GetHttpsProbeResult();
     HttpProxy httpProxy = {TEST_PROXY_HOST, 0, {}};
     NetLinkInfo info;
-    instance_->UpdateNetLinkInfo(info);
+    instance_->netLinkInfo_ = info;
     instance_->UpdateGlobalHttpProxy(httpProxy);
     int32_t ret = instance_->SendProbe(PROBE_HTTP_HTTPS, TEST_HTTP_URL, TEST_HTTPS_URL);
     EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
@@ -226,7 +226,7 @@ HWTEST_F(NetHttpProbeTest, LoadProxyTest001, TestSize.Level1)
     instance_->defaultUseGlobalHttpProxy_ = false;
     NetLinkInfo netLinkInfo;
     netLinkInfo.httpProxy_ = {"127.0.0.1", 80, {"localhost"}};
-    instance_->UpdateNetLinkInfo(netLinkInfo);
+    instance_->netLinkInfo_ = netLinkInfo;
     ret = instance_->LoadProxy(proxyHost, proxyPort);
     ASSERT_TRUE(ret);
 }
