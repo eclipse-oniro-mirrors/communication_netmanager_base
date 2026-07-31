@@ -35,6 +35,7 @@ constexpr uint32_t MAX_ROUTE_TABLE_SIZE = 128;
 constexpr uint32_t MAX_CONFIG_LIST_SIZE = 1024;
 constexpr uint32_t MAX_IP_NEIGH_TABLE_SIZE = 1024;
 constexpr uint32_t MAX_SHARING_TYPE_SIZE = 32;
+constexpr uint32_t MAX_SHARING_TYPE_SIZE2 = 32;
 
 namespace {
 bool WriteNatDataToMessage(MessageParcel &data, const std::string &downstreamIface, const std::string &upstreamIface)
@@ -52,6 +53,11 @@ bool WriteNatDataToMessage(MessageParcel &data, const std::string &downstreamIfa
     return true;
 }
 } // namespace
+
+
+
+
+
 
 int32_t NetsysNativeServiceProxy::SendRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
