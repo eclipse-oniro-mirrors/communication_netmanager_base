@@ -45,6 +45,9 @@ inline uint32_t ConvertTableByNetId(int32_t netId, uint32_t table)
 namespace OHOS::NetManagerStandard::CommonUtils {
 inline std::vector<std::string> Split(const std::string &str, const std::string &sep)
 {
+    if (sep.empty()) {
+        return {str};
+    }
     std::string s = str;
     std::vector<std::string> res;
     while (!s.empty()) {

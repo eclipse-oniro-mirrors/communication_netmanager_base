@@ -1174,7 +1174,11 @@ void NetStatsService::DeleteTrafficStatsByAccount(std::vector<NetStatsInfoSequen
         }
     } else if (uid == Sim_UID || uid == SIM2_UID) {
         int32_t curUserId = -1;
-        AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
+        int32_t ret = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
+        if (ret != 0) {
+            NETMGR_LOG_E("get userId error. ret: %{public}d", ret);
+            return;
+        }
         if (curUserId == defaultUserId) {
             EraseNetStatsInfoByUserId(infos, SYSTEM_DEFAULT_USERID);
         } else {
