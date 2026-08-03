@@ -169,6 +169,7 @@ bool NetworkExec::ExecUnsubscribe(UnsubscribeContext *context)
 
 napi_value NetworkExec::UnsubscribeCallback(UnsubscribeContext *context)
 {
+    NETMANAGER_BASE_LOGI("SubEvent op=off_all kit=networkKit event=%{public}s", EVENT_SUBSCRIBE);
     context->GetManager()->DeleteListener(EVENT_SUBSCRIBE);
     return NapiUtils::GetUndefined(context->GetEnv());
 }
