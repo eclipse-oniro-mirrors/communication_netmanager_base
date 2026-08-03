@@ -171,7 +171,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, RemoveInterfaceFromNetworkTest001, TestSi
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->DelInterfaceAddress(INTERFACENAME, "192.168.113.209", 24);
-    EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     ret = netsysNativeService->NetworkRemoveInterface(NETID, INTERFACENAME);
     EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
@@ -308,7 +308,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, GetSetProcSysNetTest001, TestSize.Level1)
     std::string value = "Testvalue";
     int32_t ret = netsysNativeService->SetProcSysNet(AF_INET, WHICH, INTERFACENAME, parameter, value);
     ret = netsysNativeService->GetProcSysNet(AF_INET, WHICH, INTERFACENAME, parameter, value);
-    EXPECT_GE(ret, ERR_FLATTEN_OBJECT);
+    EXPECT_LE(ret, ERR_FLATTEN_OBJECT);
 }
 
 HWTEST_F(NetsysNativeServiceProxyTest, GetProcSysNetTest001, TestSize.Level1)

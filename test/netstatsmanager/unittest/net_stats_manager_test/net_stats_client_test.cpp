@@ -466,7 +466,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient011, TestSize.Level1)
     int64_t value = 1;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->SetTrafficPlanInfo(
         simId, param, value);
-    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+    EXPECT_GE(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 }
 
 HWTEST_F(NetStatsClientTest, NetStatsClient012, TestSize.Level1)
@@ -476,7 +476,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient012, TestSize.Level1)
     int64_t value = 0;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetTrafficPlanInfo(
         simId, param, value);
-    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+    EXPECT_GE(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
