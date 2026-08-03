@@ -586,6 +586,9 @@ uint32_t IpParamParser::RfindIp6(const in6_addr &addr, uint32_t startBit, uint32
                 return i * BIT_PER_BYTE + BIT_PER_BYTE - j - 1;
             }
         }
+        if (i == startBytes) {
+            break;
+        }
     }
     return IPV6_BIT_COUNT;
 }
