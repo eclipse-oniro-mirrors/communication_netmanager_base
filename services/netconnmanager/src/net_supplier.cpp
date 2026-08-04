@@ -353,7 +353,6 @@ bool NetSupplier::IsConnected() const
 bool NetSupplier::RequestToConnect(const NetRequest &netrequest)
 {
     if (netSupplierType_ == BEARER_CELLULAR && netrequest.isControlled) {
-        NETMGR_LOG_E("RequestToConnect is Controlled");
         return true;
     }
     return AddRequest(netrequest);

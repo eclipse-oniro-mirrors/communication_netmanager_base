@@ -291,7 +291,6 @@ int32_t NetsysNativeClient::NativeNetDnsResultCallback::OnDnsQueryResultReport(u
 int32_t NetsysNativeClient::NativeNetDnsResultCallback::OnDnsQueryAbnormalReport(
     uint32_t eventfailcause, OHOS::NetsysNative::NetDnsQueryResultReport res)
 {
-    NETMGR_LOG_I("NetsysNativeClient OnDnsQueryAbnormalReport");
     auto netsysNativeClient = netsysNativeClient_.lock();
     if (netsysNativeClient == nullptr) {
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
