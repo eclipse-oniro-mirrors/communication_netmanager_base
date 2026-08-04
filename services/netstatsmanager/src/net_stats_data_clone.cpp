@@ -67,6 +67,7 @@ int32_t NetStatsDataClone::OnBackup(UniqueFd &fd, const std::string &backupInfo)
 
 int32_t NetStatsDataClone::OnRestore(UniqueFd &fd, const std::string &backupInfo)
 {
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     if (!FdClone(fd)) {
         return NETMANAGER_ERROR;
     }
@@ -80,7 +81,6 @@ int32_t NetStatsDataClone::OnRestore(UniqueFd &fd, const std::string &backupInfo
 
     std::string line;
     std::vector<TrafficPlanInfo> infoList;
-    std::lock_guard<ffrt::mutex> lock(mutex_);
     while (std::getline(file, line)) {
         std::istringstream iss(line);
         TrafficPlanInfo info;

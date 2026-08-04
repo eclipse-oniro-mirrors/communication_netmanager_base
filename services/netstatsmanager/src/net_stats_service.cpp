@@ -142,14 +142,16 @@ std::shared_ptr<NetStatsService> NetStatsService::instance_ = nullptr;
 
 std::shared_ptr<NetStatsService> NetStatsService::GetInstance()
 {
-    if (instance_ == nullptr) {
+    auto temp = std::atomic_load_explicit(&instance_, std::memory_order_acquire);
+    if (temp == nullptr) {
         std::lock_guard<std::mutex> lockGuard(instanceLock_);
-        if (instance_ == nullptr) {
-            instance_ = std::make_shared<NetStatsService>();
-            return instance_;
+        temp = std::atomic_load_explicit(&instance_, std::memory_order_relaxed);
+        if (temp == nullptr) {
+            temp = std::make_shared<NetStatsService>();
+            std::atomic_store_explicit(&instance_, temp, std::memory_order_release);
         }
     }
-    return instance_;
+    return temp;
 }
 
 // LCOV_EXCL_START
@@ -423,6 +425,10 @@ int32_t NetStatsService::GetMonthTrafficStatsByNetwork(uint32_t simId, uint64_t 
     networkInfo.startTime_ = static_cast<uint64_t>(NetStatsUtils::GetStartTimestamp(beginDate));
     networkInfo.endTime_ = static_cast<uint64_t>(CommonUtils::GetTodayMidnightTimestamp(23, 59, 59)); // 23:59:59
     int32_t ret = GetTrafficStatsByNetwork(infos, networkInfo);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("GetTrafficStatsByNetwork failed, err code=%{public}d", ret);
+        return ret;
+    }
     monthData = 0;
     for (const auto &info : infos) {
         monthData += info.second.rxBytes_;
