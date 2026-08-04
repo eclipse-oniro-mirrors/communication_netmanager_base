@@ -1101,7 +1101,6 @@ int32_t NetsysController::FirewallEnableChain(uint32_t chain, bool enable)
 
 int32_t NetsysController::FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule)
 {
-    NETMGR_LOG_I("NetsysController::FirewallSetUidRule Start");
     // LCOV_EXCL_START This will never happen.
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
