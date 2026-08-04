@@ -68,7 +68,7 @@ constexpr int32_t PIPE_OUT = 0;
 constexpr int32_t PIPE_IN = 1;
 constexpr int32_t DOMAIN_VALID_MIN_PART_SIZE = 2;
 constexpr int32_t DOMAIN_VALID_MAX_PART_SIZE = 5;
-constexpr uint32_t NET_MASK_MAX_LENGTH = 32;
+constexpr int32_t NET_MASK_MAX_LENGTH = 32;
 constexpr int32_t NET_MASK_GROUP_COUNT = 4;
 constexpr int32_t MAX_IPV6_PREFIX_LENGTH = 128;
 constexpr int32_t WAIT_FOR_PID_TIME_MS = 20;
@@ -194,7 +194,7 @@ int GetMaskLength(const std::string &mask)
 
 std::string GetMaskByLength(uint32_t length)
 {
-    length = std::min(length, NET_MASK_MAX_LENGTH);
+    length = std::min<uint32_t>(length, NET_MASK_MAX_LENGTH);
     const uint32_t mask = length == 0 ? 0 : 0xFFFFFFFF << (NET_MASK_MAX_LENGTH - length);
     auto maskGroup = new int[NET_MASK_GROUP_COUNT];
     for (int i = 0; i < NET_MASK_GROUP_COUNT; i++) {
