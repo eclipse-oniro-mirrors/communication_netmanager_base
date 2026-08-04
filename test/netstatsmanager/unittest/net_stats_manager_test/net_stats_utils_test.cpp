@@ -64,6 +64,44 @@ HWTEST_F(NetStatsUtilsTest, IsLessThanOneMonthAgoPreciseTest001, TestSize.Level1
     int32_t ret = NetStatsUtils::IsLessThanOneMonthAgoPrecise(timastamp);
     EXPECT_EQ(ret, true);
 }
+
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+HWTEST_F(NetStatsUtilsTest, IsSlotIdValidTest001, TestSize.Level1)
+{
+    bool ret = NetStatsUtils::IsSlotIdValid(0);
+    EXPECT_EQ(ret, true);
+}
+
+HWTEST_F(NetStatsUtilsTest, IsSlotIdValidTest002, TestSize.Level1)
+{
+    bool ret = NetStatsUtils::IsSlotIdValid(1);
+    EXPECT_EQ(ret, true);
+}
+
+HWTEST_F(NetStatsUtilsTest, IsSlotIdValidTest003, TestSize.Level1)
+{
+    bool ret = NetStatsUtils::IsSlotIdValid(2);
+    EXPECT_EQ(ret, true);
+}
+
+HWTEST_F(NetStatsUtilsTest, IsSlotIdValidTest004, TestSize.Level1)
+{
+    bool ret = NetStatsUtils::IsSlotIdValid(3);
+    EXPECT_EQ(ret, false);
+}
+
+HWTEST_F(NetStatsUtilsTest, IsSlotIdValidTest005, TestSize.Level1)
+{
+    bool ret = NetStatsUtils::IsSlotIdValid(-1);
+    EXPECT_EQ(ret, false);
+}
+
+HWTEST_F(NetStatsUtilsTest, IsSlotIdValidTest006, TestSize.Level1)
+{
+    bool ret = NetStatsUtils::IsSlotIdValid(4);
+    EXPECT_EQ(ret, false);
+}
+#endif
 }
 }
-}
+}

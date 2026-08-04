@@ -15,9 +15,11 @@
 
 #include <charconv>
 #include <chrono>
+#include <charconv>
 
 #include "net_stats_utils.h"
 #include "net_mgr_log_wrapper.h"
+#include "parameter.h"
 #ifdef SUPPORT_TRAFFIC_STATISTIC
 #include "cellular_data_client.h"
 #include "core_service_client.h"
@@ -32,6 +34,11 @@ static const int32_t DAYS_IN_MONTH[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 
 constexpr uint32_t ONE_MONTH_SECOND = 31 * 24 * 60 * 60;
 constexpr int32_t SLOT_0 = 0;
 constexpr int32_t SLOT_1 = 1;
+constexpr int32_t SLOT_2 = 2;  // Reserved for Tianjitong
+constexpr int32_t SLOT_3 = 3;  // New slot for third SIM card
+constexpr const char* PERSIST_TELEPHONY_TSTS_MODE = "persist.telephony.tsts_mode";
+constexpr uint32_t SYS_PARAMETER_SIZE = 256;
+constexpr const char* TSTS_MODE_DEFAULT_VALUE = "0";
 
 int32_t NetStatsUtils::GetStartTimestamp(int32_t startdate)
 {
@@ -308,11 +315,32 @@ bool NetStatsUtils::IsSimIdValid(int32_t simId)
 
 bool NetStatsUtils::IsSlotIdValid(int32_t slotId)
 {
-    if (slotId != SLOT_0 && slotId != SLOT_1) {
+    // Slot_3 validation is controlled by persist.telephony.tsts_mode property
+    if (slotId == SLOT_3 && !NetStatsUtils::IsTstsModeEnabled()) {
+        NETMGR_LOG_E("slotId:%{public}d (SLOT_3) is not enabled, tsts_mode property <= 0", slotId);
+        return false;
+    }
+    if (slotId != SLOT_0 && slotId != SLOT_1 && slotId != SLOT_2 && slotId != SLOT_3) {
         NETMGR_LOG_E("slotId:%{public}d, error", slotId);
         return false;
     }
     return true;
+}
+
+bool NetStatsUtils::IsTstsModeEnabled()
+{
+    char param[SYS_PARAMETER_SIZE] = {0};
+    int32_t code = GetParameter(PERSIST_TELEPHONY_TSTS_MODE, TSTS_MODE_DEFAULT_VALUE, param, SYS_PARAMETER_SIZE);
+    if (code <= 0) {
+        return false;
+    }
+    std::string value = param;
+    int32_t mode = 0;
+    auto [ptr, ec] = std::from_chars(value.data(), value.data() + value.size(), mode);
+    if (ec == std::errc{} && ptr == value.data() + value.size()) {
+        return mode > 0;
+    }
+    return false;
 }
 #endif
 }

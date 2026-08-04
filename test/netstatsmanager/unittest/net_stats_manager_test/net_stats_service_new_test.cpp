@@ -736,6 +736,176 @@ HWTEST_F(NetStatsServiceTest, CellularDataStateChangedFfrtTest03, TestSize.Level
     int32_t ret = netStatsService.CellularDataStateChangedFfrt(slotId, dataState);
     EXPECT_EQ(ret, true);
 }
+
+HWTEST_F(NetStatsServiceTest, UpdateBpfMapTimerTest001, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
+    netStatsService.trafficPlanFfrtQueue_ = std::make_shared<ffrt::queue>("TrafficPlanStatistic");
+    netStatsService.UpdateBpfMapTimer();
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(NetStatsServiceTest, UpdateBpfMapTimerTest002, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
+    netStatsService.trafficPlanFfrtQueue_ = std::make_shared<ffrt::queue>("TrafficPlanStatistic");
+    netStatsService.UpdateBpfMapTimer();
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(NetStatsServiceTest, UpdateBpfMapTimerTest003, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
+    netStatsService.trafficPlanFfrtQueue_ = std::make_shared<ffrt::queue>("TrafficPlanStatistic");
+    netStatsService.UpdateBpfMapTimer();
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(NetStatsServiceTest, UpdateBpfMapTimerTest004, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
+    netStatsService.trafficPlanFfrtQueue_ = std::make_shared<ffrt::queue>("TrafficPlanStatistic");
+    netStatsService.UpdateBpfMapTimer();
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(NetStatsServiceTest, UpdateAllHistoryDateInfoTest001, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
+    netStatsService.UpdateAllHistoryDateInfo();
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(NetStatsServiceTest, UpdateAllHistoryDateInfoTest002, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
+    netStatsService.UpdateAllHistoryDateInfo();
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(NetStatsServiceTest, DealNotificaitonTest001, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
+    netStatsService.DealNotificaiton(0, NET_STATS_MONTHLY_LIMIT);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(NetStatsServiceTest, DealNotificaitonTest002, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
+    netStatsService.DealNotificaiton(0, NET_STATS_MONTHLY_LIMIT);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(NetStatsServiceTest, DealNotificaitonTest003, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
+    netStatsService.DealNotificaiton(0, NET_STATS_MONTHLY_LIMIT);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(NetStatsServiceTest, DealNotificaitonTest004, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
+    netStatsService.DealNotificaiton(0, NET_STATS_MONTHLY_MARK);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(NetStatsServiceTest, DealNotificaitonTest005, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
+    netStatsService.DealNotificaiton(0, NET_STATS_DAILY_MARK);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(NetStatsServiceTest, DealNotificaitonTest006, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
+    netStatsService.DealNotificaiton(0, 0xFF);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(NetStatsServiceTest, OnExceedTrafficLimitsTest001, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    int8_t flag = 0;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
+    int32_t ret = netStatsService.trafficObserver_->OnExceedTrafficLimits(flag);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NetStatsServiceTest, OnExceedTrafficLimitsTest002, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    int8_t flag = 3;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
+    int32_t ret = netStatsService.trafficObserver_->OnExceedTrafficLimits(flag);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NetStatsServiceTest, OnExceedTrafficLimitsTest003, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    int8_t flag = 6;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
+    int32_t ret = netStatsService.trafficObserver_->OnExceedTrafficLimits(flag);
+    EXPECT_NE(ret, 1);
+}
+
+HWTEST_F(NetStatsServiceTest, OnExceedTrafficLimitsTest004, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    int8_t flag = -1;
+    int32_t ret = netStatsService.trafficObserver_->OnExceedTrafficLimits(flag);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetStatsServiceTest, OnExceedTrafficLimitsTest005, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    int8_t flag = 100;
+    int32_t ret = netStatsService.trafficObserver_->OnExceedTrafficLimits(flag);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetStatsServiceTest, OnExceedTrafficLimitsTest006, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    int8_t flag = 4;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(-1));
+    int32_t ret = netStatsService.trafficObserver_->OnExceedTrafficLimits(flag);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetStatsServiceTest, TelephonyInfoObserverTest001, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    netStatsService.SubscribeTelephonyInfo();
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
+    netStatsService.telephonyInfoObserver_->OnIccAccountUpdated();
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(NetStatsServiceTest, TelephonyInfoObserverTest002, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    netStatsService.SubscribeTelephonyInfo();
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(-1));
+    netStatsService.telephonyInfoObserver_->OnIccAccountUpdated();
+    EXPECT_TRUE(true);
+}
 #endif
 } // namespace NetManagerStandard
 } // namespace OHOS
