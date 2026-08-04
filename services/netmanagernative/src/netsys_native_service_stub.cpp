@@ -17,6 +17,7 @@
 #include <net/route.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <regex>
 
 #include "ipc_skeleton.h"
 #include "net_manager_constants.h"
@@ -835,6 +836,9 @@ int32_t NetsysNativeServiceStub::CmdNetworkRemoveRoute(MessageParcel &data, Mess
     NETNATIVE_LOGI("netId[%{public}d}, ifName[%{public}s], destination[%{public}s}, nextHop[%{public}s],"
         "isExcludedRoute[%{public}d]", netId, interfaceName.c_str(), ToAnonymousIp(destination).c_str(),
         ToAnonymousIp(nextHop).c_str(), isExcludedRoute);
+    if (!CommonUtils::CheckIfaceName(interfaceName)) {
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
     int32_t result = NetworkRemoveRoute(netId, interfaceName, destination, nextHop, isExcludedRoute);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("NetworkRemoveRoute has recved result %{public}d", result);
@@ -1819,6 +1823,18 @@ int32_t NetsysNativeServiceStub::CmdSetIptablesCommandForRes(MessageParcel &data
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
+bool NetsysNativeServiceStub::CheckIpCommand(const std::string &cmd)
+{
+    std::string forbiddenChars = "-c|;>&";
+    for (char c : cmd) {
+        if (forbiddenChars.find(c) != std::string::npos) {
+            return false;
+        }
+    }
+    std::regex ipCommandRegex(R"(^ip\s+(address|route|neigh|link|tunnel|rule)\s+.*)");
+    return std::regex_match(cmd, ipCommandRegex);
+}
+
 int32_t NetsysNativeServiceStub::CmdSetIpCommandForRes(MessageParcel &data, MessageParcel &reply)
 {
     if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
@@ -1828,6 +1844,10 @@ int32_t NetsysNativeServiceStub::CmdSetIpCommandForRes(MessageParcel &data, Mess
     }
     std::string cmd = data.ReadString();
     std::string respond;
+    if (!CheckIpCommand(cmd)) {
+        NETNATIVE_LOGE("Invalid IpCommand");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     int32_t result = SetIpCommandForRes(cmd, respond);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write CmdSetIpCommandForRes result failed");
@@ -2501,7 +2521,9 @@ int32_t NetsysNativeServiceStub::CmdSetIpv6PrivacyExtensions(MessageParcel &data
 {
     std::string interfaceName = data.ReadString();
     int32_t on = data.ReadInt32();
-
+    if (!CommonUtils::CheckIfaceName(interfaceName)) {
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
     int32_t result = SetIpv6PrivacyExtensions(interfaceName, on);
     reply.WriteInt32(result);
     NETNATIVE_LOGI("SetIpv6PrivacyExtensions has recved result %{public}d", result);
@@ -2514,7 +2536,9 @@ int32_t NetsysNativeServiceStub::CmdSetIpv6Enable(MessageParcel &data, MessagePa
     std::string interfaceName = data.ReadString();
     int32_t on = data.ReadInt32();
     bool needRestart = data.ReadBool();
-
+    if (!CommonUtils::CheckIfaceName(interfaceName)) {
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
     int32_t result = SetEnableIpv6(interfaceName, on, needRestart);
     reply.WriteInt32(result);
     NETNATIVE_LOGI("SetIpv6Enable has recved result %{public}d", result);
@@ -2566,7 +2590,9 @@ int32_t NetsysNativeServiceStub::CmdSetIpv6AutoConf(MessageParcel &data, Message
 {
     std::string interfaceName = data.ReadString();
     int32_t on = data.ReadInt32();
-
+    if (!CommonUtils::CheckIfaceName(interfaceName)) {
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
     int32_t result = SetIpv6AutoConf(interfaceName, on);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("SetIpv6AutoConf has recved result %{public}d", result);
@@ -2655,7 +2681,9 @@ int32_t NetsysNativeServiceStub::CmdStartClat(MessageParcel &data, MessageParcel
         NETNATIVE_LOGE("Read string failed");
         return ERR_FLATTEN_OBJECT;
     }
-
+    if (!CommonUtils::CheckIfaceName(interfaceName)) {
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
     int32_t netId = 0;
     if (!data.ReadInt32(netId)) {
         NETNATIVE_LOGE("Read int32 failed");
@@ -2689,7 +2717,9 @@ int32_t NetsysNativeServiceStub::CmdStopClat(MessageParcel &data, MessageParcel 
         NETNATIVE_LOGE("Read string failed");
         return ERR_FLATTEN_OBJECT;
     }
-
+    if (!CommonUtils::CheckIfaceName(interfaceName)) {
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
     int32_t result = StopClat(interfaceName);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write result failed");
@@ -2973,7 +3003,9 @@ int32_t NetsysNativeServiceStub::CmdUpdateEnterpriseRoute(MessageParcel &data, M
         NETNATIVE_LOGE("CmdUpdateEnterpriseRoute read interfaceName failed");
         return ERR_FLATTEN_OBJECT;
     }
- 
+    if (!CommonUtils::CheckIfaceName(interfaceName)) {
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
     uint32_t uid = 0;
     if (!data.ReadUint32(uid)) {
         NETNATIVE_LOGE("CmdUpdateEnterpriseRoute read uid failed");

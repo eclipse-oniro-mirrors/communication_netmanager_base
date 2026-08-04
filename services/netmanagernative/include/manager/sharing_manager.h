@@ -114,6 +114,7 @@ public:
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName);
 private:
     std::shared_mutex forwardingRequestsMutex_;
+    std::mutex interfaceForwardsMutex_;
     std::set<std::string> forwardingRequests_;
     std::set<std::string> interfaceForwards_;
     std::map<std::string, uint8_t> forbidIpsMap_;
@@ -123,6 +124,8 @@ private:
     std::mutex initedMutex_;
     std::mutex forbidIpMutex_;
     std::mutex enableV6mutex_;
+    std::mutex wifiShareInterfaceMutex_;
+    std::mutex onDpaSharingTrafficMutex_;
     std::string wifiShareInterface_ = "";
     std::vector<DpaWifiTrafficReport> onDpaSharingTraffic_;
 

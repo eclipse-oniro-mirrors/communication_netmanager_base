@@ -147,6 +147,7 @@ int32_t ClatManager::ClatStart(const std::string &v6Iface, int32_t netId, const 
                                NetManagerNative *netsysService)
 {
     NETNATIVE_LOGI("Start Clatd on %{public}s", v6Iface.c_str());
+    std::lock_guard<std::mutex> guard(clatdMutex_);
     if (clatdTrackers_.find(v6Iface) != clatdTrackers_.end()) {
         NETNATIVE_LOGW("Clatd is already running on %{public}s", v6Iface.c_str());
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -182,8 +183,7 @@ int32_t ClatManager::ClatStart(const std::string &v6Iface, int32_t netId, const 
         return ret;
     }
 
-    clatds_.emplace(
-        std::piecewise_construct, std::forward_as_tuple(v6Iface),
+    clatds_.emplace(std::piecewise_construct, std::forward_as_tuple(v6Iface),
         std::forward_as_tuple(tunFd, readSock6, writeSock6, v6Iface, nat64PrefixStr, v4Addr.address_, v6Addr.address_));
     clatds_[v6Iface].Start();
 
@@ -208,6 +208,7 @@ int32_t ClatManager::ClatStart(const std::string &v6Iface, int32_t netId, const 
 int32_t ClatManager::ClatStop(const std::string &v6Iface, NetManagerNative *netsysService)
 {
     NETNATIVE_LOGI("Stop Clatd on %{public}s", v6Iface.c_str());
+    std::lock_guard<std::mutex> guard(clatdMutex_);
     if (clatdTrackers_.find(v6Iface) == clatdTrackers_.end()) {
         NETNATIVE_LOGW("Clatd has not started on %{public}s", v6Iface.c_str());
         return NETMANAGER_ERR_OPERATION_FAILED;

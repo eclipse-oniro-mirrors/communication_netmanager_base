@@ -60,7 +60,7 @@ private:
     const std::string EnableByPassNatCmd(const std::string &v6Iface, const std::string &v6Ip);
     const std::string GetClatNetChains(const std::string &v6Iface);
     std::map<std::string, Clatd> clatds_;
-
+    std::mutex clatdMutex_;
     std::map<std::string, ClatdTracker> clatdTrackers_;
 };
 } // namespace nmd

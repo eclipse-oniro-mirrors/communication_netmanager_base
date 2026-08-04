@@ -161,11 +161,16 @@ SharingManager::SharingManager()
 
 void SharingManager::InitChildChains()
 {
-    iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, CREATE_TETHERCTRL_NAT_POSTROUTING);
-    iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, CREATE_TETHERCTRL_FORWARD);
-    iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, CREATE_TETHERCTRL_COUNTERS);
-    iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, CREATE_TETHERCTRL_MANGLE_FORWARD);
-    inited_ = true;
+    bool ret = true;
+    ret = (iptablesWrapper_->RunCommand(
+        IPTYPE_IPV4V6, CREATE_TETHERCTRL_NAT_POSTROUTING) == NetManagerStandard::NETMANAGER_SUCCESS) && ret;
+    ret = (iptablesWrapper_->RunCommand(
+        IPTYPE_IPV4V6, CREATE_TETHERCTRL_FORWARD) == NetManagerStandard::NETMANAGER_SUCCESS) && ret;
+    ret = (iptablesWrapper_->RunCommand(
+        IPTYPE_IPV4V6, CREATE_TETHERCTRL_COUNTERS) == NetManagerStandard::NETMANAGER_SUCCESS) && ret;
+    ret = (iptablesWrapper_->RunCommand(
+        IPTYPE_IPV4V6, CREATE_TETHERCTRL_MANGLE_FORWARD) == NetManagerStandard::NETMANAGER_SUCCESS) && ret;
+    inited_ = ret;
 }
 
 int32_t SharingManager::IpEnableForwarding(const std::string &requestor)
@@ -273,8 +278,8 @@ int32_t SharingManager::SetEnableIpv6(const std::string &interfaceName, const ui
     }
     std::string option = IPV6_PROC_PATH + interfaceName + "/disable_ipv6";
     const char *value = on ? ENABLE_IPV6_VALUE : DISABLE_IPV6_VALUE;
-    bool ipv6Success = WriteToFile(option.c_str(), value);
     std::lock_guard<std::mutex> guard(enableV6mutex_);
+    bool ipv6Success = WriteToFile(option.c_str(), value);
     bool isIfEnabled = true;
     if (enableV6Map_.find(interfaceName) != enableV6Map_.end()) {
         isIfEnabled = enableV6Map_[interfaceName];
@@ -328,8 +333,11 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
 
     std::string fwdCmdSet = "";
     CombineRestoreRules(FILTER_TABLE, fwdCmdSet);
-    if (interfaceForwards_.empty()) {
-        SetForwardRules(true, FORWARD_JUMP_TETHERCTRL_FORWARD, fwdCmdSet);
+    {
+        std::lock_guard<std::mutex> guard(interfaceForwardsMutex_);
+        if (interfaceForwards_.empty()) {
+            SetForwardRules(true, FORWARD_JUMP_TETHERCTRL_FORWARD, fwdCmdSet);
+        }
     }
     /*
      * Add a forward rule, when the status of packets is RELATED,
@@ -346,10 +354,12 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
      * Add a forward rule, from toIface to fromIface, goto tetherctrl_counters
      */
     SetForwardRules(true, SetTetherctrlForward3(toIface, fromIface), fwdCmdSet);
-
-    if (!interfaceForwards_.empty()) {
-        // ensure only one drop rule
-        SetForwardRules(false, SET_TETHERCTRL_FORWARD_DROP, fwdCmdSet);
+    {
+        std::lock_guard<std::mutex> guard(interfaceForwardsMutex_);
+        if (!interfaceForwards_.empty()) {
+            // ensure only one drop rule
+            SetForwardRules(false, SET_TETHERCTRL_FORWARD_DROP, fwdCmdSet);
+        }
     }
 
     /*
@@ -381,10 +391,12 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
     }
     if (fromIface.find(WLAN_IFACE_NAME) != std::string::npos ||
         fromIface.find(P2P_IFACE_NAME) != std::string::npos) {
+        std::lock_guard<std::mutex> guard(wifiShareInterfaceMutex_);
         wifiShareInterface_ = fromIface;
         EnableShareUnreachableRoute(RouteManager::UNREACHABLE_NETWORK);
     }
     AddSharingSecurityRules(fromIface, toIface);
+    std::lock_guard<std::mutex> guard(interfaceForwardsMutex_);
     interfaceForwards_.insert(fromIface + toIface);
     return 0;
 }
@@ -410,16 +422,20 @@ int32_t SharingManager::IpfwdRemoveInterfaceForward(const std::string &fromIface
     SetForwardRules(false, SetTetherctrlForward3(toIface, fromIface), fwdCmdSet);
     SetForwardRules(false, SetTetherctrlCounters1(fromIface, toIface), fwdCmdSet);
     SetForwardRules(false, SetTetherctrlCounters2(fromIface, toIface), fwdCmdSet);
-
-    interfaceForwards_.erase(fromIface + toIface);
-    if (interfaceForwards_.empty()) {
-        SetForwardRules(false, SET_TETHERCTRL_FORWARD_DROP, fwdCmdSet);
-        SetForwardRules(false, FORWARD_JUMP_TETHERCTRL_FORWARD, fwdCmdSet);
+    {
+        std::lock_guard<std::mutex> guard(interfaceForwardsMutex_);
+        interfaceForwards_.erase(fromIface + toIface);
+        if (interfaceForwards_.empty()) {
+            SetForwardRules(false, SET_TETHERCTRL_FORWARD_DROP, fwdCmdSet);
+            SetForwardRules(false, FORWARD_JUMP_TETHERCTRL_FORWARD, fwdCmdSet);
+        }
     }
-
     CombineRestoreRules(CMD_COMMIT, fwdCmdSet);
     iptablesWrapper_->RunRestoreCommands(IPTYPE_IPV4V6, fwdCmdSet);
-    onDpaSharingTraffic_.clear();
+    {
+        std::lock_guard<std::mutex> guard(onDpaSharingTrafficMutex_);
+        onDpaSharingTraffic_.clear();
+    }
 
     RouteManager::DisableSharing(fromIface, toIface);
 
@@ -427,6 +443,7 @@ int32_t SharingManager::IpfwdRemoveInterfaceForward(const std::string &fromIface
         fromIface.find(P2P_IFACE_NAME) != std::string::npos) {
         ClearForbidIpRules();
         DisableShareUnreachableRoute(RouteManager::UNREACHABLE_NETWORK);
+        std::lock_guard<std::mutex> guard(wifiShareInterfaceMutex_);
         wifiShareInterface_ = "";
     }
     RemoveSharingSecurityRules(fromIface, toIface);
@@ -459,14 +476,14 @@ int32_t SharingManager::GetNetworkSharingTraffic(const std::string &downIface, c
             std::string tempMatch = matches[i];
             NETNATIVE_LOG_D("GetNetworkSharingTraffic matche[%{public}s]", tempMatch.c_str());
             if (matches[i] == downIface && matches[i + NEXT_LIST_CORRECT_DATA] == upIface &&
-                ((i - TWO_LIST_CORRECT_DATA) >= 0)) {
+                (i >= TWO_LIST_CORRECT_DATA)) {
                 int64_t send =
                     static_cast<int64_t>(strtoul(matches[i - TWO_LIST_CORRECT_DATA].str().c_str(), nullptr, 0));
                 isFindTx = true;
                 traffic.send = send;
                 traffic.all += send;
             } else if (matches[i] == upIface && matches[i + NEXT_LIST_CORRECT_DATA] == downIface &&
-                       ((i - NET_TRAFFIC_RESULT_INDEX_OFFSET) >= 0)) {
+                       (i >= NET_TRAFFIC_RESULT_INDEX_OFFSET)) {
                 int64_t receive =
                     static_cast<int64_t>(strtoul(matches[i - TWO_LIST_CORRECT_DATA].str().c_str(), nullptr, 0));
                 isFindRx = true;
@@ -527,6 +544,7 @@ int32_t SharingManager::SetDpaCellularSharingTraffic(NetworkDpaTrafficReport &sh
     // LCOV_EXCL_STOP
     wifiSharingTrafficMsg.pkts = sharingTrafficMsg.pkts;
     wifiSharingTrafficMsg.bytes = sharingTrafficMsg.bytes;
+    std::lock_guard<std::mutex> guard(onDpaSharingTrafficMutex_);
     onDpaSharingTraffic_.push_back(wifiSharingTrafficMsg);
     return NETMANAGER_SUCCESS;
 }
@@ -534,6 +552,7 @@ int32_t SharingManager::SetDpaCellularSharingTraffic(NetworkDpaTrafficReport &sh
 void SharingManager::QueryDpaCellularSharingTraffic(const std::vector<DpaWifiTrafficReport> &onSharingTraffic,
     NetworkSharingTraffic &traffic, std::string &ifaceName)
 {
+    std::lock_guard<std::mutex> guard(onDpaSharingTrafficMutex_);
     if (onSharingTraffic.empty()) {
         traffic.send = 0;
         traffic.receive = 0;
@@ -721,7 +740,11 @@ void SharingManager::ClearForbidIpRules()
 {
     std::lock_guard<std::mutex> guard(forbidIpMutex_);
     for (auto ip : forbidIpsMap_) {
-        RouteManager::SetSharingUnreachableIpRule(RTM_DELRULE, wifiShareInterface_, ip.first, ip.second);
+        std::lock_guard<std::mutex> guard(wifiShareInterfaceMutex_);
+        if (RouteManager::SetSharingUnreachableIpRule(
+            RTM_DELRULE, wifiShareInterface_, ip.first, ip.second) != NETMANAGER_SUCCESS) {
+            NETNATIVE_LOGE("SetSharingUnreachableIpRule fail");
+        }
     }
     forbidIpsMap_.clear();
 }
@@ -729,22 +752,33 @@ void SharingManager::ClearForbidIpRules()
 int32_t SharingManager::SetInternetAccessByIpForWifiShare(
     const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName)
 {
-    if (wifiShareInterface_ == "") {
-        NETNATIVE_LOGE("wifi share network not enable");
-        return -1;
+    {
+        std::lock_guard<std::mutex> guard(wifiShareInterfaceMutex_);
+        if (wifiShareInterface_ == "") {
+            NETNATIVE_LOGE("wifi share network not enable");
+            return -1;
+        }
     }
     std::lock_guard<std::mutex> guard(forbidIpMutex_);
-    if (accessInternet && forbidIpsMap_.find(ipAddr) != forbidIpsMap_.end()) {
-        forbidIpsMap_.erase(ipAddr);
-    } else if (!accessInternet && forbidIpsMap_.find(ipAddr) == forbidIpsMap_.end()) {
-        forbidIpsMap_[ipAddr] = family;
-    } else {
+    if ((accessInternet && forbidIpsMap_.find(ipAddr) == forbidIpsMap_.end()) ||
+        (!accessInternet && forbidIpsMap_.find(ipAddr) != forbidIpsMap_.end())) {
         NETNATIVE_LOGE("ip[%{public}s] set conflict, access[%{public}d]",
             NetManagerStandard::CommonUtils::ToAnonymousIp(ipAddr, true).c_str(), accessInternet);
         return -1;
     }
+    int32_t res;
     uint16_t action = accessInternet ? RTM_DELRULE : RTM_NEWRULE;
-    int32_t res = RouteManager::SetSharingUnreachableIpRule(action, wifiShareInterface_, ipAddr, family);
+    {
+        std::lock_guard<std::mutex> guard(wifiShareInterfaceMutex_);
+        res = RouteManager::SetSharingUnreachableIpRule(action, wifiShareInterface_, ipAddr, family);
+    }
+    if (res == NETMANAGER_SUCCESS) {
+        if (accessInternet) {
+            forbidIpsMap_.erase(ipAddr);
+        } else {
+            forbidIpsMap_[ipAddr] = family;
+        }
+    }
     return res;
 }
 
