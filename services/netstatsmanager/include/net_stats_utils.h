@@ -45,6 +45,7 @@ public:
     static std::string GetIccIdBySimId(int32_t simId);
     static bool IsSimIdValid(int32_t simId);
     static bool IsSlotIdValid(int32_t slotId);
+    static bool IsTstsModeEnabled();
 #endif
 };
 }

@@ -83,6 +83,8 @@ constexpr uint32_t DAY_MILLISECONDS = 24 * 60 * 60 * 1000;
 constexpr int32_t TRAFFIC_NOTIFY_TYPE = 3;
 constexpr int32_t SLOT_0 = 0;
 constexpr int32_t SLOT_1 = 1;
+constexpr int32_t SLOT_2 = 2;  // Reserved for Tianjitong
+constexpr int32_t SLOT_3 = 3;  // New slot for third SIM card
 constexpr const char* UID = "uid";
 const std::string LIB_NET_BUNDLE_UTILS_PATH = "libnet_bundle_utils.z.so";
 constexpr uint64_t DELAY_US = 35 * 1000 * 1000;
@@ -1661,12 +1663,17 @@ void NetStatsService::UpdateBpfMapTimer()
 #ifndef UNITTEST_FORBID_FFRT
     trafficPlanFfrtQueue_->submit([this]() {
 #endif
-        int32_t primarySlotId = NetStatsUtils::GetPrimarySlotId();
-        int32_t primarySimId = Telephony::CoreServiceClient::GetInstance().GetSimId(primarySlotId);
-        int slaveSlotId = primarySlotId == 0 ? 1 : 0;
-        int32_t slaveSimId = Telephony::CoreServiceClient::GetInstance().GetSimId(slaveSlotId);
-        UpdateBpfMap(primarySimId);
-        UpdateBpfMap(slaveSimId);
+        // Update BPF map for all valid slots
+        int32_t simNum = Telephony::CoreServiceClient::GetInstance().GetMaxSimCount();
+        int8_t maxSlotId = NetStatsUtils::IsTstsModeEnabled() ? SLOT_3 : SLOT_1;
+        for (int32_t slotId = 0; slotId <= maxSlotId && slotId < simNum; ++slotId) {
+            bool hasSimCard = false;
+            Telephony::CoreServiceClient::GetInstance().HasSimCard(slotId, hasSimCard);
+            if (hasSimCard) {
+                int32_t simId = Telephony::CoreServiceClient::GetInstance().GetSimId(slotId);
+                UpdateBpfMap(simId);
+            }
+        }
 #ifndef UNITTEST_FORBID_FFRT
     });
 #endif
@@ -2338,6 +2345,12 @@ void NetStatsService::UpdateAllHistoryDateInfo()
     NETMGR_LOG_I("UpdateAllHistoryDateInfo simId0: %{public}d ,simId1: %{public}d", simId0, simId1);
     UpdateHistoryData(simId0);
     UpdateHistoryData(simId1);
+    // Slot_3 logic is controlled by persist.telephony.tsts_mode property
+    if (NetStatsUtils::IsTstsModeEnabled()) {
+        int32_t simId3 = Telephony::CoreServiceClient::GetInstance().GetSimId(SLOT_3);
+        NETMGR_LOG_I("UpdateAllHistoryDateInfo simId3: %{public}d", simId3);
+        UpdateHistoryData(simId3);
+    }
 }
 
 TrafficObserver::TrafficObserver() {}
@@ -2346,7 +2359,9 @@ TrafficObserver::~TrafficObserver() {}
 int32_t TrafficObserver::OnExceedTrafficLimits(int8_t &flag)
 {
     NETMGR_LOG_I("OnExceedTrafficLimits flag: %{public}d", flag);
-    if (flag < NET_STATS_MONTHLY_LIMIT || flag > NET_STATS_DAILY_MARK + TRAFFIC_NOTIFY_TYPE * 1) {
+    // Slot_3 flag range is controlled by persist.telephony.tsts_mode property
+    int8_t maxSlotId = NetStatsUtils::IsTstsModeEnabled() ? SLOT_3 : SLOT_1;
+    if (flag < NET_STATS_MONTHLY_LIMIT || flag > NET_STATS_DAILY_MARK + TRAFFIC_NOTIFY_TYPE * maxSlotId) {
         NETMGR_LOG_E("OnExceedTrafficLimits flag error. value: %{public}d", flag);
         return -1;
     }
@@ -2503,7 +2518,8 @@ void NetStatsService::DealNotificaiton(int32_t simId, uint8_t flag)
     bool isDualCard = false;
     if (simNum == 0) {
         return;
-    } else if (simNum == DUAL_CARD) {
+    } else if (simNum >= DUAL_CARD) {
+        // Multi-card scenario (dual card or triple card)
         isDualCard = true;
     }
  
@@ -2599,6 +2615,12 @@ void NetStatsService::SubscribeTelephonyInfo()
     int32_t ret2 = Telephony::TelephonyObserverClient::GetInstance().AddStateObserver(telephonyInfoObserver_,
         SLOT_1, TELEPHONY_EVENT_MASK, true);
     NETMGR_LOG_I("SubscribeTelephonyInfo result. ret1: %{public}d, ret2: %{public}d", ret1, ret2);
+    // Slot_3 subscription is controlled by persist.telephony.tsts_mode property
+    if (NetStatsUtils::IsTstsModeEnabled()) {
+        int32_t ret3 = Telephony::TelephonyObserverClient::GetInstance().AddStateObserver(telephonyInfoObserver_,
+            SLOT_3, TELEPHONY_EVENT_MASK, true);
+        NETMGR_LOG_I("SubscribeTelephonyInfo slot_3 result. ret3: %{public}d", ret3);
+    }
 }
 
 void TelephonyInfoObserver::OnSimStateUpdated(int32_t slotId, Telephony::CardType type,
@@ -2631,6 +2653,15 @@ void TelephonyInfoObserver::OnIccAccountUpdated()
     if (simState == Telephony::SimState::SIM_STATE_LOADED) {
         NetStatsService::GetInstance()->CommonEventSimStateChanged(
             SLOT_1, static_cast<int32_t>(Telephony::SimState::SIM_STATE_LOADED));
+    }
+    // Slot_3 logic is controlled by persist.telephony.tsts_mode property
+    if (NetStatsUtils::IsTstsModeEnabled()) {
+        Telephony::CoreServiceClient::GetInstance().GetSimState(SLOT_3, simState);
+        NETMGR_LOG_I("OnIccAccountUpdated slotId: 3, simState:%{public}d", static_cast<int32_t>(simState));
+        if (simState == Telephony::SimState::SIM_STATE_LOADED) {
+            NetStatsService::GetInstance()->CommonEventSimStateChanged(
+                SLOT_3, static_cast<int32_t>(Telephony::SimState::SIM_STATE_LOADED));
+        }
     }
 }
 #endif //SUPPORT_TRAFFIC_STATISTIC
