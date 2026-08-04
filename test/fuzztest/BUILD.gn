@@ -10,6 +10,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import("//build/test.gni")
+import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 group("fuzztest") {
   testonly = true
@@ -25,4 +27,7 @@ group("fuzztest") {
     "enablevnicnetwork_fuzzer:fuzztest",
     "netsysnetfirewall_fuzzer:fuzztest"
   ]
+  if (netmanager_base_enable_feature_net_firewall) {
+    deps += [ "nfqueue_fuzzer:fuzztest" ]
+  }
 }

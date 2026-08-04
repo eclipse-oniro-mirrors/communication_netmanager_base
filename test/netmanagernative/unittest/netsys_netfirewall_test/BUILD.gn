@@ -20,6 +20,7 @@ ohos_unittest("netsys_netfirewall_test") {
   sources = [
     "bpf_netfirewall_test.cpp",
     "netsys_netfirewall_test.cpp",
+    "nfqueue_parcel_test.cpp",
   ]
 
   include_dirs = [
@@ -44,6 +45,10 @@ ohos_unittest("netsys_netfirewall_test") {
 
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]
+  }
+
+  if (netmanager_base_enable_feature_net_firewall) {
+    defines += [ "FEATURE_NET_FIREWALL_ENABLE" ]
   }
 
   external_deps = [

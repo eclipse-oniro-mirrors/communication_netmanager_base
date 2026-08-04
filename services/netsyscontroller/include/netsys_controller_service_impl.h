@@ -1049,6 +1049,22 @@ public:
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
     int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add) override;
 #endif
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    sptr<NetsysNative::NfqCtx> NfqOpen() override;
+    int32_t NfqClose(sptr<NetsysNative::NfqCtx> &ctx) override;
+    int32_t NfqBindPf(sptr<NetsysNative::NfqCtx> &ctx, uint16_t pf) override;
+    int32_t NfqUnbindPf(sptr<NetsysNative::NfqCtx> &ctx, uint16_t pf) override;
+    sptr<NetsysNative::NfqQueue> NfqQueueCreate(sptr<NetsysNative::NfqCtx> &ctx, uint16_t queueNum) override;
+    int32_t NfqQueueDestroy(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &q) override;
+    int32_t NfqQueueSetMode(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &q,
+        uint8_t mode, uint32_t range) override;
+    int32_t NfqQueueSetMaxLen(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &q,
+        uint32_t maxLen) override;
+    int32_t NfqQueueSetFlag(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &q,
+        uint32_t mask, uint32_t flag) override;
+    int32_t NfqPktVerdictMark(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &qh,
+        uint32_t packetId, int32_t verdict, uint32_t mark) override;
+#endif
     int32_t SetInternetAccessByIpForWifiShare(
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName) override;
     int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid) override;

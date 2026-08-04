@@ -119,6 +119,10 @@ ohos_unittest("netsys_native_manager_test") {
     defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
   }
 
+  if (netmanager_base_enable_feature_net_firewall) {
+    defines += [ "FEATURE_NET_FIREWALL_ENABLE" ]
+  }
+
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
@@ -258,6 +262,10 @@ ohos_unittest("netsys_native_manager_netsys_native_service_test") {
     defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
   }
 
+  if (netmanager_base_enable_feature_net_firewall) {
+    defines += [ "FEATURE_NET_FIREWALL_ENABLE" ]
+  }
+
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
@@ -329,6 +337,10 @@ ohos_unittest("netsys_controller_test") {
     defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
   }
 
+  if (netmanager_base_enable_feature_net_firewall) {
+    defines += [ "FEATURE_NET_FIREWALL_ENABLE" ]
+  }
+
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
@@ -391,6 +403,10 @@ ohos_unittest("netsys_native_client_test") {
 
   if (netmanager_base_enable_feature_wearable_distributed_net) {
     defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
+  }
+
+  if (netmanager_base_enable_feature_net_firewall) {
+    defines += [ "FEATURE_NET_FIREWALL_ENABLE" ]
   }
 
   external_deps += [ "hilog:libhilog" ]

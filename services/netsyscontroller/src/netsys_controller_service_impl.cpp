@@ -1144,5 +1144,63 @@ int32_t NetsysControllerServiceImpl::SetInternetAccessByIpForWifiShare(
 {
     return netsysClient_->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+sptr<NetsysNative::NfqCtx> NetsysControllerServiceImpl::NfqOpen()
+{
+    return netsysClient_->NfqOpen();
+}
+
+int32_t NetsysControllerServiceImpl::NfqClose(sptr<NetsysNative::NfqCtx> &ctx)
+{
+    return netsysClient_->NfqClose(ctx);
+}
+
+int32_t NetsysControllerServiceImpl::NfqBindPf(sptr<NetsysNative::NfqCtx> &ctx, uint16_t pf)
+{
+    return netsysClient_->NfqBindPf(ctx, pf);
+}
+
+int32_t NetsysControllerServiceImpl::NfqUnbindPf(sptr<NetsysNative::NfqCtx> &ctx, uint16_t pf)
+{
+    return netsysClient_->NfqUnbindPf(ctx, pf);
+}
+
+sptr<NetsysNative::NfqQueue> NetsysControllerServiceImpl::NfqQueueCreate(sptr<NetsysNative::NfqCtx> &ctx,
+    uint16_t queueNum)
+{
+    return netsysClient_->NfqQueueCreate(ctx, queueNum);
+}
+
+int32_t NetsysControllerServiceImpl::NfqQueueDestroy(sptr<NetsysNative::NfqCtx> &ctx,
+    const sptr<NetsysNative::NfqQueue> &q)
+{
+    return netsysClient_->NfqQueueDestroy(ctx, q);
+}
+
+int32_t NetsysControllerServiceImpl::NfqQueueSetMode(sptr<NetsysNative::NfqCtx> &ctx,
+    const sptr<NetsysNative::NfqQueue> &q, uint8_t mode, uint32_t range)
+{
+    return netsysClient_->NfqQueueSetMode(ctx, q, mode, range);
+}
+
+int32_t NetsysControllerServiceImpl::NfqQueueSetMaxLen(sptr<NetsysNative::NfqCtx> &ctx,
+    const sptr<NetsysNative::NfqQueue> &q, uint32_t maxLen)
+{
+    return netsysClient_->NfqQueueSetMaxLen(ctx, q, maxLen);
+}
+
+int32_t NetsysControllerServiceImpl::NfqQueueSetFlag(sptr<NetsysNative::NfqCtx> &ctx,
+    const sptr<NetsysNative::NfqQueue> &q, uint32_t mask, uint32_t flag)
+{
+    return netsysClient_->NfqQueueSetFlag(ctx, q, mask, flag);
+}
+
+int32_t NetsysControllerServiceImpl::NfqPktVerdictMark(sptr<NetsysNative::NfqCtx> &ctx,
+    const sptr<NetsysNative::NfqQueue> &qh, uint32_t packetId, int32_t verdict, uint32_t mark)
+{
+    return netsysClient_->NfqPktVerdictMark(ctx, qh, packetId, verdict, mark);
+}
+#endif
 } // namespace NetManagerStandard
 } // namespace OHOS

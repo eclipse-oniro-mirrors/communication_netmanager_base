@@ -26,6 +26,7 @@
 #include "netsys_native_client.h"
 #ifdef FEATURE_NET_FIREWALL_ENABLE
 #include "netfirewall_callback_stub.h"
+#include "netfirewall_parcel.h"
 #endif
 
 namespace OHOS {
@@ -860,5 +861,96 @@ HWTEST_F(NetsysNativeClientTest, GetSystemNetPortStatesTest001, TestSize.Level1)
     int32_t ret = nativeClient->GetSystemNetPortStates(netPortStatesInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientNfqOpenNullProxy001, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    sptr<NetsysNative::NfqCtx> ctx = nativeClient->NfqOpen();
+    EXPECT_NE(ctx, nullptr);
+}
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientNfqCloseNullProxy001, TestSize.Level1)
+{
+    sptr<NetsysNative::NfqCtx> ctx = new (std::nothrow) NetsysNative::NfqCtx();
+    ASSERT_NE(ctx, nullptr);
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    int32_t ret = nativeClient->NfqClose(ctx);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_ERR_GET_PROXY_FAIL);
+}
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientNfqCloseNullCtx001, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    int32_t ret = nativeClient->NfqClose(ctx);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_GET_PROXY_FAIL);
+}
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientNfqBindPfNullCtx001, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    int32_t ret = nativeClient->NfqBindPf(ctx, AF_INET);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_GET_PROXY_FAIL);
+}
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientNfqUnbindPfNullCtx001, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    int32_t ret = nativeClient->NfqUnbindPf(ctx, AF_INET);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_GET_PROXY_FAIL);
+}
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientNfqQueueCreateNullCtx001, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    sptr<NetsysNative::NfqQueue> q = nativeClient->NfqQueueCreate(ctx, 0);
+    EXPECT_EQ(q, nullptr);
+}
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientNfqQueueDestroyNullQ001, TestSize.Level1)
+{
+    sptr<NetsysNative::NfqCtx> ctx = new (std::nothrow) NetsysNative::NfqCtx();
+    ASSERT_NE(ctx, nullptr);
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    int32_t ret = nativeClient->NfqQueueDestroy(ctx, nullptr);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_GET_PROXY_FAIL);
+}
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientNfqQueueSetModeNullCtx001, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    int32_t ret = nativeClient->NfqQueueSetMode(ctx, nullptr, 0, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_GET_PROXY_FAIL);
+}
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientNfqQueueSetMaxLenNullCtx001, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    int32_t ret = nativeClient->NfqQueueSetMaxLen(ctx, nullptr, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_GET_PROXY_FAIL);
+}
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientNfqQueueSetFlagNullCtx001, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    int32_t ret = nativeClient->NfqQueueSetFlag(ctx, nullptr, 0, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_GET_PROXY_FAIL);
+}
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientNfqPktVerdictMarkNullCtx001, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    int32_t ret = nativeClient->NfqPktVerdictMark(ctx, nullptr, 0, 0, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_GET_PROXY_FAIL);
+}
+#endif
 } // namespace NetManagerStandard
 } // namespace OHOS

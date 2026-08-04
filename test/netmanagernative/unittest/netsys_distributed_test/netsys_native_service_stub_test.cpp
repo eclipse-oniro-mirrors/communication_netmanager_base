@@ -598,6 +598,88 @@ public:
     {
         return 0;
     }
+
+    sptr<NetManagerStandard::NfqCtx> NfqOpen() override
+    {
+        return nullptr;
+    }
+
+    int32_t NfqClose(sptr<NetManagerStandard::NfqCtx> &ctx) override
+    {
+        (void)ctx;
+        return 0;
+    }
+
+    int32_t NfqBindPf(sptr<NetManagerStandard::NfqCtx> &ctx, uint16_t pf) override
+    {
+        (void)ctx;
+        (void)pf;
+        return 0;
+    }
+
+    int32_t NfqUnbindPf(sptr<NetManagerStandard::NfqCtx> &ctx, uint16_t pf) override
+    {
+        (void)ctx;
+        (void)pf;
+        return 0;
+    }
+
+    sptr<NetManagerStandard::NfqQueue> NfqQueueCreate(sptr<NetManagerStandard::NfqCtx> &ctx,
+        uint16_t queueNum) override
+    {
+        (void)ctx;
+        (void)queueNum;
+        return nullptr;
+    }
+
+    int32_t NfqQueueDestroy(sptr<NetManagerStandard::NfqCtx> &ctx,
+        const sptr<NetManagerStandard::NfqQueue> &q) override
+    {
+        (void)ctx;
+        (void)q;
+        return 0;
+    }
+
+    int32_t NfqQueueSetMode(sptr<NetManagerStandard::NfqCtx> &ctx,
+        const sptr<NetManagerStandard::NfqQueue> &q, uint8_t mode, uint32_t range) override
+    {
+        (void)ctx;
+        (void)q;
+        (void)mode;
+        (void)range;
+        return 0;
+    }
+
+    int32_t NfqQueueSetMaxLen(sptr<NetManagerStandard::NfqCtx> &ctx,
+        const sptr<NetManagerStandard::NfqQueue> &q, uint32_t maxLen) override
+    {
+        (void)ctx;
+        (void)q;
+        (void)maxLen;
+        return 0;
+    }
+
+    int32_t NfqQueueSetFlag(sptr<NetManagerStandard::NfqCtx> &ctx,
+        const sptr<NetManagerStandard::NfqQueue> &q, uint32_t mask, uint32_t flag) override
+    {
+        (void)ctx;
+        (void)q;
+        (void)mask;
+        (void)flag;
+        return 0;
+    }
+
+    int32_t NfqPktVerdictMark(sptr<NetManagerStandard::NfqCtx> &ctx,
+        const sptr<NetManagerStandard::NfqQueue> &qh, uint32_t packetId, int32_t verdict,
+        uint32_t mark) override
+    {
+        (void)ctx;
+        (void)qh;
+        (void)packetId;
+        (void)verdict;
+        (void)mark;
+        return 0;
+    }
 #endif
 
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override

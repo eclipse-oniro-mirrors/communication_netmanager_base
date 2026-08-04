@@ -40,6 +40,7 @@
 
 namespace OHOS {
 namespace NetsysNative {
+constexpr int32_t NFQ_MAX_QUEUES = 64;
 class NetsysNativeService : public SystemAbility, public NetsysNativeServiceStub, protected NoCopyable {
     DECLARE_SYSTEM_ABILITY(NetsysNativeService);
 
@@ -225,6 +226,19 @@ public:
                                int32_t &ownerUid) override;
     int32_t GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo) override;
     int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid) override;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    sptr<NfqCtx> NfqOpen() override;
+    int32_t NfqClose(sptr<NfqCtx> &ctx) override;
+    int32_t NfqBindPf(sptr<NfqCtx> &ctx, uint16_t pf) override;
+    int32_t NfqUnbindPf(sptr<NfqCtx> &ctx, uint16_t pf) override;
+    sptr<NfqQueue> NfqQueueCreate(sptr<NfqCtx> &ctx, uint16_t queueNum) override;
+    int32_t NfqQueueDestroy(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q) override;
+    int32_t NfqQueueSetMode(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q, uint8_t mode, uint32_t range) override;
+    int32_t NfqQueueSetMaxLen(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q, uint32_t maxLen) override;
+    int32_t NfqQueueSetFlag(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q, uint32_t mask, uint32_t flag) override;
+    int32_t NfqPktVerdictMark(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &qh,
+        uint32_t packetId, int32_t verdict, uint32_t mark) override;
+#endif
 
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;

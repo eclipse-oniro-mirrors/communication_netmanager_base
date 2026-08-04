@@ -170,6 +170,26 @@ public:
     MOCK_METHOD(int32_t, ClearFirewallRules, (NetFirewallRuleType type), (override));
     MOCK_METHOD(int32_t, RegisterNetFirewallCallback, (const sptr<INetFirewallCallback> &callback), (override));
     MOCK_METHOD(int32_t, UnRegisterNetFirewallCallback, (const sptr<INetFirewallCallback> &callback), (override));
+    MOCK_METHOD(sptr<NetManagerStandard::NfqCtx>, NfqOpen, (), (override));
+    MOCK_METHOD(int32_t, NfqClose, (sptr<NetManagerStandard::NfqCtx> &ctx), (override));
+    MOCK_METHOD(int32_t, NfqBindPf, (sptr<NetManagerStandard::NfqCtx> &ctx, uint16_t pf), (override));
+    MOCK_METHOD(int32_t, NfqUnbindPf, (sptr<NetManagerStandard::NfqCtx> &ctx, uint16_t pf), (override));
+    MOCK_METHOD(sptr<NetManagerStandard::NfqQueue>, NfqQueueCreate,
+        (sptr<NetManagerStandard::NfqCtx> &ctx, uint16_t queueNum), (override));
+    MOCK_METHOD(int32_t, NfqQueueDestroy,
+        (sptr<NetManagerStandard::NfqCtx> &ctx, const sptr<NetManagerStandard::NfqQueue> &q), (override));
+    MOCK_METHOD(int32_t, NfqQueueSetMode,
+        (sptr<NetManagerStandard::NfqCtx> &ctx, const sptr<NetManagerStandard::NfqQueue> &q,
+         uint8_t mode, uint32_t range), (override));
+    MOCK_METHOD(int32_t, NfqQueueSetMaxLen,
+        (sptr<NetManagerStandard::NfqCtx> &ctx, const sptr<NetManagerStandard::NfqQueue> &q,
+         uint32_t maxLen), (override));
+    MOCK_METHOD(int32_t, NfqQueueSetFlag,
+        (sptr<NetManagerStandard::NfqCtx> &ctx, const sptr<NetManagerStandard::NfqQueue> &q,
+         uint32_t mask, uint32_t flag), (override));
+    MOCK_METHOD(int32_t, NfqPktVerdictMark,
+        (sptr<NetManagerStandard::NfqCtx> &ctx, const sptr<NetManagerStandard::NfqQueue> &qh,
+         uint32_t packetId, int32_t verdict, uint32_t mark), (override));
 #endif
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
     MOCK_METHOD(int32_t, EnableWearableDistributedNetForward,

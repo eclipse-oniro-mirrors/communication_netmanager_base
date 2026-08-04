@@ -2287,5 +2287,112 @@ int32_t NetsysNativeClient::SetInternetAccessByIpForWifiShare(
     }
     return proxy->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+sptr<NetsysNative::NfqCtx> NetsysNativeClient::NfqOpen()
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return nullptr;
+    }
+    return proxy->NfqOpen();
+}
+
+int32_t NetsysNativeClient::NfqClose(sptr<NetsysNative::NfqCtx> &ctx)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr || ctx == nullptr) {
+        NETMGR_LOG_E("proxy or ctx is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->NfqClose(ctx);
+}
+
+int32_t NetsysNativeClient::NfqBindPf(sptr<NetsysNative::NfqCtx> &ctx, uint16_t pf)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr || ctx == nullptr) {
+        NETMGR_LOG_E("proxy or ctx is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->NfqBindPf(ctx, pf);
+}
+
+int32_t NetsysNativeClient::NfqUnbindPf(sptr<NetsysNative::NfqCtx> &ctx, uint16_t pf)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr || ctx == nullptr) {
+        NETMGR_LOG_E("proxy or ctx is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->NfqUnbindPf(ctx, pf);
+}
+
+sptr<NetsysNative::NfqQueue> NetsysNativeClient::NfqQueueCreate(sptr<NetsysNative::NfqCtx> &ctx, uint16_t queueNum)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr || ctx == nullptr) {
+        NETMGR_LOG_E("proxy or ctx is nullptr");
+        return nullptr;
+    }
+    return proxy->NfqQueueCreate(ctx, queueNum);
+}
+
+int32_t NetsysNativeClient::NfqQueueDestroy(sptr<NetsysNative::NfqCtx> &ctx,
+    const sptr<NetsysNative::NfqQueue> &q)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr || ctx == nullptr || q == nullptr) {
+        NETMGR_LOG_E("proxy or ctx or q is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->NfqQueueDestroy(ctx, q);
+}
+
+int32_t NetsysNativeClient::NfqQueueSetMode(sptr<NetsysNative::NfqCtx> &ctx,
+    const sptr<NetsysNative::NfqQueue> &q, uint8_t mode, uint32_t range)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr || ctx == nullptr || q == nullptr) {
+        NETMGR_LOG_E("proxy or ctx or q is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->NfqQueueSetMode(ctx, q, mode, range);
+}
+
+int32_t NetsysNativeClient::NfqQueueSetMaxLen(sptr<NetsysNative::NfqCtx> &ctx,
+    const sptr<NetsysNative::NfqQueue> &q, uint32_t maxLen)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr || ctx == nullptr || q == nullptr) {
+        NETMGR_LOG_E("proxy or ctx or q is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->NfqQueueSetMaxLen(ctx, q, maxLen);
+}
+
+int32_t NetsysNativeClient::NfqQueueSetFlag(sptr<NetsysNative::NfqCtx> &ctx,
+    const sptr<NetsysNative::NfqQueue> &q, uint32_t mask, uint32_t flag)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr || ctx == nullptr || q == nullptr) {
+        NETMGR_LOG_E("proxy or ctx or q is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->NfqQueueSetFlag(ctx, q, mask, flag);
+}
+
+int32_t NetsysNativeClient::NfqPktVerdictMark(sptr<NetsysNative::NfqCtx> &ctx,
+    const sptr<NetsysNative::NfqQueue> &qh, uint32_t packetId, int32_t verdict, uint32_t mark)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr || ctx == nullptr || qh == nullptr) {
+        NETMGR_LOG_E("proxy or ctx or qh is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->NfqPktVerdictMark(ctx, qh, packetId, verdict, mark);
+}
+#endif
 } // namespace NetManagerStandard
 } // namespace OHOS

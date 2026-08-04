@@ -25,6 +25,9 @@
 #include "net_dns_result_callback_stub.h"
 #include "netnative_log_wrapper.h"
 #include "mock_netsys_native_service_stub.h"
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+#include "netfirewall_parcel.h"
+#endif
 
 namespace OHOS {
 namespace NetsysNative {
@@ -1570,5 +1573,88 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetDpaCellularSharingTraffic001, TestSi
     int32_t ret = notifyStub_->CmdSetDpaCellularSharingTraffic(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+HWTEST_F(NetsysNativeServiceStubTest, CmdNfqOpen001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdNfqOpen(data, reply);
+    DTEST_LOG << "CmdNfqOpen001" << ret << std::endl;
+    EXPECT_TRUE(ret == ERR_FLATTEN_OBJECT || ret == ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNfqCloseInvalid001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdNfqClose(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNfqBindPfInvalid001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdNfqBindPf(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNfqUnbindPfInvalid001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdNfqUnbindPf(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNfqQueueCreateInvalid001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdNfqQueueCreate(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNfqQueueDestroyInvalid001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdNfqQueueDestroy(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNfqQueueSetModeInvalid001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdNfqQueueSetMode(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNfqQueueSetMaxLenInvalid001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdNfqQueueSetMaxLen(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNfqQueueSetFlagInvalid001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdNfqQueueSetFlag(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNfqPktVerdictMarkInvalid001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdNfqPktVerdictMark(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+#endif
 } // namespace NetsysNative
 } // namespace OHOS
