@@ -896,7 +896,7 @@ bool DnsResolvListenInternal::ProcGetKeyLengthForQueryAddr(uint8_t addrSize,
     PostDnsQueryParam &queryParam, const std::string &data, int index)
 {
     if (addrSize > 0) {
-        uint32_t allSize = static_cast<uint32_t>(index + sizeof(AddrInfo) * queryParam.addrSize);
+        uint32_t allSize = static_cast<uint32_t>(index + sizeof(AddrInfo) * addrSize);
         if (allSize > data.size()) {
             return false;
         }
