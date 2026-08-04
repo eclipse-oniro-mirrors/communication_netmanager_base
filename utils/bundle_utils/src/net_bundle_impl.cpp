@@ -157,7 +157,7 @@ std::optional<SampleBundleInfo> NetBundleImpl::ObtainBundleInfoForUid(uint32_t u
     }
     std::string bundleName;
     if (bundleMgrProxy->GetNameForUid(uid, bundleName) != ERR_OK) {
-        NETMGR_LOG_E("ObtainBundleInfoForUid Failed to GetBundleName. uid[%{public}u]", uid);
+        NETMGR_LOG_D("ObtainBundleInfoForUid Failed to GetBundleName. uid[%{public}u]", uid);
         return std::nullopt;
     }
     int32_t userId;
@@ -190,7 +190,6 @@ int32_t NetBundleImpl::GetActivatedOsAccountId(int32_t &userId)
         return NETMANAGER_ERR_INTERNAL;
     }
     userId = activatedOsAccountIds[0];
-    NETMGR_LOG_I("QueryActiveOsAccountIds is %{public}d", userId);
     return NETMANAGER_SUCCESS;
 }
 
