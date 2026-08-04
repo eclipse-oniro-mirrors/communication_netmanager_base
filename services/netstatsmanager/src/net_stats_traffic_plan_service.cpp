@@ -405,8 +405,8 @@ void NetStatsTrafficPlanService::UpdateNetStatsToMapFromDB(int32_t simId)
         int32_t curSumId = result[i].simId;
         if (simId == curSumId && trafficPlanInfoMap_.find(simId) != trafficPlanInfoMap_.end()) {
             trafficPlanInfoMap_[curSumId]->lastMonAlertTime = result[i].monWarningDate;
-            trafficPlanInfoMap_[curSumId]->lastMonNotifyTime = result[i].dayNoticeDate;
-            trafficPlanInfoMap_[curSumId]->lastDayNotifyTime = result[i].monNoticeDate;
+            trafficPlanInfoMap_[curSumId]->lastMonNotifyTime = result[i].monNoticeDate;
+            trafficPlanInfoMap_[curSumId]->lastDayNotifyTime = result[i].dayNoticeDate;
             trafficPlanInfoMap_[curSumId]->isCanNotifyMonthlyLimit =
                 static_cast<bool>(result[i].monWarningState);
             trafficPlanInfoMap_[curSumId]->isCanNotifyMonthlyMark = static_cast<bool>(result[i].monNoticeState);
