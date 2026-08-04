@@ -1047,6 +1047,22 @@ public:
     int32_t SetInternetAccessByIpForWifiShare(
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName);
     int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid);
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    sptr<NetsysNative::NfqCtx> NfqOpen();
+    int32_t NfqClose(sptr<NetsysNative::NfqCtx> &ctx);
+    int32_t NfqBindPf(sptr<NetsysNative::NfqCtx> &ctx, uint16_t pf);
+    int32_t NfqUnbindPf(sptr<NetsysNative::NfqCtx> &ctx, uint16_t pf);
+    sptr<NetsysNative::NfqQueue> NfqQueueCreate(sptr<NetsysNative::NfqCtx> &ctx, uint16_t queueNum);
+    int32_t NfqQueueDestroy(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &q);
+    int32_t NfqQueueSetMode(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &q,
+        uint8_t mode, uint32_t range);
+    int32_t NfqQueueSetMaxLen(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &q,
+        uint32_t maxLen);
+    int32_t NfqQueueSetFlag(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &q,
+        uint32_t mask, uint32_t flag);
+    int32_t NfqPktVerdictMark(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &qh,
+        uint32_t packetId, int32_t verdict, uint32_t mark);
+#endif
 
 private:
     NetsysController();

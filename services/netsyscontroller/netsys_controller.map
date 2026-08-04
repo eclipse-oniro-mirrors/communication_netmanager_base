@@ -87,6 +87,16 @@
       "OHOS::NetManagerStandard::NetsysController::IpEnableForwarding(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetsysController::IpfwdAddInterfaceForward(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetsysController::IpfwdRemoveInterfaceForward(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetsysController::NfqBindPf(OHOS::sptr<OHOS::NetManagerStandard::NfqCtx>&, unsigned short)";
+      "OHOS::NetManagerStandard::NetsysController::NfqClose(OHOS::sptr<OHOS::NetManagerStandard::NfqCtx>&)";
+      "OHOS::NetManagerStandard::NetsysController::NfqOpen()";
+      "OHOS::NetManagerStandard::NetsysController::NfqPktVerdictMark(OHOS::sptr<OHOS::NetManagerStandard::NfqCtx>&, OHOS::sptr<OHOS::NetManagerStandard::NfqQueue> const&, unsigned int, int, unsigned int)";
+      "OHOS::NetManagerStandard::NetsysController::NfqQueueCreate(OHOS::sptr<OHOS::NetManagerStandard::NfqCtx>&, unsigned short)";
+      "OHOS::NetManagerStandard::NetsysController::NfqQueueDestroy(OHOS::sptr<OHOS::NetManagerStandard::NfqCtx>&, OHOS::sptr<OHOS::NetManagerStandard::NfqQueue> const&)";
+      "OHOS::NetManagerStandard::NetsysController::NfqQueueSetFlag(OHOS::sptr<OHOS::NetManagerStandard::NfqCtx>&, OHOS::sptr<OHOS::NetManagerStandard::NfqQueue> const&, unsigned int, unsigned int)";
+      "OHOS::NetManagerStandard::NetsysController::NfqQueueSetMaxLen(OHOS::sptr<OHOS::NetManagerStandard::NfqCtx>&, OHOS::sptr<OHOS::NetManagerStandard::NfqQueue> const&, unsigned int)";
+      "OHOS::NetManagerStandard::NetsysController::NfqQueueSetMode(OHOS::sptr<OHOS::NetManagerStandard::NfqCtx>&, OHOS::sptr<OHOS::NetManagerStandard::NfqQueue> const&, unsigned char, unsigned int)";
+      "OHOS::NetManagerStandard::NetsysController::NfqUnbindPf(OHOS::sptr<OHOS::NetManagerStandard::NfqCtx>&, unsigned short)";
       "OHOS::NetManagerStandard::NetsysController::NetworkAddInterface(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::NetManagerStandard::NetBearType)";
       "OHOS::NetManagerStandard::NetsysController::NetworkAddRoute(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool)";
       "OHOS::NetManagerStandard::NetsysController::NetworkAddUids(int, std::__h::vector<int, std::__h::allocator<int>> const&, std::__h::vector<int, std::__h::allocator<int>> const&, unsigned int)";

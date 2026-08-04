@@ -69,6 +69,9 @@ private:
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
     void InitEnterpriseMap();
 #endif
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    void InitNfQueueInterfaceMap();
+#endif
     int32_t CmdSetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdCreateNetworkCache(MessageParcel &data, MessageParcel &reply);
@@ -215,6 +218,19 @@ private:
     int32_t CmdGetConnectOwnerUid(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetSystemNetPortStates(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetIpv6UidBlackList(MessageParcel &data, MessageParcel &reply);
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    int32_t CmdNfqOpen(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNfqClose(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNfqBindPf(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNfqUnbindPf(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNfqQueueCreate(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNfqQueueDestroy(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNfqQueueSetMode(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNfqQueueSetMaxLen(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNfqQueueSetFlag(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNfqPktVerdictMark(MessageParcel &data, MessageParcel &reply);
+#endif
 
 private:
     std::vector<int32_t> uids_;

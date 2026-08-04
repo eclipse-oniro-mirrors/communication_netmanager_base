@@ -62,6 +62,9 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitNetVirnicInterfaceMap();
     InitNetStatsInterfaceMap();
     InitStaticIpv6ToInterfaceMap();
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    InitNfQueueInterfaceMap();
+#endif
 #ifdef SUPPORT_SYSVPN
     InitVpnOpToInterfaceMap();
 #endif // SUPPORT_SYSVPN
@@ -408,6 +411,32 @@ void NetsysNativeServiceStub::InitNetStatsInterfaceMap()
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_SYSTEM_NET_PORT_STATES)] =
         &NetsysNativeServiceStub::CmdGetSystemNetPortStates;
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+void NetsysNativeServiceStub::InitNfQueueInterfaceMap()
+{
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_OPEN)] =
+        &NetsysNativeServiceStub::CmdNfqOpen;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_CLOSE)] =
+        &NetsysNativeServiceStub::CmdNfqClose;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_BIND_PF)] =
+        &NetsysNativeServiceStub::CmdNfqBindPf;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_UNBIND_PF)] =
+        &NetsysNativeServiceStub::CmdNfqUnbindPf;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_QUEUE_CREATE)] =
+        &NetsysNativeServiceStub::CmdNfqQueueCreate;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_QUEUE_DESTROY)] =
+        &NetsysNativeServiceStub::CmdNfqQueueDestroy;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_QUEUE_SET_MODE)] =
+        &NetsysNativeServiceStub::CmdNfqQueueSetMode;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_QUEUE_SET_MAX_LEN)] =
+        &NetsysNativeServiceStub::CmdNfqQueueSetMaxLen;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_QUEUE_SET_FLAG)] =
+        &NetsysNativeServiceStub::CmdNfqQueueSetFlag;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_PKT_VERDICT_MARK)] =
+        &NetsysNativeServiceStub::CmdNfqPktVerdictMark;
+}
+#endif
 
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
 void NetsysNativeServiceStub::InitEnterpriseMap()
@@ -3007,5 +3036,230 @@ int32_t NetsysNativeServiceStub::CmdSetInternetAccessByIpForWifiShare(MessagePar
  
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+int32_t NetsysNativeServiceStub::CmdNfqOpen(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NfqCtx> ctx = NfqOpen();
+    if (ctx == nullptr) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!ctx->Marshalling(reply)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteFileDescriptor(ctx->fd)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdNfqClose(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NfqCtx> ctx = NfqCtx::Unmarshalling(data);
+    if (ctx == nullptr) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    ctx->fd = data.ReadFileDescriptor();
+    int32_t ret = NfqClose(ctx);
+    if (!reply.WriteInt32(ret)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdNfqBindPf(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NfqCtx> ctx = NfqCtx::Unmarshalling(data);
+    if (ctx == nullptr) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    ctx->fd = data.ReadFileDescriptor();
+    if (ctx->fd == -1) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    uint16_t pf = data.ReadUint16();
+    int32_t ret = NfqBindPf(ctx, pf);
+    if (!ctx->Marshalling(reply)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteFileDescriptor(ctx->fd)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteInt32(ret)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdNfqUnbindPf(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NfqCtx> ctx = NfqCtx::Unmarshalling(data);
+    if (ctx == nullptr) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    ctx->fd = data.ReadFileDescriptor();
+    uint16_t pf = data.ReadUint16();
+    int32_t ret = NfqUnbindPf(ctx, pf);
+    if (!ctx->Marshalling(reply)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteFileDescriptor(ctx->fd)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteInt32(ret)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdNfqQueueCreate(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NfqCtx> ctx = NfqCtx::Unmarshalling(data);
+    if (ctx == nullptr) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    ctx->fd = data.ReadFileDescriptor();
+    uint16_t queueNum = data.ReadUint16();
+
+    sptr<NfqQueue> q = NfqQueueCreate(ctx, queueNum);
+    if (q == nullptr) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!ctx->Marshalling(reply)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteFileDescriptor(ctx->fd)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!q->Marshalling(reply)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdNfqQueueDestroy(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NfqCtx> ctx = NfqCtx::Unmarshalling(data);
+    sptr<NfqQueue> q = NfqQueue::Unmarshalling(data);
+    if (q == nullptr || ctx == nullptr) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    ctx->fd = data.ReadFileDescriptor();
+    int32_t ret = NfqQueueDestroy(ctx, q);
+    if (!ctx->Marshalling(reply)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteFileDescriptor(ctx->fd)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteInt32(ret)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdNfqQueueSetMode(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NfqCtx> ctx = NfqCtx::Unmarshalling(data);
+    sptr<NfqQueue> q = NfqQueue::Unmarshalling(data);
+    if (q == nullptr || ctx == nullptr) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    ctx->fd = data.ReadFileDescriptor();
+    uint8_t mode = data.ReadUint8();
+    uint32_t range = data.ReadUint32();
+    int32_t ret = NfqQueueSetMode(ctx, q, mode, range);
+    if (!ctx->Marshalling(reply)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteFileDescriptor(ctx->fd)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteInt32(ret)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdNfqQueueSetMaxLen(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NfqCtx> ctx = NfqCtx::Unmarshalling(data);
+    sptr<NfqQueue> q = NfqQueue::Unmarshalling(data);
+    if (q == nullptr || ctx == nullptr) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    ctx->fd = data.ReadFileDescriptor();
+    uint32_t maxLen = data.ReadUint32();
+    int32_t ret = NfqQueueSetMaxLen(ctx, q, maxLen);
+    if (!ctx->Marshalling(reply)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteFileDescriptor(ctx->fd)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteInt32(ret)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdNfqQueueSetFlag(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NfqCtx> ctx = NfqCtx::Unmarshalling(data);
+    sptr<NfqQueue> q = NfqQueue::Unmarshalling(data);
+    if (q == nullptr || ctx == nullptr) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    ctx->fd = data.ReadFileDescriptor();
+    uint32_t mask = data.ReadUint32();
+    uint32_t flag = data.ReadUint32();
+    int32_t ret = NfqQueueSetFlag(ctx, q, mask, flag);
+    if (!ctx->Marshalling(reply)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteFileDescriptor(ctx->fd)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteInt32(ret)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdNfqPktVerdictMark(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NfqCtx> ctx = NfqCtx::Unmarshalling(data);
+    sptr<NfqQueue> qh = NfqQueue::Unmarshalling(data);
+    if (qh == nullptr || ctx == nullptr) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    ctx->fd = data.ReadFileDescriptor();
+    if (ctx->fd < 0) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    uint32_t packetId = 0;
+    if (!data.ReadUint32(packetId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t verdict = 0;
+    if (!data.ReadInt32(verdict)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    uint32_t mark = 0;
+    if (!data.ReadUint32(mark)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret = NfqPktVerdictMark(ctx, qh, packetId, verdict, mark);
+    if (!ctx->Marshalling(reply)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteFileDescriptor(ctx->fd)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteInt32(ret)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+#endif
 } // namespace NetsysNative
 } // namespace OHOS

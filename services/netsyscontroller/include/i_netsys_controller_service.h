@@ -1062,6 +1062,22 @@ public:
                                        int32_t &ownerUid) = 0;
     virtual int32_t GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo) = 0;
     virtual int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid) = 0;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    virtual sptr<NetsysNative::NfqCtx> NfqOpen() = 0;
+    virtual int32_t NfqClose(sptr<NetsysNative::NfqCtx> &ctx) = 0;
+    virtual int32_t NfqBindPf(sptr<NetsysNative::NfqCtx> &ctx, uint16_t pf) = 0;
+    virtual int32_t NfqUnbindPf(sptr<NetsysNative::NfqCtx> &ctx, uint16_t pf) = 0;
+    virtual sptr<NetsysNative::NfqQueue> NfqQueueCreate(sptr<NetsysNative::NfqCtx> &ctx, uint16_t queueNum) = 0;
+    virtual int32_t NfqQueueDestroy(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &q) = 0;
+    virtual int32_t NfqQueueSetMode(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &q,
+        uint8_t mode, uint32_t range) = 0;
+    virtual int32_t NfqQueueSetMaxLen(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &q,
+        uint32_t maxLen) = 0;
+    virtual int32_t NfqQueueSetFlag(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &q,
+        uint32_t mask, uint32_t flag) = 0;
+    virtual int32_t NfqPktVerdictMark(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &qh,
+        uint32_t packetId, int32_t verdict, uint32_t mark) = 0;
+#endif
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

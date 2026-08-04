@@ -40,6 +40,9 @@
 #include "netsys_net_diag_data.h"
 #include "netsys_controller_service_impl.h"
 #include "common_mock_netsys_service.h"
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+#include "netfirewall_parcel.h"
+#endif
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -2085,5 +2088,82 @@ HWTEST_F(NetsysControllerTest, GetSystemNetPortStatesTest001, TestSize.Level1)
     ret = netsysController->GetSystemNetPortStates(netPortStatesInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+HWTEST_F(NetsysControllerTest, NetsysControllerNfqOpenNullService001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_ = nullptr;
+    sptr<NetsysNative::NfqCtx> ctx = netsysController->NfqOpen();
+    EXPECT_EQ(ctx, nullptr);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerNfqCloseNullCtx001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    int32_t ret = netsysController->NfqClose(ctx);
+    EXPECT_EQ(ret, NetManagerStandard::ERR_INVALID_DATA);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerNfqCloseNullService001, TestSize.Level1)
+{
+    sptr<NetsysNative::NfqCtx> ctx = new (std::nothrow) NetsysNative::NfqCtx();
+    ASSERT_NE(ctx, nullptr);
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_ = nullptr;
+    int32_t ret = netsysController->NfqClose(ctx);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerNfqQueueCreateNullCtx001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    sptr<NetsysNative::NfqQueue> q = netsysController->NfqQueueCreate(ctx, 0);
+    EXPECT_EQ(q, nullptr);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerNfqQueueDestroyNullQ001, TestSize.Level1)
+{
+    sptr<NetsysNative::NfqCtx> ctx = new (std::nothrow) NetsysNative::NfqCtx();
+    ASSERT_NE(ctx, nullptr);
+    auto netsysController = std::make_shared<NetsysController>();
+    int32_t ret = netsysController->NfqQueueDestroy(ctx, nullptr);
+    EXPECT_EQ(ret, NetManagerStandard::ERR_INVALID_DATA);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerNfqQueueSetModeNullCtx001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    int32_t ret = netsysController->NfqQueueSetMode(ctx, nullptr, 0, 0);
+    EXPECT_EQ(ret, NetManagerStandard::ERR_INVALID_DATA);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerNfqQueueSetMaxLenNullCtx001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    int32_t ret = netsysController->NfqQueueSetMaxLen(ctx, nullptr, 0);
+    EXPECT_EQ(ret, NetManagerStandard::ERR_INVALID_DATA);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerNfqQueueSetFlagNullCtx001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    int32_t ret = netsysController->NfqQueueSetFlag(ctx, nullptr, 0, 0);
+    EXPECT_EQ(ret, NetManagerStandard::ERR_INVALID_DATA);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerNfqPktVerdictMarkNullCtx001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    int32_t ret = netsysController->NfqPktVerdictMark(ctx, nullptr, 0, 0, 0);
+    EXPECT_EQ(ret, NetManagerStandard::ERR_INVALID_DATA);
+}
+#endif
 } // namespace NetManagerStandard
 } // namespace OHOS

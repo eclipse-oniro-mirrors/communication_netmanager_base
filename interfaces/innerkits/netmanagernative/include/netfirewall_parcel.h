@@ -40,6 +40,7 @@ constexpr uint8_t FAMILY_IPV6 = 2;
 constexpr uint8_t SINGLE_IP = 1;
 constexpr uint8_t MULTIPLE_IP = 2;
 constexpr int32_t IPV6_ARRAY_SIZE = 16;
+constexpr uint32_t NFQ_MAX_QUEUES = 64;
 
 constexpr const char *COMMA = ",";
 constexpr const char *NET_FIREWALL_IS_OPEN = "isOpen";
@@ -254,6 +255,20 @@ struct InterceptRecord : public Parcelable {
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static sptr<InterceptRecord> Unmarshalling(Parcel &parcel);
+};
+
+struct NfqQueue : public Parcelable {
+    uint16_t queueNum;
+    virtual bool Marshalling(Parcel &parcel) const override;
+    static sptr<NfqQueue> Unmarshalling(Parcel &parcel);
+};
+
+struct NfqCtx : public Parcelable {
+    int32_t fd;
+    uint32_t seq;
+    sptr<NfqQueue> queues[NFQ_MAX_QUEUES];
+    virtual bool Marshalling(Parcel &parcel) const override;
+    static sptr<NfqCtx> Unmarshalling(Parcel &parcel);
 };
 
 class NetFirewallUtils {

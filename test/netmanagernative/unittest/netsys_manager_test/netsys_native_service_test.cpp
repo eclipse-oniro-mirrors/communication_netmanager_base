@@ -32,6 +32,9 @@
 #include "dns_config_client.h"
 #include "net_stats_constants.h"
 #include "netsys_native_service.h"
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+#include "netfirewall_parcel.h"
+#endif
 
 namespace OHOS {
 namespace NetsysNative {
@@ -1162,5 +1165,201 @@ HWTEST_F(NetsysNativeServiceTest, StopClat001, TestSize.Level1)
     auto ret = instance_->StopClat(ifname);
     EXPECT_GE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+HWTEST_F(NetsysNativeServiceTest, NfqOpenTest001, TestSize.Level1)
+{
+    auto ctx = instance_->NfqOpen();
+    if (ctx != nullptr) {
+        instance_->NfqClose(ctx);
+    }
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NfqCloseNullCtx001, TestSize.Level1)
+{
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    int32_t ret = instance_->NfqClose(ctx);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NfqBindPfNullCtx001, TestSize.Level1)
+{
+    sptr<NetManagerStandard::NfqCtx> ctx = nullptr;
+    int32_t ret = instance_->NfqBindPf(ctx, AF_INET);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NfqUnbindPfNullCtx001, TestSize.Level1)
+{
+    sptr<NetManagerStandard::NfqCtx> ctx = nullptr;
+    int32_t ret = instance_->NfqUnbindPf(ctx, AF_INET);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NfqQueueCreateNullCtx001, TestSize.Level1)
+{
+    sptr<NetManagerStandard::NfqCtx> ctx = nullptr;
+    sptr<NetManagerStandard::NfqQueue> q = instance_->NfqQueueCreate(ctx, 0);
+    EXPECT_EQ(q, nullptr);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NfqQueueDestroyNullQ001, TestSize.Level1)
+{
+    sptr<NetManagerStandard::NfqCtx> ctx = new (std::nothrow) NetManagerStandard::NfqCtx();
+    ASSERT_NE(ctx, nullptr);
+    int32_t ret = instance_->NfqQueueDestroy(ctx, nullptr);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NfqQueueSetModeNullCtx001, TestSize.Level1)
+{
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    int32_t ret = instance_->NfqQueueSetMode(ctx, nullptr, 0, 0);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NfqQueueSetMaxLenNullCtx001, TestSize.Level1)
+{
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    int32_t ret = instance_->NfqQueueSetMaxLen(ctx, nullptr, 0);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NfqQueueSetFlagNullCtx001, TestSize.Level1)
+{
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    int32_t ret = instance_->NfqQueueSetFlag(ctx, nullptr, 0, 0);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NfqPktVerdictMarkNullCtx001, TestSize.Level1)
+{
+    sptr<NetsysNative::NfqCtx> ctx = nullptr;
+    int32_t ret = instance_->NfqPktVerdictMark(ctx, nullptr, 0, 0, 0);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NfqFullFlowTest001, TestSize.Level1)
+{
+    auto ctx = instance_->NfqOpen();
+    ASSERT_NE(ctx, nullptr);
+    int32_t ret = instance_->NfqBindPf(ctx, AF_INET);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = instance_->NfqUnbindPf(ctx, AF_INET);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    auto q = instance_->NfqQueueCreate(ctx, 1);
+    ASSERT_NE(q, nullptr);
+    EXPECT_EQ(q->queueNum, 1);
+
+    ret = instance_->NfqQueueSetMode(ctx, q, NFQ_COPY_PACKET, 0xFFFF);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->NfqQueueSetMaxLen(ctx, q, 1024);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->NfqQueueSetFlag(ctx, q, 1, 1);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->NfqPktVerdictMark(ctx, q, 1, 1, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->NfqPktVerdictMark(ctx, q, 1, 1, 0x12345678);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->NfqQueueDestroy(ctx, q);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->NfqClose(ctx);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NfqRegisterQueueFullTest001, TestSize.Level1)
+{
+    auto ctx = instance_->NfqOpen();
+    ASSERT_NE(ctx, nullptr);
+    std::vector<sptr<NetManagerStandard::NfqQueue>> dummyQueues;
+    for (uint32_t i = 0; i < NetManagerStandard::NFQ_MAX_QUEUES; i++) {
+        auto q = new (std::nothrow) NetManagerStandard::NfqQueue();
+        ASSERT_NE(q, nullptr);
+        q->queueNum = static_cast<uint16_t>(i + 100);
+        ctx->queues[i] = q;
+        dummyQueues.push_back(q);
+    }
+    auto qExtra = instance_->NfqQueueCreate(ctx, 200);
+    EXPECT_EQ(qExtra, nullptr);
+    instance_->NfqClose(ctx);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NfqUnregisterQueueNotFoundTest001, TestSize.Level1)
+{
+    auto ctx = instance_->NfqOpen();
+    ASSERT_NE(ctx, nullptr);
+    auto q = instance_->NfqQueueCreate(ctx, 2);
+    ASSERT_NE(q, nullptr);
+
+    auto qNotRegistered = new (std::nothrow) NetManagerStandard::NfqQueue();
+    ASSERT_NE(qNotRegistered, nullptr);
+    qNotRegistered->queueNum = 3;
+    int32_t ret = instance_->NfqQueueDestroy(ctx, qNotRegistered);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->NfqQueueDestroy(ctx, q);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->NfqClose(ctx);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NfqCloseWithQueuesTest001, TestSize.Level1)
+{
+    auto ctx = instance_->NfqOpen();
+    ASSERT_NE(ctx, nullptr);
+    auto q = instance_->NfqQueueCreate(ctx, 4);
+    ASSERT_NE(q, nullptr);
+    int32_t ret = instance_->NfqClose(ctx);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NfqInvalidFdTest001, TestSize.Level1)
+{
+    sptr<NetManagerStandard::NfqCtx> ctx = new (std::nothrow) NetManagerStandard::NfqCtx();
+    ASSERT_NE(ctx, nullptr);
+    ctx->fd = -1;
+    ctx->seq = 0;
+
+    int32_t ret = instance_->NfqBindPf(ctx, AF_INET);
+    EXPECT_EQ(ret, -1);
+
+    ret = instance_->NfqUnbindPf(ctx, AF_INET);
+    EXPECT_EQ(ret, -1);
+
+    auto q = instance_->NfqQueueCreate(ctx, 5);
+    EXPECT_EQ(q, nullptr);
+
+    sptr<NetManagerStandard::NfqQueue> qMock = new (std::nothrow) NetManagerStandard::NfqQueue();
+    ASSERT_NE(qMock, nullptr);
+    qMock->queueNum = 5;
+
+    ret = instance_->NfqQueueSetMode(ctx, qMock, NFQ_COPY_PACKET, 0xFFFF);
+    EXPECT_EQ(ret, -1);
+
+    ret = instance_->NfqQueueSetMaxLen(ctx, qMock, 1024);
+    EXPECT_EQ(ret, -1);
+
+    ret = instance_->NfqQueueSetFlag(ctx, qMock, 1, 1);
+    EXPECT_EQ(ret, -1);
+
+    ret = instance_->NfqPktVerdictMark(ctx, qMock, 1, 1, 0);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->NfqQueueDestroy(ctx, qMock);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->NfqClose(ctx);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+#endif
 } // namespace NetsysNative
 } // namespace OHOS

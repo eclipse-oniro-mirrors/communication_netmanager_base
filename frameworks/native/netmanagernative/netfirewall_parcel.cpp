@@ -527,5 +527,81 @@ sptr<InterceptRecord> InterceptRecord::Unmarshalling(Parcel &parcel)
     }
     return ptr;
 }
+
+bool NfqCtx::Marshalling(Parcel &parcel) const
+{
+    if (!parcel.WriteUint32(seq)) {
+        return false;
+    }
+    uint32_t count = 0;
+    for (uint32_t i = 0; i < NFQ_MAX_QUEUES; i++) {
+        if (queues[i] != nullptr) {
+            count++;
+        }
+    }
+    if (!parcel.WriteUint32(count)) {
+        return false;
+    }
+    for (uint32_t i = 0; i < NFQ_MAX_QUEUES; i++) {
+        if (queues[i] != nullptr) {
+            if (!parcel.WriteUint32(i)) {
+                return false;
+            }
+            if (!queues[i]->Marshalling(parcel)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+sptr<NfqCtx> NfqCtx::Unmarshalling(Parcel &parcel)
+{
+    sptr<NfqCtx> ctx = new (std::nothrow) NfqCtx();
+    if (ctx == nullptr) {
+        return nullptr;
+    }
+    if (!parcel.ReadUint32(ctx->seq)) {
+        return nullptr;
+    }
+    uint32_t count = 0;
+    if (!parcel.ReadUint32(count)) {
+        return nullptr;
+    }
+    for (uint32_t i = 0; i < count; i++) {
+        uint32_t index = 0;
+        if (!parcel.ReadUint32(index)) {
+            return nullptr;
+        }
+        if (index >= NFQ_MAX_QUEUES) {
+            return nullptr;
+        }
+        ctx->queues[index] = NfqQueue::Unmarshalling(parcel);
+        if (ctx->queues[index] == nullptr) {
+            return nullptr;
+        }
+    }
+    return ctx;
+}
+
+bool NfqQueue::Marshalling(Parcel &parcel) const
+{
+    if (!parcel.WriteUint16(queueNum)) {
+        return false;
+    }
+    return true;
+}
+
+sptr<NfqQueue> NfqQueue::Unmarshalling(Parcel &parcel)
+{
+    sptr<NfqQueue> q = new (std::nothrow) NfqQueue();
+    if (q == nullptr) {
+        return nullptr;
+    }
+    if (!parcel.ReadUint16(q->queueNum)) {
+        return nullptr;
+    }
+    return q;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -1919,5 +1919,136 @@ int32_t NetsysController::GetSystemNetPortStates(NetPortStatesInfo &netPortState
     // LCOV_EXCL_STOP
     return netsysService_->GetSystemNetPortStates(netPortStatesInfo);
 }
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+sptr<NetsysNative::NfqCtx> NetsysController::NfqOpen()
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return nullptr;
+    }
+    return netsysService_->NfqOpen();
+}
+
+int32_t NetsysController::NfqClose(sptr<NetsysNative::NfqCtx> &ctx)
+{
+    if (ctx == nullptr) {
+        NETMGR_LOG_E("NfqClose ctx is nullptr");
+        return ERR_INVALID_DATA;
+    }
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NfqClose(ctx);
+}
+
+int32_t NetsysController::NfqBindPf(sptr<NetsysNative::NfqCtx> &ctx, uint16_t pf)
+{
+    if (ctx == nullptr) {
+        NETMGR_LOG_E("NfqBindPf ctx is nullptr");
+        return ERR_INVALID_DATA;
+    }
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NfqBindPf(ctx, pf);
+}
+
+int32_t NetsysController::NfqUnbindPf(sptr<NetsysNative::NfqCtx> &ctx, uint16_t pf)
+{
+    if (ctx == nullptr) {
+        NETMGR_LOG_E("NfqUnbindPf ctx is nullptr");
+        return ERR_INVALID_DATA;
+    }
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NfqUnbindPf(ctx, pf);
+}
+
+sptr<NetsysNative::NfqQueue> NetsysController::NfqQueueCreate(sptr<NetsysNative::NfqCtx> &ctx, uint16_t queueNum)
+{
+    if (ctx == nullptr) {
+        NETMGR_LOG_E("NfqQueueCreate ctx is nullptr");
+        return nullptr;
+    }
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return nullptr;
+    }
+    return netsysService_->NfqQueueCreate(ctx, queueNum);
+}
+
+int32_t NetsysController::NfqQueueDestroy(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &q)
+{
+    if (q == nullptr || ctx == nullptr) {
+        NETMGR_LOG_E("NfqQueueDestroy q or ctx is nullptr");
+        return ERR_INVALID_DATA;
+    }
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NfqQueueDestroy(ctx, q);
+}
+
+int32_t NetsysController::NfqQueueSetMode(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &q,
+    uint8_t mode, uint32_t range)
+{
+    if (q == nullptr || ctx == nullptr) {
+        NETMGR_LOG_E("NfqQueueSetMode q or ctx is nullptr");
+        return ERR_INVALID_DATA;
+    }
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NfqQueueSetMode(ctx, q, mode, range);
+}
+
+int32_t NetsysController::NfqQueueSetMaxLen(sptr<NetsysNative::NfqCtx> &ctx,
+    const sptr<NetsysNative::NfqQueue> &q, uint32_t maxLen)
+{
+    if (q == nullptr || ctx == nullptr) {
+        NETMGR_LOG_E("NfqQueueSetMaxLen q or ctx is nullptr");
+        return ERR_INVALID_DATA;
+    }
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NfqQueueSetMaxLen(ctx, q, maxLen);
+}
+
+int32_t NetsysController::NfqQueueSetFlag(sptr<NetsysNative::NfqCtx> &ctx,
+    const sptr<NetsysNative::NfqQueue> &q, uint32_t mask, uint32_t flag)
+{
+    if (q == nullptr || ctx == nullptr) {
+        NETMGR_LOG_E("NfqQueueSetFlag q or ctx is nullptr");
+        return ERR_INVALID_DATA;
+    }
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NfqQueueSetFlag(ctx, q, mask, flag);
+}
+
+int32_t NetsysController::NfqPktVerdictMark(sptr<NetsysNative::NfqCtx> &ctx,
+    const sptr<NetsysNative::NfqQueue> &qh, uint32_t packetId, int32_t verdict, uint32_t mark)
+{
+    if (qh == nullptr || ctx == nullptr) {
+        NETMGR_LOG_E("NfqPktVerdictMark qh or ctx is nullptr");
+        return ERR_INVALID_DATA;
+    }
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NfqPktVerdictMark(ctx, qh, packetId, verdict, mark);
+}
+#endif
 } // namespace NetManagerStandard
 } // namespace OHOS
