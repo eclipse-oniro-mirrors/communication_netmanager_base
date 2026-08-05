@@ -107,9 +107,9 @@ uint64_t CreateUvHandlerQueue(napi_env env)
     napi_wrap(
         env, queueWrapper, reinterpret_cast<void *>(newId),
         [](napi_env env, void *data, void *) {
-            auto id = reinterpret_cast<uint64_t>(data);
+            auto dataId = reinterpret_cast<uint64_t>(data);
             std::lock_guard lock(g_mutex);
-            g_handlerQueueMap.erase(id);
+            g_handlerQueueMap.erase(dataId);
         },
         nullptr, nullptr);
     auto envWrapper = new (std::nothrow) napi_env;
