@@ -13,21 +13,32 @@
  * limitations under the License.
  */
 
+#include "common_mock_netmanager_permission.h"
 #include "net_mgr_log_wrapper.h"
 #include "netmanager_base_permission.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+
+namespace {
+bool g_mockCheckPermissionResult = true;
+} // namespace
+
+void SetMockCheckPermissionResult(bool result)
+{
+    g_mockCheckPermissionResult = result;
+}
+
 bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissionName)
 {
     NETMGR_LOG_D("permissionName: %{public}s", permissionName.c_str());
-    return true;
+    return g_mockCheckPermissionResult;
 }
 
 bool NetManagerPermission::CheckPermission(const std::string &permissionName)
 {
     NETMGR_LOG_D("permissionName: %{public}s", permissionName.c_str());
-    return true;
+    return g_mockCheckPermissionResult;
 }
 
 bool NetManagerPermission::IsSystemCaller()

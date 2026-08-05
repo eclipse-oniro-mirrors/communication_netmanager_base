@@ -40,6 +40,8 @@ static constexpr const char *GET_NETWORK_APPROXIMATE_LOCATION = "ohos.permission
 static constexpr const char *ACCESS_NET_TRACE_INFO = "ohos.permission.ACCESS_NET_TRACE_INFO";
 static constexpr const char *GET_IP_MAC_INFO = "ohos.permission.GET_IP_MAC_INFO";
 static constexpr const char *SEND_MESSAGE = "ohos.permission.SEND_MESSAGES";
+static constexpr const char *CONNECTIVITY_USE_RESTRICTED_NETWORKS =
+                                                            "ohos.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS";
 } // namespace Permission
 
 class NetManagerPermission {
