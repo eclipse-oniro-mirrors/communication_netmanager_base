@@ -23,6 +23,7 @@
 #include <curl/curl.h>
 
 #include "common_net_conn_callback_test.h"
+#include "common_mock_netmanager_permission.h"
 #include "http_proxy.h"
 #include "ipc_skeleton.h"
 #include "net_all_capabilities.h"
@@ -1787,6 +1788,59 @@ HWTEST_F(NetConnServiceExtTest, UpdateNetSupplierInfoAsyncExpand001, TestSize.Le
     oldHttpProxy.SetHost("192.168.1.1");
     netConnService->UpdateNetSupplierInfoAsyncExpand(supplier, oldHttpProxy);
     EXPECT_EQ(supplier->supplierId_, supplierId);
+}
+
+HWTEST_F(NetConnServiceExtTest, CheckNetCapPermission001, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    std::set<NetCap> netCaps;
+    EXPECT_TRUE(netConnService->CheckNetCapPermission(netCaps));
+}
+
+HWTEST_F(NetConnServiceExtTest, CheckNetCapPermission002, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    std::set<NetCap> netCaps = {NetCap::NET_CAPABILITY_INTERNET};
+    EXPECT_TRUE(netConnService->CheckNetCapPermission(netCaps));
+}
+
+HWTEST_F(NetConnServiceExtTest, CheckNetCapPermissionOemPaidAllowed, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    std::set<NetCap> netCaps = {NetCap::NET_CAPABILITY_OEM_PAID};
+    EXPECT_TRUE(netConnService->CheckNetCapPermission(netCaps));
+}
+
+HWTEST_F(NetConnServiceExtTest, CheckNetCapPermissionOemPrivateAllowed, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    std::set<NetCap> netCaps = {NetCap::NET_CAPABILITY_OEM_PRIVATE};
+    EXPECT_TRUE(netConnService->CheckNetCapPermission(netCaps));
+}
+
+HWTEST_F(NetConnServiceExtTest, CheckNetCapPermissionOemPaidDenied, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    SetMockCheckPermissionResult(false);
+    std::set<NetCap> netCaps = {NetCap::NET_CAPABILITY_OEM_PAID};
+    EXPECT_FALSE(netConnService->CheckNetCapPermission(netCaps));
+    SetMockCheckPermissionResult(true);
+}
+
+HWTEST_F(NetConnServiceExtTest, CheckNetCapPermissionOemPrivateDenied, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    SetMockCheckPermissionResult(false);
+    std::set<NetCap> netCaps = {NetCap::NET_CAPABILITY_OEM_PRIVATE};
+    EXPECT_FALSE(netConnService->CheckNetCapPermission(netCaps));
+    SetMockCheckPermissionResult(true);
+}
+
+HWTEST_F(NetConnServiceExtTest, CheckNetCapPermissionMixedCaps, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    std::set<NetCap> netCaps = {NetCap::NET_CAPABILITY_INTERNET, NetCap::NET_CAPABILITY_OEM_PAID};
+    EXPECT_TRUE(netConnService->CheckNetCapPermission(netCaps));
 }
 
 } // namespace NetManagerStandard

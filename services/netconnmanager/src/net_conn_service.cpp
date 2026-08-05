@@ -121,6 +121,8 @@ struct NetCapPermissionEntry {
 const NetCapPermissionEntry NET_CAP_PERMISSION_TABLE[] = {
     {NetCap::NET_CAPABILITY_INTERNAL_DEFAULT, Permission::CONNECTIVITY_INTERNAL, {}},
     {NetCap::NET_CAPABILITY_MMS, nullptr, {1001}},
+    {NetCap::NET_CAPABILITY_OEM_PAID, Permission::CONNECTIVITY_USE_RESTRICTED_NETWORKS, {}},
+    {NetCap::NET_CAPABILITY_OEM_PRIVATE, Permission::CONNECTIVITY_USE_RESTRICTED_NETWORKS, {}},
 };
 }
 
