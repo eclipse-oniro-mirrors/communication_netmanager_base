@@ -105,6 +105,7 @@ NetPolicyService::~NetPolicyService() = default;
 void NetPolicyService::OnStart()
 {
     NETMGR_LOG_I("OnStart");
+    std::lock_guard<std::mutex> guard(instanceLock_);
     if (state_ == STATE_RUNNING) {
         NETMGR_LOG_W("NetPolicyService already start.");
         return;
@@ -118,13 +119,13 @@ void NetPolicyService::OnStart()
             return;
         }
     }
-
-    state_ = STATE_RUNNING;
     Init();
+    state_ = STATE_RUNNING;
 }
 
 void NetPolicyService::OnStop()
 {
+    std::lock_guard<std::mutex> guard(instanceLock_);
     handler_.reset();
     netPolicyCore_.reset();
     netPolicyCallback_.reset();
@@ -138,6 +139,9 @@ void NetPolicyService::OnStop()
 int32_t NetPolicyService::Dump(int32_t fd, const std::vector<std::u16string> &args)
 {
     NETMGR_LOG_D("Start policy Dump, fd: %{public}d", fd);
+    if (fd < 0) {
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
     std::string result;
     GetDumpMessage(result);
     int32_t ret = dprintf(fd, "%s\n", result.c_str());

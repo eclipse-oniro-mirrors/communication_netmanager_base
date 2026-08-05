@@ -154,6 +154,7 @@ private:
     int32_t CmdDeleteIncreaseTrafficMap(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUpdateIfIndexMap(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetIptablesCommandForRes(MessageParcel &data, MessageParcel &reply);
+    bool CheckIpCommand(const std::string &cmd);
     int32_t CmdSetIpCommandForRes(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetDiagPingHost(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetDiagGetRouteTable(MessageParcel &data, MessageParcel &reply);

@@ -960,6 +960,9 @@ int32_t NetsysNativeService::NetDiagUpdateInterfaceConfig(const NetDiagIfaceConf
         NETNATIVE_LOGE("netDiagWrapper is null");
         return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
+    if (!CommonUtils::CheckIfaceName(ifaceName)) {
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     return netDiagWrapper->UpdateInterfaceConfig(config, ifaceName, add);
 }
 

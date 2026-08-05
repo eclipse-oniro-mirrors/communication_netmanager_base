@@ -328,6 +328,7 @@ private:
     std::shared_ptr<NetPolicyFirewall> netPolicyFirewall_ = nullptr;
     std::shared_ptr<NetPolicyRule> netPolicyRule_ = nullptr;
     std::shared_ptr<NetPolicyFile> netPolicyFile_ = nullptr;
+    std::mutex instanceLock_;
     ServiceRunningState state_ = ServiceRunningState::STATE_STOPPED;
     std::shared_ptr<NetPolicyCore> netPolicyCore_ = nullptr;
     std::shared_ptr<NetPolicyCallback> netPolicyCallback_ = nullptr;

@@ -25,6 +25,7 @@
 namespace OHOS {
 namespace nmd {
 using namespace NetsysNative;
+constexpr uint32_t VALID_MESSAGE_MAX_SIZE = 200;
 class SystemVpnWrapper : public std::enable_shared_from_this<SystemVpnWrapper> {
 public:
     SystemVpnWrapper();
@@ -46,6 +47,7 @@ public:
 private:
     void ExecuteUpdate(SysVpnStageCode stage, const std::string &message = "");
     bool PrepareUpdate(SysVpnStageCode stage, const std::string &message = "");
+    bool CheckMessage(const std::string &message);
 
 private:
     static constexpr const char *IPSEC_CMD_PATH = "/system/bin/ipsec";

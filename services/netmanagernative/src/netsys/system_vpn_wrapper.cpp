@@ -61,9 +61,27 @@ bool SystemVpnWrapper::PrepareUpdate(SysVpnStageCode stage, const std::string &m
     return true;
 }
 
+bool SystemVpnWrapper::CheckMessage(const std::string &message)
+{
+    if (message.size() > VALID_MESSAGE_MAX_SIZE) {
+        NETNATIVE_LOGI("message Oversize");
+        return false;
+    }
+    for (char c : message) {
+        if (!isalnum(static_cast<unsigned char>(c)) && c != '_') {
+            NETNATIVE_LOGI("Invalid character in message %{public}s", message.c_str());
+            return false;
+        }
+    }
+    return true;
+}
+
 void SystemVpnWrapper::ExecuteUpdate(SysVpnStageCode stage, const std::string &message)
 {
     NETNATIVE_LOGI("run ExecuteUpdate stage %{public}d", stage);
+    if (!CheckMessage(message)) {
+        return;
+    }
     std::string param = std::string(IPSEC_CMD_PATH) + " ";
     switch (stage) {
         case SysVpnStageCode::VPN_STAGE_RESTART:
