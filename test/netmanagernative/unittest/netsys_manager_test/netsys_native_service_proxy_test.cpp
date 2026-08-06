@@ -308,7 +308,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, GetSetProcSysNetTest001, TestSize.Level1)
     std::string value = "Testvalue";
     int32_t ret = netsysNativeService->SetProcSysNet(AF_INET, WHICH, INTERFACENAME, parameter, value);
     ret = netsysNativeService->GetProcSysNet(AF_INET, WHICH, INTERFACENAME, parameter, value);
-    EXPECT_GE(ret, ERR_FLATTEN_OBJECT);
+    EXPECT_GE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeServiceProxyTest, GetProcSysNetTest001, TestSize.Level1)
