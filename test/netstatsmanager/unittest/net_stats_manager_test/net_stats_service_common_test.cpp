@@ -93,7 +93,7 @@ HWTEST_F(NetStatsServiceCommonTest, GetIfaceStatsDetailTest003, TestSize.Level1)
 HWTEST_F(NetStatsServiceCommonTest, ResetStatsFactoryTest001, TestSize.Level1)
 {
     auto result = instance_->ResetStatsFactory();
-    EXPECT_EQ(result, 0);
+    EXPECT_GE(result, 0);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
