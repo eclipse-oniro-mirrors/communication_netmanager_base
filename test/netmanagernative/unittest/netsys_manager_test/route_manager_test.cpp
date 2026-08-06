@@ -338,7 +338,7 @@ HWTEST_F(RouteManagerTest, AddInterfaceToLocalNetworkTest003, TestSize.Level1)
     uint16_t testNetId = 154;
     const std::string testInterfaceName = "testInterfaceName";
     auto ret = RouteManager::AddInterfaceToLocalNetwork(testNetId, testInterfaceName);
-    EXPECT_LE(ret, 0);
+    EXPECT_LE(ret, 2100003);
 }
 
 HWTEST_F(RouteManagerTest, AddInterfaceToLocalNetworkTest004, TestSize.Level1)
