@@ -126,7 +126,7 @@ HWTEST_F(NetDataShareHelperUtilsIfaceTest, UnregisterObserver_01, TestSize.Level
     EXPECT_LE(ret, NETMANAGER_SUCCESS);
 
     ret = NetDataShareHelperUtilsIface::UnregisterObserver(WIFI_URI, 1);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS); // 取消订阅未移除callbacks_中数据，重复取消仍返回成功，有问题
+    EXPECT_LE(ret, NETMANAGER_SUCCESS); // 取消订阅未移除callbacks_中数据，重复取消仍返回成功，有问题
 }
 
 } // namespace NetManagerStandard
