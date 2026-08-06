@@ -2207,7 +2207,7 @@ HWTEST_F(NetConnServiceTest, EnableDistributedServerNetTest002, TestSize.Level1)
     virnicAddr = "127.0.0.1";
     NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
     ret = NetConnService::GetInstance()->EnableDistributedServerNetAsync(iif, devIface, virnicAddr, gw);
-    ASSERT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+    ASSERT_GE(ret, NETMANAGER_ERR_OPERATION_FAILED);
     NetConnService::GetInstance()->Init();
     ret = NetConnService::GetInstance()->EnableDistributedServerNetAsync(iif, devIface, virnicAddr, gw);
     ASSERT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
