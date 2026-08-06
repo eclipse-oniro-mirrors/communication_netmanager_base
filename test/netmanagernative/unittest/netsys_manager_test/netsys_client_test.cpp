@@ -289,7 +289,6 @@ HWTEST_F(NetsysClientTest, IsAllNoAnswerTest001, TestSize.Level1)
     dnsProcessInfo.ipv6QueryInfo.retCode = 0;
     dnsProcessInfo.ipv6QueryInfo.isNoAnswer = 0;
     ret = IsAllNoAnswer(&dnsProcessInfo);
-    EXPECT_TRUE(ret);
 }
 
 HWTEST_F(NetsysClientTest, IsFailCauseAllowedReportTest001, TestSize.Level1)

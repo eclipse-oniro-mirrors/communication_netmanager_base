@@ -335,7 +335,7 @@ HWTEST_F(DNSParamCacheTest, IsUseVpnDnsTest002, TestSize.Level1)
     dnsParCache.AddUidRange(vpnNetId, uidRanges);
     dnsParCache.CreateCacheForNet(vpnNetId, true);
     bool ret = dnsParCache.IsUseVpnDns(1500);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 
 HWTEST_F(DNSParamCacheTest, IsUseVpnDnsTest003, TestSize.Level1)

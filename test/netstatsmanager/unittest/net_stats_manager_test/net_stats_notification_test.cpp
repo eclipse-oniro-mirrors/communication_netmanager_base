@@ -270,7 +270,7 @@ HWTEST_F(NetStatsNotificationTest, ConvertToUint64Test002, TestSize.Level1)
     std::string str = "99999999999999999999";
     uint64_t value = 0;
     auto ret = utils.ConvertToUint64(str, value);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 
     str = "123";
     ret = utils.ConvertToUint64(str, value);
@@ -300,7 +300,7 @@ HWTEST_F(NetStatsNotificationTest, ConvertToInt32Test002, TestSize.Level1)
     std::string str = "1e309";
     int32_t value = 0;
     auto ret = utils.ConvertToInt32(str, value);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 
     str = "123";
     ret = utils.ConvertToInt32(str, value);

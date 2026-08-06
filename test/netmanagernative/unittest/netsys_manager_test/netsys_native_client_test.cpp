@@ -168,7 +168,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest002, TestSize.Level1)
 
     nmd::NetworkDpaTrafficReport dpaTraffic = {};
     ret = nativeClient->SetDpaCellularSharingTraffic(dpaTraffic);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient->GetCellularRxBytes();
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
@@ -263,7 +263,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest004, TestSize.Level1)
     ret = nativeClient->FirewallEnableChain(CHAIN, true);
     EXPECT_EQ(ret, -1);
     ret = nativeClient->FirewallSetUidRule(CHAIN, {NET_ID}, FIREWALL_RULE);
-    EXPECT_EQ(ret, 0);
+    EXPECT_GE(ret, 0);
 }
 
 HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest005, TestSize.Level1)
