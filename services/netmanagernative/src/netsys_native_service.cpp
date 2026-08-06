@@ -1580,8 +1580,11 @@ int32_t BuildVerdict(struct nlmsghdr *nlh, size_t cap, const struct NfqVerdictPa
 
 void NfqUnregisterQueue(const sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q)
 {
+    if (ctx == nullptr || q == nullptr) {
+        return;
+    }
     for (int i = 0; i < NFQ_MAX_QUEUES; i++) {
-        if (ctx->queues[i] == q) {
+        if (ctx->queues[i] != nullptr && ctx->queues[i]->queueNum == q->queueNum) {
             ctx->queues[i] = nullptr;
             return;
         }
