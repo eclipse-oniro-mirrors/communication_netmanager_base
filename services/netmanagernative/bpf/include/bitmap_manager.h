@@ -194,7 +194,7 @@ public:
      * @return success:return NETFIREWALL_SUCCESS, otherwise return error code
      */
     static int32_t GetIp4AndMask(const in_addr &startAddr, const in_addr &endAddr, std::vector<Ip4Data> &list);
-    static uint32_t GetCidrBlockBits(uint32_t cidrSize);
+    static uint32_t GetCidrBlockBits(uint64_t cidrSize);
     static uint32_t GetSuffixZeroLength(uint32_t ip);
 
     /**
