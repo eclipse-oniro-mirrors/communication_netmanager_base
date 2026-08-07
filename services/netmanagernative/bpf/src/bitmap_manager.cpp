@@ -485,7 +485,7 @@ std::string IpParamParser::Ip4ToStr(uint32_t ip)
     return std::string(str);
 }
 
-uint32_t IpParamParser::GetCidrBlockBits(uint32_t cidrSize)
+uint32_t IpParamParser::GetCidrBlockBits(uint64_t cidrSize)
 {
     uint32_t count = 0;
     while (cidrSize >>= 1) {
@@ -515,16 +515,20 @@ int32_t IpParamParser::GetIp4AndMask(const in_addr &startAddr, const in_addr &en
         return NETFIREWALL_ERR;
     }
     uint32_t suffixZeros = 0;
-    uint32_t maxCidrSize = 0;
-    uint32_t remainingCidrSize = 0;
+    uint64_t maxCidrSize = 0;
+    uint64_t remainingCidrSize = 0;
     uint32_t cidrBits = 0;
     while (startIpInt <= endIpInt) {
         suffixZeros = GetSuffixZeroLength(startIpInt);
-        maxCidrSize = (1 << suffixZeros);
-        remainingCidrSize = endIpInt - startIpInt + 1;
+        maxCidrSize = (1ULL << suffixZeros);
+        remainingCidrSize = static_cast<uint64_t>(endIpInt) - startIpInt + 1;
         cidrBits = GetCidrBlockBits(std::min(maxCidrSize, remainingCidrSize));
         AddIp(startIpInt, IPV4_BIT_COUNT - cidrBits, list);
-        startIpInt += (1 << cidrBits);
+        uint64_t nextStart = static_cast<uint64_t>(startIpInt) + (1ULL << cidrBits);
+        if (nextStart > endIpInt) {
+            break;
+        }
+        startIpInt = static_cast<uint32_t>(nextStart);
     }
     return NETFIREWALL_SUCCESS;
 }
