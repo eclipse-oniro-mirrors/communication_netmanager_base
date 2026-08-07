@@ -2657,6 +2657,10 @@ void NetConnService::ActiveHttpProxy()
 
 void NetConnService::SetCurlOptions(CURL *curl, HttpProxy tempProxy)
 {
+    if (curl == nullptr) {
+        NETMGR_LOG_E("curl is nullptr");
+        return;
+    }
     std::string httpUrl;
     GetHttpUrlFromConfig(httpUrl);
     if (httpUrl.empty()) {
@@ -2779,6 +2783,10 @@ int32_t NetConnService::PrepareRefreshGlobalHttpProxy(const HttpProxy &currentPr
         return NET_CONN_ERR_HTTP_PROXY_INVALID;
     }
     if (refreshInProgress_) {
+        if (refreshCallbacks_.size() >= MAX_REFRESH_CALLBACKS_SIZE) {
+            NETMGR_LOG_E("RefreshGlobalHttpProxy: too many callbacks");
+            return NET_CONN_ERR_HTTP_PROXY_INVALID;
+        }
         NETMGR_LOG_I("RefreshGlobalHttpProxy: reuse existing refresh");
         refreshCallbacks_.push_back(callback);
         return NETMANAGER_ERR_INTERNAL;

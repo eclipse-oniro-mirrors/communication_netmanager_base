@@ -89,7 +89,7 @@ NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &
     : netId_(netId), netLinkInfo_(netLinkInfo), netMonitorCallback_(callback), isScreenOn_(netMonitorInfo.isScreenOn)
 {
     netBearType_ = bearType;
-    lastDetectTimestamp_ = netMonitorInfo.lastDetectTime;
+    lastDetectTimestamp_.store(netMonitorInfo.lastDetectTime);
     LoadGlobalHttpProxy();
     GetDetectUrlConfig();
     GetXReqIDFromConfig();
@@ -182,7 +182,7 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
 
 void NetMonitor::Detection()
 {
-    lastDetectTimestamp_ = CommonUtils::GetCurrentMilliSecond();
+    lastDetectTimestamp_.store(CommonUtils::GetCurrentMilliSecond());
     NetHttpProbeResult probeResult = SendProbe();
     bool isTmpDetecting = IsDetecting();
     NETMGR_LOG_I("Detection isTmpDetecting[%{public}d]", isTmpDetecting);
@@ -575,7 +575,7 @@ void NetMonitor::SetScreenState(bool isScreenOn)
 
 uint64_t NetMonitor::GetLastDetectTime()
 {
-    return lastDetectTimestamp_;
+    return lastDetectTimestamp_.load();
 }
 
 void NetMonitor::StopDualStackProbe()

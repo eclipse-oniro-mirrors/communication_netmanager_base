@@ -308,6 +308,10 @@ int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interface
         AddNetIdAndIfaceToMap(netId, nameId);
         AddIfindexAndNetTypeToMap(interfaceName, nameId);
         std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
+        if (nw == nullptr) {
+            NETNATIVE_LOGE("AddInterfaceToNetwork failed, network is nullptr");
+            return NETMANAGER_ERROR;
+        }
         if (nw->IsPhysical() && !IsVirtualInterface(interfaceName)) {
             std::lock_guard<std::mutex> lock(interfaceNameMutex_);
             physicalInterfaceName_[netId] = interfaceName;

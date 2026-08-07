@@ -312,6 +312,9 @@ rust::vec<NetAddress> GetAddressesByName(const std::string &host, int32_t netId,
     }
 
     for (addrinfo *tmp = res; tmp != nullptr; tmp = tmp->ai_next) {
+        if (tmp->ai_addr == nullptr) {
+            continue;
+        }
         std::string addrHost;
         if (tmp->ai_family == AF_INET) {
             auto addr = reinterpret_cast<sockaddr_in *>(tmp->ai_addr);
@@ -565,6 +568,9 @@ rust::vec<NetAddress> GetAddressesByNameWithOptions(const std::string &host, int
     }
 
     for (addrinfo *tmp = res; tmp != nullptr; tmp = tmp->ai_next) {
+        if (tmp->ai_addr == nullptr) {
+            continue;
+        }
         std::string addrHost;
         if (tmp->ai_family == AF_INET) {
             auto addr = reinterpret_cast<sockaddr_in *>(tmp->ai_addr);
