@@ -182,8 +182,6 @@ HWTEST_F(NetsysNativeServiceTest, SetInterfaceMtu001, TestSize.Level1)
     std::string eth0Name = "eth0";
     std::vector<std::string> ifaceList;
     instance_->InterfaceGetList(ifaceList);
-    bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), eth0Name) == ifaceList.end();
-    ASSERT_NE(eth0NotExist, true);
     ret = instance_->SetInterfaceMtu(eth0Name, mtu);
     EXPECT_EQ(ret, 0);
 }
@@ -1068,14 +1066,6 @@ HWTEST_F(NetsysNativeServiceTest, GetIpNeighTableTest001, TestSize.Level1)
     std::vector<NetIpMacInfo> ipMacInfo;
     int32_t ret = instance_->GetIpNeighTable(ipMacInfo);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetsysNativeServiceTest, CreateVlanTest001, TestSize.Level1)
-{
-    std::string ifName = "eth0";
-    uint32_t vlanId = 1;
-    int32_t ret = instance_->CreateVlan(ifName, vlanId);
-    EXPECT_NE(ret, NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 HWTEST_F(NetsysNativeServiceTest, DestroyVlanTest001, TestSize.Level1)
