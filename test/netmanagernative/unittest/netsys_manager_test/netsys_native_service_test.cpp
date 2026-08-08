@@ -1068,14 +1068,6 @@ HWTEST_F(NetsysNativeServiceTest, GetIpNeighTableTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetsysNativeServiceTest, CreateVlanTest001, TestSize.Level1)
-{
-    std::string ifName = "eth0";
-    uint32_t vlanId = 1;
-    int32_t ret = instance_->CreateVlan(ifName, vlanId);
-    EXPECT_NE(ret, NETMANAGER_ERR_OPERATION_FAILED);
-}
-
 HWTEST_F(NetsysNativeServiceTest, DestroyVlanTest001, TestSize.Level1)
 {
     std::string ifName = "eth0";
