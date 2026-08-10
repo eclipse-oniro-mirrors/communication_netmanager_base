@@ -502,7 +502,6 @@ void MultiVpnManager::StartMultiVpnSocketListen()
     if (listen(serverfd, MAX_UNIX_SOCKET_CLIENT) < 0) {
         multiVpnListeningFlag_ = false;
         NETNATIVE_LOGE("listen socket error: %{public}d", errno);
-        close(serverfd);
         return;
     }
 
@@ -512,7 +511,6 @@ void MultiVpnManager::StartMultiVpnSocketListen()
     if (clientFd < 0) {
         NETNATIVE_LOGE("accept socket error: %{public}d", errno);
         multiVpnListeningFlag_ = false;
-        close(serverfd);
         return;
     }
     {
@@ -524,7 +522,6 @@ void MultiVpnManager::StartMultiVpnSocketListen()
     }
     multiVpnListeningFlag_ = false;
     close(clientFd);
-    close(serverfd);
     // LCOV_EXCL_STOP
 }
 

@@ -350,7 +350,7 @@ bpf_map_def SEC("maps") broker_uid_access_policy_map = {
     .key_size = sizeof(app_uid_key),
     .value_size = sizeof(app_uid_key),
     .max_entries = APP_STATS_MAP_SIZE_MIN,
-    .map_flags = BPF_F_NO_PREALLOC,
+    .map_flags = 0,
     .inner_map_idx = 0,
     .numa_node = 0,
 };
