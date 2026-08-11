@@ -266,14 +266,14 @@ int32_t NetLinkSocketDiag::ProcessSockDiagDumpResponse(uint8_t proto, const std:
         uint32_t len = static_cast<uint32_t>(readBytes);
         for (nlmsghdr *nlh = reinterpret_cast<nlmsghdr *>(buf); NLMSG_OK(nlh, len); nlh = NLMSG_NEXT(nlh, len)) {
             // LCOV_EXCL_START
-            if (nlh->nlmsg_type == NLMSG_ERROR && nlh->nlmsg_len < NLMSG_LENGTH(sizeof(nlmsgerr))) {
+            if (nlh->nlmsg_type == NLMSG_ERROR) {
                 nlmsgerr *err = reinterpret_cast<nlmsgerr *>(NLMSG_DATA(nlh));
                 NETNATIVE_LOGE("Error netlink msg, errno:%{public}d, strerror:%{public}s", -err->error,
                                strerror(-err->error));
                 return err->error;
             } else if (nlh->nlmsg_type == NLMSG_DONE) {
                 return NETMANAGER_SUCCESS;
-            } else if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(inet_diag_msg))) {
+            } else {
                 const auto *msg = reinterpret_cast<inet_diag_msg *>(NLMSG_DATA(nlh));
                 SockDiagDumpCallback(proto, msg, ipAddr, excludeLoopback);
             }
@@ -580,7 +580,7 @@ int32_t NetLinkSocketDiag::ProcessSockDiagUidDumpResponse(uint8_t proto,
     while (readBytes > 0) {
         int len = readBytes;
         for (nlmsghdr *nlh = reinterpret_cast<nlmsghdr *>(buf); NLMSG_OK(nlh, len); nlh = NLMSG_NEXT(nlh, len)) {
-            if (nlh->nlmsg_type == NLMSG_ERROR && nlh->nlmsg_len < NLMSG_LENGTH(sizeof(nlmsgerr))) {
+            if (nlh->nlmsg_type == NLMSG_ERROR) {
                 nlmsgerr *err = reinterpret_cast<nlmsgerr *>(NLMSG_DATA(nlh));
                 NETNATIVE_LOGE("Error netlink msg, errno:%{public}d, strerror:%{public}s", -err->error,
                     strerror(-err->error));
@@ -588,7 +588,7 @@ int32_t NetLinkSocketDiag::ProcessSockDiagUidDumpResponse(uint8_t proto,
             } else if (nlh->nlmsg_type == NLMSG_DONE) {
                 NETNATIVE_LOGE("ProcessSockDiagUidDumpResponse nlh->nlmsg_type == NLMSG_DONE");
                 return NETMANAGER_SUCCESS;
-            } else if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(inet_diag_msg))) {
+            } else {
                 const auto *msg = reinterpret_cast<inet_diag_msg *>(NLMSG_DATA(nlh));
                 SockDiagUidDumpCallback(proto, msg, needDestroy);
             }
@@ -706,7 +706,7 @@ int32_t NetLinkSocketDiag::ProcessQueryUidResponse(int32_t &uid)
     while (readBytes > 0) {
         int len = readBytes;
         for (nlmsghdr *nlh = reinterpret_cast<nlmsghdr *>(buf); NLMSG_OK(nlh, len); nlh = NLMSG_NEXT(nlh, len)) {
-            if (nlh->nlmsg_type == NLMSG_ERROR && nlh->nlmsg_len < NLMSG_LENGTH(sizeof(nlmsgerr))) {
+            if (nlh->nlmsg_type == NLMSG_ERROR) {
                 nlmsgerr *err = reinterpret_cast<nlmsgerr *>(NLMSG_DATA(nlh));
                 NETNATIVE_LOGE("Error netlink msg, errno:%{public}d, strerror:%{public}s", -err->error,
                                strerror(-err->error));
@@ -714,7 +714,7 @@ int32_t NetLinkSocketDiag::ProcessQueryUidResponse(int32_t &uid)
             } else if (nlh->nlmsg_type == NLMSG_DONE) {
                 NETNATIVE_LOGE("ProcessQueryUidResponse nlh->nlmsg_type == NLMSG_DONE");
                 return NETMANAGER_SUCCESS;
-            } else if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(inet_diag_msg))) {
+            } else {
                 const auto *msg = reinterpret_cast<inet_diag_msg *>(NLMSG_DATA(nlh));
                 uid = static_cast<int32_t>(msg->idiag_uid);
                 return NETMANAGER_SUCCESS;
