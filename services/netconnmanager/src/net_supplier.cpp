@@ -706,6 +706,7 @@ void NetSupplier::UpdateNetCap(const std::set<NetCap> &netCaps)
 
 std::string NetSupplier::GetNetExtAttribute()
 {
+    std::shared_lock<std::shared_mutex> lock(netExtAttributeMutex_);
     if (netExtAttribute_.empty() && netHandle_ != nullptr) {
         NETMGR_LOG_E("supplier %{public}u, netId: %{public}d, get netExtAttribute is empty",
             supplierId_, netHandle_->GetNetId());
@@ -715,6 +716,7 @@ std::string NetSupplier::GetNetExtAttribute()
 
 void NetSupplier::SetNetExtAttribute(const std::string &netExtAttribute)
 {
+    std::unique_lock<std::shared_mutex> lock(netExtAttributeMutex_);
     if (netHandle_ != nullptr) {
         NETMGR_LOG_I("supplier %{public}u, netId: %{public}d, set netExtAtt: [length: %{public}d, value: %{private}s]",
             supplierId_, netHandle_->GetNetId(), (int)netExtAttribute.size(), netExtAttribute.c_str());

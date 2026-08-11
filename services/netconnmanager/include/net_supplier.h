@@ -181,6 +181,7 @@ private:
     bool isAcceptUnvaliad = false;
     int32_t uid_ = 0;
     std::string netExtAttribute_ = "";
+    mutable std::shared_mutex netExtAttributeMutex_;
     bool isOnceSuppress_ = false;
     NetRequest netRequest_;
 };
