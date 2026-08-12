@@ -145,7 +145,7 @@ private:
     bool isNeedSuffix_ = false;
     bool isDataShareReady_ = false;
     bool isScreenOn_ = true;
-    uint64_t lastDetectTimestamp_ = 0;
+    std::atomic<uint64_t> lastDetectTimestamp_ = 0;
     int32_t dualStackProbeTimeOut_ = 5 * 1000;
     std::shared_ptr<NetDualStackProbe> dualStackProbe_;
     PortalDetectInfo portalDetectInfo_;

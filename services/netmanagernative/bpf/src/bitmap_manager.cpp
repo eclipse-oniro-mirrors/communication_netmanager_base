@@ -364,6 +364,10 @@ int32_t BitmapManager::BuildMarkBitmap(const std::vector<sptr<NetFirewallIpRule>
     uint32_t index = 0;
     int32_t ret;
     for (const auto &rule : ruleList) {
+        if (rule == nullptr) {
+            NETNATIVE_LOGW("BuildMarkBitmap: rule is nullptr, skip");
+            continue;
+        }
         Bitmap bitmap(index);
         ret = InsertIpBitmap(rule->remoteIps, true, bitmap);
         if (ret) {

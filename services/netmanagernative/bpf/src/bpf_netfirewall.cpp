@@ -768,7 +768,7 @@ int32_t NetsysBpfNetFirewall::WriteInterfaceBpfMap(BitmapManager &manager, NetFi
     for (const auto &pair : interfaceMap.Get()) {
         const std::string &devName = pair.first;
         Bitmap val = pair.second;
-        if (devName.length() > INTERFACE_NAME_MAX_LEN) {
+        if (devName.length() >= INTERFACE_NAME_MAX_LEN) {
             NETNATIVE_LOGE("WriteInterfaceBpfMap: interface name too long: %{public}s, bitmap=%{public}u",
                 devName.c_str(), val.Get()[0]);
             continue;

@@ -932,7 +932,7 @@ static bool CheckIpv4InNet(const char *ip, const char *cidr, int prefixLen)
     } else if (prefixLen == ipv4Bits) {
         mask = 0xffffffff;
     } else {
-        mask = ~((1 << (ipv4Bits - prefixLen)) - 1);
+        mask = ~((1U << (ipv4Bits - prefixLen)) - 1);
     }
     return (ip4.s_addr & htonl(mask)) == (net4.s_addr & htonl(mask));
 }

@@ -276,12 +276,13 @@ bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps, const NetR
             netCaps_.HasNetCap(NET_CAPABILITY_INTERNET));
     }
 
-    if (netController_ == nullptr) {
+    sptr<INetSupplierCallback> controller = netController_;
+    if (controller == nullptr) {
         NETMGR_LOG_E("netController_ is nullptr");
         return false;
     }
     NETMGR_LOG_D("execute RequestNetwork");
-    int32_t errCode = netController_->RequestNetwork(netSupplierIdent_, netCaps, netRequest);
+    int32_t errCode = controller->RequestNetwork(netSupplierIdent_, netCaps, netRequest);
     NETMGR_LOG_D("RequestNetwork errCode[%{public}d]", errCode);
     if (errCode != REG_OK) {
         NETMGR_LOG_E("RequestNetwork fail");
