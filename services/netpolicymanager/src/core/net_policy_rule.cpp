@@ -375,6 +375,7 @@ bool NetPolicyRule::IsPowerSave()
 
 bool NetPolicyRule::InPowerSaveAllowedList(uint32_t uid)
 {
+    std::shared_lock<std::shared_mutex> lock(powerSaveAllowedListMutex_);
     return std::find(powerSaveAllowedList_.begin(), powerSaveAllowedList_.end(), uid) != powerSaveAllowedList_.end();
 }
 
@@ -415,9 +416,11 @@ void NetPolicyRule::HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEve
             powerSaveMode_ = policyEvent->powerSaveMode;
             TransPolicyToRule();
             break;
-        case NetPolicyEventHandler::MSG_POWER_SAVE_LIST_UPDATED:
+        case NetPolicyEventHandler::MSG_POWER_SAVE_LIST_UPDATED: {
+            std::unique_lock<std::shared_mutex> lock(powerSaveAllowedListMutex_);
             powerSaveAllowedList_ = policyEvent->powerSaveList;
             break;
+        }
         case NetPolicyEventHandler::MSG_UID_REMOVED:
             DeleteUid(policyEvent->deletedUid);
             break;
