@@ -209,6 +209,7 @@ private:
     bool powerSaveMode_ = false;
     std::shared_mutex deviceIdleAllowedListMutex_;
     std::set<uint32_t> deviceIdleAllowedList_;
+    std::shared_mutex powerSaveAllowedListMutex_;
     std::set<uint32_t> powerSaveAllowedList_;
     std::set<uint32_t> foregroundUidList_;
     std::mutex foregroundUidListMutex_;
