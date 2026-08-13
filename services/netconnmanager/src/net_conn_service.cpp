@@ -388,6 +388,9 @@ int32_t NetConnService::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpe
             }
             netSpecifier->netCapabilities_.netCaps_.erase(NET_CAPABILITY_MMS);
             netSpecifier->netCapabilities_.netCaps_.insert(NET_CAPABILITY_INTERNET);
+            if (!CheckNetCapPermission(netSpecifier->netCapabilities_.netCaps_)) {
+                return NETMANAGER_ERR_PERMISSION_DENIED;
+            }
         }
         // LCOV_EXCL_STOP
     }
@@ -2993,11 +2996,7 @@ uint32_t NetConnService::SetProxyOff()
     HttpProxy globalProxy;
     globalProxy.SetHost("");
     globalProxy.SetPort(0);
-    int gpret = SetGlobalHttpProxy(globalProxy);
-    if (gpret != NETMANAGER_SUCCESS)
-        NETMGR_LOG_E("SetGlobalHttpProxy failed.");
-    SendHttpProxyChangeBroadcast(globalProxy);
-    return NETMANAGER_SUCCESS;
+    return SetGlobalHttpProxy(globalProxy);
 }
 
 uint32_t NetConnService::SetProxyAuto()

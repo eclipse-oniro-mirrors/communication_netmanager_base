@@ -3290,5 +3290,16 @@ HWTEST_F(NetConnServiceTest, UpdateNetRequestControlState004, TestSize.Level1)
     EXPECT_TRUE(active->GetNetRequest().isControlled);
     EXPECT_FALSE(netConnService->netUidActivates_.empty());
 }
+
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+HWTEST_F(NetConnServiceTest, SetProxyOffTest001, TestSize.Level1)
+{
+    std::shared_ptr<NetConnService> netConnService = nullptr;
+    netConnService = std::make_shared<NetConnService>();
+    EXPECT_TRUE(netConnService != nullptr);
+    auto ret = netConnService->SetProxyOff();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+#endif // NETMANAGER_ENABLE_PAC_PROXY
 } // namespace NetManagerStandard
 } // namespace OHOS
