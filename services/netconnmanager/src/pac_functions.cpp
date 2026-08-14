@@ -939,9 +939,13 @@ static bool CheckIpv4InNet(const char *ip, const char *cidr, int prefixLen)
 
 static bool CheckIpv6InNet(const char *ip, const char *cidr, int prefixLen)
 {
+    const int ipv6Bits = 128;
     struct in6_addr ipAddr;
     struct in6_addr netAddr;
     if (inet_pton(AF_INET6, ip, &ipAddr) != 1 || inet_pton(AF_INET6, cidr, &netAddr) != 1) {
+        return false;
+    }
+    if (prefixLen < 0 || prefixLen > ipv6Bits) {
         return false;
     }
     int bytes = prefixLen / 8;
