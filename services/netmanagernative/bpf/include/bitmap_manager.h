@@ -473,6 +473,12 @@ public:
 private:
     void GetNetworkAddress(in6_addr addr, int prefixLen, in6_addr &out)
     {
+        if (prefixLen < 0 || prefixLen > IPV6_MAX_PREFIXLEN) {
+            return; /* out 保持零 — 非法前缀不得碰 s6_addr */
+        }
+        if (prefixLen == 0) {
+            return; /* /0 网络键全零；out 已是 {} */
+        }
         int quotient = prefixLen / 8;
         int remainder = prefixLen % 8;
         for (int i = 0; i < quotient; i++) {

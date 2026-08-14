@@ -223,6 +223,10 @@ int32_t BitmapManager::InsertIp6SegBitmap(const NetFirewallIpParam &item, Bitmap
         return NETFIREWALL_ERR;
     }
     if (item.type == SINGLE_IP) {
+        if (item.mask > IPV6_MAX_PREFIXLEN) {
+            NETNATIVE_LOGE("InsertIp6SegBitmap: invalid mask %{public}u", item.mask);
+            return NETFIREWALL_ERR;
+        }
         ip6Map->OrInsert(item.ipv6.startIp, static_cast<uint32_t>(item.mask), bitmap);
         std::string addrStr = IpParamParser::Addr6ToStr(item.ipv6.startIp);
         NETNATIVE_LOG_D("InsertIp6SegBitmap ip[%{public}s], mask[%{public}u]",
