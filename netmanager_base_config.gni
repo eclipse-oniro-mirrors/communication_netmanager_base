@@ -65,6 +65,7 @@ declare_args() {
   netmanager_base_fpga_mode_enable = false
   netmanager_base_update_netcap = false
   netmanager_base_enable_automotive_traffic_stat = false
+  netmanager_base_enable_wifi_priority_ether = false
 }
 fuzz_test_path = "netmanager_base/netmanager_base"
 

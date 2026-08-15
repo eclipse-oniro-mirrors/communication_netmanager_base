@@ -176,6 +176,10 @@ ohos_shared_library("net_conn_manager") {
     defines += ["CONFIG_FACTORY_MODE"]
   }
 
+  if (netmanager_base_enable_wifi_priority_ether) {
+    defines += [ "ENABLE_WIFI_PRIORITY_ETHER" ]
+  }
+
   if (netmanager_base_enable_traffic_statistic) {
     defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
   }
