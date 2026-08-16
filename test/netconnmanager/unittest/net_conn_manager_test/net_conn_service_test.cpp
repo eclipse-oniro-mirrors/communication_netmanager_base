@@ -1245,7 +1245,7 @@ HWTEST_F(NetConnServiceTest, ExecuteRefreshInFfrtTimeoutTest, TestSize.Level1)
     service->refreshInProgress_ = true;
     service->refreshResultReady_ = false;
     sptr<IRefreshHttpProxyCallback> callback = new RefreshHttpProxyCallbackStub();
-    service->refreshCallbacks_.push_back(callback);
+    service->refreshCallbacks_.insert(callback);
     HttpProxy currentProxy;
     currentProxy.SetHost(TEST_PROXY_HOST);
     currentProxy.SetPort(8080);

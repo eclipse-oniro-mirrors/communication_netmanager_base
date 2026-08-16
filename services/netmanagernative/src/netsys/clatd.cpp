@@ -179,7 +179,7 @@ int32_t Clatd::MaybeCalculateL4Checksum(int packetLen, ClatdReadV6Buf &readBuf)
 {
     const int csumStart = readBuf.vnet.csumStart;
     const int csumOffset = csumStart + readBuf.vnet.csumOffset;
-    if (csumOffset + 1 >= packetLen) {
+    if (csumOffset >= packetLen - 1) {
         NETNATIVE_LOGW("csum offset %{public}d larger than packet length %{public}d", csumOffset, packetLen);
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }

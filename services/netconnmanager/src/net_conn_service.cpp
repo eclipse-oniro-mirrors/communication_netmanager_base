@@ -2788,12 +2788,8 @@ int32_t NetConnService::PrepareRefreshGlobalHttpProxy(const HttpProxy &currentPr
         return NET_CONN_ERR_HTTP_PROXY_INVALID;
     }
     if (refreshInProgress_) {
-        if (refreshCallbacks_.size() >= MAX_REFRESH_CALLBACKS_SIZE) {
-            NETMGR_LOG_E("RefreshGlobalHttpProxy: too many callbacks");
-            return NET_CONN_ERR_HTTP_PROXY_INVALID;
-        }
         NETMGR_LOG_I("RefreshGlobalHttpProxy: reuse existing refresh");
-        refreshCallbacks_.push_back(callback);
+        refreshCallbacks_.insert(callback);
         return NETMANAGER_ERR_INTERNAL;
     }
     refreshInProgress_ = true;
@@ -2801,7 +2797,7 @@ int32_t NetConnService::PrepareRefreshGlobalHttpProxy(const HttpProxy &currentPr
     refreshAuthSuccess_ = false;
     lastRefreshProxy_ = currentProxy;
     lastRefreshTime_ = std::chrono::steady_clock::now();
-    refreshCallbacks_.push_back(callback);
+    refreshCallbacks_.insert(callback);
     return NETMANAGER_SUCCESS;
 }
 
