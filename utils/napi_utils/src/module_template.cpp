@@ -127,6 +127,7 @@ napi_value Off(napi_env env, napi_callback_info info, const std::initializer_lis
         if (paramsCount == EVENT_PARAM_NUM) {
             manager->DeleteListener(event, params[1]);
         } else {
+            NETMANAGER_BASE_LOGI("SubEvent op=off_all kit=networkKit event=%{public}s", event.c_str());
             manager->DeleteListener(event);
         }
     }

@@ -134,6 +134,7 @@ void PolicyObserverWrapper::DeleteListener(size_t paramsCount, napi_value *param
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
         manager_->DeleteListener(event, params[ARG_INDEX_1]);
     } else {
+        NETMANAGER_BASE_LOGI("SubEvent op=off_all kit=networkKit event=%{public}s", event.c_str());
         manager_->DeleteListener(event);
     }
 }
