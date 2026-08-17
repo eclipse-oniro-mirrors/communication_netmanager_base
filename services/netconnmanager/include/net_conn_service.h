@@ -691,12 +691,11 @@ private:
     bool refreshAuthSuccess_ = false;
     bool refreshResultReady_ = false;
     std::condition_variable refreshResultCv_;
-    std::vector<sptr<IRefreshHttpProxyCallback>> refreshCallbacks_;
+    std::set<sptr<IRefreshHttpProxyCallback>> refreshCallbacks_;
     std::chrono::steady_clock::time_point lastRefreshTime_;
     HttpProxy lastRefreshProxy_;
     static constexpr uint32_t REFRESH_RATE_LIMIT_S = 10;
     static constexpr uint32_t REFRESH_WAIT_TIMEOUT_S = 15;
-    static constexpr size_t MAX_REFRESH_CALLBACKS_SIZE = 64;
     std::map<int32_t, sptr<IPreAirplaneCallback>> preAirplaneCallbacks_;
     std::mutex preAirplaneCbsMutex_;
     std::mutex dataShareMutex_;
