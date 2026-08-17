@@ -53,8 +53,8 @@ int32_t NetBundleImpl::GetJsonFromBundle(std::string &jsonProfile)
         NETMGR_LOG_I("GetSelfBundleName: bundleName get fail.");
         return NETMANAGER_ERR_INTERNAL;
     }
-    ret = bundleMgrProxy->GetJsonProfile(AppExecFwk::ProfileType::NETWORK_PROFILE,
-        bundleInfo.name, bundleInfo.entryModuleName, jsonProfile);
+    ret = bundleMgrProxy->GetJsonProfileForSelf(AppExecFwk::ProfileType::NETWORK_PROFILE,
+        bundleInfo.entryModuleName, jsonProfile);
     if (ret != ERR_OK) {
         NETMGR_LOG_D("No network_config profile configured in bundle manager.[%{public}d]", ret);
         return NETMANAGER_SUCCESS;
