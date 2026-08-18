@@ -151,7 +151,6 @@ napi_value ConnectionExec::CreateNetPortStatesInfo(napi_env env, const NetPortSt
     }
 
     napi_value tcpArray = NapiUtils::CreateArray(env, netPortStatesInfo.tcpNetPortStatesInfo_.size());
-    diff a/frameworks/js/napi/connection/connection_exec/src/connection_exec.cpp b/frameworks/js/napi/connection/connection_exec/src/connection_exec.cpp	(rejected hunks)
 
     if (NapiUtils::GetValueType(env, tcpArray) != napi_object) {
         return NapiUtils::GetUndefined(env);
