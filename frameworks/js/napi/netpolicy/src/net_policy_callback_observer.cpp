@@ -89,6 +89,9 @@ int32_t NetPolicyCallbackObserver::NetBackgroundPolicyChange(bool isBackgroundPo
 napi_value NetPolicyCallbackObserver::CreateNetUidPolicyChangeParam(napi_env env, void *data)
 {
     auto pair = static_cast<std::pair<uint32_t, uint32_t> *>(data);
+    if (pair == nullptr) {
+        return nullptr;
+    }
     napi_value obj = NapiUtils::CreateObject(env);
     NapiUtils::SetUint32Property(env, obj, KEY_UID, pair->first);
     NapiUtils::SetUint32Property(env, obj, KEY_POLICY, pair->second);
@@ -99,6 +102,9 @@ napi_value NetPolicyCallbackObserver::CreateNetUidPolicyChangeParam(napi_env env
 napi_value NetPolicyCallbackObserver::CreateNetUidRuleChangeParam(napi_env env, void *data)
 {
     auto pair = static_cast<std::pair<uint32_t, uint32_t> *>(data);
+    if (pair == nullptr) {
+        return nullptr;
+    }
     napi_value obj = NapiUtils::CreateObject(env);
     NapiUtils::SetUint32Property(env, obj, KEY_UID, pair->first);
     NapiUtils::SetUint32Property(env, obj, KEY_RULE, pair->second);
@@ -109,6 +115,9 @@ napi_value NetPolicyCallbackObserver::CreateNetUidRuleChangeParam(napi_env env, 
 napi_value NetPolicyCallbackObserver::CreateNetQuotaPolicyChangeParam(napi_env env, void *data)
 {
     auto quotaPolicies = static_cast<std::vector<NetQuotaPolicy> *>(data);
+    if (quotaPolicies == nullptr) {
+        return nullptr;
+    }
     auto arraySize = quotaPolicies->size();
     napi_value callbackValue = NapiUtils::CreateArray(env, arraySize);
     for (size_t i = 0; i < arraySize; i++) {
@@ -123,6 +132,9 @@ napi_value NetPolicyCallbackObserver::CreateNetQuotaPolicyChangeParam(napi_env e
 napi_value NetPolicyCallbackObserver::CreateMeteredIfacesChangeParam(napi_env env, void *data)
 {
     auto ifaces = static_cast<std::vector<std::string> *>(data);
+    if (ifaces == nullptr) {
+        return nullptr;
+    }
     auto arraySize = ifaces->size();
     napi_value callbackValue = NapiUtils::CreateArray(env, arraySize);
     for (size_t i = 0; i < arraySize; i++) {

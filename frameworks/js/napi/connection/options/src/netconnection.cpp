@@ -41,6 +41,9 @@ NetConnection *NetConnection::MakeNetConnection(std::shared_ptr<EventManager>& e
 
 void NetConnection::DeleteNetConnection(NetConnection *netConnection)
 {
+    if (netConnection == nullptr) {
+        return;
+    }
     std::unique_lock<std::shared_mutex> lock(g_netConnectionsMutex);
     NET_CONNECTIONS.erase(netConnection->observer_.GetRefPtr());
     auto manager = netConnection->GetEventManager();
