@@ -617,7 +617,6 @@ private:
     std::mutex appHttpProxyCbMapMutex_;
     uint32_t currentCallbackId_ = 0;
     std::map<uint32_t, std::function<void(const HttpProxy &httpProxy)>> appHttpProxyCbMap_;
-    std::mutex appHttpProxyMutex_;
     HttpProxy appHttpProxy_;
     std::mutex globalHttpProxyMutex_;
     HttpProxy globalHttpProxy_;
