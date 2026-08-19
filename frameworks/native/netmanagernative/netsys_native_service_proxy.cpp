@@ -35,7 +35,6 @@ constexpr uint32_t MAX_ROUTE_TABLE_SIZE = 128;
 constexpr uint32_t MAX_CONFIG_LIST_SIZE = 1024;
 constexpr uint32_t MAX_IP_NEIGH_TABLE_SIZE = 1024;
 constexpr uint32_t MAX_SHARING_TYPE_SIZE = 32;
-constexpr uint32_t MAX_SHARING_TYPE_SIZE2 = 32;
 
 namespace {
 bool WriteNatDataToMessage(MessageParcel &data, const std::string &downstreamIface, const std::string &upstreamIface)
@@ -53,11 +52,6 @@ bool WriteNatDataToMessage(MessageParcel &data, const std::string &downstreamIfa
     return true;
 }
 } // namespace
-
-
-
-
-
 
 int32_t NetsysNativeServiceProxy::SendRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -106,7 +100,10 @@ int32_t NetsysNativeServiceProxy::SetResolverConfig(uint16_t netId, uint16_t bas
     NETNATIVE_LOGI("PROXY: SetResolverConfig Write Servers  String_SIZE: %{public}d",
                    static_cast<int32_t>(vServers.size()));
     for (auto &vServer : vServers) {
-        data.WriteString(vServer);
+        if (!data.WriteString(vServer)) {
+            NETNATIVE_LOGE("SetResolverConfig WriteString server failed");
+            return ERR_FLATTEN_OBJECT;
+        }
     }
 
     int vDomainSize1 = static_cast<int>(domains.size());
@@ -119,7 +116,10 @@ int32_t NetsysNativeServiceProxy::SetResolverConfig(uint16_t netId, uint16_t bas
     NETNATIVE_LOGI("PROXY: SetResolverConfig Write Domains String_SIZE: %{public}d",
                    static_cast<int32_t>(vDomains.size()));
     for (auto &vDomain : vDomains) {
-        data.WriteString(vDomain);
+        if (!data.WriteString(vDomain)) {
+            NETNATIVE_LOGE("SetResolverConfig WriteString domain failed");
+            return ERR_FLATTEN_OBJECT;
+        }
     }
 
     MessageParcel reply;
@@ -355,7 +355,10 @@ int32_t NetsysNativeServiceProxy::RegisterNotifyCallback(sptr<INotifyCallback> &
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    data.WriteRemoteObject(callback->AsObject().GetRefPtr());
+    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        NETNATIVE_LOGE("RegisterNotifyCallback WriteRemoteObject failed");
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -1263,7 +1266,10 @@ int32_t NetsysNativeServiceProxy::SetInterfaceConfig(const InterfaceConfiguratio
     NETNATIVE_LOGI("PROXY: SetInterfaceConfig Write flags String_SIZE: %{public}d",
                    static_cast<int32_t>(vCflags.size()));
     for (std::vector<std::string>::iterator it = vCflags.begin(); it != vCflags.end(); ++it) {
-        data.WriteString(*it);
+        if (!data.WriteString(*it)) {
+            NETNATIVE_LOGE("SetInterfaceConfig WriteString flag failed");
+            return ERR_FLATTEN_OBJECT;
+        }
     }
     MessageParcel reply;
     MessageOption option;
@@ -1297,16 +1303,24 @@ int32_t NetsysNativeServiceProxy::GetInterfaceConfig(InterfaceConfigurationParce
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
         return IPC_INVOKER_ERR;
     }
-    ret = reply.ReadInt32();
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("GetInterfaceConfig read ret failed");
+        return ERR_FLATTEN_OBJECT;
+    }
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("Fail to GetInterfaceConfig ret= %{public}d", ret);
         return ret;
     }
-    reply.ReadString(cfg.ifName);
-    reply.ReadString(cfg.hwAddr);
-    reply.ReadString(cfg.ipv4Addr);
-    reply.ReadInt32(cfg.prefixLength);
+    if (!reply.ReadString(cfg.ifName) || !reply.ReadString(cfg.hwAddr) || !reply.ReadString(cfg.ipv4Addr) ||
+        !reply.ReadInt32(cfg.prefixLength)) {
+        NETNATIVE_LOGE("GetInterfaceConfig read config fields failed");
+        return ERR_FLATTEN_OBJECT;
+    }
     vSize = reply.ReadInt32();
+    if (vSize < 0) {
+        NETNATIVE_LOGE("GetInterfaceConfig vSize is negative: %{public}d", vSize);
+        return ERR_INVALID_DATA;
+    }
     vSize = vSize > MAX_INTERFACE_CONFIG_SIZE ? MAX_INTERFACE_CONFIG_SIZE : vSize;
     std::vector<std::string> vecString;
     for (int i = 0; i < vSize; i++) {
@@ -1718,7 +1732,12 @@ int32_t NetsysNativeServiceProxy::FirewallSetUidsAllowedListChain(uint32_t chain
     }
     std::vector<uint32_t> vUids;
     vUids.assign(uids.begin(), uids.end());
-    std::for_each(vUids.begin(), vUids.end(), [&data](uint32_t uid) { data.WriteUint32(uid); });
+    for (const auto &uid : vUids) {
+        if (!data.WriteUint32(uid)) {
+            NETNATIVE_LOGE("WriteUint32 uid failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -1758,7 +1777,12 @@ int32_t NetsysNativeServiceProxy::FirewallSetUidsDeniedListChain(uint32_t chain,
     }
     std::vector<uint32_t> vUids;
     vUids.assign(uids.begin(), uids.end());
-    std::for_each(vUids.begin(), vUids.end(), [&data](uint32_t uid) { data.WriteUint32(uid); });
+    for (const auto &uid : vUids) {
+        if (!data.WriteUint32(uid)) {
+            NETNATIVE_LOGE("WriteUint32 uid failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -1947,8 +1971,12 @@ int32_t NetsysNativeServiceProxy::GetNetworkCellularSharingTraffic(NetworkSharin
 
     MessageParcel reply;
     MessageOption option;
-    SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_CELLULAR_SHARING_NETWORK_TRAFFIC),
-        data, reply, option);
+    int32_t error = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_CELLULAR_SHARING_NETWORK_TRAFFIC),
+                                data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("GetNetworkCellularSharingTraffic proxy SendRequest failed, error code: [%{public}d]", error);
+        return error;
+    }
 
     int32_t ret = reply.ReadInt32();
     if (ret != ERR_NONE) {
@@ -3523,7 +3551,12 @@ int32_t NetsysNativeServiceProxy::UnRegisterNetsysTrafficCallback(const sptr<INe
         return ret;
     }
 
-    return NetManagerStandard::NETMANAGER_SUCCESS;
+    int32_t result = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(result)) {
+        NETNATIVE_LOGE("UnRegisterNetsysTrafficCallback proxy read result failed");
+        return IPC_PROXY_TRANSACTION_ERR;
+    }
+    return result;
 }
 
 int32_t NetsysNativeServiceProxy::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
@@ -3587,7 +3620,7 @@ int32_t NetsysNativeServiceProxy::SetIpv6UidBlackList(std::vector<int32_t> &netI
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteInt32(netIds.size())) {
+    if (!data.WriteInt32(static_cast<int32_t>(netIds.size()))) {
         NETNATIVE_LOGE("SetIpv6UidBlackList write netIds size return error");
         return ERR_FLATTEN_OBJECT;
     }
@@ -3604,10 +3637,23 @@ int32_t NetsysNativeServiceProxy::SetIpv6UidBlackList(std::vector<int32_t> &netI
  
     MessageParcel reply;
     MessageOption option;
-    SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_UID_BLACK_LIST),
-        data, reply, option);
- 
-    return reply.ReadInt32();
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("SetIpv6UidBlackList Remote pointer is null");
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t error = remote->SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_UID_BLACK_LIST), data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("SetIpv6UidBlackList proxy SendRequest failed, error code: [%{public}d]", error);
+        return IPC_INVOKER_ERR;
+    }
+    int32_t result = ERR_INVALID_DATA;
+    if (!reply.ReadInt32(result)) {
+        NETNATIVE_LOGE("SetIpv6UidBlackList proxy read result failed");
+        return IPC_PROXY_TRANSACTION_ERR;
+    }
+    return result;
 }
 
 int32_t NetsysNativeServiceProxy::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
@@ -3930,7 +3976,7 @@ int32_t NetsysNativeServiceProxy::UpdateVpnRules(uint16_t netId, const std::vect
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!data.WriteInt32(extMessages.size())) {
+    if (!data.WriteInt32(static_cast<int32_t>(extMessages.size()))) {
         NETNATIVE_LOGE("UpdateVpnRules extMessages size return error");
         return ERR_FLATTEN_OBJECT;
     }
@@ -3944,6 +3990,7 @@ int32_t NetsysNativeServiceProxy::UpdateVpnRules(uint16_t netId, const std::vect
 
     if (!data.WriteBool(add)) {
         NETNATIVE_LOGE("UpdateVpnRules add error");
+        return ERR_FLATTEN_OBJECT;
     }
 
     MessageParcel reply;
@@ -4051,6 +4098,7 @@ int32_t NetsysNativeServiceProxy::SetUserDefinedServerFlag(uint16_t netId, bool 
     }
     if (!data.WriteBool(isUserDefinedServer)) {
         NETNATIVE_LOGE("SetUserDefinedServerFlag WriteBool func return error");
+        return ERR_FLATTEN_OBJECT;
     }
     if (Remote() == nullptr) {
         NETNATIVE_LOGE("SetUserDefinedServerFlag remote pointer is null");
