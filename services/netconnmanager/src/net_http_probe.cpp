@@ -540,8 +540,8 @@ bool NetHttpProbe::SetUserInfo(CURL *curlHandler)
     auto passwd = tempProxy.GetPassword();
     if (!username.empty()) {
         NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYUSERNAME, username.c_str());
-        NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
+        NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+        NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
         if (!passwd.empty()) {
             NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYPASSWORD, passwd.c_str());
         } else {

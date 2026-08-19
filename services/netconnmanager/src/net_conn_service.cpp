@@ -2679,8 +2679,8 @@ void NetConnService::SetCurlOptions(CURL *curl, HttpProxy tempProxy)
     curl_easy_setopt(curl, CURLOPT_PROXYPORT, tempProxy.port_);
     curl_easy_setopt(curl, CURLOPT_PROXYTYPE, proxyType);
     curl_easy_setopt(curl, CURLOPT_PROXYUSERNAME, tempProxy.username_.c_str());
-    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
+    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+    curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
     if (!tempProxy.password_.empty()) {
         curl_easy_setopt(curl, CURLOPT_PROXYPASSWORD, tempProxy.password_.c_str());
     }
