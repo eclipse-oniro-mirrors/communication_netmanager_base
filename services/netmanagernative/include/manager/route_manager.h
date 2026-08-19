@@ -353,7 +353,7 @@ private:
         VPN_NETWORK_TABLE,
     };
 
-    static std::atomic<bool> vpnSysCall_;
+    static bool vpnSysCall_;
     static std::string defauleNetWorkName_;
 
     static bool CheckSysVpnCall();
