@@ -763,9 +763,9 @@ int32_t NetConnClient::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 void NetConnClient::RegisterAppHttpProxyCallback(std::function<void(const HttpProxy &httpProxy)> callback,
                                                  uint32_t &callbackid)
 {
-    std::lock_guard<std::mutex> lock(appHttpProxyMutex_);
-    std::lock_guard<std::mutex> cbLock(appHttpProxyCbMapMutex_);
-    uint32_t id = currentCallbackId_++;
+    std::lock_guard<std::mutex> lock(appHttpProxyCbMapMutex_);
+    uint32_t id = currentCallbackId_;
+    currentCallbackId_++;
     appHttpProxyCbMap_[id] = callback;
     callbackid = id;
     if (callback && !appHttpProxy_.GetHost().empty()) {
@@ -777,17 +777,13 @@ void NetConnClient::RegisterAppHttpProxyCallback(std::function<void(const HttpPr
 void NetConnClient::UnregisterAppHttpProxyCallback(uint32_t callbackid)
 {
     NETMGR_LOG_I("unregisterCallback callbackid:%{public}d.", callbackid);
-    std::lock_guard<std::mutex> lock(appHttpProxyMutex_);
-    std::lock_guard<std::mutex> cbLock(appHttpProxyCbMapMutex_);
+    std::lock_guard<std::mutex> lock(appHttpProxyCbMapMutex_);
     appHttpProxyCbMap_.erase(callbackid);
 }
 
 int32_t NetConnClient::SetAppHttpProxy(const HttpProxy &httpProxy)
 {
     NETMGR_LOG_I("Enter AppHttpProxy");
-
-    std::lock_guard<std::mutex> lock(appHttpProxyMutex_);
-    std::lock_guard<std::mutex> cbLock(appHttpProxyCbMapMutex_);
     if (appHttpProxy_ != httpProxy) {
         appHttpProxy_ = httpProxy;
         for (const auto &pair : appHttpProxyCbMap_) {
@@ -810,10 +806,10 @@ int32_t NetConnClient::GetGlobalHttpProxy(HttpProxy &httpProxy)
 
 int32_t NetConnClient::GetDefaultHttpProxy(HttpProxy &httpProxy)
 {
-    std::lock_guard<std::mutex> lock(appHttpProxyMutex_);
     if (!appHttpProxy_.GetHost().empty()) {
         httpProxy = appHttpProxy_;
-        NETMGR_LOG_D("Return AppHttpProxy:%{public}s:%{public}d", httpProxy.GetHost().c_str(), httpProxy.GetPort());
+        NETMGR_LOG_D("Return AppHttpProxy:%{public}s:%{public}d",
+                     httpProxy.GetHost().c_str(), httpProxy.GetPort());
         return NETMANAGER_SUCCESS;
     }
 
