@@ -879,8 +879,8 @@ bool UrlRegexParse(const std::string &str, const std::string &patternStr)
 
 uint64_t GenRandomNumber()
 {
-    thread_local std::random_device rd;
-    thread_local std::uniform_int_distribution<uint64_t> dist(0ULL, UINT64_MAX);
+    static std::random_device rd;
+    static std::uniform_int_distribution<uint64_t> dist(0ULL, UINT64_MAX);
     uint64_t num = dist(rd);
     return num;
 }
