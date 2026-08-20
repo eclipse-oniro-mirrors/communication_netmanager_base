@@ -65,41 +65,68 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
     std::string ident;
     std::set<NetCap> netCaps;
 
-    data.ReadString(ident);
+    if (!data.ReadString(ident)) {
+        NETMGR_LOG_E("Read ident failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
     uint32_t size = 0;
     uint32_t value = 0;
-    data.ReadUint32(size);
+    if (!data.ReadUint32(size)) {
+        NETMGR_LOG_E("Read netCap size failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
     if (size > MAX_NET_CAP_NUM) {
         NETMGR_LOG_E("Net cap size is too large");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     for (uint32_t i = 0; i < size; i++) {
-        data.ReadUint32(value);
+        if (!data.ReadUint32(value)) {
+            NETMGR_LOG_E("Read netCap value failed");
+            return NETMANAGER_ERR_READ_DATA_FAIL;
+        }
         if (value < NET_CAPABILITY_END) {
             netCaps.insert(static_cast<NetCap>(value));
         }
     }
-    int32_t registerType = 0;
-    data.ReadInt32(registerType);
+    uint32_t registerType = 0;
+    if (!data.ReadUint32(registerType)) {
+        NETMGR_LOG_E("Read registerType failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
     std::set<NetBearType> netBearTypes;
     uint32_t bearTypeSize = 0;
-    data.ReadUint32(bearTypeSize);
+    if (!data.ReadUint32(bearTypeSize)) {
+        NETMGR_LOG_E("Read bearType size failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
     if (bearTypeSize > MAX_NET_BEARTYPE_NUM) {
         NETMGR_LOG_E("Net beartype size is too large");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     for (uint32_t i = 0; i < bearTypeSize; i++) {
-        data.ReadUint32(value);
+        if (!data.ReadUint32(value)) {
+            NETMGR_LOG_E("Read bearType value failed");
+            return NETMANAGER_ERR_READ_DATA_FAIL;
+        }
         if (value <= BEARER_DEFAULT) {
             netBearTypes.insert(static_cast<NetBearType>(value));
         }
     }
     uint32_t uid = 0;
-    data.ReadUint32(uid);
+    if (!data.ReadUint32(uid)) {
+        NETMGR_LOG_E("Read uid failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
     uint32_t requestId = 0;
-    data.ReadUint32(requestId);
+    if (!data.ReadUint32(requestId)) {
+        NETMGR_LOG_E("Read requestId failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
     std::string requestIdent;
-    data.ReadString(requestIdent);
+    if (!data.ReadString(requestIdent)) {
+        NETMGR_LOG_E("Read requestIdent failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
     NetRequest netRequest(uid, requestId, registerType, requestIdent, netBearTypes, netCaps);
     RequestNetwork(ident, netCaps, netRequest);
 
@@ -121,12 +148,12 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     std::set<NetBearType> netBearTypes;
-    int32_t value = 0;
+    uint32_t value = 0;
     if (size > MAX_NET_BEARTYPE_NUM) {
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     for (uint32_t i = 0; i < size; i++) {
-        if (!data.ReadInt32(value)) {
+        if (!data.ReadUint32(value)) {
             NETMGR_LOG_E("Read bearType failed");
             return NETMANAGER_ERR_READ_DATA_FAIL;
         }
@@ -143,7 +170,7 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     for (uint32_t i = 0; i < size; i++) {
-        if (!data.ReadInt32(value)) {
+        if (!data.ReadUint32(value)) {
             NETMGR_LOG_E("Read Netcap failed");
             return NETMANAGER_ERR_READ_DATA_FAIL;
         }
