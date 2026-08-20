@@ -151,7 +151,6 @@ napi_value ConnectionExec::CreateNetPortStatesInfo(napi_env env, const NetPortSt
     }
 
     napi_value tcpArray = NapiUtils::CreateArray(env, netPortStatesInfo.tcpNetPortStatesInfo_.size());
-
     if (NapiUtils::GetValueType(env, tcpArray) != napi_object) {
         return NapiUtils::GetUndefined(env);
     }
