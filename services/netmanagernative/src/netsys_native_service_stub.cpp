@@ -1825,14 +1825,14 @@ int32_t NetsysNativeServiceStub::CmdSetIptablesCommandForRes(MessageParcel &data
 
 bool NetsysNativeServiceStub::CheckIpCommand(const std::string &cmd)
 {
-    std::string forbiddenChars = "-c|;>&";
+    std::string forbiddenChars = "|;>&";
     for (char c : cmd) {
         if (forbiddenChars.find(c) != std::string::npos) {
             return false;
         }
     }
-    std::regex ipCommandRegex(R"(^ip\s+(address|route|neigh|link|tunnel|rule)\s+.*)");
-    return std::regex_match(cmd, ipCommandRegex);
+    std::regex ipCommandRegex(R"(^(?:/system/bin/)?ip\s+(?:-6 )?(address|route|neigh|link|tunnel|rule)\s+.*)");
+    return std::regex_match(cmd, ipCommandRegex) || (cmd == "/system/bin/ifconfig");
 }
 
 int32_t NetsysNativeServiceStub::CmdSetIpCommandForRes(MessageParcel &data, MessageParcel &reply)
