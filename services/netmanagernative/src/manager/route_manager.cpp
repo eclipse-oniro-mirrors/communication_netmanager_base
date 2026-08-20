@@ -114,7 +114,8 @@ std::string RouteManager::sharingTunv4Interface_ = "";
 uint32_t RouteManager::sharingTunv4TableId_ = 0;
 
 #ifdef SUPPORT_SYSVPN
-bool RouteManager::vpnSysCall_ = true;
+std::atomic<bool> RouteManager::vpnSysCall_{true};
+std::mutex RouteManager::defauleNetWorkNameLock_;
 std::string RouteManager::defauleNetWorkName_ = "";
 #endif // SUPPORT_SYSVPN
 
@@ -252,7 +253,10 @@ int32_t RouteManager::AddInterfaceToDefaultNetwork(const std::string &interfaceN
     NETNATIVE_LOGI("AddInterfaceToDefaultNetwork, %{public}s;permission:%{public}d;", interfaceName.c_str(),
                    permission);
 #ifdef SUPPORT_SYSVPN
-    defauleNetWorkName_ = interfaceName;
+    {
+        std::lock_guard lock(defauleNetWorkNameLock_);
+        defauleNetWorkName_ = interfaceName;
+    }
 #endif // SUPPORT_SYSVPN
     uint32_t table = FindTableByInterfacename(interfaceName);
     if (table == RT_TABLE_UNSPEC) {
@@ -362,9 +366,14 @@ int32_t RouteManager::UpdateVpnRules(uint16_t netId, const std::string &interfac
         return ROUTEMANAGER_ERROR;
     }
 
-    if (defauleNetWorkName_.empty()) {
-        NETNATIVE_LOGE("UpdateVpnRules err, default network name is not configured");
-        return ROUTEMANAGER_ERROR;
+    std::string defaultNetWorkName;
+    {
+        std::lock_guard lock(defauleNetWorkNameLock_);
+        if (defauleNetWorkName_.empty()) {
+            NETNATIVE_LOGE("UpdateVpnRules err, default network name is not configured");
+            return ROUTEMANAGER_ERROR;
+        }
+        defaultNetWorkName = defauleNetWorkName_;
     }
     
     NETNATIVE_LOG_D("update vpn rules on interface, %{public}s.", interface.c_str());
@@ -380,7 +389,7 @@ int32_t RouteManager::UpdateVpnRules(uint16_t netId, const std::string &interfac
             NETNATIVE_LOGI("TUN mode, skipping update for interface: %{public}s", interface.c_str());
             continue;
         }
-        ret = UpdateVpnOutPutPenetrationRule(netId, defauleNetWorkName_, msg, add);
+        ret = UpdateVpnOutPutPenetrationRule(netId, defaultNetWorkName, msg, add);
         if (ret != ROUTEMANAGER_SUCCESS) {
             return ret;
         }
@@ -392,11 +401,11 @@ int32_t RouteManager::SetVpnCallMode(const std::string &message)
 {
     std::lock_guard lock(interfaceToTableLock_);
     if (message.find("0") == std::string::npos) {
-        vpnSysCall_ = true;
+        vpnSysCall_.store(true);
     } else {
-        vpnSysCall_ = false;
+        vpnSysCall_.store(false);
     }
-    NETNATIVE_LOG_D("vpnSysCall_ %{public}d", vpnSysCall_);
+    NETNATIVE_LOG_D("vpnSysCall_ %{public}d", vpnSysCall_.load());
     return ROUTEMANAGER_SUCCESS;
 }
 
@@ -406,7 +415,7 @@ bool RouteManager::CheckTunVpnCall(const std::string &vpnName)
         NETNATIVE_LOGE("CheckTunVpnCall err, vpn name is empty");
         return false;
     }
-    NETNATIVE_LOG_D("vpnName %{public}s, vpnSysCall_ %{public}d", vpnName.c_str(), vpnSysCall_);
+    NETNATIVE_LOG_D("vpnName %{public}s, vpnSysCall_ %{public}d", vpnName.c_str(), vpnSysCall_.load());
     if (vpnName.find(TUN_CARD_NAME) != std::string::npos) {
         return true;
     }
@@ -415,7 +424,7 @@ bool RouteManager::CheckTunVpnCall(const std::string &vpnName)
 
 bool RouteManager::CheckSysVpnCall()
 {
-    return vpnSysCall_;
+    return vpnSysCall_.load();
 }
 
 bool RouteManager::CheckMultiVpnCall(const std::string &vpnName)
@@ -1073,6 +1082,7 @@ int32_t RouteManager::ClearRoutes(const std::string &interfaceName, int32_t netI
     }
     int32_t ret = ClearRouteInfo(RTM_GETROUTE, table);
     if (ret == 0 && table > ROUTE_INTERNAL_DEFAULT_TABLE) {
+        std::lock_guard lock(interfaceToTableLock_);
         interfaceToTable_.erase(interfaceName);
     }
 
@@ -1636,6 +1646,7 @@ int32_t RouteManager::SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtm
 uint32_t RouteManager::FindTableByInterfacename(const std::string &interfaceName, int32_t netId)
 {
     NETNATIVE_LOG_D("FindTableByInterfacename netId %{public}d", netId);
+    std::lock_guard lock(RouteManager::interfaceToTableLock_);
     auto iter = interfaceToTable_.find(interfaceName);
     if (iter != interfaceToTable_.end()) {
         return ConvertTableByNetId(netId, iter->second);
@@ -1647,7 +1658,6 @@ uint32_t RouteManager::FindTableByInterfacename(const std::string &interfaceName
         return RT_TABLE_UNSPEC;
     }
     table += ROUTE_TABLE_OFFSET_FROM_INDEX;
-    std::lock_guard lock(RouteManager::interfaceToTableLock_);
     interfaceToTable_[interfaceName] = table;
     return ConvertTableByNetId(netId, table);
 }
