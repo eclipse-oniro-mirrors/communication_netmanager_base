@@ -120,8 +120,16 @@ void NetPolicyFirewall::ReportFirewallPolicyChange(const std::string &callingFnc
 
 int32_t NetPolicyFirewall::SetDeviceIdleTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
 {
+    if (uids.size() > MAX_LIST_SIZE) {
+        NETMGR_LOG_E("Device idle allowed list's size is over the max size.");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
     std::unique_lock<std::shared_mutex> lock(listMutex_);
-    if (powerSaveAllowedList_.size() > MAX_LIST_SIZE) {
+    if (deviceIdleFirewallRule_ == nullptr) {
+        NETMGR_LOG_E("deviceIdleFirewallRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    if (isAllowed && (deviceIdleAllowedList_.size() + uids.size() > MAX_LIST_SIZE)) {
         NETMGR_LOG_E("Device idle allowed list's size is over the max size.");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
@@ -138,17 +146,21 @@ int32_t NetPolicyFirewall::SetDeviceIdleTrustlist(const std::vector<uint32_t> &u
 
 int32_t NetPolicyFirewall::SetPowerSaveTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
 {
+    if (uids.size() > MAX_LIST_SIZE) {
+        NETMGR_LOG_E("Power save allowed list's size is over the max size.");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
     std::unique_lock<std::shared_mutex> lock(listMutex_);
-    if (powerSaveAllowedList_.size() > MAX_LIST_SIZE) {
+    if (powerSaveFirewallRule_ == nullptr) {
+        NETMGR_LOG_E("powerSaveFirewallRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    if (isAllowed && (powerSaveAllowedList_.size() + uids.size() > MAX_LIST_SIZE)) {
         NETMGR_LOG_E("Power save allowed list's size is over the max size.");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     UpdateFirewallPolicyList(FIREWALL_CHAIN_POWER_SAVE, uids, isAllowed);
     GetFileInst()->WriteFirewallRules(FIREWALL_CHAIN_POWER_SAVE, powerSaveAllowedList_, powerSaveDeniedList_);
-    if (powerSaveFirewallRule_ == nullptr) {
-        NETMGR_LOG_E("powerSaveFirewallRule_ is nullptr");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
     powerSaveFirewallRule_->SetAllowedList(uids, isAllowed ? FIREWALL_RULE_ALLOW : FIREWALL_RULE_DENY);
     ReportFirewallPolicyChange(__func__, FIREWALL_CHAIN_POWER_SAVE, powerSaveMode_, powerSaveFirewallRule_);
     std::shared_ptr<PolicyEvent> eventData = std::make_shared<PolicyEvent>();

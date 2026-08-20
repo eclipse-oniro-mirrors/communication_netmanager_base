@@ -80,8 +80,13 @@ HWTEST_F(NetSupplierCallbackStubTest, RequestNetwork001, TestSize.Level1)
     size = static_cast<uint32_t>(netCaps.size());
     ASSERT_NE(dataOk.WriteUint32(size), false);
     for (auto netCap : netCaps) {
-        dataOk.WriteInt32(static_cast<uint32_t>(netCap));
+        dataOk.WriteUint32(static_cast<uint32_t>(netCap));
     }
+    ASSERT_NE(dataOk.WriteUint32(0), false);
+    ASSERT_NE(dataOk.WriteUint32(0), false);
+    ASSERT_NE(dataOk.WriteUint32(0), false);
+    ASSERT_NE(dataOk.WriteUint32(0), false);
+    ASSERT_NE(dataOk.WriteString(ident), false);
     ret = supplierCbStub_->OnRemoteRequest(
         static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_REQUEST_NETWORK), dataOk, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);

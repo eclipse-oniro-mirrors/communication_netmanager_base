@@ -69,10 +69,19 @@ void NetAccessPolicyConfigUtils::AddNetAccessPolicyConfig(const std::vector<std:
         return;
     }
     std::lock_guard<ffrt::mutex> lock(lock_);
+    size_t totalSize = netAccessPolicyConfigs_.size() + dynamicNetAccessPolicyConfigs_.size();
+    if (totalSize >= MAX_NET_ACCESS_COUNT) {
+        NETMGR_LOG_W("Total configs exceed limit(%{public}zu), cannot add more", totalSize);
+        return;
+    }
     for (const auto &bundleName : bundleNames) {
         if (dynamicNetAccessPolicyConfigs_.find(bundleName) != dynamicNetAccessPolicyConfigs_.end()) {
             NETMGR_LOG_W("Bundle: %{public}s has already been added.", bundleName.c_str());
             continue;
+        }
+        if (dynamicNetAccessPolicyConfigs_.size() + netAccessPolicyConfigs_.size() >= MAX_NET_ACCESS_COUNT) {
+            NETMGR_LOG_W("Total configs reach limit(%{public}zu), stop adding", MAX_NET_ACCESS_COUNT);
+            break;
         }
         NetAccessPolicyConfig config;
         config.bundleName = bundleName;

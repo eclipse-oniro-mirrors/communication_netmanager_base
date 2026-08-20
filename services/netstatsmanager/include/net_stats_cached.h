@@ -48,7 +48,7 @@ typedef  struct {
 class NetStatsCached {
 public:
     NetStatsCached();
-    ~NetStatsCached() = default;
+    ~NetStatsCached();
     void ForceUpdateStats();
     void ForceUpdateStatsAndBackupDB(const std::string &sourceDb, const std::string &backupDb);
 

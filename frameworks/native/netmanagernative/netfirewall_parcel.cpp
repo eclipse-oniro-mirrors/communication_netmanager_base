@@ -28,22 +28,34 @@ constexpr uint32_t FIREWALL_MAX_LIST_SIZE = 100;
 // Firewall IP parameters
 bool NetFirewallIpParam::Marshalling(Parcel &parcel) const
 {
-    parcel.WriteUint8(family);
+    if (!parcel.WriteUint8(family)) {
+        return false;
+    }
     if (!parcel.WriteUint8(type)) {
         return false;
     }
-    parcel.WriteUint8(mask);
+    if (!parcel.WriteUint8(mask)) {
+        return false;
+    }
     if (family == FAMILY_IPV4) {
-        parcel.WriteUint32(ipv4.startIp.s_addr);
+        if (!parcel.WriteUint32(ipv4.startIp.s_addr)) {
+            return false;
+        }
         if (type == MULTIPLE_IP) {
-            parcel.WriteUint32(ipv4.endIp.s_addr);
+            if (!parcel.WriteUint32(ipv4.endIp.s_addr)) {
+                return false;
+            }
         }
         return true;
     }
     for (int32_t index = 0; index < IPV6_ARRAY_SIZE; index++) {
-        parcel.WriteUint8(ipv6.startIp.s6_addr[index]);
+        if (!parcel.WriteUint8(ipv6.startIp.s6_addr[index])) {
+            return false;
+        }
         if (type == MULTIPLE_IP) {
-            parcel.WriteUint8(ipv6.endIp.s6_addr[index]);
+            if (!parcel.WriteUint8(ipv6.endIp.s6_addr[index])) {
+                return false;
+            }
         }
     }
     return true;
@@ -56,23 +68,35 @@ sptr<NetFirewallIpParam> NetFirewallIpParam::Unmarshalling(Parcel &parcel)
         NETMGR_LOG_E("NetFirewallIpParam ptr is null");
         return nullptr;
     }
-    parcel.ReadUint8(ptr->family);
+    if (!parcel.ReadUint8(ptr->family)) {
+        return nullptr;
+    }
     if (!parcel.ReadUint8(ptr->type)) {
         return nullptr;
     }
-    parcel.ReadUint8(ptr->mask);
+    if (!parcel.ReadUint8(ptr->mask)) {
+        return nullptr;
+    }
 
     if (ptr->family == FAMILY_IPV4) {
-        parcel.ReadUint32(ptr->ipv4.startIp.s_addr);
+        if (!parcel.ReadUint32(ptr->ipv4.startIp.s_addr)) {
+            return nullptr;
+        }
         if (ptr->type == MULTIPLE_IP) {
-            parcel.ReadUint32(ptr->ipv4.endIp.s_addr);
+            if (!parcel.ReadUint32(ptr->ipv4.endIp.s_addr)) {
+                return nullptr;
+            }
         }
         return ptr;
     }
     for (int32_t index = 0; index < IPV6_ARRAY_SIZE; index++) {
-        parcel.ReadUint8(ptr->ipv6.startIp.s6_addr[index]);
+        if (!parcel.ReadUint8(ptr->ipv6.startIp.s6_addr[index])) {
+            return nullptr;
+        }
         if (ptr->type == MULTIPLE_IP) {
-            parcel.ReadUint8(ptr->ipv6.endIp.s6_addr[index]);
+            if (!parcel.ReadUint8(ptr->ipv6.endIp.s6_addr[index])) {
+                return nullptr;
+            }
         }
     }
     return ptr;
@@ -187,7 +211,9 @@ bool NetFirewallDnsParam::Marshalling(Parcel &parcel) const
     if (!parcel.WriteString(primaryDns)) {
         return false;
     }
-    parcel.WriteString(standbyDns);
+    if (!parcel.WriteString(standbyDns)) {
+        return false;
+    }
     return true;
 }
 
@@ -201,7 +227,9 @@ sptr<NetFirewallDnsParam> NetFirewallDnsParam::Unmarshalling(Parcel &parcel)
     if (!parcel.ReadString(ptr->primaryDns)) {
         return nullptr;
     }
-    parcel.ReadString(ptr->standbyDns);
+    if (!parcel.ReadString(ptr->standbyDns)) {
+        return nullptr;
+    }
     return ptr;
 }
 
@@ -247,11 +275,15 @@ template <typename T> bool NetFirewallUtils::UnmarshallingList(Parcel &parcel, s
 // Firewall rules, external interfaces
 bool NetFirewallRule::Marshalling(Parcel &parcel) const
 {
-    parcel.WriteInt32(ruleId);
+    if (!parcel.WriteInt32(ruleId)) {
+        return false;
+    }
     if (!parcel.WriteString(ruleName)) {
         return false;
     }
-    parcel.WriteString(ruleDescription);
+    if (!parcel.WriteString(ruleDescription)) {
+        return false;
+    }
     if (!parcel.WriteInt32(static_cast<int32_t>(ruleDirection))) {
         return false;
     }
@@ -261,15 +293,33 @@ bool NetFirewallRule::Marshalling(Parcel &parcel) const
     if (!parcel.WriteInt32(static_cast<int32_t>(ruleType))) {
         return false;
     }
-    parcel.WriteBool(isEnabled);
-    parcel.WriteInt32(appUid);
-    NetFirewallUtils::MarshallingList(localIps, parcel);
-    NetFirewallUtils::MarshallingList(remoteIps, parcel);
-    parcel.WriteInt32(static_cast<int32_t>(protocol));
-    NetFirewallUtils::MarshallingList(localPorts, parcel);
-    NetFirewallUtils::MarshallingList(remotePorts, parcel);
-    NetFirewallUtils::MarshallingList(domains, parcel);
-    dns.Marshalling(parcel);
+    if (!parcel.WriteBool(isEnabled)) {
+        return false;
+    }
+    if (!parcel.WriteInt32(appUid)) {
+        return false;
+    }
+    if (!NetFirewallUtils::MarshallingList(localIps, parcel)) {
+        return false;
+    }
+    if (!NetFirewallUtils::MarshallingList(remoteIps, parcel)) {
+        return false;
+    }
+    if (!parcel.WriteInt32(static_cast<int32_t>(protocol))) {
+        return false;
+    }
+    if (!NetFirewallUtils::MarshallingList(localPorts, parcel)) {
+        return false;
+    }
+    if (!NetFirewallUtils::MarshallingList(remotePorts, parcel)) {
+        return false;
+    }
+    if (!NetFirewallUtils::MarshallingList(domains, parcel)) {
+        return false;
+    }
+    if (!dns.Marshalling(parcel)) {
+        return false;
+    }
     if (!parcel.WriteInt32(userId)) {
         return false;
     }
@@ -281,19 +331,24 @@ bool NetFirewallRule::Marshalling(Parcel &parcel) const
 
 sptr<NetFirewallRule> NetFirewallRule::Unmarshalling(Parcel &parcel)
 {
-    sptr<NetFirewallRule> ptr = new (std::nothrow) NetFirewallRule();
-    if (ptr == nullptr) {
-        NETMGR_LOG_E("NetFirewallRule ptr is null");
+    sptr<NetFirewallRule> ptr = sptr<NetFirewallRule>::MakeSptr();
+    if (!parcel.ReadInt32(ptr->ruleId)) {
         return nullptr;
     }
-    parcel.ReadInt32(ptr->ruleId);
 
     if (!parcel.ReadString(ptr->ruleName)) {
         return nullptr;
     }
-    parcel.ReadString(ptr->ruleDescription);
+    if (!parcel.ReadString(ptr->ruleDescription)) {
+        return nullptr;
+    }
     int32_t ruleDirection = 0;
     if (!parcel.ReadInt32(ruleDirection)) {
+        return nullptr;
+    }
+    if (ruleDirection < static_cast<int32_t>(NetFirewallRuleDirection::RULE_IN) ||
+        ruleDirection > static_cast<int32_t>(NetFirewallRuleDirection::RULE_OUT)) {
+        NETMGR_LOG_E("Invalid ruleDirection: %{public}d", ruleDirection);
         return nullptr;
     }
     ptr->ruleDirection = static_cast<NetFirewallRuleDirection>(ruleDirection);
@@ -301,56 +356,70 @@ sptr<NetFirewallRule> NetFirewallRule::Unmarshalling(Parcel &parcel)
     if (!parcel.ReadInt32(ruleAction)) {
         return nullptr;
     }
+    if (ruleAction <= static_cast<int32_t>(FirewallRuleAction::RULE_INVALID) ||
+        ruleAction > static_cast<int32_t>(FirewallRuleAction::RULE_DENY)) {
+        NETMGR_LOG_E("Invalid ruleAction: %{public}d", ruleAction);
+        return nullptr;
+    }
     ptr->ruleAction = static_cast<FirewallRuleAction>(ruleAction);
     int32_t ruleType = 0;
     if (!parcel.ReadInt32(ruleType)) {
         return nullptr;
     }
+    if (ruleType <= static_cast<int32_t>(NetFirewallRuleType::RULE_INVALID) ||
+        ruleType > static_cast<int32_t>(NetFirewallRuleType::RULE_ALL) || ruleType == 0) {
+        NETMGR_LOG_E("Invalid ruleType: %{public}d", ruleType);
+        return nullptr;
+    }
     ptr->ruleType = static_cast<NetFirewallRuleType>(ruleType);
-    parcel.ReadBool(ptr->isEnabled);
-    parcel.ReadInt32(ptr->appUid);
-    NetFirewallUtils::UnmarshallingList(parcel, ptr->localIps);
-    NetFirewallUtils::UnmarshallingList(parcel, ptr->remoteIps);
+    if (!parcel.ReadBool(ptr->isEnabled)) {
+        return nullptr;
+    }
+    if (!parcel.ReadInt32(ptr->appUid)) {
+        return nullptr;
+    }
+    if (!NetFirewallUtils::UnmarshallingList(parcel, ptr->localIps)) {
+        return nullptr;
+    }
+    if (!NetFirewallUtils::UnmarshallingList(parcel, ptr->remoteIps)) {
+        return nullptr;
+    }
     int32_t protocol = 0;
-    if (parcel.ReadInt32(protocol)) {
-        ptr->protocol = static_cast<NetworkProtocol>(protocol);
+    if (!parcel.ReadInt32(protocol)) {
+        return nullptr;
     }
-    NetFirewallUtils::UnmarshallingList(parcel, ptr->localPorts);
-    NetFirewallUtils::UnmarshallingList(parcel, ptr->remotePorts);
-    NetFirewallUtils::UnmarshallingList(parcel, ptr->domains);
+    ptr->protocol = static_cast<NetworkProtocol>(protocol);
+    if (!NetFirewallUtils::UnmarshallingList(parcel, ptr->localPorts)) {
+        return nullptr;
+    }
+    if (!NetFirewallUtils::UnmarshallingList(parcel, ptr->remotePorts)) {
+        return nullptr;
+    }
+    if (!NetFirewallUtils::UnmarshallingList(parcel, ptr->domains)) {
+        return nullptr;
+    }
     sptr<NetFirewallDnsParam> dns = NetFirewallDnsParam::Unmarshalling(parcel);
-    if (dns != nullptr) {
-        ptr->dns = *dns;
+    if (dns == nullptr) {
+        return nullptr;
     }
+    ptr->dns = *dns;
     if (!parcel.ReadInt32(ptr->userId)) {
         return nullptr;
     }
-    parcel.ReadString(ptr->interface);
+    if (!parcel.ReadString(ptr->interface)) {
+        return nullptr;
+    }
     return ptr;
-}
-
-std::string NetFirewallRule::ToString() const
-{
-    const std::string size = " size=";
-    std::stringstream ss;
-    ss << "NetFirewallRule:{" << NET_FIREWALL_RULE_ID << EQUAL << this->ruleId << COMMA << NET_FIREWALL_RULE_NAME <<
-        EQUAL << this->ruleName << COMMA << NET_FIREWALL_RULE_DESC << EQUAL << this->ruleDescription << COMMA <<
-        NET_FIREWALL_RULE_DIR << EQUAL << int(this->ruleDirection) << COMMA << NET_FIREWALL_RULE_ACTION << EQUAL <<
-        int(this->ruleAction) << COMMA << NET_FIREWALL_RULE_TYPE << EQUAL << int(this->ruleType) << COMMA <<
-        NET_FIREWALL_IS_ENABLED << EQUAL << this->isEnabled << COMMA << NET_FIREWALL_APP_ID << EQUAL << this->appUid <<
-        COMMA << NET_FIREWALL_PROTOCOL << EQUAL << int(this->protocol) << COMMA << NET_FIREWALL_USER_ID << EQUAL <<
-        this->userId << COMMA << NET_FIREWALL_LOCAL_IP << size << this->localIps.size() << COMMA <<
-        NET_FIREWALL_REMOTE_IP << size << this->remoteIps.size() << COMMA << NET_FIREWALL_LOCAL_PORT << size <<
-        this->localPorts.size() << COMMA << NET_FIREWALL_DOMAIN << size << this->remotePorts.size() << COMMA <<
-        NET_FIREWALL_REMOTE_PORT << size << this->domains.size() << COMMA << NET_FIREWALL_INTERFACE << EQUAL <<
-        this->interface << "}";
-    return ss.str();
 }
 
 bool NetFirewallBaseRule::Marshalling(Parcel &parcel) const
 {
-    parcel.WriteInt32(userId);
-    parcel.WriteInt32(appUid);
+    if (!parcel.WriteInt32(userId)) {
+        return false;
+    }
+    if (!parcel.WriteInt32(appUid)) {
+        return false;
+    }
     return true;
 }
 
@@ -361,34 +430,60 @@ sptr<NetFirewallBaseRule> NetFirewallBaseRule::Unmarshalling(Parcel &parcel)
         NETMGR_LOG_E("NetFirewallBaseRule ptr is null");
         return nullptr;
     }
-    parcel.ReadInt32(ptr->userId);
-    parcel.ReadInt32(ptr->appUid);
+    if (!parcel.ReadInt32(ptr->userId)) {
+        return nullptr;
+    }
+    if (!parcel.ReadInt32(ptr->appUid)) {
+        return nullptr;
+    }
     return ptr;
 }
 
 bool NetFirewallBaseRule::UnmarshallingBase(Parcel &parcel, sptr<NetFirewallBaseRule> ptr)
 {
-    parcel.ReadInt32(ptr->userId);
-    parcel.ReadInt32(ptr->appUid);
+    if (ptr == nullptr) {
+        NETMGR_LOG_E("UnmarshallingBase ptr is null");
+        return false;
+    }
+    if (!parcel.ReadInt32(ptr->userId)) {
+        return false;
+    }
+    if (!parcel.ReadInt32(ptr->appUid)) {
+        return false;
+    }
     return true;
 }
 
 // IP rule data
 bool NetFirewallIpRule::Marshalling(Parcel &parcel) const
 {
-    NetFirewallBaseRule::Marshalling(parcel);
+    if (!NetFirewallBaseRule::Marshalling(parcel)) {
+        return false;
+    }
     if (!parcel.WriteInt32(static_cast<int32_t>(ruleDirection))) {
         return false;
     }
     if (!parcel.WriteInt32(static_cast<int32_t>(ruleAction))) {
         return false;
     }
-    parcel.WriteInt32(static_cast<int32_t>(protocol));
-    NetFirewallUtils::MarshallingList(localIps, parcel);
-    NetFirewallUtils::MarshallingList(remoteIps, parcel);
-    NetFirewallUtils::MarshallingList(localPorts, parcel);
-    NetFirewallUtils::MarshallingList(remotePorts, parcel);
-    parcel.WriteString(interface);
+    if (!parcel.WriteInt32(static_cast<int32_t>(protocol))) {
+        return false;
+    }
+    if (!NetFirewallUtils::MarshallingList(localIps, parcel)) {
+        return false;
+    }
+    if (!NetFirewallUtils::MarshallingList(remoteIps, parcel)) {
+        return false;
+    }
+    if (!NetFirewallUtils::MarshallingList(localPorts, parcel)) {
+        return false;
+    }
+    if (!NetFirewallUtils::MarshallingList(remotePorts, parcel)) {
+        return false;
+    }
+    if (!parcel.WriteString(interface)) {
+        return false;
+    }
     return true;
 }
 
@@ -399,9 +494,16 @@ sptr<NetFirewallIpRule> NetFirewallIpRule::Unmarshalling(Parcel &parcel)
         NETMGR_LOG_E("NetFirewallIpRule ptr is null");
         return nullptr;
     }
-    NetFirewallBaseRule::UnmarshallingBase(parcel, ptr);
+    if (!NetFirewallBaseRule::UnmarshallingBase(parcel, ptr)) {
+        return nullptr;
+    }
     int32_t ruleDirection = 0;
     if (!parcel.ReadInt32(ruleDirection)) {
+        return nullptr;
+    }
+    if (ruleDirection < static_cast<int32_t>(NetFirewallRuleDirection::RULE_IN) ||
+        ruleDirection > static_cast<int32_t>(NetFirewallRuleDirection::RULE_OUT)) {
+        NETMGR_LOG_E("Invalid ruleDirection: %{public}d", ruleDirection);
         return nullptr;
     }
     ptr->ruleDirection = static_cast<NetFirewallRuleDirection>(ruleDirection);
@@ -409,27 +511,47 @@ sptr<NetFirewallIpRule> NetFirewallIpRule::Unmarshalling(Parcel &parcel)
     if (!parcel.ReadInt32(ruleAction)) {
         return nullptr;
     }
+    if (ruleAction <= static_cast<int32_t>(FirewallRuleAction::RULE_INVALID) ||
+        ruleAction > static_cast<int32_t>(FirewallRuleAction::RULE_DENY)) {
+        NETMGR_LOG_E("Invalid ruleAction: %{public}d", ruleAction);
+        return nullptr;
+    }
     ptr->ruleAction = static_cast<FirewallRuleAction>(ruleAction);
     int32_t protocol = 0;
-    if (parcel.ReadInt32(protocol)) {
-        ptr->protocol = static_cast<NetworkProtocol>(protocol);
+    if (!parcel.ReadInt32(protocol)) {
+        return nullptr;
     }
-    NetFirewallUtils::UnmarshallingList(parcel, ptr->localIps);
-    NetFirewallUtils::UnmarshallingList(parcel, ptr->remoteIps);
-    NetFirewallUtils::UnmarshallingList(parcel, ptr->localPorts);
-    NetFirewallUtils::UnmarshallingList(parcel, ptr->remotePorts);
-    parcel.ReadString(ptr->interface);
+    ptr->protocol = static_cast<NetworkProtocol>(protocol);
+    if (!NetFirewallUtils::UnmarshallingList(parcel, ptr->localIps)) {
+        return nullptr;
+    }
+    if (!NetFirewallUtils::UnmarshallingList(parcel, ptr->remoteIps)) {
+        return nullptr;
+    }
+    if (!NetFirewallUtils::UnmarshallingList(parcel, ptr->localPorts)) {
+        return nullptr;
+    }
+    if (!NetFirewallUtils::UnmarshallingList(parcel, ptr->remotePorts)) {
+        return nullptr;
+    }
+    if (!parcel.ReadString(ptr->interface)) {
+        return nullptr;
+    }
     return ptr;
 }
 
 // domain rule data
 bool NetFirewallDomainRule::Marshalling(Parcel &parcel) const
 {
-    NetFirewallBaseRule::Marshalling(parcel);
+    if (!NetFirewallBaseRule::Marshalling(parcel)) {
+        return false;
+    }
     if (!parcel.WriteInt32(static_cast<int32_t>(ruleAction))) {
         return false;
     }
-    NetFirewallUtils::MarshallingList(domains, parcel);
+    if (!NetFirewallUtils::MarshallingList(domains, parcel)) {
+        return false;
+    }
     return true;
 }
 
@@ -440,24 +562,37 @@ sptr<NetFirewallDomainRule> NetFirewallDomainRule::Unmarshalling(Parcel &parcel)
         NETMGR_LOG_E("NetFirewallDomainRule ptr is null");
         return nullptr;
     }
-    NetFirewallBaseRule::UnmarshallingBase(parcel, ptr);
+    if (!NetFirewallBaseRule::UnmarshallingBase(parcel, ptr)) {
+        return nullptr;
+    }
     int32_t ruleAction = 0;
     if (!parcel.ReadInt32(ruleAction)) {
         return nullptr;
     }
+    if (ruleAction <= static_cast<int32_t>(FirewallRuleAction::RULE_INVALID) ||
+        ruleAction > static_cast<int32_t>(FirewallRuleAction::RULE_DENY)) {
+        NETMGR_LOG_E("Invalid ruleAction: %{public}d", ruleAction);
+        return nullptr;
+    }
     ptr->ruleAction = static_cast<FirewallRuleAction>(ruleAction);
-    NetFirewallUtils::UnmarshallingList(parcel, ptr->domains);
+    if (!NetFirewallUtils::UnmarshallingList(parcel, ptr->domains)) {
+        return nullptr;
+    }
     return ptr;
 }
 
 // DNS rule data
 bool NetFirewallDnsRule::Marshalling(Parcel &parcel) const
 {
-    NetFirewallBaseRule::Marshalling(parcel);
+    if (!NetFirewallBaseRule::Marshalling(parcel)) {
+        return false;
+    }
     if (!parcel.WriteString(primaryDns)) {
         return false;
     }
-    parcel.WriteString(standbyDns);
+    if (!parcel.WriteString(standbyDns)) {
+        return false;
+    }
     return true;
 }
 
@@ -468,20 +603,30 @@ sptr<NetFirewallDnsRule> NetFirewallDnsRule::Unmarshalling(Parcel &parcel)
         NETMGR_LOG_E("NetFirewallDnsRule ptr is null");
         return nullptr;
     }
-    NetFirewallBaseRule::UnmarshallingBase(parcel, ptr);
+    if (!NetFirewallBaseRule::UnmarshallingBase(parcel, ptr)) {
+        return nullptr;
+    }
     if (!parcel.ReadString(ptr->primaryDns)) {
         return nullptr;
     }
-    parcel.ReadString(ptr->standbyDns);
+    if (!parcel.ReadString(ptr->standbyDns)) {
+        return nullptr;
+    }
     return ptr;
 }
 
 // Interception Record
 bool InterceptRecord::Marshalling(Parcel &parcel) const
 {
-    parcel.WriteUint16(localPort);
-    parcel.WriteUint16(remotePort);
-    parcel.WriteUint16(protocol);
+    if (!parcel.WriteUint16(localPort)) {
+        return false;
+    }
+    if (!parcel.WriteUint16(remotePort)) {
+        return false;
+    }
+    if (!parcel.WriteUint16(protocol)) {
+        return false;
+    }
     if (!parcel.WriteUint64(time)) {
         return false;
     }
@@ -507,9 +652,15 @@ sptr<InterceptRecord> InterceptRecord::Unmarshalling(Parcel &parcel)
         NETMGR_LOG_E("InterceptRecord ptr is null");
         return nullptr;
     }
-    parcel.ReadUint16(ptr->localPort);
-    parcel.ReadUint16(ptr->remotePort);
-    parcel.ReadUint16(ptr->protocol);
+    if (!parcel.ReadUint16(ptr->localPort)) {
+        return nullptr;
+    }
+    if (!parcel.ReadUint16(ptr->remotePort)) {
+        return nullptr;
+    }
+    if (!parcel.ReadUint16(ptr->protocol)) {
+        return nullptr;
+    }
     if (!parcel.ReadUint64(ptr->time)) {
         return nullptr;
     }

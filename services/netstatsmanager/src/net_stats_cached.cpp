@@ -57,6 +57,16 @@ NetStatsCached::NetStatsCached()
     isDisplayTrafficAncoList = CommonUtils::IsNeedDisplayTrafficAncoList();
 }
 
+NetStatsCached::~NetStatsCached()
+{
+    if (cacheTimer_ != nullptr) {
+        cacheTimer_->StopPro();
+    }
+    if (writeTimer_ != nullptr) {
+        writeTimer_->StopPro();
+    }
+}
+
 // LCOV_EXCL_START
 int32_t NetStatsCached::StartCached()
 {
