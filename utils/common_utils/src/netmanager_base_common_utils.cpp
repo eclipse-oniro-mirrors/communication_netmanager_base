@@ -479,7 +479,7 @@ std::string AnonymizeIptablesCommand(const std::string &command)
 {
     std::string temp{command};
     std::transform(temp.cbegin(), temp.cend(), temp.begin(), [](char c) {
-        return std::isdigit(c) ? 'x' : c;
+        return std::isdigit(static_cast<unsigned char>(c)) ? 'x' : c;
     });
     return temp;
 }
@@ -803,6 +803,12 @@ bool WriteFile(const std::string &filePath, const std::string &fileContent)
         return false;
     }
     file << fileContent;
+    if (!file) {
+        NETMGR_LOG_E("write file=%{public}s content failed. err %{public}d %{public}s",
+            filePath.c_str(), errno, strerror(errno));
+        file.close();
+        return false;
+    }
     file.close();
     return true;
 }
