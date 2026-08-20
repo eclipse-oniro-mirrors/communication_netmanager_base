@@ -62,7 +62,7 @@ static __always_inline bool add_domain_cache(struct __sk_buff *skb, const __u8 *
 }
 
 static __always_inline __u16 parse_queries_name(struct __sk_buff *skb, __u16 dns_qry_off, __u8 *key_data,
-    __u16 *key_len)
+    __u8 *origin_data, __u16 *key_len)
 {
     __u8 offset = dns_qry_off;
     __u8 i = 0;
@@ -81,12 +81,25 @@ static __always_inline __u16 parse_queries_name(struct __sk_buff *skb, __u16 dns
 
     __u8 len = (__u8)*key_len;
     if (len > DNS_DOMAIN_LEN_MIN && len < DNS_DOMAIN_LEN) {
+        size_t j = 0;
+        while (j < len) {
+            size_t labelLen = key_data[j];
+            if (labelLen == 0) {
+                break;
+            }
+            if (j + labelLen > len) {
+                break;
+            }
+            key_data[j] = '.';
+            j = j + labelLen + 1;
+        }
+
         __u8 start = 0;
         __u8 end = len - 1;
         while (start < end) {
             __u8 temp = key_data[start];
-            key_data[start] = key_data[end];
-            key_data[end] = temp;
+            origin_data[end] = key_data[start] = key_data[end];
+            origin_data[start] = key_data[end] = temp;
             start++;
             end--;
         }
@@ -96,9 +109,9 @@ static __always_inline __u16 parse_queries_name(struct __sk_buff *skb, __u16 dns
 }
 
 static __always_inline __u16 parse_queries(struct __sk_buff *skb, __u16 dns_qry_off, __u8 *key_data,
-    __u16 *key_len)
+    __u8 *origin_data, __u16 *key_len)
 {
-    __u16 offset = parse_queries_name(skb, dns_qry_off, key_data, key_len);
+    __u16 offset = parse_queries_name(skb, dns_qry_off, key_data, origin_data, key_len);
     if (offset == 0) {
         return 0;
     }
@@ -163,46 +176,92 @@ static __always_inline bool match_domain_value(struct __sk_buff *skb, const stru
     return false;
 }
 
+static __always_inline void match_domain_suffix(struct __sk_buff *skb, struct domain_hash_key *key,
+    __u16 *allowrst, __u16 *denyrst)
+{
+    if (skb == NULL || key == NULL || allowrst == NULL || denyrst == NULL) {
+        return;
+    }
+
+    key->appuid = bpf_get_socket_uid(skb);
+    __u8 *allow_value_exact = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, key);
+    if ((allow_value_exact != NULL) && (*allow_value_exact == 1)) {
+        *allowrst = 1;
+    }
+    __u8 *deny_value_exact = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, key);
+    if ((deny_value_exact != NULL) && (*deny_value_exact == 1)) {
+        *denyrst = 1;
+    }
+
+    key->appuid = 0;
+    __u8 *allow_value_wild = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, key);
+    if ((allow_value_wild != NULL) && (*allow_value_wild == 1)) {
+        *allowrst = 1;
+    }
+    __u8 *deny_value_wild = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, key);
+    if ((deny_value_wild != NULL) && (*deny_value_wild == 1)) {
+        *denyrst = 1;
+    }
+}
+
+static __always_inline void match_domain_prefix(struct __sk_buff *skb, struct domain_hash_key *key,
+    __u16 *allowrst, __u16 *denyrst)
+{
+    if (skb == NULL || key == NULL || allowrst == NULL || denyrst == NULL) {
+        return;
+    }
+
+    key->appuid = bpf_get_socket_uid(skb);
+    __u8 *allow_value_exact = bpf_map_lookup_elem(&DOMAIN_PREFIX_PASS_MAP, key);
+    if ((allow_value_exact != NULL) && (*allow_value_exact == 1)) {
+        *allowrst = 1;
+    }
+    __u8 *deny_value_exact = bpf_map_lookup_elem(&DOMAIN_PREFIX_DENY_MAP, key);
+    if ((deny_value_exact != NULL) && (*deny_value_exact == 1)) {
+        *denyrst = 1;
+    }
+
+    key->appuid = 0;
+    __u8 *allow_value_wild = bpf_map_lookup_elem(&DOMAIN_PREFIX_PASS_MAP, key);
+    if ((allow_value_wild != NULL) && (*allow_value_wild == 1)) {
+        *allowrst = 1;
+    }
+    __u8 *deny_value_wild = bpf_map_lookup_elem(&DOMAIN_PREFIX_DENY_MAP, key);
+    if ((deny_value_wild != NULL) && (*deny_value_wild == 1)) {
+        *denyrst = 1;
+    }
+
+    if (*denyrst == 1) {
+        __u64 skbAddr = (__u64)(unsigned long)skb;
+        bpf_map_update_elem(&DOMAIN_DATA_KEY_MAP, &skbAddr, key, BPF_ANY);
+    }
+}
+
 static __always_inline __u8 parse_dns_query(struct __sk_buff *skb, __u16 dns_qry_off, __u16 quNum,
     __u16 defaultactionrst)
 {
     if (quNum == 1) {
         __u16 res;
         __u16 key_len = 0;
-        struct domain_hash_key key = { 0 };
+        __u32 zero = 0;
+        __u32 one = 1;
+        struct domain_hash_key *key = bpf_map_lookup_elem(&DOMAIN_SCRATCH_MAP, &zero);
+        struct domain_hash_key *origin_key = bpf_map_lookup_elem(&DOMAIN_SCRATCH_MAP, &one);
+        if (key == NULL || origin_key == NULL) {
+            return 0;
+        }
 
-        res = parse_queries(skb, dns_qry_off, (__u8*)&key.data, &key_len);
+        res = parse_queries(skb, dns_qry_off, (__u8*)key->data, (__u8*)origin_key->data, &key_len);
         if (res == 0) {
             return 0;
         }
-        key.prefixlen = (__u32)((key_len + sizeof(key.uid) + sizeof(key.appuid)) * BITS_PER_BYTE);
-        key.uid = get_current_uid(skb);
-        key.appuid = bpf_get_socket_uid(skb);
-
+        origin_key->prefixlen = key->prefixlen = (__u32)((key_len + sizeof(key->uid) +
+            sizeof(key->appuid)) * BITS_PER_BYTE);
+        origin_key->uid = key->uid = get_current_uid(skb);
         __u16 denyrst = 0;
         __u16 allowrst = 0;
-        __u8 *allow_value_exact = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
-        if ((allow_value_exact != NULL) && (*allow_value_exact == 1)) {
-            allowrst = 1;
-        }
-        __u8 *deny_value_exact  = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
-        if ((deny_value_exact != NULL) && (*deny_value_exact == 1)) {
-            __u64 skbAddr = (__u64)(unsigned long)skb;
-            bpf_map_update_elem(&DOMAIN_DATA_KEY_MAP, &skbAddr, &key, BPF_ANY);
-            denyrst = 1;
-        }
- 
-        key.appuid = 0;
-        __u8 *allow_value_wild = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
-        if ((allow_value_wild != NULL) && (*allow_value_wild == 1)) {
-            allowrst = 1;
-        }
-        __u8 *deny_value_wild = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
-        if ((deny_value_wild != NULL) && (*deny_value_wild == 1)) {
-            __u64 skbAddr = (__u64)(unsigned long)skb;
-            bpf_map_update_elem(&DOMAIN_DATA_KEY_MAP, &skbAddr, &key, BPF_ANY);
-            denyrst = 1;
-        }
+        match_domain_suffix(skb, key, &allowrst, &denyrst);
+        match_domain_prefix(skb, origin_key, &allowrst, &denyrst);
 
         if (!defaultactionrst && denyrst) {
             return 1;
@@ -224,40 +283,26 @@ static __always_inline __u16 parse_dns_response(struct __sk_buff *skb, __u16 dns
 
     if (qu_num == 1) {
         __u16 key_len = 0;
-        struct domain_hash_key key = { 0 };
+        __u32 zero = 0;
+        __u32 one = 1;
+        struct domain_hash_key *key = bpf_map_lookup_elem(&DOMAIN_SCRATCH_MAP, &zero);
+        struct domain_hash_key *origin_key = bpf_map_lookup_elem(&DOMAIN_SCRATCH_MAP, &one);
+        if (key == NULL || origin_key == NULL) {
+            return 0;
+        }
 
-        offset = parse_queries(skb, dns_qry_off, (__u8*)&key.data, &key_len);
+        offset = parse_queries(skb, dns_qry_off, (__u8*)key->data, (__u8*)origin_key->data, &key_len);
         if (offset == 0) {
             return 0;
         }
-        key.prefixlen = (__u32)((key_len + sizeof(key.uid) + sizeof(key.appuid)) * BITS_PER_BYTE);
-        key.uid = get_current_uid(skb);
+        origin_key->prefixlen = key->prefixlen = (__u32)((key_len + sizeof(key->uid) +
+            sizeof(key->appuid)) * BITS_PER_BYTE);
+        origin_key->uid = key->uid = get_current_uid(skb);
         __u32 appuid_tmp = bpf_get_socket_uid(skb);
-        key.appuid = appuid_tmp;
-
         __u16 denyrst = 0;
         __u16 allowrst = 0;
-        __u8 *allow_value_exact = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
-        if ((allow_value_exact != NULL) && (*allow_value_exact == 1)) {
-            allowrst = 1;
-        }
-        __u8 *deny_value_exact = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
-        if ((deny_value_exact != NULL) && (*deny_value_exact == 1)) {
-            __u64 skbAddr = (__u64)(unsigned long)skb;
-            bpf_map_update_elem(&DOMAIN_DATA_KEY_MAP, &skbAddr, &key, BPF_ANY);
-            denyrst = 1;
-        }
-        key.appuid = 0;
-        __u8 *allow_value_wild = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
-        if ((allow_value_wild != NULL) && (*allow_value_wild == 1)) {
-            allowrst = 1;
-        }
-        __u8 *deny_value_wild = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
-        if ((deny_value_wild != NULL) && (*deny_value_wild == 1)) {
-            __u64 skbAddr = (__u64)(unsigned long)skb;
-            bpf_map_update_elem(&DOMAIN_DATA_KEY_MAP, &skbAddr, &key, BPF_ANY);
-            denyrst = 1;
-        }
+        match_domain_suffix(skb, key, &allowrst, &denyrst);
+        match_domain_prefix(skb, origin_key, &allowrst, &denyrst);
 
         if (!defaultactionrst && denyrst) {
             return 1;
@@ -271,7 +316,7 @@ static __always_inline __u16 parse_dns_response(struct __sk_buff *skb, __u16 dns
             return 0;
         } else {
             is_in_pass = 1;
-            appuid = (allow_value_exact != NULL && *allow_value_exact == 1) ? appuid_tmp : 0;
+            appuid = (allowrst == 1) ? appuid_tmp : 0;
             log_dbg(DBG_MATCH_DOMAIN_ACTION, EGRESS, SK_PASS);
         }
     } else {

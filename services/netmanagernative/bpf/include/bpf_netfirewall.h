@@ -284,10 +284,13 @@ private:
 
     int32_t SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList);
 
-    void GetDomainHashKey(const std::string &domain, DomainHashKey &out);
+    void GetDomainHashKey(const std::string &domain, DomainHashKey &out, bool isReversed = false);
 
     int32_t SetBpfFirewallDomainRules(FirewallRuleAction action, DomainHashKey &key, DomainValue value,
         bool isWildcard);
+
+    int32_t SetBpfFirewallDomainPrefixRules(FirewallRuleAction action, DomainHashKey &key, DomainValue value,
+ 	         bool isWildcard);
 
     void ClearDomainRules();
 

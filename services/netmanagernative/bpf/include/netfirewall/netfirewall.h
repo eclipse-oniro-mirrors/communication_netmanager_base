@@ -107,8 +107,8 @@ static __always_inline bool get_ct_tuple(struct match_tuple *match_tpl, struct c
  */
 static __always_inline enum sk_action netfirewall_policy_ingress(struct __sk_buff *skb)
 {
+    struct match_tuple tuple = { 0 };
     if (match_dns_query(skb) == SK_DROP) {
-        struct match_tuple tuple = { 0 };
         if (!get_match_tuple(skb, &tuple, INGRESS)) {
             return SK_DROP;
         }
@@ -116,7 +116,6 @@ static __always_inline enum sk_action netfirewall_policy_ingress(struct __sk_buf
         return SK_DROP;
     }
 
-    struct match_tuple tuple = { 0 };
     if (!get_match_tuple(skb, &tuple, INGRESS)) {
         return SK_PASS;
     }
@@ -138,12 +137,17 @@ static __always_inline enum sk_action netfirewall_policy_ingress(struct __sk_buf
         return SK_PASS;
     }
 
-    struct bitmap key = { 0 };
-    if (!match_action_key(skb, &tuple, &key)) {
+    __u32 nf_scratch_key = 0;
+    struct bitmap *key = bpf_map_lookup_elem(&NF_BITMAP_SCRATCH, &nf_scratch_key);
+    if (key == NULL) {
+        return SK_PASS;
+    }
+    __builtin_memset(key, 0, sizeof(*key));
+    if (!match_action_key(skb, &tuple, key)) {
         return SK_PASS;
     }
 
-    if (match_action(&tuple, &key) != SK_PASS) {
+    if (match_action(&tuple, key) != SK_PASS) {
         log_intercept(&tuple);
         send_sock_tcp_reset(&tuple, skb, INGRESS);
         return SK_DROP;
@@ -209,12 +213,17 @@ static __always_inline enum sk_action netfirewall_policy_egress(struct __sk_buff
         return SK_PASS;
     }
 
-    struct bitmap key = { 0 };
-    if (!match_action_key(skb, &tuple, &key)) {
+    __u32 nf_scratch_key = 0;
+    struct bitmap *key = bpf_map_lookup_elem(&NF_BITMAP_SCRATCH, &nf_scratch_key);
+    if (key == NULL) {
+        return SK_PASS;
+    }
+    __builtin_memset(key, 0, sizeof(*key));
+    if (!match_action_key(skb, &tuple, key)) {
         return SK_PASS;
     }
     // Outbound DNS queries need to be released
-    if (!MatchDnsQuery(&tuple) && match_action(&tuple, &key) != SK_PASS) {
+    if (!MatchDnsQuery(&tuple) && match_action(&tuple, key) != SK_PASS) {
         log_intercept(&tuple);
         send_sock_tcp_reset(&tuple, skb, EGRESS);
         return SK_DROP;
