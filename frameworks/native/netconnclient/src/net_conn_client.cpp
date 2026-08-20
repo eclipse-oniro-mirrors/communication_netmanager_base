@@ -1117,7 +1117,7 @@ int32_t NetConnClient::AddNetworkRoute(int32_t netId, const std::string &ifName,
         NETMGR_LOG_E("destination is invalid.");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-    if (nextHop.empty() || nextHop.length() >= MAX_IP_ADDR_LEN) {
+    if (nextHop.length() >= MAX_IP_ADDR_LEN) {
         NETMGR_LOG_E("nextHop is invalid.");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
@@ -1142,7 +1142,7 @@ int32_t NetConnClient::RemoveNetworkRoute(int32_t netId, const std::string &ifNa
         NETMGR_LOG_E("destination is invalid.");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-    if (nextHop.empty() || nextHop.length() >= MAX_IP_ADDR_LEN) {
+    if (nextHop.length() >= MAX_IP_ADDR_LEN) {
         NETMGR_LOG_E("nextHop is invalid.");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
