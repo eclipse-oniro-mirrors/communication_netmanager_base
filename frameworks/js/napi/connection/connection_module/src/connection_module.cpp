@@ -81,11 +81,13 @@ template <typename T> static bool ParseTypesArray(napi_env env, napi_value obj, 
             uint32_t value = NapiUtils::GetUint32FromValue(env, val);
             if (!isValid(value)) {
                 NETMANAGER_BASE_LOGE("Invalid parameter value of array element!");
+                typeArray.clear();
                 return false;
             }
             typeArray.insert(static_cast<T>(value));
         } else {
             NETMANAGER_BASE_LOGE("Invalid parameter type of array element!");
+            typeArray.clear();
             return false;
         }
     }
@@ -102,13 +104,17 @@ static bool ParseCapabilities(napi_env env, napi_value obj, NetAllCapabilities &
     capabilities.linkDownBandwidthKbps_ = NapiUtils::GetUint32Property(env, obj, KEY_LINK_DOWN_BAND_WIDTH_KPS);
 
     napi_value networkCap = NapiUtils::GetNamedProperty(env, obj, KEY_NETWORK_CAP);
-    (void)ParseTypesArray<NetCap>(env, networkCap, capabilities.netCaps_, [](uint32_t value) {
-        return value >= 0 && value <= static_cast<uint32_t>(NetCap::NET_CAPABILITY_END);
-    });
+    if (NapiUtils::GetValueType(env, networkCap) != napi_undefined) {
+        if (!ParseTypesArray<NetCap>(env, networkCap, capabilities.netCaps_, [](uint32_t value) {
+                return value <= static_cast<uint32_t>(NetCap::NET_CAPABILITY_END);
+            })) {
+            return false;
+        }
+    }
 
     napi_value bearerTypes = NapiUtils::GetNamedProperty(env, obj, KEY_BEARER_TYPE);
     bool ret = ParseTypesArray<NetBearType>(env, bearerTypes, capabilities.bearerTypes_, [](uint32_t value) {
-        return value >= 0 && value <= static_cast<uint32_t>(NetBearType::BEARER_DEFAULT);
+        return value <= static_cast<uint32_t>(NetBearType::BEARER_DEFAULT);
     });
     return ret;
 }
@@ -215,7 +221,11 @@ static void AddCleanupHook(napi_env env)
         return;
     }
     *envWrapper = env;
-    napi_add_env_cleanup_hook(env, NapiUtils::HookForEnvCleanup, envWrapper);
+    napi_status status = napi_add_env_cleanup_hook(env, NapiUtils::HookForEnvCleanup, envWrapper);
+    if (status != napi_ok) {
+        NETMANAGER_BASE_LOGE("napi_add_env_cleanup_hook failed: %{public}d", status);
+        delete envWrapper;
+    }
 }
 
 #define DEFINE_NET_EXT_ATTRIBUTE_FUNCTIONS \
@@ -366,7 +376,7 @@ void ConnectionModule::InitProperties(napi_env env, napi_value exports)
     napi_value pmtypes = NapiUtils::CreateObject(env);
     NapiUtils::DefineProperties(env, pmtypes, proxyModeTypes);
     NapiUtils::SetNamedProperty(env, exports, INTERFACE_PROXY_MODE_TYPE, pmtypes);
-    
+
     InitFamilyTypes(env, exports);
 
     InitSocks5DnsStrategyProperties(env, exports);
@@ -564,7 +574,9 @@ napi_value ConnectionModule::CreateNetConnection(napi_env env, napi_callback_inf
             auto manager = *sharedManager;
             auto netConnection = static_cast<NetConnection *>(manager->GetData());
             delete sharedManager;
-            NetConnection::DeleteNetConnection(netConnection);
+            if (netConnection != nullptr) {
+                NetConnection::DeleteNetConnection(netConnection);
+            }
         });
 }
 
@@ -580,7 +592,9 @@ napi_value ConnectionModule::CreateNetInterface(napi_env env, napi_callback_info
             auto manager = *sharedManager;
             auto netInterface = static_cast<NetInterface *>(manager->GetData());
             delete sharedManager;
-            NetInterface::DeleteNetInterface(netInterface);
+            if (netInterface != nullptr) {
+                NetInterface::DeleteNetInterface(netInterface);
+            }
         });
 }
 

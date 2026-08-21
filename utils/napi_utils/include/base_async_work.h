@@ -61,6 +61,7 @@ public:
         if (status != napi_ok) { return; }
         if (reinterpret_cast<BaseContext *>(data)->magic_ != BASE_CONTEXT_MAGIC_NUMBER) {
             NETMANAGER_BASE_LOGE("data has been destructed.");
+            (void)context.release();
             return;
         }
         auto baseContext = reinterpret_cast<BaseContext *>(data);

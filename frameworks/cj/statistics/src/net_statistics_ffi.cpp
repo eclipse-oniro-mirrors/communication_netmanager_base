@@ -14,6 +14,7 @@
  */
 
 #include <cstdint>
+#include <climits>
 #include "common.h"
 #include "net_statistics_impl.h"
 #include "net_manager_constants.h"
@@ -30,7 +31,11 @@ FFI_EXPORT RetDataI64 FfiNetStatisticsGetUidRxBytes(uint32_t uid)
     int32_t result = impl.GetUidRxBytes(stats, uid);
     if (result == NETMANAGER_SUCCESS) {
         ret.code = NETMANAGER_SUCCESS;
-        ret.data = static_cast<int64_t>(stats);
+        if (stats > static_cast<uint64_t>(INT64_MAX)) {
+            ret.data = INT64_MAX;
+        } else {
+            ret.data = static_cast<int64_t>(stats);
+        }
     } else {
         ret.code = result;
         NETMANAGER_BASE_LOGE("FfiNetStatisticsGetUidRxBytes failed, uid=%{public}u, result=%{public}d", uid, result);
@@ -46,7 +51,11 @@ FFI_EXPORT RetDataI64 FfiNetStatisticsGetUidTxBytes(uint32_t uid)
     int32_t result = impl.GetUidTxBytes(stats, uid);
     if (result == NETMANAGER_SUCCESS) {
         ret.code = NETMANAGER_SUCCESS;
-        ret.data = static_cast<int64_t>(stats);
+        if (stats > static_cast<uint64_t>(INT64_MAX)) {
+            ret.data = INT64_MAX;
+        } else {
+            ret.data = static_cast<int64_t>(stats);
+        }
     } else {
         ret.code = result;
         NETMANAGER_BASE_LOGE("FfiNetStatisticsGetUidTxBytes failed, uid=%{public}u, result=%{public}d", uid, result);

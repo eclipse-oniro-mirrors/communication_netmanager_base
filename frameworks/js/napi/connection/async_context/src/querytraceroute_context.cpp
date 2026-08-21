@@ -81,14 +81,17 @@ int32_t QueryTraceRouteContext::Conv2TraceRouteInfoRtt(const std::string &rttStr
 {
     std::vector<std::string> tokens = splitStr(rttStr, ';');
     uint32_t tokensSize = tokens.size();
+    if (tokensSize == 0) {
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     // tokens: max min avg std
     // rtt: min avg max std
     std::string max = tokens[0];
     uint8_t maxIdx = 2;
     for (uint32_t i = 0; i < tokensSize && i < NETCONN_MAX_RTT_NUM; ++i) {
-        if (i < tokensSize - maxIdx) {
-            tokens[i] = tokens[i+1];
-        } else if (i == tokensSize - maxIdx) {
+        if (tokensSize > maxIdx && i < tokensSize - maxIdx) {
+            tokens[i] = tokens[i + 1];
+        } else if (tokensSize >= maxIdx && i == tokensSize - maxIdx) {
             tokens[i] = max;
         }
         uint32_t num = 0;

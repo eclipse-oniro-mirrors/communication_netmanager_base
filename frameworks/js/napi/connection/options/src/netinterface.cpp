@@ -38,6 +38,9 @@ NetInterface *NetInterface::MakeNetInterface(std::shared_ptr<EventManager>& even
 
 void NetInterface::DeleteNetInterface(NetInterface *netInterface)
 {
+    if (netInterface == nullptr) {
+        return;
+    }
     std::unique_lock<std::shared_mutex> lock(g_netInterfacesMutex);
     NET_INTERFACES.erase(netInterface->observer_.GetRefPtr());
     delete netInterface;

@@ -54,6 +54,9 @@ static int64_t g_limitSdkReports = 0;
 
 napi_value ConnectionExec::CreateNetHandle(napi_env env, NetHandle *handle)
 {
+    if (handle == nullptr) {
+        return NapiUtils::GetUndefined(env);
+    }
     napi_value netHandle = NapiUtils::CreateObject(env);
     if (NapiUtils::GetValueType(env, netHandle) != napi_object) {
         return NapiUtils::GetUndefined(env);
@@ -148,9 +151,15 @@ napi_value ConnectionExec::CreateNetPortStatesInfo(napi_env env, const NetPortSt
     }
 
     napi_value tcpArray = NapiUtils::CreateArray(env, netPortStatesInfo.tcpNetPortStatesInfo_.size());
+    if (NapiUtils::GetValueType(env, tcpArray) != napi_object) {
+        return NapiUtils::GetUndefined(env);
+    }
     uint32_t tcpArrayIndex = 0;
     for (const auto &tcpInfo : netPortStatesInfo.tcpNetPortStatesInfo_) {
         napi_value item = NapiUtils::CreateObject(env);
+        if (NapiUtils::GetValueType(env, item) != napi_object) {
+            break;
+        }
         NapiUtils::SetStringPropertyUtf8(env, item, KEY_TCP_LOCAL_IP, tcpInfo.tcpLocalIp_);
         NapiUtils::SetUint32Property(env, item, KEY_TCP_LOCAL_PORT, tcpInfo.tcpLocalPort_);
         NapiUtils::SetStringPropertyUtf8(env, item, KEY_TCP_REOMTE_IP, tcpInfo.tcpRemoteIp_);
@@ -163,9 +172,15 @@ napi_value ConnectionExec::CreateNetPortStatesInfo(napi_env env, const NetPortSt
     NapiUtils::SetNamedProperty(env, netPortStatesInfoObject, KEY_TCP_PORT_STATES_INFO, tcpArray);
 
     napi_value udpArray = NapiUtils::CreateArray(env, netPortStatesInfo.udpNetPortStatesInfo_.size());
+    if (NapiUtils::GetValueType(env, udpArray) != napi_object) {
+        return NapiUtils::GetUndefined(env);
+    }
     uint32_t udpArrayIndex = 0;
     for (const auto &udpInfo : netPortStatesInfo.udpNetPortStatesInfo_) {
         napi_value item = NapiUtils::CreateObject(env);
+        if (NapiUtils::GetValueType(env, item) != napi_object) {
+            break;
+        }
         NapiUtils::SetStringPropertyUtf8(env, item, KEY_UDP_LOCAL_IP, udpInfo.udpLocalIp_);
         NapiUtils::SetUint32Property(env, item, KEY_UDP_LOCAL_PORT, udpInfo.udpLocalPort_);
         NapiUtils::SetUint32Property(env, item, KEY_UDP_UID, udpInfo.udpUid_);
@@ -993,7 +1008,7 @@ napi_value ConnectionExec::AddNetworkRouteCallback(AddNetworkRouteContext *conte
 
 bool ConnectionExec::ExecGetNetInterfaceConfiguration(GetNetInterfaceConfigurationContext *context)
 {
-    NETMANAGER_BASE_LOGI("ExecAddNetworkRoute");
+    NETMANAGER_BASE_LOGI("ExecGetNetInterfaceConfiguration");
     int32_t errorCode = NetConnClient::GetInstance().GetNetInterfaceConfiguration(
         context->interface_, context->config_);
     if (errorCode != NET_CONN_SUCCESS) {
@@ -1321,6 +1336,9 @@ napi_value ConnectionExec::NetHandleExec::BindSocketCallback(BindSocketContext *
 
 void ConnectionExec::NetHandleExec::SetAddressInfo(const char *host, addrinfo *info, NetAddress &address)
 {
+    if (info == nullptr || info->ai_addr == nullptr) {
+        return;
+    }
     address.SetAddress(host);
     address.SetFamilyBySaFamily(info->ai_addr->sa_family);
     if (info->ai_addr->sa_family == AF_INET) {
@@ -1704,7 +1722,7 @@ napi_value ConnectionExec::QueryProbeResultCallback(QueryProbeResultContext *con
         return NapiUtils::GetUndefined(env);
     }
     NapiUtils::SetUint32Property(env, jsProbeResult, KEY_LOSS_RATE, context->probeResultInfo_.lossRate);
-    
+
     napi_value jsRttArray = NapiUtils::CreateArray(env, OHOS::NetManagerStandard::NETCONN_MAX_RTT_NUM);
     if (NapiUtils::GetValueType(env, jsRttArray) != napi_object) {
         return NapiUtils::GetUndefined(env);

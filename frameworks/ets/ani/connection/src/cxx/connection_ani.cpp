@@ -414,6 +414,9 @@ int32_t NetCoonCallback::NetAvailable(sptr<NetManagerStandard::NetHandle> &netHa
 int32_t NetCoonCallback::NetCapabilitiesChange(sptr<NetManagerStandard::NetHandle> &netHandle,
                                                const sptr<NetManagerStandard::NetAllCapabilities> &netAllCap)
 {
+    if (netHandle == nullptr || netAllCap == nullptr) {
+        return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     rust::vec<NetManagerStandard::NetCap> networkCap;
     for (auto &cap : netAllCap->netCaps_) {
         networkCap.push_back(cap);
@@ -439,6 +442,9 @@ int32_t NetCoonCallback::NetCapabilitiesChange(sptr<NetManagerStandard::NetHandl
 int32_t NetCoonCallback::NetConnectionPropertiesChange(sptr<NetManagerStandard::NetHandle> &netHandle,
                                                        const sptr<NetManagerStandard::NetLinkInfo> &linkInfo)
 {
+    if (netHandle == nullptr || linkInfo == nullptr) {
+        return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     NetConnectionPropertyInfo info{
         .net_handle = NetHandle{.net_id = netHandle->GetNetId()},
         .connection_properties = ConvertConnectionProperties(*linkInfo),
