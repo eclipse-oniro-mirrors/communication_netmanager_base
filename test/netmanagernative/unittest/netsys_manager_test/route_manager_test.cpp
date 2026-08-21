@@ -801,7 +801,7 @@ HWTEST_F(RouteManagerTest, GetRouteTableFromType001, TestSize.Level1)
     RouteManager::TableType tableType = RouteManager::INTERNAL_DEFAULT;
     std::string interfaceName = "123";
     auto ret = RouteManager::GetRouteTableFromType(tableType, interfaceName);
-    EXPECT_EQ(ret, 1);
+    EXPECT_EQ(ret, RT_TABLE_UNSPEC);
 }
 
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM

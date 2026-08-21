@@ -63,6 +63,7 @@ constexpr int32_t RULE_LEVEL_ENTERPRISE = 15000;
 constexpr int32_t RULE_LEVEL_DEFAULT = 16000;
 constexpr int32_t RULE_LEVEL_DISTRIBUTE_COMMUNICATION_SERVER = 8500;
 constexpr int32_t RULE_LEVEL_DISTRIBUTE_COMMUNICATION_CLIENT = 16500;
+constexpr uint32_t RULE_PRIORITY_MAX = 65535;
 constexpr uint32_t ROUTE_UNREACHABLE_TABLE = 80;
 constexpr uint32_t ROUTE_DISTRIBUTE_TO_CLIENT_TABLE = 90;
 constexpr uint32_t ROUTE_DISTRIBUTE_FROM_CLIENT_TABLE = 91;
@@ -73,7 +74,6 @@ constexpr uint32_t OUTPUT_MAX = 128;
 constexpr uint32_t BIT_32_LEN = 32;
 constexpr uint32_t BIT_128_LEN = 128;
 constexpr uint32_t BIT_MAX_LEN = 255;
-constexpr uint32_t DECIMAL_DIGITAL = 10;
 constexpr uint32_t BYTE_ALIGNMENT = 8;
 constexpr uint32_t ROUTE_TABLE_OFFSET_FROM_INDEX = 2000;
 constexpr uint16_t LOCAL_NET_ID = 99;
@@ -452,15 +452,31 @@ uint32_t RouteManager::FindVpnIdByInterfacename(VpnRuleIdType type, const std::s
     uint32_t id = GetVpnInterffaceToId(interfaceName.c_str());
     switch (type) {
         case VpnRuleIdType::VPN_OUTPUT_TO_LOCAL:
+            if (id > static_cast<uint32_t>(RULE_LEVEL_VPN_OUTPUT_TO_LOCAL)) {
+                NETNATIVE_LOGE("invalid id %{public}u for VPN_OUTPUT_TO_LOCAL", id);
+                return 0;
+            }
             id = RULE_LEVEL_VPN_OUTPUT_TO_LOCAL - id;
             break;
         case VpnRuleIdType::VPN_SECURE:
+            if (id > static_cast<uint32_t>(RULE_LEVEL_SECURE_VPN)) {
+                NETNATIVE_LOGE("invalid id %{public}u for VPN_SECURE", id);
+                return 0;
+            }
             id = RULE_LEVEL_SECURE_VPN - id;
             break;
         case VpnRuleIdType::VPN_EXPLICIT_NETWORK:
+            if (id > static_cast<uint32_t>(RULE_LEVEL_EXPLICIT_NETWORK)) {
+                NETNATIVE_LOGE("invalid id %{public}u for VPN_EXPLICIT_NETWORK", id);
+                return 0;
+            }
             id = RULE_LEVEL_EXPLICIT_NETWORK - id;
             break;
         case VpnRuleIdType::VPN_OUTPUT_IFACE:
+            if (id > static_cast<uint32_t>(RULE_LEVEL_OUTPUT_IFACE_VPN)) {
+                NETNATIVE_LOGE("invalid id %{public}u for VPN_OUTPUT_IFACE", id);
+                return 0;
+            }
             id = RULE_LEVEL_OUTPUT_IFACE_VPN - id;
             break;
         case VpnRuleIdType::VPN_NETWORK_TABLE:
@@ -523,7 +539,7 @@ int32_t RouteManager::UpdateVpnOutPutPenetrationRule(int32_t netId, const std::s
                                                      const std::string &ruleDstIp, bool add)
 {
     RuleInfo ruleInfo;
-    ruleInfo.ruleTable = FindTableByInterfacename(interfaceName);
+    ruleInfo.ruleTable = FindTableByInterfacename(interfaceName, netId);
     ruleInfo.rulePriority = RULE_LEVEL_VPN_OUTPUT_TO_LOCAL;
     ruleInfo.ruleFwmark = MARK_UNSET;
     ruleInfo.ruleMask = MARK_UNSET;
@@ -1004,26 +1020,27 @@ int32_t RouteManager::ReadAddr(const std::string &addr, InetAddr *res)
         return -EINVAL;
     }
 
-    const char *maskLenStr = slashStr + 1;
-    if (*maskLenStr == 0) {
+    std::string maskLenStr(slashStr + 1);
+    uint64_t templen = CommonUtils::StrToUint64(maskLenStr, UINT64_MAX);
+    if (templen == UINT64_MAX) {
         return -EINVAL;
     }
-
-    char *endptr = nullptr;
-    unsigned templen = strtoul(maskLenStr, &endptr, DECIMAL_DIGITAL);
-    if ((endptr == nullptr) || (templen > BIT_MAX_LEN)) {
-        return -EINVAL;
-    }
-    res->prefixlen = templen;
 
     std::string addressString(addr.c_str(), slashStr - addr.c_str());
     if (strchr(addr.c_str(), ':')) {
         res->family = AF_INET6;
         res->bitlen = OUTPUT_MAX;
+        if (templen > BIT_128_LEN) {
+            return -EINVAL;
+        }
     } else {
         res->family = AF_INET;
         res->bitlen = BIT_32_LEN;
+        if (templen > BIT_32_LEN) {
+            return -EINVAL;
+        }
     }
+    res->prefixlen = static_cast<int32_t>(templen);
 
     return inet_pton(res->family, addressString.c_str(), res->data);
 }
@@ -1307,8 +1324,8 @@ int32_t RouteManager::SetSharingUnreachableIpRule(uint16_t action, const std::st
 int32_t RouteManager::UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo, uid_t uidStart, uid_t uidEnd)
 {
     NETNATIVE_LOG_D("UpdateRuleInfo");
-    if (ruleInfo.rulePriority < 0) {
-        NETNATIVE_LOGE("invalid IP-rule priority %{public}d", ruleInfo.rulePriority);
+    if (ruleInfo.rulePriority > RULE_PRIORITY_MAX) {
+        NETNATIVE_LOGE("invalid IP-rule priority %{public}u", ruleInfo.rulePriority);
         return ROUTEMANAGER_ERROR;
     }
 
@@ -1340,8 +1357,8 @@ int32_t RouteManager::UpdateDistributedRule(uint32_t action, uint8_t ruleType, R
                                             uid_t uidEnd)
 {
     NETNATIVE_LOGI("UpdateDistributedRule");
-    if (ruleInfo.rulePriority < 0) {
-        NETNATIVE_LOGE("invalid IP-rule priority %{public}d", ruleInfo.rulePriority);
+    if (ruleInfo.rulePriority > RULE_PRIORITY_MAX) {
+        NETNATIVE_LOGE("invalid IP-rule priority %{public}u", ruleInfo.rulePriority);
         return ROUTEMANAGER_ERROR;
     }
 
@@ -1483,8 +1500,8 @@ int32_t RouteManager::SendRuleToKernelEx(uint32_t action, uint8_t family, uint8_
     struct fib_rule_hdr msg = {0};
     msg.action = ruleType;
     msg.family = family;
-    if (ruleInfo.ruleDstIp != RULEIP_NULL && family == AF_INET) {
-        msg.dst_len = BIT_32_LEN;
+    if (ruleInfo.ruleDstIp != RULEIP_NULL) {
+        msg.dst_len = (family == AF_INET) ? BIT_32_LEN : BIT_128_LEN;
     }
     uint16_t ruleFlag = GetRuleFlag(action);
     NetlinkMsg nlmsg(ruleFlag, NETLINK_MAX_LEN, getpid());
@@ -1669,8 +1686,13 @@ uint32_t RouteManager::GetRouteTableFromType(TableType tableType, const std::str
 #else
             return ROUTE_VPN_NETWORK_TABLE;
 #endif // SUPPORT_SYSVPN
-        case RouteManager::INTERNAL_DEFAULT:
-            return FindTableByInterfacename(interfaceName) % ROUTE_INTERNAL_DEFAULT_TABLE + 1;
+        case RouteManager::INTERNAL_DEFAULT: {
+            uint32_t table = FindTableByInterfacename(interfaceName);
+            if (table == RT_TABLE_UNSPEC) {
+                return RT_TABLE_UNSPEC;
+            }
+            return table % ROUTE_INTERNAL_DEFAULT_TABLE + 1;
+        }
         case RouteManager::UNREACHABLE_NETWORK:
             return ROUTE_UNREACHABLE_TABLE;
         default:
