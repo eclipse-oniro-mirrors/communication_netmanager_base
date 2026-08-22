@@ -160,10 +160,6 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(uint16_t netId, std::vector<
         NETNATIVE_LOGE("GetResolverConfig read vServerSize failed");
         return ERR_FLATTEN_OBJECT;
     }
-    if (vServerSize < 0) {
-        NETNATIVE_LOGE("GetResolverConfig vServerSize is negative: %{public}d", vServerSize);
-        return ERR_INVALID_DATA;
-    }
     vServerSize = vServerSize > MAX_DNS_CONFIG_SIZE ? MAX_DNS_CONFIG_SIZE : vServerSize;
     std::vector<std::string> vecString;
     for (int i = 0; i < vServerSize; i++) {
