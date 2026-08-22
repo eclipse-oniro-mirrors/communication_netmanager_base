@@ -1306,10 +1306,7 @@ int32_t NetsysNativeServiceProxy::GetInterfaceConfig(InterfaceConfigurationParce
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
         return IPC_INVOKER_ERR;
     }
-    if (!reply.ReadInt32(ret)) {
-        NETNATIVE_LOGE("GetInterfaceConfig read ret failed");
-        return ERR_FLATTEN_OBJECT;
-    }
+    ret = reply.ReadInt32();
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("Fail to GetInterfaceConfig ret= %{public}d", ret);
         return ret;
