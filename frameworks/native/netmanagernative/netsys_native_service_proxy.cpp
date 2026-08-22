@@ -2280,7 +2280,7 @@ int32_t NetsysNativeServiceProxy::SetNetStateTrafficMap(uint8_t flag, uint64_t a
     MessageParcel reply;
     MessageOption option;
     if (Remote() == nullptr) {
-        NETNATIVE_LOGE("SetIptablesCommandForRes Remote pointer is null");
+        NETNATIVE_LOGE("SetNetStateTrafficMap Remote pointer is null");
         return ERR_FLATTEN_OBJECT;
     }
     auto result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_TRAFFIC_AVAILABLE_MAP),
@@ -2316,7 +2316,7 @@ int32_t NetsysNativeServiceProxy::GetNetStateTrafficMap(uint8_t flag, uint64_t &
     MessageParcel reply;
     MessageOption option;
     if (Remote() == nullptr) {
-        NETNATIVE_LOGE("SetIptablesCommandForRes Remote pointer is null");
+        NETNATIVE_LOGE("GetNetStateTrafficMap Remote pointer is null");
         return ERR_FLATTEN_OBJECT;
     }
     if (ERR_NONE != SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_TRAFFIC_AVAILABLE_MAP),
@@ -2353,7 +2353,7 @@ int32_t NetsysNativeServiceProxy::ClearIncreaseTrafficMap()
     MessageParcel reply;
     MessageOption option;
     if (Remote() == nullptr) {
-        NETNATIVE_LOGE("SetIptablesCommandForRes Remote pointer is null");
+        NETNATIVE_LOGE("ClearIncreaseTrafficMap Remote pointer is null");
         return ERR_FLATTEN_OBJECT;
     }
     auto result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_INCRE_TRAFFIC_MAP),
@@ -2384,7 +2384,7 @@ int32_t NetsysNativeServiceProxy::ClearSimStatsBpfMap()
     MessageParcel reply;
     MessageOption option;
     if (Remote() == nullptr) {
-        NETNATIVE_LOGE("SetIptablesCommandForRes Remote pointer is null");
+        NETNATIVE_LOGE("ClearSimStatsBpfMap Remote pointer is null");
         return ERR_FLATTEN_OBJECT;
     }
     auto result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_SIM_STATS_MAP),
@@ -2454,7 +2454,7 @@ int32_t NetsysNativeServiceProxy::UpdateIfIndexMap(int8_t key, uint64_t index)
     MessageParcel reply;
     MessageOption option;
     if (Remote() == nullptr) {
-        NETNATIVE_LOGE("SetIptablesCommandForRes Remote pointer is null");
+        NETNATIVE_LOGE("UpdateIfIndexMap Remote pointer is null");
         return ERR_FLATTEN_OBJECT;
     }
     auto result = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_IFINDEX_MAP), data,
