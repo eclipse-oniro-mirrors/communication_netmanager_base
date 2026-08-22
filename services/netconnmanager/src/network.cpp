@@ -835,10 +835,14 @@ void Network::StartNetDetection(bool needReport)
     NETMGR_LOG_I("factory mode, stop net detection");
     return;
 #endif
+
+#ifndef IP_CMD_QUICK_CONFIG
     if (!IsConnected()) {
         NETMGR_LOG_W("Network[%{public}d] is not connected, stop net detection", netId_);
         return;
     }
+#endif
+
     NETMGR_LOG_D("Enter StartNetDetection");
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     if (forbidDetectionFlag_) {
@@ -867,10 +871,13 @@ void Network::SetNetCaps(const std::set<NetCap> &netCaps)
 
 void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
 {
+#ifndef IP_CMD_QUICK_CONFIG
     if (!IsConnected()) {
         NETMGR_LOG_W("Network[%{public}d] is not connected, stop dns health detection", netId_);
         return;
     }
+#endif
+
     NETMGR_LOG_D("Enter NetDetectionForDnsHealthSync");
     std::shared_lock<std::shared_mutex> lockMonitor(netMonitorMutex_);
     if (netMonitor_ == nullptr) {
