@@ -184,6 +184,10 @@ ohos_shared_library("net_conn_manager") {
     defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
   }
 
+  if (netmanager_base_ip_cmd_quick_config) {
+    defines += [ "IP_CMD_QUICK_CONFIG" ]
+  }
+
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
@@ -283,6 +287,10 @@ ohos_static_library("net_conn_manager_static") {
 
   if (netmanager_base_enable_traffic_statistic) {
     defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
+  }
+
+  if (netmanager_base_ip_cmd_quick_config) {
+    defines += [ "IP_CMD_QUICK_CONFIG" ]
   }
 
   external_deps += [ "hilog:libhilog" ]
