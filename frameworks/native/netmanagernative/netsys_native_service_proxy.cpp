@@ -155,9 +155,19 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(uint16_t netId, std::vector<
         return result;
     }
 
-    reply.ReadUint16(baseTimeoutMsec);
-    reply.ReadUint8(retryCount);
-    int32_t vServerSize = reply.ReadInt32();
+    if (!reply.ReadUint16(baseTimeoutMsec) || !reply.ReadUint8(retryCount)) {
+        NETNATIVE_LOGE("GetResolverConfig read baseTimeoutMsec/retryCount failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t vServerSize = 0;
+    if (!reply.ReadInt32(vServerSize)) {
+        NETNATIVE_LOGE("GetResolverConfig read vServerSize failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (vServerSize < 0) {
+        NETNATIVE_LOGE("GetResolverConfig vServerSize is negative: %{public}d", vServerSize);
+        return ERR_INVALID_DATA;
+    }
     vServerSize = vServerSize > MAX_DNS_CONFIG_SIZE ? MAX_DNS_CONFIG_SIZE : vServerSize;
     std::vector<std::string> vecString;
     for (int i = 0; i < vServerSize; i++) {
@@ -1353,6 +1363,10 @@ int32_t NetsysNativeServiceProxy::InterfaceGetList(std::vector<std::string> &ifa
         return ret;
     }
     vSize = reply.ReadInt32();
+    if (vSize < 0) {
+        NETNATIVE_LOGE("InterfaceGetList vSize is negative: %{public}d", vSize);
+        return ERR_INVALID_DATA;
+    }
     vSize = vSize > MAX_INTERFACE_SIZE ? MAX_INTERFACE_SIZE : vSize;
     std::vector<std::string> vecString;
     for (int i = 0; i < vSize; i++) {
