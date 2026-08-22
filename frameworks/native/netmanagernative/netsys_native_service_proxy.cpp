@@ -97,8 +97,7 @@ int32_t NetsysNativeServiceProxy::SetResolverConfig(uint16_t netId, uint16_t bas
     }
     std::vector<std::string> vServers;
     vServers.assign(servers.begin(), servers.end());
-    NETNATIVE_LOGI("PROXY: SetResolverConfig Write Servers  String_SIZE: %{public}d",
-                   static_cast<int32_t>(vServers.size()));
+    NETNATIVE_LOGI("PROXY: SetResolverConfig Write Servers String_SIZE: %{public}d", static_cast<int32_t>(vServers.size()));
     for (auto &vServer : vServers) {
         if (!data.WriteString(vServer)) {
             NETNATIVE_LOGE("SetResolverConfig WriteString server failed");
@@ -113,8 +112,7 @@ int32_t NetsysNativeServiceProxy::SetResolverConfig(uint16_t netId, uint16_t bas
 
     std::vector<std::string> vDomains;
     vDomains.assign(domains.begin(), domains.end());
-    NETNATIVE_LOGI("PROXY: SetResolverConfig Write Domains String_SIZE: %{public}d",
-                   static_cast<int32_t>(vDomains.size()));
+    NETNATIVE_LOGI("PROXY: SetResolverConfig Write Domains String_SIZE: %{public}d", static_cast<int32_t>(vDomains.size()));
     for (auto &vDomain : vDomains) {
         if (!data.WriteString(vDomain)) {
             NETNATIVE_LOGE("SetResolverConfig WriteString domain failed");
@@ -124,8 +122,7 @@ int32_t NetsysNativeServiceProxy::SetResolverConfig(uint16_t netId, uint16_t bas
 
     MessageParcel reply;
     MessageOption option;
-    int ret = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_RESOLVER_CONFIG),
-        data, reply, option);
+    int ret = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_RESOLVER_CONFIG), data, reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, ret code: [%{public}d]", ret);
         return IPC_INVOKER_ERR;
