@@ -24,6 +24,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 int32_t StatisticsCallbackObserver::NetIfaceStatsChanged(const std::string &iface)
 {
+    std::unique_lock<std::mutex> lock(eventMutex);
     if (!StatisticsObserverWrapper::GetInstance().GetEventManager()->HasEventListener(EVENT_STATS_CHANGE)) {
         NETMANAGER_BASE_LOGE("no event listener find %{public}s", EVENT_STATS_CHANGE);
         return 0;
@@ -38,6 +39,7 @@ int32_t StatisticsCallbackObserver::NetIfaceStatsChanged(const std::string &ifac
 
 int32_t StatisticsCallbackObserver::NetUidStatsChanged(const std::string &iface, uint32_t uid)
 {
+    std::unique_lock<std::mutex> lock(eventMutex);
     if (!StatisticsObserverWrapper::GetInstance().GetEventManager()->HasEventListener(EVENT_STATS_CHANGE)) {
         NETMANAGER_BASE_LOGE("no event listener find %{public}s", EVENT_STATS_CHANGE);
         return 0;

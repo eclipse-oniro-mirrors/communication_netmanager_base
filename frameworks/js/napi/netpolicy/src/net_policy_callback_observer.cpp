@@ -27,6 +27,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 int32_t NetPolicyCallbackObserver::NetUidPolicyChange(uint32_t uid, uint32_t policy)
 {
+    std::unique_lock<std::mutex> lock(eventMutex);
     if (!PolicyObserverWrapper::GetInstance().GetEventManager()->HasEventListener(EVENT_POLICY_UID_POLICY)) {
         NETMANAGER_BASE_LOGE("no event listener find %{public}s", EVENT_POLICY_UID_POLICY);
         return NETMANAGER_SUCCESS;
@@ -39,6 +40,7 @@ int32_t NetPolicyCallbackObserver::NetUidPolicyChange(uint32_t uid, uint32_t pol
 
 int32_t NetPolicyCallbackObserver::NetUidRuleChange(uint32_t uid, uint32_t rule)
 {
+    std::unique_lock<std::mutex> lock(eventMutex);
     if (!PolicyObserverWrapper::GetInstance().GetEventManager()->HasEventListener(EVENT_POLICY_UID_RULE)) {
         NETMANAGER_BASE_LOGE("no event listener find %{public}s", EVENT_POLICY_UID_RULE);
         return NETMANAGER_SUCCESS;
@@ -51,6 +53,7 @@ int32_t NetPolicyCallbackObserver::NetUidRuleChange(uint32_t uid, uint32_t rule)
 
 int32_t NetPolicyCallbackObserver::NetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &quotaPolicies)
 {
+    std::unique_lock<std::mutex> lock(eventMutex);
     if (!PolicyObserverWrapper::GetInstance().GetEventManager()->HasEventListener(EVENT_POLICY_QUOTA_POLICY)) {
         NETMANAGER_BASE_LOGE("no event listener find %{public}s", EVENT_POLICY_QUOTA_POLICY);
         return NETMANAGER_SUCCESS;
@@ -64,6 +67,7 @@ int32_t NetPolicyCallbackObserver::NetQuotaPolicyChange(const std::vector<NetQuo
 
 int32_t NetPolicyCallbackObserver::NetMeteredIfacesChange(std::vector<std::string> &ifaces)
 {
+    std::unique_lock<std::mutex> lock(eventMutex);
     if (!PolicyObserverWrapper::GetInstance().GetEventManager()->HasEventListener(EVENT_POLICY_METERED_IFACES)) {
         NETMANAGER_BASE_LOGE("no event listener find %{public}s", EVENT_POLICY_METERED_IFACES);
         return NETMANAGER_SUCCESS;
@@ -77,6 +81,7 @@ int32_t NetPolicyCallbackObserver::NetMeteredIfacesChange(std::vector<std::strin
 
 int32_t NetPolicyCallbackObserver::NetBackgroundPolicyChange(bool isBackgroundPolicyAllow)
 {
+    std::unique_lock<std::mutex> lock(eventMutex);
     if (!PolicyObserverWrapper::GetInstance().GetEventManager()->HasEventListener(EVENT_POLICY_BACKGROUND_POLICY)) {
         NETMANAGER_BASE_LOGE("no event listener find %{public}s", EVENT_POLICY_BACKGROUND_POLICY);
         return NETMANAGER_SUCCESS;

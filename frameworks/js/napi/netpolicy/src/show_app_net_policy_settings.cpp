@@ -177,9 +177,17 @@ napi_value SettingsCompletePromise(napi_env env, AsyncCallbackInfo* asyncCallbac
     }
     napi_value promise;
     napi_deferred deferred;
-    napi_create_promise(env, &deferred, &promise);
+    napi_status status = napi_create_promise(env, &deferred, &promise);
+    if (status != napi_ok) {
+        NETMGR_LOG_E("settings complete promise create error");
+        return nullptr;
+    }
     asyncCallbackInfo->deferred = deferred;
-    napi_resolve_deferred(env, asyncCallbackInfo->deferred, result);
+    status = napi_resolve_deferred(env, asyncCallbackInfo->deferred, result);
+    if (status != napi_ok) {
+        NETMGR_LOG_E("settings complete promise resolve deferred error");
+        return nullptr;
+    }
     return promise;
 }
 
@@ -191,9 +199,17 @@ napi_value SettingsInCompletePromise(napi_env env, AsyncCallbackInfo* asyncCallb
     }
     napi_value promise;
     napi_deferred deferred;
-    napi_create_promise(env, &deferred, &promise);
+    napi_status status = napi_create_promise(env, &deferred, &promise);
+    if (status != napi_ok) {
+        NETMGR_LOG_E("settings incomplete promise create error");
+        return nullptr;
+    }
     asyncCallbackInfo->deferred = deferred;
-    napi_reject_deferred(env, asyncCallbackInfo->deferred, result);
+    status = napi_reject_deferred(env, asyncCallbackInfo->deferred, result);
+    if (status != napi_ok) {
+        NETMGR_LOG_E("settings incomplete promise reject deferred error");
+        return nullptr;
+    }
     return promise;
 }
 

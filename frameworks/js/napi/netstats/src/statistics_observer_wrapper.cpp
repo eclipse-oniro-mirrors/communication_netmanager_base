@@ -34,6 +34,7 @@ StatisticsObserverWrapper::~StatisticsObserverWrapper() = default;
 napi_value StatisticsObserverWrapper::On(napi_env env, napi_callback_info info,
                                          const std::initializer_list<std::string> &events, bool asyncCallback)
 {
+    std::unique_lock<std::mutex> lock(observer_->eventMutex);
     size_t paramsCount = MAX_PARAM_NUM;
     napi_value params[MAX_PARAM_NUM] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &paramsCount, params, nullptr, nullptr));
@@ -69,6 +70,7 @@ napi_value StatisticsObserverWrapper::On(napi_env env, napi_callback_info info,
 napi_value StatisticsObserverWrapper::Off(napi_env env, napi_callback_info info,
                                           const std::initializer_list<std::string> &events, bool asyncCallback)
 {
+    std::unique_lock<std::mutex> lock(observer_->eventMutex);
     napi_value thisVal = nullptr;
     size_t paramsCount = MAX_PARAM_NUM;
     napi_value params[MAX_PARAM_NUM] = {nullptr};

@@ -40,6 +40,9 @@ void SetCalibrationTrafficContext::ParseParams(napi_value *params, size_t params
     simId_ = NapiUtils::GetUint32FromValue(GetEnv(), params[ARG_INDEX_0]);
     remainingData_ = NapiUtils::GetInt64FromValue(GetEnv(), params[ARG_INDEX_1]);
     NETMANAGER_BASE_LOGD("get remainingData_ %{public}" PRId64, remainingData_);
+    if (remainingData_ < 0) {
+        remainingData_ = 0;
+    }
 
     if (paramsCount == PARAM_TRIPLE_OPTIONS) {
         int64_t totalDataTmp = NapiUtils::GetInt64FromValue(GetEnv(), params[ARG_INDEX_2]);
