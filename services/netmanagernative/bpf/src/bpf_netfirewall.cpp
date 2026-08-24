@@ -380,43 +380,53 @@ int32_t NetsysBpfNetFirewall::SetFirewallDomainRules(const std::vector<sptr<NetF
             } else {
                 isWildcard = false;
             }
-            DomainHashKey key = { 0 };
-            GetDomainHashKey(param.domain, key);
-            ret = SetBpfFirewallDomainRules(rule->ruleAction, key, domainVaule, isWildcard);
+            bool endsWild = !param.domain.empty() && param.domain.back() == '*';
+            if (endsWild) {
+                DomainHashKey key = { 0 };
+                GetDomainHashKey(param.domain, key, false);
+                ret = SetBpfFirewallDomainPrefixRules(rule->ruleAction, key, domainVaule, isWildcard);
+            } else {
+                DomainHashKey key = { 0 };
+                GetDomainHashKey(param.domain, key, true);
+                ret = SetBpfFirewallDomainRules(rule->ruleAction, key, domainVaule, isWildcard);
+            }
         }
     }
     return ret;
 }
 
-void NetsysBpfNetFirewall::GetDomainHashKey(const std::string &domain, DomainHashKey &out)
+void NetsysBpfNetFirewall::GetDomainHashKey(const std::string &domain, DomainHashKey &out, bool isReversed)
 {
     if (domain.empty()) {
         NETNATIVE_LOGE("GetDomainHashKey: domain is empty");
         return;
     }
     std::string text(domain);
-    std::reverse(text.begin(), text.end());
     text.erase(std::remove(text.begin(), text.end(), '*'), text.end());
-
-    std::regex delimit("\\.");
-    std::vector<std::string> v(std::sregex_token_iterator(text.begin(), text.end(), delimit, -1),
-        std::sregex_token_iterator());
-
-    int i = 0;
-    for (auto &s : v) {
-        int strLen = static_cast<int>(s.length());
-        if (i + strLen + 1 > DNS_DOMAIN_LEN) {
-            NETNATIVE_LOGE("GetDomainHashKey: domain length exceeds DNS_DOMAIN_LEN");
-            return;
-        }
-        if (memcpy_s(out.data + i, DNS_DOMAIN_LEN - i, (uint8_t *)s.c_str(), strLen) != EOK) {
-            NETNATIVE_LOGE("GetDomainHashKey: memcpy_s failed");
-            return;
-        }
-        i += strLen;
-        out.data[i++] = static_cast<uint8_t>(strLen);
+    if (text.empty()) {
+        NETNATIVE_LOGE("GetDomainHashKey: domain is empty after strip");
+        return;
     }
-    out.prefixlen = static_cast<uint32_t>((sizeof(out.uid) + sizeof(out.appuid) + i) * BIT_PER_BYTE);
+    int strLen = static_cast<int>(text.length());
+    if (strLen >= DNS_DOMAIN_LEN) {
+        NETNATIVE_LOGE("GetDomainHashKey: domain length exceeds DNS_DOMAIN_LEN");
+        return;
+    }
+    if (isReversed) {
+        std::reverse(text.begin(), text.end());
+        if (memcpy_s(out.data, DNS_DOMAIN_LEN, (uint8_t *)text.c_str(), strLen) != EOK) {
+            NETNATIVE_LOGE("GetDomainHashKey: isReversed memcpy_s failed");
+            return;
+        }
+        out.prefixlen = static_cast<uint32_t>((sizeof(out.uid) + sizeof(out.appuid) + strLen) * BIT_PER_BYTE);
+    } else {
+        out.data[0] = '.';
+        if (memcpy_s(out.data + 1, DNS_DOMAIN_LEN - 1, (uint8_t *)text.c_str(), strLen) != EOK) {
+            NETNATIVE_LOGE("GetDomainHashKey: noReversed memcpy_s failed");
+            return;
+        }
+        out.prefixlen = static_cast<uint32_t>((sizeof(out.uid) + sizeof(out.appuid) + strLen + 1) * BIT_PER_BYTE);
+    }
 }
 
 int32_t NetsysBpfNetFirewall::SetBpfFirewallDomainRules(FirewallRuleAction action, DomainHashKey &key,
@@ -436,6 +446,23 @@ int32_t NetsysBpfNetFirewall::SetBpfFirewallDomainRules(FirewallRuleAction actio
     return ret;
 }
 
+int32_t NetsysBpfNetFirewall::SetBpfFirewallDomainPrefixRules(FirewallRuleAction action, DomainHashKey &key,
+    DomainValue value, bool isWildcard)
+{
+    NETNATIVE_LOG_D("SetBpfFirewallDomainPrefixRules: action=%{public}d, userid=%{public}d appuid=%{public}d",
+        (action == FirewallRuleAction::RULE_ALLOW), value.uid, value.appuid);
+    int32_t ret = 0;
+    key.uid = value.uid;
+    key.appuid = value.appuid;
+    __u8 v = 1;
+    if (action == FirewallRuleAction::RULE_ALLOW) {
+        ret = WriteBpfMap(MAP_PATH(DOMAIN_PREFIX_PASS_MAP), key, v);
+    } else if (action == FirewallRuleAction::RULE_DENY) {
+        ret = WriteBpfMap(MAP_PATH(DOMAIN_PREFIX_DENY_MAP), key, v);
+    }
+    return ret;
+}
+
 void NetsysBpfNetFirewall::ClearDomainRules()
 {
     NETNATIVE_LOG_D("ClearDomainRules");
@@ -445,6 +472,8 @@ void NetsysBpfNetFirewall::ClearDomainRules()
     __u8 v = 1;
     ClearBpfMap(MAP_PATH(DOMAIN_PASS_MAP), key, v);
     ClearBpfMap(MAP_PATH(DOMAIN_DENY_MAP), key, v);
+    ClearBpfMap(MAP_PATH(DOMAIN_PREFIX_PASS_MAP), key, v);
+    ClearBpfMap(MAP_PATH(DOMAIN_PREFIX_DENY_MAP), key, v);
 }
 
 int32_t NetsysBpfNetFirewall::SetFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList)
@@ -875,27 +904,9 @@ std::string NetsysBpfNetFirewall::DecodeDomainFromKey(const DomainHashKey &key)
     if (domainLenBytes > DNS_DOMAIN_LEN) {
         domainLenBytes = DNS_DOMAIN_LEN;
     }
-    std::vector<uint8_t> qnameReconstructed(domainLenBytes);
-    for (size_t i = 0; i < domainLenBytes; i++) {
-        qnameReconstructed[i] = key.data[domainLenBytes - 1 - i];
-    }
-    std::string domain;
-    size_t i = 0;
-    bool isFirstLable = true;
-    while (i < qnameReconstructed.size()) {
-        uint8_t labelLen = qnameReconstructed[i++];
-        if (labelLen == 0) {
-            break;
-        }
-        if (i + labelLen > qnameReconstructed.size()) {
-            break;
-        }
-        if (!isFirstLable) {
-            domain.push_back('.');
-        }
-        domain.append(reinterpret_cast<const char*>(&qnameReconstructed[i]), labelLen);
-        isFirstLable = false;
-        i += labelLen;
+    std::string domain(reinterpret_cast<const char*>(key.data), domainLenBytes);
+    if (!domain.empty() && domain.front() == '.') {
+        domain.erase(0, 1);
     }
     return domain;
 }

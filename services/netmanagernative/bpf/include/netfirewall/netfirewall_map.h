@@ -273,6 +273,26 @@ bpf_map_def SEC("maps") DOMAIN_DENY_MAP = {
     .numa_node = 0,
 };
 
+bpf_map_def SEC("maps") DOMAIN_PREFIX_PASS_MAP = {
+    .type = BPF_MAP_TYPE_LPM_TRIE,
+    .key_size = sizeof(struct domain_hash_key),
+    .value_size = sizeof(uint8_t),
+    .max_entries = MAP_MAX_ENTRIES,
+    .map_flags = BPF_F_NO_PREALLOC,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
+bpf_map_def SEC("maps") DOMAIN_PREFIX_DENY_MAP = {
+    .type = BPF_MAP_TYPE_LPM_TRIE,
+    .key_size = sizeof(struct domain_hash_key),
+    .value_size = sizeof(uint8_t),
+    .max_entries = MAP_MAX_ENTRIES,
+    .map_flags = BPF_F_NO_PREALLOC,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
 bpf_map_def SEC("maps") LOOP_BACK_IPV4_MAP = {
     .type = BPF_MAP_TYPE_LPM_TRIE,
     .key_size = sizeof(struct ipv4_lpm_key),
@@ -298,6 +318,26 @@ bpf_map_def SEC("maps") LOOP_BACK_IPV6_MAP = {
     .value_size = sizeof(loop_back_val),
     .max_entries = 1,
     .map_flags = BPF_F_NO_PREALLOC,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
+bpf_map_def SEC("maps") DOMAIN_SCRATCH_MAP = {
+    .type = BPF_MAP_TYPE_PERCPU_ARRAY,
+    .key_size = sizeof(__u32),
+    .value_size = sizeof(struct domain_hash_key),
+    .max_entries = 2,
+    .map_flags = 0,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
+bpf_map_def SEC("maps") NF_BITMAP_SCRATCH = {
+    .type = BPF_MAP_TYPE_PERCPU_ARRAY,
+    .key_size = sizeof(__u32),
+    .value_size = sizeof(struct bitmap),
+    .max_entries = 1,
+    .map_flags = 0,
     .inner_map_idx = 0,
     .numa_node = 0,
 };
