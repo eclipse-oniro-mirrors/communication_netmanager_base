@@ -1831,7 +1831,7 @@ bool NetsysNativeServiceStub::CheckIpCommand(const std::string &cmd)
             return false;
         }
     }
-    std::regex ipCommandRegex(R"(^(?:/system/bin/)?ip\s+(?:-6 )?(address|route|neigh|link|tunnel|rule)\s+.*)");
+    std::regex ipCommandRegex(R"(^(?:/system/bin/)?ip\s+(?:-6 )?(address|addr|route|neigh|link|tunnel|rule)\s+.*)");
     return std::regex_match(cmd, ipCommandRegex) || (cmd == "/system/bin/ifconfig");
 }
 
