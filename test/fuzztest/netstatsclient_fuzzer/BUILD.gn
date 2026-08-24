@@ -67,6 +67,7 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
   ]
 
   external_deps = [
+    "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_manager",
     "ability_runtime:dataobs_manager",
     "bundle_framework:appexecfwk_base",

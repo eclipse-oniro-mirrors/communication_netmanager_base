@@ -147,6 +147,7 @@ ohos_unittest("net_stats_manager_test") {
 
   external_deps = [
     "ability_base:want",
+    "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_manager",
     "ability_runtime:dataobs_manager",
     "ability_runtime:wantagent_innerkits",
@@ -244,6 +245,7 @@ ohos_unittest("net_stats_cached_service_test") {
 
   external_deps = [
     "ability_base:want",
+    "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_manager",
     "ability_runtime:dataobs_manager",
     "ability_runtime:wantagent_innerkits",
@@ -334,6 +336,7 @@ ohos_unittest("net_stats_service_new_test") {
 
   external_deps = [
     "ability_base:want",
+    "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_manager",
     "ability_runtime:dataobs_manager",
     "ability_runtime:wantagent_innerkits",
@@ -430,6 +433,7 @@ ohos_unittest("net_stats_service_common_test") {
 
   external_deps = [
     "ability_base:want",
+    "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_manager",
     "ability_runtime:dataobs_manager",
     "ability_runtime:wantagent_innerkits",
