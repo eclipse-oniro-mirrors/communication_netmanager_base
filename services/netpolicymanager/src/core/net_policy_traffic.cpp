@@ -341,7 +341,7 @@ bool NetPolicyTraffic::IsMeteredIfaces(const std::string& ifaceName)
 
 int32_t NetPolicyTraffic::ResetPolicies(const std::string &simId)
 {
-    std::shared_lock<std::shared_mutex> lock(quotaMutex_);
+    std::unique_lock<std::shared_mutex> lock(quotaMutex_);
     for (auto &quotaPolicy : quotaPolicies_) {
         if (quotaPolicy.networkmatchrule.simId == simId) {
             quotaPolicy.Reset();
@@ -353,7 +353,7 @@ int32_t NetPolicyTraffic::ResetPolicies(const std::string &simId)
 
 int32_t NetPolicyTraffic::ResetPolicies()
 {
-    std::shared_lock<std::shared_mutex> lock(quotaMutex_);
+    std::unique_lock<std::shared_mutex> lock(quotaMutex_);
     for (auto &quotaPolicy : quotaPolicies_) {
         NETMGR_LOG_I("NetPolicyTraffic::ResetPolicies [%{public}s.", quotaPolicy.networkmatchrule.simId.c_str());
         quotaPolicy.Reset();

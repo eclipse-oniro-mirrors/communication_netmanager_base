@@ -16,6 +16,7 @@
 #ifndef NET_POLICY_RULE_H
 #define NET_POLICY_RULE_H
 
+#include <atomic>
 #include <map>
 #include <shared_mutex>
 
@@ -39,9 +40,24 @@ enum PolicyTransCtrl {
 };
 
 struct UidPolicyRule {
-    uint32_t policy_ = 0;
-    uint32_t rule_ = 1 << 7;
-    uint32_t netsys_ = 7;
+    std::atomic<uint32_t> policy_{0};
+    std::atomic<uint32_t> rule_{1 << 7};
+    std::atomic<uint32_t> netsys_{7};
+
+    UidPolicyRule() = default;
+    UidPolicyRule(const UidPolicyRule &other)
+        : policy_(other.policy_.load()), rule_(other.rule_.load()), netsys_(other.netsys_.load())
+    {
+    }
+    UidPolicyRule &operator=(const UidPolicyRule &other)
+    {
+        if (this != &other) {
+            policy_.store(other.policy_.load());
+            rule_.store(other.rule_.load());
+            netsys_.store(other.netsys_.load());
+        }
+        return *this;
+    }
 };
 
 class NetPolicyRule : public NetPolicyBase {

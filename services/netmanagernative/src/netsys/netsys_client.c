@@ -927,11 +927,11 @@ static void FillDnsProcessInfo(char *srcAddr, struct DnsProcessInfo *processInfo
     FillFamilyQueryInfo(&(processInfoExt->ipv6QueryInfo), &(processInfo->ipv6QueryInfo));
 }
 
-static int32_t GetDnsCacheSize(void)
+static int32_t GetDnsCacheSize(const struct DnsCacheInfo *dnsCaches, uint32_t dnsCacheSize)
 {
     uint32_t size = 0;
-    for (uint32_t i = 0; i < g_curDnsStoreSize; i++) {
-        uint8_t addrSize = g_dnsCaches[i].addrSize;
+    for (uint32_t i = 0; i < dnsCacheSize; i++) {
+        uint8_t addrSize = dnsCaches[i].addrSize;
         size += (sizeof(uint8_t) + sizeof(struct DnsProcessInfoExt) + addrSize * sizeof(struct AddrInfo));
     }
     return size;
@@ -971,39 +971,31 @@ static int32_t NetSysPostDnsQueryResultInternal(void)
         .command = POST_DNS_QUERY_RESULT,
         .netId = 0,
     };
-    uint32_t allDnsCacheSize = GetDnsCacheSize();
+
+    pthread_spin_lock(&g_dnsReportLock);
+    uint32_t allDnsCacheSize = GetDnsCacheSize(g_dnsCaches, g_curDnsStoreSize);
     // LCOV_EXCL_START
-    if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
-        return CloseSocketReturn(sockFd, -errno);
-    }
-
-    if (!PollSendData(sockFd, (char *)&uid, sizeof(int32_t))) {
-        return CloseSocketReturn(sockFd, -errno);
-    }
-
-    if (!PollSendData(sockFd, (char *)&pid, sizeof(int32_t))) {
-        return CloseSocketReturn(sockFd, -errno);
-    }
-    if (!PollSendData(sockFd, (char *)&g_curDnsStoreSize, sizeof(int32_t))) {
-        return CloseSocketReturn(sockFd, -errno);
-    }
-    if (!PollSendData(sockFd, (char *)&allDnsCacheSize, sizeof(int32_t))) {
+    if (!PollSendData(sockFd, (const char *)(&info), sizeof(info)) ||
+        !PollSendData(sockFd, (char *)&uid, sizeof(int32_t)) ||
+        !PollSendData(sockFd, (char *)&pid, sizeof(int32_t)) ||
+        !PollSendData(sockFd, (char *)&g_curDnsStoreSize, sizeof(int32_t)) ||
+        !PollSendData(sockFd, (char *)&allDnsCacheSize, sizeof(int32_t))) {
+        pthread_spin_unlock(&g_dnsReportLock);
         return CloseSocketReturn(sockFd, -errno);
     }
     // LCOV_EXCL_STOP
     for (uint32_t i = 0; i < g_curDnsStoreSize; i++) {
         int32_t ret = NetSysPostDnsQueryForOne(sockFd, g_dnsCaches[i]);
         if (ret < 0) {
+            pthread_spin_unlock(&g_dnsReportLock);
             return CloseSocketReturn(sockFd, ret);
         }
     }
-    CloseSocketReturn(sockFd, 0);
-    pthread_spin_lock(&g_dnsReportLock);
     memset_s(&g_dnsCaches, sizeof(struct DnsCacheInfo) * MAX_DNS_CACHE_SIZE, 0,
         sizeof(struct DnsCacheInfo) * MAX_DNS_CACHE_SIZE);
     g_curDnsStoreSize = 0;
     pthread_spin_unlock(&g_dnsReportLock);
-    return 0;
+    return CloseSocketReturn(sockFd, 0);
 }
 
 char *addr_to_string(const AlignedSockAddr *addr, char *buf, size_t len)

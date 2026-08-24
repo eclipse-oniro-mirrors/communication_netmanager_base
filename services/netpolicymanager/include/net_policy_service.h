@@ -335,8 +335,7 @@ private:
     sptr<NetPolicyServiceCommon> serviceComm_ = nullptr;
     std::mutex mutex_;
     std::vector<uint16_t> monthDay_;
-
-    bool hasSARemoved_ = false;
+    std::atomic<bool> hasSARemoved_{false};
     bool isDisplayTrafficAncoList_ = false;
     uint64_t netPolicySysTimerId_ = 0;
 
