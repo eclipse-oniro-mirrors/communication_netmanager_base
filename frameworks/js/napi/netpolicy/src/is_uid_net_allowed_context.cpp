@@ -64,8 +64,8 @@ bool IsUidNetAllowedContext::CheckParamsType(napi_value *params, size_t paramsCo
             NETMANAGER_BASE_LOGE("IsUidNetAllowedContext first param is not number");
             return false;
         }
-        if (!(NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) != napi_string ||
-              NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) != napi_boolean)) {
+        if (!(NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_string ||
+              NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_boolean)) {
             NETMANAGER_BASE_LOGE("IsUidNetAllowedContext second param is not string or boolean");
             return false;
         }

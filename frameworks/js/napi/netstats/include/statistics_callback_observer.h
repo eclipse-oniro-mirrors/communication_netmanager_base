@@ -33,6 +33,8 @@ namespace OHOS {
 namespace NetManagerStandard {
 class StatisticsCallbackObserver : public NetStatsCallbackStub {
 public:
+    std::mutex eventMutex;
+
     int32_t NetIfaceStatsChanged(const std::string &iface) override;
     int32_t NetUidStatsChanged(const std::string &iface, uint32_t uid) override;
 

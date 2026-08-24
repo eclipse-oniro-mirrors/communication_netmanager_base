@@ -133,6 +133,10 @@ int32_t NetPolicyFirewall::SetDeviceIdleTrustlist(const std::vector<uint32_t> &u
         NETMGR_LOG_E("Device idle allowed list's size is over the max size.");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
+    if (deviceIdleFirewallRule_ == nullptr) {
+        NETMGR_LOG_E("SetDeviceIdleTrustlist deviceIdleFirewallRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     UpdateFirewallPolicyList(FIREWALL_CHAIN_DEVICE_IDLE, uids, isAllowed);
     GetFileInst()->WriteFirewallRules(FIREWALL_CHAIN_DEVICE_IDLE, deviceIdleAllowedList_, deviceIdleDeniedList_);
     deviceIdleFirewallRule_->SetAllowedList(uids, isAllowed ? FIREWALL_RULE_ALLOW : FIREWALL_RULE_DENY);
@@ -342,9 +346,12 @@ void NetPolicyFirewall::DeleteUid(uint32_t uid)
 {
     SetDeviceIdleTrustlist({uid}, false);
     SetPowerSaveTrustlist({uid}, false);
-
-    deviceIdleFirewallRule_->RemoveFromAllowedList(uid);
-    powerSaveFirewallRule_->RemoveFromAllowedList(uid);
+    if (deviceIdleFirewallRule_ != nullptr) {
+        deviceIdleFirewallRule_->RemoveFromAllowedList(uid);
+    }
+    if (powerSaveFirewallRule_ != nullptr) {
+        powerSaveFirewallRule_->RemoveFromAllowedList(uid);
+    }
     NETMGR_LOG_I("NetPolicyFirewall::DeleteUid End");
 }
 

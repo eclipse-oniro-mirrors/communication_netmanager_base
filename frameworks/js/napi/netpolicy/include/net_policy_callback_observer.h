@@ -34,6 +34,8 @@ namespace OHOS {
 namespace NetManagerStandard {
 class NetPolicyCallbackObserver : public NetPolicyCallbackStub {
 public:
+    std::mutex eventMutex;
+
     int32_t NetUidPolicyChange(uint32_t uid, uint32_t policy) override;
     int32_t NetUidRuleChange(uint32_t uid, uint32_t rule) override;
     int32_t NetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &quotaPolicies) override;

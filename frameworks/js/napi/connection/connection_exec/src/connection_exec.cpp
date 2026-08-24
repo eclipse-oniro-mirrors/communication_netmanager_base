@@ -61,6 +61,9 @@ napi_value ConnectionExec::CreateNetHandle(napi_env env, NetHandle *handle)
     if (NapiUtils::GetValueType(env, netHandle) != napi_object) {
         return NapiUtils::GetUndefined(env);
     }
+    if (handle == nullptr) {
+        return NapiUtils::GetUndefined(env);
+    }
 
     std::initializer_list<napi_property_descriptor> properties = {
         DECLARE_WRITABLE_NAPI_FUNCTION(NetHandleInterface::FUNCTION_GET_ADDRESSES_BY_NAME,
@@ -81,6 +84,9 @@ napi_value ConnectionExec::CreateNetCapabilities(napi_env env, NetAllCapabilitie
 {
     napi_value netCapabilities = NapiUtils::CreateObject(env);
     if (NapiUtils::GetValueType(env, netCapabilities) != napi_object) {
+        return NapiUtils::GetUndefined(env);
+    }
+    if (capabilities == nullptr) {
         return NapiUtils::GetUndefined(env);
     }
 
@@ -113,6 +119,10 @@ napi_value ConnectionExec::CreateConnectionProperties(napi_env env, NetLinkInfo 
     if (NapiUtils::GetValueType(env, connectionProperties) != napi_object) {
         return NapiUtils::GetUndefined(env);
     }
+    if (linkInfo == nullptr) {
+        return NapiUtils::GetUndefined(env);
+    }
+
     NapiUtils::SetStringPropertyUtf8(env, connectionProperties, KEY_INTERFACE_NAME, linkInfo->ifaceName_);
     NapiUtils::SetStringPropertyUtf8(env, connectionProperties, KEY_DOMAINS, linkInfo->domain_);
     NapiUtils::SetUint32Property(env, connectionProperties, KEY_MTU, linkInfo->mtu_);

@@ -38,6 +38,9 @@ const std::string NET_STATS_INFO = "info";
 
 bool StatisticsExec::ExecGetCellularRxBytes(GetCellularRxBytesContext *context)
 {
+    if (context == nullptr) {
+        return false;
+    }
     int32_t result = NetStatsClient::GetInstance().GetCellularRxBytes(context->bytes64_);
     context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
@@ -45,6 +48,9 @@ bool StatisticsExec::ExecGetCellularRxBytes(GetCellularRxBytesContext *context)
 
 bool StatisticsExec::ExecGetCellularTxBytes(GetCellularTxBytesContext *context)
 {
+    if (context == nullptr) {
+        return false;
+    }
     int32_t result = NetStatsClient::GetInstance().GetCellularTxBytes(context->bytes64_);
     context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
@@ -52,6 +58,9 @@ bool StatisticsExec::ExecGetCellularTxBytes(GetCellularTxBytesContext *context)
 
 bool StatisticsExec::ExecGetAllRxBytes(GetAllRxBytesContext *context)
 {
+    if (context == nullptr) {
+        return false;
+    }
     int32_t result = NetStatsClient::GetInstance().GetAllRxBytes(context->bytes64_);
     context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
@@ -59,6 +68,9 @@ bool StatisticsExec::ExecGetAllRxBytes(GetAllRxBytesContext *context)
 
 bool StatisticsExec::ExecGetAllTxBytes(GetAllTxBytesContext *context)
 {
+    if (context == nullptr) {
+        return false;
+    }
     int32_t result = NetStatsClient::GetInstance().GetAllTxBytes(context->bytes64_);
     context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
@@ -66,6 +78,9 @@ bool StatisticsExec::ExecGetAllTxBytes(GetAllTxBytesContext *context)
 
 bool StatisticsExec::ExecGetUidRxBytes(GetUidRxBytesContext *context)
 {
+    if (context == nullptr) {
+        return false;
+    }
     int32_t result = NetStatsClient::GetInstance().GetUidRxBytes(context->bytes64_, context->uid_);
     context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
@@ -73,6 +88,9 @@ bool StatisticsExec::ExecGetUidRxBytes(GetUidRxBytesContext *context)
 
 bool StatisticsExec::ExecGetUidTxBytes(GetUidTxBytesContext *context)
 {
+    if (context == nullptr) {
+        return false;
+    }
     int32_t result = NetStatsClient::GetInstance().GetUidTxBytes(context->bytes64_, context->uid_);
     context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
@@ -80,6 +98,9 @@ bool StatisticsExec::ExecGetUidTxBytes(GetUidTxBytesContext *context)
 
 bool StatisticsExec::ExecGetIfaceRxBytes(GetIfaceRxBytesContext *context)
 {
+    if (context == nullptr) {
+        return false;
+    }
     int32_t result = NetStatsClient::GetInstance().GetIfaceRxBytes(context->bytes64_, context->interfaceName_);
     context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
@@ -87,6 +108,9 @@ bool StatisticsExec::ExecGetIfaceRxBytes(GetIfaceRxBytesContext *context)
 
 bool StatisticsExec::ExecGetIfaceTxBytes(GetIfaceTxBytesContext *context)
 {
+    if (context == nullptr) {
+        return false;
+    }
     int32_t result = NetStatsClient::GetInstance().GetIfaceTxBytes(context->bytes64_, context->interfaceName_);
     context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
@@ -94,6 +118,9 @@ bool StatisticsExec::ExecGetIfaceTxBytes(GetIfaceTxBytesContext *context)
 
 bool StatisticsExec::ExecGetIfaceStats(GetIfaceStatsContext *context)
 {
+    if (context == nullptr) {
+        return false;
+    }
     int32_t result = NetStatsClient::GetInstance().GetIfaceStatsDetail(context->GetInterfaceName(), context->GetStart(),
                                                                        context->GetEnd(), context->GetStatsInfo());
     context->SetErrorCode(result);
@@ -102,6 +129,9 @@ bool StatisticsExec::ExecGetIfaceStats(GetIfaceStatsContext *context)
 
 bool StatisticsExec::ExecGetIfaceUidStats(GetIfaceUidStatsContext *context)
 {
+    if (context == nullptr) {
+        return false;
+    }
     int32_t result = NetStatsClient::GetInstance().GetUidStatsDetail(context->GetInterfaceName(), context->GetUid(),
                                                                      context->GetStart(), context->GetEnd(),
                                                                      context->GetStatsInfo());
@@ -111,6 +141,9 @@ bool StatisticsExec::ExecGetIfaceUidStats(GetIfaceUidStatsContext *context)
 
 bool StatisticsExec::ExecUpdateIfacesStats(UpdateIfacesStatsContext *context)
 {
+    if (context == nullptr) {
+        return false;
+    }
     int32_t result = NetStatsClient::GetInstance().UpdateIfacesStats(context->GetInterfaceName(), context->GetStart(),
                                                                      context->GetEnd(), context->GetStatsInfo());
     context->SetErrorCode(result);
@@ -119,6 +152,9 @@ bool StatisticsExec::ExecUpdateIfacesStats(UpdateIfacesStatsContext *context)
 
 bool StatisticsExec::ExecUpdateStatsData(UpdateStatsDataContext *context)
 {
+    if (context == nullptr) {
+        return false;
+    }
     int32_t result = NetStatsClient::GetInstance().UpdateStatsData();
     context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
@@ -126,6 +162,9 @@ bool StatisticsExec::ExecUpdateStatsData(UpdateStatsDataContext *context)
 
 bool StatisticsExec::ExecGetSockfdRxBytes(GetSockfdRxBytesContext *context)
 {
+    if (context == nullptr) {
+        return false;
+    }
     int32_t result = NetStatsClient::GetInstance().GetSockfdRxBytes(context->bytes64_, context->sockfd_);
     context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
@@ -133,6 +172,9 @@ bool StatisticsExec::ExecGetSockfdRxBytes(GetSockfdRxBytesContext *context)
 
 bool StatisticsExec::ExecGetSockfdTxBytes(GetSockfdTxBytesContext *context)
 {
+    if (context == nullptr) {
+        return false;
+    }
     int32_t result = NetStatsClient::GetInstance().GetSockfdTxBytes(context->bytes64_, context->sockfd_);
     context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
@@ -140,6 +182,9 @@ bool StatisticsExec::ExecGetSockfdTxBytes(GetSockfdTxBytesContext *context)
 
 bool StatisticsExec::ExecGetTrafficStatsByNetwork(GetTrafficStatsByNetworkContext *context)
 {
+    if (context == nullptr) {
+        return false;
+    }
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
     if (network == nullptr) {
         NETMANAGER_BASE_LOGE("the network of param to get traffic stats is null");
@@ -156,6 +201,9 @@ bool StatisticsExec::ExecGetTrafficStatsByNetwork(GetTrafficStatsByNetworkContex
 
 bool StatisticsExec::ExecGetMonthTrafficStatsByNetwork(GetMonthTrafficStatsByNetworkContext *context)
 {
+    if (context == nullptr) {
+        return false;
+    }
     uint32_t simId = context->GetSimId();
     int32_t result = NetStatsClient::GetInstance().GetMonthTrafficStatsByNetwork(simId,
         context->GetMonthTrafficData());
@@ -165,6 +213,9 @@ bool StatisticsExec::ExecGetMonthTrafficStatsByNetwork(GetMonthTrafficStatsByNet
 
 bool StatisticsExec::ExecGetTrafficStatsByUidNetwork(GetTrafficStatsByUidNetworkContext *context)
 {
+    if (context == nullptr) {
+        return false;
+    }
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
     if (network == nullptr) {
         NETMANAGER_BASE_LOGE("the network of param to get traffic stats is null");
@@ -182,6 +233,9 @@ bool StatisticsExec::ExecGetTrafficStatsByUidNetwork(GetTrafficStatsByUidNetwork
 
 bool StatisticsExec::ExecGetSelfTrafficStats(GetSelfTrafficStatsContext *context)
 {
+    if (context == nullptr) {
+        return false;
+    }
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
     if (network == nullptr) {
         NETMANAGER_BASE_LOGE("the network of param to get traffic stats is null");
@@ -238,46 +292,73 @@ bool StatisticsExec::ExecGetTrafficPlanInfo(GetTrafficPlanInfoContext *context)
 
 napi_value StatisticsExec::GetCellularRxBytesCallback(GetCellularRxBytesContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 
 napi_value StatisticsExec::GetCellularTxBytesCallback(GetCellularTxBytesContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 
 napi_value StatisticsExec::GetAllRxBytesCallback(GetAllRxBytesContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 
 napi_value StatisticsExec::GetAllTxBytesCallback(GetAllTxBytesContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 
 napi_value StatisticsExec::GetUidRxBytesCallback(GetUidRxBytesContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 
 napi_value StatisticsExec::GetUidTxBytesCallback(GetUidTxBytesContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 
 napi_value StatisticsExec::GetIfaceRxBytesCallback(GetIfaceRxBytesContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 
 napi_value StatisticsExec::GetIfaceTxBytesCallback(GetIfaceTxBytesContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 
 napi_value StatisticsExec::GetIfaceStatsCallback(GetIfaceStatsContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     napi_value netStatsInfo = NapiUtils::CreateObject(context->GetEnv());
     NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, RX_BYTES, context->GetStatsInfo().rxBytes_);
     NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, TX_BYTES, context->GetStatsInfo().txBytes_);
@@ -288,6 +369,9 @@ napi_value StatisticsExec::GetIfaceStatsCallback(GetIfaceStatsContext *context)
 
 napi_value StatisticsExec::GetIfaceUidStatsCallback(GetIfaceUidStatsContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     napi_value netStatsInfo = NapiUtils::CreateObject(context->GetEnv());
     NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, RX_BYTES, context->GetStatsInfo().rxBytes_);
     NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, TX_BYTES, context->GetStatsInfo().txBytes_);
@@ -298,6 +382,9 @@ napi_value StatisticsExec::GetIfaceUidStatsCallback(GetIfaceUidStatsContext *con
 
 napi_value StatisticsExec::GetGetTrafficStatsByNetworkCallback(GetTrafficStatsByNetworkContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     napi_value infos = NapiUtils::CreateObject(context->GetEnv());
     auto data = context->GetNetStatsInfo();
     for (const auto &item : data) {
@@ -314,6 +401,9 @@ napi_value StatisticsExec::GetGetTrafficStatsByNetworkCallback(GetTrafficStatsBy
 
 napi_value StatisticsExec::GetGetTrafficStatsByUidNetworkCallback(GetTrafficStatsByUidNetworkContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     auto list = context->GetNetStatsInfoSequence();
     napi_value stats = NapiUtils::CreateArray(context->GetEnv(), list.size());
     size_t index = 0;
@@ -336,6 +426,9 @@ napi_value StatisticsExec::GetGetTrafficStatsByUidNetworkCallback(GetTrafficStat
 
 napi_value StatisticsExec::GetSelfTrafficStatsCallback(GetSelfTrafficStatsContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     auto list = context->GetNetStatsInfoSequence();
     int64_t rxByte = 0;
     int64_t txByte = 0;
@@ -358,41 +451,65 @@ napi_value StatisticsExec::GetSelfTrafficStatsCallback(GetSelfTrafficStatsContex
 
 napi_value StatisticsExec::SetCalibrationTrafficCallback(SetCalibrationTrafficContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
 napi_value StatisticsExec::GetMonthTrafficStatsByNetworkCallback(GetMonthTrafficStatsByNetworkContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     return NapiUtils::CreateInt64(context->GetEnv(), context->GetMonthTrafficData());
 }
 
 napi_value StatisticsExec::UpdateIfacesStatsCallback(UpdateIfacesStatsContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
 napi_value StatisticsExec::UpdateStatsDataCallback(UpdateStatsDataContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
 napi_value StatisticsExec::GetSockfdRxBytesCallback(GetSockfdRxBytesContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 
 napi_value StatisticsExec::GetSockfdTxBytesCallback(GetSockfdTxBytesContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 
 napi_value StatisticsExec::SetTrafficPlanInfoCallback(SetTrafficPlanInfoContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
 napi_value StatisticsExec::GetTrafficPlanInfoCallback(GetTrafficPlanInfoContext *context)
 {
+    if (context == nullptr) {
+        return nullptr;
+    }
     return NapiUtils::CreateInt64(context->GetEnv(), context->GetValue());
 }
 
