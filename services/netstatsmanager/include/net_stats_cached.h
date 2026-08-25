@@ -155,6 +155,8 @@ public:
     uint64_t GetWriteDateTime();
 #endif
 
+    std::mutex &GetTrafficCalcMutex() { return trafficCalcMutex_; }
+
 private:
     class CachedInfo {
     public:
@@ -329,6 +331,7 @@ private:
 
     CachedInfo stats_;
     ffrt::mutex lock_;
+    std::mutex trafficCalcMutex_;
     std::mutex mutex_ {};
     std::atomic<bool> isForce_ = false;
     std::atomic<bool> isExec_ = false;
