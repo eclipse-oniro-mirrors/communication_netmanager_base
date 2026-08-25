@@ -353,8 +353,9 @@ private:
         VPN_NETWORK_TABLE,
     };
 
-    static bool vpnSysCall_;
+    static std::atomic<bool> vpnSysCall_;
     static std::string defauleNetWorkName_;
+    static std::mutex defauleNetWorkNameLock_;
 
     static bool CheckSysVpnCall();
     static bool CheckTunVpnCall(const std::string &vpnName);
