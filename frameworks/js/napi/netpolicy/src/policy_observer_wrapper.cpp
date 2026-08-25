@@ -86,7 +86,7 @@ napi_value PolicyObserverWrapper::Off(napi_env env, napi_callback_info info,
     napi_value params[MAX_PARAM_NUM] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &paramsCount, params, &thisVal, nullptr));
 
-    if (!(paramsCount != PARAM_JUST_OPTIONS && paramsCount != PARAM_OPTIONS_AND_CALLBACK) ||
+    if ((paramsCount != PARAM_JUST_OPTIONS && paramsCount != PARAM_OPTIONS_AND_CALLBACK) ||
         NapiUtils::GetValueType(env, params[ARG_INDEX_0]) != napi_string) {
         NETMANAGER_BASE_LOGE("on off once interface para: [string, function?]");
         napi_throw_error(env, std::to_string(NETMANAGER_ERR_PARAMETER_ERROR).c_str(), "Parameter error");
