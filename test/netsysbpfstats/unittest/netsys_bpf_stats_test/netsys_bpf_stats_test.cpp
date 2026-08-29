@@ -239,6 +239,39 @@ HWTEST_F(NetsysBpfStatsTest, LoadAndIfaceStats, TestSize.Level1)
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 }
 
+HWTEST_F(NetsysBpfStatsTest, GetTotalStatsFilterDeletedIface, TestSize.Level1)
+{
+    BpfMapper<iface_stats_key, iface_stats_value> ifaceStatsMap(IFACE_STATS_MAP_PATH, BPF_ANY);
+    EXPECT_TRUE(ifaceStatsMap.IsValid());
+
+    auto keys = ifaceStatsMap.GetAllKeys();
+    auto r = ifaceStatsMap.Clear(keys);
+    EXPECT_EQ(r, NETSYS_SUCCESS);
+
+    constexpr uint64_t fakeIfIndex = 999999;
+    iface_stats_value fakeStats = {0};
+    fakeStats.rxBytes = TEST_BYTES0;
+    fakeStats.rxPackets = TEST_BYTES0;
+    fakeStats.txBytes = TEST_BYTES0;
+    fakeStats.txPackets = TEST_BYTES0;
+    auto ret = ifaceStatsMap.Write(fakeIfIndex, fakeStats, BPF_ANY);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+
+    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
+    uint64_t stats = 0;
+    EXPECT_EQ(bpfStats->GetTotalStats(stats, StatsType::STATS_TYPE_RX_BYTES), NETSYS_SUCCESS);
+    EXPECT_EQ(stats, 0);
+    EXPECT_EQ(bpfStats->GetTotalStats(stats, StatsType::STATS_TYPE_RX_PACKETS), NETSYS_SUCCESS);
+    EXPECT_EQ(stats, 0);
+    EXPECT_EQ(bpfStats->GetTotalStats(stats, StatsType::STATS_TYPE_TX_BYTES), NETSYS_SUCCESS);
+    EXPECT_EQ(stats, 0);
+    EXPECT_EQ(bpfStats->GetTotalStats(stats, StatsType::STATS_TYPE_TX_PACKETS), NETSYS_SUCCESS);
+    EXPECT_EQ(stats, 0);
+
+    ret = ifaceStatsMap.Delete(fakeIfIndex);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+}
+
 HWTEST_F(NetsysBpfStatsTest, LoadAndUidIfaceStats, TestSize.Level1)
 {
     BpfMapper<app_uid_if_stats_key, app_uid_if_stats_value> uidIfaceStatsMap(APP_UID_IF_STATS_MAP_PATH, BPF_ANY);
