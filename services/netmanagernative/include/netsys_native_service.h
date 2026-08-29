@@ -17,6 +17,7 @@
 #define NETSYS_NATIVE_SERVICE_H
 
 #include <mutex>
+#include <unordered_map>
 
 #include "system_ability.h"
 #include "system_ability_status_change_stub.h"
@@ -240,6 +241,14 @@ public:
         uint32_t packetId, int32_t verdict, uint32_t mark) override;
 #endif
 
+private:
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    uint32_t RegisterNfqCtx(int32_t fd);
+    int32_t GetNfqFdById(uint32_t ctxId);
+    int32_t UnregisterNfqCtx(uint32_t ctxId);
+    void NfqUnbindQueueInternal(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q);
+#endif
+
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
@@ -276,6 +285,10 @@ private:
     std::mutex instanceLock_;
     bool hasSARemoved_ = false;
     std::set<uint32_t> sharingTypeIsOn_;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    std::mutex nfqCtxMutex_;
+    std::unordered_map<uint32_t, int32_t> nfqCtxMap_;
+#endif
 };
 } // namespace NetsysNative
 } // namespace OHOS

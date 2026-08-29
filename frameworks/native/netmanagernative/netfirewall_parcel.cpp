@@ -703,6 +703,9 @@ bool NfqCtx::Marshalling(Parcel &parcel) const
             }
         }
     }
+    if (!parcel.WriteUint32(ctxId)) {
+        return false;
+    }
     return true;
 }
 
@@ -731,6 +734,9 @@ sptr<NfqCtx> NfqCtx::Unmarshalling(Parcel &parcel)
         if (ctx->queues[index] == nullptr) {
             return nullptr;
         }
+    }
+    if (!parcel.ReadUint32(ctx->ctxId)) {
+        return nullptr;
     }
     return ctx;
 }
