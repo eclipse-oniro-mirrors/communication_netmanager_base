@@ -86,7 +86,7 @@ int32_t NetsysBpfStats::GetTotalStats(uint64_t &stats, StatsType statsType)
         }
 
         char *pName = if_indextoname(value, if_name);
-        if (pName != nullptr && IFACE_NAME_SET.find(pName) == IFACE_NAME_SET.end()) {
+        if (pName == nullptr || IFACE_NAME_SET.find(pName) == IFACE_NAME_SET.end()) {
             needFilterIfIndex.insert(value);
         }
     }
