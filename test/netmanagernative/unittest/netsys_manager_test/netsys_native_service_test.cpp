@@ -1355,10 +1355,10 @@ HWTEST_F(NetsysNativeServiceTest, NfqInvalidFdTest001, TestSize.Level1)
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->NfqQueueDestroy(ctx, qMock);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, -1);
 
     ret = instance_->NfqClose(ctx);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, -1);
 }
 #endif
 } // namespace NetsysNative

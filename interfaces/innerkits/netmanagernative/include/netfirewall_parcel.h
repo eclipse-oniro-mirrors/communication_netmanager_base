@@ -263,9 +263,10 @@ struct NfqQueue : public Parcelable {
 };
 
 struct NfqCtx : public Parcelable {
-    int32_t fd;
-    uint32_t seq;
+    int32_t fd = -1;
+    uint32_t seq = 0;
     sptr<NfqQueue> queues[NFQ_MAX_QUEUES];
+    uint32_t ctxId = 0;
     virtual bool Marshalling(Parcel &parcel) const override;
     static sptr<NfqCtx> Unmarshalling(Parcel &parcel);
 };

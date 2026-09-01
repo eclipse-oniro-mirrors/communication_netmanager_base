@@ -4416,14 +4416,14 @@ int32_t NetsysNativeServiceProxy::NfqClose(sptr<NfqCtx> &ctx)
     if (ctx == nullptr) {
         return ERR_FLATTEN_OBJECT;
     }
+    if (ctx->fd >= 0) {
+        close(ctx->fd);
+    }
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
     }
     if (!ctx->Marshalling(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteFileDescriptor(ctx->fd)) {
         return ERR_FLATTEN_OBJECT;
     }
     MessageParcel reply;
@@ -4454,9 +4454,6 @@ int32_t NetsysNativeServiceProxy::NfqBindPf(sptr<NfqCtx> &ctx, uint16_t pf)
     if (!ctx->Marshalling(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteFileDescriptor(ctx->fd)) {
-        return ERR_FLATTEN_OBJECT;
-    }
     if (!data.WriteUint16(pf)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -4468,14 +4465,12 @@ int32_t NetsysNativeServiceProxy::NfqBindPf(sptr<NfqCtx> &ctx, uint16_t pf)
         NETNATIVE_LOGE("NfqBindPf SendRequest failed, error code: [%{public}d]", err);
         return IPC_INVOKER_ERR;
     }
+    int32_t localFd = ctx->fd;
     ctx = NfqCtx::Unmarshalling(reply);
     if (ctx == nullptr) {
         return ERR_FLATTEN_OBJECT;
     }
-    ctx->fd = reply.ReadFileDescriptor();
-    if (ctx->fd < 0) {
-        return ERR_FLATTEN_OBJECT;
-    }
+    ctx->fd = localFd;
     int32_t ret;
     if (!reply.ReadInt32(ret)) {
         NETNATIVE_LOGE("NfqBindPf ReadInt32 failed");
@@ -4496,9 +4491,6 @@ int32_t NetsysNativeServiceProxy::NfqUnbindPf(sptr<NfqCtx> &ctx, uint16_t pf)
     if (!ctx->Marshalling(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteFileDescriptor(ctx->fd)) {
-        return ERR_FLATTEN_OBJECT;
-    }
     if (!data.WriteUint16(pf)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -4510,14 +4502,12 @@ int32_t NetsysNativeServiceProxy::NfqUnbindPf(sptr<NfqCtx> &ctx, uint16_t pf)
         NETNATIVE_LOGE("NfqUnbindPf SendRequest failed, error code: [%{public}d]", err);
         return IPC_INVOKER_ERR;
     }
+    int32_t localFd = ctx->fd;
     ctx = NfqCtx::Unmarshalling(reply);
     if (ctx == nullptr) {
         return ERR_FLATTEN_OBJECT;
     }
-    ctx->fd = reply.ReadFileDescriptor();
-    if (ctx->fd < 0) {
-        return ERR_FLATTEN_OBJECT;
-    }
+    ctx->fd = localFd;
     int32_t ret;
     if (!reply.ReadInt32(ret)) {
         return ERR_FLATTEN_OBJECT;
@@ -4537,9 +4527,6 @@ sptr<NfqQueue> NetsysNativeServiceProxy::NfqQueueCreate(sptr<NfqCtx> &ctx, uint1
     if (!ctx->Marshalling(data)) {
         return nullptr;
     }
-    if (!data.WriteFileDescriptor(ctx->fd)) {
-        return nullptr;
-    }
     if (!data.WriteUint16(queueNum)) {
         return nullptr;
     }
@@ -4551,14 +4538,12 @@ sptr<NfqQueue> NetsysNativeServiceProxy::NfqQueueCreate(sptr<NfqCtx> &ctx, uint1
         NETNATIVE_LOGE("NfqQueueCreate SendRequest failed, error code: [%{public}d]", err);
         return nullptr;
     }
+    int32_t localFd = ctx->fd;
     ctx = NfqCtx::Unmarshalling(reply);
     if (ctx == nullptr) {
         return nullptr;
     }
-    ctx->fd = reply.ReadFileDescriptor();
-    if (ctx->fd < 0) {
-        return nullptr;
-    }
+    ctx->fd = localFd;
     return NfqQueue::Unmarshalling(reply);
 }
 
@@ -4577,9 +4562,6 @@ int32_t NetsysNativeServiceProxy::NfqQueueDestroy(sptr<NfqCtx> &ctx, const sptr<
     if (!q->Marshalling(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteFileDescriptor(ctx->fd)) {
-        return ERR_FLATTEN_OBJECT;
-    }
     MessageParcel reply;
     MessageOption option;
     int32_t err = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_QUEUE_DESTROY),
@@ -4588,14 +4570,12 @@ int32_t NetsysNativeServiceProxy::NfqQueueDestroy(sptr<NfqCtx> &ctx, const sptr<
         NETNATIVE_LOGE("NfqQueueDestroy SendRequest failed, error code: [%{public}d]", err);
         return IPC_INVOKER_ERR;
     }
+    int32_t localFd = ctx->fd;
     ctx = NfqCtx::Unmarshalling(reply);
     if (ctx == nullptr) {
         return ERR_FLATTEN_OBJECT;
     }
-    ctx->fd = reply.ReadFileDescriptor();
-    if (ctx->fd < 0) {
-        return ERR_FLATTEN_OBJECT;
-    }
+    ctx->fd = localFd;
     int32_t ret;
     if (!reply.ReadInt32(ret)) {
         NETNATIVE_LOGE("NfqQueueDestroy ReadInt32 failed");
@@ -4620,9 +4600,6 @@ int32_t NetsysNativeServiceProxy::NfqQueueSetMode(sptr<NfqCtx> &ctx, const sptr<
     if (!q->Marshalling(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteFileDescriptor(ctx->fd)) {
-        return ERR_FLATTEN_OBJECT;
-    }
     if (!data.WriteUint8(mode)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -4637,14 +4614,12 @@ int32_t NetsysNativeServiceProxy::NfqQueueSetMode(sptr<NfqCtx> &ctx, const sptr<
         NETNATIVE_LOGE("NfqQueueSetMode SendRequest failed, error code: [%{public}d]", err);
         return IPC_INVOKER_ERR;
     }
+    int32_t localFd = ctx->fd;
     ctx = NfqCtx::Unmarshalling(reply);
     if (ctx == nullptr) {
         return ERR_FLATTEN_OBJECT;
     }
-    ctx->fd = reply.ReadFileDescriptor();
-    if (ctx->fd < 0) {
-        return ERR_FLATTEN_OBJECT;
-    }
+    ctx->fd = localFd;
     int32_t ret;
     if (!reply.ReadInt32(ret)) {
         NETNATIVE_LOGE("NfqQueueSetMode ReadInt32 failed");
@@ -4668,9 +4643,6 @@ int32_t NetsysNativeServiceProxy::NfqQueueSetMaxLen(sptr<NfqCtx> &ctx, const spt
     if (!q->Marshalling(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteFileDescriptor(ctx->fd)) {
-        return ERR_FLATTEN_OBJECT;
-    }
     if (!data.WriteUint32(maxLen)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -4682,14 +4654,12 @@ int32_t NetsysNativeServiceProxy::NfqQueueSetMaxLen(sptr<NfqCtx> &ctx, const spt
         NETNATIVE_LOGE("NfqQueueSetMaxLen SendRequest failed, error code: [%{public}d]", err);
         return IPC_INVOKER_ERR;
     }
+    int32_t localFd = ctx->fd;
     ctx = NfqCtx::Unmarshalling(reply);
     if (ctx == nullptr) {
         return ERR_FLATTEN_OBJECT;
     }
-    ctx->fd = reply.ReadFileDescriptor();
-    if (ctx->fd < 0) {
-        return ERR_FLATTEN_OBJECT;
-    }
+    ctx->fd = localFd;
     int32_t ret;
     if (!reply.ReadInt32(ret)) {
         NETNATIVE_LOGE("NfqQueueSetMaxLen ReadInt32 failed");
@@ -4714,9 +4684,6 @@ int32_t NetsysNativeServiceProxy::NfqQueueSetFlag(sptr<NfqCtx> &ctx, const sptr<
     if (!q->Marshalling(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteFileDescriptor(ctx->fd)) {
-        return ERR_FLATTEN_OBJECT;
-    }
     if (!data.WriteUint32(mask)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -4731,14 +4698,12 @@ int32_t NetsysNativeServiceProxy::NfqQueueSetFlag(sptr<NfqCtx> &ctx, const sptr<
         NETNATIVE_LOGE("NfqQueueSetFlag SendRequest failed, error code: [%{public}d]", err);
         return IPC_INVOKER_ERR;
     }
+    int32_t localFd = ctx->fd;
     ctx = NfqCtx::Unmarshalling(reply);
     if (ctx == nullptr) {
         return ERR_FLATTEN_OBJECT;
     }
-    ctx->fd = reply.ReadFileDescriptor();
-    if (ctx->fd < 0) {
-        return ERR_FLATTEN_OBJECT;
-    }
+    ctx->fd = localFd;
     int32_t ret;
     if (!reply.ReadInt32(ret)) {
         NETNATIVE_LOGE("NfqQueueSetFlag ReadInt32 failed");
@@ -4763,9 +4728,6 @@ int32_t NetsysNativeServiceProxy::NfqPktVerdictMark(sptr<NfqCtx> &ctx, const spt
     if (!qh->Marshalling(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteFileDescriptor(ctx->fd)) {
-        return ERR_FLATTEN_OBJECT;
-    }
     if (!data.WriteUint32(packetId)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -4783,14 +4745,12 @@ int32_t NetsysNativeServiceProxy::NfqPktVerdictMark(sptr<NfqCtx> &ctx, const spt
         NETNATIVE_LOGE("NfqPktVerdictMark SendRequest failed, error code: [%{public}d]", err);
         return IPC_INVOKER_ERR;
     }
+    int32_t localFd = ctx->fd;
     ctx = NfqCtx::Unmarshalling(reply);
     if (ctx == nullptr) {
         return ERR_FLATTEN_OBJECT;
     }
-    ctx->fd = reply.ReadFileDescriptor();
-    if (ctx->fd < 0) {
-        return ERR_FLATTEN_OBJECT;
-    }
+    ctx->fd = localFd;
     int32_t ret;
     if (!reply.ReadInt32(ret)) {
         NETNATIVE_LOGE("NfqPktVerdictMark ReadInt32 failed");

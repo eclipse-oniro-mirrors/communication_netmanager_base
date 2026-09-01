@@ -113,7 +113,6 @@ void NfqCloseFuzzTest(const uint8_t *data, size_t size)
     }
     ctx->seq = NfQueueGetData<uint32_t>();
     ctx->Marshalling(dataParcel);
-    dataParcel.WriteFileDescriptor(-1);
 
     (void)OnRemoteRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_CLOSE), dataParcel);
 }
@@ -129,7 +128,6 @@ void NfqBindPfFuzzTest(const uint8_t *data, size_t size)
     }
     ctx->seq = NfQueueGetData<uint32_t>();
     ctx->Marshalling(dataParcel);
-    dataParcel.WriteFileDescriptor(-1);
     dataParcel.WriteUint16(NfQueueGetData<uint16_t>());
 
     (void)OnRemoteRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_BIND_PF), dataParcel);
@@ -146,7 +144,6 @@ void NfqUnbindPfFuzzTest(const uint8_t *data, size_t size)
     }
     ctx->seq = NfQueueGetData<uint32_t>();
     ctx->Marshalling(dataParcel);
-    dataParcel.WriteFileDescriptor(-1);
     dataParcel.WriteUint16(NfQueueGetData<uint16_t>());
 
     (void)OnRemoteRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_UNBIND_PF), dataParcel);
@@ -163,7 +160,6 @@ void NfqQueueCreateFuzzTest(const uint8_t *data, size_t size)
     }
     ctx->seq = NfQueueGetData<uint32_t>();
     ctx->Marshalling(dataParcel);
-    dataParcel.WriteFileDescriptor(-1);
     dataParcel.WriteUint16(NfQueueGetData<uint16_t>());
 
     (void)OnRemoteRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_QUEUE_CREATE), dataParcel);
@@ -183,7 +179,6 @@ void NfqQueueDestroyFuzzTest(const uint8_t *data, size_t size)
     q->queueNum = NfQueueGetData<uint16_t>();
     ctx->Marshalling(dataParcel);
     q->Marshalling(dataParcel);
-    dataParcel.WriteFileDescriptor(-1);
 
     (void)OnRemoteRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_QUEUE_DESTROY), dataParcel);
 }
@@ -202,7 +197,6 @@ void NfqQueueSetModeFuzzTest(const uint8_t *data, size_t size)
     q->queueNum = NfQueueGetData<uint16_t>();
     ctx->Marshalling(dataParcel);
     q->Marshalling(dataParcel);
-    dataParcel.WriteFileDescriptor(-1);
     dataParcel.WriteUint8(NfQueueGetData<uint8_t>());
     dataParcel.WriteUint32(NfQueueGetData<uint32_t>());
 
@@ -223,7 +217,6 @@ void NfqQueueSetMaxLenFuzzTest(const uint8_t *data, size_t size)
     q->queueNum = NfQueueGetData<uint16_t>();
     ctx->Marshalling(dataParcel);
     q->Marshalling(dataParcel);
-    dataParcel.WriteFileDescriptor(-1);
     dataParcel.WriteUint32(NfQueueGetData<uint32_t>());
 
     (void)OnRemoteRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_QUEUE_SET_MAX_LEN), dataParcel);
@@ -243,7 +236,6 @@ void NfqQueueSetFlagFuzzTest(const uint8_t *data, size_t size)
     q->queueNum = NfQueueGetData<uint16_t>();
     ctx->Marshalling(dataParcel);
     q->Marshalling(dataParcel);
-    dataParcel.WriteFileDescriptor(-1);
     dataParcel.WriteUint32(NfQueueGetData<uint32_t>());
     dataParcel.WriteUint32(NfQueueGetData<uint32_t>());
 
@@ -264,7 +256,6 @@ void NfqPktVerdictMarkFuzzTest(const uint8_t *data, size_t size)
     q->queueNum = NfQueueGetData<uint16_t>();
     ctx->Marshalling(dataParcel);
     q->Marshalling(dataParcel);
-    dataParcel.WriteFileDescriptor(-1);
     dataParcel.WriteUint32(NfQueueGetData<uint32_t>());
     dataParcel.WriteInt32(NfQueueGetData<int32_t>());
     dataParcel.WriteUint32(NfQueueGetData<uint32_t>());

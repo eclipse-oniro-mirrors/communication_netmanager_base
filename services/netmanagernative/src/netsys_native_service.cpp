@@ -1602,6 +1602,55 @@ int32_t NfqRegisterQueue(const sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q)
     return -1;
 }
 
+uint32_t NetsysNativeService::RegisterNfqCtx(int32_t fd)
+{
+    std::lock_guard<std::mutex> lock(nfqCtxMutex_);
+    for (uint32_t id = 1; id != UINT32_MAX; id++) {
+        if (nfqCtxMap_.find(id) == nfqCtxMap_.end()) {
+            nfqCtxMap_[id] = fd;
+            return id;
+        }
+    }
+    return 0;
+}
+
+int32_t NetsysNativeService::GetNfqFdById(uint32_t ctxId)
+{
+    std::lock_guard<std::mutex> lock(nfqCtxMutex_);
+    auto it = nfqCtxMap_.find(ctxId);
+    if (it == nfqCtxMap_.end()) {
+        return -1;
+    }
+    return it->second;
+}
+
+int32_t NetsysNativeService::UnregisterNfqCtx(uint32_t ctxId)
+{
+    std::lock_guard<std::mutex> lock(nfqCtxMutex_);
+    auto it = nfqCtxMap_.find(ctxId);
+    if (it == nfqCtxMap_.end()) {
+        return -1;
+    }
+    int32_t fd = it->second;
+    nfqCtxMap_.erase(it);
+    return fd;
+}
+
+void NetsysNativeService::NfqUnbindQueueInternal(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q)
+{
+    if (ctx == nullptr || q == nullptr) {
+        return;
+    }
+    char buf[BUFFER_SIZE];
+    struct nlmsghdr *nlh = reinterpret_cast<struct nlmsghdr *>(buf);
+    struct NfqBuildConfig cfg = {q->queueNum, NFQ_CMD_UNBIND, 0, 0xFF, 0, 0, 0, 0};
+    if (BuildConfig(nlh, sizeof(buf), &cfg) == 0) {
+        nlh->nlmsg_seq = NextSeq(ctx);
+        SendToKernel(ctx->fd, nlh);
+    }
+    NfqUnregisterQueue(ctx, q);
+}
+
 sptr<NfqCtx> NetsysNativeService::NfqOpen()
 {
     int fd = socket(AF_NETLINK, SOCK_RAW | SOCK_CLOEXEC, NETLINK_NETFILTER);
@@ -1626,7 +1675,14 @@ sptr<NfqCtx> NetsysNativeService::NfqOpen()
         close(fd);
         return nullptr;
     }
+    uint32_t ctxId = RegisterNfqCtx(fd);
+    if (ctxId == 0) {
+        NETNATIVE_LOGE("NfqOpen register ctx failed");
+        close(fd);
+        return nullptr;
+    }
     ctx->fd = fd;
+    ctx->ctxId = ctxId;
     return ctx;
 }
 
@@ -1635,14 +1691,19 @@ int32_t NetsysNativeService::NfqClose(sptr<NfqCtx> &ctx)
     if (ctx == nullptr) {
         return -1;
     }
+    int32_t fd = UnregisterNfqCtx(ctx->ctxId);
+    if (fd < 0) {
+        NETNATIVE_LOGE("NfqClose invalid ctxId: %{public}u", ctx->ctxId);
+        return -1;
+    }
+    ctx->fd = fd;
     for (uint32_t i = 0; i < NFQ_MAX_QUEUES; i++) {
-        if (ctx->queues[i] != nullptr) {
-            NfqQueueDestroy(ctx, ctx->queues[i]);
+        if (ctx->queues[i] == nullptr) {
+            continue;
         }
+        NfqUnbindQueueInternal(ctx, ctx->queues[i]);
     }
-    if (ctx->fd >= 0) {
-        close(ctx->fd);
-    }
+    close(fd);
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
@@ -1651,6 +1712,12 @@ int32_t NetsysNativeService::NfqBindPf(sptr<NfqCtx> &ctx, uint16_t pf)
     if (ctx == nullptr) {
         return -1;
     }
+    int32_t fd = GetNfqFdById(ctx->ctxId);
+    if (fd < 0) {
+        NETNATIVE_LOGE("NfqBindPf invalid ctxId: %{public}u", ctx->ctxId);
+        return -1;
+    }
+    ctx->fd = fd;
     char buf[BUFFER_SIZE];
     struct nlmsghdr *nlh = reinterpret_cast<struct nlmsghdr *>(buf);
     struct NfqBuildConfig cfg = {0, NFQ_CMD_PF_BIND, pf, 0xFF, 0, 0, 0, 0};
@@ -1666,6 +1733,12 @@ int32_t NetsysNativeService::NfqUnbindPf(sptr<NfqCtx> &ctx, uint16_t pf)
     if (ctx == nullptr) {
         return -1;
     }
+    int32_t fd = GetNfqFdById(ctx->ctxId);
+    if (fd < 0) {
+        NETNATIVE_LOGE("NfqUnbindPf invalid ctxId: %{public}u", ctx->ctxId);
+        return -1;
+    }
+    ctx->fd = fd;
     char buf[BUFFER_SIZE];
     struct nlmsghdr *nlh = reinterpret_cast<struct nlmsghdr *>(buf);
     struct NfqBuildConfig cfg = {0, NFQ_CMD_PF_UNBIND, pf, 0xFF, 0, 0, 0, 0};
@@ -1681,6 +1754,12 @@ sptr<NfqQueue> NetsysNativeService::NfqQueueCreate(sptr<NfqCtx> &ctx, uint16_t q
     if (ctx == nullptr) {
         return nullptr;
     }
+    int32_t fd = GetNfqFdById(ctx->ctxId);
+    if (fd < 0) {
+        NETNATIVE_LOGE("NfqQueueCreate invalid ctxId: %{public}u", ctx->ctxId);
+        return nullptr;
+    }
+    ctx->fd = fd;
     char buf[BUFFER_SIZE];
     struct nlmsghdr *nlh = reinterpret_cast<struct nlmsghdr *>(buf);
     struct NfqBuildConfig cfg = {queueNum, NFQ_CMD_BIND, 0, 0xFF, 0, 0, 0, 0};
@@ -1707,16 +1786,13 @@ int32_t NetsysNativeService::NfqQueueDestroy(sptr<NfqCtx> &ctx, const sptr<NfqQu
     if (q == nullptr || ctx == nullptr) {
         return -1;
     }
-    char buf[BUFFER_SIZE];
-    struct nlmsghdr *nlh = reinterpret_cast<struct nlmsghdr *>(buf);
-    struct NfqBuildConfig cfg = {q->queueNum, NFQ_CMD_UNBIND, 0, 0xFF, 0, 0, 0, 0};
-    if (BuildConfig(nlh, sizeof(buf), &cfg) < 0) {
+    int32_t fd = GetNfqFdById(ctx->ctxId);
+    if (fd < 0) {
+        NETNATIVE_LOGE("NfqQueueDestroy invalid ctxId: %{public}u", ctx->ctxId);
         return -1;
     }
-    nlh->nlmsg_seq = NextSeq(ctx);
-    SendToKernel(ctx->fd, nlh);
-
-    NfqUnregisterQueue(ctx, q);
+    ctx->fd = fd;
+    NfqUnbindQueueInternal(ctx, q);
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
@@ -1726,6 +1802,12 @@ int32_t NetsysNativeService::NfqQueueSetMode(sptr<NfqCtx> &ctx, const sptr<NfqQu
     if (q == nullptr || ctx == nullptr) {
         return -1;
     }
+    int32_t fd = GetNfqFdById(ctx->ctxId);
+    if (fd < 0) {
+        NETNATIVE_LOGE("NfqQueueSetMode invalid ctxId: %{public}u", ctx->ctxId);
+        return -1;
+    }
+    ctx->fd = fd;
     char buf[BUFFER_SIZE];
     struct nlmsghdr *nlh = reinterpret_cast<struct nlmsghdr *>(buf);
     struct NfqBuildConfig cfg = {q->queueNum, NFQ_CMD_NONE, 0, mode, range, 0, 0, 0};
@@ -1741,6 +1823,12 @@ int32_t NetsysNativeService::NfqQueueSetMaxLen(sptr<NfqCtx> &ctx, const sptr<Nfq
     if (q == nullptr || ctx == nullptr) {
         return -1;
     }
+    int32_t fd = GetNfqFdById(ctx->ctxId);
+    if (fd < 0) {
+        NETNATIVE_LOGE("NfqQueueSetMaxLen invalid ctxId: %{public}u", ctx->ctxId);
+        return -1;
+    }
+    ctx->fd = fd;
     char buf[BUFFER_SIZE];
     struct nlmsghdr *nlh = reinterpret_cast<struct nlmsghdr *>(buf);
     struct NfqBuildConfig cfg = {q->queueNum, NFQ_CMD_NONE, 0, 0xFF, 0, maxLen, 0, 0};
@@ -1757,6 +1845,12 @@ int32_t NetsysNativeService::NfqQueueSetFlag(sptr<NfqCtx> &ctx, const sptr<NfqQu
     if (q == nullptr || ctx == nullptr) {
         return -1;
     }
+    int32_t fd = GetNfqFdById(ctx->ctxId);
+    if (fd < 0) {
+        NETNATIVE_LOGE("NfqQueueSetFlag invalid ctxId: %{public}u", ctx->ctxId);
+        return -1;
+    }
+    ctx->fd = fd;
     char buf[BUFFER_SIZE];
     struct nlmsghdr *nlh = reinterpret_cast<struct nlmsghdr *>(buf);
     struct NfqBuildConfig cfg = {q->queueNum, NFQ_CMD_NONE, 0, 0xFF, 0, 0, mask, flag};
@@ -1773,6 +1867,12 @@ int32_t NetsysNativeService::NfqPktVerdictMark(sptr<NfqCtx> &ctx, const sptr<Nfq
     if (qh == nullptr || ctx == nullptr) {
         return NETMANAGER_ERROR;
     }
+    int32_t fd = GetNfqFdById(ctx->ctxId);
+    if (fd < 0) {
+        NETNATIVE_LOGE("NfqPktVerdictMark invalid ctxId: %{public}u", ctx->ctxId);
+        return NETMANAGER_ERROR;
+    }
+    ctx->fd = fd;
     char buf[BUFFER_SIZE];
     struct nlmsghdr *nlh = reinterpret_cast<struct nlmsghdr *>(buf);
     struct NfqVerdictParams params;
