@@ -112,7 +112,6 @@ int InterfaceManager::GetMtu(const char *interfaceName)
 
     int32_t mtu = -1;
     mtu = StrToInt(originMtuValue);
-    NETNATIVE_LOGE();
     return mtu;
 }
 
