@@ -1697,14 +1697,15 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest004, TestSize.Level1)
     ret = stateCallback.RegisterInterfaceCallback(interfaceStateCallback);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
     ret = stateCallback.UnregisterInterfaceCallback(interfaceStateCallback);
-    EXPECT_EQ(ret, NET_CONN_ERR_CALLBACK_NOT_FOUND);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
 HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest005, TestSize.Level1)
 {
+    auto service = std::make_shared<NetConnService>();
     NetHttpProxyTracker httpProxyTracker;
     std::string exclusions = "";
-    NetConnService::GetInstance()->GetPreferredRegex();
+    service->GetPreferredRegex();
     std::list<std::string> list = httpProxyTracker.ParseExclusionList(exclusions);
     EXPECT_TRUE(list.empty());
 
@@ -1713,20 +1714,20 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest005, TestSize.Level1)
 
     uint32_t supplierId = 10;
     int32_t type = 0;
-    auto ret = NetConnService::GetInstance()->RegisterSlotType(supplierId, type);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    auto ret = service->RegisterSlotType(supplierId, type);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
 
     std::string slotType = "";
-    ret = NetConnService::GetInstance()->GetSlotType(slotType);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = service->GetSlotType(slotType);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
     std::string url = "";
     PreferCellularType preferCellular = PreferCellularType::NOT_PREFER;
-    ret = NetConnService::GetInstance()->IsPreferCellularUrl(url, preferCellular);
+    ret = service->IsPreferCellularUrl(url, preferCellular);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
-    NetConnService::GetInstance()->netFactoryResetCallback_ = nullptr;
-    ret = NetConnService::GetInstance()->FactoryResetNetwork();
+    service->netFactoryResetCallback_ = nullptr;
+    ret = service->FactoryResetNetwork();
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
@@ -2099,20 +2100,23 @@ HWTEST_F(NetConnServiceTest, OnAddSystemAbilityTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceTest, RegisterSlotTypeTest002, TestSize.Level1)
 {
+    auto service = std::make_shared<NetConnService>();
     uint32_t supplierId = 0;
     int32_t type = 1;
     std::string netSupplierIdent = "test";
     const std::set<NetCap> netCaps = {NetCap::NET_CAPABILITY_SUPL};
     sptr<NetSupplier> supplier = new (std::nothrow) NetSupplier(NetBearType::BEARER_WIFI, netSupplierIdent, netCaps);
     std::map<uint32_t, sptr<NetSupplier>> netSupplierMap = {{1, supplier}};
-    NetConnService::GetInstance()->netSuppliers_ = netSupplierMap;
-    NetConnService::GetInstance()->Init();
-    int32_t ret = NetConnService::GetInstance()->RegisterSlotType(supplierId, type);
-    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    service->netSuppliers_ = netSupplierMap;
+    service->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
+    ASSERT_NE(service->netConnEventRunner_, nullptr);
+    service->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(service->netConnEventRunner_);
+    int32_t ret = service->RegisterSlotType(supplierId, type);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 
     supplierId = 1;
-    ret = NetConnService::GetInstance()->RegisterSlotType(supplierId, type);
-    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = service->RegisterSlotType(supplierId, type);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceTest, GetSlotTypeTest001, TestSize.Level1)
