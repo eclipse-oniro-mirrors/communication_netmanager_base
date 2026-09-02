@@ -277,10 +277,14 @@ void ConnManager::AddIfindexAndNetTypeToMap(const std::string &interfaceName, ne
     BpfMapper<if_index, net_interface_name_id> ifIndexAndNetTypeMap(IFINDEX_AND_NET_TYPE_MAP_PATH, BPF_ANY);
     if (ifIndexAndNetTypeMap.IsValid()) {
         uint32_t ifIndex = if_nametoindex(interfaceName.c_str());
-        if (ifIndexAndNetTypeMap.Write(ifIndex, nameId, 0) != 0) {
+        // LCOV_EXCL_START
+        if (ifIndex == 0) {
+            NETNATIVE_LOGE("if_nametoindex returned 0 for interface: %{public}s", interfaceName.c_str());
+        } else if (ifIndexAndNetTypeMap.Write(ifIndex, nameId, 0) != 0) {
             NETNATIVE_LOGE("ifIndexAndNetTypeMap add error: interfaceName:%{public}s, ifIndex:%{public}d",
                 interfaceName.c_str(), ifIndex);
         }
+        // LCOV_EXCL_STOP
     }
 }
 
@@ -343,10 +347,14 @@ int32_t ConnManager::RemoveInterfaceFromNetwork(int32_t netId, std::string &inte
             }
             BpfMapper<if_index, net_interface_name_id> ifIndexAndNetTypeMap(IFINDEX_AND_NET_TYPE_MAP_PATH, BPF_ANY);
             uint32_t ifIndex = if_nametoindex(interfaceName.c_str());
-            if (ifIndexAndNetTypeMap.IsValid() && ifIndexAndNetTypeMap.Delete(ifIndex) != 0) {
+            // LCOV_EXCL_START
+            if (ifIndex == 0) {
+                NETNATIVE_LOGE("if_nametoindex returned 0 for interface: %{public}s", interfaceName.c_str());
+            } else if (ifIndexAndNetTypeMap.IsValid() && ifIndexAndNetTypeMap.Delete(ifIndex) != 0) {
                 NETNATIVE_LOGE("ifIndexAndNetTypeMap remove error: ifIndex:%{public}d, interfaceName:%{public}s",
                     ifIndex, interfaceName.c_str());
             }
+            // LCOV_EXCL_STOP
             return ret;
         }
     }
