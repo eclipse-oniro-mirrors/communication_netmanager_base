@@ -347,6 +347,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     } else if (nat464Service_ != nullptr) {
         nat464Service_->UpdateService(NAT464_SERVICE_STOP);
     }
+    UpdateNetConnState(NET_CONN_STATE_CONNECTED);
     if (netSupplierType_ != BEARER_VPN && isSupportInternet_) {
         if (DelayStartDetectionForIpUpdate(hasSameIpAddr)) {
             return true;
