@@ -57,16 +57,16 @@ enum NetConnMonitorFault {
 };
 
 struct EventInfo {
-    int32_t updateSupplierId = 0;
+    uint32_t updateSupplierId = 0;
     std::string supplierInfo;
     std::string netlinkInfo;
-    int32_t updateNetlinkId = 0;
+    uint32_t updateNetlinkId = 0;
     std::string capabilities;
     int32_t socketFd = 0;
     int32_t netId = 0;
     int32_t bearerType = 0;
     std::string ident;
-    int32_t supplierId = 0;
+    uint32_t supplierId = 0;
     std::string callbackAvailable;
     std::string supplierIdent;
     std::string netcaps;
