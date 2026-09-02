@@ -311,6 +311,7 @@ int32_t NetsysBpfNetFirewall::SetBpfFirewallRules(const std::vector<sptr<NetFire
     res += WriteInterfaceBpfMap(manager, direction);
     if (res) {
         NETNATIVE_LOGE("SetBpfFirewallRules: dir=%{public}d, res=%{public}d", direction, res);
+        return NETFIREWALL_ERR;
     }
     return NETFIREWALL_SUCCESS;
 }
