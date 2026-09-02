@@ -94,7 +94,10 @@ void NetSupplier::ResetNetSupplier()
     netAllCapabilities_.netCaps_.insert(NET_CAPABILITY_CHECKING_CONNECTIVITY);
     lock.unlock();
     // Reset network extAttribute.
-    netExtAttribute_ = "";
+    {
+        std::unique_lock<std::shared_mutex> extLock(netExtAttributeMutex_);
+        netExtAttribute_ = "";
+    }
     NETMGR_LOG_I("Reset net supplier %{public}u", supplierId_);
 }
 
@@ -197,7 +200,9 @@ void NetSupplier::SetNetwork(const std::shared_ptr<Network> &network)
 {
     network_ = network;
     if (network_ != nullptr) {
-        netHandle_ = std::make_unique<NetHandle>(network_->GetNetId()).release();
+        netHandle_ = sptr<NetHandle>::MakeSptr(network_->GetNetId());
+    } else {
+        netHandle_ = nullptr;
     }
 }
 

@@ -125,6 +125,15 @@ HWTEST_F(NetsysNativeServiceTest, EnableDistributedClientNet003, TestSize.Level1
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysNativeServiceTest, EnableDistributedClientNet004, TestSize.Level1)
+{
+    std::string virnicAddr = "1.189.55.60";
+    std::string virnicName = "invalid!name";
+    std::string iif = "lo";
+    int32_t ret = instance_->EnableDistributedClientNet(virnicAddr, virnicName, iif);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysNativeServiceTest, EnableDistributedServerNet003, TestSize.Level1)
 {
     std::string iif = "lo";

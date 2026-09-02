@@ -712,7 +712,7 @@ private:
     std::atomic<bool> enableAppFrozenedCallbackLimitation_ = false;
     std::recursive_mutex delayFindBestNetMutex_;
     std::atomic<bool> isDelayHandleFindBestNetwork_ = false;
-    uint32_t delaySupplierId_ = 0;
+    std::atomic<uint32_t> delaySupplierId_ = 0;
 #ifdef NETMANAGER_ENABLE_PAC_PROXY
     std::shared_ptr<OHOS::NetManagerStandard::NetPACManager> netPACManager_;
     std::mutex netPacManagerMutex_;
@@ -781,7 +781,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> netSuplierDeathRecipient_ = nullptr;
     std::vector<sptr<INetConnCallback>> remoteCallback_;
-    NetBearType prevNetSupplierType_ = BEARER_DEFAULT;
+    std::atomic<NetBearType> prevNetSupplierType_ = BEARER_DEFAULT;
     bool CheckIfSettingsDataReady();
     std::mutex dataShareMutexWait;
     std::condition_variable dataShareWait;

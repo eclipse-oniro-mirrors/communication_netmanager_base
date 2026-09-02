@@ -619,6 +619,10 @@ void NetConnService::OnNetSupplierRemoteDied(const wptr<IRemoteObject> &remoteOb
     uint32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
     NETMGR_LOG_I("OnNetSupplierRemoteDied, callingUid=%{public}u", callingUid);
     sptr<INetSupplierCallback> callback = iface_cast<INetSupplierCallback>(diedRemoted);
+    if (callback == nullptr) {
+        NETMGR_LOG_E("iface_cast INetSupplierCallback failed, callback is null");
+        return;
+    }
 
     netConnEventHandler_->PostSyncTask([this, callingUid, &callback]() {
         uint32_t tmpSupplierId = INVALID_SUPPLIER_ID;
@@ -2803,7 +2807,10 @@ int32_t NetConnService::PrepareRefreshGlobalHttpProxy(const HttpProxy &currentPr
 
 void NetConnService::ExecuteRefreshInFfrt(const HttpProxy &currentProxy)
 {
-    httpProxyThreadCv_.notify_all();
+    {
+        std::lock_guard<std::mutex> cvLock(httpProxyThreadMutex_);
+        httpProxyThreadCv_.notify_all();
+    }
     std::unique_lock<std::mutex> lock(refreshProxyMutex_);
     bool ready = refreshResultCv_.wait_for(lock, std::chrono::seconds(REFRESH_WAIT_TIMEOUT_S),
         [this] { return refreshResultReady_; });
@@ -3190,10 +3197,6 @@ int32_t NetConnService::RegisterNetInterfaceCallback(const sptr<INetInterfaceSta
 
 int32_t NetConnService::UnregisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback)
 {
-    if (callback == nullptr) {
-        NETMGR_LOG_E("callback is nullptr");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
     NETMGR_LOG_I("Enter UnregisterNetInterfaceCallback.");
     if (interfaceStateCallback_ == nullptr) {
         NETMGR_LOG_E("interfaceStateCallback_ is nullptr");
@@ -3457,7 +3460,10 @@ int32_t NetConnService::NetInterfaceStateCallback::UnregisterInterfaceCallback(
 {
     NETMGR_LOG_I("UnregisterInterfaceCallback, callingPid=%{public}d, callingUid=%{public}d",
                  IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
-    
+    if (callback == nullptr) {
+        NETMGR_LOG_E("callback is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     std::lock_guard<std::mutex> locker(mutex_);
     auto isSameCallback = [&callback](const sptr<INetInterfaceStateCallback> &item) {
         return item->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr();
@@ -3481,11 +3487,6 @@ void NetConnService::NetInterfaceStateCallback::OnNetIfaceStateRemoteDied(const 
         return;
     }
     sptr<INetInterfaceStateCallback> callback = iface_cast<INetInterfaceStateCallback>(diedRemoted);
-    if (callback == nullptr) {
-        NETMGR_LOG_E("iface_cast INetInterfaceStateCallback failed, callback is null");
-        return;
-    }
-
     int32_t ret = UnregisterInterfaceCallback(callback);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("UnregisterInterfaceCallback failed with code %{public}d", ret);
@@ -3824,7 +3825,7 @@ void NetConnService::RecoverNetSys()
 
 int32_t NetConnService::RegisterSlotType(uint32_t supplierId, int32_t type)
 {
-    int32_t result = NETMANAGER_SUCCESS;
+    int32_t result = NETMANAGER_ERR_INTERNAL;
     if (netConnEventHandler_) {
         netConnEventHandler_->PostSyncTask([this, supplierId, type, &result]() {
             auto netSupplier = FindNetSupplier(supplierId);
@@ -3927,13 +3928,20 @@ bool NetConnService::IsIfaceNameInUse(const std::string &ifaceName, int32_t netI
 {
     std::shared_lock<ffrt::shared_mutex> lock(netSuppliersMutex_);
     for (const auto &netSupplier : netSuppliers_) {
-        if (netSupplier.second->GetNetwork()->GetNetId() == netId) {
+        if (netSupplier.second == nullptr) {
+            continue;
+        }
+        auto network = netSupplier.second->GetNetwork();
+        if (network == nullptr) {
+            continue;
+        }
+        if (network->GetNetId() == netId) {
             continue;
         }
         if (!netSupplier.second->IsAvailable()) {
             continue;
         }
-        if (netSupplier.second->GetNetwork()->GetIfaceName() == ifaceName) {
+        if (network->GetIfaceName() == ifaceName) {
             return true;
         }
     }
@@ -4248,6 +4256,11 @@ int32_t NetConnService::EnableDistributedClientNetAsync(const std::string &virni
 {
     if (iif.empty()) {
         NETMGR_LOG_E("iif is empty");
+        return NET_CONN_ERR_INVALID_NETWORK;
+    }
+
+    if (!CommonUtils::CheckIfaceName(virnicName)) {
+        NETMGR_LOG_E("virnicName is invalid");
         return NET_CONN_ERR_INVALID_NETWORK;
     }
 

@@ -963,7 +963,7 @@ HWTEST_F(NetConnServiceExtTest, RegisterSlotTypeTest001, TestSize.Level1)
     uint32_t supplierId = 10;
     int32_t type = 0;
     auto ret = netConnService->RegisterSlotType(supplierId, type);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
     netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
     netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
     EXPECT_NE(netConnService->netConnEventHandler_, nullptr);
@@ -1028,6 +1028,20 @@ HWTEST_F(NetConnServiceExtTest, IsIfaceNameInUseTest001, TestSize.Level1)
     netConnService->netSuppliers_[1] = supplier;
     auto ret = netConnService->IsIfaceNameInUse("rmnet0", 100);
     EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetConnServiceExtTest, IsIfaceNameInUseTest002, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    std::string netSupplierIdent;
+    std::set<NetCap> netCaps;
+    netConnService->netSuppliers_.clear();
+    netConnService->netSuppliers_[0] = nullptr;
+    sptr<NetSupplier> supplier = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
+    supplier->netSupplierInfo_.isAvailable_ = true;
+    netConnService->netSuppliers_[1] = supplier;
+    auto ret = netConnService->IsIfaceNameInUse("rmnet0", 100);
+    EXPECT_FALSE(ret);
 }
 
 HWTEST_F(NetConnServiceExtTest, FindSupplierWithInternetByBearerTypeTest001, TestSize.Level1)
@@ -1155,6 +1169,16 @@ HWTEST_F(NetConnServiceExtTest, EnableDistributedClientNetAsyncTest003, TestSize
     std::string iif = "eth0";
     auto ret = netConnService->EnableDistributedClientNetAsync(virnicAddr, virnicAddr, iif);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceExtTest, EnableDistributedClientNetAsyncTest004, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    std::string virnicAddr = "192.168.1.5";
+    std::string virnicName = "invalid!name";
+    std::string iif = "eth0";
+    auto ret = netConnService->EnableDistributedClientNetAsync(virnicAddr, virnicName, iif);
+    EXPECT_EQ(ret, NET_CONN_ERR_INVALID_NETWORK);
 }
 
 HWTEST_F(NetConnServiceExtTest, EnableDistributedServerNetTest001, TestSize.Level1)

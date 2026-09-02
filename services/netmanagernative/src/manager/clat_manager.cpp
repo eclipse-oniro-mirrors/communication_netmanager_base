@@ -191,10 +191,11 @@ int32_t ClatManager::ClatStart(const std::string &v6Iface, int32_t netId, const 
     ret = AddClatRoute(netId, tunIface, v4Addr.address_, netsysService);
     auto netRet = AddNatBypassRules(v6Iface, v6Addr.address_);
     if (ret != NETMANAGER_SUCCESS || netRet != NETMANAGER_SUCCESS) {
+        clatds_[v6Iface].Stop();
+        clatds_.erase(v6Iface);
         close(tunFd);
         close(readSock6);
         close(writeSock6);
-        clatds_.erase(v6Iface);
         NETNATIVE_LOGW("Add route on %{public}s failed", tunIface.c_str());
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
@@ -214,10 +215,6 @@ int32_t ClatManager::ClatStop(const std::string &v6Iface, NetManagerNative *nets
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
 
-    if (netsysService == nullptr) {
-        NETNATIVE_LOGW("NetManagerNative pointer is null");
-        return NETMANAGER_ERR_INVALID_PARAMETER;
-    }
     // LCOV_EXCL_START
     int32_t netId = clatdTrackers_[v6Iface].netId;
     std::string tunIface = clatdTrackers_[v6Iface].tunIface;
@@ -225,8 +222,10 @@ int32_t ClatManager::ClatStop(const std::string &v6Iface, NetManagerNative *nets
 
     DeleteNatBypassRules(v6Iface);
     NETNATIVE_LOGI("Stopping clatd on %{public}s", v6Iface.c_str());
-    netsysService->SetClatDnsEnableIpv4(netId, false);
-    DeleteClatRoute(netId, tunIface, v4Addr, netsysService);
+    if (netsysService != nullptr) {
+        netsysService->SetClatDnsEnableIpv4(netId, false);
+        DeleteClatRoute(netId, tunIface, v4Addr, netsysService);
+    }
     // LCOV_EXCL_STOP
 
     clatds_[v6Iface].Stop();
@@ -271,6 +270,7 @@ int32_t ClatManager::GenerateClatSrcAddr(const std::string &v6Iface, uint32_t fw
     std::string v6AddrStr;
     ret = GenerateIpv6Address(v6Iface, v4AddrStr, nat64PrefixStr, fwmark, v6AddrStr);
     if (ret != NETMANAGER_SUCCESS) {
+        FreeTunV4Addr(v4AddrStr);
         NETNATIVE_LOGW("no IPv6 addresses were available for clat");
         return ret;
     }
