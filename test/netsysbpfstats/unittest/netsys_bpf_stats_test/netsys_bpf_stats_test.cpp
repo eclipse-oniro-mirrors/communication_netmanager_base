@@ -535,6 +535,9 @@ HWTEST_F(NetsysBpfStatsTest, UpdateIfIndexMapTest001, TestSize.Level1)
 
     index = UINT64_MAX;
     EXPECT_EQ(bpfStats->UpdateIfIndexMap(key, index), -1);
+
+    key = -1;
+    EXPECT_EQ(bpfStats->UpdateIfIndexMap(key, index), NETMANAGER_ERR_INVALID_PARAMETER);
 }
 
 HWTEST_F(NetsysBpfStatsTest, ClearSimStatsBpfMapTest001, TestSize.Level1)
