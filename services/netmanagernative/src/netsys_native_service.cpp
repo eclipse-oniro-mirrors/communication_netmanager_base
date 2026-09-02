@@ -463,8 +463,8 @@ int32_t NetsysNativeService::DestroyVnic()
 int32_t NetsysNativeService::EnableDistributedClientNet(const std::string &virnicAddr,
     const std::string &virnicName, const std::string &iif)
 {
-    if (virnicAddr.empty() || virnicName.empty() || iif.empty()) {
-        NETNATIVE_LOGE("EnableDistributedClientNet param is empty.");
+    if (virnicAddr.empty() || iif.empty() || !CheckIfaceName(virnicName)) {
+        NETNATIVE_LOGE("EnableDistributedClientNet param is invalid.");
         return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
     }
     int32_t result = netsysService_->EnableDistributedClientNet(virnicAddr, virnicName, iif);
