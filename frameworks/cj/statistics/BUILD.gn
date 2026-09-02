@@ -72,6 +72,8 @@ ohos_shared_library("cj_net_statistics_ffi") {
     defines += [ "WINDOWS_PLATFORM" ]
   }
 
+  version_script = "libcj_net_statistics_ffi.map"
+
   innerapi_tags = [ "platformsdk" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
