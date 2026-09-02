@@ -97,12 +97,12 @@ public:
 
     void SetCallingUid(uint32_t callingUid)
     {
-        callingUid_ = callingUid;
+        callingUid_.store(callingUid);
     }
 
     uint32_t GetCallingUid()
     {
-        return callingUid_;
+        return callingUid_.load();
     }
 #endif
     int32_t SetUserDefinedServerFlag(uint16_t netId, bool flag);
@@ -160,7 +160,7 @@ private:
 
     std::unordered_map<int32_t, std::vector<sptr<NetFirewallDnsRule>>> netFirewallDnsRuleMap_;
 
-    uint32_t callingUid_ = 0;
+    std::atomic<uint32_t> callingUid_ = 0;
 
     std::atomic<int32_t> currentUserId_ = 0;
 
