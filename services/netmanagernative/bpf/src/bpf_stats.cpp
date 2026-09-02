@@ -340,10 +340,12 @@ int32_t NetsysBpfStats::GetNetStateIncreTrafficMap(std::vector<uint64_t> &keys)
             return NETMANAGER_ERROR;
         }
         char ifName[IFNAME_SIZE] = { 0 };
-        auto pName = if_indextoname(key, ifName);
+        auto pName = if_indextoname(static_cast<unsigned int>(key), ifName);
+        // LCOV_EXCL_START
         NETNATIVE_LOGI("NetsysBpfStats::GetNetStateIncreTrafficMap keys: %{public}" PRIu64 ", \
 value: %{public}" PRIu64 ", name: %{public}s",
-            key, static_cast<uint64_t>(value), ifName);
+            key, static_cast<uint64_t>(value), pName != nullptr ? ifName : "unknown");
+        // LCOV_EXCL_STOP
     }
     return NETMANAGER_SUCCESS;
 }
@@ -418,6 +420,10 @@ int32_t NetsysBpfStats::ClearSimStatsBpfMap()
 
 int32_t NetsysBpfStats::UpdateIfIndexMap(int8_t key, uint64_t index)
 {
+    if (key < 0) {
+        NETNATIVE_LOGE("UpdateIfIndexMap invalid key: %{public}d", key);
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     NETNATIVE_LOGI("UpdateIfIndexMap start. key:%{public}d, index:%{public}" PRIu64, key, index);
 
     BpfMapper<uint8_t, uint64_t> netStatsIfIndexMap(IFINDEX_MAP_PATH, BPF_F_WRONLY);
