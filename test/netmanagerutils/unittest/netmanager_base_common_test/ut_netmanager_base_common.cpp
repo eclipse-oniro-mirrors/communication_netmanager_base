@@ -456,6 +456,21 @@ HWTEST_F(UtNetmanagerBaseCommon, StrToIntTest001, TestSize.Level1)
     ASSERT_NE(result, 0);
 }
 
+HWTEST_F(UtNetmanagerBaseCommon, StrToIntTest002, TestSize.Level1)
+{
+    auto result = CommonUtils::StrToInt(std::string("1500\n"));
+    EXPECT_EQ(result, -1);
+
+    result = CommonUtils::StrToInt(std::string("1500\r\n"));
+    EXPECT_EQ(result, -1);
+
+    result = CommonUtils::StrToInt(std::string("1500"));
+    EXPECT_EQ(result, 1500);
+
+    result = CommonUtils::StrToInt(std::string("0"));
+    EXPECT_EQ(result, 0);
+}
+
 /**
  * @tc.name: StrToUintTest001
  * @tc.desc: Test UtNetmanagerBaseCommon StrToUint.

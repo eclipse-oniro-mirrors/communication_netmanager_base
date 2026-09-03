@@ -59,7 +59,14 @@ HWTEST_F(InterfaceManagerTest, GetMtuTest002, TestSize.Level1)
 {
     std::string interfaceName = "eth0";
     auto ret = InterfaceManager::GetMtu(interfaceName.c_str());
-    EXPECT_TRUE(ret == -1 || ret == 1500);
+    EXPECT_TRUE(ret == -1 || ret > 0);
+}
+
+HWTEST_F(InterfaceManagerTest, GetMtuTest003, TestSize.Level1)
+{
+    std::string interfaceName = "lo";
+    auto ret = InterfaceManager::GetMtu(interfaceName.c_str());
+    EXPECT_TRUE(ret == -1 || ret > 0);
 }
 
 HWTEST_F(InterfaceManagerTest, SetMtuTest001, TestSize.Level1)
@@ -108,6 +115,29 @@ HWTEST_F(InterfaceManagerTest, SetMtuTest004, TestSize.Level1)
     char *mtuValue = nullptr;
     auto ret = InterfaceManager::SetMtu(interfaceName, mtuValue);
     EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(InterfaceManagerTest, SetMtuTest005, TestSize.Level1)
+{
+    std::string interfaceName = "wlan0";
+    char *mtuValue = nullptr;
+    auto ret = InterfaceManager::SetMtu(interfaceName.c_str(), mtuValue);
+    EXPECT_EQ(ret, -1);
+
+    ret = InterfaceManager::SetMtu(interfaceName.c_str(), "");
+    EXPECT_EQ(ret, -1);
+
+    ret = InterfaceManager::SetMtu(interfaceName.c_str(), "1400");
+    EXPECT_EQ(ret, 0);
+
+    ret = InterfaceManager::GetMtu(interfaceName.c_str());
+    EXPECT_EQ(ret, 1400);
+
+    ret = InterfaceManager::SetMtu(interfaceName.c_str(), "1500000000000000");
+    EXPECT_EQ(ret, -1);
+
+    ret = InterfaceManager::SetMtu(interfaceName.c_str(), "1500");
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(InterfaceManagerTest, ModifyAddressTest001, TestSize.Level1)
@@ -634,6 +664,5 @@ HWTEST_F(InterfaceManagerTest, AddVlanIp001, TestSize.Level1)
     ret = InterfaceManager::AddVlanIp(ifName, vlanId, ip, mask);
     EXPECT_TRUE(ret == NETMANAGER_ERR_OPERATION_FAILED || ret == NETMANAGER_SUCCESS);
 }
-
 } // namespace nmd
 } // namespace OHOS

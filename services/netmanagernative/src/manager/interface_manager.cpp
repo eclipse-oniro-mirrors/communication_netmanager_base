@@ -110,6 +110,10 @@ int InterfaceManager::GetMtu(const char *interfaceName)
     }
     close(fd);
 
+    originMtuValue[nread] = '\0';
+    while (nread > 0 && (originMtuValue[nread - 1] == '\n' || originMtuValue[nread - 1] == '\r')) {
+        originMtuValue[--nread] = '\0';
+    }
     int32_t mtu = -1;
     mtu = StrToInt(originMtuValue);
     return mtu;
