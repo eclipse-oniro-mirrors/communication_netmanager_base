@@ -81,10 +81,10 @@ void NetStatsTrafficPlanService::InitTrafficPlanInfo(int32_t simId)
 
 void NetStatsTrafficPlanService::DeleteTrafficPlanInfo(int32_t slotId)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     NETMGR_LOG_I("DeleteTrafficPlanInfo start, slotId: %{public}d, map size:%{public}lu",
         slotId, trafficPlanInfoMap_.size());
 
-    std::lock_guard<std::mutex> lock(mutex_);
     for (auto iter = trafficPlanInfoMap_.begin(); iter != trafficPlanInfoMap_.end();) {
         if (iter->second->slotId == slotId) {
             iter = trafficPlanInfoMap_.erase(iter);

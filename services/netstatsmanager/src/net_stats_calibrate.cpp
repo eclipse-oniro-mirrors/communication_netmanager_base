@@ -61,9 +61,12 @@ void NetStatsCalibrate::UpdateChangeToIfaceTime(uint32_t startTime)
 bool NetStatsCalibrate::InitCalibrationInfo(uint32_t simId)
 {
 #ifdef SUPPORT_TRAFFIC_STATISTIC
-    if (calibrateInfo_.find(simId) != calibrateInfo_.end()) {
-        NETMGR_LOG_I("has calicrationInfo, no need read DB. simId:%{public}d", simId);
-        return true;
+    {
+        std::lock_guard<std::mutex> lock1(calibrateInfoMutex_);
+        if (calibrateInfo_.find(simId) != calibrateInfo_.end()) {
+            NETMGR_LOG_I("has calicrationInfo, no need read DB. simId:%{public}d", simId);
+            return true;
+        }
     }
     CalibrateInfo info;
     ReadCalibrationTrafficInfo(simId, info);
