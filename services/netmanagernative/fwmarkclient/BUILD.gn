@@ -45,7 +45,10 @@ ohos_shared_library("fwmark_client") {
   cflags = common_cflags
 
   cflags_cc = common_cflags
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [ 
+    "c_utils:utils",
+    "bounds_checking_function:libsec_shared",
+  ]
 
   defines = [
     "NETMGR_LOG_TAG = \"NetsysFwmark\"",
