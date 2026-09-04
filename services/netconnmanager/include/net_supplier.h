@@ -102,7 +102,6 @@ public:
     int32_t GetNetId() const;
     sptr<NetHandle> GetNetHandle() const;
     void GetHttpProxy(HttpProxy &httpProxy);
-    void UpdateNetConnState(NetConnState netConnState);
     bool IsConnecting() const;
     bool IsConnected() const;
     void SetNetValid(NetDetectionStatus netState);

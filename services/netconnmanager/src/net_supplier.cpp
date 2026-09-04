@@ -131,7 +131,7 @@ void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
     }
     network_->UpdateBasicNetwork(netSupplierInfo_.isAvailable_);
     if (!netSupplierInfo_.isAvailable_) {
-        UpdateNetConnState(NET_CONN_STATE_DISCONNECTED);
+        network_->UpdateNetConnState(NET_CONN_STATE_DISCONNECTED);
     }
 }
 
@@ -154,7 +154,6 @@ int32_t NetSupplier::UpdateNetLinkInfo(NetLinkInfo &netLinkInfo)
     if (!network->UpdateNetLinkInfo(netLinkInfo)) {
         return NET_CONN_ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
-    UpdateNetConnState(NET_CONN_STATE_CONNECTED);
     return NETMANAGER_SUCCESS;
 }
 
@@ -330,13 +329,6 @@ bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps, const N
         return false;
     }
     return true;
-}
-
-void NetSupplier::UpdateNetConnState(NetConnState netConnState)
-{
-    if (network_) {
-        network_->UpdateNetConnState(netConnState);
-    }
 }
 
 bool NetSupplier::IsConnecting() const
