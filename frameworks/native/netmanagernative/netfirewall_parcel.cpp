@@ -722,6 +722,11 @@ sptr<NfqCtx> NfqCtx::Unmarshalling(Parcel &parcel)
     if (!parcel.ReadUint32(count)) {
         return nullptr;
     }
+    if (count > NFQ_MAX_QUEUES) {
+        NETMGR_LOG_E("NfqCtx Unmarshalling invalid count %{public}u", count);
+        return nullptr;
+    }
+    uint64_t usedMask = 0;
     for (uint32_t i = 0; i < count; i++) {
         uint32_t index = 0;
         if (!parcel.ReadUint32(index)) {
@@ -730,6 +735,11 @@ sptr<NfqCtx> NfqCtx::Unmarshalling(Parcel &parcel)
         if (index >= NFQ_MAX_QUEUES) {
             return nullptr;
         }
+        if ((usedMask & (1ULL << index)) != 0) {
+            NETMGR_LOG_E("NfqCtx Unmarshalling duplicate index %{public}u", index);
+            return nullptr;
+        }
+        usedMask |= (1ULL << index);
         ctx->queues[index] = NfqQueue::Unmarshalling(parcel);
         if (ctx->queues[index] == nullptr) {
             return nullptr;

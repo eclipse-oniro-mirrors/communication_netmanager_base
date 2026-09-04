@@ -943,14 +943,6 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientNfqQueueSetFlagNullCtx001, Te
     int32_t ret = nativeClient->NfqQueueSetFlag(ctx, nullptr, 0, 0);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_GET_PROXY_FAIL);
 }
-
-HWTEST_F(NetsysNativeClientTest, NetsysNativeClientNfqPktVerdictMarkNullCtx001, TestSize.Level1)
-{
-    auto nativeClient = std::make_shared<NetsysNativeClient>();
-    sptr<NetsysNative::NfqCtx> ctx = nullptr;
-    int32_t ret = nativeClient->NfqPktVerdictMark(ctx, nullptr, 0, 0, 0);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_GET_PROXY_FAIL);
-}
 #endif
 } // namespace NetManagerStandard
 } // namespace OHOS

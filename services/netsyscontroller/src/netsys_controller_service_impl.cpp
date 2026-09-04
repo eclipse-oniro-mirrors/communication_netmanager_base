@@ -1195,12 +1195,6 @@ int32_t NetsysControllerServiceImpl::NfqQueueSetFlag(sptr<NetsysNative::NfqCtx> 
 {
     return netsysClient_->NfqQueueSetFlag(ctx, q, mask, flag);
 }
-
-int32_t NetsysControllerServiceImpl::NfqPktVerdictMark(sptr<NetsysNative::NfqCtx> &ctx,
-    const sptr<NetsysNative::NfqQueue> &qh, uint32_t packetId, int32_t verdict, uint32_t mark)
-{
-    return netsysClient_->NfqPktVerdictMark(ctx, qh, packetId, verdict, mark);
-}
 #endif
 } // namespace NetManagerStandard
 } // namespace OHOS

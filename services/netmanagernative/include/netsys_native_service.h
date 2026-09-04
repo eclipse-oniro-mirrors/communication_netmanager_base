@@ -237,8 +237,6 @@ public:
     int32_t NfqQueueSetMode(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q, uint8_t mode, uint32_t range) override;
     int32_t NfqQueueSetMaxLen(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q, uint32_t maxLen) override;
     int32_t NfqQueueSetFlag(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q, uint32_t mask, uint32_t flag) override;
-    int32_t NfqPktVerdictMark(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &qh,
-        uint32_t packetId, int32_t verdict, uint32_t mark) override;
 #endif
 
 private:
@@ -246,7 +244,14 @@ private:
     uint32_t RegisterNfqCtx(int32_t fd);
     int32_t GetNfqFdById(uint32_t ctxId);
     int32_t UnregisterNfqCtx(uint32_t ctxId);
-    void NfqUnbindQueueInternal(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q);
+    int32_t NfqUnbindQueueInternal(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q);
+    int32_t GetFdSockOpt(int32_t fd);
+    void SetFdSockOpt(int32_t fd, int32_t size);
+    void RemoveFdSockOpt(int32_t fd);
+    int32_t CalculateSockOpt(uint32_t maxLen);
+    void SetQueueNumSize(uint32_t queueNum, int32_t size);
+    int32_t GetQueueNumSize(uint32_t queueNum);
+    void RemoveQueueNumSize(uint32_t queueNum);
 #endif
 
 protected:
@@ -288,6 +293,9 @@ private:
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     std::mutex nfqCtxMutex_;
     std::unordered_map<uint32_t, int32_t> nfqCtxMap_;
+    std::mutex fdSockOptMutex_;
+    std::unordered_map<int32_t, int32_t> fdSockOptMap_;
+    std::unordered_map<int32_t, int32_t> queueNumSizeMap_;
 #endif
 };
 } // namespace NetsysNative

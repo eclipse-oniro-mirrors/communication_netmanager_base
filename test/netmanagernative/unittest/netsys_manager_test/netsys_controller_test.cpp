@@ -2156,14 +2156,6 @@ HWTEST_F(NetsysControllerTest, NetsysControllerNfqQueueSetFlagNullCtx001, TestSi
     int32_t ret = netsysController->NfqQueueSetFlag(ctx, nullptr, 0, 0);
     EXPECT_EQ(ret, NetManagerStandard::ERR_INVALID_DATA);
 }
-
-HWTEST_F(NetsysControllerTest, NetsysControllerNfqPktVerdictMarkNullCtx001, TestSize.Level1)
-{
-    auto netsysController = std::make_shared<NetsysController>();
-    sptr<NetsysNative::NfqCtx> ctx = nullptr;
-    int32_t ret = netsysController->NfqPktVerdictMark(ctx, nullptr, 0, 0, 0);
-    EXPECT_EQ(ret, NetManagerStandard::ERR_INVALID_DATA);
-}
 #endif
 } // namespace NetManagerStandard
 } // namespace OHOS

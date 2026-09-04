@@ -649,18 +649,6 @@ public:
         (void)flag;
         return 0;
     }
-
-    int32_t NfqPktVerdictMark(sptr<NetManagerStandard::NfqCtx> &ctx,
-        const sptr<NetManagerStandard::NfqQueue> &qh, uint32_t packetId, int32_t verdict,
-        uint32_t mark) override
-    {
-        (void)ctx;
-        (void)qh;
-        (void)packetId;
-        (void)verdict;
-        (void)mark;
-        return 0;
-    }
 #endif
 
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE

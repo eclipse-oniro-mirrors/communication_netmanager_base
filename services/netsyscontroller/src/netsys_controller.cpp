@@ -2035,20 +2035,6 @@ int32_t NetsysController::NfqQueueSetFlag(sptr<NetsysNative::NfqCtx> &ctx,
     }
     return netsysService_->NfqQueueSetFlag(ctx, q, mask, flag);
 }
-
-int32_t NetsysController::NfqPktVerdictMark(sptr<NetsysNative::NfqCtx> &ctx,
-    const sptr<NetsysNative::NfqQueue> &qh, uint32_t packetId, int32_t verdict, uint32_t mark)
-{
-    if (qh == nullptr || ctx == nullptr) {
-        NETMGR_LOG_E("NfqPktVerdictMark qh or ctx is nullptr");
-        return ERR_INVALID_DATA;
-    }
-    if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("netsysService_ is null");
-        return NETSYS_NETSYSSERVICE_NULL;
-    }
-    return netsysService_->NfqPktVerdictMark(ctx, qh, packetId, verdict, mark);
-}
 #endif
 } // namespace NetManagerStandard
 } // namespace OHOS

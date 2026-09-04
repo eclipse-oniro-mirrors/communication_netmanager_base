@@ -1075,8 +1075,6 @@ public:
         uint32_t maxLen) = 0;
     virtual int32_t NfqQueueSetFlag(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &q,
         uint32_t mask, uint32_t flag) = 0;
-    virtual int32_t NfqPktVerdictMark(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &qh,
-        uint32_t packetId, int32_t verdict, uint32_t mark) = 0;
 #endif
 };
 } // namespace NetManagerStandard

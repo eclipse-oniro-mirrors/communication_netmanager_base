@@ -210,8 +210,6 @@ public:
     int32_t NfqQueueSetMode(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q, uint8_t mode, uint32_t range) override;
     int32_t NfqQueueSetMaxLen(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q, uint32_t maxLen) override;
     int32_t NfqQueueSetFlag(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q, uint32_t mask, uint32_t flag) override;
-    int32_t NfqPktVerdictMark(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &qh, uint32_t packetId,
-        int32_t verdict, uint32_t mark) override;
 #endif
 private:
     int32_t DealBandwidth(uint32_t uid, uint32_t code);

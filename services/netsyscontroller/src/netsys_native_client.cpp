@@ -2381,17 +2381,6 @@ int32_t NetsysNativeClient::NfqQueueSetFlag(sptr<NetsysNative::NfqCtx> &ctx,
     }
     return proxy->NfqQueueSetFlag(ctx, q, mask, flag);
 }
-
-int32_t NetsysNativeClient::NfqPktVerdictMark(sptr<NetsysNative::NfqCtx> &ctx,
-    const sptr<NetsysNative::NfqQueue> &qh, uint32_t packetId, int32_t verdict, uint32_t mark)
-{
-    auto proxy = GetProxy();
-    if (proxy == nullptr || ctx == nullptr || qh == nullptr) {
-        NETMGR_LOG_E("proxy or ctx or qh is nullptr");
-        return NETMANAGER_ERR_GET_PROXY_FAIL;
-    }
-    return proxy->NfqPktVerdictMark(ctx, qh, packetId, verdict, mark);
-}
 #endif
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -230,7 +230,6 @@ private:
     int32_t CmdNfqQueueSetMode(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNfqQueueSetMaxLen(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNfqQueueSetFlag(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdNfqPktVerdictMark(MessageParcel &data, MessageParcel &reply);
 #endif
 
 private:

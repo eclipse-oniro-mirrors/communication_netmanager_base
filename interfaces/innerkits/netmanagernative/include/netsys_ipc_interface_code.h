@@ -177,7 +177,6 @@ enum class NetsysInterfaceCode {
     NETSYS_NFQUEUE_QUEUE_SET_MODE,
     NETSYS_NFQUEUE_QUEUE_SET_MAX_LEN,
     NETSYS_NFQUEUE_QUEUE_SET_FLAG,
-    NETSYS_NFQUEUE_PKT_VERDICT_MARK,
 };
 
 enum class NotifyInterfaceCode {

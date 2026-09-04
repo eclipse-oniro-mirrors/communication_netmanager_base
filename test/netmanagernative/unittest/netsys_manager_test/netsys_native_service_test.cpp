@@ -1233,13 +1233,6 @@ HWTEST_F(NetsysNativeServiceTest, NfqQueueSetFlagNullCtx001, TestSize.Level1)
     EXPECT_EQ(ret, -1);
 }
 
-HWTEST_F(NetsysNativeServiceTest, NfqPktVerdictMarkNullCtx001, TestSize.Level1)
-{
-    sptr<NetsysNative::NfqCtx> ctx = nullptr;
-    int32_t ret = instance_->NfqPktVerdictMark(ctx, nullptr, 0, 0, 0);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-}
-
 HWTEST_F(NetsysNativeServiceTest, NfqFullFlowTest001, TestSize.Level1)
 {
     auto ctx = instance_->NfqOpen();
@@ -1260,12 +1253,6 @@ HWTEST_F(NetsysNativeServiceTest, NfqFullFlowTest001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->NfqQueueSetFlag(ctx, q, 1, 1);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    ret = instance_->NfqPktVerdictMark(ctx, q, 1, 1, 0);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    ret = instance_->NfqPktVerdictMark(ctx, q, 1, 1, 0x12345678);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->NfqQueueDestroy(ctx, q);
@@ -1350,9 +1337,6 @@ HWTEST_F(NetsysNativeServiceTest, NfqInvalidFdTest001, TestSize.Level1)
 
     ret = instance_->NfqQueueSetFlag(ctx, qMock, 1, 1);
     EXPECT_EQ(ret, -1);
-
-    ret = instance_->NfqPktVerdictMark(ctx, qMock, 1, 1, 0);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->NfqQueueDestroy(ctx, qMock);
     EXPECT_EQ(ret, -1);
