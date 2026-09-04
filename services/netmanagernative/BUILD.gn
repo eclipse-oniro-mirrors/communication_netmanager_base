@@ -340,6 +340,7 @@ ohos_shared_library("netsys_client") {
     "cJSON:cjson",
     "c_utils:utils",
     "hilog:libhilog",
+    "bounds_checking_function:libsec_shared",
   ]
 
   defines = [
