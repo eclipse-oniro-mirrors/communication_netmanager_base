@@ -81,6 +81,7 @@ ohos_shared_library("net_manager_common") {
     "hicollie:libhicollie",
     "hilog:libhilog",
     "init:libbegetutil",
+    "samgr:samgr_proxy",
   ]
 
   external_deps += [
