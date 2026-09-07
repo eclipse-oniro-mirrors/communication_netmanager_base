@@ -1819,7 +1819,7 @@ void NetStatsService::UpdateCalibrationTrafficAsync(uint32_t simId, int64_t rema
     if (totalMonthlyData != UINT64_MAX && infoPtr) {
         infoPtr->trafficLimit = totalMonthlyData;
         NetStatsRDB rdb;
-        rdb.UpdateTrafficPlanParam(NetStatsUtils::GetIccIdBySimId(simId), TrafficPlanParam::TRAFFIC_LIMIT, 
+        rdb.UpdateTrafficPlanParam(NetStatsUtils::GetIccIdBySimId(simId), TrafficPlanParam::TRAFFIC_LIMIT,
             static_cast<int64_t>(totalMonthlyData));
     }
     if (totalMonthlyData == UINT64_MAX && infoPtr) {
