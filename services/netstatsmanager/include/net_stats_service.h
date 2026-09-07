@@ -157,6 +157,7 @@ private:
     int32_t GetHitstoryTrafficInIfaceTable(const NetStatsNetwork &network, std::vector<NetStatsInfo> &infos);
     void PrintSumNetStatsInfo(const std::vector<NetStatsInfo> &infos);
     void UpdateBpfMap(int32_t simId);
+    void UpdateCalibrationTrafficAsync(uint32_t simId, int64_t remainingData, uint64_t totalMonthlyData);
     void SetTrafficMapMaxValue();
     void SetTrafficMapMaxValue(int32_t slotId);
     void StartTrafficOvserver();
