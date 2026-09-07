@@ -1540,43 +1540,25 @@ int32_t NetStatsService::SetCalibrationTraffic(uint32_t simId, int64_t remaining
     if (checkPermission != NETMANAGER_SUCCESS) {
         return checkPermission;
     }
-
     if (!NetStatsUtils::IsSimIdValid(simId)) {
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-
     if (remainingData > 0 && static_cast<uint64_t>(remainingData) > totalMonthlyData) {
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-
     netStatsCached_->CacheIfaceStats();
     uint64_t usedTraffic = 0;
     if (totalMonthlyData != UINT64_MAX) {
         usedTraffic = totalMonthlyData - static_cast<uint64_t>(remainingData);
         netStatsCalibrate_->UpdateCalibrationInfo(simId, usedTraffic);
     }
-
 #ifndef UNITTEST_FORBID_FFRT
     if (!trafficPlanFfrtQueue_) {
         return NETMANAGER_ERR_INTERNAL;
     }
     trafficPlanFfrtQueue_->submit([this, simId, totalMonthlyData, remainingData]() {
 #endif
-        auto infoPtr = trafficPlanService_->GetTrafficPlanInfoBySimId(simId);
-        if (totalMonthlyData != UINT64_MAX && infoPtr) {
-            infoPtr->trafficLimit = totalMonthlyData;
-        }
-        if (totalMonthlyData == UINT64_MAX && infoPtr) {
-            uint64_t usedTraffic = infoPtr->trafficLimit - static_cast<uint64_t>(remainingData);
-            if (remainingData > 0 && infoPtr->trafficLimit < static_cast<uint64_t>(remainingData)) {
-                usedTraffic = 0;
-            }
-            netStatsCalibrate_->UpdateCalibrationInfo(simId, usedTraffic);
-        }
-
-        trafficPlanService_->ResetNotifyState(simId);
-        UpdateHistoryData(simId);
-        UpdateBpfMap(simId);
+        UpdateCalibrationTrafficAsync(simId, remainingData, totalMonthlyData);
 #ifndef UNITTEST_FORBID_FFRT
     });
 #endif
@@ -1829,6 +1811,27 @@ bool NetStatsService::CellularDataStateChangedFfrt(int32_t slotId, int32_t dataS
     }
     UpdateCurActiviteSimChanged(simId, ifIndex);
     return true;
+}
+
+void NetStatsService::UpdateCalibrationTrafficAsync(uint32_t simId, int64_t remainingData, uint64_t totalMonthlyData)
+{
+    auto infoPtr = trafficPlanService_->GetTrafficPlanInfoBySimId(simId);
+    if (totalMonthlyData != UINT64_MAX && infoPtr) {
+        infoPtr->trafficLimit = totalMonthlyData;
+        NetStatsRDB rdb;
+        rdb.UpdateTrafficPlanParam(NetStatsUtils::GetIccIdBySimId(simId), TrafficPlanParam::TRAFFIC_LIMIT,
+            static_cast<int64_t>(totalMonthlyData));
+    }
+    if (totalMonthlyData == UINT64_MAX && infoPtr) {
+        uint64_t usedTraffic = infoPtr->trafficLimit - static_cast<uint64_t>(remainingData);
+        if (remainingData > 0 && infoPtr->trafficLimit < static_cast<uint64_t>(remainingData)) {
+            usedTraffic = 0;
+        }
+        netStatsCalibrate_->UpdateCalibrationInfo(simId, usedTraffic);
+    }
+    trafficPlanService_->ResetNotifyState(simId);
+    UpdateHistoryData(simId);
+    UpdateBpfMap(simId);
 }
 
 void NetStatsService::StartTrafficOvserver()
