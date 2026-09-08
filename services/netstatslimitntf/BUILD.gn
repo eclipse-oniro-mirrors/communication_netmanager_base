@@ -92,8 +92,8 @@ if (netmanager_base_enable_traffic_statistic) {
     }
 
     external_deps += [
-      "hilog:libhilog"，
-      "safwk:system_ability_fwk"，
+      "hilog:libhilog",
+      "safwk:system_ability_fwk",
     ]
 
     part_name = "netmanager_base"
