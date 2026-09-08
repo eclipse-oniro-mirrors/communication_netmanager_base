@@ -49,6 +49,10 @@ void NetPolicyFileEventHandler::SendWriteEvent(AppExecFwk::InnerEvent::Pointer &
 
 void NetPolicyFileEventHandler::SendEvent(const AppExecFwk::InnerEvent::Pointer &event, uint32_t delayTime)
 {
+    if (event == nullptr) {
+        NETMGR_LOG_E("SendEvent event is null");
+        return;
+    }
     auto eventId = event->GetInnerEventId();
     auto eventData = event->GetSharedObject<PolicyFileEvent>();
     netPolicyFileEventQueue_.submit([this, eventId, eventData] { ProcessEvent(eventId, eventData); },
