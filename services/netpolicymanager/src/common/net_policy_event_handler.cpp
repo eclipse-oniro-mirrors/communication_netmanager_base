@@ -36,6 +36,10 @@ void NetPolicyEventHandler::ProcessEvent(int32_t eventId, std::shared_ptr<Policy
 
 void NetPolicyEventHandler::SendEvent(const AppExecFwk::InnerEvent::Pointer &event, int64_t delayTime)
 {
+    if (event == nullptr) {
+        NETMGR_LOG_E("sendevent event is null.");
+        return;
+    }
     auto eventId = static_cast<int32_t>(event->GetInnerEventId());
     auto eventData = event->GetSharedObject<PolicyEvent>();
     std::weak_ptr<NetPolicyEventHandler> wp = shared_from_this();
