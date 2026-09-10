@@ -14,6 +14,7 @@
  */
 #include <atomic>
 #include <charconv>
+#include <cstdlib>
 #include <fstream>
 #include <functional>
 #include <memory>
@@ -54,6 +55,7 @@
 #include "net_datashare_utils_iface.h"
 #include "iservice_registry.h"
 #include "datashare_helper.h"
+#include "xcollie/watchdog.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -203,6 +205,7 @@ void NetConnService::CreateDefaultRequest()
 void NetConnService::OnStop()
 {
     NETMGR_LOG_D("OnStop begin");
+    HiviewDFX::Watchdog::GetInstance().RemoveThread(NET_CONN_MANAGER_WORK_THREAD);
     if (netConnEventRunner_) {
         netConnEventRunner_->Stop();
         netConnEventRunner_.reset();
@@ -255,6 +258,10 @@ bool NetConnService::Init()
     if (netConnEventHandler_ == nullptr) {
         NETMGR_LOG_E("Create netConnEventHandler_ == nullptr.");
         return false;
+    }
+    int32_t ret = HiviewDFX::Watchdog::GetInstance().AddThread(NET_CONN_MANAGER_WORK_THREAD, netConnEventHandler_);
+    if (ret != 0) {
+        NETMGR_LOG_E("Watchdog AddThread for netConnEventHandler_ failed, ret: %{public}d", ret);
     }
     RegisterAppStateAware();
     // LCOV_EXCL_STOP
