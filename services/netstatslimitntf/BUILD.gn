@@ -91,7 +91,10 @@ if (netmanager_base_enable_traffic_statistic) {
       defines += [ "NETMGR_DEBUG" ]
     }
 
-    external_deps += [ "hilog:libhilog" ]
+    external_deps += [
+      "hilog:libhilog",
+      "safwk:system_ability_fwk",
+    ]
 
     part_name = "netmanager_base"
     subsystem_name = "communication"

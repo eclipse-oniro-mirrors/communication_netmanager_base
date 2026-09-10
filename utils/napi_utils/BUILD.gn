@@ -66,6 +66,7 @@ ohos_shared_library("napi_utils") {
     "napi:ace_napi",
     "node:node_header_notice",
     "ffrt:libffrt",
+    "samgr:samgr_proxy",
   ]
 
   if (product_name != "qemu-arm-linux-min") {
