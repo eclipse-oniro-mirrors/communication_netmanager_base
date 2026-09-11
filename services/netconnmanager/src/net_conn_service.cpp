@@ -837,21 +837,10 @@ void NetConnService::StartAllNetDetection()
                 continue;
             }
             pNetwork->UpdateForbidDetectionFlag(false);
+            pNetwork->StartNetDetection(false);
         }
         netSuppliersLock.unlock();
-        std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLocker(defaultNetSupplierMutex_);
-        if ((defaultNetSupplier_ == nullptr)) {
-            NETMGR_LOG_W("defaultNetSupplier_ is  null");
-            return;
-        }
-        std::shared_ptr<Network> pDefaultNetwork = defaultNetSupplier_->GetNetwork();
-        if (pDefaultNetwork == nullptr) {
-            NETMGR_LOG_E("pDefaultNetwork is null");
-            return;
-        }
-        defaultNetSupplierLocker.unlock();
         httpProxyThreadCv_.notify_all();
-        pDefaultNetwork->StartNetDetection(false);
     });
 }
 
