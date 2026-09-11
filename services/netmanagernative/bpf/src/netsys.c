@@ -340,7 +340,7 @@ bpf_map_def SEC("maps") app_uid_access_policy_map = {
     .key_size = sizeof(app_uid_key),
     .value_size = sizeof(uid_access_policy_value),
     .max_entries = UID_ACCESS_POLICY_ARRAY_SIZE,
-    .map_flags = BPF_F_NO_PREALLOC,
+    .map_flags = 0,
     .inner_map_idx = 0,
     .numa_node = 0,
 };
