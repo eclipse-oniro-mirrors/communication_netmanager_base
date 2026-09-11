@@ -442,16 +442,22 @@ HWTEST_F(NetsysClientTest, NetSysGetResolvConfExtTest001, TestSize.Level1)
 HWTEST_F(NetsysClientTest, NetSysIsIpv6EnableTest001, TestSize.Level1)
 {
     uint16_t netId = 0;
-    SetNetForApp(1);
     auto ret = NetSysIsIpv6Enable(netId);
+    EXPECT_GE(ret, -1);
+
+    SetNetForApp(1);
+    ret = NetSysIsIpv6Enable(netId);
     EXPECT_GE(ret, -1);
 }
 
 HWTEST_F(NetsysClientTest, NetSysIsIpv4EnableTest001, TestSize.Level1)
 {
     uint16_t netId = 0;
-    SetNetForApp(1);
     auto ret = NetSysIsIpv4Enable(netId);
+    EXPECT_GE(ret, -1);
+
+    SetNetForApp(1);
+    ret = NetSysIsIpv4Enable(netId);
     EXPECT_GE(ret, -1);
 }
 
