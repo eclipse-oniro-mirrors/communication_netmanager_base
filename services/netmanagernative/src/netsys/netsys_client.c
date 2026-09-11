@@ -610,6 +610,9 @@ static int32_t NetSysIsIpv6EnableInternal(int sockFd, uint16_t netId, int *enabl
         .command = JUDGE_IPV6,
         .netId = netId,
     };
+    if (netId == 0 && GetNetForApp() > 0) {
+        info.netId = (uint32_t)GetNetForApp();
+    }
     // LCOV_EXCL_START
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
@@ -650,6 +653,9 @@ static int32_t NetSysIsIpv4EnableInternal(int sockFd, uint16_t netId, const int 
         .command = JUDGE_IPV4,
         .netId = netId,
     };
+    if (netId == 0 && GetNetForApp() > 0) {
+        info.netId = (uint32_t)GetNetForApp();
+    }
     // LCOV_EXCL_START
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
