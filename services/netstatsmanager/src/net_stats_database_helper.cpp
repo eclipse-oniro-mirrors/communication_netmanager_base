@@ -337,6 +337,37 @@ int32_t NetStatsDatabaseHelper::SelectData(const std::string &iface, const uint3
     return Step(infos);
 }
 
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+int32_t NetStatsDatabaseHelper::SelectUidDataByIface(const std::string &iface, uint64_t start, uint64_t end,
+                                                     std::vector<NetStatsInfo> &infos)
+{
+    infos.clear();
+    std::string sql = SELECT_FROM + std::string(UID_TABLE) + " t WHERE 1=1 AND t.IFace = ?" +
+                      DATA_MORE_THAN + DATA_LESS_THAN;
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
+    int32_t ret = statement_.Prepare(sqlite_, sql);
+    int32_t rettmp = DeleteAndBackup(ret);
+    if (rettmp != SQLITE_OK) {
+        NETMGR_LOG_E("Prepare failed ret:%{public}d, rettmp:%{public}d", ret, rettmp);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+    if (rettmp != ret) {
+        statement_.Prepare(sqlite_, sql);
+    }
+    int32_t idx = 1;
+    ret = statement_.BindText(idx, iface);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("Bind text failed ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+    ret = BindInt64(idx, start, end);
+    if (ret != SQLITE_OK) {
+        return ret;
+    }
+    return Step(infos);
+}
+#endif
+
 int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const std::string &ident, uint64_t start,
                                           uint64_t end, std::vector<NetStatsInfo> &infos)
 {

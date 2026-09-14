@@ -53,42 +53,28 @@ public:
         if (!reply.WriteInt32(NETSYS_SUCCESS)) {
             return NETMANAGER_ERROR;
         }
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+        if (code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_TRAFFIC_STATS)) {
+            if (eCode == NETMANAGER_ERR_READ_REPLY_FAIL) {
+                return NETSYS_SUCCESS;
+            }
+            if (!(reply.WriteUint32(1) && WriteNetStatsInfo(reply))) {
+                return NETMANAGER_ERROR;
+            }
+            return eCode;
+        }
+#endif
         if (code >= static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_RXBYTES) &&
             code <= static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_TXBYTES)) {
             if (!reply.WriteInt64(STATS_CODE)) {
                 return NETMANAGER_ERROR;
             }
-        } else if (code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_STATS_DETAIL) ||
-                   code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_STATS_DETAIL) ||
-                   code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_SIM_STATS_INFO) ||
-                   code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_NETWORK) ||
-                   code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_UID_NETWORK)) {
+        } else if (IsNetStatsInfoCode(code)) {
             if (eCode == NETMANAGER_ERR_READ_REPLY_FAIL) {
                 return NETSYS_SUCCESS;
             }
 
-            if (!reply.WriteUint32(TEST_UID)) {
-                return NETMANAGER_ERROR;
-            }
-            if (!reply.WriteString("wlan0")) {
-                return NETMANAGER_ERROR;
-            }
-            if (!reply.WriteString("ident0")) {
-                return NETMANAGER_ERROR;
-            }
-            if (!reply.WriteUint64(TEST_UID)) {
-                return NETMANAGER_ERROR;
-            }
-            if (!reply.WriteUint64(TEST_UID)) {
-                return NETMANAGER_ERROR;
-            }
-            if (!reply.WriteUint64(TEST_UID)) {
-                return NETMANAGER_ERROR;
-            }
-            if (!reply.WriteUint64(TEST_UID)) {
-                return NETMANAGER_ERROR;
-            }
-            if (!reply.WriteUint64(TEST_UID)) {
+            if (!WriteNetStatsInfo(reply)) {
                 return NETMANAGER_ERROR;
             }
         }
@@ -142,6 +128,22 @@ public:
     }
 
 private:
+    bool WriteNetStatsInfo(MessageParcel &reply)
+    {
+        return reply.WriteUint32(TEST_UID) && reply.WriteString("wlan0") && reply.WriteString("ident0") &&
+               reply.WriteUint64(TEST_UID) && reply.WriteUint64(TEST_UID) && reply.WriteUint64(TEST_UID) &&
+               reply.WriteUint64(TEST_UID) && reply.WriteUint64(TEST_UID);
+    }
+
+    bool IsNetStatsInfoCode(uint32_t code)
+    {
+        return code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_STATS_DETAIL) ||
+               code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_STATS_DETAIL) ||
+               code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_SIM_STATS_INFO) ||
+               code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_NETWORK) ||
+               code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_UID_NETWORK);
+    }
+
     int eCode = 0;
 };
 
@@ -799,6 +801,61 @@ HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByNetworkTest004, TestSize.Lev
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
     EXPECT_EQ(instance_.GetTrafficStatsByNetwork(infos, *network), 5);
 }
+
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+/**
+ * @tc.name: GetIfaceTrafficStatsTest001
+ * @tc.desc: Test NetStatsServiceProxy GetIfaceTrafficStats.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceProxyTest, GetIfaceTrafficStatsTest001, TestSize.Level1)
+{
+    NetStatsServiceProxy instance_(nullptr);
+    std::unordered_map<uint32_t, NetStatsInfo> infos;
+    EXPECT_EQ(instance_.GetIfaceTrafficStats(infos, "wlan0", 0, LONG_MAX), NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: GetIfaceTrafficStatsTest002
+ * @tc.desc: Test NetStatsServiceProxy GetIfaceTrafficStats.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceProxyTest, GetIfaceTrafficStatsTest002, TestSize.Level1)
+{
+    remoteObj_->SetErrorCode(NETMANAGER_ERROR);
+    NetStatsServiceProxy instance_(remoteObj_);
+    std::unordered_map<uint32_t, NetStatsInfo> infos;
+    EXPECT_EQ(instance_.GetIfaceTrafficStats(infos, "wlan0", 0, LONG_MAX), NETMANAGER_ERROR);
+}
+
+/**
+ * @tc.name: GetIfaceTrafficStatsTest003
+ * @tc.desc: Test NetStatsServiceProxy GetIfaceTrafficStats.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceProxyTest, GetIfaceTrafficStatsTest003, TestSize.Level1)
+{
+    remoteObj_->SetErrorCode(NETMANAGER_ERR_READ_REPLY_FAIL);
+    NetStatsServiceProxy instance_(remoteObj_);
+    std::unordered_map<uint32_t, NetStatsInfo> infos;
+    EXPECT_EQ(instance_.GetIfaceTrafficStats(infos, "wlan0", 0, LONG_MAX), NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+/**
+ * @tc.name: GetIfaceTrafficStatsTest004
+ * @tc.desc: Test NetStatsServiceProxy GetIfaceTrafficStats.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceProxyTest, GetIfaceTrafficStatsTest004, TestSize.Level1)
+{
+    remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
+    NetStatsServiceProxy instance_(remoteObj_);
+    std::unordered_map<uint32_t, NetStatsInfo> infos;
+    EXPECT_EQ(instance_.GetIfaceTrafficStats(infos, "wlan0", 0, LONG_MAX), NETMANAGER_SUCCESS);
+    ASSERT_EQ(infos.size(), 1);
+    EXPECT_EQ(infos.at(TEST_UID).iface_, "wlan0");
+}
+#endif
 
 /**
  * @tc.name: GetTrafficStatsByUidNetworkTest001

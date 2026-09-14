@@ -144,6 +144,10 @@ ohos_shared_library("net_stats_manager") {
     defines += [ "NETMGR_DEBUG" ]
   }
 
+  if (netmanager_base_enable_automotive_traffic_stat) {
+    defines += [ "FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT" ]
+  }
+
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
@@ -249,6 +253,10 @@ ohos_static_library("net_stats_manager_static") {
 
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]
+  }
+  
+  if (netmanager_base_enable_automotive_traffic_stat) {
+    defines += [ "FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT" ]
   }
 
   external_deps += [ "hilog:libhilog" ]

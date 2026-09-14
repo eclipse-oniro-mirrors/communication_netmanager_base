@@ -1028,6 +1028,51 @@ int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, N
     return NETMANAGER_SUCCESS;
 }
 
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+int32_t NetStatsService::GetIfaceTrafficStats(std::unordered_map<uint32_t, NetStatsInfo> &infos,
+                                              const std::string &iface, uint64_t start, uint64_t end)
+{
+    NETMGR_LOG_D("Enter GetIfaceTrafficStats, iface=%{public}s, start=%{public}llu, end=%{public}llu",
+                 iface.c_str(), static_cast<unsigned long long>(start), static_cast<unsigned long long>(end));
+    int32_t checkPermission = CheckNetManagerAvailable();
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        return checkPermission;
+    }
+    if (iface.empty()) {
+        NETMGR_LOG_E("iface is empty");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (start > end) {
+        NETMGR_LOG_E("start is after end");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (netStatsCached_ == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    auto history = std::make_unique<NetStatsHistory>();
+    if (history == nullptr) {
+        NETMGR_LOG_E("history is null");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    std::vector<NetStatsInfo> allInfo;
+    int32_t ret = history->GetUidHistoryByIface(allInfo, iface, start, end);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("GetUidHistoryByIface failed, err code=%{public}d", ret);
+        return ret;
+    }
+    netStatsCached_->GetKernelStats(allInfo);
+    netStatsCached_->GetUidPushStatsCached(allInfo);
+    netStatsCached_->GetUidStatsCached(allInfo);
+#ifdef SUPPORT_NETWORK_SHARE
+    GetSharingStats(allInfo, end);
+#endif
+ 
+    MergeTrafficStatsByAccount(allInfo);
+    FilterTrafficStatsByIface(allInfo, infos, iface, start, end);
+    return NETMANAGER_SUCCESS;
+}
+#endif
+
 void NetStatsService::FilterTrafficStatsByNetwork(std::vector<NetStatsInfo> &allInfo,
     std::unordered_map<uint32_t, NetStatsInfo> &infos,
     const std::string ident, uint32_t startTime, uint32_t endTime)
@@ -1047,6 +1092,28 @@ void NetStatsService::FilterTrafficStatsByNetwork(std::vector<NetStatsInfo> &all
         }
     });
 }
+
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+void NetStatsService::FilterTrafficStatsByIface(std::vector<NetStatsInfo> &allInfo,
+    std::unordered_map<uint32_t, NetStatsInfo> &infos,
+    const std::string &iface, uint64_t startTime, uint64_t endTime)
+{
+    std::for_each(allInfo.begin(), allInfo.end(), [&infos, &iface, &startTime, &endTime](NetStatsInfo &info) {
+        if (iface != info.iface_ || startTime > info.date_ || endTime < info.date_) {
+            return;
+        }
+        if (info.flag_ == STATS_DATA_FLAG_UNINSTALLED) {
+            info.uid_ = UNINSTALLED_UID;
+        }
+        auto item = infos.find(info.uid_);
+        if (item == infos.end()) {
+            infos.emplace(info.uid_, info);
+        } else {
+            item->second += info;
+        }
+    });
+}
+#endif
 
 void NetStatsService::MergeTrafficStatsByAccount(std::vector<NetStatsInfo> &infos)
 {

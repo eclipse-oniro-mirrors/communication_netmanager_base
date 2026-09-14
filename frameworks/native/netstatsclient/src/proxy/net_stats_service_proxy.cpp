@@ -473,6 +473,34 @@ int32_t NetStatsServiceProxy::GetTrafficStatsByNetwork(std::unordered_map<uint32
     return result;
 }
 
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+int32_t NetStatsServiceProxy::GetIfaceTrafficStats(std::unordered_map<uint32_t, NetStatsInfo> &infos,
+                                                   const std::string &iface, uint64_t start, uint64_t end)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!(data.WriteString(iface) && data.WriteUint64(start) && data.WriteUint64(end))) {
+        NETMGR_LOG_E("Write data failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    MessageParcel reply;
+    int32_t result =
+        SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_TRAFFIC_STATS), data, reply);
+    if (result != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", result);
+        return result;
+    }
+    if (!NetStatsInfo::Unmarshalling(reply, infos)) {
+        NETMGR_LOG_E("Read stats info failed");
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return result;
+}
+#endif
+
 int32_t NetStatsServiceProxy::GetMonthTrafficStatsByNetwork(uint32_t simId, uint64_t &monthData)
 {
     MessageParcel data;

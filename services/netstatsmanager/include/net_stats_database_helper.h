@@ -49,6 +49,10 @@ public:
                        std::vector<NetStatsInfo> &infos);
     int32_t QueryData(const std::string &tableName, const std::string &ident, uint64_t start, uint64_t end,
                       std::vector<NetStatsInfo> &infos);
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+    int32_t SelectUidDataByIface(const std::string &iface, uint64_t start, uint64_t end,
+                                std::vector<NetStatsInfo> &infos);
+#endif
     int32_t QueryData(const std::string &tableName, const uint32_t uid, const std::string &ident, uint64_t start,
                       uint64_t end, std::vector<NetStatsInfo> &infos);
     int32_t QueryData(const std::string &tableName, const std::string &ident, const int32_t userId,

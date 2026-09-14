@@ -116,6 +116,14 @@ public:
         return 0;
     }
 
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+    int32_t GetIfaceTrafficStats(std::unordered_map<uint32_t, NetStatsInfo> &infos,
+                                 const std::string &iface, uint64_t start, uint64_t end) override
+    {
+        return 0;
+    }
+#endif
+
     int32_t GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
                                         const sptr<NetStatsNetwork> &network) override
     {

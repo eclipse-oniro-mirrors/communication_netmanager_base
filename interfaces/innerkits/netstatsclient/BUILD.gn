@@ -97,6 +97,10 @@ ohos_static_library("netstats_service_interface_stub") {
     "samgr:samgr_proxy",
     "c_utils:utils",
   ]
+  defines = []
+  if (netmanager_base_enable_automotive_traffic_stat) {
+    defines += [ "FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT" ]
+  }
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
@@ -153,6 +157,10 @@ ohos_shared_library("net_stats_manager_if") {
 
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]
+  }
+  
+  if (netmanager_base_enable_automotive_traffic_stat) {
+    defines += [ "FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT" ]
   }
 
   external_deps += [ "hilog:libhilog" ]

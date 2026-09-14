@@ -33,6 +33,8 @@ interface OHOS.NetManagerStandard.INetStatsService {
         [in] NetStatsNetwork network);
     void GetTrafficStatsByUidNetwork([out] List<NetStatsInfoSequence> infos, [in] unsigned int uid,
         [in] NetStatsNetwork network);
+    [macrodef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT] void GetIfaceTrafficStats([out] Map<unsigned int, NetStatsInfo> infos,
+        [in] String iface, [in] unsigned long start, [in] unsigned long end);
     void GetMonthTrafficStatsByNetwork([in] unsigned int simId, [out] unsigned long monthTrafficData);
     void SetAppStats([in] PushStatsInfo info);
     void SetDpaAppStats([in] NetStatsInfo info);

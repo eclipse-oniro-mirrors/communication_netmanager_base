@@ -116,6 +116,14 @@ public:
         return 0;
     }
 
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+    int32_t GetIfaceTrafficStats(std::unordered_map<uint32_t, NetStatsInfo> &infos,
+                                 const std::string &iface, uint64_t start, uint64_t end) override
+    {
+        return 0;
+    }
+#endif
+
     int32_t GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
                                         const NetStatsNetwork &network) override
     {
@@ -681,6 +689,28 @@ HWTEST_F(TestNetStatsServiceStub, GetTrafficStatsByNetworkTest001, TestSize.Leve
         static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_NETWORK), data, reply, option);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+/**
+ * @tc.name: GetIfaceTrafficStatsTest001
+ * @tc.desc: Test NetStatsServiceStub GetIfaceTrafficStats.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TestNetStatsServiceStub, GetIfaceTrafficStatsTest001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    ASSERT_TRUE(data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor()));
+    ASSERT_TRUE(data.WriteString("wlan0"));
+    ASSERT_TRUE(data.WriteUint64(0));
+    ASSERT_TRUE(data.WriteUint64(LONG_MAX));
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_TRAFFIC_STATS), data, reply, option);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+#endif
 
 /**
  * @tc.name: GetTrafficStatsByUidNetworkTest001

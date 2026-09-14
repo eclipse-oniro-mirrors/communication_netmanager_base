@@ -121,6 +121,23 @@ int32_t NetStatsDataHandler::ReadStatsDataByIdent(std::vector<NetStatsInfo> &inf
     return NETMANAGER_SUCCESS;
 }
 
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+int32_t NetStatsDataHandler::ReadUidStatsDataByIface(std::vector<NetStatsInfo> &infos, const std::string &iface,
+                                                     uint64_t start, uint64_t end)
+{
+    if (iface.empty()) {
+        NETMGR_LOG_E("Param is invalid");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return helper->SelectUidDataByIface(iface, start, end, infos);
+}
+#endif
+
 int32_t NetStatsDataHandler::ReadIfaceTableHistoryByIdent(std::vector<NetStatsInfo> &recv, const std::string &ident,
                                                           uint64_t start, uint64_t end)
 {

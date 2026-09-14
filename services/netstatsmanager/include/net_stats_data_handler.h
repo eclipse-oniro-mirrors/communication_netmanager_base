@@ -35,6 +35,10 @@ public:
                           uint64_t start, uint64_t end);
     int32_t ReadStatsDataByIdent(std::vector<NetStatsInfo> &infos, const std::string &ident, uint64_t start,
                                  uint64_t end);
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+    int32_t ReadUidStatsDataByIface(std::vector<NetStatsInfo> &infos, const std::string &iface,
+                                    uint64_t start, uint64_t end);
+#endif
     int32_t ReadStatsData(std::vector<NetStatsInfo> &infos, uint32_t uid, const std::string &ident, uint64_t start,
                           uint64_t end);
     int32_t ReadStatsDataByIdentAndUserId(std::vector<NetStatsInfo> &infos, const std::string &ident,

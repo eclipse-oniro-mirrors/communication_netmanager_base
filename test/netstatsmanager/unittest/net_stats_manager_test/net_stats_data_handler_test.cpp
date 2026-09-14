@@ -265,6 +265,19 @@ HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataTest006, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+HWTEST_F(NetStatsDataHandlerTest, ReadUidStatsDataByIfaceTest001, TestSize.Level1)
+{
+    NetStatsDataHandler handler;
+    std::vector<NetStatsInfo> infos;
+    int32_t ret = handler.ReadUidStatsDataByIface(infos, "", 0, LONG_MAX);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ret = handler.ReadUidStatsDataByIface(infos, "wlan0", 0, LONG_MAX);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+#endif
+
 HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataTest007, TestSize.Level1)
 {
     NetStatsDataHandler handler;

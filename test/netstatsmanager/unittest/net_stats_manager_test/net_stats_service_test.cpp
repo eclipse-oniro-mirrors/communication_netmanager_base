@@ -367,6 +367,65 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByNetworkTest001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+HWTEST_F(NetStatsServiceTest, GetIfaceTrafficStatsTest001, TestSize.Level1)
+{
+    auto netStatsService = NetStatsService::GetInstance();
+    std::unordered_map<uint32_t, NetStatsInfo> infos;
+    int32_t ret = netStatsService->GetIfaceTrafficStats(infos, "", 0, LONG_MAX);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+
+    ret = netStatsService->GetIfaceTrafficStats(infos, "wlan0", 1, 0);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+
+    netStatsService->netStatsCached_ = nullptr;
+    ret = netStatsService->GetIfaceTrafficStats(infos, "wlan0", 0, LONG_MAX);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    netStatsService->netStatsCached_ = std::make_unique<NetStatsCached>();
+    ret = netStatsService->GetIfaceTrafficStats(infos, "wlan0", 0, LONG_MAX);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsServiceTest, FilterTrafficStatsByIfaceTest001, TestSize.Level1)
+{
+    NetStatsInfo first;
+    first.uid_ = 100;
+    first.iface_ = "wlan0";
+    first.date_ = 10;
+    first.rxBytes_ = 1;
+    first.txBytes_ = 2;
+
+    NetStatsInfo second = first;
+    second.date_ = 20;
+    second.rxBytes_ = 3;
+    second.txBytes_ = 4;
+
+    NetStatsInfo otherIface = first;
+    otherIface.iface_ = "eth0";
+    otherIface.rxBytes_ = 100;
+
+    NetStatsInfo outOfRange = first;
+    outOfRange.uid_ = 200;
+    outOfRange.date_ = 40;
+
+    NetStatsInfo uninstalled = first;
+    uninstalled.uid_ = 300;
+    uninstalled.date_ = 15;
+    uninstalled.rxBytes_ = 5;
+    uninstalled.flag_ = STATS_DATA_FLAG_UNINSTALLED;
+
+    std::vector<NetStatsInfo> allInfo = {first, second, otherIface, outOfRange, uninstalled};
+    std::unordered_map<uint32_t, NetStatsInfo> infos;
+    NetStatsService::GetInstance()->FilterTrafficStatsByIface(allInfo, infos, "wlan0", 0, 30);
+
+    ASSERT_EQ(infos.size(), 2);
+    EXPECT_EQ(infos.at(100).rxBytes_, 4);
+    EXPECT_EQ(infos.at(100).txBytes_, 6);
+    EXPECT_EQ(infos.at(UNINSTALLED_UID).rxBytes_, 5);
+}
+#endif
+
 HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest001, TestSize.Level1)
 {
     std::vector<NetStatsInfoSequence> infos;
