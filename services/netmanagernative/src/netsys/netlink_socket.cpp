@@ -102,7 +102,7 @@ int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg, uint32_t table)
         NETNATIVE_LOGE("netlink read socket[%{public}d] failed, msgState=%{public}zd", kernelSocket, msgState);
     }
     close(kernelSocket);
-    return msgState;
+    return static_cast<int32_t>(msgState);
 }
 
 int32_t SendNetlinkMsgsToKernel(std::vector<NetlinkMsg> &msgs)
@@ -389,7 +389,7 @@ int32_t ReceiveMsgFromKernel(struct nlmsghdr *msg, uint32_t table, void* rcvMsg)
             kernelSocket, msgState);
     }
     close(kernelSocket);
-    return msgState;
+    return static_cast<int32_t>(msgState);
 }
 
 int32_t GetRcvMsgFromKernel(int32_t &sock, uint16_t msgType, uint32_t table, void* rcvMsg)
