@@ -209,7 +209,7 @@ std::string NetMgrNetStatsLimitNotification::GetMonthNotificationText()
     }
     std::string style = "percent";
     std::string unitStyle = "short";
-    std::map<std::string, std::string> mp = {{"style", style}, {"unitStyle", unitStyle}};
+    std::map<std::string, std::string> mp = {{"style", style}, {"unitDisplay", unitStyle}};
 
     std::string systemLocalStr = Global::I18n::LocaleConfig::GetSystemLocale();
     std::vector<std::string> local{systemLocalStr};
@@ -487,7 +487,7 @@ std::string NetMgrNetStatsLimitNotification::GetTrafficNum(double traffic)
     std::string style = "unit";
     std::string unit = unitFullNamesLower[record];
     std::string unitStyle = "short";
-    std::map<std::string, std::string> mp = {{"style", style}, {"unit", unit}, {"unitStyle", unitStyle}};
+    std::map<std::string, std::string> mp = {{"style", style}, {"unit", unit}, {"unitDisplay", unitStyle}};
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(2) << traffic; // 2: 保留两位小数
     std::string strt = oss.str();
