@@ -421,12 +421,12 @@ int32_t FirewallManager::SetUidRule(ChainType chain, uint32_t uid, FirewallRule 
         return NETMANAGER_ERROR;
     }
 
+    std::unique_lock<std::mutex> lock(firewallMutex_);
     if (!firewallChainStatus_[chain].enable) {
         return NETMANAGER_ERROR;
     }
 
     bool ret = false;
-    std::unique_lock<std::mutex> lock(firewallMutex_);
     CheckChainInitialization();
 
     std::string op;
