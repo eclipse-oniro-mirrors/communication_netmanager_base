@@ -501,7 +501,7 @@ void NetStatsCached::UpdateIdent(const std::string &ifName, NetStatsInfo &statsI
 
 void NetStatsCached::CacheStats()
 {
-    std::lock_guard<std::mutex> calcLock(trafficCalcMutex_);
+    std::lock_guard<ffrt::mutex> calcLock(trafficCalcMutex_);
     std::lock_guard<ffrt::mutex> lock(lock_);
     NETMGR_LOG_I("cacheStats");
     CacheUidStats();
@@ -521,7 +521,7 @@ void NetStatsCached::CacheStatsSim()
 
 void NetStatsCached::WriteStats()
 {
-    std::lock_guard<std::mutex> calcLock(trafficCalcMutex_);
+    std::lock_guard<ffrt::mutex> calcLock(trafficCalcMutex_);
     std::lock_guard<ffrt::mutex> lock(lock_);
     NETMGR_LOG_I("writeStats");
     WriteUidStats();

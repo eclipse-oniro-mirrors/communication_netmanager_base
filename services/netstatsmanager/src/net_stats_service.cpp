@@ -1924,7 +1924,7 @@ void NetStatsService::GetAllUsedCellularTraffic(const sptr<NetStatsNetwork> &net
 {
     allUsedTraffic = 0;
     std::vector<NetStatsInfo> netStatsInfos;
-    std::lock_guard<std::mutex> calcLock(netStatsCached_->GetTrafficCalcMutex());
+    std::lock_guard<ffrt::mutex> calcLock(netStatsCached_->GetTrafficCalcMutex());
     // history
     GetHistoryTrafficInfo(network, netStatsInfos, true);  // true: contain calibrate data
     // cached
