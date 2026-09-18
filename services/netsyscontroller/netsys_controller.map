@@ -90,7 +90,6 @@
       "OHOS::NetManagerStandard::NetsysController::NfqBindPf(OHOS::sptr<OHOS::NetManagerStandard::NfqCtx>&, unsigned short)";
       "OHOS::NetManagerStandard::NetsysController::NfqClose(OHOS::sptr<OHOS::NetManagerStandard::NfqCtx>&)";
       "OHOS::NetManagerStandard::NetsysController::NfqOpen()";
-      "OHOS::NetManagerStandard::NetsysController::NfqPktVerdictMark(OHOS::sptr<OHOS::NetManagerStandard::NfqCtx>&, OHOS::sptr<OHOS::NetManagerStandard::NfqQueue> const&, unsigned int, int, unsigned int)";
       "OHOS::NetManagerStandard::NetsysController::NfqQueueCreate(OHOS::sptr<OHOS::NetManagerStandard::NfqCtx>&, unsigned short)";
       "OHOS::NetManagerStandard::NetsysController::NfqQueueDestroy(OHOS::sptr<OHOS::NetManagerStandard::NfqCtx>&, OHOS::sptr<OHOS::NetManagerStandard::NfqQueue> const&)";
       "OHOS::NetManagerStandard::NetsysController::NfqQueueSetFlag(OHOS::sptr<OHOS::NetManagerStandard::NfqCtx>&, OHOS::sptr<OHOS::NetManagerStandard::NfqQueue> const&, unsigned int, unsigned int)";

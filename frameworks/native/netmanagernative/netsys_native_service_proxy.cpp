@@ -4416,8 +4416,10 @@ int32_t NetsysNativeServiceProxy::NfqClose(sptr<NfqCtx> &ctx)
     if (ctx == nullptr) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (ctx->fd >= 0) {
-        close(ctx->fd);
+    int32_t localFd = ctx->fd;
+    ctx->fd = -1;
+    if (localFd >= 0) {
+        close(localFd);
     }
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -4707,53 +4709,6 @@ int32_t NetsysNativeServiceProxy::NfqQueueSetFlag(sptr<NfqCtx> &ctx, const sptr<
     int32_t ret;
     if (!reply.ReadInt32(ret)) {
         NETNATIVE_LOGE("NfqQueueSetFlag ReadInt32 failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-    return ret;
-}
-
-int32_t NetsysNativeServiceProxy::NfqPktVerdictMark(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &qh,
-    uint32_t packetId, int32_t verdict, uint32_t mark)
-{
-    if (qh == nullptr || ctx == nullptr) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!ctx->Marshalling(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!qh->Marshalling(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteUint32(packetId)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteInt32(verdict)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteUint32(mark)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    MessageParcel reply;
-    MessageOption option;
-    int32_t err = SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_PKT_VERDICT_MARK),
-        data, reply, option);
-    if (err != ERR_NONE) {
-        NETNATIVE_LOGE("NfqPktVerdictMark SendRequest failed, error code: [%{public}d]", err);
-        return IPC_INVOKER_ERR;
-    }
-    int32_t localFd = ctx->fd;
-    ctx = NfqCtx::Unmarshalling(reply);
-    if (ctx == nullptr) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    ctx->fd = localFd;
-    int32_t ret;
-    if (!reply.ReadInt32(ret)) {
-        NETNATIVE_LOGE("NfqPktVerdictMark ReadInt32 failed");
         return ERR_FLATTEN_OBJECT;
     }
     return ret;

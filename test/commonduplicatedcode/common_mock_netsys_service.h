@@ -187,9 +187,6 @@ public:
     MOCK_METHOD(int32_t, NfqQueueSetFlag,
         (sptr<NetManagerStandard::NfqCtx> &ctx, const sptr<NetManagerStandard::NfqQueue> &q,
          uint32_t mask, uint32_t flag), (override));
-    MOCK_METHOD(int32_t, NfqPktVerdictMark,
-        (sptr<NetManagerStandard::NfqCtx> &ctx, const sptr<NetManagerStandard::NfqQueue> &qh,
-         uint32_t packetId, int32_t verdict, uint32_t mark), (override));
 #endif
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
     MOCK_METHOD(int32_t, EnableWearableDistributedNetForward,

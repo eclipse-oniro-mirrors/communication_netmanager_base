@@ -241,27 +241,6 @@ void NfqQueueSetFlagFuzzTest(const uint8_t *data, size_t size)
 
     (void)OnRemoteRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_QUEUE_SET_FLAG), dataParcel);
 }
-
-void NfqPktVerdictMarkFuzzTest(const uint8_t *data, size_t size)
-{
-    MessageParcel dataParcel;
-    CheckParamValid(dataParcel, data, size);
-
-    sptr<NetManagerStandard::NfqCtx> ctx = new (std::nothrow) NetManagerStandard::NfqCtx();
-    sptr<NetManagerStandard::NfqQueue> q = new (std::nothrow) NetManagerStandard::NfqQueue();
-    if (ctx == nullptr || q == nullptr) {
-        return;
-    }
-    ctx->seq = NfQueueGetData<uint32_t>();
-    q->queueNum = NfQueueGetData<uint16_t>();
-    ctx->Marshalling(dataParcel);
-    q->Marshalling(dataParcel);
-    dataParcel.WriteUint32(NfQueueGetData<uint32_t>());
-    dataParcel.WriteInt32(NfQueueGetData<int32_t>());
-    dataParcel.WriteUint32(NfQueueGetData<uint32_t>());
-
-    (void)OnRemoteRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_PKT_VERDICT_MARK), dataParcel);
-}
 } // namespace
 } // namespace NetsysNative
 
@@ -279,7 +258,6 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     OHOS::NetsysNative::NfqQueueSetModeFuzzTest(data, size);
     OHOS::NetsysNative::NfqQueueSetMaxLenFuzzTest(data, size);
     OHOS::NetsysNative::NfqQueueSetFlagFuzzTest(data, size);
-    OHOS::NetsysNative::NfqPktVerdictMarkFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

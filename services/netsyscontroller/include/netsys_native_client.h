@@ -1092,8 +1092,6 @@ public:
         uint32_t maxLen);
     int32_t NfqQueueSetFlag(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &q,
         uint32_t mask, uint32_t flag);
-    int32_t NfqPktVerdictMark(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &qh,
-        uint32_t packetId, int32_t verdict, uint32_t mark);
 #endif
 
 private:

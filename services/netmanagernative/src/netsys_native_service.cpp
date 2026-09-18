@@ -14,6 +14,7 @@
  */
 
 #include <csignal>
+#include <cerrno>
 #include <sys/types.h>
 #include <regex>
 #include <thread>
@@ -50,6 +51,8 @@ constexpr const int32_t NFQA_IFINDEX_OUTDEV = 6;
 constexpr const int32_t NFQA_HWADDR = 9;
 constexpr const int32_t NFQA_PAYLOAD = 10;
 constexpr const int32_t BUFFER_SIZE = 256;
+constexpr const int32_t DEFAULT_MTU = 1500;
+constexpr const uint32_t NFQUEUE_MAXLEN = 0xFFFF;
 #define NFQ_CMD_NONE      0
 #define NFQ_CMD_BIND      1
 #define NFQ_CMD_UNBIND    2
@@ -1424,7 +1427,11 @@ int32_t SendToKernel(int fd, struct nlmsghdr *nlh)
         .msg_name = &addr, .msg_namelen = sizeof(addr),
         .msg_iov = &iov, .msg_iovlen = 1,
     };
-    return sendmsg(fd, &msg, 0) >= 0 ? 0 : -1;
+    if (sendmsg(fd, &msg, 0) < 0) {
+        NETNATIVE_LOGE("SendToKernel failed, errno: %{public}d", errno);
+        return -errno;
+    }
+    return 0;
 }
 
 uint32_t NextSeq(NfqCtx *ctx)
@@ -1476,22 +1483,10 @@ struct NfqCmode {
     uint8_t  copyMode;
 };
 
-struct NfqVerdictParams {
-    uint16_t qnum;
-    uint32_t pktId;
-    uint32_t verdict;
-    uint32_t mark;
-};
-
 uint16_t NfqNlType(uint8_t subsys, uint8_t msg)
 {
     return (static_cast<uint16_t>(subsys) << NUMBER_EIGHT) | msg;
 }
-
-struct NfqVhdr {
-    uint32_t verdict;
-    uint32_t id;
-};
 
 int32_t BuildConfig(struct nlmsghdr *nlh, size_t cap, const struct NfqBuildConfig *cfg)
 {
@@ -1547,37 +1542,6 @@ int32_t BuildConfig(struct nlmsghdr *nlh, size_t cap, const struct NfqBuildConfi
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
-int32_t BuildVerdict(struct nlmsghdr *nlh, size_t cap, const struct NfqVerdictParams *params)
-{
-    errno_t ret = memset_s(nlh, cap, 0, NLMSG_LENGTH(sizeof(struct NfqNfg)));
-    if (ret != 0) {
-        return -1;
-    }
-    nlh->nlmsg_len = NLMSG_LENGTH(sizeof(struct NfqNfg));
-    nlh->nlmsg_type = NfqNlType(NFNL_SUBSYS_QUEUE, NFQ_MSG_VERDICT);
-    nlh->nlmsg_flags = NLM_F_REQUEST;
-    nlh->nlmsg_seq = 0;
-
-    struct NfqNfg *nfg = reinterpret_cast<struct NfqNfg *>(NLMSG_DATA(nlh));
-    nfg->family = AF_UNSPEC;
-    nfg->version = 0;
-    nfg->resId = htons(params->qnum);
-
-    struct NfqVhdr vh = { .verdict = htonl(params->verdict), .id = htonl(params->pktId) };
-    if (NlaAppend(nlh, cap, NFQA_VERDICT_HDR, &vh, sizeof(vh)) < 0) {
-        return -1;
-    }
-
-    if (params->mark != 0) {
-        uint32_t beMark = htonl(params->mark);
-        if (NlaAppend(nlh, cap, NFQA_MARK, &beMark, sizeof(beMark)) < 0) {
-            return -1;
-        }
-    }
-
-    return NetManagerStandard::NETMANAGER_SUCCESS;
-}
-
 void NfqUnregisterQueue(const sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q)
 {
     if (ctx == nullptr || q == nullptr) {
@@ -1593,13 +1557,25 @@ void NfqUnregisterQueue(const sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q)
 
 int32_t NfqRegisterQueue(const sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q)
 {
+    if (ctx == nullptr || q == nullptr) {
+        return -1;
+    }
+    int32_t firstEmpty = -1;
     for (int i = 0; i < NFQ_MAX_QUEUES; i++) {
-        if (ctx->queues[i] == nullptr) {
-            ctx->queues[i] = q;
-            return NetManagerStandard::NETMANAGER_SUCCESS;
+        if (ctx->queues[i] != nullptr && ctx->queues[i]->queueNum == q->queueNum) {
+            NETNATIVE_LOGE("NfqRegisterQueue duplicate queueNum: %{public}u", q->queueNum);
+            return -1;
+        }
+        if (firstEmpty < 0 && ctx->queues[i] == nullptr) {
+            firstEmpty = i;
         }
     }
-    return -1;
+    if (firstEmpty < 0) {
+        NETNATIVE_LOGE("NfqRegisterQueue no empty slot");
+        return -1;
+    }
+    ctx->queues[firstEmpty] = q;
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
 uint32_t NetsysNativeService::RegisterNfqCtx(int32_t fd)
@@ -1624,6 +1600,64 @@ int32_t NetsysNativeService::GetNfqFdById(uint32_t ctxId)
     return it->second;
 }
 
+int32_t NetsysNativeService::GetFdSockOpt(int32_t fd)
+{
+    std::lock_guard<std::mutex> lock(fdSockOptMutex_);
+    auto it = fdSockOptMap_.find(fd);
+    if (it == fdSockOptMap_.end()) {
+        return 0;
+    }
+    return it->second;
+}
+
+void NetsysNativeService::SetFdSockOpt(int32_t fd, int32_t opt)
+{
+    std::lock_guard<std::mutex> lock(fdSockOptMutex_);
+    fdSockOptMap_[fd] = opt;
+}
+
+void NetsysNativeService::RemoveFdSockOpt(int32_t fd)
+{
+    std::lock_guard<std::mutex> lock(fdSockOptMutex_);
+    auto it = fdSockOptMap_.find(fd);
+    if (it != fdSockOptMap_.end()) {
+        fdSockOptMap_.erase(it);
+    }
+}
+
+void NetsysNativeService::SetQueueNumSize(uint32_t queueNum, int32_t size)
+{
+    std::lock_guard<std::mutex> lock(fdSockOptMutex_);
+    queueNumSizeMap_[queueNum] = size;
+}
+
+int32_t NetsysNativeService::GetQueueNumSize(uint32_t queueNum)
+{
+    std::lock_guard<std::mutex> lock(fdSockOptMutex_);
+    auto it = queueNumSizeMap_.find(queueNum);
+    if (it == queueNumSizeMap_.end()) {
+        return 0;
+    }
+    return it->second;
+}
+
+void NetsysNativeService::RemoveQueueNumSize(uint32_t queueNum)
+{
+    std::lock_guard<std::mutex> lock(fdSockOptMutex_);
+    auto it = queueNumSizeMap_.find(queueNum);
+    if (it != queueNumSizeMap_.end()) {
+        queueNumSizeMap_.erase(it);
+    }
+}
+
+int32_t NetsysNativeService::CalculateSockOpt(uint32_t maxLen)
+{
+    if (maxLen > NFQUEUE_MAXLEN) {
+        return -1;
+    }
+    return static_cast<int32_t>(DEFAULT_MTU * maxLen);
+}
+
 int32_t NetsysNativeService::UnregisterNfqCtx(uint32_t ctxId)
 {
     std::lock_guard<std::mutex> lock(nfqCtxMutex_);
@@ -1636,19 +1670,33 @@ int32_t NetsysNativeService::UnregisterNfqCtx(uint32_t ctxId)
     return fd;
 }
 
-void NetsysNativeService::NfqUnbindQueueInternal(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q)
+int32_t NetsysNativeService::NfqUnbindQueueInternal(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q)
 {
     if (ctx == nullptr || q == nullptr) {
-        return;
+        return -1;
     }
     char buf[BUFFER_SIZE];
     struct nlmsghdr *nlh = reinterpret_cast<struct nlmsghdr *>(buf);
     struct NfqBuildConfig cfg = {q->queueNum, NFQ_CMD_UNBIND, 0, 0xFF, 0, 0, 0, 0};
+    int32_t ret = -1;
     if (BuildConfig(nlh, sizeof(buf), &cfg) == 0) {
         nlh->nlmsg_seq = NextSeq(ctx);
-        SendToKernel(ctx->fd, nlh);
+        ret = SendToKernel(ctx->fd, nlh);
     }
+    int32_t rmem_size = GetFdSockOpt(ctx->fd) - GetQueueNumSize(q->queueNum);
+    if (0 == ret && rmem_size > 0) {
+        socklen_t socklen = sizeof(rmem_size);
+        int32_t status = setsockopt(ctx->fd, SOL_SOCKET, SO_RCVBUFFORCE, &rmem_size, socklen);
+        if (status < 0) {
+            status = setsockopt(ctx->fd, SOL_SOCKET, SO_RCVBUF, &rmem_size, socklen);
+        }
+        if (0 == status) {
+            SetFdSockOpt(ctx->fd, rmem_size);
+        }
+    }
+    RemoveQueueNumSize(q->queueNum);
     NfqUnregisterQueue(ctx, q);
+    return ret;
 }
 
 sptr<NfqCtx> NetsysNativeService::NfqOpen()
@@ -1703,7 +1751,9 @@ int32_t NetsysNativeService::NfqClose(sptr<NfqCtx> &ctx)
         }
         NfqUnbindQueueInternal(ctx, ctx->queues[i]);
     }
+    RemoveFdSockOpt(fd);
     close(fd);
+    ctx->fd = -1;
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
@@ -1776,6 +1826,7 @@ sptr<NfqQueue> NetsysNativeService::NfqQueueCreate(sptr<NfqCtx> &ctx, uint16_t q
     }
     nlh->nlmsg_seq = NextSeq(ctx);
     if (SendToKernel(ctx->fd, nlh) < 0) {
+        NfqUnregisterQueue(ctx, q);
         return nullptr;
     }
     return q;
@@ -1792,7 +1843,11 @@ int32_t NetsysNativeService::NfqQueueDestroy(sptr<NfqCtx> &ctx, const sptr<NfqQu
         return -1;
     }
     ctx->fd = fd;
-    NfqUnbindQueueInternal(ctx, q);
+    int32_t ret = NfqUnbindQueueInternal(ctx, q);
+    if (ret < 0) {
+        NETNATIVE_LOGE("NfqQueueDestroy unbind queue %{public}u failed", q->queueNum);
+        return ret;
+    }
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
@@ -1836,7 +1891,23 @@ int32_t NetsysNativeService::NfqQueueSetMaxLen(sptr<NfqCtx> &ctx, const sptr<Nfq
         return -1;
     }
     nlh->nlmsg_seq = NextSeq(ctx);
-    return SendToKernel(ctx->fd, nlh);
+    int32_t ret = SendToKernel(ctx->fd, nlh);
+    int32_t queueNumSize = CalculateSockOpt(maxLen);
+    if (ret == 0 && queueNumSize > 0) {
+        int32_t rmem_size = GetFdSockOpt(fd) - GetQueueNumSize(q->queueNum) + queueNumSize;
+        socklen_t socklen = sizeof(rmem_size);
+        int32_t status = setsockopt(fd, SOL_SOCKET, SO_RCVBUFFORCE, &rmem_size, socklen);
+        if (status < 0) {
+            status = setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &rmem_size, socklen);
+        }
+        if (0 == status) {
+            SetFdSockOpt(fd, rmem_size);
+            SetQueueNumSize(q->queueNum, queueNumSize);
+        } else {
+            NETNATIVE_LOGE("NfqQueueSetMaxLen setsockopt failed");
+        }
+    }
+    return ret;
 }
 
 int32_t NetsysNativeService::NfqQueueSetFlag(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &q,
@@ -1856,32 +1927,6 @@ int32_t NetsysNativeService::NfqQueueSetFlag(sptr<NfqCtx> &ctx, const sptr<NfqQu
     struct NfqBuildConfig cfg = {q->queueNum, NFQ_CMD_NONE, 0, 0xFF, 0, 0, mask, flag};
     if (BuildConfig(nlh, sizeof(buf), &cfg) < 0) {
         return -1;
-    }
-    nlh->nlmsg_seq = NextSeq(ctx);
-    return SendToKernel(ctx->fd, nlh);
-}
-
-int32_t NetsysNativeService::NfqPktVerdictMark(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &qh,
-    uint32_t packetId, int32_t verdict, uint32_t mark)
-{
-    if (qh == nullptr || ctx == nullptr) {
-        return NETMANAGER_ERROR;
-    }
-    int32_t fd = GetNfqFdById(ctx->ctxId);
-    if (fd < 0) {
-        NETNATIVE_LOGE("NfqPktVerdictMark invalid ctxId: %{public}u", ctx->ctxId);
-        return NETMANAGER_ERROR;
-    }
-    ctx->fd = fd;
-    char buf[BUFFER_SIZE];
-    struct nlmsghdr *nlh = reinterpret_cast<struct nlmsghdr *>(buf);
-    struct NfqVerdictParams params;
-    params.qnum = qh->queueNum;
-    params.pktId = packetId;
-    params.verdict = verdict;
-    params.mark = mark;
-    if (BuildVerdict(nlh, sizeof(buf), &params) < 0) {
-        return NETMANAGER_ERROR;
     }
     nlh->nlmsg_seq = NextSeq(ctx);
     return SendToKernel(ctx->fd, nlh);
