@@ -34,6 +34,7 @@ namespace OHOS {
 namespace NetsysNative {
 namespace {
 constexpr int32_t MAX_VNIC_UID_ARRAY_SIZE = 20;
+constexpr int32_t MAX_VNICTUN_UID_ARRAY_SIZE = 1000;
 constexpr int32_t MAX_FLAG_NUM = 64;
 constexpr int32_t MAX_DNS_CONFIG_SIZE = 7;
 constexpr int32_t NETMANAGER_ERR_PERMISSION_DENIED = 201;
@@ -1163,7 +1164,7 @@ int32_t NetsysNativeServiceStub::CmdCreateVnic(MessageParcel &data, MessageParce
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    if (size < 0 || size > MAX_VNIC_UID_ARRAY_SIZE) {
+    if (size < 0 || size > MAX_VNICTUN_UID_ARRAY_SIZE) {
         NETNATIVE_LOGE("vnic uids size is invalid");
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }

@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
-constexpr int32_t MAX_VNIC_UID_ARRAY_SIZE = 20;
+constexpr int32_t MAX_VNIC_UID_ARRAY_SIZE = 1000;
 constexpr size_t MAX_BUNDLE_NAME_LEN = 256;
 constexpr uint32_t MAX_IFACE_NUM = 16;
 constexpr uint32_t MAX_NET_CAP_NUM = 32;
