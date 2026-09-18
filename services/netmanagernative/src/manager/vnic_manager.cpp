@@ -46,7 +46,7 @@ constexpr const char *VNIC_TUN_CARD_NAME = "vnic-tun";
 constexpr const char *VNIC_TUN_DEVICE_PATH = "/dev/tun";
 constexpr int32_t NET_MASK_MAX_LENGTH = 32;
 constexpr int32_t NET6_MASK_MAX_LENGTH = 128;
-constexpr uint32_t MAX_VNIC_UID_ARRAY_SIZE = 20;
+constexpr uint32_t MAX_VNIC_UID_ARRAY_SIZE = 1000;
 } // namespace
 
 
