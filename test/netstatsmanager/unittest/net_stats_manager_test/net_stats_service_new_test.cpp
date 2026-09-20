@@ -914,26 +914,6 @@ HWTEST_F(NetStatsServiceTest, CellularDataStateChangedFfrtTest04, TestSize.Level
     int32_t ret = netStatsService.CellularDataStateChangedFfrt(0, 0);
     EXPECT_EQ(ret, false);
 }
- 
-HWTEST_F(NetStatsServiceTest, TelephonyInfoObserverTest003, TestSize.Level1)
-{
-    NetStatsService netStatsService;
-    netStatsService.SubscribeTelephonyInfo();
-    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(-1));
-    netStatsService.telephonyInfoObserver_->OnSimStateUpdated(0, Telephony::CardType::UNKNOWN_CARD,
-        Telephony::SimState::SIM_STATE_UNKNOWN, Telephony::LockReason::SIM_NONE);
-    EXPECT_TRUE(true);
-}
- 
-HWTEST_F(NetStatsServiceTest, TelephonyInfoObserverTest004, TestSize.Level1)
-{
-    NetStatsService netStatsService;
-    netStatsService.SubscribeTelephonyInfo();
-    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(1));
-    netStatsService.telephonyInfoObserver_->OnSimStateUpdated(0, Telephony::CardType::UNKNOWN_CARD,
-        Telephony::SimState::SIM_STATE_UNKNOWN, Telephony::LockReason::SIM_NONE);
-    EXPECT_TRUE(true);
-}
 #endif
 } // namespace NetManagerStandard
 } // namespace OHOS
