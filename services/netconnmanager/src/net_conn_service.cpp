@@ -1617,8 +1617,9 @@ void NetConnService::RequestAllNetworkExceptDefault()
     std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock(defaultNetSupplierMutex_);
     auto defaultNetSupplier = defaultNetSupplier_;
     defaultNetSupplierLock.unlock();
-    if ((defaultNetSupplier == nullptr) || (defaultNetSupplier->IsNetValidated())
-        || (defaultNetSupplier->IsNetAcceptUnavalidate())) {
+    if ((defaultNetSupplier == nullptr) ||
+        (defaultNetSupplier->IsNetValidated() && !defaultNetSupplier->IsNetQualityUnuse()) ||
+        (defaultNetSupplier->IsNetAcceptUnavalidate())) {
         NETMGR_LOG_E("defaultNetSupplier is  null or IsNetValidated or AcceptUnavalidate");
         return;
     }
