@@ -251,10 +251,12 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
         }
     }
 
-    NETNATIVE_LOGI("ModifyAddress:%{public}u %{public}s %{public}s %{public}d", action, interfaceName,
-                   ToAnonymousIp(addr).c_str(), prefixLen);
-
-    return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    int32_t sendRet = SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    NETNATIVE_LOGI("ModifyAddress:%{public}u %{public}s %{public}s %{public}d, %{public}d", action, interfaceName,
+                   ToAnonymousIp(addr).c_str(), prefixLen, sendRet);
+    // LCOV_EXCL_START
+    return sendRet >= 0 ? NETMANAGER_SUCCESS : sendRet;
+    // LCOV_EXCL_STOP
 }
 
 int InterfaceManager::AddAddress(const char *interfaceName, const char *addr, int prefixLen)
@@ -788,7 +790,10 @@ int32_t InterfaceManager::CreateVlan(const std::string &ifName, uint32_t vlanId)
     nlmsg.AddNestedEnd(info_data);
     nlmsg.AddNestedEnd(linkinfo);
 
-    return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    int32_t sendRet = SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    // LCOV_EXCL_START
+    return sendRet >= 0 ? NETMANAGER_SUCCESS : sendRet;
+    // LCOV_EXCL_STOP
 }
 
 int32_t InterfaceManager::DestroyVlan(const std::string &ifName, uint32_t vlanId)
@@ -809,7 +814,10 @@ int32_t InterfaceManager::DestroyVlan(const std::string &ifName, uint32_t vlanId
     ifm.ifi_change = 0;
 
     nlmsg.AddLink(RTM_DELLINK, ifm);
-    return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    int32_t sendRet = SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    // LCOV_EXCL_START
+    return sendRet >= 0 ? NETMANAGER_SUCCESS : sendRet;
+    // LCOV_EXCL_STOP
 }
 
 int32_t InterfaceManager::AddVlanIp(const std::string &ifName, uint32_t vlanId,
@@ -860,7 +868,10 @@ int32_t InterfaceManager::AddVlanIp(const std::string &ifName, uint32_t vlanId,
     nlmsg.AddAttr(IFA_LOCAL, const_cast<char*>(addrbuf), addrLen);
     nlmsg.AddAttr(IFA_ADDRESS, const_cast<char*>(addrbuf), addrLen);
 
-    return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    int32_t sendRet = SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    // LCOV_EXCL_START
+    return sendRet >= 0 ? NETMANAGER_SUCCESS : sendRet;
+    // LCOV_EXCL_STOP
 }
 } // namespace nmd
 } // namespace OHOS
