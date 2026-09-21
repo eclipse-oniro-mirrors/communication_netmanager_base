@@ -1762,9 +1762,13 @@ bool NetStatsService::CellularDataStateChangedFfrt(int32_t slotId, int32_t dataS
     }
 
     int32_t simId = Telephony::CoreServiceClient::GetInstance().GetSimId(slotId);
-
+    if (simId < 0) {
+        NETMGR_LOG_E("CellularDataStateChangedFfrt get simId error, simId: %{public}d", simId);
+        return false;
+    }
     netStatsCalibrate_->InitCalibrationInfo(simId);
-    if (!trafficPlanService_->GetTrafficPlanInfoBySimId(simId)) {
+    auto trafficPlanInfoPtr = trafficPlanService_->GetTrafficPlanInfoBySimId(simId);
+    if (!trafficPlanInfoPtr || trafficPlanInfoPtr->lastMonAlertTime == 0) {
         trafficPlanService_->InitTrafficPlanInfo(simId);
         trafficPlanService_->UpdateNetStatsToMapFromDB(simId);
     }
@@ -2642,6 +2646,10 @@ void TelephonyInfoObserver::OnSimStateUpdated(int32_t slotId, Telephony::CardTyp
 {
     NETMGR_LOG_I("OnSimStateUpdated start slot:%{public}d, state:%{public}d", slotId, state);
     int32_t simId = Telephony::CoreServiceClient::GetInstance().GetSimId(slotId);
+    if (simId < 0) {
+        NETMGR_LOG_E("OnSimStateUpdated get simId error, simId: %{public}d", simId);
+        return;
+    }
     NETMGR_LOG_I("OnSimStateUpdated simId:%{public}d", simId);
 
     if (state == Telephony::SimState::SIM_STATE_NOT_PRESENT) {

@@ -906,6 +906,14 @@ HWTEST_F(NetStatsServiceTest, TelephonyInfoObserverTest002, TestSize.Level1)
     netStatsService.telephonyInfoObserver_->OnIccAccountUpdated();
     EXPECT_TRUE(true);
 }
+
+HWTEST_F(NetStatsServiceTest, CellularDataStateChangedFfrtTest04, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(-1));
+    int32_t ret = netStatsService.CellularDataStateChangedFfrt(0, 0);
+    EXPECT_EQ(ret, false);
+}
 #endif
 } // namespace NetManagerStandard
 } // namespace OHOS
