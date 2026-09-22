@@ -580,7 +580,7 @@ int32_t NetSupplier::GetRealScore()
     }
 
     if (IsNetQualityUnuse()) {
-        return static_cast<int32_t>(NetManagerStandard::NetTypeScoreValue::ZERO_VALUE);
+        return static_cast<int32_t>(NetManagerStandard::NetTypeScoreValue::MIN_SCORE);
     }
 
     // 2. If network detection is not complete in the first time, subtract NET_VALID_SCORE.
