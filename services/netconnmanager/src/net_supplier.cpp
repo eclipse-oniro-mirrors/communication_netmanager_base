@@ -668,7 +668,7 @@ bool NetSupplier::IsNetAcceptUnavalidate()
     return netQuality_ == ACCEPT_UNVALIDATED;
 }
 
-bool NetSupplier::IsNetQualityUnuse()
+bool NetSupplier::IsNetQualityUnuse() const
 {
     return netQuality_ == QUALITY_UNUSE_STATE;
 }
