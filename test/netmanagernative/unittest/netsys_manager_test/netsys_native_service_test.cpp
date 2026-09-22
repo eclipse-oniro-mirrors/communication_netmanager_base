@@ -991,7 +991,6 @@ HWTEST_F(NetsysNativeServiceTest, SetBrokerUidAccessPolicyMapTest003, TestSize.L
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_SUCCESS);
 }
 
-
 HWTEST_F(NetsysNativeServiceTest, SetInternetAccessByIpForWifiShare001, TestSize.Level1)
 {
     std::string iptest = "1.1.1.1";
