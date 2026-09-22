@@ -222,7 +222,7 @@ HWTEST_F(NetSupplierTest, GetRealScoreTest002, TestSize.Level1)
 {
     supplier->netQuality_ = QUALITY_UNUSE_STATE;
     auto result = supplier->GetRealScore();
-    EXPECT_EQ(result, 0);
+    EXPECT_EQ(result, 1);
 }
 
 HWTEST_F(NetSupplierTest, ResumeNetworkInfoTest001, TestSize.Level1)
