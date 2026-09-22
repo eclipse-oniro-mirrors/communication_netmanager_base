@@ -738,7 +738,6 @@ HWTEST_F(NetsysNativeServiceProxyTest, SetNetStatusMap001, TestSize.Level1)
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
-
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
 HWTEST_F(NetsysNativeServiceProxyTest, UpdateEnterpriseRouteTest001, TestSize.Level1)
 {
