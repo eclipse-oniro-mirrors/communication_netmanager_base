@@ -1375,21 +1375,6 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdClearSimStatsBpfMap001, TestSize.Level1
     EXPECT_EQ(ret, ERR_NONE);
 }
 
-HWTEST_F(NetsysNativeServiceStubTest, SetDnsCache001, TestSize.Level1)
-{
-    uint16_t netId = 101;
-    std::string testHost = "test";
-    AddrInfo info;
-    MessageParcel data;
-    EXPECT_TRUE(data.WriteUint32(netId));
-    EXPECT_TRUE(data.WriteString(testHost));
-    EXPECT_TRUE(data.WriteRawData(&info, sizeof(AddrInfo)));
-
-    MessageParcel reply;
-    int32_t ret = notifyStub_->CmdSetDnsCache(data, reply);
-    EXPECT_EQ(ret, ERR_NONE);
-}
-
 HWTEST_F(NetsysNativeServiceStubTest, SetInternetAccessByIpForWifiShare001, TestSize.Level1)
 {
     std::string iptest = "1.1.1.1";

@@ -761,11 +761,6 @@ public:
     {
         return 0;
     }
-    
-    int32_t SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo) override
-    {
-        return 0;
-    }
 
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
     int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add) override

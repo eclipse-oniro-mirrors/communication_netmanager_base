@@ -1045,7 +1045,6 @@ public:
     int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) override;
     int32_t SetNetStatusMap(uint8_t type, uint8_t value) override;
     int32_t FlushDnsCache(uint16_t netId) override;
-    int32_t SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo) override;
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
     int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add) override;
 #endif

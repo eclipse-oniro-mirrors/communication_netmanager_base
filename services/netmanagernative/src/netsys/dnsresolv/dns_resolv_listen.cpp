@@ -14,7 +14,9 @@
  */
 
 #include <cinttypes>
+#include <cerrno>
 #include <arpa/inet.h>
+#include <sys/socket.h>
 #include "netnative_log_wrapper.h"
 #include "dns_config_client.h"
 #include "dns_param_cache.h"
@@ -43,6 +45,20 @@ const std::string PUBLIC_DNS_SERVER = "persist.sys.netsysnative_dns_servers_back
 using namespace NetManagerStandard;
 static constexpr int32_t DNS_REPLACE_NUM = 2;
 
+// LCOV_EXCL_START
+static bool GetPeerUid(int fd, uint32_t &peerUid)
+{
+    struct ucred cred;
+    socklen_t len = sizeof(cred);
+    if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &cred, &len) != 0) {
+        NETNATIVE_LOGE("GetPeerUid: getsockopt SO_PEERCRED failed: %{public}d", errno);
+        return false;
+    }
+    peerUid = static_cast<uint32_t>(cred.uid);
+    return true;
+}
+// LCOV_EXCL_STOP
+
 class DnsResolvListenInternal {
 public:
     DnsResolvListenInternal() = default;
@@ -58,15 +74,10 @@ public:
 private:
     static void ProcGetConfigCommand(int clientSockFd, uint16_t netId, uint32_t uid);
     static void ProcGetConfigCommandExt(int clientSockFd, uint16_t netId, uint32_t uid);
-#ifdef FEATURE_NET_FIREWALL_ENABLE
-    static void ProcSetCacheCommand(const std::string &name, uint16_t netId, uint32_t callingUid,
+    static void ProcSetCacheCommand(const std::string &name, uint16_t netId, uint32_t uid,
                                     AddrInfoWithTtl addrInfo[MAX_RESULTS], uint32_t resNum);
-    static void ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId, uint32_t callingUid);
-#endif
-    static void ProcSetCacheCommand(const std::string &name, uint16_t netId, AddrInfoWithTtl addrInfo[MAX_RESULTS],
-                                    uint32_t resNum);
-    static void ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId);
-    static void ProcSetNodataCacheCommand(const std::string &name, uint16_t netId);
+    static void ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId, uint32_t uid);
+    static void ProcSetNodataCacheCommand(const std::string &name, uint16_t netId, uint32_t uid);
     static void ProcGetNodataCacheCommand(int clientSockFd, uint16_t netId, const std::string &name, uint32_t uid);
     static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId);
     static void ProcJudgeIpv4Command(int clientSockFd, uint16_t netId);
@@ -277,18 +288,13 @@ void DnsResolvListenInternal::ProcGetConfigCommandExt(int clientSockFd, uint16_t
     DNS_CONFIG_PRINT("ProcGetConfigCommand end");
 }
 
-void DnsResolvListenInternal::ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId)
+void DnsResolvListenInternal::ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId,
+                                                  uint32_t uid)
 {
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-    ProcGetCacheCommand(name, clientSockFd, netId, 0);
-}
-
-void DnsResolvListenInternal::ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId,
-                                                  uint32_t callingUid)
-{
-    DnsParamCache::GetInstance().SetCallingUid(callingUid);
+    DnsParamCache::GetInstance().SetCallingUid(uid);
 #endif
-    auto cacheRes = DnsParamCache::GetInstance().GetDnsCache(netId, name);
+    auto cacheRes = DnsParamCache::GetInstance().GetDnsCache(netId, uid, name);
 
     uint32_t resNum = std::min<uint32_t>(MAX_RESULTS, static_cast<uint32_t>(cacheRes.size()));
     if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&resNum), sizeof(resNum))) {
@@ -314,40 +320,32 @@ void DnsResolvListenInternal::ProcGetCacheCommand(const std::string &name, int c
     DNS_CONFIG_PRINT("ProcGetCacheCommand end");
 }
 
-void DnsResolvListenInternal::ProcSetCacheCommand(const std::string &name, uint16_t netId,
+void DnsResolvListenInternal::ProcSetCacheCommand(const std::string &name, uint16_t netId, uint32_t uid,
                                                   AddrInfoWithTtl addrInfo[MAX_RESULTS], uint32_t resNum)
 {
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-    ProcSetCacheCommand(name, netId, 0, addrInfo, resNum);
-}
-
-void DnsResolvListenInternal::ProcSetCacheCommand(const std::string &name, uint16_t netId, uint32_t callingUid,
-                                                  AddrInfoWithTtl addrInfo[MAX_RESULTS], uint32_t resNum)
-{
-#endif
-#ifdef FEATURE_NET_FIREWALL_ENABLE
-    DnsParamCache::GetInstance().SetCallingUid(callingUid);
+    DnsParamCache::GetInstance().SetCallingUid(uid);
 #endif
 
     std::sort(addrInfo, addrInfo + resNum, [](const AddrInfoWithTtl &a, const AddrInfoWithTtl &b) {
         return a.ttl > b.ttl;
     });
     for (size_t i = 0; i < resNum; ++i) {
-        DnsParamCache::GetInstance().SetDnsCache(netId, name, addrInfo[i]);
+        DnsParamCache::GetInstance().SetDnsCache(netId, uid, name, addrInfo[i]);
     }
-    DnsParamCache::GetInstance().SetCacheDelayed(netId, name);
+    DnsParamCache::GetInstance().SetCacheDelayed(netId, uid, name);
     DNS_CONFIG_PRINT("ProcSetCacheCommand end");
 }
 
-void DnsResolvListenInternal::ProcSetNodataCacheCommand(const std::string &name, uint16_t netId)
+void DnsResolvListenInternal::ProcSetNodataCacheCommand(const std::string &name, uint16_t netId, uint32_t uid)
 {
-    DnsParamCache::GetInstance().SetNodataCache(netId, name);
+    DnsParamCache::GetInstance().SetNodataCache(netId, uid, name);
 }
 
 void DnsResolvListenInternal::ProcGetNodataCacheCommand(int clientSockFd, uint16_t netId, const std::string &name,
     uint32_t uid)
 {
-    int isInNodataCache = DnsParamCache::GetInstance().IsInNodataCache(netId, name) ? 1 : 0;
+    int isInNodataCache = DnsParamCache::GetInstance().IsInNodataCache(netId, uid, name) ? 1 : 0;
     int isInIpv6UidBlackList = DnsParamCache::GetInstance().IsInIpv6UidBlackList(netId, uid) ? 1 : 0;
     int skipAAAA = (isInNodataCache != 0 || isInIpv6UidBlackList != 0) ? 1 : 0;
     if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&skipAAAA), sizeof(int))) {
@@ -435,20 +433,24 @@ ReceiverRunner DnsResolvListenInternal::ProcCommand()
         auto info = &requestInfo;
         auto netId = info->netId;
         auto uid = info->uid;
+        uint32_t peerUid = 0;
+        if (!GetPeerUid(fd, peerUid)) {
+            return FixedLengthReceiverState::ONERROR;
+        }
 
         switch (info->command) {
             case GET_CONFIG:
-                ProcGetConfigCommand(fd, netId, uid);
+                ProcGetConfigCommand(fd, netId, peerUid);
                 return FixedLengthReceiverState::DATA_ENOUGH;
             case GET_CONFIG_EXT:
-                ProcGetConfigCommandExt(fd, netId, uid);
+                ProcGetConfigCommandExt(fd, netId, peerUid);
                 return FixedLengthReceiverState::DATA_ENOUGH;
             case GET_CACHE:
             case SET_CACHE:
                 if (server_) {
                     server_->AddReceiver(fd, sizeof(uint32_t),
                                          ProcGetKeyLengthForCache(static_cast<CommandType>(info->command),
-                                                                  static_cast<uint16_t>(info->netId), info->uid));
+                                                                  static_cast<uint16_t>(info->netId), peerUid));
                 }
                 return FixedLengthReceiverState::CONTINUE;
             case SET_NODATA_CACHE:
@@ -456,7 +458,7 @@ ReceiverRunner DnsResolvListenInternal::ProcCommand()
                 if (server_) {
                     server_->AddReceiver(fd, sizeof(uint32_t),
                                          ProcGetKeyLengthForCache(static_cast<CommandType>(info->command),
-                                                                  static_cast<uint16_t>(info->netId), info->uid));
+                                                                  static_cast<uint16_t>(info->netId), peerUid));
                 }
                 return FixedLengthReceiverState::CONTINUE;
             case POST_DNS_RESULT:
@@ -547,17 +549,13 @@ ReceiverRunner DnsResolvListenInternal::ProcGetKeyForCache(CommandType command, 
                 server_->AddReceiver(fd, sizeof(uint32_t), ProcGetCacheSize(command, data, netId, uid));
                 return FixedLengthReceiverState::CONTINUE;
             case SET_NODATA_CACHE:
-                ProcSetNodataCacheCommand(data, netId);
+                ProcSetNodataCacheCommand(data, netId, uid);
                 return FixedLengthReceiverState::DATA_ENOUGH;
             case GET_NODATA_CACHE:
                 ProcGetNodataCacheCommand(fd, netId, data, uid);
                 return FixedLengthReceiverState::DATA_ENOUGH;
             case GET_CACHE:
-#ifdef FEATURE_NET_FIREWALL_ENABLE
                 ProcGetCacheCommand(data, fd, netId, uid);
-#else
-                ProcGetCacheCommand(data, fd, netId);
-#endif
                 return FixedLengthReceiverState::DATA_ENOUGH;
             default:
                 return FixedLengthReceiverState::ONERROR;
@@ -607,11 +605,7 @@ ReceiverRunner DnsResolvListenInternal::ProcGetCacheContent(const std::string &n
             return FixedLengthReceiverState::ONERROR;
         }
 
-#ifdef FEATURE_NET_FIREWALL_ENABLE
         ProcSetCacheCommand(name, netId, uid, addrInfo, size);
-#else
-        ProcSetCacheCommand(name, netId, addrInfo, size);
-#endif
         return FixedLengthReceiverState::DATA_ENOUGH;
     };
 }

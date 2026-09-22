@@ -805,11 +805,6 @@ int32_t NetManagerNative::AddVlanIp(const std::string &ifName, uint32_t vlanId,
     return interfaceManager_->AddVlanIp(ifName, vlanId, ip, mask);
 }
 
-int32_t NetManagerNative::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo)
-{
-    return dnsManager_->SetDnsCache(netId, hostName, addrInfo);
-}
-
 void NetManagerNative::SetClatDnsEnableIpv4(int32_t netId, bool enable)
 {
     dnsManager_->SetClatDnsEnableIpv4(netId, enable);

@@ -69,7 +69,7 @@ HWTEST_F(DNSParamCacheTest, SetResolverConfigTest002, TestSize.Level1)
     AddrInfo addrInfo;
     for (size_t i = 0; i < MAX_SERVER_NUM; i++) {
         dnsParCache.CreateCacheForNet(i + 1);
-        dnsParCache.SetDnsCache(i, hostName.append(std::to_string(i)), addrInfo);
+        dnsParCache.SetDnsCache(i, 0, hostName.append(std::to_string(i)), addrInfo);
         servers.emplace_back(hostName);
     }
     uint16_t netId = 1;
@@ -88,12 +88,12 @@ HWTEST_F(DNSParamCacheTest, SetResolverConfigTest003, TestSize.Level1)
     servers.resize(MAX_SERVER_NUM + 1);
     uint16_t netId = 1;
     std::string hostName = "hoseName";
-    dnsParCache.GetDnsCache(netId, hostName);
+    dnsParCache.GetDnsCache(netId, 0, hostName);
     AddrInfo addrInfo;
     addrInfo.aiFlags = 100;
     for (size_t i = 0; i < MAX_SERVER_NUM; i++) {
         dnsParCache.CreateCacheForNet(i);
-        dnsParCache.SetDnsCache(i, hostName.append(std::to_string(i)), addrInfo);
+        dnsParCache.SetDnsCache(i, 0, hostName.append(std::to_string(i)), addrInfo);
         servers.emplace_back(hostName.append(std::to_string(i)));
     }
     
@@ -123,9 +123,9 @@ HWTEST_F(DNSParamCacheTest, CreateCacheForNetTest, TestSize.Level1)
     EXPECT_EQ(ret, -EEXIST);
     netId = 0;
     std::string hostName = "hostName";
-    dnsParCache.SetCacheDelayed(netId, hostName);
+    dnsParCache.SetCacheDelayed(netId, 0, hostName);
     netId = 2;
-    dnsParCache.SetCacheDelayed(netId, hostName);
+    dnsParCache.SetCacheDelayed(netId, 0, hostName);
 }
 
 HWTEST_F(DNSParamCacheTest, DestroyNetworkCacheTest, TestSize.Level1)
@@ -197,12 +197,12 @@ HWTEST_F(DNSParamCacheTest, GetResolverConfigTest05, TestSize.Level1)
     servers.resize(MAX_SERVER_NUM + 1);
     uint16_t netId = 0;
     std::string hostName = "hoseName";
-    dnsParCache.GetDnsCache(netId, hostName);
+    dnsParCache.GetDnsCache(netId, 0, hostName);
     AddrInfo addrInfo;
     addrInfo.aiFlags = 100;
     for (size_t i = 0; i < MAX_SERVER_NUM; i++) {
         dnsParCache.CreateCacheForNet(i);
-        dnsParCache.SetDnsCache(i, hostName.append(std::to_string(i)), addrInfo);
+        dnsParCache.SetDnsCache(i, 0, hostName.append(std::to_string(i)), addrInfo);
         servers.emplace_back(hostName.append(std::to_string(i)));
     }
 
@@ -223,7 +223,7 @@ HWTEST_F(DNSParamCacheTest, GetDnsCacheTest01, TestSize.Level1)
     DnsParamCache dnsParCache;
     uint16_t netId = 0;
     std::string hostName = "";
-    auto ret = dnsParCache.GetDnsCache(netId, hostName);
+    auto ret = dnsParCache.GetDnsCache(netId, 0, hostName);
     EXPECT_TRUE(netId == dnsParCache.defaultNetId_);
 }
 
@@ -463,16 +463,16 @@ HWTEST_F(DNSParamCacheTest, SetDnsCacheTest001, TestSize.Level1)
     dnsParCache.defaultNetId_ = 1;
     std::string hostName = "test";
     AddrInfo addrInfo;
-    dnsParCache.SetDnsCache(0, hostName, addrInfo);
+    dnsParCache.SetDnsCache(0, 0, hostName, addrInfo);
 
     dnsParCache.CreateCacheForNet(1);
-    dnsParCache.SetDnsCache(1, hostName, addrInfo);
+    dnsParCache.SetDnsCache(1, 0, hostName, addrInfo);
 
     AddrInfo addrInfoV6;
     addrInfoV6.aiFamily = 10;
-    dnsParCache.SetDnsCache(1, hostName, addrInfoV6);
+    dnsParCache.SetDnsCache(1, 0, hostName, addrInfoV6);
 
-    auto res = dnsParCache.GetDnsCache(1, hostName);
+    auto res = dnsParCache.GetDnsCache(1, 0, hostName);
     EXPECT_NE(res.size(), 0);
     dnsParCache.DestroyNetworkCache(1);
 }
@@ -482,14 +482,14 @@ HWTEST_F(DNSParamCacheTest, SetDnsCacheTest002, TestSize.Level1)
     DnsParamCache dnsParCache;
     dnsParCache.CreateCacheForNet(1);
     std::string hostName = "test";
-    dnsParCache.SetCacheDelayed(1, hostName);
+    dnsParCache.SetCacheDelayed(1, 0, hostName);
 
     AddrInfo addrInfo;
     addrInfo.aiFamily = 2;
-    dnsParCache.SetDnsCache(1, hostName, addrInfo);
-    dnsParCache.SetCacheDelayed(1, hostName);
+    dnsParCache.SetDnsCache(1, 0, hostName, addrInfo);
+    dnsParCache.SetCacheDelayed(1, 0, hostName);
 
-    auto res = dnsParCache.GetDnsCache(1, hostName);
+    auto res = dnsParCache.GetDnsCache(1, 0, hostName);
     EXPECT_NE(res.size(), 0);
     dnsParCache.DestroyNetworkCache(1);
 }
@@ -500,19 +500,70 @@ HWTEST_F(DNSParamCacheTest, SetDnsCacheTest003, TestSize.Level1)
     dnsParCache.defaultNetId_ = 1;
     std::string hostName = "test";
     AddrInfoWithTtl addrInfo;
-    dnsParCache.SetDnsCache(0, hostName, addrInfo);
+    dnsParCache.SetDnsCache(0, 0, hostName, addrInfo);
 
     dnsParCache.CreateCacheForNet(1);
     addrInfo.addrInfo.aiFamily = 2;
     addrInfo.ttl = 0;
-    dnsParCache.SetDnsCache(0, hostName, addrInfo);
+    dnsParCache.SetDnsCache(0, 0, hostName, addrInfo);
 
     addrInfo.ttl = 50;
-    dnsParCache.SetDnsCache(1, hostName, addrInfo);
+    dnsParCache.SetDnsCache(1, 0, hostName, addrInfo);
 
-    auto res = dnsParCache.GetDnsCache(1, hostName);
+    auto res = dnsParCache.GetDnsCache(1, 0, hostName);
     EXPECT_NE(res.size(), 0);
     dnsParCache.DestroyNetworkCache(1);
+}
+
+HWTEST_F(DNSParamCacheTest, SetDnsCacheUidIsolationTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetDnsCacheUidIsolationTest001 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    uint32_t uidA = 20000001;
+    uint32_t uidB = 20000002;
+    std::string hostName = "isolation.example.com";
+    dnsParCache.CreateCacheForNet(netId);
+
+    AddrInfo addrInfo;
+    addrInfo.aiFamily = AF_INET;
+    dnsParCache.SetDnsCache(netId, uidA, hostName, addrInfo);
+
+    // cache entries are keyed by uid, uidB cannot read entries written by uidA
+    auto resUidB = dnsParCache.GetDnsCache(netId, uidB, hostName);
+    EXPECT_EQ(resUidB.size(), 0);
+    // uidA still hits its own entry
+    auto resUidA = dnsParCache.GetDnsCache(netId, uidA, hostName);
+    EXPECT_NE(resUidA.size(), 0);
+
+    AddrInfoWithTtl addrInfoWithTtl;
+    addrInfoWithTtl.addrInfo.aiFamily = AF_INET;
+    addrInfoWithTtl.ttl = 50;
+    dnsParCache.SetDnsCache(netId, uidA, hostName, addrInfoWithTtl);
+    EXPECT_EQ(dnsParCache.GetDnsCache(netId, uidB, hostName).size(), 0);
+    EXPECT_NE(dnsParCache.GetDnsCache(netId, uidA, hostName).size(), 0);
+    dnsParCache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DNSParamCacheTest, SetCacheDelayedUidIsolationTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetCacheDelayedUidIsolationTest001 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    uint32_t uidA = 20000001;
+    uint32_t uidB = 20000002;
+    std::string hostName = "delayed.example.com";
+    dnsParCache.CreateCacheForNet(netId);
+
+    AddrInfo addrInfo;
+    addrInfo.aiFamily = AF_INET;
+    dnsParCache.SetDnsCache(netId, uidA, hostName, addrInfo);
+    dnsParCache.SetCacheDelayed(netId, uidA, hostName);
+
+    // delayed removal is tracked per uid, uidB has no entry for the same host
+    EXPECT_EQ(dnsParCache.GetDnsCache(netId, uidB, hostName).size(), 0);
+    EXPECT_NE(dnsParCache.GetDnsCache(netId, uidA, hostName).size(), 0);
+    dnsParCache.DestroyNetworkCache(netId);
 }
 
 HWTEST_F(DNSParamCacheTest, GetDefaultNetworkTest001, TestSize.Level1)
@@ -601,8 +652,8 @@ HWTEST_F(DNSParamCacheTest, SetNodataCacheTest001, TestSize.Level1)
     std::string hostName = "test.example.com";
     dnsParCache.CreateCacheForNet(netId);
     dnsParCache.EnableIpv4(netId);
-    dnsParCache.SetNodataCache(netId, hostName);
-    bool ret = dnsParCache.IsInNodataCache(netId, hostName);
+    dnsParCache.SetNodataCache(netId, 0, hostName);
+    bool ret = dnsParCache.IsInNodataCache(netId, 0, hostName);
     EXPECT_TRUE(ret);
     dnsParCache.DestroyNetworkCache(netId);
 }
@@ -613,8 +664,8 @@ HWTEST_F(DNSParamCacheTest, SetNodataCacheTest002, TestSize.Level1)
     DnsParamCache dnsParCache;
     uint16_t netId = 1;
     std::string hostName = "test.example.com";
-    dnsParCache.SetNodataCache(netId, hostName);
-    bool ret = dnsParCache.IsInNodataCache(netId, hostName);
+    dnsParCache.SetNodataCache(netId, 0, hostName);
+    bool ret = dnsParCache.IsInNodataCache(netId, 0, hostName);
     EXPECT_FALSE(ret);
 }
 
@@ -626,7 +677,7 @@ HWTEST_F(DNSParamCacheTest, IsInNodataCacheTest001, TestSize.Level1)
     std::string hostName = "test.example.com";
     dnsParCache.CreateCacheForNet(netId);
     dnsParCache.EnableIpv4(netId);
-    bool ret = dnsParCache.IsInNodataCache(netId, hostName);
+    bool ret = dnsParCache.IsInNodataCache(netId, 0, hostName);
     EXPECT_FALSE(ret);
     dnsParCache.DestroyNetworkCache(netId);
 }
@@ -637,7 +688,7 @@ HWTEST_F(DNSParamCacheTest, IsInNodataCacheTest002, TestSize.Level1)
     DnsParamCache dnsParCache;
     uint16_t netId = 1;
     std::string hostName = "test.example.com";
-    bool ret = dnsParCache.IsInNodataCache(netId, hostName);
+    bool ret = dnsParCache.IsInNodataCache(netId, 0, hostName);
     EXPECT_FALSE(ret);
 }
 
@@ -650,12 +701,12 @@ HWTEST_F(DNSParamCacheTest, SetNodataCacheTest003, TestSize.Level1)
     dnsParCache.CreateCacheForNet(netId);
     dnsParCache.EnableIpv4(netId);
     // Set cache first time
-    dnsParCache.SetNodataCache(netId, hostName);
-    bool ret = dnsParCache.IsInNodataCache(netId, hostName);
+    dnsParCache.SetNodataCache(netId, 0, hostName);
+    bool ret = dnsParCache.IsInNodataCache(netId, 0, hostName);
     EXPECT_TRUE(ret);
     // Update existing cache entry - covers DnsResolvConfig::SetNodataCache branch for updating existing entry
-    dnsParCache.SetNodataCache(netId, hostName);
-    ret = dnsParCache.IsInNodataCache(netId, hostName);
+    dnsParCache.SetNodataCache(netId, 0, hostName);
+    ret = dnsParCache.IsInNodataCache(netId, 0, hostName);
     EXPECT_TRUE(ret);
     dnsParCache.DestroyNetworkCache(netId);
 }
@@ -668,12 +719,12 @@ HWTEST_F(DNSParamCacheTest, IsInNodataCacheTest003, TestSize.Level1)
     std::string hostName = "test.example.com";
     dnsParCache.CreateCacheForNet(netId);
     dnsParCache.EnableIpv4(netId);
-    dnsParCache.SetNodataCache(netId, hostName);
-    bool ret = dnsParCache.IsInNodataCache(netId, hostName);
+    dnsParCache.SetNodataCache(netId, 0, hostName);
+    bool ret = dnsParCache.IsInNodataCache(netId, 0, hostName);
     EXPECT_TRUE(ret);
     // Clear the cache to simulate expiration - covers DnsResolvConfig::IsInNodataCache branch for cache not exist
     dnsParCache.FlushDnsCache(netId);
-    ret = dnsParCache.IsInNodataCache(netId, hostName);
+    ret = dnsParCache.IsInNodataCache(netId, 0, hostName);
     EXPECT_FALSE(ret);
     dnsParCache.DestroyNetworkCache(netId);
 }
@@ -687,8 +738,8 @@ HWTEST_F(DNSParamCacheTest, SetNodataCacheTest004, TestSize.Level1)
     // Not enable IPv4, SetNodataCache should return directly without setting cache
     // This covers DnsResolvConfig::SetNodataCache branch: if (!IsIpv4Enable()) return;
     std::string hostName = "test.example.com";
-    dnsParCache.SetNodataCache(netId, hostName);
-    bool ret = dnsParCache.IsInNodataCache(netId, hostName);
+    dnsParCache.SetNodataCache(netId, 0, hostName);
+    bool ret = dnsParCache.IsInNodataCache(netId, 0, hostName);
     EXPECT_FALSE(ret);
     dnsParCache.DestroyNetworkCache(netId);
 }
@@ -704,14 +755,32 @@ HWTEST_F(DNSParamCacheTest, SetNodataCacheTest005, TestSize.Level1)
     // This covers DnsResolvConfig::SetNodataCache branch: if (nodataCache_.size() >= MAX_NODATA_CACHE_SIZE)
     for (size_t i = 0; i < MAX_NODATA_CACHE_SIZE + 1; ++i) {
         std::string hostName = "host" + std::to_string(i) + ".example.com";
-        dnsParCache.SetNodataCache(netId, hostName);
+        dnsParCache.SetNodataCache(netId, 0, hostName);
     }
     // The first entry should be removed due to cache size limit
     std::string firstHostName = "host0.example.com";
-    EXPECT_FALSE(dnsParCache.IsInNodataCache(netId, firstHostName));
+    EXPECT_FALSE(dnsParCache.IsInNodataCache(netId, 0, firstHostName));
     // The last entry should still exist
     std::string lastHostName = "host100.example.com";
-    EXPECT_TRUE(dnsParCache.IsInNodataCache(netId, lastHostName));
+    EXPECT_TRUE(dnsParCache.IsInNodataCache(netId, 0, lastHostName));
+    dnsParCache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DNSParamCacheTest, NodataCacheUidIsolationTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NodataCacheUidIsolationTest001 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    uint32_t uidA = 20000001;
+    uint32_t uidB = 20000002;
+    std::string hostName = "nodata.example.com";
+    dnsParCache.CreateCacheForNet(netId);
+    dnsParCache.EnableIpv4(netId);
+
+    dnsParCache.SetNodataCache(netId, uidA, hostName);
+    // NODATA cache entries are keyed by uid
+    EXPECT_TRUE(dnsParCache.IsInNodataCache(netId, uidA, hostName));
+    EXPECT_FALSE(dnsParCache.IsInNodataCache(netId, uidB, hostName));
     dnsParCache.DestroyNetworkCache(netId);
 }
 

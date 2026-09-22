@@ -180,16 +180,6 @@ HWTEST_F(DnsManagerTest, FillAddrInfoTest001, TestSize.Level1)
     EXPECT_EQ(result, 0);
 }
 
-HWTEST_F(DnsManagerTest, SetDnsCacheTest001, TestSize.Level1)
-{
-    DnsManager dnsManager;
-    uint16_t netId = 101;
-    std::string testHost = "test";
-    AddrInfo info;
-    auto result = dnsManager.SetDnsCache(netId, testHost, info);
-    EXPECT_EQ(result, 0);
-}
-
 HWTEST_F(DnsManagerTest, SetIpv6UidBlackList001, TestSize.Level1)
 {
     DnsManager dnsManager;
