@@ -153,8 +153,8 @@ HWTEST_F(DnsResolvListenTest, DnsParamCacheInteractionTest005, TestSize.Level1)
     cache.CreateCacheForNet(netId);
     cache.EnableIpv4(netId);
     std::string hostName = "test.example.com";
-    cache.SetNodataCache(netId, hostName);
-    bool isInNodataCache = cache.IsInNodataCache(netId, hostName);
+    cache.SetNodataCache(netId, 0, hostName);
+    bool isInNodataCache = cache.IsInNodataCache(netId, 0, hostName);
     EXPECT_TRUE(isInNodataCache);
     cache.DestroyNetworkCache(netId);
 }
@@ -167,9 +167,9 @@ HWTEST_F(DnsResolvListenTest, DnsParamCacheInteractionTest006, TestSize.Level1)
     cache.CreateCacheForNet(netId);
     cache.EnableIpv4(netId);
     std::string hostName = "test.example.com";
-    cache.SetNodataCache(netId, hostName);
+    cache.SetNodataCache(netId, 0, hostName);
     cache.FlushDnsCache(netId);
-    bool isInNodataCache = cache.IsInNodataCache(netId, hostName);
+    bool isInNodataCache = cache.IsInNodataCache(netId, 0, hostName);
     EXPECT_FALSE(isInNodataCache);
     cache.DestroyNetworkCache(netId);
 }
@@ -214,8 +214,8 @@ HWTEST_F(DnsResolvListenTest, DnsParamCacheInteractionTest009, TestSize.Level1)
     AddrInfo addrInfo;
     addrInfo.aiFamily = AF_INET;
     addrInfo.aiAddr.sin.sin_addr.s_addr = inet_addr("192.168.1.1");
-    cache.SetDnsCache(netId, hostName, addrInfo);
-    auto result = cache.GetDnsCache(netId, hostName);
+    cache.SetDnsCache(netId, 0, hostName, addrInfo);
+    auto result = cache.GetDnsCache(netId, 0, hostName);
     EXPECT_EQ(result.size(), 1);
     EXPECT_EQ(result[0].aiFamily, addrInfo.aiFamily);
     cache.DestroyNetworkCache(netId);
@@ -231,10 +231,10 @@ HWTEST_F(DnsResolvListenTest, DnsParamCacheInteractionTest010, TestSize.Level1)
     AddrInfo addrInfo;
     addrInfo.aiFamily = AF_INET;
     addrInfo.aiAddr.sin.sin_addr.s_addr = inet_addr("192.168.1.1");
-    cache.SetDnsCache(netId, hostName, addrInfo);
+    cache.SetDnsCache(netId, 0, hostName, addrInfo);
     int32_t ret = cache.FlushDnsCache(netId);
     EXPECT_EQ(ret, 0);
-    auto result = cache.GetDnsCache(netId, hostName);
+    auto result = cache.GetDnsCache(netId, 0, hostName);
     EXPECT_EQ(result.size(), 0);
     cache.DestroyNetworkCache(netId);
 }

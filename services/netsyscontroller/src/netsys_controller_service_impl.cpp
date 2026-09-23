@@ -1087,12 +1087,6 @@ int32_t NetsysControllerServiceImpl::FlushDnsCache(uint16_t netId)
     return netsysClient_->FlushDnsCache(netId);
 }
 
-int32_t NetsysControllerServiceImpl::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo)
-{
-    NETMGR_LOG_I("SetDnsCache Enter. netId[%{public}u]", netId);
-    return netsysClient_->SetDnsCache(netId, hostName, addrInfo);
-}
-
 int32_t NetsysControllerServiceImpl::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
 {
     NETMGR_LOG_I("GetIpNeighTable");

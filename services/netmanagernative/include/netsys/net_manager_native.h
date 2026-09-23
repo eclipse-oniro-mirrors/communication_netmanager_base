@@ -172,7 +172,6 @@ public:
 #ifdef SUPPORT_SYSVPN
     int32_t UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add);
 #endif // SUPPORT_SYSVPN
-    int32_t SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo);
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
     int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add);
 #endif

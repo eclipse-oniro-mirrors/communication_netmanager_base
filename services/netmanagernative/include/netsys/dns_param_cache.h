@@ -50,13 +50,13 @@ public:
     void SetDefaultNetwork(int32_t netId);
 
     // for client
-    void SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo);
+    void SetDnsCache(uint16_t netId, uint32_t uid, const std::string &hostName, const AddrInfo &addrInfo);
 
-    void SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfoWithTtl &addrInfo);
+    void SetDnsCache(uint16_t netId, uint32_t uid, const std::string &hostName, const AddrInfoWithTtl &addrInfo);
 
-    void SetCacheDelayed(uint16_t netId, const std::string &hostName);
+    void SetCacheDelayed(uint16_t netId, uint32_t uid, const std::string &hostName);
 
-    std::vector<AddrInfo> GetDnsCache(uint16_t netId, const std::string &hostName);
+    std::vector<AddrInfo> GetDnsCache(uint16_t netId, uint32_t uid, const std::string &hostName);
 
     int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers, std::vector<std::string> &domains,
                               uint16_t &baseTimeoutMsec, uint8_t &retryCount);
@@ -116,8 +116,8 @@ public:
     int32_t FlushDnsCache(uint16_t netId);
 
     // NODATA cache methods
-    void SetNodataCache(uint16_t netId, const std::string &hostName);
-    bool IsInNodataCache(uint16_t netId, const std::string &hostName);
+    void SetNodataCache(uint16_t netId, uint32_t uid, const std::string &hostName);
+    bool IsInNodataCache(uint16_t netId, uint32_t uid, const std::string &hostName);
 
     // ipv6 uid black list methods
     void SetIpv6UidBlackList(std::vector<int32_t> &netIds, uint32_t uid);
@@ -125,6 +125,11 @@ public:
 
 private:
     DnsParamCache();
+
+    static std::string MakeCacheKey(uint32_t uid, const std::string &hostName)
+    {
+        return std::to_string(uid) + "|" + hostName;
+    }
 
     std::vector<NetManagerStandard::UidRange> vpnUidRanges_;
 

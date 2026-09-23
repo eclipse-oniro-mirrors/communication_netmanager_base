@@ -339,12 +339,6 @@ int32_t DnsManager::FlushDnsCache(uint16_t netId)
     return DnsParamCache::GetInstance().FlushDnsCache(netId);
 }
 
-int32_t DnsManager::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo)
-{
-    DnsParamCache::GetInstance().SetDnsCache(netId, hostName, addrInfo);
-    return 0;
-}
-
 int32_t DnsManager::SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid)
 {
     if (uid < 0) {

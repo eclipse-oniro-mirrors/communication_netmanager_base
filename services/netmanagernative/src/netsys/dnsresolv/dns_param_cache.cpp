@@ -327,7 +327,7 @@ int32_t DnsParamCache::GetDefaultNetwork() const
     return defaultNetId_;
 }
 
-void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo)
+void DnsParamCache::SetDnsCache(uint16_t netId, uint32_t uid, const std::string &hostName, const AddrInfo &addrInfo)
 {
     if (netId == 0) {
         netId = defaultNetId_;
@@ -347,10 +347,11 @@ void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, con
     }
     // LCOV_EXCL_STOP
     addrInfoWithTtl.ttl = DEFAULT_DELAYED_COUNT;
-    it->second.GetCache().Put(hostName, addrInfoWithTtl);
+    it->second.GetCache().Put(MakeCacheKey(uid, hostName), addrInfoWithTtl);
 }
 
-void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfoWithTtl &addrInfo)
+void DnsParamCache::SetDnsCache(uint16_t netId, uint32_t uid, const std::string &hostName,
+                                const AddrInfoWithTtl &addrInfo)
 {
     if (netId == 0) {
         netId = defaultNetId_;
@@ -374,10 +375,10 @@ void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, con
     }
     // LCOV_EXCL_STOP
     addrInfoWithTtl.ttl = ttl > DEFAULT_DELAYED_COUNT ? ttl : DEFAULT_DELAYED_COUNT;
-    it->second.GetCache().Put(hostName, addrInfoWithTtl);
+    it->second.GetCache().Put(MakeCacheKey(uid, hostName), addrInfoWithTtl);
 }
 
-std::vector<AddrInfo> DnsParamCache::GetDnsCache(uint16_t netId, const std::string &hostName)
+std::vector<AddrInfo> DnsParamCache::GetDnsCache(uint16_t netId, uint32_t uid, const std::string &hostName)
 {
     if (netId == 0) {
         netId = defaultNetId_;
@@ -390,7 +391,7 @@ std::vector<AddrInfo> DnsParamCache::GetDnsCache(uint16_t netId, const std::stri
         return {};
     }
 
-    auto infos = it->second.GetCache().Get(hostName);
+    auto infos = it->second.GetCache().Get(MakeCacheKey(uid, hostName));
     std::vector<AddrInfo> addrInfo;
     for (auto info : infos) {
         addrInfo.push_back(info.addrInfo);
@@ -398,7 +399,7 @@ std::vector<AddrInfo> DnsParamCache::GetDnsCache(uint16_t netId, const std::stri
     return addrInfo;
 }
 
-void DnsParamCache::SetCacheDelayed(uint16_t netId, const std::string &hostName)
+void DnsParamCache::SetCacheDelayed(uint16_t netId, uint32_t uid, const std::string &hostName)
 {
     if (netId == 0) {
         netId = defaultNetId_;
@@ -411,7 +412,7 @@ void DnsParamCache::SetCacheDelayed(uint16_t netId, const std::string &hostName)
         return;
     }
 
-    it->second.SetCacheDelayed(hostName);
+    it->second.SetCacheDelayed(MakeCacheKey(uid, hostName));
 }
 
 int32_t DnsParamCache::AddUidRange(uint32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges)
@@ -722,7 +723,7 @@ int32_t DnsParamCache::FlushDnsCache(uint16_t netId)
     return 0;
 }
 
-void DnsParamCache::SetNodataCache(uint16_t netId, const std::string &hostName)
+void DnsParamCache::SetNodataCache(uint16_t netId, uint32_t uid, const std::string &hostName)
 {
     if (netId == 0) {
         netId = defaultNetId_;
@@ -734,10 +735,10 @@ void DnsParamCache::SetNodataCache(uint16_t netId, const std::string &hostName)
         return;
     }
     NETNATIVE_LOGI("SetNodataCache netid:%{public}d", netId);
-    it->second.SetNodataCache(hostName);
+    it->second.SetNodataCache(MakeCacheKey(uid, hostName));
 }
 
-bool DnsParamCache::IsInNodataCache(uint16_t netId, const std::string &hostName)
+bool DnsParamCache::IsInNodataCache(uint16_t netId, uint32_t uid, const std::string &hostName)
 {
     if (netId == 0) {
         netId = defaultNetId_;
@@ -748,7 +749,7 @@ bool DnsParamCache::IsInNodataCache(uint16_t netId, const std::string &hostName)
         DNS_CONFIG_PRINT("IsInNodataCache failed: netid is not have netid:%{public}d,", netId);
         return false;
     }
-    bool enable = it->second.IsInNodataCache(hostName);
+    bool enable = it->second.IsInNodataCache(MakeCacheKey(uid, hostName));
     if (enable) {
         NETNATIVE_LOGI("IsInNodataCache netid:%{public}d", netId);
     }

@@ -47,11 +47,10 @@ public:
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     static void ProcSetCacheCommand(const std::string &name, uint16_t netId, uint32_t callingUid,
                                     AddrInfoWithTtl addrInfo[MAX_RESULTS], uint32_t resNum);
-    static void ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId, uint32_t callingUid);
 #endif
     static void ProcSetCacheCommand(const std::string &name, uint16_t netId, AddrInfoWithTtl addrInfo[MAX_RESULTS],
                                     uint32_t resNum);
-    static void ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId);
+    static void ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId, uint32_t callingUid);
     static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId);
     static void ProcJudgeIpv4Command(int clientSockFd, uint16_t netId);
     static void ProcGetDefaultNetworkCommand(int clientSockFd);
@@ -205,16 +204,6 @@ HWTEST_F(DnsResolvListenTest, ProcGetConfigCommandExt_ShouldHandleError_WhenGetR
     EXPECT_EQ(dnsResolvListenInternal.serverSockFd_, -1);
 }
 
-HWTEST_F(DnsResolvListenTest, ProcGetCacheCommand_ShouldReturnNull_WhenCacheIsEmpty_01, TestSize.Level0)
-{
-    std::string name = "testName";
-    int clientSockFd = 1;
-    uint16_t netId = 1;
-    dnsResolvListenInternal.ProcGetCacheCommand(name, clientSockFd, netId);
-    EXPECT_EQ(dnsResolvListenInternal.serverSockFd_, -1);
-}
-
-#ifdef FEATURE_NET_FIREWALL_ENABLE
 HWTEST_F(DnsResolvListenTest, ProcGetCacheCommand_ShouldReturnNull_WhenCacheIsEmpty_02, TestSize.Level0)
 {
     std::string name = "testName";
@@ -224,7 +213,6 @@ HWTEST_F(DnsResolvListenTest, ProcGetCacheCommand_ShouldReturnNull_WhenCacheIsEm
     dnsResolvListenInternal.ProcGetCacheCommand(name, clientSockFd, netId, callingUid);
     EXPECT_EQ(dnsResolvListenInternal.serverSockFd_, -1);
 }
-#endif
 
 HWTEST_F(DnsResolvListenTest, ProcJudgeIpv6Command_EnableIpv6, TestSize.Level0)
 {
