@@ -48,6 +48,7 @@ constexpr int32_t NET_TYPE_SCORE_INTERVAL = 10;
 constexpr int32_t NET_VALID_SCORE = 4 * NET_TYPE_SCORE_INTERVAL;
 constexpr int32_t DIFF_SCORE_BETWEEN_GOOD_POOR = 2 * NET_TYPE_SCORE_INTERVAL;
 enum class NetTypeScoreValue : int32_t {
+    MIN_SCORE = 1,
     USB_VALUE = 4 * NET_TYPE_SCORE_INTERVAL,
     BLUETOOTH_VALUE = 5 * NET_TYPE_SCORE_INTERVAL,
     CELLULAR_VALUE = 6 * NET_TYPE_SCORE_INTERVAL,
@@ -158,6 +159,7 @@ public:
     void SetNetExtAttribute(const std::string &netExtAttribute);
     bool IsNetQualityPoor() const;
     bool IsOnceSuppress() const;
+    bool IsNetQualityUnuse() const;
 
 private:
     void SetOnceSuppress();

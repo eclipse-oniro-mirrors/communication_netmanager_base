@@ -517,6 +517,8 @@ void NetSupplier::SetNetValid(NetDetectionStatus netState)
     } else if (netState == ACCEPT_UNVALIDATED) {
         netQuality_ = ACCEPT_UNVALIDATED;
         isAcceptUnvaliad = true;
+    } else if (netState == QUALITY_UNUSE_STATE) {
+        netQuality_ = QUALITY_UNUSE_STATE;
     } else {
         if (HasNetCap(NET_CAPABILITY_VALIDATED)) {
             NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_VALIDATED");
@@ -575,6 +577,10 @@ int32_t NetSupplier::GetRealScore()
     // 1.If the user chooses to use this network, return MAX_SCORE
     if (isAcceptUnvaliad) {
         return static_cast<int32_t>(NetManagerStandard::NetTypeScoreValue::MAX_SCORE);
+    }
+
+    if (IsNetQualityUnuse()) {
+        return static_cast<int32_t>(NetManagerStandard::NetTypeScoreValue::MIN_SCORE);
     }
 
     // 2. If network detection is not complete in the first time, subtract NET_VALID_SCORE.
@@ -660,6 +666,11 @@ bool NetSupplier::IsNetQualityPoor() const
 bool NetSupplier::IsNetAcceptUnavalidate()
 {
     return netQuality_ == ACCEPT_UNVALIDATED;
+}
+
+bool NetSupplier::IsNetQualityUnuse() const
+{
+    return netQuality_ == QUALITY_UNUSE_STATE;
 }
 
 void NetSupplier::SetDetectionDone()

@@ -158,6 +158,13 @@ HWTEST_F(NetSupplierTest, SetNetValidTest001, TestSize.Level1)
     EXPECT_FALSE(supplier->HasNetCap(NET_CAPABILITY_PORTAL));
 }
 
+HWTEST_F(NetSupplierTest, SetNetValidTest002, TestSize.Level1)
+{
+    NetDetectionStatus netState = QUALITY_UNUSE_STATE;
+    supplier->SetNetValid(netState);
+    EXPECT_EQ(supplier->netQuality_, QUALITY_UNUSE_STATE);
+}
+
 HWTEST_F(NetSupplierTest, SetDefaultTest001, TestSize.Level1)
 {
     std::shared_ptr<Network> network = nullptr;
@@ -209,6 +216,13 @@ HWTEST_F(NetSupplierTest, GetRealScoreTest001, TestSize.Level1)
     supplier->isAcceptUnvaliad = true;
     auto result = supplier->GetRealScore();
     EXPECT_EQ(result, 100);
+}
+
+HWTEST_F(NetSupplierTest, GetRealScoreTest002, TestSize.Level1)
+{
+    supplier->netQuality_ = QUALITY_UNUSE_STATE;
+    auto result = supplier->GetRealScore();
+    EXPECT_EQ(result, 1);
 }
 
 HWTEST_F(NetSupplierTest, ResumeNetworkInfoTest001, TestSize.Level1)
