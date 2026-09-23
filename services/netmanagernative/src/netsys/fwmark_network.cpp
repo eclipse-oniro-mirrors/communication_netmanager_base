@@ -44,6 +44,8 @@ static constexpr const int32_t ERROR_CODE_WRITE_FAILED = -3;
 static constexpr const int32_t ERROR_CODE_GETSOCKOPT_FAILED = -4;
 static constexpr const int32_t ERROR_CODE_SETSOCKOPT_FAILED = -5;
 static constexpr const int32_t ERROR_CODE_SET_MARK = -6;
+static constexpr const int32_t ERROR_CODE_FSTAT_FAILED = -7;
+static constexpr const int32_t ERROR_CODE_FD_OWNER_MISMATCH = -8;
 static constexpr const int32_t MAX_CONCURRENT_CONNECTION_REQUESTS = 10;
 union Cmsgu {
     cmsghdr cmh;
@@ -78,6 +80,13 @@ void CloseSocket(int32_t *socket, int32_t ret, int32_t errorCode)
         case ERROR_CODE_SET_MARK:
             NETNATIVE_LOGE("SetMark failed, clientSockfd:%{public}d, ret:%{public}d, errno: %{public}d", *socket, ret,
                            errno);
+            break;
+        case ERROR_CODE_FSTAT_FAILED:
+            NETNATIVE_LOGE("fstat failed, socketFd:%{public}d, ret:%{public}d, errno: %{public}d", *socket, ret, errno);
+            break;
+        case ERROR_CODE_FD_OWNER_MISMATCH:
+            NETNATIVE_LOGE("socketFd owner mismatch, socketFd:%{public}d, ret:%{public}d, errno: %{public}d", *socket,
+                           ret, errno);
             break;
         default:
             NETNATIVE_LOG_D("NO_ERROR_CODE CloseSocket socket:%{public}d, ret:%{public}d", *socket, ret);
@@ -132,8 +141,31 @@ int32_t SetMark(int32_t *socketFd, FwmarkCommand *command)
     return ret;
 }
 
+static int32_t CheckSocketOwnership(int32_t socketFd, uid_t peerUid)
+{
+    struct stat st = {};
+    if (fstat(socketFd, &st) < 0) {
+        NETNATIVE_LOGE("CheckSocketOwnership: fstat socketFd failed: %{public}d", errno);
+        return ERROR_CODE_FSTAT_FAILED;
+    }
+    if (st.st_uid != peerUid) {
+        NETNATIVE_LOGE("CheckSocketOwnership: fd ownership mismatch: peer uid:%{public}d, fd uid:%{public}d",
+                       static_cast<int32_t>(peerUid), static_cast<int32_t>(st.st_uid));
+        return ERROR_CODE_FD_OWNER_MISMATCH;
+    }
+    return NO_ERROR_CODE;
+}
+
 void RunForClientFd(int32_t clientSockfd)
 {
+    struct ucred cred = {};
+    socklen_t credLen = sizeof(cred);
+    if (getsockopt(clientSockfd, SOL_SOCKET, SO_PEERCRED, &cred, &credLen) < 0) {
+        NETNATIVE_LOGE("RunForClientFd: getsockopt SO_PEERCRED failed: %{public}d", errno);
+        CloseSocket(&clientSockfd, -1, ERROR_CODE_GETSOCKOPT_FAILED);
+        return;
+    }
+
     FwmarkCommand fwmCmd{};
     iovec iov = {.iov_base = &fwmCmd, .iov_len = sizeof(fwmCmd)};
     int32_t socketFd = -1;
@@ -164,6 +196,20 @@ void RunForClientFd(int32_t clientSockfd)
         CloseSocket(&clientSockfd, ret, ERROR_CODE_SOCKETFD_INVALID);
         return;
     }
+
+    int32_t ownerRet = CheckSocketOwnership(socketFd, cred.uid);
+    // LCOV_EXCL_START
+    if (ownerRet != NO_ERROR_CODE) {
+        int32_t errCode = ownerRet;
+        if (write(clientSockfd, &errCode, sizeof(errCode)) < 0) {
+            NETNATIVE_LOGE("RunForClientFd: write error code failed: %{public}d", errno);
+        }
+        CloseSocket(&socketFd, -1, ownerRet);
+        CloseSocket(&clientSockfd, -1, ownerRet);
+        return;
+    }
+    // LCOV_EXCL_STOP
+
     if ((ret = SetMark(&socketFd, &fwmCmd)) != 0) {
         CloseSocket(&clientSockfd, ret, ERROR_CODE_SET_MARK);
         return;
