@@ -789,6 +789,7 @@ private:
     bool isScreenOn_ = true;
     int32_t dualStackProbeTime_ = 0;
     std::function<bool(const NetRequest &)> controlFunc_;
+    ffrt::shared_mutex controlFuncMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

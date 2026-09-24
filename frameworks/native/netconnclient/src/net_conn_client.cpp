@@ -1517,12 +1517,12 @@ NetConnClient::NetConnCallbackManager::NetConnCallbackManager(std::shared_ptr<ff
 
 int32_t NetConnClient::NetConnCallbackManager::NetAvailable(sptr<NetHandle> &netHandle)
 {
-    std::unique_lock<std::mutex> handlerLock(netHandlerMutex_);
     if (netHandle == nullptr) {
-        netHandle_ = nullptr;
-    } else {
-        netHandle_ = sptr<NetHandle>::MakeSptr(netHandle->GetNetId());
+        NETMGR_LOG_E("netHandle is nullptr");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
+    std::unique_lock<std::mutex> handlerLock(netHandlerMutex_);
+    netHandle_ = sptr<NetHandle>::MakeSptr(netHandle->GetNetId());
     isNetStateUpdated_ = true;
     handlerLock.unlock();
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
@@ -1599,6 +1599,10 @@ int32_t NetConnClient::NetConnCallbackManager::NetConnectionPropertiesChange(spt
 
 int32_t NetConnClient::NetConnCallbackManager::NetLost(sptr<NetHandle> &netHandle)
 {
+    if (netHandle == nullptr) {
+        NETMGR_LOG_E("netHandle is nullptr");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
     std::unique_lock<std::mutex> handlerLock(netHandlerMutex_);
     if (netHandle_ != nullptr && netHandle->GetNetId() == netHandle_->GetNetId()) {
         netHandle_ = nullptr;
