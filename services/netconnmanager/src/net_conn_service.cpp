@@ -1385,8 +1385,13 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     uint32_t reqId = request->GetRequestId();
     NETMGR_LOG_I("New request [id:%{public}u]", reqId);
     NetRequest &netrequest = request->GetNetRequest();
-    if (controlFunc_) {
-        netrequest.isControlled = controlFunc_(netrequest);
+    std::function<bool(const NetRequest &)> controlFunc;
+    {
+        std::shared_lock<ffrt::shared_mutex> lock(controlFuncMutex_);
+        controlFunc = controlFunc_;
+    }
+    if (controlFunc) {
+        netrequest.isControlled = controlFunc(netrequest);
     }
     std::unique_lock<std::shared_mutex> lock(uidActivateMutex_);
     netUidActivates_[callingUid].push_back(request);
@@ -4726,7 +4731,8 @@ int32_t NetConnService::IsDeadFlowResetTargetBundle(const std::string &bundleNam
 
 bool NetConnService::RegisterNetRequestControlFunc(std::function<bool(const NetRequest &)> func)
 {
-    controlFunc_ = func;
+    std::unique_lock<ffrt::shared_mutex> lock(controlFuncMutex_);
+    controlFunc_ = std::move(func);
     return true;
 }
 
