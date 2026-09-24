@@ -93,7 +93,7 @@ const std::regex IP_MASK_PATTERN{
 
 const std::regex IPV6_PATTERN{"([\\da-fA-F]{0,4}:){2,7}([\\da-fA-F]{0,4})"};
 
-const std::regex IPV6_MASK_PATTERN{"([\\da-fA-F]{0,4}:){2,7}([\\da-fA-F]{0,4})/(1[0-2][0-8]|[1-9]\\d|[1-9])"};
+const std::regex IPV6_MASK_PATTERN{"([\\da-fA-F]{0,4}:){2,7}([\\da-fA-F]{0,4})/(12[0-8]|1[01]\\d|[1-9]\\d|\\d)"};
 
 std::vector<std::string> HOST_DOMAIN_TLDS{"com",  "net",     "org",    "edu",  "gov", "mil",  "cn",   "hk",  "tw",
                                           "jp",   "de",      "uk",     "fr",   "au",  "ca",   "br",   "ru",  "it",
