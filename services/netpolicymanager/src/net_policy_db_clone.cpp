@@ -148,6 +148,7 @@ int32_t NetPolicyDBClone::OnRestore(UniqueFd &fd, const std::string &backupInfo)
         policyData.setFromConfigFlag = 1;
         int32_t insertRet = netAccessPolicyRdb.InsertData(policyData);
         if (insertRet != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("insert error, bundleName: %{public}s, ret: %{public}d", bundleName.c_str(), insertRet);
             continue;
         }
         NetworkAccessPolicy policy;

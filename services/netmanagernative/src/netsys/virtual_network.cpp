@@ -41,15 +41,14 @@ int32_t VirtualNetwork::AddUids(const std::vector<UidRange> &uidVec)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     NETNATIVE_LOG_D("VirtualNetwork::AddUids update uidRanges_");
-    auto middle = uidRanges_.insert(uidRanges_.end(), uidVec.begin(), uidVec.end());
-    std::inplace_merge(uidRanges_.begin(), middle, uidRanges_.end()); // restart sort
-
     for (const auto &interface : interfaces_) {
         if (RouteManager::AddUsersToVirtualNetwork(netId_, interface, uidVec)) {
             NETNATIVE_LOGE("failed to add uids on interface %s of netId %u", interface.c_str(), netId_);
             return NETMANAGER_ERROR;
         }
     }
+    auto middle = uidRanges_.insert(uidRanges_.end(), uidVec.begin(), uidVec.end());
+    std::inplace_merge(uidRanges_.begin(), middle, uidRanges_.end()); // restart sort
     return NETMANAGER_SUCCESS;
 }
 
