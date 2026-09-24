@@ -61,7 +61,10 @@ int32_t PhysicalNetwork::AddInterface(std::string &interfaceName)
     }
 
     if (isDefault_) {
-        RouteManager::AddInterfaceToDefaultNetwork(interfaceName, permission_);
+        if (RouteManager::AddInterfaceToDefaultNetwork(interfaceName, permission_) != 0) {
+            NETNATIVE_LOGE("Failed to add interface %{public}s to default network", interfaceName.c_str());
+            return NETMANAGER_ERROR;
+        }
     }
     std::lock_guard<std::mutex> lock(mutex_);
     interfaces_.insert(interfaceName);
@@ -77,7 +80,10 @@ int32_t PhysicalNetwork::RemoveInterface(std::string &interfaceName)
     }
 
     if (isDefault_) {
-        RouteManager::RemoveInterfaceFromDefaultNetwork(interfaceName, permission_);
+        if (RouteManager::RemoveInterfaceFromDefaultNetwork(interfaceName, permission_) != 0) {
+            NETNATIVE_LOGE("Failed to remove interface %{public}s from default network", interfaceName.c_str());
+            return NETMANAGER_ERROR;
+        }
     }
 
     if (RouteManager::RemoveInterfaceFromPhysicalNetwork(netId_, interfaceName, permission_) != 0) {
