@@ -171,11 +171,6 @@ public:
         return 0;
     }
 
-    int32_t GetSpecificUidNet(int32_t uid, int32_t &netId) override
-    {
-        return 0;
-    }
-
     int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) override
     {
         return 0;

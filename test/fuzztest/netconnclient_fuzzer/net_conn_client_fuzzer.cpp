@@ -1000,38 +1000,6 @@ void OnSetAppNetFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_APP_NET), dataParcelNoNetId);
 }
 
-void GetSpecificUidNetFuzzTest(const uint8_t *data, size_t size)
-{
-    int32_t uid = NetConnGetData<int32_t>();
-    int32_t netId = NetConnGetData<int32_t>();
-
-    MessageParcel dataParcel;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
-
-    dataParcel.WriteInt32(uid);
-    dataParcel.WriteInt32(netId);
-
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_UID_NET), dataParcel);
-
-    MessageParcel dataParcelNoUid;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoUid)) {
-        return;
-    }
-
-    dataParcelNoUid.WriteInt32(netId);
-
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_UID_NET), dataParcelNoUid);
-
-    MessageParcel dataParcelNoNetId;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoNetId)) {
-        return;
-    }
-    dataParcel.WriteInt32(uid);
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_UID_NET), dataParcelNoNetId);
-}
-
 void AddNetworkRouteFuzzTest(const uint8_t *data, size_t size)
 {
     int32_t netId = NetConnGetData<int32_t>();
@@ -2072,7 +2040,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::RegisterNetDetectionCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::UnRegisterNetDetectionCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::GetSpecificNetFuzzTest(data, size);
-    OHOS::NetManagerStandard::GetSpecificUidNetFuzzTest(data, size);
     OHOS::NetManagerStandard::OnSetAppNetFuzzTest(data, size);
     OHOS::NetManagerStandard::AddNetworkRouteFuzzTest(data, size);
     OHOS::NetManagerStandard::RemoveNetworkRouteFuzzTest(data, size);

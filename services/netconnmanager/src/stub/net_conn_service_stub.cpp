@@ -203,8 +203,6 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
         &NetConnServiceStub::OnGetSpecificNet, {Permission::INTERNET}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ALL_NETS)] = {&NetConnServiceStub::OnGetAllNets,
                                                                                      {Permission::GET_NETWORK_INFO}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_UID_NET)] = {
-        &NetConnServiceStub::OnGetSpecificUidNet, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_CONNECTION_PROPERTIES)] = {
         &NetConnServiceStub::OnGetConnectionProperties, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_CAPABILITIES)] = {
@@ -1151,27 +1149,6 @@ int32_t NetConnServiceStub::OnGetAllNets(MessageParcel &data, MessageParcel &rep
             if (!reply.WriteInt32(*p)) {
                 return NETMANAGER_ERR_WRITE_REPLY_FAIL;
             }
-        }
-    }
-    return NETMANAGER_SUCCESS;
-}
-
-int32_t NetConnServiceStub::OnGetSpecificUidNet(MessageParcel &data, MessageParcel &reply)
-{
-    int32_t uid = 0;
-    if (!data.ReadInt32(uid)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-    NETMGR_LOG_D("stub execute GetSpecificUidNet");
-
-    int32_t netId = 0;
-    int32_t ret = GetSpecificUidNet(uid, netId);
-    if (!reply.WriteInt32(ret)) {
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-    if (ret == NETMANAGER_SUCCESS) {
-        if (!reply.WriteInt32(netId)) {
-            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
     }
     return NETMANAGER_SUCCESS;

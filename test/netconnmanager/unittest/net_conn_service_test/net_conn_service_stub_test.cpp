@@ -353,20 +353,6 @@ HWTEST_F(NetConnServiceStubTest, OnGetAllNetsTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnGetSpecificUidNetTest001
- * @tc.desc: Test NetConnServiceStub OnGetSpecificUidNet.
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnServiceStubTest, OnGetSpecificUidNetTest001, TestSize.Level1)
-{
-    MessageParcel data;
-    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
-    EXPECT_TRUE(data.WriteInt32(TEST_INT32_VALUE));
-    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_GET_SPECIFIC_UID_NET);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-/**
  * @tc.name: OnGetConnectionPropertiesTest001
  * @tc.desc: Test NetConnServiceStub OnGetConnectionProperties.
  * @tc.type: FUNC

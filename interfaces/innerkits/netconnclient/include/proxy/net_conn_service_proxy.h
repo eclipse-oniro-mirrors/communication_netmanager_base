@@ -63,7 +63,6 @@ public:
     int32_t GetSpecificNetByIdent(NetBearType bearerType, const std::string &ident,
                                   std::list<int32_t> &netIdList) override;
     int32_t GetAllNets(std::list<int32_t> &netIdList) override;
-    int32_t GetSpecificUidNet(int32_t uid, int32_t &netId) override;
     int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) override;
     int32_t GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap) override;
     int32_t SetAirplaneMode(bool state) override;

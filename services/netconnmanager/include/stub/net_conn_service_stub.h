@@ -81,7 +81,6 @@ private:
     int32_t OnGetSpecificNet(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetSpecificNetByIdent(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetAllNets(MessageParcel &data, MessageParcel &reply);
-    int32_t OnGetSpecificUidNet(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetConnectionProperties(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetNetCapabilities(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetAirplaneMode(MessageParcel &data, MessageParcel &reply);

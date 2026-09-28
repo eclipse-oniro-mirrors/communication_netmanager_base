@@ -789,10 +789,6 @@ HWTEST_F(NetConnManagerTest, NetConnManager021, TestSize.Level1)
     std::string ifaceName;
     result = proxy->GetIfaceNameByType(bearerType, ident, ifaceName);
     EXPECT_NE(result, NETMANAGER_SUCCESS);
-
-    int32_t uid = 1000;
-    result = proxy->GetSpecificUidNet(uid, netId);
-    EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnManagerTest, NetConnManager022, TestSize.Level1)

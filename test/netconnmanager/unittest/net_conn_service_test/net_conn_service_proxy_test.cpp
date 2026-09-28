@@ -607,18 +607,6 @@ HWTEST_F(NetConnServiceProxyTest, GetAllNetsTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSpecificUidNetTest001
- * @tc.desc: Test NetConnServiceProxy GetSpecificUidNet.
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnServiceProxyTest, GetSpecificUidNetTest001, TestSize.Level1)
-{
-    int32_t netId = 0;
-    int32_t ret = instance_->GetSpecificUidNet(TEST_UID, netId);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-/**
  * @tc.name: GetConnectionPropertiesTest001
  * @tc.desc: Test NetConnServiceProxy GetConnectionProperties.
  * @tc.type: FUNC

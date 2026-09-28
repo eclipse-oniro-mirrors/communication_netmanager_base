@@ -2178,24 +2178,6 @@ bool NetConnService::IsInRequestNetUids(int32_t uid)
     return internalDefaultUidRequest_.count(uid) > 0;
 }
 
-int32_t NetConnService::GetSpecificUidNet(int32_t uid, int32_t &netId)
-{
-    NETMGR_LOG_D("Enter GetSpecificUidNet, uid is [%{public}d].", uid);
-    netId = INVALID_NET_ID;
-    std::shared_lock<ffrt::shared_mutex> lock(netSuppliersMutex_);
-    for (auto iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
-        if ((iterSupplier->second != nullptr) && (uid == iterSupplier->second->GetSupplierUid()) &&
-            (iterSupplier->second->GetNetSupplierType() == BEARER_VPN)) {
-            netId = iterSupplier->second->GetNetId();
-            return NETMANAGER_SUCCESS;
-        }
-    }
-    lock.unlock();
-    GetDefaultNet(netId);
-    NETMGR_LOG_D("GetDefaultNet found the netId: [%{public}d]", netId);
-    return NETMANAGER_SUCCESS;
-}
-
 int32_t NetConnService::GetConnectionProperties(int32_t netId, NetLinkInfo &info)
 {
     if (netConnEventHandler_ == nullptr) {
