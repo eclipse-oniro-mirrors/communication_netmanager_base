@@ -1037,37 +1037,6 @@ int32_t NetConnServiceProxy::GetAllNets(std::list<int32_t> &netIdList)
     return ret;
 }
 
-int32_t NetConnServiceProxy::GetSpecificUidNet(int32_t uid, int32_t &netId)
-{
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
-    }
-
-    if (!data.WriteInt32(uid)) {
-        return NETMANAGER_ERR_WRITE_DATA_FAIL;
-    }
-
-    MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_UID_NET),
-                                      data, reply);
-    if (error != NETMANAGER_SUCCESS) {
-        return error;
-    }
-
-    int32_t ret = NETMANAGER_SUCCESS;
-    if (!reply.ReadInt32(ret)) {
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    if (ret == NETMANAGER_SUCCESS) {
-        if (!reply.ReadInt32(netId)) {
-            return NETMANAGER_ERR_READ_REPLY_FAIL;
-        }
-    }
-    return ret;
-}
-
 int32_t NetConnServiceProxy::GetConnectionProperties(int32_t netId, NetLinkInfo &info)
 {
     MessageParcel data;

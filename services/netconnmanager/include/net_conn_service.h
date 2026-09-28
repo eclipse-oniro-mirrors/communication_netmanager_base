@@ -289,7 +289,6 @@ public:
         std::list<int32_t> &netIdList) override;
     int32_t GetAllNetsAsync(std::list<int32_t> &netIdList);
     int32_t GetAllNets(std::list<int32_t> &netIdList) override;
-    int32_t GetSpecificUidNet(int32_t uid, int32_t &netId) override;
     int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) override;
     int32_t GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap) override;
     void HandleDetectionResult(uint32_t supplierId, NetDetectionStatus netState);
