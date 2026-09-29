@@ -502,7 +502,7 @@ HWTEST_F(NetMonitorTest, ExtractDomainFormUrlTest002, TestSize.Level1)
     
     url = "//test1";
     ret = CommonUtils::ExtractDomainFormUrl(url);
-    EXPECT_NE(ret, "test1");
+    EXPECT_EQ(ret, "test1");
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
