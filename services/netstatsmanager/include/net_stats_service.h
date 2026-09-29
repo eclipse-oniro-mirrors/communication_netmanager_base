@@ -79,6 +79,10 @@ public:
     int32_t GetAllSimStatsInfo(std::vector<NetStatsInfo> &infos) override;
     int32_t GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
                                      const NetStatsNetwork &networkIpc) override;
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+    int32_t GetIfaceTrafficStats(std::unordered_map<uint32_t, NetStatsInfo> &infos,
+                                const std::string &iface, uint64_t start, uint64_t end) override;
+#endif
     int32_t GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
                                         const NetStatsNetwork &networkIpc) override;
     int32_t GetMonthTrafficStatsByNetwork(uint32_t simId, uint64_t &monthDataIpc) override;
@@ -135,6 +139,11 @@ private:
     void FilterTrafficStatsByNetwork(std::vector<NetStatsInfo> &allInfo,
         std::unordered_map<uint32_t, NetStatsInfo> &infos,
         const std::string ident, uint32_t startTime, uint32_t endTime);
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+    void FilterTrafficStatsByIface(std::vector<NetStatsInfo> &allInfo,
+        std::unordered_map<uint32_t, NetStatsInfo> &infos,
+        const std::string &iface, uint64_t startTime, uint64_t endTime);
+#endif
     void MergeTrafficStatsByAccount(std::vector<NetStatsInfo> &infos);
     void FilterTrafficStatsByUidNetwork(std::vector<NetStatsInfo> &allInfo, std::vector<NetStatsInfoSequence> &infos,
         const uint32_t uid, const std::string ident, uint32_t startTime, uint32_t endTime);

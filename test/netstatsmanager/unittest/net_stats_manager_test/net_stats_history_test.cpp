@@ -134,6 +134,18 @@ HWTEST_F(NetStatsHistoryTest, HistoryTest009, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+HWTEST_F(NetStatsHistoryTest, GetUidHistoryByIfaceTest001, TestSize.Level1)
+{
+    auto history = std::make_unique<NetStatsHistory>();
+    std::vector<NetStatsInfo> infos;
+    int32_t ret = history->GetUidHistoryByIface(infos, "", 0, LONG_MAX);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+    ret = history->GetUidHistoryByIface(infos, "wlan0", 0, LONG_MAX);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+#endif
+
 HWTEST_F(NetStatsHistoryTest, HistoryTest010, TestSize.Level1)
 {
     auto history = std::make_unique<NetStatsHistory>();

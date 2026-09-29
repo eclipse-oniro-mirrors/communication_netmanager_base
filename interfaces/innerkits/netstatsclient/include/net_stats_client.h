@@ -178,6 +178,22 @@ public:
      */
     int32_t GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
                                      const sptr<NetStatsNetwork> &network);
+                                     
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+    /**
+     * Get traffic of all application with the specified Net Interface Name
+     *
+     * @param infos traffic of all application
+     * @param iface network cards name
+     * @param start start time
+     * @param end end time
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t GetIfaceTrafficStats(std::unordered_map<uint32_t, NetStatsInfo> &infos,
+        const std::string &iface, uint64_t start, uint64_t end);
+#endif
 
     /**
      * Get traffic of the specified application with the specified network cards

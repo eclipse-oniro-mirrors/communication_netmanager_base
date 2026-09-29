@@ -188,6 +188,65 @@ HWTEST_F(NetStatsDatabaseHelperTest, SelectDataHelperTest004, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+HWTEST_F(NetStatsDatabaseHelperTest, SelectUidDataByIfaceTest001, TestSize.Level1)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    ASSERT_EQ(helper->CreateTable(UID_TABLE, UID_TABLE_CREATE_PARAM), NETMANAGER_SUCCESS);
+
+    NetStatsInfo info;
+    info.uid_ = 400000001;
+    info.iface_ = "ut_iface_traffic_stats";
+    info.date_ = 15254501;
+    info.rxBytes_ = 10;
+    info.rxPackets_ = 1;
+    info.txBytes_ = 20;
+    info.txPackets_ = 2;
+    info.ident_ = "ut_ident";
+
+    ASSERT_EQ(helper->DeleteData(UID_TABLE, info.uid_), NETMANAGER_SUCCESS);
+    ASSERT_EQ(helper->InsertData(UID_TABLE, UID_TABLE_PARAM_LIST, info), NETMANAGER_SUCCESS);
+
+    std::vector<NetStatsInfo> infos;
+    int32_t ret = helper->SelectUidDataByIface(info.iface_, info.date_, info.date_, infos);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    ASSERT_EQ(infos.size(), 1);
+    EXPECT_EQ(infos.front().uid_, info.uid_);
+    EXPECT_EQ(infos.front().iface_, info.iface_);
+    EXPECT_EQ(infos.front().date_, info.date_);
+
+    EXPECT_EQ(helper->DeleteData(UID_TABLE, info.uid_), NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsDatabaseHelperTest, SelectUidDataByIfaceTest002, TestSize.Level1)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    ASSERT_EQ(helper->CreateTable(UID_TABLE, UID_TABLE_CREATE_PARAM), NETMANAGER_SUCCESS);
+ 
+    sqlite3 *originDb = helper->sqlite_;
+    helper->sqlite_ = nullptr;
+    helper->statement_.Finalize();
+ 
+    std::vector<NetStatsInfo> infos;
+    int32_t ret = helper->SelectUidDataByIface("ut_iface", 0, LONG_MAX, infos);
+    EXPECT_EQ(ret, STATS_ERR_READ_DATA_FAIL);
+    helper->sqlite_ = originDb;
+}
+ 
+HWTEST_F(NetStatsDatabaseHelperTest, SelectUidDataByIfaceTest003, TestSize.Level1)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    ASSERT_EQ(helper->CreateTable(UID_TABLE, UID_TABLE_CREATE_PARAM), NETMANAGER_SUCCESS);
+ 
+    std::vector<NetStatsInfo> infos;
+    helper->SelectUidDataByIface("ut_iface", 0, LONG_MAX, infos);
+    helper->statement_.stmtHandle_ = nullptr;
+ 
+    int32_t ret = helper->SelectUidDataByIface("ut_iface", 0, LONG_MAX, infos);
+    EXPECT_EQ(ret, STATS_ERR_READ_DATA_FAIL);
+}
+#endif
+
 HWTEST_F(NetStatsDatabaseHelperTest, QueryDataDataHelperTest001, TestSize.Level1)
 {
     NETMGR_LOG_I("QueryDataDataHelperTest001");

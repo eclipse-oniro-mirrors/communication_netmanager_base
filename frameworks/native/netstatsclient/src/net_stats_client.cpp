@@ -350,6 +350,29 @@ int32_t NetStatsClient::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, Ne
     return proxy->GetTrafficStatsByNetwork(infos, *network);
 }
 
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+int32_t NetStatsClient::GetIfaceTrafficStats(std::unordered_map<uint32_t, NetStatsInfo> &infos,
+                                             const std::string &iface, uint64_t start, uint64_t end)
+{
+    sptr<INetStatsService> proxy = GetProxy();
+    // LCOV_EXCL_START
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    if (iface.empty()) {
+        NETMGR_LOG_E("iface is empty");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (start > end) {
+        NETMGR_LOG_E("start is after end");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    return proxy->GetIfaceTrafficStats(infos, iface, start, end);
+}
+#endif
+
 int32_t NetStatsClient::GetMonthTrafficStatsByNetwork(uint32_t simId, uint64_t &monthData)
 {
     sptr<INetStatsService> proxy = GetProxy();

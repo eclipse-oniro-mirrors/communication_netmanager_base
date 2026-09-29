@@ -328,6 +328,35 @@ HWTEST_F(NetStatsClientTest, GetTrafficStatsByNetwork001, TestSize.Level1)
     EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+HWTEST_F(NetStatsClientTest, GetIfaceTrafficStats001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    sptr<IRemoteObject::DeathRecipient> deathRecipient =
+        new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
+    sptr<IRemoteObject> remote = nullptr;
+    deathRecipient->OnRemoteDied(remote);
+    std::unordered_map<uint32_t, NetStatsInfo> infos;
+    int32_t ret =
+        DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceTrafficStats(infos, MOCK_IFACE, 0, LONG_MAX);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsClientTest, GetIfaceTrafficStats002, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    sptr<IRemoteObject::DeathRecipient> deathRecipient =
+        new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
+    sptr<IRemoteObject> remote = nullptr;
+    deathRecipient->OnRemoteDied(remote);
+    std::unordered_map<uint32_t, NetStatsInfo> infos;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceTrafficStats(infos, "", 0, LONG_MAX);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+    ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceTrafficStats(infos, MOCK_IFACE, 1, 0);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+}
+#endif
+
 HWTEST_F(NetStatsClientTest, GetAllContainerStatsInfo001, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
