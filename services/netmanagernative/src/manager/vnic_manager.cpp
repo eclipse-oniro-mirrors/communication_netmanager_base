@@ -361,8 +361,10 @@ int32_t VnicManager::DestroyVnic()
     }
     if (ret == NETMANAGER_SUCCESS) {
         uidRanges.clear();
+    } else {
+        NETNATIVE_LOGE("DestroyVnic UpdateVnicUidRangesRule failed, ret: %{public}d", ret);
     }
-    return NETMANAGER_SUCCESS;
+    return ret;
 }
 
 } // namespace NetManagerStandard
