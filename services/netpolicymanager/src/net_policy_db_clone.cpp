@@ -153,7 +153,10 @@ int32_t NetPolicyDBClone::OnRestore(UniqueFd &fd, const std::string &backupInfo)
         NetworkAccessPolicy policy;
         policy.wifiAllow = policyData.wifiPolicy == NET_ACCESS_POLICY_ALLOW_VALUE ? true : false;
         policy.cellularAllow = policyData.cellularPolicy == NET_ACCESS_POLICY_ALLOW_VALUE ? true : false;
-        (void)netPolicyRule->SetNetworkAccessPolicy(policyData.uid, policy, true);
+        int32_t policyRet = netPolicyRule->SetNetworkAccessPolicy(policyData.uid, policy, true);
+        if (policyRet != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("SetNetworkAccessPolicy failed, uid: %{public}d, ret: %{public}d", policyData.uid, policyRet);
+        }
     }
 
     file.close();
@@ -200,7 +203,10 @@ int32_t NetPolicyDBClone::OnRestoreSingleApp(const std::string &bundleNameFromLi
     NetworkAccessPolicy policy;
     policy.wifiAllow = policyData.wifiPolicy == NET_ACCESS_POLICY_ALLOW_VALUE ? true : false;
     policy.cellularAllow = policyData.cellularPolicy == NET_ACCESS_POLICY_ALLOW_VALUE ? true : false;
-    (void)netPolicyRule->SetNetworkAccessPolicy(policyData.uid, policy, true);
+    int32_t policyRet = netPolicyRule->SetNetworkAccessPolicy(policyData.uid, policy, true);
+    if (policyRet != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("SetNetworkAccessPolicy failed, uid: %{public}d, ret: %{public}d", policyData.uid, policyRet);
+    }
     return NETMANAGER_SUCCESS;
 }
 
@@ -217,9 +223,10 @@ bool NetPolicyDBClone::FdClone(UniqueFd &fd)
         NETMGR_LOG_E("OnRestore open file fail.");
         return false;
     }
-    if (sendfile(destFd, fd.Get(), nullptr, statBuf.st_size) < 0) {
-        NETMGR_LOG_E("OnRestore fd sendfile(size: %{public}d) to destFd fail.",
-            static_cast<int>(statBuf.st_size));
+    ssize_t sentSize = sendfile(destFd, fd.Get(), nullptr, statBuf.st_size);
+    if (sentSize < 0 || sentSize != statBuf.st_size) {
+        NETMGR_LOG_E("OnRestore fd sendfile(size: %{public}d, sent: %{public}zd) to destFd fail.",
+            static_cast<int>(statBuf.st_size), sentSize);
         close(destFd);
         return false;
     }

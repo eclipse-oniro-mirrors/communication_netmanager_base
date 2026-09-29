@@ -262,19 +262,33 @@ int32_t NetStatsDataHandler::WriteStatsData(const std::vector<NetStatsInfo> &inf
         return NETMANAGER_ERR_INTERNAL;
     }
     if (tableName == UID_TABLE) {
-        std::for_each(infos.begin(), infos.end(),
-                      [&helper](const auto &info) { helper->InsertData(UID_TABLE, UID_TABLE_PARAM_LIST, info); });
+        for (const auto &info : infos) {
+            int32_t ret = helper->InsertData(UID_TABLE, UID_TABLE_PARAM_LIST, info);
+            if (ret != NETMANAGER_SUCCESS) {
+                NETMGR_LOG_E("InsertData failed, ret=%{public}d", ret);
+                return ret;
+            }
+        }
         return NETMANAGER_SUCCESS;
     }
     if (tableName == IFACE_TABLE) {
-        std::for_each(infos.begin(), infos.end(),
-                      [&helper](const auto &info) { helper->InsertData(IFACE_TABLE, IFACE_TABLE_PARAM_LIST, info); });
+        for (const auto &info : infos) {
+            int32_t ret = helper->InsertData(IFACE_TABLE, IFACE_TABLE_PARAM_LIST, info);
+            if (ret != NETMANAGER_SUCCESS) {
+                NETMGR_LOG_E("InsertData failed, ret=%{public}d", ret);
+                return ret;
+            }
+        }
         return NETMANAGER_SUCCESS;
     }
     if (tableName == UID_SIM_TABLE) {
-        std::for_each(infos.begin(), infos.end(), [&helper](const auto &info) {
-            helper->InsertData(UID_SIM_TABLE, UID_SIM_TABLE_PARAM_LIST, info);
-        });
+        for (const auto &info : infos) {
+            int32_t ret = helper->InsertData(UID_SIM_TABLE, UID_SIM_TABLE_PARAM_LIST, info);
+            if (ret != NETMANAGER_SUCCESS) {
+                NETMGR_LOG_E("InsertData failed, ret=%{public}d", ret);
+                return ret;
+            }
+        }
         return NETMANAGER_SUCCESS;
     }
     return NETMANAGER_ERR_PARAMETER_ERROR;

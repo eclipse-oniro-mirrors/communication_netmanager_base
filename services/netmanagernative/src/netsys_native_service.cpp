@@ -197,8 +197,7 @@ int32_t NetsysNativeService::SetResolverConfig(uint16_t netId, uint16_t baseTime
                                                const std::vector<std::string> &servers,
                                                const std::vector<std::string> &domains)
 {
-    netsysService_->DnsSetResolverConfig(netId, baseTimeoutMsec, retryCount, servers, domains);
-    return 0;
+    return netsysService_->DnsSetResolverConfig(netId, baseTimeoutMsec, retryCount, servers, domains);
 }
 
 int32_t NetsysNativeService::GetResolverConfig(uint16_t netid, std::vector<std::string> &servers,
@@ -206,16 +205,13 @@ int32_t NetsysNativeService::GetResolverConfig(uint16_t netid, std::vector<std::
                                                uint8_t &retryCount)
 {
     NETNATIVE_LOG_D("GetResolverConfig netid = %{public}d", netid);
-    netsysService_->DnsGetResolverConfig(netid, servers, domains, baseTimeoutMsec, retryCount);
-    return 0;
+    return netsysService_->DnsGetResolverConfig(netid, servers, domains, baseTimeoutMsec, retryCount);
 }
 
 int32_t NetsysNativeService::CreateNetworkCache(uint16_t netid, bool isVpnNet)
 {
     NETNATIVE_LOG_D("CreateNetworkCache Begin");
-    netsysService_->DnsCreateNetworkCache(netid, isVpnNet);
-
-    return 0;
+    return netsysService_->DnsCreateNetworkCache(netid, isVpnNet);
 }
 
 int32_t NetsysNativeService::DestroyNetworkCache(uint16_t netId, bool isVpnNet)
