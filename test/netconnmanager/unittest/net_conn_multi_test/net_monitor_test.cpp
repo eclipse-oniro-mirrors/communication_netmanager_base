@@ -484,5 +484,25 @@ HWTEST_F(NetMonitorTest, ExtractDomainFormUrlTest001, TestSize.Level1)
     ret = CommonUtils::ExtractDomainFormUrl(url);
     EXPECT_NE(ret, url);
 }
+
+HWTEST_F(NetMonitorTest, ExtractDomainFormUrlTest002, TestSize.Level1)
+{
+    std::string url = "//";
+    std::string ret = "";
+    ret = CommonUtils::ExtractDomainFormUrl(url);
+    EXPECT_EQ(ret.size(), 0);
+    
+    url = "//[::1]";
+    ret = CommonUtils::ExtractDomainFormUrl(url);
+    EXPECT_NE(ret.size(), 0);
+    
+    url = "//test:";
+    ret = CommonUtils::ExtractDomainFormUrl(url);
+    EXPECT_EQ(ret, "test");
+    
+    url = "//test1";
+    ret = CommonUtils::ExtractDomainFormUrl(url);
+    EXPECT_EQ(ret, "test1");
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

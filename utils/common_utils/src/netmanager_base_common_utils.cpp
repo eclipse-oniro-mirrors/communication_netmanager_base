@@ -1096,6 +1096,13 @@ std::string ExtractDomainFormUrl(const std::string &url)
     } else {
         domain = url.substr(domainStartPos);
     }
+
+    if (!domain.empty() && domain.front() != '[') {
+        size_t colonPos = domain.find(':');
+        if (colonPos != std::string::npos) {
+            domain.resize(colonPos);
+        }
+    }
     return domain;
 }
 
