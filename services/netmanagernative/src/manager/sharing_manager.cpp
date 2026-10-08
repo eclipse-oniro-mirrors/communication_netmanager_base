@@ -329,7 +329,6 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
                    toIface.c_str());
 
     IpfwdExecSaveBak();
-    int32_t result = 0;
 
     std::string fwdCmdSet = "";
     CombineRestoreRules(FILTER_TABLE, fwdCmdSet);
@@ -387,7 +386,7 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
 
     if (RouteManager::EnableSharing(fromIface, toIface)) {
         Rollback();
-        return result;
+        return -1;
     }
     if (fromIface.find(WLAN_IFACE_NAME) != std::string::npos ||
         fromIface.find(P2P_IFACE_NAME) != std::string::npos) {

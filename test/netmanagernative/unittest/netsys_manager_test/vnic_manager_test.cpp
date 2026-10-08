@@ -136,6 +136,26 @@ HWTEST_F(VnicManagerTest, CreateWithDestroyVnic003, TestSize.Level1)
     EXPECT_EQ(result, NETMANAGER_ERROR);
 }
 
+HWTEST_F(VnicManagerTest, CreateVnicUidInvalid001, TestSize.Level1)
+{
+    VnicManager vnicManager;
+    uint16_t mtu = 1500;
+    const std::string tunAddr = "192.168.1.100";
+    int32_t prefix = 24;
+    std::set<int32_t> uids = {0};
+    auto result = vnicManager.CreateVnic(mtu, tunAddr, prefix, uids);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+
+    uids = {5527, -1};
+    result = vnicManager.CreateVnic(mtu, tunAddr, prefix, uids);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+
+    uids = {-100};
+    result = vnicManager.CreateVnic(mtu, tunAddr, prefix, uids);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+    EXPECT_TRUE(vnicManager.uidRanges.empty());
+}
+
 HWTEST_F(VnicManagerTest, DestroyVnicInterface001, TestSize.Level1)
 {
     VnicManager vnicmanager;

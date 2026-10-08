@@ -256,7 +256,7 @@ int32_t MptcpManager::ExecuteMptcpCommand(const std::string &command, std::strin
 
     int32_t ret = NetManagerStandard::CommonUtils::ForkExec(command, &result);
     if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
-        NETNATIVE_LOGE("ExecuteMptcpCommand: execute failed, ret=%{public}d, result=%{public}s",
+        NETNATIVE_LOGE("ExecuteMptcpCommand: execute failed, ret=%{public}d, result=%{private}s",
             ret, result.c_str());
         return NetManagerStandard::NETMANAGER_ERR_INTERNAL;
     }

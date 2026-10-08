@@ -42,6 +42,17 @@ Nat464Service::Nat464Service(int32_t netId, const std::string &v6Iface)
 
 void Nat464Service::MaybeUpdateV6Iface(const std::string &v6Iface)
 {
+    std::weak_ptr<Nat464Service> wp = shared_from_this();
+    auto handle = serviceUpdateQueue_.submit_h([wp, v6Iface]() {
+        if (auto sharedSelf = wp.lock()) {
+            sharedSelf->UpdateV6Iface(v6Iface);
+        }
+    }, ffrt::task_attr().name("UpdateNat464V6Iface"));
+    serviceUpdateQueue_.wait(handle);
+}
+
+void Nat464Service::UpdateV6Iface(const std::string &v6Iface)
+{
     if (serviceState_ == NAT464_SERVICE_STATE_IDLE) {
         v6Iface_ = v6Iface;
         v4TunIface_ = std::string(CLAT_PREFIX) + v6Iface;

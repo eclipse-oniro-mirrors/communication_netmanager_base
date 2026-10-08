@@ -221,8 +221,8 @@ private:
 private:
     std::map<uint32_t, UidPolicyRule> uidPolicyRules_;
     bool backgroundAllow_ = true;
-    bool deviceIdleMode_ = false;
-    bool powerSaveMode_ = false;
+    std::atomic<bool> deviceIdleMode_{false};
+    std::atomic<bool> powerSaveMode_{false};
     std::shared_mutex deviceIdleAllowedListMutex_;
     std::set<uint32_t> deviceIdleAllowedList_;
     std::shared_mutex powerSaveAllowedListMutex_;

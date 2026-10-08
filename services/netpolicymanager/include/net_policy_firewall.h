@@ -16,6 +16,9 @@
 #ifndef NET_POLICY_FIREWALL_H
 #define NET_POLICY_FIREWALL_H
 
+#include <atomic>
+#include <memory>
+#include <mutex>
 #include <shared_mutex>
 #include "firewall_rule.h"
 #include "net_policy_base.h"
@@ -121,14 +124,15 @@ private:
     std::shared_ptr<FirewallRule> deviceIdleFirewallRule_;
     std::shared_ptr<FirewallRule> powerSaveFirewallRule_;
     std::shared_ptr<FirewallRule> idleDenyFirewallRule_;
-    bool deviceIdleMode_ = false;
-    bool powerSaveMode_ = false;
-    bool idleDenyMode_ = false;
+    std::atomic<bool> deviceIdleMode_{false};
+    std::atomic<bool> powerSaveMode_{false};
+    std::atomic<bool> idleDenyMode_{false};
     std::set<uint32_t> deviceIdleAllowedList_;
     std::set<uint32_t> deviceIdleDeniedList_;
     std::set<uint32_t> powerSaveAllowedList_;
     std::set<uint32_t> powerSaveDeniedList_;
     std::shared_mutex listMutex_;
+    std::mutex firewallMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -86,6 +86,16 @@ constexpr const char *CALIBRATION_TABLE = "T_calibration_traffic";
 constexpr const char *CHANGE_TABLE = "T_change";
 constexpr const char *TRAFFIC_PLAN_TABLE = "T_traffic_plan";
 
+constexpr int32_t TRAFFIC_PLAN_COL_ICCID = 0;
+constexpr int32_t TRAFFIC_PLAN_COL_SIM_ID = 1;
+constexpr int32_t TRAFFIC_PLAN_COL_DISPLAY_SWITCH = 2;
+constexpr int32_t TRAFFIC_PLAN_COL_UNLIMIT_SWITCH = 3;
+constexpr int32_t TRAFFIC_PLAN_COL_TRAFFIC_LIMIT = 4;
+constexpr int32_t TRAFFIC_PLAN_COL_START_DATE = 5;
+constexpr int32_t TRAFFIC_PLAN_COL_OVER_LIMIT_BEHAVIOR = 6;
+constexpr int32_t TRAFFIC_PLAN_COL_MONTHLY_PERCENTAGE = 7;
+constexpr int32_t TRAFFIC_PLAN_COL_DAILY_PERCENTAGE = 8;
+
 constexpr int32_t UID_PARAM_NUM = 10;
 constexpr int32_t IFACE_PARAM_NUM = 7;
 

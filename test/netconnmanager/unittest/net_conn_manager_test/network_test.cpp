@@ -1190,7 +1190,7 @@ HWTEST_F(NetworkTest, IsNat464PreferedTest001, TestSize.Level1)
     EXPECT_NE(network, nullptr);
     network->netLinkInfo_.ifaceName_ = "test";
     EXPECT_TRUE(network->netLinkInfo_.netAddrList_.empty());
-    auto ret = network->IsNat464Prefered();
+    auto ret = network->IsNat464Prefered(network->netLinkInfo_);
     EXPECT_FALSE(ret);
 }
 
@@ -1202,7 +1202,7 @@ HWTEST_F(NetworkTest, IsNat464PreferedTest002, TestSize.Level1)
     network->netLinkInfo_.ifaceName_ = "test";
     network->state_ = NET_CONN_STATE_CONNECTED;
     EXPECT_TRUE(network->netLinkInfo_.netAddrList_.empty());
-    auto ret = network->IsNat464Prefered();
+    auto ret = network->IsNat464Prefered(network->netLinkInfo_);
     EXPECT_TRUE(ret);
 }
 
@@ -2644,6 +2644,91 @@ HWTEST_F(NetworkTest, InvokeRefreshCallbackSuccess, TestSize.Level1)
     httpProxy.SetPort(8080);
     InvokeRefreshCallback(callback, NETMANAGER_SUCCESS, httpProxy, nullptr);
     EXPECT_TRUE(receivedProxy.load());
+}
+
+HWTEST_F(NetworkTest, IsNat464PreferedNotPreferedBearer, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_BLUETOOTH, nullptr);
+    network->state_ = NET_CONN_STATE_CONNECTED;
+    INetAddr addr;
+    addr.type_ = INetAddr::IpType::IPV6;
+    addr.address_ = "fe80::1";
+    network->netLinkInfo_.netAddrList_.push_back(addr);
+    network->netLinkInfo_.ifaceName_ = "bt0";
+
+    EXPECT_FALSE(network->IsNat464Prefered(network->netLinkInfo_));
+
+    network->UpdateNat464Service();
+    EXPECT_EQ(network->nat464Service_, nullptr);
+}
+
+HWTEST_F(NetworkTest, IsNat464PreferedHasV4Addr, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_WIFI, nullptr);
+    network->state_ = NET_CONN_STATE_CONNECTED;
+    INetAddr addrV4;
+    addrV4.type_ = INetAddr::IpType::IPV4;
+    addrV4.address_ = "192.168.1.1";
+    network->netLinkInfo_.netAddrList_.push_back(addrV4);
+    network->netLinkInfo_.ifaceName_ = "wlan0";
+
+    EXPECT_FALSE(network->IsNat464Prefered(network->netLinkInfo_));
+
+    network->UpdateNat464Service();
+    EXPECT_EQ(network->nat464Service_, nullptr);
+}
+
+HWTEST_F(NetworkTest, IsNat464PreferedIfaceEmptyOrDisconnected, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_WIFI, nullptr);
+    network->state_ = NET_CONN_STATE_CONNECTED;
+    INetAddr addrV6;
+    addrV6.type_ = INetAddr::IpType::IPV6;
+    addrV6.address_ = "fe80::1";
+    network->netLinkInfo_.netAddrList_.push_back(addrV6);
+    network->netLinkInfo_.ifaceName_ = "";
+
+    EXPECT_FALSE(network->IsNat464Prefered(network->netLinkInfo_));
+    network->UpdateNat464Service();
+    EXPECT_EQ(network->nat464Service_, nullptr);
+
+    network->netLinkInfo_.ifaceName_ = "wlan0";
+    network->state_ = NET_CONN_STATE_IDLE;
+    EXPECT_FALSE(network->IsNat464Prefered(network->netLinkInfo_));
+    network->UpdateNat464Service();
+    EXPECT_EQ(network->nat464Service_, nullptr);
+}
+
+HWTEST_F(NetworkTest, StopNat464ServiceTest001, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_WIFI, nullptr);
+    network->StopNat464Service();
+    EXPECT_EQ(network->nat464Service_, nullptr);
+
+    network->nat464Service_ = std::make_shared<Nat464Service>(netId, "wlan0");
+    network->StopNat464Service();
+    EXPECT_NE(network->nat464Service_, nullptr);
+}
+
+HWTEST_F(NetworkTest, Nat464ServiceMaybeUpdateV6IfaceTest001, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto nat464Service = std::make_shared<Nat464Service>(netId, "wlan0");
+    EXPECT_EQ(nat464Service->v6Iface_, "wlan0");
+    EXPECT_EQ(nat464Service->v4TunIface_, "tunv4-wlan0");
+
+    nat464Service->MaybeUpdateV6Iface("eth1");
+    EXPECT_EQ(nat464Service->v6Iface_, "eth1");
+    EXPECT_EQ(nat464Service->v4TunIface_, "tunv4-eth1");
+
+    nat464Service->serviceState_ = NAT464_SERVICE_STATE_RUNNING;
+    nat464Service->MaybeUpdateV6Iface("eth2");
+    EXPECT_EQ(nat464Service->v6Iface_, "eth1");
+    EXPECT_EQ(nat464Service->v4TunIface_, "tunv4-eth1");
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
