@@ -536,7 +536,7 @@ int32_t NetStatsRDB::QueryAllTrafficPlanInfo(std::vector<TrafficPlanInfo> &infoL
             queryResultSet->GetInt(TRAFFIC_PLAN_COL_START_DATE, info.startDate) != NativeRdb::E_OK ||
             queryResultSet->GetInt(TRAFFIC_PLAN_COL_OVER_LIMIT_BEHAVIOR, info.overLimitBehavior) != NativeRdb::E_OK ||
             queryResultSet->GetInt(TRAFFIC_PLAN_COL_MONTHLY_PERCENTAGE, info.monthlyLimitPercentage) !=
-                NativeRdb::E_OK ||
+            NativeRdb::E_OK ||
             queryResultSet->GetInt(TRAFFIC_PLAN_COL_DAILY_PERCENTAGE, info.dailyLimitPercentage) != NativeRdb::E_OK) {
             NETMGR_LOG_E("Failed to get traffic plan info from result set");
             queryResultSet->Close();
