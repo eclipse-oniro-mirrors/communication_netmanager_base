@@ -28,6 +28,30 @@ namespace NetManagerStandard {
 namespace {
 constexpr const char *ADDR_SEPARATOR = ",";
 constexpr int32_t DOMAIN_IP_ADDR_LEN_MAX = 128;
+
+// LCOV_EXCL_START
+bool HasIpInList(const std::string &ipList, const std::string &ip)
+{
+    if (ipList.empty() || ip.empty()) {
+        return false;
+    }
+    size_t pos = 0;
+    while (pos <= ipList.size()) {
+        size_t end = ipList.find(ADDR_SEPARATOR, pos);
+        if (end == std::string::npos) {
+            end = ipList.size();
+        }
+        if (ipList.compare(pos, end - pos, ip) == 0) {
+            return true;
+        }
+        if (end == ipList.size()) {
+            break;
+        }
+        pos = end + 1;
+    }
+    return false;
+}
+// LCOV_EXCL_STOP
 }
 
 NetDnsResolve::NetDnsResolve(uint32_t netId,
@@ -93,7 +117,7 @@ void NetDnsResolve::GetAddrInfo()
             if (!inet_ntop(AF_INET, &addr->sin_addr, ip, sizeof(ip))) {
                 continue;
             }
-            if (resolveResultIpv4_.find(ip) != std::string::npos) {
+            if (HasIpInList(resolveResultIpv4_, ip)) {
                 continue;
             }
             resolveResultIpv4_ = resolveResultIpv4_.empty() ?
@@ -103,7 +127,7 @@ void NetDnsResolve::GetAddrInfo()
             if (!inet_ntop(AF_INET6, &addr->sin6_addr, ip, sizeof(ip))) {
                 continue;
             }
-            if (resolveResultIpv6_.find(ip) != std::string::npos) {
+            if (HasIpInList(resolveResultIpv6_, ip)) {
                 continue;
             }
             resolveResultIpv6_ = resolveResultIpv6_.empty() ?

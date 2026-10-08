@@ -301,44 +301,172 @@ int32_t NetStatsTrafficPlanService::OnRestore(MessageParcel& data, MessageParcel
 
 void NetStatsTrafficPlanService::ResetNotifyState(int32_t simId)
 {
-    if (!IsSimIdExistInMap(simId)) {
-        NETMGR_LOG_E("UpdateTrafficLimitDate err. Not find simId:%{public}d", simId);
-        return;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        auto it = trafficPlanInfoMap_.find(simId);
+        if (it == trafficPlanInfoMap_.end() || it->second == nullptr) {
+            NETMGR_LOG_E("ResetNotifyState err. Not find simId:%{public}d", simId);
+            return;
+        }
+        it->second->isCanNotifyMonthlyLimit = true;
+        it->second->isCanNotifyDailyMark = true;
+        it->second->isCanNotifyMonthlyMark = true;
     }
-
-    NETMGR_LOG_I("ResetNotifyState start");
-
-    auto info = GetTrafficPlanInfoBySimId(simId);
-    if (info == nullptr) {
-        NETMGR_LOG_E("GetTrafficPlanInfoBySimId fail");
-        return;
-    }
-    info->isCanNotifyMonthlyLimit = true;
-    info->isCanNotifyDailyMark = true;
-    info->isCanNotifyMonthlyMark = true;
 
     UpdateTrafficLimitDate(simId);
+}
+
+bool NetStatsTrafficPlanService::ConsumeMonAlertState(int32_t simId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = trafficPlanInfoMap_.find(simId);
+    if (it == trafficPlanInfoMap_.end() || it->second == nullptr) {
+        return false;
+    }
+    if (it->second->isCanNotifyMonthlyLimit) {
+        NETMGR_LOG_I("isCanNotify true : states changed caused.");
+        it->second->isCanNotifyMonthlyLimit = false;
+        it->second->isCanNotifyMonthlyMark = false;
+        it->second->isCanNotifyDailyMark = false;
+        return true;
+    }
+    int64_t currentTime = NetStatsUtils::GetNowTimestamp();
+    int32_t currentStartTime = NetStatsUtils::GetStartTimestamp(it->second->startDate);
+    NETMGR_LOG_I("Enter currentTime:%{public}" PRId64 ", currentDayStartTime:%{public}d, lastMonAlertTime: %{public}d",
+        currentTime, currentStartTime, it->second->lastMonAlertTime);
+    return it->second->lastMonAlertTime < currentStartTime;
+}
+
+bool NetStatsTrafficPlanService::ConsumeMonNotifyState(int32_t simId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = trafficPlanInfoMap_.find(simId);
+    if (it == trafficPlanInfoMap_.end() || it->second == nullptr) {
+        return false;
+    }
+    if (it->second->isCanNotifyMonthlyMark) {
+        it->second->isCanNotifyMonthlyMark = false;
+        return true;
+    }
+    int64_t currentTime = NetStatsUtils::GetNowTimestamp();
+    int32_t currentStartTime = NetStatsUtils::GetStartTimestamp(it->second->startDate);
+    NETMGR_LOG_I("Enter currentTime:%{public}" PRId64 ", currentDayStartTime:%{public}d, lastMonNotifyTime: %{public}d",
+        currentTime, currentStartTime, it->second->lastMonNotifyTime);
+    return it->second->lastMonNotifyTime < currentStartTime;
+}
+
+bool NetStatsTrafficPlanService::ConsumeDayNotifyState(int32_t simId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = trafficPlanInfoMap_.find(simId);
+    if (it == trafficPlanInfoMap_.end() || it->second == nullptr) {
+        return false;
+    }
+    if (it->second->isCanNotifyDailyMark) {
+        it->second->isCanNotifyDailyMark = false;
+        return true;
+    }
+    int32_t currentDayStartTime = NetStatsUtils::GetTodayStartTimestamp();
+    NETMGR_LOG_I("Enter currentDayStartTime:%{public}d, lastDayNotifyTime: %{public}d",
+        currentDayStartTime, it->second->lastDayNotifyTime);
+    return it->second->lastDayNotifyTime < currentDayStartTime;
+}
+
+void NetStatsTrafficPlanService::UpdateMonAlertTime(int32_t simId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = trafficPlanInfoMap_.find(simId);
+    if (it == trafficPlanInfoMap_.end() || it->second == nullptr) {
+        return;
+    }
+    it->second->lastMonAlertTime = static_cast<int32_t>(NetStatsUtils::GetNowTimestamp());
+    NETMGR_LOG_I("update MonAlert time:%{public}d", it->second->lastMonAlertTime);
+}
+
+void NetStatsTrafficPlanService::UpdateMonNotifyTime(int32_t simId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = trafficPlanInfoMap_.find(simId);
+    if (it == trafficPlanInfoMap_.end() || it->second == nullptr) {
+        return;
+    }
+    it->second->lastMonNotifyTime = static_cast<int32_t>(NetStatsUtils::GetNowTimestamp());
+    NETMGR_LOG_I("update MonNotification time:%{public}d", it->second->lastMonNotifyTime);
+}
+
+void NetStatsTrafficPlanService::UpdateDayNotifyTime(int32_t simId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = trafficPlanInfoMap_.find(simId);
+    if (it == trafficPlanInfoMap_.end() || it->second == nullptr) {
+        return;
+    }
+    it->second->lastDayNotifyTime = static_cast<int32_t>(NetStatsUtils::GetNowTimestamp());
+    NETMGR_LOG_I("update DayNotification time:%{public}d", it->second->lastDayNotifyTime);
+}
+
+bool NetStatsTrafficPlanService::IsOverLimitDisconnect(int32_t simId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = trafficPlanInfoMap_.find(simId);
+    if (it == trafficPlanInfoMap_.end() || it->second == nullptr) {
+        return false;
+    }
+    return it->second->overLimitBehavior != 0;
+}
+
+bool NetStatsTrafficPlanService::IsUnlimitTrafficSwitchOn(int32_t simId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = trafficPlanInfoMap_.find(simId);
+    if (it == trafficPlanInfoMap_.end() || it->second == nullptr) {
+        return false;
+    }
+    return it->second->unlimitTrafficSwitch == 1;
+}
+
+void NetStatsTrafficPlanService::UpdateTrafficLimit(int32_t simId, uint64_t trafficLimit)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = trafficPlanInfoMap_.find(simId);
+    if (it == trafficPlanInfoMap_.end() || it->second == nullptr) {
+        return;
+    }
+    it->second->trafficLimit = trafficLimit;
+}
+
+bool NetStatsTrafficPlanService::GetTrafficPlanInfoSnapshot(int32_t simId, TrafficPlanInfo &info)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = trafficPlanInfoMap_.find(simId);
+    if (it == trafficPlanInfoMap_.end() || it->second == nullptr) {
+        return false;
+    }
+    info = *(it->second);
+    return true;
 }
 
 void NetStatsTrafficPlanService::UpdateTrafficLimitDate(int32_t simId)
 {
     NETMGR_LOG_I("UpdateTrafficLimitDate start");
-    NetStatsRDB netStats;
     NetStatsData statsData;
 
-    auto trafficPlaninfoPtr = GetTrafficPlanInfoBySimId(simId);
-    if (!trafficPlaninfoPtr) {
-        return;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        auto it = trafficPlanInfoMap_.find(simId);
+        if (it == trafficPlanInfoMap_.end() || it->second == nullptr) {
+            return;
+        }
+        statsData.simId = simId;
+        statsData.monWarningDate = it->second->lastMonAlertTime;
+        statsData.dayNoticeDate = it->second->lastDayNotifyTime;
+        statsData.monNoticeDate = it->second->lastMonNotifyTime;
+        statsData.monWarningState = it->second->isCanNotifyMonthlyLimit;
+        statsData.dayNoticeState = it->second->isCanNotifyDailyMark;
+        statsData.monNoticeState = it->second->isCanNotifyMonthlyMark;
     }
 
-    statsData.simId = simId;
-    statsData.monWarningDate = trafficPlaninfoPtr->lastMonAlertTime;
-    statsData.dayNoticeDate = trafficPlaninfoPtr->lastDayNotifyTime;
-    statsData.monNoticeDate = trafficPlaninfoPtr->lastMonNotifyTime;
-    statsData.monWarningState = trafficPlaninfoPtr->isCanNotifyMonthlyLimit;
-    statsData.dayNoticeState = trafficPlaninfoPtr->isCanNotifyDailyMark;
-    statsData.monNoticeState = trafficPlaninfoPtr->isCanNotifyMonthlyMark;
-
+    NetStatsRDB netStats;
     netStats.InsertData(statsData);
 }
 
@@ -351,46 +479,36 @@ bool NetStatsTrafficPlanService::IsSimIdExistInMap(int32_t simId)
     return true;
 }
 
-std::shared_ptr<TrafficPlanInfo> NetStatsTrafficPlanService::GetTrafficPlanInfoBySimId(int32_t simId)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (trafficPlanInfoMap_.find(simId) == trafficPlanInfoMap_.end()) {
-        return nullptr;
-    }
-    return trafficPlanInfoMap_[simId];
-}
-
 bool NetStatsTrafficPlanService::GetMonthlyLimitBySimId(int32_t simId, uint64_t &monthlyLimit)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    if (trafficPlanInfoMap_.find(simId) == trafficPlanInfoMap_.end()) {
+    auto it = trafficPlanInfoMap_.find(simId);
+    if (it == trafficPlanInfoMap_.end() || it->second == nullptr) {
         return false;
     }
-    if (trafficPlanInfoMap_[simId] == nullptr) {
-        trafficPlanInfoMap_.erase(simId);
-        return false;
-    }
-    monthlyLimit = trafficPlanInfoMap_[simId]->trafficLimit;
+    monthlyLimit = it->second->trafficLimit;
     return true;
 }
 
 bool NetStatsTrafficPlanService::GetMonthlyMarkBySimId(int32_t simId, uint16_t &monthlyMark)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    if (trafficPlanInfoMap_.find(simId) == trafficPlanInfoMap_.end()) {
+    auto it = trafficPlanInfoMap_.find(simId);
+    if (it == trafficPlanInfoMap_.end() || it->second == nullptr) {
         return false;
     }
-    monthlyMark = trafficPlanInfoMap_[simId]->monthlyLimitPercentage;
+    monthlyMark = it->second->monthlyLimitPercentage;
     return true;
 }
 
 bool NetStatsTrafficPlanService::GetDailyMarkBySimId(int32_t simId, uint16_t &dailyMark)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    if (trafficPlanInfoMap_.find(simId) == trafficPlanInfoMap_.end()) {
+    auto it = trafficPlanInfoMap_.find(simId);
+    if (it == trafficPlanInfoMap_.end() || it->second == nullptr) {
         return false;
     }
-    dailyMark = trafficPlanInfoMap_[simId]->dailyLimitPercentage;
+    dailyMark = it->second->dailyLimitPercentage;
     return true;
 }
 

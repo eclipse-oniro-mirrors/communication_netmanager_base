@@ -217,18 +217,18 @@ HWTEST_F(NetsysBpfNetFirewallTest, GetDomainHashKey001, TestSize.Level0)
     DomainHashKey key = {};
 
     // empty domain
-    bpfNet->GetDomainHashKey("", key);
+    EXPECT_FALSE(bpfNet->GetDomainHashKey("", key));
     EXPECT_EQ(key.prefixlen, 0);
 
     // domain with only '*'
     key = {};
-    bpfNet->GetDomainHashKey("***", key);
+    EXPECT_FALSE(bpfNet->GetDomainHashKey("***", key));
     EXPECT_EQ(key.prefixlen, 0);
 
     // domain too long
     key = {};
     std::string longDomain(DNS_DOMAIN_LEN + 1, 'a');
-    bpfNet->GetDomainHashKey(longDomain, key);
+    EXPECT_FALSE(bpfNet->GetDomainHashKey(longDomain, key));
     EXPECT_EQ(key.prefixlen, 0);
 }
 
@@ -240,7 +240,7 @@ HWTEST_F(NetsysBpfNetFirewallTest, GetDomainHashKey002, TestSize.Level0)
     // isReversed=true should reverse the raw domain text before stripping '*'
     // "www.example.com" -> reversed "moc.elpmaxe.www"
     key = {};
-    bpfNet->GetDomainHashKey("www.example.com", key, true);
+    EXPECT_TRUE(bpfNet->GetDomainHashKey("www.example.com", key, true));
     uint32_t expectedPrefixlen =
         static_cast<uint32_t>((sizeof(key.uid) + sizeof(key.appuid) + strlen("moc.elpmaxe.www")) * BIT_PER_BYTE);
     EXPECT_EQ(key.prefixlen, expectedPrefixlen);
@@ -248,14 +248,14 @@ HWTEST_F(NetsysBpfNetFirewallTest, GetDomainHashKey002, TestSize.Level0)
 
     // reversed suffix rule "*.example.com" -> strips '*' then reverses -> "moc.elpmaxe."
     key = {};
-    bpfNet->GetDomainHashKey("*.example.com", key, true);
+    EXPECT_TRUE(bpfNet->GetDomainHashKey("*.example.com", key, true));
     expectedPrefixlen =
         static_cast<uint32_t>((sizeof(key.uid) + sizeof(key.appuid) + strlen("moc.elpmaxe.")) * BIT_PER_BYTE);
     EXPECT_EQ(key.prefixlen, expectedPrefixlen);
     EXPECT_EQ(memcmp(key.data, "moc.elpmaxe.", strlen("moc.elpmaxe.")), 0);
 
     key = {};
-    bpfNet->GetDomainHashKey("*w.example.com", key, true);
+    EXPECT_TRUE(bpfNet->GetDomainHashKey("*w.example.com", key, true));
     expectedPrefixlen =
         static_cast<uint32_t>((sizeof(key.uid) + sizeof(key.appuid) + strlen("moc.elpmaxe.w")) * BIT_PER_BYTE);
     EXPECT_EQ(key.prefixlen, expectedPrefixlen);
@@ -263,14 +263,14 @@ HWTEST_F(NetsysBpfNetFirewallTest, GetDomainHashKey002, TestSize.Level0)
 
     // isReversed=false keeps original order ("www.example.*")
     key = {};
-    bpfNet->GetDomainHashKey("www.example.*", key, false);
+    EXPECT_TRUE(bpfNet->GetDomainHashKey("www.example.*", key, false));
     expectedPrefixlen =
         static_cast<uint32_t>((sizeof(key.uid) + sizeof(key.appuid) + strlen(".www.example.")) * BIT_PER_BYTE);
     EXPECT_EQ(key.prefixlen, expectedPrefixlen);
     EXPECT_EQ(memcmp(key.data, ".www.example.", strlen(".www.example.")), 0);
 
     key = {};
-    bpfNet->GetDomainHashKey("www.example.co*", key, false);
+    EXPECT_TRUE(bpfNet->GetDomainHashKey("www.example.co*", key, false));
     expectedPrefixlen =
         static_cast<uint32_t>((sizeof(key.uid) + sizeof(key.appuid) + strlen(".www.example.co")) * BIT_PER_BYTE);
     EXPECT_EQ(key.prefixlen, expectedPrefixlen);

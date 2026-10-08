@@ -439,10 +439,6 @@ void NetMgrNetStatsLimitNotification::PublishNetStatsLimitNotification(int notif
     UpdateResourceMap();
     std::shared_ptr<Notification::NotificationNormalContent> notificationContent =
         std::make_shared<Notification::NotificationNormalContent>();
-    if (notificationContent == nullptr) {
-        NETMGR_LOG_E("get notification content nullptr");
-        return;
-    }
     if (!SetTitleAndText(notificationId, notificationContent, isDualCard)) {
         NETMGR_LOG_E("error setting title and text");
         return;
@@ -450,10 +446,6 @@ void NetMgrNetStatsLimitNotification::PublishNetStatsLimitNotification(int notif
 
     std::shared_ptr<Notification::NotificationContent> content =
         std::make_shared<Notification::NotificationContent>(notificationContent);
-    if (content == nullptr) {
-        NETMGR_LOG_E("get notification content nullptr");
-        return;
-    }
 
     Notification::NotificationRequest request;
     request.SetNotificationId(static_cast<int32_t>(notificationId));

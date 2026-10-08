@@ -111,9 +111,7 @@ bool Network::UpdateBasicNetwork(bool isAvailable_)
         if (netSupplierType_ == BEARER_VPN) {
             return ReleaseVirtualNetwork();
         }
-        if (nat464Service_ != nullptr) {
-            nat464Service_->UpdateService(NAT464_SERVICE_STOP);
-        }
+        StopNat464Service();
         return ReleaseBasicNetwork();
     }
 }
@@ -335,18 +333,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateMtu(netLinkInfo);
     UpdateTcpBufferSize(netLinkInfo);
     UpdateNetLinkInfoLinkType(netLinkInfo);
-    std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-    NetLinkInfo netLinkInfoBck = netLinkInfo_;
-    lock.unlock();
-    if (IsNat464Prefered()) {
-        if (nat464Service_ == nullptr) {
-            nat464Service_ = std::make_shared<Nat464Service>(netId_, netLinkInfoBck.ifaceName_);
-        }
-        nat464Service_->MaybeUpdateV6Iface(netLinkInfoBck.ifaceName_);
-        nat464Service_->UpdateService(NAT464_SERVICE_CONTINUE);
-    } else if (nat464Service_ != nullptr) {
-        nat464Service_->UpdateService(NAT464_SERVICE_STOP);
-    }
+    UpdateNat464Service();
     UpdateNetConnState(NET_CONN_STATE_CONNECTED);
     if (netSupplierType_ != BEARER_VPN && isSupportInternet_) {
         if (DelayStartDetectionForIpUpdate(hasSameIpAddr)) {
@@ -1028,18 +1015,7 @@ void Network::UpdateNetConnState(NetConnState netConnState)
     }
 
     SendConnectionChangedBroadcast(netConnState);
-    if (IsNat464Prefered()) {
-        std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-        NetLinkInfo netLinkInfoBck = netLinkInfo_;
-        lock.unlock();
-        if (nat464Service_ == nullptr) {
-            nat464Service_ = std::make_shared<Nat464Service>(netId_, netLinkInfoBck.ifaceName_);
-        }
-        nat464Service_->MaybeUpdateV6Iface(netLinkInfoBck.ifaceName_);
-        nat464Service_->UpdateService(NAT464_SERVICE_CONTINUE);
-    } else if (nat464Service_ != nullptr) {
-        nat464Service_->UpdateService(NAT464_SERVICE_STOP);
-    }
+    UpdateNat464Service();
     NETMGR_LOG_I("Network[%{public}d] state changed, from [%{public}d] to [%{public}d]", netId_, oldState, state_);
 }
 
@@ -1129,14 +1105,11 @@ bool Network::IsDetectionForDnsFail(NetDetectionStatus netDetectionState, bool d
     return ((netDetectionState == VERIFICATION_STATE) && !dnsHealthSuccess && !(netMonitor_->IsDetecting()));
 }
 
-bool Network::IsNat464Prefered()
+bool Network::IsNat464Prefered(const NetLinkInfo &netLinkInfoBck)
 {
     if (netSupplierType_ != BEARER_CELLULAR && netSupplierType_ != BEARER_WIFI && netSupplierType_ != BEARER_ETHERNET) {
         return false;
     }
-    std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-    NetLinkInfo netLinkInfoBck = netLinkInfo_;
-    lock.unlock();
     if (std::any_of(netLinkInfoBck.netAddrList_.begin(), netLinkInfoBck.netAddrList_.end(),
                     [](const INetAddr &i) { return i.type_ != INetAddr::IPV6; })) {
         return false;
@@ -1147,6 +1120,42 @@ bool Network::IsNat464Prefered()
     return true;
 }
 
+void Network::StopNat464Service()
+{
+    std::shared_ptr<Nat464Service> nat464Service;
+    {
+        std::lock_guard<std::mutex> nat464Lock(nat464Mutex_);
+        nat464Service = nat464Service_;
+    }
+    if (nat464Service != nullptr) {
+        nat464Service->UpdateService(NAT464_SERVICE_STOP);
+    }
+}
+
+void Network::UpdateNat464Service()
+{
+    NetLinkInfo netLinkInfoBck;
+    {
+        std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
+        netLinkInfoBck = netLinkInfo_;
+    }
+    if (!IsNat464Prefered(netLinkInfoBck)) {
+        StopNat464Service();
+        return;
+    }
+    // LCOV_EXCL_START
+    std::shared_ptr<Nat464Service> nat464Service;
+    {
+        std::lock_guard<std::mutex> nat464Lock(nat464Mutex_);
+        if (nat464Service_ == nullptr) {
+            nat464Service_ = std::make_shared<Nat464Service>(netId_, netLinkInfoBck.ifaceName_);
+        }
+        nat464Service = nat464Service_;
+    }
+    nat464Service->MaybeUpdateV6Iface(netLinkInfoBck.ifaceName_);
+    nat464Service->UpdateService(NAT464_SERVICE_CONTINUE);
+    // LCOV_EXCL_STOP
+}
 
 void Network::CloseSocketsUid(uint32_t uid)
 {

@@ -316,6 +316,11 @@ int32_t VnicManager::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_
     
     uidRanges.clear();
     for (const auto &uid: uids) {
+        if (uid <= 0) {
+            NETNATIVE_LOGE("vnic uid is invalid, uid:%{public}d", uid);
+            uidRanges.clear();
+            return NETMANAGER_ERROR;
+        }
         uidRanges.push_back({uid, uid, 0, 0});
     }
 

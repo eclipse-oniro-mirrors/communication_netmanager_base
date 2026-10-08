@@ -38,7 +38,16 @@ public:
 
 public:
     void ResetNotifyState(int32_t simId);
-    std::shared_ptr<TrafficPlanInfo> GetTrafficPlanInfoBySimId(int32_t simId);
+    bool ConsumeMonAlertState(int32_t simId);
+    bool ConsumeMonNotifyState(int32_t simId);
+    bool ConsumeDayNotifyState(int32_t simId);
+    void UpdateMonAlertTime(int32_t simId);
+    void UpdateMonNotifyTime(int32_t simId);
+    void UpdateDayNotifyTime(int32_t simId);
+    bool IsOverLimitDisconnect(int32_t simId);
+    bool IsUnlimitTrafficSwitchOn(int32_t simId);
+    void UpdateTrafficLimit(int32_t simId, uint64_t trafficLimit);
+    bool GetTrafficPlanInfoSnapshot(int32_t simId, TrafficPlanInfo &info);
     bool GetMonthlyLimitBySimId(int32_t simId, uint64_t &monthlyLimit);
     bool GetMonthlyMarkBySimId(int32_t simId, uint16_t &monthlyMark);
     bool GetDailyMarkBySimId(int32_t simId, uint16_t &dailyMark);

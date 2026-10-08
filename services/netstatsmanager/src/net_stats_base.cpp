@@ -526,19 +526,23 @@ int32_t NetStatsRDB::QueryAllTrafficPlanInfo(std::vector<TrafficPlanInfo> &infoL
 
     do {
         TrafficPlanInfo info;
-        int32_t idx = 0;
-        queryResultSet->GetString(idx++, info.iccid);
-        queryResultSet->GetInt(idx++, info.simId);
-        queryResultSet->GetInt(idx++, info.displayTrafficSwitch);
-        queryResultSet->GetInt(idx++, info.unlimitTrafficSwitch);
         int64_t trafficLimitTemp = 0;
-        queryResultSet->GetLong(idx++, trafficLimitTemp);
+        if (queryResultSet->GetString(TRAFFIC_PLAN_COL_ICCID, info.iccid) != NativeRdb::E_OK ||
+            queryResultSet->GetInt(TRAFFIC_PLAN_COL_SIM_ID, info.simId) != NativeRdb::E_OK ||
+            queryResultSet->GetInt(TRAFFIC_PLAN_COL_DISPLAY_SWITCH, info.displayTrafficSwitch) != NativeRdb::E_OK ||
+            queryResultSet->GetInt(TRAFFIC_PLAN_COL_UNLIMIT_SWITCH, info.unlimitTrafficSwitch) != NativeRdb::E_OK ||
+            queryResultSet->GetLong(TRAFFIC_PLAN_COL_TRAFFIC_LIMIT, trafficLimitTemp) != NativeRdb::E_OK ||
+            trafficLimitTemp < 0 ||
+            queryResultSet->GetInt(TRAFFIC_PLAN_COL_START_DATE, info.startDate) != NativeRdb::E_OK ||
+            queryResultSet->GetInt(TRAFFIC_PLAN_COL_OVER_LIMIT_BEHAVIOR, info.overLimitBehavior) != NativeRdb::E_OK ||
+            queryResultSet->GetInt(TRAFFIC_PLAN_COL_MONTHLY_PERCENTAGE, info.monthlyLimitPercentage) !=
+            NativeRdb::E_OK ||
+            queryResultSet->GetInt(TRAFFIC_PLAN_COL_DAILY_PERCENTAGE, info.dailyLimitPercentage) != NativeRdb::E_OK) {
+            NETMGR_LOG_E("Failed to get traffic plan info from result set");
+            queryResultSet->Close();
+            return TRAFFIC_PLAN_ERR_DATABASE_FAILED;
+        }
         info.trafficLimit = static_cast<uint64_t>(trafficLimitTemp);
-        queryResultSet->GetInt(idx++, info.startDate);
-        queryResultSet->GetInt(idx++, info.overLimitBehavior);
-        queryResultSet->GetInt(idx++, info.monthlyLimitPercentage);
-        queryResultSet->GetInt(idx++, info.dailyLimitPercentage);
-        
         infoList.push_back(info);
     } while (queryResultSet->GoToNextRow() == NativeRdb::E_OK);
 

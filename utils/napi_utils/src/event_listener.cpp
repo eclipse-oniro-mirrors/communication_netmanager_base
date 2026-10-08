@@ -92,9 +92,11 @@ void EventListener::Emit(const std::string &eventType, size_t argc, napi_value *
 
 bool EventListener::Match(const std::string &type, napi_value callback) const
 {
-    if (type_ != type) {
+    // LCOV_EXCL_START
+    if (type_ != type || callbackRef_ == nullptr) {
         return false;
     }
+    // LCOV_EXCL_STOP
 
     napi_value callback1 = NapiUtils::GetReference(env_, callbackRef_);
     bool ret = false;

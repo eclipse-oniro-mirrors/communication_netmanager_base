@@ -29,6 +29,8 @@
 #include "nat464_service.h"
 #include "netmanager_base_common_utils.h"
 #include "dual_stack_probe_callback.h"
+#include <memory>
+#include <mutex>
 #include <shared_mutex>
 
 namespace OHOS {
@@ -103,7 +105,9 @@ private:
     bool IsDetectionForDnsSuccess(NetDetectionStatus netDetectionState, bool dnsHealthSuccess);
     bool IsDetectionForDnsFail(NetDetectionStatus netDetectionState, bool dnsHealthSuccess);
     bool IsIfaceNameInUse();
-    bool IsNat464Prefered();
+    bool IsNat464Prefered(const NetLinkInfo &netLinkInfoBck);
+    void StopNat464Service();
+    void UpdateNat464Service();
     void RemoveRouteByFamily(INetAddr::IpType addrFamily);
     bool IsAddressValid(const Route &route);
     void ReleaseRouteList(NetLinkInfo &netLinkInfoBck);
@@ -130,6 +134,7 @@ private:
     std::atomic<bool> isDetectingForDns_ = false;
     bool isSupportInternet_ = false;
     std::shared_ptr<Nat464Service> nat464Service_;
+    std::mutex nat464Mutex_;
     uint64_t lastDetectTime_ = 0;
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     bool forbidDetectionFlag_ = false;

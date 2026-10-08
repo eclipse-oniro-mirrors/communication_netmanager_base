@@ -348,8 +348,8 @@ int32_t NetPolicyRule::GetBackgroundPolicy(bool &backgroundPolicy)
 
 bool NetPolicyRule::IsIdleMode()
 {
-    NETMGR_LOG_D("IsIdleMode:deviceIdleMode_[%{public}d", deviceIdleMode_);
-    return deviceIdleMode_;
+    NETMGR_LOG_D("IsIdleMode:deviceIdleMode_[%{public}d", deviceIdleMode_.load());
+    return deviceIdleMode_.load();
 }
 
 bool NetPolicyRule::InIdleAllowedList(uint32_t uid)
@@ -375,7 +375,7 @@ bool NetPolicyRule::IsForeground(uint32_t uid)
 
 bool NetPolicyRule::IsPowerSave()
 {
-    return powerSaveMode_;
+    return powerSaveMode_.load();
 }
 
 bool NetPolicyRule::InPowerSaveAllowedList(uint32_t uid)
@@ -414,11 +414,11 @@ void NetPolicyRule::HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEve
             break;
         }
         case NetPolicyEventHandler::MSG_DEVICE_IDLE_MODE_CHANGED:
-            deviceIdleMode_ = policyEvent->deviceIdleMode;
+            deviceIdleMode_.store(policyEvent->deviceIdleMode);
             TransPolicyToRule();
             break;
         case NetPolicyEventHandler::MSG_POWER_SAVE_MODE_CHANGED:
-            powerSaveMode_ = policyEvent->powerSaveMode;
+            powerSaveMode_.store(policyEvent->powerSaveMode);
             TransPolicyToRule();
             break;
         case NetPolicyEventHandler::MSG_POWER_SAVE_LIST_UPDATED: {
@@ -484,11 +484,11 @@ void NetPolicyRule::GetDumpMessage(std::string &message)
                   [&message](const auto &item) { message.append(std::to_string(item) + ", "); });
     deviceIdleAllowedListLock.unlock();
     message.append("}\n");
-    message.append(TAB + "DeviceIdleMode: " + std::to_string(deviceIdleMode_) + "\n");
+    message.append(TAB + "DeviceIdleMode: " + std::to_string(deviceIdleMode_.load()) + "\n");
     message.append(TAB + "PowerSaveAllowedList: {");
     std::for_each(powerSaveAllowedList_.begin(), powerSaveAllowedList_.end(),
                   [&message](const auto &item) { message.append(std::to_string(item) + ", "); });
-    message.append(TAB + "PowerSaveMode: " + std::to_string(powerSaveMode_) + "\n");
+    message.append(TAB + "PowerSaveMode: " + std::to_string(powerSaveMode_.load()) + "\n");
     message.append(TAB + "BackgroundPolicy: " + std::to_string(backgroundAllow_) + "\n");
 }
 

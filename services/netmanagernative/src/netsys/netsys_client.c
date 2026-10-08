@@ -173,6 +173,14 @@ static bool MakeKey(const char *hostName, const char *serv, const struct addrinf
     return sprintf_s(key, MAX_KEY_LEN, "%s", hostName) > 0;
 }
 
+static void FillDefaultNetId(uint16_t netId, struct RequestInfo *info)
+{
+    int defaultNetId = GetNetForApp();
+    if (netId == 0 && defaultNetId > 0) {
+        info->netId = (uint32_t)defaultNetId;
+    }
+}
+
 static int32_t NetSysGetResolvConfInternal(int sockFd, uint16_t netId, struct ResolvConfig *config)
 {
     struct RequestInfo info = {
@@ -180,9 +188,7 @@ static int32_t NetSysGetResolvConfInternal(int sockFd, uint16_t netId, struct Re
         .command = GET_CONFIG,
         .netId = netId,
     };
-    if (netId == 0 && GetNetForApp() > 0) {
-        info.netId = (uint32_t)GetNetForApp();
-    }
+    FillDefaultNetId(netId, &info);
     DNS_CONFIG_PRINT("NetSysGetResolvConfInternal begin netid: %d", info.netId);
     // LCOV_EXCL_START
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
@@ -212,9 +218,7 @@ static int32_t NetSysGetResolvConfInternalExt(int sockFd, uint16_t netId, struct
         .command = GET_CONFIG_EXT,
         .netId = netId,
     };
-    if (netId == 0 && GetNetForApp() > 0) {
-        info.netId = (uint32_t)GetNetForApp();
-    }
+    FillDefaultNetId(netId, &info);
     DNS_CONFIG_PRINT("NetSysGetResolvConfInternalExt begin netid: %d", info.netId);
     // LCOV_EXCL_START
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
@@ -337,9 +341,7 @@ static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, const st
         .command = GET_CACHE,
         .netId = netId,
     };
-    if (netId == 0 && GetNetForApp() > 0) {
-        info.netId = (uint32_t)GetNetForApp();
-    }
+    FillDefaultNetId(netId, &info);
     int32_t res = NetsysSendKeyForCache(sockFd, param, info);
     // LCOV_EXCL_START
     if (res < 0) {
@@ -544,9 +546,7 @@ static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, const st
         .command = SET_CACHE,
         .netId = netId,
     };
-    if (netId == 0 && GetNetForApp() > 0) {
-        info.netId = (uint32_t)GetNetForApp();
-    }
+    FillDefaultNetId(netId, &info);
     int32_t result = NetsysSendKeyForCache(sockFd, param, info);
     if (result < 0) {
         return result;
@@ -610,9 +610,7 @@ static int32_t NetSysIsIpv6EnableInternal(int sockFd, uint16_t netId, int *enabl
         .command = JUDGE_IPV6,
         .netId = netId,
     };
-    if (netId == 0 && GetNetForApp() > 0) {
-        info.netId = (uint32_t)GetNetForApp();
-    }
+    FillDefaultNetId(netId, &info);
     // LCOV_EXCL_START
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
@@ -653,9 +651,7 @@ static int32_t NetSysIsIpv4EnableInternal(int sockFd, uint16_t netId, const int 
         .command = JUDGE_IPV4,
         .netId = netId,
     };
-    if (netId == 0 && GetNetForApp() > 0) {
-        info.netId = (uint32_t)GetNetForApp();
-    }
+    FillDefaultNetId(netId, &info);
     // LCOV_EXCL_START
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
@@ -887,6 +883,9 @@ static int32_t NetSysBindSocketInternal(int sockFd, uint16_t netId, int32_t fd)
 int32_t NetSysBindSocket(int32_t fd, uint32_t netId)
 {
     int sockFd = CreateConnectionToNetSys();
+    if (sockFd < 0) {
+        return -1;
+    }
     DNS_CONFIG_PRINT("NetSysBindSocket %d", fd);
     int err = NetSysBindSocketInternal(sockFd, netId, fd);
     // LCOV_EXCL_START
@@ -1246,9 +1245,7 @@ static int32_t NetSysSetNodataCacheInternal(int sockFd, uint16_t netId, const ch
         .command = SET_NODATA_CACHE,
         .netId = netId,
     };
-    if (netId == 0 && GetNetForApp() > 0) {
-        info.netId = (uint32_t)GetNetForApp();
-    }
+    FillDefaultNetId(netId, &info);
 
     DNS_CONFIG_PRINT("NetSysSetNodataCacheInternal begin netid: %{public}d, host: %{public}s",
         info.netId, host);
@@ -1304,9 +1301,7 @@ static int32_t NetSysGetNodataCacheInternal(int sockFd, uint16_t netId, const ch
         .command = GET_NODATA_CACHE,
         .netId = netId,
     };
-    if (netId == 0 && GetNetForApp() > 0) {
-        info.netId = (uint32_t)GetNetForApp();
-    }
+    FillDefaultNetId(netId, &info);
 
     DNS_CONFIG_PRINT("NetSysGetNodataCacheInternal begin netid: %{public}d, host: %{public}s",
         info.netId, host);

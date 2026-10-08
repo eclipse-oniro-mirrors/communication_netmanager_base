@@ -18,8 +18,8 @@
 
 #include "net_access_policy_dialog.h"
 
-#include <mutex>
 #include <iostream>
+#include <mutex>
 
 
 #include "ability_connect_callback_interface.h"
@@ -52,12 +52,19 @@ private:
         void OnAbilityConnectDone(const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject,
                                   int resultCode) override;
         void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode) override;
+        void SetUid(uint32_t uid);
+        bool ReshowDialog();
 
     private:
+        int32_t SendDialogRequest(const sptr<IRemoteObject> &remoteObject);
+
         std::mutex mutex_;
+        sptr<IRemoteObject> remoteObject_ = nullptr;
+        bool isDialogShow_ = false;
+        uint32_t uid_ = 0;
     };
 
-    sptr<OHOS::AAFwk::IAbilityConnection> dialogConnectionCallback_{nullptr};
+    sptr<DialogAbilityConnection> dialogConnectionCallback_{nullptr};
     static std::string bundleName_;
     static std::string abilityName_;
     static std::string uiExtensionType_;

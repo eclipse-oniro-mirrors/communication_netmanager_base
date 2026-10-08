@@ -17,6 +17,11 @@
 #include <gtest/gtest.h>
 #include <unistd.h>
 
+#ifdef GTEST_API_
+#define private public
+#define protected public
+#endif
+
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_traffic_plan_service.h"
 #include "net_manager_constants.h"
@@ -621,11 +626,11 @@ HWTEST_F(NetStatsTrafficPlanServiceTest, IsSimIdExistInMap_False, TestSize.Level
 }
 
 /**
- * @tc.number: NetStatsTrafficPlanService_GetTrafficPlanInfoBySimId_Found
- * @tc.name: GetTrafficPlanInfoBySimId when found
- * @tc.desc: Test getting traffic plan info when simId exists
+ * @tc.number: NetStatsTrafficPlanService_GetTrafficPlanInfoSnapshot_Found
+ * @tc.name: GetTrafficPlanInfoSnapshot when found
+ * @tc.desc: Test getting traffic plan info snapshot when simId exists
  */
-HWTEST_F(NetStatsTrafficPlanServiceTest, GetTrafficPlanInfoBySimId_Found, TestSize.Level1)
+HWTEST_F(NetStatsTrafficPlanServiceTest, GetTrafficPlanInfoSnapshot_Found, TestSize.Level1)
 {
     // Arrange
     int32_t simId = 1;
@@ -635,28 +640,517 @@ HWTEST_F(NetStatsTrafficPlanServiceTest, GetTrafficPlanInfoBySimId_Found, TestSi
     trafficPlanService.InitTrafficPlanInfo(simId);
 
     // Act
-    auto info = trafficPlanService.GetTrafficPlanInfoBySimId(simId);
+    TrafficPlanInfo info;
+    bool ret = trafficPlanService.GetTrafficPlanInfoSnapshot(simId, info);
 
     // Assert
-    EXPECT_NE(info, nullptr);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(info.trafficLimit, trafficPlanService.trafficPlanInfoMap_[simId]->trafficLimit);
 }
 
 /**
- * @tc.number: NetStatsTrafficPlanService_GetTrafficPlanInfoBySimId_NotFound
- * @tc.name: GetTrafficPlanInfoBySimId when not found
- * @tc.desc: Test getting traffic plan info when simId doesn't exist
+ * @tc.number: NetStatsTrafficPlanService_GetTrafficPlanInfoSnapshot_NotFound
+ * @tc.name: GetTrafficPlanInfoSnapshot when not found
+ * @tc.desc: Test getting traffic plan info snapshot when simId doesn't exist
  */
-HWTEST_F(NetStatsTrafficPlanServiceTest, GetTrafficPlanInfoBySimId_NotFound, TestSize.Level1)
+HWTEST_F(NetStatsTrafficPlanServiceTest, GetTrafficPlanInfoSnapshot_NotFound, TestSize.Level1)
 {
     // Arrange
     int32_t simId = 999;
 
     // Act
     NetStatsTrafficPlanService trafficPlanService;
-    auto info = trafficPlanService.GetTrafficPlanInfoBySimId(simId);
+    TrafficPlanInfo info;
+    bool ret = trafficPlanService.GetTrafficPlanInfoSnapshot(simId, info);
 
     // Assert
-    EXPECT_EQ(info, nullptr);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_GetTrafficPlanInfoSnapshot_Nullptr
+ * @tc.name: GetTrafficPlanInfoSnapshot with null entry
+ * @tc.desc: Test getting traffic plan info snapshot when map entry is null
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, GetTrafficPlanInfoSnapshot_Nullptr, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 1;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[simId] = nullptr;
+
+    // Act
+    TrafficPlanInfo info;
+    bool ret = trafficPlanService.GetTrafficPlanInfoSnapshot(simId, info);
+
+    // Assert
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_ResetNotifyState_NotFound
+ * @tc.name: ResetNotifyState when simId not found
+ * @tc.desc: Test ResetNotifyState does not crash and inserts nothing when simId is absent
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, ResetNotifyState_NotFound, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 999;
+    NetStatsTrafficPlanService trafficPlanService;
+
+    // Act
+    trafficPlanService.ResetNotifyState(simId);
+
+    // Assert
+    EXPECT_TRUE(trafficPlanService.trafficPlanInfoMap_.empty());
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_ResetNotifyState_Nullptr
+ * @tc.name: ResetNotifyState with null entry
+ * @tc.desc: Test ResetNotifyState returns early without crash when map entry is null
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, ResetNotifyState_Nullptr, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 1;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[simId] = nullptr;
+
+    // Act
+    trafficPlanService.ResetNotifyState(simId);
+
+    // Assert
+    EXPECT_NE(trafficPlanService.trafficPlanInfoMap_.find(simId), trafficPlanService.trafficPlanInfoMap_.end());
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_ResetNotifyState_SetFlags
+ * @tc.name: ResetNotifyState enables all notify flags
+ * @tc.desc: Test ResetNotifyState sets the three notify flags to true
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, ResetNotifyState_SetFlags, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 1;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[simId] = std::make_shared<TrafficPlanInfo>();
+    trafficPlanService.trafficPlanInfoMap_[simId]->isCanNotifyMonthlyLimit = false;
+    trafficPlanService.trafficPlanInfoMap_[simId]->isCanNotifyMonthlyMark = false;
+    trafficPlanService.trafficPlanInfoMap_[simId]->isCanNotifyDailyMark = false;
+
+    // Act
+    trafficPlanService.ResetNotifyState(simId);
+
+    // Assert
+    TrafficPlanInfo info;
+    EXPECT_TRUE(trafficPlanService.GetTrafficPlanInfoSnapshot(simId, info));
+    EXPECT_TRUE(info.isCanNotifyMonthlyLimit);
+    EXPECT_TRUE(info.isCanNotifyMonthlyMark);
+    EXPECT_TRUE(info.isCanNotifyDailyMark);
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_ConsumeMonAlertState_NotFound
+ * @tc.name: ConsumeMonAlertState when simId not found
+ * @tc.desc: Test ConsumeMonAlertState returns false when simId is absent
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, ConsumeMonAlertState_NotFound, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 999;
+    NetStatsTrafficPlanService trafficPlanService;
+
+    // Act
+    bool ret = trafficPlanService.ConsumeMonAlertState(simId);
+
+    // Assert
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_ConsumeMonAlertState_Nullptr
+ * @tc.name: ConsumeMonAlertState with null entry
+ * @tc.desc: Test ConsumeMonAlertState returns false when map entry is null
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, ConsumeMonAlertState_Nullptr, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 1;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[simId] = nullptr;
+
+    // Act
+    bool ret = trafficPlanService.ConsumeMonAlertState(simId);
+
+    // Assert
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_ConsumeMonAlertState_CanNotify
+ * @tc.name: ConsumeMonAlertState when monthly limit notify flag is set
+ * @tc.desc: Test ConsumeMonAlertState returns true and clears all notify flags
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, ConsumeMonAlertState_CanNotify, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 1;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[simId] = std::make_shared<TrafficPlanInfo>();
+    trafficPlanService.trafficPlanInfoMap_[simId]->isCanNotifyMonthlyLimit = true;
+    trafficPlanService.trafficPlanInfoMap_[simId]->isCanNotifyMonthlyMark = true;
+    trafficPlanService.trafficPlanInfoMap_[simId]->isCanNotifyDailyMark = true;
+
+    // Act
+    bool ret = trafficPlanService.ConsumeMonAlertState(simId);
+
+    // Assert
+    EXPECT_TRUE(ret);
+    TrafficPlanInfo info;
+    EXPECT_TRUE(trafficPlanService.GetTrafficPlanInfoSnapshot(simId, info));
+    EXPECT_FALSE(info.isCanNotifyMonthlyLimit);
+    EXPECT_FALSE(info.isCanNotifyMonthlyMark);
+    EXPECT_FALSE(info.isCanNotifyDailyMark);
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_ConsumeMonAlertState_TimeWindow
+ * @tc.name: ConsumeMonAlertState time window branches
+ * @tc.desc: Test ConsumeMonAlertState result depends on lastMonAlertTime vs current month start
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, ConsumeMonAlertState_TimeWindow, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 1;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[simId] = std::make_shared<TrafficPlanInfo>();
+    trafficPlanService.trafficPlanInfoMap_[simId]->lastMonAlertTime = 0;
+
+    // Act
+    bool retEarly = trafficPlanService.ConsumeMonAlertState(simId);
+
+    trafficPlanService.trafficPlanInfoMap_[simId]->lastMonAlertTime =
+        static_cast<int32_t>(NetStatsUtils::GetNowTimestamp());
+    bool retLate = trafficPlanService.ConsumeMonAlertState(simId);
+
+    // Assert
+    EXPECT_TRUE(retEarly);
+    EXPECT_FALSE(retLate);
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_ConsumeMonNotifyState_NotFound
+ * @tc.name: ConsumeMonNotifyState when simId not found
+ * @tc.desc: Test ConsumeMonNotifyState returns false when simId is absent or entry is null
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, ConsumeMonNotifyState_NotFound, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 999;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[1] = nullptr;
+
+    // Act
+    bool retAbsent = trafficPlanService.ConsumeMonNotifyState(simId);
+    bool retNull = trafficPlanService.ConsumeMonNotifyState(1);
+
+    // Assert
+    EXPECT_FALSE(retAbsent);
+    EXPECT_FALSE(retNull);
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_ConsumeMonNotifyState_CanNotify
+ * @tc.name: ConsumeMonNotifyState when monthly mark notify flag is set
+ * @tc.desc: Test ConsumeMonNotifyState returns true and clears the monthly mark flag
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, ConsumeMonNotifyState_CanNotify, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 1;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[simId] = std::make_shared<TrafficPlanInfo>();
+    trafficPlanService.trafficPlanInfoMap_[simId]->isCanNotifyMonthlyMark = true;
+
+    // Act
+    bool ret = trafficPlanService.ConsumeMonNotifyState(simId);
+
+    // Assert
+    EXPECT_TRUE(ret);
+    TrafficPlanInfo info;
+    EXPECT_TRUE(trafficPlanService.GetTrafficPlanInfoSnapshot(simId, info));
+    EXPECT_FALSE(info.isCanNotifyMonthlyMark);
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_ConsumeMonNotifyState_TimeWindow
+ * @tc.name: ConsumeMonNotifyState time window branches
+ * @tc.desc: Test ConsumeMonNotifyState result depends on lastMonNotifyTime vs current month start
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, ConsumeMonNotifyState_TimeWindow, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 1;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[simId] = std::make_shared<TrafficPlanInfo>();
+    trafficPlanService.trafficPlanInfoMap_[simId]->lastMonNotifyTime = 0;
+
+    // Act
+    bool retEarly = trafficPlanService.ConsumeMonNotifyState(simId);
+
+    trafficPlanService.trafficPlanInfoMap_[simId]->lastMonNotifyTime =
+        static_cast<int32_t>(NetStatsUtils::GetNowTimestamp());
+    bool retLate = trafficPlanService.ConsumeMonNotifyState(simId);
+
+    // Assert
+    EXPECT_TRUE(retEarly);
+    EXPECT_FALSE(retLate);
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_ConsumeDayNotifyState_NotFound
+ * @tc.name: ConsumeDayNotifyState when simId not found
+ * @tc.desc: Test ConsumeDayNotifyState returns false when simId is absent or entry is null
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, ConsumeDayNotifyState_NotFound, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 999;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[1] = nullptr;
+
+    // Act
+    bool retAbsent = trafficPlanService.ConsumeDayNotifyState(simId);
+    bool retNull = trafficPlanService.ConsumeDayNotifyState(1);
+
+    // Assert
+    EXPECT_FALSE(retAbsent);
+    EXPECT_FALSE(retNull);
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_ConsumeDayNotifyState_CanNotify
+ * @tc.name: ConsumeDayNotifyState when daily mark notify flag is set
+ * @tc.desc: Test ConsumeDayNotifyState returns true and clears the daily mark flag
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, ConsumeDayNotifyState_CanNotify, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 1;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[simId] = std::make_shared<TrafficPlanInfo>();
+    trafficPlanService.trafficPlanInfoMap_[simId]->isCanNotifyDailyMark = true;
+
+    // Act
+    bool ret = trafficPlanService.ConsumeDayNotifyState(simId);
+
+    // Assert
+    EXPECT_TRUE(ret);
+    TrafficPlanInfo info;
+    EXPECT_TRUE(trafficPlanService.GetTrafficPlanInfoSnapshot(simId, info));
+    EXPECT_FALSE(info.isCanNotifyDailyMark);
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_ConsumeDayNotifyState_TimeWindow
+ * @tc.name: ConsumeDayNotifyState time window branches
+ * @tc.desc: Test ConsumeDayNotifyState result depends on lastDayNotifyTime vs today start
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, ConsumeDayNotifyState_TimeWindow, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 1;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[simId] = std::make_shared<TrafficPlanInfo>();
+    trafficPlanService.trafficPlanInfoMap_[simId]->lastDayNotifyTime = 0;
+
+    // Act
+    bool retEarly = trafficPlanService.ConsumeDayNotifyState(simId);
+
+    trafficPlanService.trafficPlanInfoMap_[simId]->lastDayNotifyTime =
+        static_cast<int32_t>(NetStatsUtils::GetNowTimestamp());
+    bool retLate = trafficPlanService.ConsumeDayNotifyState(simId);
+
+    // Assert
+    EXPECT_TRUE(retEarly);
+    EXPECT_FALSE(retLate);
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_UpdateNotifyTime_NotFound
+ * @tc.name: UpdateMonAlertTime/UpdateMonNotifyTime/UpdateDayNotifyTime when simId not found
+ * @tc.desc: Test the three Update*Time methods do not crash when simId is absent or entry is null
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, UpdateNotifyTime_NotFound, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 999;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[1] = nullptr;
+
+    // Act
+    trafficPlanService.UpdateMonAlertTime(simId);
+    trafficPlanService.UpdateMonNotifyTime(simId);
+    trafficPlanService.UpdateDayNotifyTime(simId);
+    trafficPlanService.UpdateMonAlertTime(1);
+    trafficPlanService.UpdateMonNotifyTime(1);
+    trafficPlanService.UpdateDayNotifyTime(1);
+
+    // Assert
+    EXPECT_TRUE(trafficPlanService.trafficPlanInfoMap_.find(1) != trafficPlanService.trafficPlanInfoMap_.end());
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_UpdateNotifyTime_Normal
+ * @tc.name: UpdateMonAlertTime/UpdateMonNotifyTime/UpdateDayNotifyTime normal path
+ * @tc.desc: Test the three Update*Time methods record the current timestamp
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, UpdateNotifyTime_Normal, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 1;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[simId] = std::make_shared<TrafficPlanInfo>();
+
+    // Act
+    trafficPlanService.UpdateMonAlertTime(simId);
+    trafficPlanService.UpdateMonNotifyTime(simId);
+    trafficPlanService.UpdateDayNotifyTime(simId);
+
+    // Assert
+    TrafficPlanInfo info;
+    EXPECT_TRUE(trafficPlanService.GetTrafficPlanInfoSnapshot(simId, info));
+    EXPECT_GT(info.lastMonAlertTime, 0);
+    EXPECT_GT(info.lastMonNotifyTime, 0);
+    EXPECT_GT(info.lastDayNotifyTime, 0);
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_IsOverLimitDisconnect_Branches
+ * @tc.name: IsOverLimitDisconnect branch coverage
+ * @tc.desc: Test IsOverLimitDisconnect with absent simId, null entry and both behavior values
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, IsOverLimitDisconnect_Branches, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 1;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[2] = nullptr;
+
+    // Act
+    bool retAbsent = trafficPlanService.IsOverLimitDisconnect(999);
+    bool retNull = trafficPlanService.IsOverLimitDisconnect(2);
+
+    trafficPlanService.trafficPlanInfoMap_[simId] = std::make_shared<TrafficPlanInfo>();
+    trafficPlanService.trafficPlanInfoMap_[simId]->overLimitBehavior = 1;
+    bool retDisconnect = trafficPlanService.IsOverLimitDisconnect(simId);
+
+    trafficPlanService.trafficPlanInfoMap_[simId]->overLimitBehavior = 0;
+    bool retPopup = trafficPlanService.IsOverLimitDisconnect(simId);
+
+    // Assert
+    EXPECT_FALSE(retAbsent);
+    EXPECT_FALSE(retNull);
+    EXPECT_TRUE(retDisconnect);
+    EXPECT_FALSE(retPopup);
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_IsUnlimitTrafficSwitchOn_Branches
+ * @tc.name: IsUnlimitTrafficSwitchOn branch coverage
+ * @tc.desc: Test IsUnlimitTrafficSwitchOn with absent simId, null entry and both switch values
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, IsUnlimitTrafficSwitchOn_Branches, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 1;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[2] = nullptr;
+
+    // Act
+    bool retAbsent = trafficPlanService.IsUnlimitTrafficSwitchOn(999);
+    bool retNull = trafficPlanService.IsUnlimitTrafficSwitchOn(2);
+
+    trafficPlanService.trafficPlanInfoMap_[simId] = std::make_shared<TrafficPlanInfo>();
+    trafficPlanService.trafficPlanInfoMap_[simId]->unlimitTrafficSwitch = 1;
+    bool retOn = trafficPlanService.IsUnlimitTrafficSwitchOn(simId);
+
+    trafficPlanService.trafficPlanInfoMap_[simId]->unlimitTrafficSwitch = 0;
+    bool retOff = trafficPlanService.IsUnlimitTrafficSwitchOn(simId);
+
+    // Assert
+    EXPECT_FALSE(retAbsent);
+    EXPECT_FALSE(retNull);
+    EXPECT_TRUE(retOn);
+    EXPECT_FALSE(retOff);
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_UpdateTrafficLimit_NotFound
+ * @tc.name: UpdateTrafficLimit when simId not found
+ * @tc.desc: Test UpdateTrafficLimit does not crash and inserts nothing when simId is absent or null
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, UpdateTrafficLimit_NotFound, TestSize.Level1)
+{
+    // Arrange
+    uint64_t trafficLimit = 1024;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[2] = nullptr;
+
+    // Act
+    trafficPlanService.UpdateTrafficLimit(999, trafficLimit);
+    trafficPlanService.UpdateTrafficLimit(2, trafficLimit);
+
+    // Assert
+    EXPECT_EQ(trafficPlanService.trafficPlanInfoMap_.size(), 1);
+    EXPECT_EQ(trafficPlanService.trafficPlanInfoMap_[2], nullptr);
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_UpdateTrafficLimit_Normal
+ * @tc.name: UpdateTrafficLimit normal path
+ * @tc.desc: Test UpdateTrafficLimit updates the traffic limit of the existing entry
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, UpdateTrafficLimit_Normal, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 1;
+    uint64_t trafficLimit = 2048;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[simId] = std::make_shared<TrafficPlanInfo>();
+    trafficPlanService.trafficPlanInfoMap_[simId]->trafficLimit = 1024;
+
+    // Act
+    trafficPlanService.UpdateTrafficLimit(simId, trafficLimit);
+
+    // Assert
+    uint64_t monthlyLimit = 0;
+    EXPECT_TRUE(trafficPlanService.GetMonthlyLimitBySimId(simId, monthlyLimit));
+    EXPECT_EQ(monthlyLimit, trafficLimit);
+}
+
+/**
+ * @tc.number: NetStatsTrafficPlanService_GetMonthlyDailyMarkBySimId_Nullptr
+ * @tc.name: GetMonthlyMarkBySimId/GetDailyMarkBySimId with null entry
+ * @tc.desc: Test both mark getters return false when map entry is null
+ */
+HWTEST_F(NetStatsTrafficPlanServiceTest, GetMonthlyDailyMarkBySimId_Nullptr, TestSize.Level1)
+{
+    // Arrange
+    int32_t simId = 1;
+    uint16_t monthlyMark = 0;
+    uint16_t dailyMark = 0;
+    NetStatsTrafficPlanService trafficPlanService;
+    trafficPlanService.trafficPlanInfoMap_[simId] = nullptr;
+
+    // Act
+    bool retMonthly = trafficPlanService.GetMonthlyMarkBySimId(simId, monthlyMark);
+    bool retDaily = trafficPlanService.GetDailyMarkBySimId(simId, dailyMark);
+
+    // Assert
+    EXPECT_FALSE(retMonthly);
+    EXPECT_FALSE(retDaily);
 }
 
 /**

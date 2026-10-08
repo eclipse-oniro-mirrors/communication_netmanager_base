@@ -84,7 +84,7 @@ long GetInterfaceTrafficByType(const std::string &path, const std::string &type)
     }
 
     char buf[100] = {0};
-    int nread = read(fd, buf, sizeof(long));
+    int nread = read(fd, buf, sizeof(buf) - 1);
     if (nread == -1) {
         NETNATIVE_LOGE("GetInterfaceTrafficByType read %{private}s failed", INTERFACE_LIST_DIR);
         close(fd);

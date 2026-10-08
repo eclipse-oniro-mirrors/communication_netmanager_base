@@ -38,6 +38,8 @@ public:
 private:
     void UpdateServiceState(Nat464UpdateFlag updateFlag);
 
+    void UpdateV6Iface(const std::string &v6Iface);
+
     void StartPrefixDiscovery();
 
     void DiscoverPrefix();
