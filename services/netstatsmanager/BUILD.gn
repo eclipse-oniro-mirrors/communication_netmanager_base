@@ -145,7 +145,11 @@ ohos_shared_library("net_stats_manager") {
   }
 
   if (netmanager_base_enable_automotive_traffic_stat) {
-    defines += [ "FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT" ]
+    defines += [
+      "FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT",
+      "SUPPORT_NETWORK_SHARE"
+    ]
+    external_deps += [ "netmanager_ext:net_tether_manager_if" ]
   }
 
   external_deps += [ "hilog:libhilog" ]
@@ -256,7 +260,11 @@ ohos_static_library("net_stats_manager_static") {
   }
   
   if (netmanager_base_enable_automotive_traffic_stat) {
-    defines += [ "FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT" ]
+    defines += [
+      "FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT",
+      "SUPPORT_NETWORK_SHARE"
+    ]
+    external_deps += [ "netmanager_ext:net_tether_manager_if" ]
   }
 
   external_deps += [ "hilog:libhilog" ]
