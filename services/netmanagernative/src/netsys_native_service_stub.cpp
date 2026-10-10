@@ -433,6 +433,8 @@ void NetsysNativeServiceStub::InitNfQueueInterfaceMap()
         &NetsysNativeServiceStub::CmdNfqQueueSetMaxLen;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_QUEUE_SET_FLAG)] =
         &NetsysNativeServiceStub::CmdNfqQueueSetFlag;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_PKT_VERDICT_MARK)] =
+        &NetsysNativeServiceStub::CmdNfqPktVerdictMark;
 }
 #endif
 
@@ -3202,6 +3204,35 @@ int32_t NetsysNativeServiceStub::CmdNfqQueueSetFlag(MessageParcel &data, Message
         return ERR_FLATTEN_OBJECT;
     }
     int32_t ret = NfqQueueSetFlag(ctx, q, mask, flag);
+    if (!ctx->Marshalling(reply)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteInt32(ret)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdNfqPktVerdictMark(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NfqCtx> ctx = NfqCtx::Unmarshalling(data);
+    sptr<NfqQueue> qh = NfqQueue::Unmarshalling(data);
+    if (qh == nullptr || ctx == nullptr) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    uint32_t packetId = 0;
+    if (!data.ReadUint32(packetId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t verdict = 0;
+    if (!data.ReadInt32(verdict)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    uint32_t mark = 0;
+    if (!data.ReadUint32(mark)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret = NfqPktVerdictMark(ctx, qh, packetId, verdict, mark);
     if (!ctx->Marshalling(reply)) {
         return ERR_FLATTEN_OBJECT;
     }

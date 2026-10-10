@@ -1632,6 +1632,14 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNfqQueueSetFlagInvalid001, TestSize.Lev
     int32_t ret = notifyStub_->CmdNfqQueueSetFlag(data, reply);
     EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
 }
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNfqPktVerdictMarkInvalid001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdNfqPktVerdictMark(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
 #endif
 } // namespace NetsysNative
 } // namespace OHOS

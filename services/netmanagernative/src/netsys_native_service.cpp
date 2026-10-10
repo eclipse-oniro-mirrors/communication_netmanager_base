@@ -1470,10 +1470,22 @@ struct NfqCmode {
     uint8_t  copyMode;
 };
 
+struct NfqVerdictParams {
+    uint16_t qnum;
+    uint32_t pktId;
+    uint32_t verdict;
+    uint32_t mark;
+};
+
 uint16_t NfqNlType(uint8_t subsys, uint8_t msg)
 {
     return (static_cast<uint16_t>(subsys) << NUMBER_EIGHT) | msg;
 }
+
+struct NfqVhdr {
+    uint32_t verdict;
+    uint32_t id;
+};
 
 int32_t BuildConfig(struct nlmsghdr *nlh, size_t cap, const struct NfqBuildConfig *cfg)
 {
@@ -1522,6 +1534,37 @@ int32_t BuildConfig(struct nlmsghdr *nlh, size_t cap, const struct NfqBuildConfi
     if (cfg->flag != 0) {
         uint32_t beFlag = htonl(cfg->flag);
         if (NlaAppend(nlh, cap, NFQA_CFG_QUEUE_FLAG, &beFlag, sizeof(beFlag)) < 0) {
+            return -1;
+        }
+    }
+
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t BuildVerdict(struct nlmsghdr *nlh, size_t cap, const struct NfqVerdictParams *params)
+{
+    errno_t ret = memset_s(nlh, cap, 0, NLMSG_LENGTH(sizeof(struct NfqNfg)));
+    if (ret != 0) {
+        return -1;
+    }
+    nlh->nlmsg_len = NLMSG_LENGTH(sizeof(struct NfqNfg));
+    nlh->nlmsg_type = NfqNlType(NFNL_SUBSYS_QUEUE, NFQ_MSG_VERDICT);
+    nlh->nlmsg_flags = NLM_F_REQUEST;
+    nlh->nlmsg_seq = 0;
+
+    struct NfqNfg *nfg = reinterpret_cast<struct NfqNfg *>(NLMSG_DATA(nlh));
+    nfg->family = AF_UNSPEC;
+    nfg->version = 0;
+    nfg->resId = htons(params->qnum);
+
+    struct NfqVhdr vh = { .verdict = htonl(params->verdict), .id = htonl(params->pktId) };
+    if (NlaAppend(nlh, cap, NFQA_VERDICT_HDR, &vh, sizeof(vh)) < 0) {
+        return -1;
+    }
+
+    if (params->mark != 0) {
+        uint32_t beMark = htonl(params->mark);
+        if (NlaAppend(nlh, cap, NFQA_MARK, &beMark, sizeof(beMark)) < 0) {
             return -1;
         }
     }
@@ -1914,6 +1957,32 @@ int32_t NetsysNativeService::NfqQueueSetFlag(sptr<NfqCtx> &ctx, const sptr<NfqQu
     struct NfqBuildConfig cfg = {q->queueNum, NFQ_CMD_NONE, 0, 0xFF, 0, 0, mask, flag};
     if (BuildConfig(nlh, sizeof(buf), &cfg) < 0) {
         return -1;
+    }
+    nlh->nlmsg_seq = NextSeq(ctx);
+    return SendToKernel(ctx->fd, nlh);
+}
+
+int32_t NetsysNativeService::NfqPktVerdictMark(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &qh,
+    uint32_t packetId, int32_t verdict, uint32_t mark)
+{
+    if (qh == nullptr || ctx == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    int32_t fd = GetNfqFdById(ctx->ctxId);
+    if (fd < 0) {
+        NETNATIVE_LOGE("NfqPktVerdictMark invalid ctxId: %{public}u", ctx->ctxId);
+        return NETMANAGER_ERROR;
+    }
+    ctx->fd = fd;
+    char buf[BUFFER_SIZE];
+    struct nlmsghdr *nlh = reinterpret_cast<struct nlmsghdr *>(buf);
+    struct NfqVerdictParams params;
+    params.qnum = qh->queueNum;
+    params.pktId = packetId;
+    params.verdict = verdict;
+    params.mark = mark;
+    if (BuildVerdict(nlh, sizeof(buf), &params) < 0) {
+        return NETMANAGER_ERROR;
     }
     nlh->nlmsg_seq = NextSeq(ctx);
     return SendToKernel(ctx->fd, nlh);
