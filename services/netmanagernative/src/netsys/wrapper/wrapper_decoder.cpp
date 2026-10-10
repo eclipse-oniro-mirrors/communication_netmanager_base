@@ -233,7 +233,7 @@ WrapperDecoder::WrapperDecoder(std::shared_ptr<NetsysEventMessage> message) : me
 
 bool WrapperDecoder::DecodeAscii(const char *buffer, int32_t buffSize)
 {
-    std::string buf = buffer;
+    std::string buf(buffer, buffSize);
     const char *start = buffer;
     const char *end = start + buffSize;
     std::vector<std::string> recvmsg;
@@ -255,13 +255,26 @@ bool WrapperDecoder::DecodeAscii(const char *buffer, int32_t buffSize)
     }
 
     // Skip the first line.
-    start += strlen(start) + 1;
+    size_t firstLineLen = 0;
+    while (start < end && *start != '\0') {
+        start++;
+        firstLineLen++;
+    }
+    if (start < end) {
+        start++;
+    }
     while (start < end) {
-        if (start != nullptr) {
-            recvmsg.emplace_back(start);
+        const char *segStart = start;
+        while (start < end && *start != '\0') {
+            start++;
         }
-        // Skip to next line.
-        start += strlen(start) + 1;
+        int32_t segLen = static_cast<int32_t>(start - segStart);
+        if (segLen > 0) {
+            recvmsg.emplace_back(segStart, segLen);
+        }
+        if (start < end) {
+            start++;
+        }
     }
 
     // Split the message and push them into params.
