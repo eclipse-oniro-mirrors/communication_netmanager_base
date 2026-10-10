@@ -17,8 +17,10 @@
 #define MULTI_VPN_MANAGER_H
 
 #include <cstdint>
+#include <deque>
 #include <linux/if.h>
 #include <string>
+#include <map>
 #include <mutex>
 
 namespace OHOS {
@@ -65,18 +67,24 @@ private:
     int32_t AddVpnRemoteAddress(const std::string &ifName, std::atomic_int &net4Sock, ifreq &ifr);
     int32_t CreatePppInterface(const std::string &ifName);
     int32_t GetMultiVpnFd(const std::string &ifName, int32_t &multiVpnFd);
+    void PushPendingIfNameLocked(const std::string &ifName);
+    std::string ReceiveClientRequest(int32_t clientFd);
     int32_t DestroyMultiVpnFd(const std::string &ifName);
     int32_t CreateMultiTunInterface(const std::string &ifName);
     int32_t SetVpnAddressIPv6(const std::string &ifName, const std::string &vpnAddr, int32_t prefix);
     int32_t SetVpnAddressIPv4(const std::string &ifName, const std::string &vpnAddr, int32_t prefix);
     void StartMultiVpnSocketListen();
     void StartMultiVpnInterfaceFdListen();
+    void ResetMultiVpnFdListenLocked();
+    bool TryStopMultiVpnFdListenLocked();
 
 private:
     std::atomic_bool multiVpnListeningFlag_ = false;
-    std::unordered_map<std::string, std::atomic_int> multiVpnFdMap_;
+    int32_t multiVpnStopFd_ = -1;
+    std::map<std::string, std::atomic_int> multiVpnFdMap_;
     std::string phyName_;
     std::string multiVpnListeningName_;
+    std::deque<std::string> pendingIfNames_;
     std::string remoteIpv4Addr_;
     std::mutex mutex_;
 };

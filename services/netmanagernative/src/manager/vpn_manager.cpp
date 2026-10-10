@@ -20,6 +20,8 @@
 #include <linux/ipv6.h>
 #include <linux/if_tun.h>
 #include <netinet/in.h>
+#include <poll.h>
+#include <sys/eventfd.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -115,7 +117,16 @@ void VpnManager::DestroyVpnInterface()
         close(tunFd_);
         tunFd_ = -1;
     }
-    listeningFlag_ = false;
+
+    int32_t stopFd = -1;
+    {
+        std::lock_guard<std::mutex> lock(listenMutex_);
+        stopFd = stopFd_;
+    }
+    if (stopFd >= 0) {
+        uint64_t one = 1;
+        (void)write(stopFd, &one, sizeof(one));
+    }
 }
 
 int32_t VpnManager::SetVpnResult(std::atomic_int &fd, unsigned long cmd, ifreq &ifr)
@@ -305,43 +316,122 @@ int32_t VpnManager::SendVpnInterfaceFdToClient(int32_t clientFd, int32_t tunFd)
     return NETMANAGER_SUCCESS;
 }
 
+void VpnManager::ResetVpnFdListenLocked()
+{
+    listeningFlag_ = false;
+    if (stopFd_ >= 0) {
+        close(stopFd_);
+        stopFd_ = -1;
+    }
+}
+
+bool VpnManager::TryStopVpnFdListenLocked()
+{
+    if (tunFd_ >= 0) {
+        return false;
+    }
+    ResetVpnFdListenLocked();
+    return true;
+}
+
 void VpnManager::StartUnixSocketListen()
 {
     NETNATIVE_LOGI("StartUnixSocketListen...");
     int32_t serverfd = GetControlSocket("tunfd");
     if (serverfd < 0) {
         NETNATIVE_LOGE("get control socket error: %{public}d", errno);
-        listeningFlag_ = false;
+        std::lock_guard<std::mutex> lock(listenMutex_);
+        ResetVpnFdListenLocked();
         return;
     }
+    // LCOV_EXCL_START
     if (listen(serverfd, MAX_UNIX_SOCKET_CLIENT) < 0) {
         close(serverfd);
         NETNATIVE_LOGE("listen socket error: %{public}d", errno);
-        listeningFlag_ = false;
+        std::lock_guard<std::mutex> lock(listenMutex_);
+        ResetVpnFdListenLocked();
+        return;
+    }
+
+    int32_t stopFd = -1;
+    {
+        std::lock_guard<std::mutex> lock(listenMutex_);
+        stopFd = stopFd_;
+    }
+    if (stopFd < 0) {
         return;
     }
 
     sockaddr_in clientAddr;
     socklen_t len = sizeof(clientAddr);
+    pollfd fds[2] = {{serverfd, POLLIN, 0}, {stopFd, POLLIN, 0}};
     while (true) {
+        int32_t ret = poll(fds, 2, -1);
+        if (ret < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            NETNATIVE_LOGE("poll error: %{public}d", errno);
+            usleep(10000);
+            continue;
+        }
+        if (fds[1].revents & POLLIN) {
+            eventfd_t val = 0;
+            (void)read(stopFd, &val, sizeof(val));
+            std::lock_guard<std::mutex> lock(listenMutex_);
+            if (TryStopVpnFdListenLocked()) {
+                NETNATIVE_LOGI("tunfd listener exit");
+                return;
+            }
+            continue;
+        }
+        if ((fds[0].revents & POLLIN) == 0) {
+            continue;
+        }
         int32_t clientFd = accept(serverfd, reinterpret_cast<sockaddr *>(&clientAddr), &len);
         if (clientFd < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
             NETNATIVE_LOGE("accept socket error: %{public}d", errno);
+            usleep(10000);
             continue;
         }
 
-        SendVpnInterfaceFdToClient(clientFd, tunFd_);
+        int32_t peerUid = -1;
+        if (!CommonUtils::IsTrustedVpnFdClient(clientFd, peerUid)) {
+            NETNATIVE_LOGE("reject unauthorized tunfd client, peer uid: %{public}d", peerUid);
+            close(clientFd);
+            continue;
+        }
+
+        SendVpnInterfaceFdToClient(clientFd, tunFd_.load());
         close(clientFd);
     }
+    // LCOV_EXCL_STOP
 }
 
 void VpnManager::StartVpnInterfaceFdListen()
 {
-    if (listeningFlag_) {
-        NETNATIVE_LOGI("VpnInterface fd is listening...");
-        return;
+    {
+        std::lock_guard<std::mutex> lock(listenMutex_);
+        if (listeningFlag_) {
+            NETNATIVE_LOGI("VpnInterface fd is listening...");
+            return;
+        }
+        int32_t efd = eventfd(0, EFD_CLOEXEC);
+        // LCOV_EXCL_START
+        if (efd < 0) {
+            NETNATIVE_LOGE("create eventfd error: %{public}d", errno);
+            return;
+        }
+        if (stopFd_ >= 0) {
+            close(stopFd_);
+        }
+        // LCOV_EXCL_STOP
+        stopFd_ = efd;
+        listeningFlag_ = true;
     }
-    listeningFlag_ = true;
 
     NETNATIVE_LOGI("StartVpnInterfaceFdListen...");
     std::thread t([sp = shared_from_this()]() { sp->StartUnixSocketListen(); });

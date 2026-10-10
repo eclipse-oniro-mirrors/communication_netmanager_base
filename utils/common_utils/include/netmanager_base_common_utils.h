@@ -20,6 +20,8 @@
 #include <sstream>
 #include <vector>
 #include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
 #define HMFS_MONITOR_FL 0x00000002
 #define HMFS_IOCTL_HW_GET_FLAGS _IOR(0xf5, 70, unsigned int)
@@ -32,6 +34,7 @@ constexpr int32_t MIN_INTERNAL_NET_ID = 1;
 constexpr int32_t MAX_INTERNAL_NET_ID = 50;
 constexpr int32_t MIN_NET_ID = 100;
 constexpr int32_t MAX_NET_ID = 0xFFFF - 0x400;
+constexpr int32_t VPN_FD_CHANNEL_ALLOWED_UID = 1099;
 inline bool IsInternalNetId(int32_t netId)
 {
     return netId >= MIN_INTERNAL_NET_ID && netId <= MAX_INTERNAL_NET_ID;
@@ -43,6 +46,18 @@ inline uint32_t ConvertTableByNetId(int32_t netId, uint32_t table)
 }
 }
 namespace OHOS::NetManagerStandard::CommonUtils {
+inline bool IsTrustedVpnFdClient(int32_t clientFd, int32_t &peerUid)
+{
+    struct ucred cred = {};
+    socklen_t len = sizeof(cred);
+    peerUid = -1;
+    if (getsockopt(clientFd, SOL_SOCKET, SO_PEERCRED, &cred, &len) != 0) {
+        return false;
+    }
+    peerUid = cred.uid;
+    return peerUid == VPN_FD_CHANNEL_ALLOWED_UID;
+}
+
 inline std::vector<std::string> Split(const std::string &str, const std::string &sep)
 {
     if (sep.empty()) {

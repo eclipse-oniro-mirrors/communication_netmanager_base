@@ -15,7 +15,9 @@
 
 #include <gtest/gtest.h>
 #include <fstream>
-#include <sys/stat.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "netmanager_base_common_utils.h"
 
@@ -1464,6 +1466,27 @@ HWTEST_F(UtNetmanagerBaseCommon, SerializeStringVector001, TestSize.Level0)
     testStrVec.push_back("222");
     std::string result = CommonUtils::SerializeStringVector(testStrVec);
     EXPECT_FALSE(result.empty());
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsTrustedVpnFdClient001, TestSize.Level0)
+{
+    int32_t peerUid = VPN_FD_CHANNEL_ALLOWED_UID;
+    bool ret = CommonUtils::IsTrustedVpnFdClient(-1, peerUid);
+    EXPECT_FALSE(ret);
+    EXPECT_EQ(peerUid, -1);
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsTrustedVpnFdClient002, TestSize.Level0)
+{
+    int fds[2] = {-1, -1};
+    ASSERT_EQ(socketpair(AF_UNIX, SOCK_STREAM, 0, fds), 0);
+    int32_t peerUid = -1;
+    bool ret = CommonUtils::IsTrustedVpnFdClient(fds[0], peerUid);
+    // The peer is this test process itself: trusted only when the test process uid equals the whitelist uid.
+    EXPECT_EQ(ret, getuid() == VPN_FD_CHANNEL_ALLOWED_UID);
+    EXPECT_EQ(peerUid, static_cast<int32_t>(getuid()));
+    close(fds[0]);
+    close(fds[1]);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
