@@ -74,39 +74,34 @@ int32_t NetsysBpfStats::GetTotalStats(uint64_t &stats, StatsType statsType)
     iface_stats_value totalStats = {0};
     auto keys = ifaceStatsMap.GetAllKeys();
     std::set<uint64_t> ifIndexSet;
-    std::set<uint64_t> needFilterIfIndex;
     for (auto key : keys) {
         ifIndexSet.insert(key);
     }
-
-    for (auto value : ifIndexSet) {
+    // LCOV_EXCL_START
+    for (auto index : ifIndexSet) {
         char if_name[IFNAME_SIZE] = {0};
-        if (memset_s(if_name, sizeof(if_name), 0, sizeof(if_name)) != EOK) {
-            return STATS_ERR_READ_BPF_FAIL;
-        }
 
-        char *pName = if_indextoname(value, if_name);
-        if (pName == nullptr || IFACE_NAME_SET.find(pName) == IFACE_NAME_SET.end()) {
-            needFilterIfIndex.insert(value);
+        char *pName = if_indextoname(index, if_name);
+        if (pName != nullptr && IFACE_NAME_SET.find(pName) != IFACE_NAME_SET.end()) {
+            ifaceIndexSet_.insert(index);
         }
     }
+    std::shared_lock<ffrt::shared_mutex> lock(ifaceIndexSetMutex_);
     for (const auto &k : keys) {
-        if (needFilterIfIndex.find(k) != needFilterIfIndex.end()) {
+        if (ifaceIndexSet_.find(k) == ifaceIndexSet_.end()) {
             continue;
         }
         iface_stats_value v = {0};
-        // LCOV_EXCL_START
         if (ifaceStatsMap.ReadAndLog(k, v) < NETSYS_SUCCESS) {
             NETNATIVE_LOGE("Read ifaceStatsMap err");
             return STATS_ERR_READ_BPF_FAIL;
         }
-        // LCOV_EXCL_STOP
         totalStats.rxPackets += v.rxPackets;
         totalStats.rxBytes += v.rxBytes;
         totalStats.txPackets += v.txPackets;
         totalStats.txBytes += v.txBytes;
     }
-
+    // LCOV_EXCL_STOP
     return GetNumberFromStatsValue(stats, statsType, totalStats);
 }
 
