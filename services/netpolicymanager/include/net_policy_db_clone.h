@@ -16,6 +16,7 @@
 #ifndef NET_POLICY_DB_CLONE_H
 #define NET_POLICY_DB_CLONE_H
 
+#include <atomic>
 #include <mutex>
 #include <string>
 #include "unique_fd.h"
@@ -35,6 +36,7 @@ public:
 
 private:
     ffrt::mutex mutex_;
+    std::atomic<uint64_t> backupInfoSeq_ {0};
 };
 }
 }

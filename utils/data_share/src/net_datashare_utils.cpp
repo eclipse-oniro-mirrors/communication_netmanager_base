@@ -209,7 +209,10 @@ int32_t NetDataShareHelperUtils::RegisterObserver(const Uri &uri, const std::fun
     }
     dataShareHelper->RegisterObserver(uri, observer);
     auto id = ++callbackId;
-    callbacks_.emplace(id, observer);
+    {
+        std::lock_guard<std::mutex> lock(callbacksMutex_);
+        callbacks_.emplace(id, observer);
+    }
     dataShareHelper->Release();
     return id;
 }
@@ -221,13 +224,18 @@ int32_t NetDataShareHelperUtils::UnregisterObserver(const Uri &uri, int32_t call
         NETMGR_LOG_E("dataShareHelper is nullptr");
         return NETMANAGER_ERROR;
     }
-    auto it = callbacks_.find(callbackId);
-    if (it == callbacks_.end() || it->second == nullptr) {
-        dataShareHelper->Release();
-        return NETMANAGER_ERROR;
+    sptr<AAFwk::IDataAbilityObserver> observer = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(callbacksMutex_);
+        auto it = callbacks_.find(callbackId);
+        if (it == callbacks_.end() || it->second == nullptr) {
+            dataShareHelper->Release();
+            return NETMANAGER_ERROR;
+        }
+        observer = it->second;
+        callbacks_.erase(it);
     }
-    dataShareHelper->UnregisterObserver(uri, it->second);
-    callbacks_.erase(it);
+    dataShareHelper->UnregisterObserver(uri, observer);
     dataShareHelper->Release();
     return NETMANAGER_SUCCESS;
 }

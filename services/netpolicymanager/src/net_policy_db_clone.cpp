@@ -238,8 +238,15 @@ bool NetPolicyDBClone::FdClone(UniqueFd &fd)
 void NetPolicyDBClone::ClearBackupInfo()
 {
     NETMGR_LOG_I("start timer: clearBackupInfo");
-    std::function<void()> ClearApps = [this]() {
+    const uint64_t seq = ++backupInfoSeq_;
+    std::function<void()> ClearApps = [this, seq]() {
         std::lock_guard<ffrt::mutex> lock(mutex_);
+        // LCOV_EXCL_START
+        if (seq != backupInfoSeq_.load()) {
+            NETMGR_LOG_I("a newer restore is scheduled, skip clearing backup apps");
+            return;
+        }
+        // LCOV_EXCL_STOP
         this->unInstallApps_.clear();
         NETMGR_LOG_I("ClearBackupApps");
     };

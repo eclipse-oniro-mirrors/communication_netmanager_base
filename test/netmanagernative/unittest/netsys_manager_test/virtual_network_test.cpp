@@ -84,6 +84,22 @@ HWTEST_F(VirtualNetWorkTest, RemoveInterface001, TestSize.Level1)
     EXPECT_TRUE(result == NETMANAGER_SUCCESS || result == NETMANAGER_ERROR);
 }
 
+HWTEST_F(VirtualNetWorkTest, AddInterface002, TestSize.Level1)
+{
+    std::string iface = "wlan0";
+    EXPECT_TRUE(instance_->interfaces_.insert(iface).second);
+    auto result = instance_->AddInterface(iface);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VirtualNetWorkTest, RemoveInterface002, TestSize.Level1)
+{
+    std::string iface = "wlan0";
+    instance_->interfaces_.clear();
+    auto result = instance_->RemoveInterface(iface);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+}
+
 #ifdef SUPPORT_SYSVPN
 HWTEST_F(VirtualNetWorkTest, UpdateVpnRules001, TestSize.Level1)
 {

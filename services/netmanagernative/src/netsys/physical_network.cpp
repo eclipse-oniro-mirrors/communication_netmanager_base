@@ -51,7 +51,8 @@ void PhysicalNetwork::RemoveDefault()
 int32_t PhysicalNetwork::AddInterface(std::string &interfaceName)
 {
     NETNATIVE_LOGI("AddInterface %{public}s", interfaceName.c_str());
-    if (ExistInterface(interfaceName)) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (interfaces_.find(interfaceName) != interfaces_.end()) {
         return NETMANAGER_SUCCESS;
     }
 
@@ -66,7 +67,6 @@ int32_t PhysicalNetwork::AddInterface(std::string &interfaceName)
             return NETMANAGER_ERROR;
         }
     }
-    std::lock_guard<std::mutex> lock(mutex_);
     interfaces_.insert(interfaceName);
 
     return NETMANAGER_SUCCESS;
@@ -75,7 +75,8 @@ int32_t PhysicalNetwork::AddInterface(std::string &interfaceName)
 int32_t PhysicalNetwork::RemoveInterface(std::string &interfaceName)
 {
     NETNATIVE_LOGI("RemoveInterface %{public}s", interfaceName.c_str());
-    if (!ExistInterface(interfaceName)) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (interfaces_.find(interfaceName) == interfaces_.end()) {
         return NETMANAGER_SUCCESS;
     }
 
@@ -90,7 +91,6 @@ int32_t PhysicalNetwork::RemoveInterface(std::string &interfaceName)
         NETNATIVE_LOGE("Failed to remove interface %{public}s to netId_ %{public}u", interfaceName.c_str(), netId_);
         return NETMANAGER_ERROR;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
     interfaces_.erase(interfaceName);
     return NETMANAGER_SUCCESS;
 }
