@@ -89,9 +89,17 @@ int32_t FwmarkClient::Send(FwmarkCommand *data, int32_t fd)
     }
     int32_t error = 0;
     ret = read(socketFd, &error, sizeof(error));
-    if (ret < 0) {
+    // LCOV_EXCL_START
+    if (ret < static_cast<int32_t>(sizeof(error))) {
+        NETNATIVE_LOGE("read response failed, ret: %{public}d", ret);
         return HandleError(ret, ERROR_CODE_READ_FAILED, socketFd);
     }
+    if (error < 0) {
+        NETNATIVE_LOGE("fwmarkd rejected the request, error: %{public}d", error);
+        close(socketFd);
+        return NETMANAGER_ERROR;
+    }
+    // LCOV_EXCL_STOP
 
     close(socketFd);
     return NETMANAGER_SUCCESS;

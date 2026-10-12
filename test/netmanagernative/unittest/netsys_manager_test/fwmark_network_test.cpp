@@ -15,11 +15,14 @@
 
 #include <arpa/inet.h>
 #include <cstdio>
+#include <fcntl.h>
 #include <gtest/gtest.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #define private public
+#include "fwmark.h"
 #include "fwmark_client.h"
 #include "fwmark_network.cpp"
 #include "netsys_sock_client.h"
@@ -160,7 +163,8 @@ HWTEST_F(UnitTestFwmarkClient, HandleErrorTest, TestSize.Level1)
  */
 HWTEST_F(UnitTestFwmarkClient, CloseSocketTest001, TestSize.Level1)
 {
-    int32_t socket = 32;
+    int32_t socket = dup(STDOUT_FILENO);
+    ASSERT_GE(socket, 0);
     int32_t ret = -1;
     CloseSocket(nullptr, ret, NO_ERROR_CODE);
     CloseSocket(&socket, ret, ERROR_CODE_RECVMSG_FAILED);
@@ -168,6 +172,8 @@ HWTEST_F(UnitTestFwmarkClient, CloseSocketTest001, TestSize.Level1)
     CloseSocket(&socket, ret, ERROR_CODE_WRITE_FAILED);
     CloseSocket(&socket, ret, ERROR_CODE_GETSOCKOPT_FAILED);
     CloseSocket(&socket, ret, ERROR_CODE_SETSOCKOPT_FAILED);
+    CloseSocket(&socket, ret, ERROR_CODE_FSTAT_FAILED);
+    CloseSocket(&socket, ret, ERROR_CODE_FD_OWNER_MISMATCH);
     CloseSocket(&socket, ret, ERROR_CODE_SETSOCKOPT_FAILED - 1);
     EXPECT_EQ(socket, -1);
 }
@@ -298,7 +304,8 @@ HWTEST_F(UnitTestFwmarkClient, SetMarkTest009, TestSize.Level1)
  */
 HWTEST_F(UnitTestFwmarkClient, CloseSocketTest002, TestSize.Level1)
 {
-    int32_t socket = 32;
+    int32_t socket = dup(STDOUT_FILENO);
+    ASSERT_GE(socket, 0);
     int32_t ret = -1;
     CloseSocket(&socket, ret, ERROR_CODE_SOCKETFD_INVALID);
     EXPECT_EQ(socket, -1);
@@ -306,14 +313,97 @@ HWTEST_F(UnitTestFwmarkClient, CloseSocketTest002, TestSize.Level1)
 
 /**
  * @tc.name: RunForClientFdTest001
- * @tc.desc: Test FwmarkNetwork RunForClientFd.
+ * @tc.desc: Test FwmarkNetwork RunForClientFd with a non-socket fd (SO_PEERCRED fails).
  * @tc.type: FUNC
  */
 HWTEST_F(UnitTestFwmarkClient, RunForClientFdTest001, TestSize.Level1)
 {
-    int32_t socket = 32;
-    RunForClientFd(socket);
-    EXPECT_TRUE(socket == -1 || socket == 32);
+    int32_t fds[2] = {-1, -1};
+    ASSERT_EQ(pipe(fds), 0);
+    RunForClientFd(fds[0]);
+    EXPECT_EQ(fcntl(fds[0], F_GETFD), -1);
+    close(fds[1]);
+}
+
+/**
+ * @tc.name: RunForClientFdTest002
+ * @tc.desc: Test FwmarkNetwork RunForClientFd with a valid command and an owned fd.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UnitTestFwmarkClient, RunForClientFdTest002, TestSize.Level1)
+{
+    int32_t sv[2] = {-1, -1};
+    ASSERT_EQ(socketpair(AF_UNIX, SOCK_STREAM, 0, sv), 0);
+    int32_t ownedSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    ASSERT_GE(ownedSocket, 0);
+
+    FwmarkCommand cmd{};
+    cmd.cmdId = FwmarkCommand::SELECT_NETWORK;
+    cmd.netId = static_cast<uint32_t>(NETID_FIRST);
+
+    iovec iov = {.iov_base = &cmd, .iov_len = sizeof(cmd)};
+    union {
+        cmsghdr cmh;
+        char cmsg[CMSG_SPACE(sizeof(ownedSocket))];
+    } cmsgu{};
+    msghdr message{};
+    message.msg_iov = &iov;
+    message.msg_iovlen = 1;
+    message.msg_control = cmsgu.cmsg;
+    message.msg_controllen = sizeof(cmsgu.cmsg);
+    cmsghdr *const cmsgh = CMSG_FIRSTHDR(&message);
+    cmsgh->cmsg_len = CMSG_LEN(sizeof(ownedSocket));
+    cmsgh->cmsg_level = SOL_SOCKET;
+    cmsgh->cmsg_type = SCM_RIGHTS;
+    memcpy_s(CMSG_DATA(cmsgh), CMSG_ALIGN(sizeof(ownedSocket)), &ownedSocket, sizeof(ownedSocket));
+    ASSERT_EQ(sendmsg(sv[1], &message, 0), static_cast<ssize_t>(sizeof(cmd)));
+
+    RunForClientFd(sv[0]);
+
+    int32_t response = 1;
+    ASSERT_EQ(read(sv[1], &response, sizeof(response)), static_cast<ssize_t>(sizeof(response)));
+    EXPECT_EQ(response, 0);
+
+    Fwmark fwmark;
+    socklen_t fwmarkLen = sizeof(fwmark.intValue);
+    ASSERT_EQ(getsockopt(ownedSocket, SOL_SOCKET, SO_MARK, &fwmark.intValue, &fwmarkLen), 0);
+    EXPECT_EQ(fwmark.netId, static_cast<uint16_t>(NETID_FIRST));
+    close(ownedSocket);
+    close(sv[1]);
+}
+
+/**
+ * @tc.name: RunForClientFdTest003
+ * @tc.desc: Test FwmarkNetwork RunForClientFd without SCM_RIGHTS (socketFd invalid).
+ * @tc.type: FUNC
+ */
+HWTEST_F(UnitTestFwmarkClient, RunForClientFdTest003, TestSize.Level1)
+{
+    int32_t sv[2] = {-1, -1};
+    ASSERT_EQ(socketpair(AF_UNIX, SOCK_STREAM, 0, sv), 0);
+    FwmarkCommand cmd{};
+    ASSERT_EQ(write(sv[1], &cmd, sizeof(cmd)), static_cast<ssize_t>(sizeof(cmd)));
+    RunForClientFd(sv[0]);
+    int32_t response = 1;
+    EXPECT_NE(read(sv[1], &response, sizeof(response)), static_cast<ssize_t>(sizeof(response)));
+    close(sv[1]);
+}
+
+/**
+ * @tc.name: CheckSocketOwnershipTest001
+ * @tc.desc: Test FwmarkNetwork CheckSocketOwnership for all ownership check branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UnitTestFwmarkClient, CheckSocketOwnershipTest001, TestSize.Level1)
+{
+    int32_t udpSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    ASSERT_GE(udpSocket, 0);
+    uid_t selfUid = geteuid();
+    uid_t foreignUid = (selfUid == 0) ? 1 : 0;
+    EXPECT_EQ(CheckSocketOwnership(udpSocket, selfUid), NO_ERROR_CODE);
+    EXPECT_EQ(CheckSocketOwnership(udpSocket, foreignUid), ERROR_CODE_FD_OWNER_MISMATCH);
+    EXPECT_EQ(CheckSocketOwnership(-1, selfUid), ERROR_CODE_FSTAT_FAILED);
+    close(udpSocket);
 }
 
 /**
