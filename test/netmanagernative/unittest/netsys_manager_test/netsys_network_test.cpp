@@ -15,6 +15,11 @@
 
 #include <gtest/gtest.h>
 
+#ifdef GTEST_API_
+#define private public
+#define protected public
+#endif
+
 #include "netsys_network.h"
 #include "net_manager_constants.h"
 #include "network_permission.h"
@@ -65,6 +70,21 @@ HWTEST_F(NetsysNetworkTest, InterfaceTest002, TestSize.Level1)
 
     int32_t ret = netsysNetwork->ClearInterfaces();
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNetworkTest, InterfaceTest003, TestSize.Level1)
+{
+    PhysicalNetwork physicNetwork(NET_ID, NetworkPermission::PERMISSION_NETWORK);
+    NetsysNetwork *netsysNetwork = &physicNetwork;
+    EXPECT_TRUE(netsysNetwork->interfaces_.insert(INTERFACE_NAME).second);
+
+    auto interfaces = netsysNetwork->GetAllInterface();
+    EXPECT_EQ(interfaces.size(), static_cast<size_t>(1));
+    EXPECT_EQ(interfaces.count(INTERFACE_NAME), static_cast<size_t>(1));
+
+    int32_t ret = netsysNetwork->ClearInterfaces();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(interfaces.size(), static_cast<size_t>(1));
 }
 } // namespace nmd
 } // namespace OHOS

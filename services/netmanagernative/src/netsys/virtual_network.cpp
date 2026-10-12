@@ -71,7 +71,8 @@ int32_t VirtualNetwork::RemoveUids(const std::vector<UidRange> &uidVec)
 int32_t VirtualNetwork::AddInterface(std::string &interfaceName)
 {
     NETNATIVE_LOGI("Entry VirtualNetwork::AddInterface %{public}s", interfaceName.c_str());
-    if (ExistInterface(interfaceName)) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (interfaces_.find(interfaceName) != interfaces_.end()) {
         NETNATIVE_LOGW("Failed to add interface %{public}s to netId_ %{public}u", interfaceName.c_str(), netId_);
         return NETMANAGER_ERROR;
     }
@@ -98,7 +99,6 @@ int32_t VirtualNetwork::AddInterface(std::string &interfaceName)
         return NETMANAGER_ERROR;
     }
 
-    std::lock_guard<std::mutex> lock(mutex_);
     interfaces_.insert(interfaceName);
     return NETMANAGER_SUCCESS;
 }
@@ -106,7 +106,8 @@ int32_t VirtualNetwork::AddInterface(std::string &interfaceName)
 int32_t VirtualNetwork::RemoveInterface(std::string &interfaceName)
 {
     NETNATIVE_LOGI("Entry VirtualNetwork::RemoveInterface %{public}s", interfaceName.c_str());
-    if (!ExistInterface(interfaceName)) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (interfaces_.find(interfaceName) == interfaces_.end()) {
         NETNATIVE_LOGW("Failed to remove interface %{public}s to netId_ %{public}u", interfaceName.c_str(), netId_);
         return NETMANAGER_SUCCESS;
     }
@@ -127,7 +128,6 @@ int32_t VirtualNetwork::RemoveInterface(std::string &interfaceName)
 #else
     VpnManager::GetInstance().DestroyVpnInterface();
 #endif // SUPPORT_SYSVPN
-    std::lock_guard<std::mutex> lock(mutex_);
     interfaces_.erase(interfaceName);
     return NETMANAGER_SUCCESS;
 }

@@ -19,6 +19,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <utility>
 
 #include "datashare_helper.h"
@@ -51,6 +52,7 @@ public:
 
 private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
+    std::mutex callbacksMutex_;
     std::map<int32_t, sptr<AAFwk::IDataAbilityObserver>> callbacks_;
 };
 } // namespace NetManagerStandard

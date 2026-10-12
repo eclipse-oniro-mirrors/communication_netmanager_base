@@ -81,10 +81,11 @@ public:
     /**
      * Get all interfaces
      *
-     * @return Returns interfaces_
+     * @return Returns a copy of interfaces_
      */
-    const std::set<std::string> &GetAllInterface() const
+    std::set<std::string> GetAllInterface() const
     {
+        std::lock_guard<std::mutex> lock(mutex_);
         return interfaces_;
     }
 
@@ -102,7 +103,7 @@ protected:
     explicit NetsysNetwork(uint16_t netId);
     uint16_t netId_;
     std::set<std::string> interfaces_;
-    std::mutex mutex_;
+    mutable std::mutex mutex_;
 };
 } // namespace nmd
 } // namespace OHOS

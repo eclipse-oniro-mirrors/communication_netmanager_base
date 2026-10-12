@@ -69,6 +69,9 @@ napi_status BaseContext::SetCallback(napi_value callback)
 {
     if (callback_ != nullptr) {
         (void)napi_delete_reference(env_, callback_);
+        // LCOV_EXCL_START
+        callback_ = nullptr;
+        // LCOV_EXCL_STOP
     }
     return napi_create_reference(env_, callback, 1, &callback_);
 }
