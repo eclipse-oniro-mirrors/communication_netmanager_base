@@ -15,7 +15,11 @@
 
 #include <gtest/gtest.h>
 #include <ifaddrs.h>
+#include <memory>
+#include <sys/eventfd.h>
+#include <sys/socket.h>
 #include <sys/resource.h>
+#include <thread>
 
 #ifdef GTEST_API_
 #define private public
@@ -326,6 +330,69 @@ HWTEST_F(VpnManagerTest, SendVpnInterfaceFdToClientTest002, TestSize.Level1)
     int32_t tunFd = 0;
     auto result = vpnmanager.SendVpnInterfaceFdToClient(clientFd, tunFd);
     EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VpnManagerTest, VpnFdListenLifecycle001, TestSize.Level1)
+{
+    auto holder = std::make_shared<VpnManager>();
+    VpnManager &instance = *holder;
+    int fds[2] = {-1, -1};
+    ASSERT_EQ(socketpair(AF_UNIX, SOCK_STREAM, 0, fds), 0);
+    int32_t stopFd = -1;
+    {
+        std::lock_guard<std::mutex> lock(instance.listenMutex_);
+        instance.net4Sock_ = -1;
+        instance.net6Sock_ = -1;
+        instance.tunFd_ = fds[0];
+        instance.listeningFlag_ = true;
+        instance.stopFd_ = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
+        ASSERT_GE(instance.stopFd_, 0);
+        stopFd = instance.stopFd_;
+    }
+
+    instance.StartVpnInterfaceFdListen();
+    {
+        std::lock_guard<std::mutex> lock(instance.listenMutex_);
+        EXPECT_EQ(instance.stopFd_, stopFd);
+        EXPECT_FALSE(instance.TryStopVpnFdListenLocked());
+        EXPECT_TRUE(instance.listeningFlag_);
+    }
+
+    instance.DestroyVpnInterface();
+    eventfd_t count = 0;
+    EXPECT_EQ(read(stopFd, &count, sizeof(count)), static_cast<ssize_t>(sizeof(count)));
+    EXPECT_EQ(count, 1);
+    {
+        std::lock_guard<std::mutex> lock(instance.listenMutex_);
+        EXPECT_TRUE(instance.TryStopVpnFdListenLocked());
+        EXPECT_FALSE(instance.listeningFlag_);
+        EXPECT_EQ(instance.stopFd_, -1);
+    }
+    close(fds[1]);
+
+    instance.StartVpnInterfaceFdListen();
+    {
+        std::lock_guard<std::mutex> lock(instance.listenMutex_);
+        EXPECT_GE(instance.stopFd_, 0);
+        stopFd = instance.stopFd_;
+    }
+    if (stopFd >= 0) {
+        uint64_t one = 1;
+        (void)write(stopFd, &one, sizeof(one));
+    }
+    for (int32_t i = 0; i < 100; i++) {
+        std::lock_guard<std::mutex> lock(instance.listenMutex_);
+        if (!instance.listeningFlag_) {
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    {
+        std::lock_guard<std::mutex> lock(instance.listenMutex_);
+        EXPECT_FALSE(instance.listeningFlag_);
+        EXPECT_EQ(instance.stopFd_, -1);
+        instance.ResetVpnFdListenLocked();
+    }
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

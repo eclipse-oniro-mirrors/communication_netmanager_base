@@ -14,6 +14,12 @@
  */
 
 #include <gtest/gtest.h>
+#include <memory>
+#include <sys/eventfd.h>
+#include <sys/socket.h>
+#include <thread>
+#include <unistd.h>
+#include <vector>
 
 #ifdef GTEST_API_
 #define private public
@@ -579,6 +585,195 @@ HWTEST_F(MultiVpnManagerTest, SetVpnAddressIPv6PrivateInvalidPrefix, TestSize.Le
     int32_t prefix = 129;
     auto result = multiVpnManager.SetVpnAddressIPv6(ifName, ipAddr, prefix);
     EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(MultiVpnManagerTest, ReceiveClientRequest001, TestSize.Level1)
+{
+    MultiVpnManager &instance = MultiVpnManager::GetInstance();
+    auto result = instance.ReceiveClientRequest(-1);
+    EXPECT_EQ(result, "");
+}
+
+HWTEST_F(MultiVpnManagerTest, ReceiveClientRequest002, TestSize.Level1)
+{
+    int fds[2] = {-1, -1};
+    ASSERT_EQ(socketpair(AF_UNIX, SOCK_STREAM, 0, fds), 0);
+    MultiVpnManager &instance = MultiVpnManager::GetInstance();
+    // No request byte arrives: 100ms poll timeout, empty name returned, queue not consumed.
+    instance.pendingIfNames_.clear();
+    instance.pendingIfNames_.push_back(TEST_PPP_CARD_NAME);
+    auto result = instance.ReceiveClientRequest(fds[0]);
+    EXPECT_EQ(result, "");
+    EXPECT_EQ(instance.pendingIfNames_.size(), 1UL);
+    close(fds[0]);
+    close(fds[1]);
+}
+
+HWTEST_F(MultiVpnManagerTest, ReceiveClientRequest003, TestSize.Level1)
+{
+    int fds[2] = {-1, -1};
+    ASSERT_EQ(socketpair(AF_UNIX, SOCK_STREAM, 0, fds), 0);
+    const std::string ifName = "ppp-test9";
+    ASSERT_EQ(static_cast<long>(send(fds[1], ifName.c_str(), ifName.size(), 0)),
+              static_cast<long>(ifName.size()));
+    MultiVpnManager &instance = MultiVpnManager::GetInstance();
+    instance.pendingIfNames_.clear();
+    auto result = instance.ReceiveClientRequest(fds[0]);
+    EXPECT_EQ(result, ifName);
+    EXPECT_TRUE(instance.pendingIfNames_.empty());
+    close(fds[0]);
+    close(fds[1]);
+}
+
+HWTEST_F(MultiVpnManagerTest, ReceiveClientRequest004, TestSize.Level1)
+{
+    int fds[2] = {-1, -1};
+    ASSERT_EQ(socketpair(AF_UNIX, SOCK_STREAM, 0, fds), 0);
+    const std::string longName = "ppp-0123456789012345678901234567890123456789";
+    ASSERT_EQ(static_cast<long>(send(fds[1], longName.c_str(), longName.size(), 0)),
+              static_cast<long>(longName.size()));
+    MultiVpnManager &instance = MultiVpnManager::GetInstance();
+    auto result = instance.ReceiveClientRequest(fds[0]);
+    // Name longer than IFNAMSIZ - 1 is rejected instead of being silently truncated.
+    EXPECT_EQ(result, "");
+    close(fds[0]);
+    close(fds[1]);
+}
+
+HWTEST_F(MultiVpnManagerTest, MultiVpnFdListenLifecycle001, TestSize.Level1)
+{
+    auto holder = std::make_shared<MultiVpnManager>();
+    MultiVpnManager &instance = *holder;
+    int fds[2] = {-1, -1};
+    ASSERT_EQ(socketpair(AF_UNIX, SOCK_STREAM, 0, fds), 0);
+    int32_t stopFd = -1;
+    {
+        std::lock_guard<std::mutex> lock(instance.mutex_);
+        instance.multiVpnListeningFlag_ = true;
+        instance.multiVpnStopFd_ = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
+        ASSERT_GE(instance.multiVpnStopFd_, 0);
+        instance.multiVpnFdMap_[TEST_PPP_CARD_NAME] = fds[0];
+        stopFd = instance.multiVpnStopFd_;
+    }
+
+    instance.StartMultiVpnInterfaceFdListen();
+    {
+        std::lock_guard<std::mutex> lock(instance.mutex_);
+        EXPECT_EQ(instance.multiVpnStopFd_, stopFd);
+        EXPECT_FALSE(instance.TryStopMultiVpnFdListenLocked());
+        EXPECT_TRUE(instance.multiVpnListeningFlag_);
+    }
+
+    EXPECT_EQ(instance.DestroyMultiVpnFd(TEST_PPP_CARD_NAME), NETMANAGER_SUCCESS);
+    eventfd_t count = 0;
+    EXPECT_EQ(read(stopFd, &count, sizeof(count)), static_cast<ssize_t>(sizeof(count)));
+    EXPECT_EQ(count, 1);
+    {
+        std::lock_guard<std::mutex> lock(instance.mutex_);
+        EXPECT_TRUE(instance.TryStopMultiVpnFdListenLocked());
+        EXPECT_FALSE(instance.multiVpnListeningFlag_);
+        EXPECT_EQ(instance.multiVpnStopFd_, -1);
+    }
+    close(fds[1]);
+
+    {
+        std::lock_guard<std::mutex> lock(instance.mutex_);
+        instance.multiVpnFdMap_[TEST_PPP_CARD_NAME] = -1;
+    }
+    EXPECT_EQ(instance.DestroyMultiVpnFd(TEST_PPP_CARD_NAME), NETMANAGER_SUCCESS);
+    {
+        std::lock_guard<std::mutex> lock(instance.mutex_);
+        EXPECT_TRUE(instance.multiVpnFdMap_.empty());
+        instance.ResetMultiVpnFdListenLocked();
+    }
+
+    instance.StartMultiVpnInterfaceFdListen();
+    {
+        std::lock_guard<std::mutex> lock(instance.mutex_);
+        EXPECT_GE(instance.multiVpnStopFd_, 0);
+        stopFd = instance.multiVpnStopFd_;
+    }
+    if (stopFd >= 0) {
+        uint64_t one = 1;
+        (void)write(stopFd, &one, sizeof(one));
+    }
+    for (int32_t i = 0; i < 100; i++) {
+        std::lock_guard<std::mutex> lock(instance.mutex_);
+        if (!instance.multiVpnListeningFlag_) {
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    {
+        std::lock_guard<std::mutex> lock(instance.mutex_);
+        EXPECT_FALSE(instance.multiVpnListeningFlag_);
+        EXPECT_EQ(instance.multiVpnStopFd_, -1);
+        instance.ResetMultiVpnFdListenLocked();
+    }
+}
+
+HWTEST_F(MultiVpnManagerTest, MultiVpnFdListenConcurrent001, TestSize.Level1)
+{
+    auto holder = std::make_shared<MultiVpnManager>();
+    MultiVpnManager &instance = *holder;
+    constexpr int32_t THREAD_NUM = 4;
+    constexpr int32_t LOOP_NUM = 50;
+    std::vector<std::thread> threads;
+    for (int32_t t = 0; t < THREAD_NUM; t++) {
+        threads.emplace_back([&instance, t]() {
+            for (int32_t i = 0; i < LOOP_NUM; i++) {
+                std::string ifName = "ppp-vpnc" + std::to_string(t) + "-" + std::to_string(i);
+                int fds[2] = {-1, -1};
+                if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds) != 0) {
+                    continue;
+                }
+                {
+                    std::lock_guard<std::mutex> lock(instance.mutex_);
+                    instance.multiVpnFdMap_[ifName] = fds[0];
+                    instance.pendingIfNames_.push_back(ifName);
+                }
+                instance.StartMultiVpnInterfaceFdListen();
+                if (i % 2 == 0) {
+                    EXPECT_EQ(instance.DestroyMultiVpnFd(ifName), NETMANAGER_SUCCESS);
+                }
+                close(fds[1]);
+            }
+        });
+    }
+    for (auto &threadItem : threads) {
+        threadItem.join();
+    }
+
+    int32_t stopFd = -1;
+    {
+        std::lock_guard<std::mutex> lock(instance.mutex_);
+        for (auto &entry : instance.multiVpnFdMap_) {
+            int32_t fd = entry.second.load();
+            if (fd >= 0) {
+                close(fd);
+            }
+        }
+        instance.multiVpnFdMap_.clear();
+        instance.pendingIfNames_.clear();
+        stopFd = instance.multiVpnStopFd_;
+    }
+    if (stopFd >= 0) {
+        uint64_t one = 1;
+        (void)write(stopFd, &one, sizeof(one));
+    }
+    for (int32_t i = 0; i < 100; i++) {
+        std::lock_guard<std::mutex> lock(instance.mutex_);
+        if (!instance.multiVpnListeningFlag_) {
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    {
+        std::lock_guard<std::mutex> lock(instance.mutex_);
+        EXPECT_FALSE(instance.multiVpnListeningFlag_);
+        EXPECT_EQ(instance.multiVpnStopFd_, -1);
+        instance.ResetMultiVpnFdListenLocked();
+    }
 }
 
 } // namespace NetManagerStandard

@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <net/if.h>
+#include <mutex>
 #include <string>
 
 namespace OHOS {
@@ -52,12 +53,16 @@ private:
     int32_t SendVpnInterfaceFdToClient(int32_t clientFd, int32_t tunFd);
     void StartUnixSocketListen();
     void StartVpnInterfaceFdListen();
+    void ResetVpnFdListenLocked();
+    bool TryStopVpnFdListenLocked();
 
 private:
     std::atomic_int tunFd_ = -1;
     std::atomic_int net4Sock_ = -1;
     std::atomic_int net6Sock_ = -1;
     std::atomic_bool listeningFlag_ = false;
+    std::mutex listenMutex_;
+    int32_t stopFd_ = -1;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
