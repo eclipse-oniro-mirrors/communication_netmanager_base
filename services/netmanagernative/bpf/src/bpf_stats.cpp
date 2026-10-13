@@ -86,7 +86,7 @@ int32_t NetsysBpfStats::GetTotalStats(uint64_t &stats, StatsType statsType)
             ifaceIndexSet_.insert(index);
         }
     }
-    std::shared_lock<ffrt::shared_mutex> lock(ifaceIndexSetMutex_);
+
     for (const auto &k : keys) {
         if (ifaceIndexSet_.find(k) == ifaceIndexSet_.end()) {
             continue;
