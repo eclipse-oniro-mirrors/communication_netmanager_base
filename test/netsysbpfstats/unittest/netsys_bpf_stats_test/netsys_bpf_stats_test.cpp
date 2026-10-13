@@ -234,12 +234,14 @@ HWTEST_F(NetsysBpfStatsTest, LoadAndIfaceStats, TestSize.Level1)
     EXPECT_EQ(stats, TEST_BYTES0);
     EXPECT_EQ(bpfStats->GetTotalStats(stats, StatsType::STATS_TYPE_TX_PACKETS), NETSYS_SUCCESS);
     EXPECT_EQ(stats, TEST_BYTES0);
+    // wlan0 为白名单内的在网接口，调用后应被记入历史缓存
+    EXPECT_EQ(bpfStats->ifaceIndexSet_.count(ifIndex), 1);
 
     ret = ifaceStatsMap.Delete(ifIndex);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 }
 
-HWTEST_F(NetsysBpfStatsTest, GetTotalStatsFilterDeletedIface, TestSize.Level1)
+HWTEST_F(NetsysBpfStatsTest, GetTotalStatsCountDeletedIface, TestSize.Level1)
 {
     BpfMapper<iface_stats_key, iface_stats_value> ifaceStatsMap(IFACE_STATS_MAP_PATH, BPF_ANY);
     EXPECT_TRUE(ifaceStatsMap.IsValid());
@@ -257,18 +259,38 @@ HWTEST_F(NetsysBpfStatsTest, GetTotalStatsFilterDeletedIface, TestSize.Level1)
     auto ret = ifaceStatsMap.Write(fakeIfIndex, fakeStats, BPF_ANY);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 
+    constexpr uint64_t unknownIfIndex = 888888;
+    ret = ifaceStatsMap.Write(unknownIfIndex, fakeStats, BPF_ANY);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+
+    auto loIfIndex = if_nametoindex(TEST_IFACE_NAME_LO);
+    iface_stats_value loStats = {0};
+    loStats.rxBytes = TEST_BYTES0;
+    loStats.rxPackets = TEST_BYTES0;
+    loStats.txBytes = TEST_BYTES0;
+    loStats.txPackets = TEST_BYTES0;
+    ret = ifaceStatsMap.Write(loIfIndex, loStats, BPF_ANY);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+
     std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
+    // 模拟曾为白名单接口后被注销的场景：历史缓存中已存在该 ifIndex，其流量应继续计入总量
+    bpfStats->ifaceIndexSet_.insert(fakeIfIndex);
+    // unknownIfIndex 为无历史的孤儿接口，应被过滤；lo 不在白名单内，应被过滤
     uint64_t stats = 0;
     EXPECT_EQ(bpfStats->GetTotalStats(stats, StatsType::STATS_TYPE_RX_BYTES), NETSYS_SUCCESS);
-    EXPECT_EQ(stats, 0);
+    EXPECT_GE(stats, TEST_BYTES0);
     EXPECT_EQ(bpfStats->GetTotalStats(stats, StatsType::STATS_TYPE_RX_PACKETS), NETSYS_SUCCESS);
-    EXPECT_EQ(stats, 0);
+    EXPECT_GE(stats, TEST_BYTES0);
     EXPECT_EQ(bpfStats->GetTotalStats(stats, StatsType::STATS_TYPE_TX_BYTES), NETSYS_SUCCESS);
-    EXPECT_EQ(stats, 0);
+    EXPECT_GE(stats, TEST_BYTES0);
     EXPECT_EQ(bpfStats->GetTotalStats(stats, StatsType::STATS_TYPE_TX_PACKETS), NETSYS_SUCCESS);
-    EXPECT_EQ(stats, 0);
+    EXPECT_GE(stats, TEST_BYTES0);
 
     ret = ifaceStatsMap.Delete(fakeIfIndex);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+    ret = ifaceStatsMap.Delete(unknownIfIndex);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+    ret = ifaceStatsMap.Delete(loIfIndex);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 }
 

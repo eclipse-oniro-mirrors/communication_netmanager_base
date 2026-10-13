@@ -19,6 +19,7 @@
 #include <vector>
 #include <cstdint>
 #include <string>
+#include <set>
 #include <mutex>
 
 #include "bpf_def.h"
@@ -114,6 +115,7 @@ private:
     std::mutex netStatusMapMutex_;
     std::mutex netWlan1MapMutex_;
     std::mutex ifaceStatsMapMutext_;
+    std::set<uint64_t> ifaceIndexSet_;
 };
 } // namespace OHOS::NetManagerStandard
 #endif // BPF_STATS_H
