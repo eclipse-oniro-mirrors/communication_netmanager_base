@@ -265,7 +265,7 @@ bool NetConnService::Init()
     if (ret != 0) {
         NETMGR_LOG_E("Watchdog AddThread for netConnEventHandler_ failed, ret: %{public}d", ret);
     }
-    if (!HiviewDFX::IpcFull::GetInstance().AddIpcFull(IPC_FULL_CHECK_INTERVAL, XCOLLIE_FLAG_LOG)) {
+    if (!HiviewDFX::IpcFull::GetInstance().AddIpcFull(IPC_FULL_CHECK_INTERVAL, HiviewDFX::XCOLLIE_FLAG_LOG)) {
         NETMGR_LOG_E("AddIpcFull failed");
     }
     RegisterAppStateAware();
