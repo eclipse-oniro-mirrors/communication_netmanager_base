@@ -56,6 +56,7 @@
 #include "iservice_registry.h"
 #include "datashare_helper.h"
 #include "xcollie/watchdog.h"
+#include "xcollie/ipc_full.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -108,6 +109,7 @@ constexpr const char *PAC_URL_URI =
 constexpr const char *KEY_PAC_FILE_URL = "settings.netmanager.pac_file_url";
 constexpr const char *KEY_PROXY_MODE = "settings.netmanager.proxy_mode";
 constexpr const char *KEY_PAC_URL = "settings.netmanager.pac_url";
+constexpr const uint64_t IPC_FULL_CHECK_INTERVAL = 30;  // 30s
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
@@ -262,6 +264,9 @@ bool NetConnService::Init()
     int32_t ret = HiviewDFX::Watchdog::GetInstance().AddThread(NET_CONN_MANAGER_WORK_THREAD, netConnEventHandler_);
     if (ret != 0) {
         NETMGR_LOG_E("Watchdog AddThread for netConnEventHandler_ failed, ret: %{public}d", ret);
+    }
+    if (!HiviewDFX::IpcFull::GetInstance().AddIpcFull(IPC_FULL_CHECK_INTERVAL, XCOLLIE_FLAG_LOG)) {
+        NETMGR_LOG_E("AddIpcFull failed");
     }
     RegisterAppStateAware();
     // LCOV_EXCL_STOP
