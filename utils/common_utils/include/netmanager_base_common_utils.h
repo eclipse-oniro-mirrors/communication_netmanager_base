@@ -34,7 +34,11 @@ constexpr int32_t MIN_INTERNAL_NET_ID = 1;
 constexpr int32_t MAX_INTERNAL_NET_ID = 50;
 constexpr int32_t MIN_NET_ID = 100;
 constexpr int32_t MAX_NET_ID = 0xFFFF - 0x400;
-constexpr int32_t VPN_FD_CHANNEL_ALLOWED_UID = 1099;
+// fd 递交通道（tunfd/multivpnfd init socket）合法客户端 uid：
+// 1099 = netmanager 进程（netmanager_ext VpnFdChannel 兜底通道）；
+// 1098 = netsysnative 进程及其 ForkExec 子进程（ipsec 脚本拉起的 pppd/openvpn，继承 uid 1098）
+constexpr int32_t NETMANAGER_VPN_UID = 1099;
+constexpr int32_t NETSYSNATIVE_VPN_UID = 1098;
 inline bool IsInternalNetId(int32_t netId)
 {
     return netId >= MIN_INTERNAL_NET_ID && netId <= MAX_INTERNAL_NET_ID;
@@ -46,6 +50,9 @@ inline uint32_t ConvertTableByNetId(int32_t netId, uint32_t table)
 }
 }
 namespace OHOS::NetManagerStandard::CommonUtils {
+// SO_PEERCRED/struct ucred is Linux-only: excluded from ArkUI-X cross-platform targets (iOS/macOS/Windows),
+// where the fd delivery channel (netsysnative side) does not exist and no caller references this function.
+#ifndef CROSS_PLATFORM
 inline bool IsTrustedVpnFdClient(int32_t clientFd, int32_t &peerUid)
 {
     struct ucred cred = {};
@@ -55,8 +62,9 @@ inline bool IsTrustedVpnFdClient(int32_t clientFd, int32_t &peerUid)
         return false;
     }
     peerUid = cred.uid;
-    return peerUid == VPN_FD_CHANNEL_ALLOWED_UID;
+    return peerUid == NETMANAGER_VPN_UID || peerUid == NETSYSNATIVE_VPN_UID;
 }
+#endif // CROSS_PLATFORM
 
 inline std::vector<std::string> Split(const std::string &str, const std::string &sep)
 {
