@@ -32,13 +32,13 @@ ani_constructor!(
         "getDefaultHttpProxySync": connection::get_default_http_proxy,
         "getGlobalHttpProxySync": connection::get_global_http_proxy,
         "setGlobalHttpProxySync": connection::set_global_http_proxy,
-        "setAppHttpProxy": connection::set_app_http_proxy,
+        "setAppHttpProxySync": connection::set_app_http_proxy,
         "enableAirplaneModeSync": connection::enable_airplane_mode,
         "disableAirplaneModeSync": connection::disable_airplane_mode,
         "getAppNetSync": connection::get_app_net,
         "setAppNetSync": connection::set_app_net,
-        "getPacUrl" : connection::get_pac_url,
-        "setPacUrl" : connection::set_pac_url,
+        "getPacUrlSync" : connection::get_pac_url,
+        "setPacUrlSync" : connection::set_pac_url,
         "factoryResetSync" : connection::factory_reset_network,
         "isDefaultNetMeteredSync" : connection::is_default_net_metered,
         "getConnectionPropertiesSync" : connection::get_connection_properties,
@@ -58,7 +58,7 @@ ani_constructor!(
         "deleteVlanIpSync" : connection::delete_vlan_ip,
         "getSystemNetPortStatesSync" : connection::get_system_net_port_states,
         "getIpNeighTableSync" : connection::get_ip_neigh_table,
-        "getConnectOwnerUidSyncImpl" : connection::get_connect_owner_uid,
+        "getConnectOwnerUidSync" : connection::get_connect_owner_uid,
         "getDnsUnicodeSync" : connection::get_dns_unicode,
         "getDnsAsciiSync" : connection::get_dns_ascii,
         "setInterfaceUpSync" : connection::set_interface_up,
@@ -72,6 +72,7 @@ ani_constructor!(
     ]
     class "@ohos.net.connection.connection.NetHandleInner"
     [
+        "bindSocketSyncWithHandle": connection::bind_socket,
         "getAddressByNameSyncWithHandle" : connection::get_address_by_name_with_handle,
         "getAddressesByNameSyncWithHandle": connection::get_addresses_by_name_with_handle,
         "getAddressesByNameWithOptionsSyncWithHandle": connection::get_addresses_by_name_with_options_with_handle,

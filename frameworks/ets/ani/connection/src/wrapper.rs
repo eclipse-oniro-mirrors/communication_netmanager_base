@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::ffi::CString;
-
 use crate::connection::ConnCallback;
 use cxx::{let_cxx_string, UniquePtr};
 use ffi::{NetBlockStatusInfo, NetCapabilityInfo, NetConnectionPropertyInfo, NetHandle};
@@ -20,11 +18,6 @@ use ffi::{NetBlockStatusInfo, NetCapabilityInfo, NetConnectionPropertyInfo, NetH
 use crate::bridge;
 
 pub struct NetConnClient;
-
-pub fn check_permission(permission: &str) -> bool {
-    let token_id = ipc::Skeleton::calling_full_token_id();
-    ffi::CheckPermission(token_id, permission)
-}
 
 impl NetConnClient {
     pub fn get_default_net_handle() -> Result<bridge::NetHandle, i32> {
@@ -129,10 +122,8 @@ impl NetConnClient {
     }
 
     pub fn set_pac_url(pac_url: &str) -> Result<(), i32> {
-        let net_conn_client = ffi::GetNetConnClient(&mut 0);
-
         let_cxx_string!(pac_url = pac_url);
-        let ret = net_conn_client.SetPacUrl(&pac_url);
+        let ret = ffi::SetPacUrl(&pac_url);
         if ret != 0 {
             return Err(ret);
         }
@@ -259,23 +250,22 @@ impl NetConnClient {
     }
 
     pub fn get_connect_owner_uid(
-        protocol_type: i32,
-        family: i32,
-        local_address: &str,
-        local_port: u16,
-        remote_address: &str,
-        remote_port: u16,
+        protocol: bridge::ProtocolType,
+        local: bridge::NetAddress,
+        remote: bridge::NetAddress,
     ) -> Result<i32, i32> {
-        let param = ffi::NetConnInfoParam {
-            protocol_type,
-            family,
-            local_address: local_address.to_string(),
-            local_port,
-            remote_address: remote_address.to_string(),
-            remote_port,
-        };
         let mut ret: i32 = 0;
-        let uid = ffi::GetConnectOwnerUid(&param, &mut ret);
+        let local = ffi::NetAddress {
+            address: local.address,
+            family: local.family.unwrap_or(1),
+            port: local.port.unwrap_or(0),
+        };
+        let remote = ffi::NetAddress {
+            address: remote.address,
+            family: remote.family.unwrap_or(1),
+            port: remote.port.unwrap_or(0),
+        };
+        let uid = ffi::GetConnectOwnerUid(protocol as i32, &local, &remote, &mut ret);
         if ret != 0 {
             return Err(ret);
         }
@@ -342,9 +332,9 @@ impl NetConnClient {
             return Err(ret);
         }
         match mode {
-            0 => Ok(bridge::ProxyMode::PROXY_MODE_OFF),
-            1 => Ok(bridge::ProxyMode::PROXY_MODE_AUTO),
-            _ => Err(-1),
+            0 => Ok(bridge::ProxyMode::ProxyModeOff),
+            1 => Ok(bridge::ProxyMode::ProxyModeAuto),
+            _ => Ok(bridge::ProxyMode::ProxyModeOff),
         }
     }
 
@@ -424,9 +414,7 @@ impl NetConnClient {
     }
 
     pub fn bind_socket(fd: i32, net_id: i32) -> Result<(), i32> {
-        let net_conn_client = ffi::GetNetConnClient(&mut 0);
-
-        let ret = net_conn_client.BindSocket(fd, net_id);
+        let ret = ffi::BindSocket(fd, net_id);
         if ret != 0 {
             return Err(ret);
         }
@@ -443,7 +431,7 @@ impl NetConnClient {
     }
 
     pub fn clear_custom_dns_rules() -> Result<(), i32> {
-        let ret = unsafe { predefined_host_clear_all_hosts() };
+        let ret = ffi::ClearCustomDnsRules();
         if ret != 0 {
             return Err(ret);
         }
@@ -451,29 +439,17 @@ impl NetConnClient {
     }
 
     pub fn remove_custom_dns_rule(host: String) -> Result<(), i32> {
-        let Ok(c_host) = CString::new(host) else {
-            return Err(-1);
-        };
-        let ret = unsafe { predefined_host_remove_host(c_host.as_ptr()) };
+        let_cxx_string!(host = host);
+        let ret = ffi::RemoveCustomDnsRule(&host);
         if ret != 0 {
             return Err(ret);
         }
         Ok(())
     }
 
-    pub fn set_custom_dns_rules(mut host: String, ips: Vec<String>) -> Result<(), i32> {
-        host.push(',');
-        for i in 0..ips.len() {
-            host.push_str(&ips[i]);
-            if i < ips.len() - 1 {
-                host.push(',');
-            }
-        }
-        let Ok(c_host) = CString::new(host) else {
-            return Err(-1);
-        };
-
-        let ret = unsafe { predefined_host_set_hosts(c_host.as_ptr()) };
+    pub fn set_custom_dns_rules(host: String, ips: Vec<String>) -> Result<(), i32> {
+        let_cxx_string!(host = host);
+        let ret = ffi::SetCustomDnsRule(&host, &ips);
         if ret != 0 {
             return Err(ret);
         }
@@ -482,9 +458,21 @@ impl NetConnClient {
 
     pub fn register_net_conn_callback(
         callback: Box<ConnCallback>,
+        net_specifier: Option<bridge::NetSpecifier>,
+        timeout: Option<i32>,
     ) -> Result<ConnUnregisterHandle, i32> {
         let mut ret = 0;
-        let unregister = ffi::RegisterNetConnCallback(callback, &mut ret);
+        let unregister = match (net_specifier, timeout) {
+            (Some(specifier), Some(timeout)) => {
+                let specifier: ffi::NetSpecifier = specifier.into();
+                ffi::RegisterNetConnCallbackWithSpecifier(callback, &specifier, timeout, &mut ret)
+            }
+            (Some(specifier), None) => {
+                let specifier: ffi::NetSpecifier = specifier.into();
+                ffi::RegisterNetConnCallbackWithSpecifier(callback, &specifier, 0, &mut ret)
+            }
+            (None, _) => ffi::RegisterNetConnCallback(callback, &mut ret),
+        };
         if ret != 0 {
             return Err(ret);
         }
@@ -607,13 +595,61 @@ impl From<ffi::NetCapabilities> for bridge::NetCapabilities {
     }
 }
 
+impl From<bridge::NetCap> for ffi::NetCap {
+    fn from(value: bridge::NetCap) -> Self {
+        match value {
+            bridge::NetCap::NetCapabilityMms => ffi::NetCap::NET_CAPABILITY_MMS,
+            bridge::NetCap::NetCapabilityNotMetered => ffi::NetCap::NET_CAPABILITY_NOT_METERED,
+            bridge::NetCap::NetCapabilityInternet => ffi::NetCap::NET_CAPABILITY_INTERNET,
+            bridge::NetCap::NetCapabilityNotVpn => ffi::NetCap::NET_CAPABILITY_NOT_VPN,
+            bridge::NetCap::NetCapabilityValidated => ffi::NetCap::NET_CAPABILITY_VALIDATED,
+            bridge::NetCap::NetCapabilityPortal => ffi::NetCap::NET_CAPABILITY_PORTAL,
+            bridge::NetCap::NetCapabilityCheckingConnectivity => {
+                ffi::NetCap::NET_CAPABILITY_CHECKING_CONNECTIVITY
+            }
+        }
+    }
+}
+
+impl From<bridge::NetBearType> for ffi::NetBearType {
+    fn from(value: bridge::NetBearType) -> Self {
+        match value {
+            bridge::NetBearType::BearerCellular => ffi::NetBearType::BEARER_CELLULAR,
+            bridge::NetBearType::BearerWifi => ffi::NetBearType::BEARER_WIFI,
+            bridge::NetBearType::BearerBluetooth => ffi::NetBearType::BEARER_BLUETOOTH,
+            bridge::NetBearType::BearerEthernet => ffi::NetBearType::BEARER_ETHERNET,
+            bridge::NetBearType::BearerVpn => ffi::NetBearType::BEARER_VPN,
+        }
+    }
+}
+
+impl From<bridge::NetCapabilities> for ffi::NetCapabilities {
+    fn from(value: bridge::NetCapabilities) -> Self {
+        ffi::NetCapabilities {
+            linkUpBandwidthKbps: value.link_up_bandwidth_kbps.unwrap_or(0),
+            linkDownBandwidthKbps: value.link_down_bandwidth_kbps.unwrap_or(0),
+            networkCap: value.network_cap.unwrap_or_default().into_iter().map(Into::into).collect(),
+            bearerTypes: value.bearer_types.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<bridge::NetSpecifier> for ffi::NetSpecifier {
+    fn from(value: bridge::NetSpecifier) -> Self {
+        ffi::NetSpecifier {
+            bearer_private_identifier: value.bearer_private_identifier.unwrap_or_default(),
+            net_capabilities: value.net_capabilities.into(),
+        }
+    }
+}
+
 impl From<ffi::HttpProxy> for bridge::HttpProxy {
     fn from(value: ffi::HttpProxy) -> Self {
         bridge::HttpProxy {
             host: value.host,
             port: value.port,
-            username: Some(value.username),
-            password: Some(value.password),
+            username: if value.username.is_empty() { None } else { Some(value.username) },
+            password: if value.password.is_empty() { None } else { Some(value.password) },
             exclusion_list: value.exclusionList,
         }
     }
@@ -650,6 +686,7 @@ impl From<ffi::RouteInfo> for bridge::RouteInfo {
             gateway: value.gateway.into(),
             has_gateway: value.has_gateway,
             is_default_route: value.is_default_route,
+            is_excluded_route: if value.is_excluded_route { Some(true) } else { None },
         }
     }
 }
@@ -663,6 +700,8 @@ impl From<ffi::ConnectionProperties> for bridge::ConnectionProperties {
             dnses: value.dnses.into_iter().map(Into::into).collect(),
             routes: value.routes.into_iter().map(Into::into).collect(),
             mtu: value.mtu,
+            is_i_pv4_link_valid: Some(value.is_ipv4_link_valid),
+            is_i_pv6_link_valid: Some(value.is_ipv6_link_valid),
         }
     }
 }
@@ -716,18 +755,18 @@ impl From<ffi::AniTcpNetPortStatesInfo> for bridge::TcpNetPortStatesInfo {
             tcp_uid: value.tcpUid,
             tcp_pid: value.tcpPid,
             tcp_state: match value.tcpState {
-                1 => bridge::TcpState::TCP_ESTABLISHED,
-                2 => bridge::TcpState::TCP_SYN_SENT,
-                3 => bridge::TcpState::TCP_SYN_RECV,
-                4 => bridge::TcpState::TCP_FIN_WAIT1,
-                5 => bridge::TcpState::TCP_FIN_WAIT2,
-                6 => bridge::TcpState::TCP_TIME_WAIT,
-                7 => bridge::TcpState::TCP_CLOSE,
-                8 => bridge::TcpState::TCP_CLOSE_WAIT,
-                9 => bridge::TcpState::TCP_LAST_ACK,
-                10 => bridge::TcpState::TCP_LISTEN,
-                11 => bridge::TcpState::TCP_CLOSING,
-                _ => bridge::TcpState::TCP_CLOSE,
+                1 => bridge::TcpState::TcpEstablished,
+                2 => bridge::TcpState::TcpSynSent,
+                3 => bridge::TcpState::TcpSynRecv,
+                4 => bridge::TcpState::TcpFinWait1,
+                5 => bridge::TcpState::TcpFinWait2,
+                6 => bridge::TcpState::TcpTimeWait,
+                7 => bridge::TcpState::TcpClose,
+                8 => bridge::TcpState::TcpCloseWait,
+                9 => bridge::TcpState::TcpLastAck,
+                10 => bridge::TcpState::TcpListen,
+                11 => bridge::TcpState::TcpClosing,
+                _ => bridge::TcpState::TcpClose,
             },
         }
     }
@@ -779,9 +818,11 @@ impl From<ffi::AniProbeResultInfo> for bridge::ProbeResultInfo {
 impl From<ffi::AniTraceRouteInfo> for bridge::TraceRouteInfo {
     fn from(value: ffi::AniTraceRouteInfo) -> Self {
         bridge::TraceRouteInfo {
-            jump_no: value.jumpNo,
+            jump_no: value.jumpNo as i32,
             address: value.address,
-            rtt: value.rtt,
+            rtt: value.rtt.into_iter()
+                .map(|v|i32::try_from(v).unwrap_or(i32::MAX))
+                .collect(),
         }
     }
 }
@@ -825,6 +866,11 @@ pub mod ffi {
         linkDownBandwidthKbps: i32,
         networkCap: Vec<NetCap>,
         bearerTypes: Vec<NetBearType>,
+    }
+
+    pub struct NetSpecifier {
+        bearer_private_identifier: String,
+        net_capabilities: NetCapabilities,
     }
 
     pub struct NetCapabilityInfo {
@@ -886,15 +932,6 @@ pub mod ffi {
         pub is_ipv4_link_valid: bool,
     }
 
-    pub struct NetConnInfoParam {
-        pub protocol_type: i32,
-        pub family: i32,
-        pub local_address: String,
-        pub local_port: u16,
-        pub remote_address: String,
-        pub remote_port: u16,
-    }
-
     extern "Rust" {
         type ConnCallback;
 
@@ -944,7 +981,7 @@ pub mod ffi {
 
         fn GetPacUrl(self: Pin<&mut NetConnClient>, pac_url: Pin<&mut CxxString>) -> i32;
 
-        fn SetPacUrl(self: Pin<&mut NetConnClient>, pac_url: &CxxString) -> i32;
+        fn SetPacUrl(pac_url: &CxxString) -> i32;
 
         fn FactoryResetNetwork(self: Pin<&mut NetConnClient>) -> i32;
 
@@ -954,16 +991,28 @@ pub mod ffi {
 
         fn GetAddressByName(host: &CxxString, net_id: i32, ret: &mut i32) -> NetAddress;
 
-        fn BindSocket(self: Pin<&mut NetConnClient>, fd: i32, net_id: i32) -> i32;
 
         fn NetDetection(net_id: i32, ret: &mut i32);
-
-        fn CheckPermission(token_id: u64, permission: &str) -> bool;
+	
+        fn BindSocket(socket_fd: i32, net_id: i32) -> i32;
 
         fn RegisterNetConnCallback(
             connection: Box<ConnCallback>,
             ret: &mut i32,
         ) -> UniquePtr<UnregisterHandle>;
+
+        fn RegisterNetConnCallbackWithSpecifier(
+            connection: Box<ConnCallback>,
+            net_specifier: &NetSpecifier,
+            timeout: i32,
+            ret: &mut i32,
+        ) -> UniquePtr<UnregisterHandle>;
+
+        fn RemoveCustomDnsRule(host: &CxxString) -> i32;
+
+        fn SetCustomDnsRule(host: &CxxString, ips: &Vec<String>) -> i32;
+
+        fn ClearCustomDnsRules() -> i32;
 
         fn GetErrorCodeAndMessage(error_code: &mut i32) -> String;
 
@@ -987,9 +1036,8 @@ pub mod ffi {
 
         fn GetIpNeighTable(ret: &mut i32) -> Vec<AniNetIpMacInfo>;
 
-        type NetConnInfoParam;
-
-        fn GetConnectOwnerUid(param: &NetConnInfoParam, ret: &mut i32) -> i32;
+        fn GetConnectOwnerUid(protocol_type: i32, local_address: &NetAddress, remote_address: &NetAddress,
+            ret: &mut i32) -> i32;
 
         fn GetDnsUnicode(host: &CxxString, conversion_process: i32, ret: &mut i32) -> String;
 
@@ -1048,14 +1096,8 @@ pub mod ffi {
     }
 
     pub struct AniTraceRouteInfo {
-        pub jumpNo: i32,
+        pub jumpNo: i8,
         pub address: String,
-        pub rtt: Vec<f64>,
+        pub rtt: Vec<u32>,
     }
-}
-
-extern "C" {
-    fn predefined_host_clear_all_hosts() -> i32;
-    fn predefined_host_remove_host(host: *const ::std::os::raw::c_char) -> i32;
-    fn predefined_host_set_hosts(host_ips: *const ::std::os::raw::c_char) -> i32;
 }

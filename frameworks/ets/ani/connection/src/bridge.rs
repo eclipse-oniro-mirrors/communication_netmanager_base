@@ -21,7 +21,7 @@ pub struct Cleaner {
     pub ptr: i64,
 }
 
-#[ani_rs::ani]
+#[ani_rs::ani(path = "@ohos.net.connection.connection.NetSpecifierInner")]
 pub struct NetSpecifier {
     pub net_capabilities: NetCapabilities,
     pub bearer_private_identifier: Option<String>,
@@ -36,6 +36,11 @@ pub struct NetCapabilityInfo {
 #[ani_rs::ani(path = "@ohos.net.connection.connection.NetHandleInner")]
 pub struct NetHandle {
     pub net_id: i32,
+}
+
+#[ani_rs::ani]
+pub struct SocketClient {
+    pub socket_fd: i32,
 }
 
 #[ani_rs::ani(path = "@ohos.net.connection.connection.NetCapabilitiesInner")]
@@ -86,6 +91,8 @@ pub struct ConnectionProperties {
     pub dnses: Vec<NetAddress>,
     pub routes: Vec<RouteInfo>,
     pub mtu: i32,
+    pub is_i_pv4_link_valid: Option<bool>,
+    pub is_i_pv6_link_valid: Option<bool>,
 }
 
 #[ani_rs::ani(path = "@ohos.net.connection.connection.RouteInfoInner")]
@@ -95,6 +102,7 @@ pub struct RouteInfo {
     pub gateway: NetAddress,
     pub has_gateway: bool,
     pub is_default_route: bool,
+    pub is_excluded_route: Option<bool>,
 }
 
 #[ani_rs::ani(path = "@ohos.net.connection.connection.LinkAddressInner")]
@@ -137,49 +145,49 @@ pub struct HttpProxy {
 
 #[ani_rs::ani(path = "@ohos.net.connection.connection.FamilyType")]
 pub enum FamilyType {
-    FAMILY_TYPE_ALL = 0,
-    FAMILY_TYPE_IPV4 = 1,
-    FAMILY_TYPE_IPV6 = 2,
+    FamilyTypeAll = 0,
+    FamilyTypeIpv4 = 1,
+    FamilyTypeIpv6 = 2,
 }
 
 #[ani_rs::ani(path = "@ohos.net.connection.connection.ConversionProcess")]
 pub enum ConversionProcess {
-    NO_CONFIGURATION = 0,
-    ALLOW_UNASSIGNED = 1,
-    USE_STD3_ASCII_RULES = 2,
+    NoConfiguration = 0,
+    AllowUnassigned = 1,
+    UseStd3AsciiRules = 2,
 }
 
 #[ani_rs::ani(path = "@ohos.net.connection.connection.TcpState")]
 pub enum TcpState {
-    TCP_ESTABLISHED = 1,
-    TCP_SYN_SENT = 2,
-    TCP_SYN_RECV = 3,
-    TCP_FIN_WAIT1 = 4,
-    TCP_FIN_WAIT2 = 5,
-    TCP_TIME_WAIT = 6,
-    TCP_CLOSE = 7,
-    TCP_CLOSE_WAIT = 8,
-    TCP_LAST_ACK = 9,
-    TCP_LISTEN = 10,
-    TCP_CLOSING = 11,
+    TcpEstablished = 1,
+    TcpSynSent = 2,
+    TcpSynRecv = 3,
+    TcpFinWait1 = 4,
+    TcpFinWait2 = 5,
+    TcpTimeWait = 6,
+    TcpClose = 7,
+    TcpCloseWait = 8,
+    TcpLastAck = 9,
+    TcpListen = 10,
+    TcpClosing = 11,
 }
 
 #[ani_rs::ani(path = "@ohos.net.connection.connection.ProtocolType")]
 pub enum ProtocolType {
-    PROTO_TYPE_TCP = 6,
-    PROTO_TYPE_UDP = 17,
+    ProtoTypeTcp = 6,
+    ProtoTypeUdp = 17,
 }
 
 #[ani_rs::ani(path = "@ohos.net.connection.connection.PacketsType")]
 pub enum PacketsType {
-    NETCONN_PACKETS_ICMP = 0,
-    NETCONN_PACKETS_UDP = 1,
+    NetconnPacketsIcmp = 0,
+    NetconnPacketsUdp = 1,
 }
 
 #[ani_rs::ani(path = "@ohos.net.connection.connection.ProxyMode")]
 pub enum ProxyMode {
-    PROXY_MODE_OFF = 0,
-    PROXY_MODE_AUTO = 1,
+    ProxyModeOff = 0,
+    ProxyModeAuto = 1,
 }
 
 #[ani_rs::ani(path = "@ohos.net.connection.connection.TcpNetPortStatesInfoInner")]
@@ -229,39 +237,11 @@ pub struct ProbeResultInfo {
 pub struct TraceRouteInfo {
     pub jump_no: i32,
     pub address: String,
-    pub rtt: Vec<f64>,
+    pub rtt: Vec<i32>,
 }
 
 #[ani_rs::ani(path = "@ohos.net.connection.connection.TraceRouteOptionsInner")]
 pub struct TraceRouteOptions {
     pub max_jump_number: Option<i32>,
     pub packets_type: Option<PacketsType>,
-}
-
-#[ani_rs::ani(path = "@ohos.net.connection.connection.UDPSocket")]
-pub struct UDPSocket {
-    pub socket_fd: i32,
-}
-
-#[ani_rs::ani(path = "@ohos.net.connection.connection.TCPSocket")]
-pub struct TCPSocket {
-    pub socket_fd: i32,
-}
-
-#[ani_rs::ani(path = "@ohos.net.connection.connection.NetConnInfoParamInner")]
-pub struct NetConnInfoParam {
-    pub protocol_type: ProtocolType,
-    pub family: FamilyType,
-    pub local_address: String,
-    pub local_port: i32,
-    pub remote_address: String,
-    pub remote_port: i32,
-}
-
-#[ani_rs::ani(path = "@ohos.net.connection.connection.HttpRequest")]
-pub struct HttpRequest {
-    pub url: String,
-    pub method: String,
-    pub headers: Vec<String>,
-    pub body: Option<String>,
 }

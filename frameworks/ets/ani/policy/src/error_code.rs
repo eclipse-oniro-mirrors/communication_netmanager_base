@@ -12,7 +12,6 @@
 // limitations under the License.
 
 use ani_rs::business_error::BusinessError;
-use crate::{policy_error};
 
 pub fn convert_to_business_error(mut code: i32) -> BusinessError {
     let error_msg = crate::wrapper::ffi::GetErrorCodeAndMessage(&mut code);

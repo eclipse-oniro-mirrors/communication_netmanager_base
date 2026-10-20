@@ -21,6 +21,9 @@ rust_cxx("policy_ani_cxx") {
 
 ohos_static_library("policy_ani_static") {
   sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
     debug = false
@@ -48,15 +51,16 @@ ohos_static_library("policy_ani_static") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
-    "napi:ace_napi",
     "rust_cxx:cxx_cppdeps",
     "ability_base:want",
+    "ability_runtime:ability_manager",
     "ability_runtime:ability_context_native",
-    "ability_runtime:wantagent_innerkits",
-    "ability_runtime:napi_base_context",
-    "ability_runtime:runtime",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:ani_base_context",
+    "ability_runtime:ani_common",
     "ability_runtime:ui_extension",
     "ace_engine:ace_uicontent",
+    "runtime_core:ani",
   ]
 
   part_name = "netmanager_base"
@@ -67,6 +71,8 @@ ohos_rust_shared_library("policy_ani") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    boundary_sanitize = true
+    all_ubsan = true
     debug = false
   }
 
@@ -78,20 +84,21 @@ ohos_rust_shared_library("policy_ani") {
   ]
   rustflags = [
     "-C", "opt-level=z",
+    "-C", "debuginfo=0",
     "-C", "link-arg=-ffunction-sections",
     "-C", "link-arg=-fdata-sections",
     "-C", "link-arg=-Wl,--gc-sections",
     "-C", "link-arg=-Wl,--strip-all",
+    "-Z", "dylib-lto",
+    "-Z", "stack-protector=all",
     "-C", "codegen-units=1",
-    "-C", "lto=thin",
     "-C", "link-arg=-flto",
     "-C", "overflow-checks=no",
     "-C", "code-model=small",
-    "-Z", "dylib-lto",
-    "-Z", "stack-protector=all",
     "-Z", "location-detail=none",
     "-Z", "dump-mir=deadcode",
   ]
+
   sources = [ "src/lib.rs" ]
 
   external_deps = [
@@ -128,11 +135,4 @@ ohos_prebuilt_etc("policy_etc") {
   part_name = "netmanager_base"
   subsystem_name = "communication"
   deps = [ ":policy" ]
-}
-
-group("policy_ani_group") {
-  deps = [
-    ":policy_ani",
-    ":policy_etc",
-  ]
 }

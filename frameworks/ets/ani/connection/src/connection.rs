@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{ffi::CStr, mem, net::IpAddr};
+use std::{ffi::CStr, mem};
 
 use ani_rs::{
     business_error::BusinessError,
@@ -26,10 +26,8 @@ use crate::{
     },
     connection_error,
     error_code::convert_to_business_error,
-    wrapper::{check_permission, ConnUnregisterHandle, NetConnClient},
+    wrapper::{ConnUnregisterHandle, NetConnClient},
 };
-
-const INTERNET_PERMISSION: &str = "ohos.permission.INTERNET";
 
 #[ani_rs::native]
 pub(crate) fn get_default_net() -> Result<NetHandle, BusinessError> {
@@ -92,7 +90,6 @@ pub(crate) fn get_pac_url() -> Result<String, BusinessError> {
 
 #[ani_rs::native]
 pub(crate) fn set_pac_url(pac_url: String) -> Result<(), BusinessError> {
-    validate_pac_file_url(&pac_url)?;
     NetConnClient::set_pac_url(&pac_url).map_err(convert_to_business_error)
 }
 
@@ -145,8 +142,14 @@ pub(crate) fn set_app_http_proxy(proxy: HttpProxy) -> Result<(), BusinessError> 
 }
 
 #[ani_rs::native]
-pub(crate) fn bind_socket(this: NetHandle, socket: i32) -> Result<(), BusinessError> {
-    NetConnClient::bind_socket(socket, this.net_id).map_err(convert_to_business_error)
+pub(crate) fn bind_socket(
+    this: NetHandle,
+    socket: crate::bridge::SocketClient,
+) -> Result<(), BusinessError> {
+    if socket.socket_fd <= 0 {
+        return Err(convert_to_business_error(2100001, ));
+    }
+    NetConnClient::bind_socket(socket.socket_fd, this.net_id).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
@@ -156,25 +159,16 @@ pub(crate) fn net_detection(net_handle: NetHandle) -> Result<(), BusinessError> 
 
 #[ani_rs::native]
 pub(crate) fn clear_custom_dns_rules() -> Result<(), BusinessError> {
-    if !check_permission(INTERNET_PERMISSION) {
-        return Err(BusinessError::PERMISSION);
-    }
     NetConnClient::clear_custom_dns_rules().map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn set_custom_dns_rule(host: String, ips: Vec<String>) -> Result<(), BusinessError> {
-    if !check_permission(INTERNET_PERMISSION) {
-        return Err(BusinessError::PERMISSION);
-    }
     NetConnClient::set_custom_dns_rules(host, ips).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn remove_custom_dns_rule(host: String) -> Result<(), BusinessError> {
-    if !check_permission(INTERNET_PERMISSION) {
-        return Err(BusinessError::PERMISSION);
-    }
     NetConnClient::remove_custom_dns_rule(host).map_err(convert_to_business_error)
 }
 
@@ -183,30 +177,8 @@ pub(crate) fn refresh_global_http_proxy() -> Result<HttpProxy, BusinessError> {
     NetConnClient::refresh_global_http_proxy().map_err(convert_to_business_error)
 }
 
-fn validate_pac_file_url(pac_url: &str) -> Result<(), BusinessError> {
-    if pac_url.is_empty() {
-        return Err(BusinessError::new(401, "pac_url must not be empty".to_string()));
-    }
-    if let Some(scheme_end) = pac_url.find("://") {
-        let original_scheme = &pac_url[..scheme_end];
-        let scheme = original_scheme.to_lowercase();
-        let valid_schemes = ["http", "https", "ftp", "file", "data"];
-        if scheme.is_empty() || !valid_schemes.contains(&scheme.as_str()) {
-            return Err(BusinessError::new(401,
-                format!("pac_url has unsupported scheme '{}'. Supported: http, https, ftp, file, data", original_scheme)));
-        }
-        if pac_url.len() <= scheme_end + 3 {
-            return Err(BusinessError::new(401, "pac_url is missing host part after scheme://".to_string()));
-        }
-        Ok(())
-    } else {
-        Err(BusinessError::new(401, "pac_url must be a valid URL with scheme:// (e.g. http://example.com)".to_string()))
-    }
-}
-
 #[ani_rs::native]
 pub(crate) fn set_pac_file_url(pac_url: String) -> Result<(), BusinessError> {
-    validate_pac_file_url(&pac_url)?;
     NetConnClient::set_pac_file_url(&pac_url).map_err(convert_to_business_error)
 }
 
@@ -221,7 +193,7 @@ pub(crate) fn get_addresses_by_name_with_options(
     option: crate::bridge::QueryOptions,
 ) -> Result<Vec<NetAddress>, BusinessError> {
     let family = option.family.map(|f| f as i32)
-        .unwrap_or(crate::bridge::FamilyType::FAMILY_TYPE_ALL as i32);
+        .unwrap_or(crate::bridge::FamilyType::FamilyTypeAll as i32);
     NetConnClient::get_addresses_by_name_with_options(&host, 0, family).map_err(convert_to_business_error)
 }
 
@@ -232,7 +204,7 @@ pub(crate) fn get_addresses_by_name_with_options_with_handle(
     option: crate::bridge::QueryOptions,
 ) -> Result<Vec<NetAddress>, BusinessError> {
     let family = option.family.map(|f| f as i32)
-        .unwrap_or(crate::bridge::FamilyType::FAMILY_TYPE_ALL as i32);
+        .unwrap_or(crate::bridge::FamilyType::FamilyTypeAll as i32);
     NetConnClient::get_addresses_by_name_with_options(&host, this.net_id, family).map_err(convert_to_business_error)
 }
 
@@ -246,33 +218,13 @@ pub(crate) fn destroy_vlan_interface(if_name: String, vlan_id: u32) -> Result<()
     NetConnClient::destroy_vlan_interface(&if_name, vlan_id).map_err(convert_to_business_error)
 }
 
-const MAX_IPV4_PREFIX_LENGTH: u32 = 32;
-const MAX_IPV6_PREFIX_LENGTH: u32 = 128;
-
-fn validate_vlan_mask(mask: u32, ip: &str) -> Result<(), BusinessError> {
-    let addr = ip.parse::<IpAddr>()
-        .map_err(|_| BusinessError::new(401, format!("Invalid IP address '{}'", ip)))?;
-    let max_mask = if addr.is_ipv6() { MAX_IPV6_PREFIX_LENGTH } else { MAX_IPV4_PREFIX_LENGTH };
-    if mask > max_mask {
-        return Err(BusinessError::new(401,
-            format!("Invalid mask value {} for this address type. IPv4 allows 0-32, IPv6 allows 0-128", mask)));
-    }
-    Ok(())
-}
-
 #[ani_rs::native]
 pub(crate) fn add_vlan_ip(if_name: String, vlan_id: u32, ip: String, mask: u32) -> Result<(), BusinessError> {
-    ip.parse::<IpAddr>()
-        .map_err(|_| BusinessError::new(401, format!("Invalid IP address '{}'", ip)))?;
-    validate_vlan_mask(mask, &ip)?;
     NetConnClient::add_vlan_ip(&if_name, vlan_id, &ip, mask).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn delete_vlan_ip(if_name: String, vlan_id: u32, ip: String, mask: u32) -> Result<(), BusinessError> {
-    ip.parse::<IpAddr>()
-        .map_err(|_| BusinessError::new(401, format!("Invalid IP address '{}'", ip)))?;
-    validate_vlan_mask(mask, &ip)?;
     NetConnClient::delete_vlan_ip(&if_name, vlan_id, &ip, mask).map_err(convert_to_business_error)
 }
 
@@ -288,32 +240,29 @@ pub(crate) fn get_ip_neigh_table() -> Result<Vec<crate::bridge::NetIpMacInfo>, B
 
 #[ani_rs::native]
 pub(crate) fn get_connect_owner_uid(
-    param: crate::bridge::NetConnInfoParam,
+    protocol: crate::bridge::ProtocolType,
+    local: crate::bridge::NetAddress,
+    remote: crate::bridge::NetAddress,
 ) -> Result<i32, BusinessError> {
-    NetConnClient::get_connect_owner_uid(
-        param.protocol_type as i32,
-        param.family as i32,
-        &param.local_address,
-        param.local_port as u16,
-        &param.remote_address,
-        param.remote_port as u16,
-    ).map_err(convert_to_business_error)
+    NetConnClient::get_connect_owner_uid(protocol, local, remote).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn get_dns_unicode(
     host: String,
-    conversion_process: crate::bridge::ConversionProcess,
+    conversion_process: Option<crate::bridge::ConversionProcess>,
 ) -> Result<String, BusinessError> {
-    NetConnClient::get_dns_unicode(&host, conversion_process as i32).map_err(convert_to_business_error)
+    let process = conversion_process.unwrap_or(crate::bridge::ConversionProcess::NoConfiguration);
+    NetConnClient::get_dns_unicode(&host, process as i32).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn get_dns_ascii(
     host: String,
-    conversion_process: crate::bridge::ConversionProcess,
+    conversion_process: Option<crate::bridge::ConversionProcess>,
 ) -> Result<String, BusinessError> {
-    NetConnClient::get_dns_ascii(&host, conversion_process as i32).map_err(convert_to_business_error)
+    let process = conversion_process.unwrap_or(crate::bridge::ConversionProcess::NoConfiguration);
+    NetConnClient::get_dns_ascii(&host, process as i32).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
@@ -332,9 +281,17 @@ pub(crate) fn query_probe_result(
 #[ani_rs::native]
 pub(crate) fn query_trace_route(
     destination: String,
-    max_jump_number: i32,
-    packets_type: crate::bridge::PacketsType,
+    option: Option<crate::bridge::TraceRouteOptions>,
 ) -> Result<Vec<crate::bridge::TraceRouteInfo>, BusinessError> {
+    // NAPI defaults maxJumpNumber to NETCONN_MAX_JUMP_NUM (30) and packetsType to
+    // NetconnPacketsIcmp (0), see TraceRouteOptions in net_trace_route_info.h.
+    let option = option.unwrap_or(crate::bridge::TraceRouteOptions {
+        max_jump_number: None,
+        packets_type: None,
+    });
+    let max_jump_number = option.max_jump_number.unwrap_or(30);
+    let packets_type = option.packets_type
+        .unwrap_or(crate::bridge::PacketsType::NetconnPacketsIcmp);
     NetConnClient::query_trace_route(&destination, max_jump_number, packets_type as i32)
         .map_err(convert_to_business_error)
 }
@@ -504,9 +461,11 @@ pub(crate) fn register_network_change(this: NetConnection) -> Result<(), Busines
     let mut callback = Box::new(ConnCallback::new());
     mem::swap(&mut connection.callback, &mut callback);
 
-    let unregister = NetConnClient::register_net_conn_callback(callback).map_err(|e| {
-        BusinessError::new(e, format!("Failed to register network change callback"))
-    })?;
+    let unregister = NetConnClient::register_net_conn_callback(
+        callback,
+        connection.net_specifier.take(),
+        connection.timeout,
+    ).map_err(convert_to_business_error)?;
     connection.unregister = Some(unregister);
 
     Ok(())

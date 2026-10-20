@@ -170,12 +170,7 @@ int32_t GetTrafficStatsByUidNetworkVec(rust::Vec<AniNetStatsInfoSequenceItem> &n
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
-uint32_t GetCallingUid()
-{
-    return static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
-}
-
-int32_t UpdateIfacesStatsCxx(const std::string &iface, uint64_t start, uint64_t end, const NetStatsInfoInner &stats)
+int32_t UpdateIfacesStats(const std::string &iface, uint32_t start, uint32_t end, const NetStatsInfoInner &stats)
 {
     NetManagerStandard::NetStatsInfo info;
     info.rxBytes_ = stats.rx_bytes;
@@ -183,6 +178,55 @@ int32_t UpdateIfacesStatsCxx(const std::string &iface, uint64_t start, uint64_t 
     info.rxPackets_ = stats.rx_packets;
     info.txPackets_ = stats.tx_packets;
     return NetManagerStandard::NetStatsClient::GetInstance().UpdateIfacesStats(iface, start, end, info);
+}
+
+int32_t SetCalibrationTraffic(uint32_t simId, int64_t remainingData, int64_t totalData, bool hasTotalData)
+{
+    uint64_t totalMonthlyData = UINT64_MAX;
+    if (hasTotalData) {
+        if (totalData < 0) {
+            return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
+        }
+        totalMonthlyData = static_cast<uint64_t>(totalData);
+        if (totalMonthlyData == UINT64_MAX) {
+            return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
+        }
+    }
+    return NetManagerStandard::NetStatsClient::GetInstance().SetCalibrationTraffic(
+        simId, remainingData, totalMonthlyData);
+}
+
+int32_t GetSelfTrafficStats(const AniNetworkInfo &networkInfo, bool hasSimId, NetStatsInfoInner &result)
+{
+    if (static_cast<int32_t>(networkInfo.type_) < 0 || networkInfo.start_time < 0 ||
+        networkInfo.end_time < 0 || (hasSimId && networkInfo.sim_id < 0)) {
+        return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    sptr<NetManagerStandard::NetStatsNetwork> network = new (std::nothrow) NetManagerStandard::NetStatsNetwork();
+    if (network == nullptr) {
+        return NetManagerStandard::NETMANAGER_ERR_INTERNAL;
+    }
+    network->type_ = static_cast<uint32_t>(networkInfo.type_);
+    network->startTime_ = static_cast<uint64_t>(networkInfo.start_time);
+    network->endTime_ = static_cast<uint64_t>(networkInfo.end_time);
+    network->simId_ = hasSimId ? static_cast<uint32_t>(networkInfo.sim_id) : UINT32_MAX;
+    std::vector<NetManagerStandard::NetStatsInfoSequence> sequence;
+    int32_t ret = NetManagerStandard::NetStatsClient::GetInstance().GetTrafficStatsByUidNetwork(
+        sequence, static_cast<uint32_t>(IPCSkeleton::GetCallingUid()), network);
+    if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    result.rx_bytes = 0;
+    result.tx_bytes = 0;
+    result.rx_packets = 0;
+    result.tx_packets = 0;
+    for (const auto &item : sequence) {
+        result.rx_bytes += item.info_.rxBytes_;
+        result.tx_bytes += item.info_.txBytes_;
+        result.rx_packets += item.info_.rxPackets_;
+        result.tx_packets += item.info_.txPackets_;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerAni
 } // namespace OHOS

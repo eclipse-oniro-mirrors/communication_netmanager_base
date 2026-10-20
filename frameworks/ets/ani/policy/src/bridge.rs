@@ -11,123 +11,184 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use ani_rs::ani;
-use serde::Deserialize;
+use std::collections::HashMap;
 
-#[ani_rs::ani(path = "@ohos.net.policy.policy.NetAccessPolicyInner")]
+#[ani_rs::ani(path = "@ohos.net.connection.connection.NetBearType")]
+#[repr(i32)]
 #[derive(Clone, Debug)]
-pub struct NetAccessPolicyInner {
-    pub allow_wiFi: bool,
-    pub allow_cellular: bool,
+pub enum NetBearType {
+    BearerCellular = 0,
+    BearerWifi = 1,
+    BearerBluetooth = 2,
+    BearerEthernet = 3,
+    BearerVpn = 4,
 }
 
-#[ani_rs::ani(path = "@ohos.net.policy.policy.UidPolicyChangeInfo")]
-#[derive(Clone, Debug)]
-pub struct NetUidPolicyInfo {
-    pub uid: i32,
-    pub policy: i32,
+impl From<i32> for NetBearType {
+    fn from(value: i32) -> Self {
+        match value {
+            0 => NetBearType::BearerCellular,
+            1 => NetBearType::BearerWifi,
+            2 => NetBearType::BearerBluetooth,
+            3 => NetBearType::BearerEthernet,
+            4 => NetBearType::BearerVpn,
+            _ => NetBearType::BearerCellular,
+        }
+    }
 }
 
-#[ani_rs::ani(path = "@ohos.net.policy.policy.UidRuleChangeInfo")]
+#[ani_rs::ani(path = "@ohos.net.policy.policy.NetBackgroundPolicy")]
+#[repr(i32)]
+#[derive(Clone, Debug)]
+pub enum NetBackgroundPolicy {
+    NetBackgroundPolicyNone = 0,
+    NetBackgroundPolicyEnable = 1,
+    NetBackgroundPolicyDisable = 2,
+    NetBackgroundPolicyTrustlist = 3,
+}
+
+impl From<i32> for NetBackgroundPolicy {
+    fn from(value: i32) -> Self {
+        match value {
+            0 => NetBackgroundPolicy::NetBackgroundPolicyNone,
+            1 => NetBackgroundPolicy::NetBackgroundPolicyEnable,
+            2 => NetBackgroundPolicy::NetBackgroundPolicyDisable,
+            3 => NetBackgroundPolicy::NetBackgroundPolicyTrustlist,
+            _ => NetBackgroundPolicy::NetBackgroundPolicyNone,
+        }
+    }
+}
+
+#[ani_rs::ani(path = "@ohos.net.policy.policy.NetQuotaPolicyInner")]
+#[derive(Clone, Debug)]
+pub struct NetQuotaPolicy {
+    pub network_match_rule: NetworkMatchRule,
+    pub quota_policy: QuotaPolicy,
+}
+
+#[ani_rs::ani(path = "@ohos.net.policy.policy.QuotaPolicyInner")]
+#[derive(Clone, Debug)]
+pub struct QuotaPolicy {
+    pub period_duration: String,
+    pub warning_bytes: i64,
+    pub limit_bytes: i64,
+    pub metered: bool,
+    pub limit_action: LimitAction,
+    pub last_warning_remind: Option<i64>,
+    pub last_limit_remind: Option<i64>,
+}
+
+#[ani_rs::ani(path = "@ohos.net.policy.policy.NetworkMatchRuleInner")]
+#[derive(Clone, Debug)]
+pub struct NetworkMatchRule {
+    pub net_type: NetBearType,
+    pub identity: String,
+    pub sim_id: String,
+}
+
+#[ani_rs::ani(path = "@ohos.net.policy.policy.NetUidRuleInfoInner")]
 #[derive(Clone, Debug)]
 pub struct NetUidRuleInfo {
     pub uid: i32,
-    pub rule: i32,
+    pub rule: NetUidRule,
 }
 
-/// Typed input for setNetQuotaPolicies – deserialized from ETS by the ANI framework.
-/// Nested structure matching the external API: networkMatchRule + quotaPolicy.
-#[derive(Clone, Debug, Deserialize)]
-#[allow(non_snake_case)]
-pub struct NetworkMatchRuleInput {
-    pub netType: i32,
-    pub identity: String,
-    pub simId: String,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-#[allow(non_snake_case)]
-pub struct QuotaPolicyInput {
-    pub periodDuration: String,
-    pub warningBytes: i64,
-    pub limitBytes: i64,
-    pub metered: bool,
-    pub limitAction: i32,
-    #[serde(default)]
-    pub lastWarningRemind: i64,
-    #[serde(default)]
-    pub lastLimitRemind: i64,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-#[allow(non_snake_case)]
-pub struct NetQuotaPolicyInput {
-    pub networkMatchRule: NetworkMatchRuleInput,
-    pub quotaPolicy: QuotaPolicyInput,
-}
-
-/// Typed input for setNetworkAccessPolicy – deserialized from ETS by the ANI framework.
-/// Field names follow the external API NetworkAccessPolicy interface.
-#[derive(Clone, Debug, Deserialize)]
-#[allow(non_snake_case)]
-pub struct NetworkAccessPolicyInput {
-    #[serde(default)]
-    pub allowWiFi: bool,
-    #[serde(default)]
-    pub allowCellular: bool,
-    #[serde(default)]
-    pub alwaysAllowWiFi: bool,
-    #[serde(default)]
-    pub alwaysAllowCellular: bool,
-}
-
-/// Typed output for getNetworkAccessPolicy(uid) – serialized to ETS by the ANI framework.
-#[ani_rs::ani(path = "@ohos.net.policy.policy.NetworkAccessPolicy")]
+#[ani_rs::ani(path = "@ohos.net.policy.policy.NetUidPolicyInfoInner")]
 #[derive(Clone, Debug)]
-pub struct NetworkAccessPolicyOutput {
-    pub allowWiFi: bool,
-    pub allowCellular: bool,
-    pub alwaysAllowWiFi: bool,
-    pub alwaysAllowCellular: bool,
-}
-
-/// Typed output item for getNetworkAccessPolicy() – one uid-policy pair.
-#[ani_rs::ani(path = "@ohos.net.policy.policy.UidNetworkPolicyItem")]
-#[derive(Clone, Debug)]
-pub struct UidNetworkPolicyItem {
+pub struct NetUidPolicyInfo {
     pub uid: i32,
-    pub allowWiFi: bool,
-    pub allowCellular: bool,
-    pub alwaysAllowWiFi: bool,
-    pub alwaysAllowCellular: bool,
+    pub policy: NetUidPolicy,
 }
 
-/// Typed output for getNetQuotaPolicies – serialized to ETS by the ANI framework.
-/// Nested structure matching the external API: networkMatchRule + quotaPolicy.
-#[ani_rs::ani(path = "@ohos.net.policy.policy.NetworkMatchRule")]
+#[ani_rs::ani(path = "@ohos.net.policy.policy.LimitAction")]
+#[repr(i32)]
 #[derive(Clone, Debug)]
-pub struct NetworkMatchRuleOutput {
-    pub netType: i32,
-    pub identity: String,
-    pub simId: String,
+pub enum LimitAction {
+    LimitActionNone = -1,
+    LimitActionAccessDisabled = 0,
+    LimitActionAlertOnly = 1
 }
 
-#[ani_rs::ani(path = "@ohos.net.policy.policy.QuotaPolicy")]
+impl From<i32> for LimitAction {
+    fn from(value: i32) -> Self {
+        match value {
+            -1 => LimitAction::LimitActionNone,
+            0 => LimitAction::LimitActionAccessDisabled,
+            _ => LimitAction::LimitActionAlertOnly,
+        }
+    }
+}
+
+#[ani_rs::ani(path = "@ohos.net.policy.policy.NetUidRule")]
+#[repr(i32)]
 #[derive(Clone, Debug)]
-pub struct QuotaPolicyOutput {
-    pub periodDuration: String,
-    pub warningBytes: i64,
-    pub limitBytes: i64,
-    pub metered: bool,
-    pub limitAction: i32,
-    pub lastWarningRemind: i64,
-    pub lastLimitRemind: i64,
+pub enum NetUidRule {
+    NetRuleNone = 0,
+    NetRuleAllowMeteredForeground = 1 << 0,
+    NetRuleAllowMetered = 1 << 1,
+    NetRuleRejectMetered = 1 << 2,
+    NetRuleAllowAll = 1 << 5,
+    NetRuleRejectAll = 1 << 6
 }
 
-#[ani_rs::ani(path = "@ohos.net.policy.policy.NetQuotaPolicy")]
+impl From<i32> for NetUidRule {
+    fn from(value: i32) -> Self {
+        match value {
+            1 => NetUidRule::NetRuleAllowMeteredForeground,
+            2 => NetUidRule::NetRuleAllowMetered,
+            4 => NetUidRule::NetRuleRejectMetered,
+            32 => NetUidRule::NetRuleAllowAll,
+            64 => NetUidRule::NetRuleRejectAll,
+            _ => NetUidRule::NetRuleNone,
+        }
+    }
+}
+
+#[ani_rs::ani(path = "@ohos.net.policy.policy.RemindType")]
+#[repr(u32)]
 #[derive(Clone, Debug)]
-pub struct NetQuotaPolicyOutput {
-    pub networkMatchRule: NetworkMatchRuleOutput,
-    pub quotaPolicy: QuotaPolicyOutput,
+pub enum RemindType {
+    RemindTypeWarning = 1,
+    RemindTypeLimit = 2
 }
 
+#[ani_rs::ani(path = "@ohos.net.policy.policy.NetUidPolicy")]
+#[repr(u32)]
+#[derive(Clone, Debug)]
+pub enum NetUidPolicy {
+    NetPolicyNone = 0,
+    NetPolicyAllowMeteredBackground = 1 << 0,
+    NetPolicyRejectMeteredBackground = 1 << 1
+}
+
+impl From<i32> for NetUidPolicy {
+    fn from(value: i32) -> Self {
+        match value {
+            1 => NetUidPolicy::NetPolicyAllowMeteredBackground,
+            2 => NetUidPolicy::NetPolicyRejectMeteredBackground,
+            _ => NetUidPolicy::NetPolicyNone,
+        }
+    }
+}
+
+#[ani_rs::ani(path = "@ohos.net.policy.policy.NetworkAccessPolicyInner")]
+#[derive(Clone, Debug)]
+pub struct NetworkAccessPolicy {
+    pub allow_wi_fi: Option<bool>,
+    pub allow_cellular: Option<bool>,
+    pub always_allow_wi_fi: Option<bool>,
+    pub always_allow_cellular: Option<bool>,
+}
+
+#[ani_rs::ani(path = "@ohos.net.policy.policy.NetAccessPolicyInner")]
+#[derive(Clone, Debug)]
+pub struct NetAccessPolicy {
+    pub allow_wi_fi: bool,
+    pub allow_cellular: bool,
+}
+
+#[ani_rs::ani(path = "@ohos.net.policy.policy.UidNetworkAccessPolicy")]
+#[derive(Clone, Debug)]
+pub enum UidNetworkAccessPolicy {
+    MapNetworkAccessPolicy(HashMap<String, NetworkAccessPolicy>),
+}

@@ -16,7 +16,7 @@
 #include <cstdlib>
 #include <limits>
 #include <memory>
-#include <sstream>
+#include <mutex>
 #include <string>
 #include <vector>
 #include <arpa/inet.h>
@@ -35,16 +35,20 @@
 #include "tokenid_kit.h"
 #include "net_manager_constants.h"
 #include "netmanager_base_log.h"
+#include "netmanager_base_common_utils.h"
+#include "netmanager_base_permission.h"
 #include "errorcode_convertor.h"
 #include "icu_helper.h"
 #include "net_conn_info.h"
 #include "net_port_states_info.h"
 #include "net_ip_mac_info.h"
 #include "net_probe.h"
+#include "net_trace_route_info.h"
 
 namespace OHOS {
 namespace NetManagerAni {
 using namespace Security::AccessToken;
+std::mutex g_predefinedHostMtx;
 
 rust::String GetErrorCodeAndMessage(int32_t &errorCode)
 {
@@ -176,6 +180,15 @@ NetManagerStandard::NetConnClient &GetNetConnClient(int32_t &nouse)
     return NetManagerStandard::NetConnClient::GetInstance();
 }
 
+int32_t BindSocket(int32_t socketFd, int32_t netId)
+{
+    if (socketFd <= 0) {
+        NETMANAGER_BASE_LOGE("socketFd is invalid.");
+        return NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    return NetManagerStandard::NetConnClient::GetInstance().BindSocket(socketFd, netId);
+}
+
 int32_t IsDefaultNetMetered(bool &isMetered)
 {
     return NetManagerStandard::NetConnClient::GetInstance().IsDefaultNetMetered(isMetered);
@@ -203,6 +216,7 @@ RouteInfo ConvertRouteInfo(NetManagerStandard::Route &route)
             },
         .has_gateway = route.hasGateway_,
         .is_default_route = route.isDefaultRoute_,
+        .is_excluded_route = route.isExcludedRoute_,
     };
 }
 
@@ -243,6 +257,8 @@ ConnectionProperties ConvertConnectionProperties(NetManagerStandard::NetLinkInfo
         .dnses = dnses,
         .routes = routes,
         .mtu = info.mtu_,
+        .is_ipv6_link_valid = info.isIpv6LinkValid_,
+        .is_ipv4_link_valid = info.isIpv4LinkValid_,
     };
 }
 
@@ -252,7 +268,7 @@ ConnectionProperties GetConnectionProperties(int32_t net_id, int32_t &ret)
     netHandle.SetNetId(net_id);
     NetManagerStandard::NetLinkInfo info;
     ret = NetManagerStandard::NetConnClient::GetInstance().GetConnectionProperties(netHandle, info);
-    if (ret != 0) {
+    if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
         return ConnectionProperties{};
     }
 
@@ -387,20 +403,6 @@ void NetDetection(int32_t netId, int32_t &ret)
     ret = NetManagerStandard::NetConnClient::GetInstance().NetDetection(netHandle);
 }
 
-bool CheckPermission(uint64_t tokenId, rust::str permission)
-{
-    auto perm = std::string(permission);
-    TypeATokenTypeEnum tokenType = AccessTokenKit::GetTokenTypeFlag(static_cast<AccessTokenID>(tokenId));
-    if (tokenType == TOKEN_INVALID) {
-        return false;
-    }
-    int result = AccessTokenKit::VerifyAccessToken(tokenId, perm);
-    if (result != PERMISSION_GRANTED) {
-        return false;
-    }
-    return true;
-}
-
 NetCoonCallback::NetCoonCallback(rust::Box<ConnCallback> callback) : inner_(std::move(callback)) {}
 
 int32_t NetCoonCallback::NetAvailable(sptr<NetManagerStandard::NetHandle> &netHandle)
@@ -475,7 +477,33 @@ std::unique_ptr<UnregisterHandle> RegisterNetConnCallback(rust::Box<ConnCallback
 {
     auto callback = sptr<NetCoonCallback>::MakeSptr(std::move(Connection));
     ret = NetManagerStandard::NetConnClient::GetInstance().RegisterNetConnCallback(callback);
-    if (ret != 0) {
+    if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
+        return nullptr;
+    }
+    auto unregisterHandle = std::make_unique<UnregisterHandle>(callback);
+    return unregisterHandle;
+}
+
+std::unique_ptr<UnregisterHandle> RegisterNetConnCallbackWithSpecifier(rust::Box<ConnCallback> Connection,
+    const NetSpecifier &netSpecifier, int32_t timeout, int32_t &ret)
+{
+    auto callback = sptr<NetCoonCallback>::MakeSptr(std::move(Connection));
+    sptr<NetManagerStandard::NetSpecifier> specifier = new NetManagerStandard::NetSpecifier();
+    specifier->ident_ = std::string(netSpecifier.bearer_private_identifier);
+    specifier->netCapabilities_.linkUpBandwidthKbps_ =
+        static_cast<uint32_t>(netSpecifier.net_capabilities.linkUpBandwidthKbps);
+    specifier->netCapabilities_.linkDownBandwidthKbps_ =
+        static_cast<uint32_t>(netSpecifier.net_capabilities.linkDownBandwidthKbps);
+    for (const auto &cap : netSpecifier.net_capabilities.networkCap) {
+        specifier->netCapabilities_.netCaps_.insert(cap);
+    }
+    for (const auto &type : netSpecifier.net_capabilities.bearerTypes) {
+        specifier->netCapabilities_.bearerTypes_.insert(type);
+    }
+    uint32_t timeoutMs = timeout < 0 ? 0 : static_cast<uint32_t>(timeout);
+    ret = NetManagerStandard::NetConnClient::GetInstance().RegisterNetConnCallback(
+        specifier, callback, timeoutMs);
+    if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
         return nullptr;
     }
     auto unregisterHandle = std::make_unique<UnregisterHandle>(callback);
@@ -489,6 +517,53 @@ int32_t UnregisterHandle::Unregister()
     return NetManagerStandard::NetConnClient::GetInstance().UnregisterNetConnCallback(callback_);
 }
 
+int32_t SetCustomDnsRule(const std::string &host, const rust::Vec<rust::String> &ips)
+{
+    if (!NetManagerStandard::CommonUtils::HasInternetPermission()) {
+        return NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+    if (host.empty() || ips.empty()) {
+        return NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    for (const auto &ip : ips) {
+        std::string ipStr(ip);
+        if (!NetManagerStandard::CommonUtils::IsValidIPV4(ipStr) &&
+            !NetManagerStandard::CommonUtils::IsValidIPV6(ipStr)) {
+            return NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR;
+        }
+    }
+    std::string hostIps = host + ",";
+    for (size_t i = 0; i < ips.size(); i++) {
+        hostIps.append(std::string(ips[i]));
+        if (i < ips.size() - 1) {
+            hostIps.append(",");
+        }
+    }
+    std::lock_guard<std::mutex> lock(g_predefinedHostMtx);
+    return predefined_host_set_hosts(hostIps.c_str());
+}
+
+int32_t RemoveCustomDnsRule(const std::string &host)
+{
+    if (!NetManagerStandard::CommonUtils::HasInternetPermission()) {
+        return NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+    if (host.empty()) {
+        return NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    std::lock_guard<std::mutex> lock(g_predefinedHostMtx);
+    return predefined_host_remove_host(host.c_str());
+}
+
+int32_t ClearCustomDnsRules()
+{
+    if (!NetManagerStandard::CommonUtils::HasInternetPermission()) {
+        return NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+    std::lock_guard<std::mutex> lock(g_predefinedHostMtx);
+    return predefined_host_clear_all_hosts();
+}
+
 HttpProxy RefreshGlobalHttpProxySync(int32_t &ret)
 {
     HttpProxy resultProxy{};
@@ -499,7 +574,7 @@ HttpProxy RefreshGlobalHttpProxySync(int32_t &ret)
     auto callback = [&mtx, &cv, &callbackCalled, &ret, &resultProxy](int32_t resultCode,
                        const NetManagerStandard::HttpProxy &httpProxy) {
         ret = resultCode;
-        if (resultCode == 0) {
+        if (resultCode == NetManagerStandard::NETMANAGER_SUCCESS) {
             auto exclusionList = rust::vec<rust::string>();
             for (const auto &s : httpProxy.GetExclusionList()) {
                 exclusionList.push_back(rust::String(s));
@@ -520,7 +595,7 @@ HttpProxy RefreshGlobalHttpProxySync(int32_t &ret)
     };
 
     int32_t refreshRet = NetManagerStandard::NetConnClient::GetInstance().RefreshGlobalHttpProxy(callback);
-    if (refreshRet != 0) {
+    if (refreshRet != NetManagerStandard::NETMANAGER_SUCCESS) {
         ret = refreshRet;
         return HttpProxy{};
     }
@@ -529,6 +604,14 @@ HttpProxy RefreshGlobalHttpProxySync(int32_t &ret)
     cv.wait(lock, [&callbackCalled] { return callbackCalled; });
 
     return resultProxy;
+}
+
+int32_t SetPacUrl(const std::string &pacUrl)
+{
+    if (pacUrl.empty()) {
+        return NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    return NetManagerStandard::NetConnClient::GetInstance().SetPacUrl(pacUrl);
 }
 
 int32_t SetPacFileUrl(const std::string &pacUrl)
@@ -551,28 +634,25 @@ rust::vec<NetAddress> GetAddressesByNameWithOptions(const std::string &host, int
     param.qp_type = QEURY_TYPE_NORMAL;
     param.qp_netid = netId;
     rust::vec<NetAddress> addresses;
-    if (host.empty()) {
-        NETMANAGER_BASE_LOGE("host is empty!");
+    if (host.empty() || family < static_cast<int32_t>(Family::All) ||
+        family > static_cast<int32_t>(Family::IPv6)) {
         ret = NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
         return addresses;
     }
     struct addrinfo hints = {};
     hints.ai_family = AF_UNSPEC;
-    if (family == AF_INET) {
+    if (family == Family::IPv4) {
         hints.ai_family = AF_INET;
-    } else if (family == AF_INET6) {
+    } else if (family == Family::IPv6) {
         hints.ai_family = AF_INET6;
     }
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
     int status = getaddrinfo_ext(host.c_str(), nullptr, &hints, &res, &param);
     if (status < 0) {
-        NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s,  status: %{public}d", errno, strerror(errno),
-                             status);
         ret = TransErrorCode(errno);
         return addresses;
     }
-
     for (addrinfo *tmp = res; tmp != nullptr; tmp = tmp->ai_next) {
         if (tmp->ai_addr == nullptr) {
             continue;
@@ -589,7 +669,6 @@ rust::vec<NetAddress> GetAddressesByNameWithOptions(const std::string &host, int
             inet_ntop(AF_INET6, &addr->sin6_addr, ip, sizeof(ip));
             addrHost = ip;
         }
-
         NetAddress address;
         SetAddressInfo(addrHost, tmp, address);
         addresses.push_back(address);
@@ -661,19 +740,26 @@ rust::vec<AniNetIpMacInfo> GetIpNeighTable(int32_t &ret)
     return result;
 }
 
-int32_t GetConnectOwnerUid(const NetConnInfoParam &param, int32_t &ret)
+int32_t GetConnectOwnerUid(int32_t protocolType, const NetAddress &localAddress,
+    const NetAddress &remoteAddress, int32_t &ret)
 {
-    if (param.family < 0 || param.family > Family::IPv6) {
+    auto normalizeFamily = [](int32_t family) {
+        return family == static_cast<int32_t>(NetManagerStandard::NetConnInfo::Family::IPv6)
+            ? static_cast<int32_t>(NetManagerStandard::NetConnInfo::Family::IPv6)
+            : static_cast<int32_t>(NetManagerStandard::NetConnInfo::Family::IPv4);
+    };
+    if (normalizeFamily(localAddress.family) != normalizeFamily(remoteAddress.family)) {
         ret = NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
         return -1;
     }
     NetManagerStandard::NetConnInfo connInfo;
-    connInfo.protocolType_ = param.protocolType;
-    connInfo.family_ = static_cast<NetManagerStandard::NetConnInfo::Family>(param.family);
-    connInfo.localAddress_ = std::string(param.localAddress);
-    connInfo.localPort_ = param.localPort;
-    connInfo.remoteAddress_ = std::string(param.remoteAddress);
-    connInfo.remotePort_ = param.remotePort;
+    connInfo.protocolType_ = protocolType;
+    connInfo.family_ = static_cast<NetManagerStandard::NetConnInfo::Family>(
+        normalizeFamily(localAddress.family));
+    connInfo.localAddress_ = std::string(localAddress.address);
+    connInfo.localPort_ = static_cast<uint16_t>(localAddress.port);
+    connInfo.remoteAddress_ = std::string(remoteAddress.address);
+    connInfo.remotePort_ = static_cast<uint16_t>(remoteAddress.port);
     int32_t ownerUid = -1;
     ret = NetManagerStandard::NetConnClient::GetInstance().GetConnectOwnerUid(connInfo, ownerUid);
     return ownerUid;
@@ -681,14 +767,26 @@ int32_t GetConnectOwnerUid(const NetConnInfoParam &param, int32_t &ret)
 
 rust::String GetDnsUnicode(const std::string &host, int32_t conversionProcess, int32_t &ret)
 {
+    if (host.empty()) {
+        ret = NetManagerStandard::NETMANAGER_SUCCESS;
+        return rust::String();
+    }
+    std::string validHost = host;
+    if (validHost.length() > MAX_HOST_LENGTH) {
+        validHost = validHost.substr(0, MAX_HOST_LENGTH);
+    }
     std::string unicode;
     ret = NetManagerStandard::ICUHelper::GetDnsUnicode(
-        host, static_cast<NetManagerStandard::ConversionProcess>(conversionProcess), unicode);
+        validHost, static_cast<NetManagerStandard::ConversionProcess>(conversionProcess), unicode);
     return rust::String(unicode);
 }
 
 rust::String GetDnsAscii(const std::string &host, int32_t conversionProcess, int32_t &ret)
 {
+    if (host.empty()) {
+        ret = NetManagerStandard::NETMANAGER_SUCCESS;
+        return rust::String();
+    }
     std::string ascii;
     ret = NetManagerStandard::ICUHelper::GetDnsASCII(
         host, static_cast<NetManagerStandard::ConversionProcess>(conversionProcess), ascii);
@@ -702,12 +800,20 @@ int32_t SetInterfaceUp(const std::string &iface)
 
 AniProbeResultInfo QueryProbeResult(const std::string &dest, int32_t duration, int32_t &ret)
 {
+    if (dest.empty() || duration <= 0 || duration > MAX_PING_DURATION) {
+        ret = NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
+        return AniProbeResultInfo{};
+    }
+    if (!NetManagerStandard::CommonUtils::HasInternetPermission()) {
+        ret = NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED;
+        return AniProbeResultInfo{};
+    }
     NetManagerStandard::NetProbe netProbe;
     NetManagerStandard::NetConn_ProbeResultInfo probeResult = {0};
     std::string tempDest = dest;
     ret = netProbe.QueryProbeResult(tempDest, duration, probeResult);
     AniProbeResultInfo result;
-    if (ret == 0) {
+    if (ret == NetManagerStandard::NETMANAGER_SUCCESS) {
         result.lossRate = static_cast<int32_t>(probeResult.lossRate);
         for (int i = 0; i < NetManagerStandard::NETCONN_MAX_RTT_NUM; i++) {
             result.rtt.push_back(static_cast<int32_t>(probeResult.rtt[i]));
@@ -716,88 +822,64 @@ AniProbeResultInfo QueryProbeResult(const std::string &dest, int32_t duration, i
     return result;
 }
 
-static bool ExtractNumericRtt(const std::string &token, double &out)
-{
-    if (token.empty()) {
-        return false;
-    }
-    char *end = nullptr;
-    double val = std::strtod(token.c_str(), &end);
-    if (end == token.c_str()) {
-        return false;
-    }
-    std::string suffix(end);
-    if (suffix == "ms" || suffix == "s" || suffix.empty()) {
-        out = val;
-        return true;
-    }
-    return false;
-}
-
-static bool ExtractJumpNo(const std::string &token, int32_t &jumpNo)
-{
-    char *end = nullptr;
-    long val = std::strtol(token.c_str(), &end, 10);
-    if (end == token.c_str() || *end != '\0') {
-        return false;
-    }
-    if (val < std::numeric_limits<int32_t>::min() || val > std::numeric_limits<int32_t>::max()) {
-        return false;
-    }
-    jumpNo = static_cast<int32_t>(val);
-    return true;
-}
-
-static void CollectRttAndAddress(const std::vector<std::string> &tokens,
-                                 std::string &address,
-                                 std::vector<double> &rttValues)
-{
-    size_t rttStart = tokens.size();
-    for (size_t i = tokens.size();
-         i > 1 && rttValues.size() < static_cast<size_t>(MAX_RTT_COUNT); --i) {
-        double rtt = 0.0;
-        if (ExtractNumericRtt(tokens[i - 1], rtt)) {
-            rttValues.push_back(rtt);
-            rttStart = i - 1;
-        } else {
-            break;
-        }
-    }
-    for (size_t i = 1; i < rttStart; ++i) {
-        if (!address.empty()) {
-            address += ' ';
-        }
-        address += tokens[i];
-    }
-}
-
-static bool ParseTraceRouteLine(const std::string &line, AniTraceRouteInfo &info)
+std::vector<std::string> splitStr(const std::string &str, const char delimiter)
 {
     std::vector<std::string> tokens;
-    {
-        std::istringstream tokenStream(line);
-        std::string token;
-        while (tokenStream >> token) {
-            tokens.push_back(token);
+    std::string token;
+    std::istringstream tokenStream(str);
+    while (std::getline(tokenStream, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
+int32_t Conv2TraceRouteInfoRtt(const std::string &rttStr, rust::Vec<uint32_t> &rtt)
+{
+    std::vector<std::string> tokens = splitStr(rttStr, ';');
+    uint32_t tokensSize = tokens.size();
+    std::string max = tokens[0];
+    uint8_t maxIdx = 2;
+    for (uint32_t i = 0; i < tokensSize && i < NetManagerStandard::NETCONN_MAX_RTT_NUM; ++i) {
+        if (i < tokensSize - maxIdx) {
+            tokens[i] = tokens[i + 1];
+        } else if (i == tokensSize - maxIdx) {
+            tokens[i] = max;
+        }
+        uint32_t num = 0;
+        std::istringstream iss(tokens[i]);
+        if (iss >> num) {
+            rtt.push_back(num);
         }
     }
-    if (tokens.size() < MIN_TRACE_ROUTE_TOKENS) {
-        return false;
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t Conv2TraceRouteInfo(const std::string &traceRouteInfoStr,
+    rust::Vec<AniTraceRouteInfo> &traceRouteInfo, uint32_t maxJumpNumber)
+{
+    if (traceRouteInfoStr == "") {
+        return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
     }
 
-    if (!ExtractJumpNo(tokens[0], info.jumpNo)) {
-        return false;
+    // traceRouteInfo is "1 *.*.*.*;2;3;4 ..." pos is space position
+    const uint32_t pos2 = 2;
+    const uint32_t pos3 = 3;
+    std::vector<std::string> tokens = splitStr(traceRouteInfoStr, ' ');
+    uint32_t tokensSize = static_cast<uint32_t>(tokens.size());
+    for (uint32_t i = 0; i < tokensSize / pos3 && i < maxJumpNumber; i++) {
+        AniTraceRouteInfo info;
+        uint32_t num = 0;
+        std::istringstream iss(tokens[i * pos3]);
+        if (iss >> num) {
+            info.jumpNo = static_cast<uint8_t>(num);
+        }
+        info.address = tokens[i * pos3 + 1];
+        if (Conv2TraceRouteInfoRtt(tokens[i * pos3 + pos2], info.rtt) != NetManagerStandard::NETMANAGER_SUCCESS) {
+            return NetManagerStandard::NETMANAGER_ERR_INTERNAL;
+        }
+        traceRouteInfo.push_back(std::move(info));
     }
-
-    std::vector<double> rttValues;
-    std::string address;
-    CollectRttAndAddress(tokens, address, rttValues);
-    info.address = address;
-
-    for (auto it = rttValues.rbegin(); it != rttValues.rend(); ++it) {
-        info.rtt.push_back(*it);
-    }
-    return true;
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
 rust::vec<AniTraceRouteInfo> QueryTraceRoute(const std::string &destination, int32_t maxJumpNumber,
@@ -807,20 +889,10 @@ rust::vec<AniTraceRouteInfo> QueryTraceRoute(const std::string &destination, int
     ret = NetManagerStandard::NetConnClient::GetInstance().QueryTraceRoute(
         destination, maxJumpNumber, packetsType, traceRouteInfoStr, false);
     rust::vec<AniTraceRouteInfo> result;
-    if (ret != 0) {
+    if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
         return result;
     }
-    std::istringstream iss(traceRouteInfoStr);
-    std::string line;
-    while (std::getline(iss, line)) {
-        if (line.empty()) {
-            continue;
-        }
-        AniTraceRouteInfo info;
-        if (ParseTraceRouteLine(line, info)) {
-            result.push_back(std::move(info));
-        }
-    }
+    (void)Conv2TraceRouteInfo(traceRouteInfoStr, result, static_cast<uint32_t>(maxJumpNumber));
     return result;
 }
 
@@ -828,7 +900,7 @@ int32_t GetProxyMode(int32_t &mode)
 {
     NetManagerStandard::ProxyModeType proxyMode;
     int32_t ret = NetManagerStandard::NetConnClient::GetInstance().GetProxyMode(proxyMode);
-    if (ret == 0) {
+    if (ret == NetManagerStandard::NETMANAGER_SUCCESS) {
         mode = static_cast<int32_t>(proxyMode);
     }
     return ret;
@@ -837,7 +909,7 @@ int32_t GetProxyMode(int32_t &mode)
 int32_t SetProxyMode(int32_t mode)
 {
     if (mode < 0 || mode > 1) {
-        return -1;
+        return NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR;
     }
     auto proxyMode = static_cast<NetManagerStandard::ProxyModeType>(mode);
     return NetManagerStandard::NetConnClient::GetInstance().SetProxyMode(proxyMode);
@@ -852,12 +924,21 @@ rust::String GetPacFileUrl(int32_t &ret)
 
 int32_t SetNetExtAttribute(int32_t netId, const std::string &netExtAttribute)
 {
+    if (!NetManagerStandard::NetManagerPermission::CheckPermission(
+        NetManagerStandard::Permission::SET_NET_EXT_ATTRIBUTE)) {
+        return NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED;
+    }
     NetManagerStandard::NetHandle netHandle(netId);
     return NetManagerStandard::NetConnClient::GetInstance().SetNetExtAttribute(netHandle, netExtAttribute);
 }
 
 rust::String GetNetExtAttribute(int32_t netId, int32_t &ret)
 {
+    if (!NetManagerStandard::NetManagerPermission::CheckPermission(
+        NetManagerStandard::Permission::GET_NETWORK_INFO)) {
+        ret = NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED;
+        return rust::String();
+    }
     std::string netExtAttribute;
     NetManagerStandard::NetHandle netHandle(netId);
     ret = NetManagerStandard::NetConnClient::GetInstance().GetNetExtAttribute(netHandle, netExtAttribute);
