@@ -1340,5 +1340,26 @@ HWTEST_F(NetsysNativeServiceTest, NfqInvalidFdTest001, TestSize.Level1)
     EXPECT_EQ(ret, -1);
 }
 #endif
+
+HWTEST_F(NetsysNativeServiceTest, RenewDhcpClientTest001, TestSize.Level1)
+{
+    std::string iface(64, 'a');
+    int32_t ret = instance_->RenewDhcpClient(iface, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetsysNativeServiceTest, RenewDhcpClientTest002, TestSize.Level1)
+{
+    std::string iface(64, 'b');
+    int32_t ret = instance_->RenewDhcpClient(iface, true);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetsysNativeServiceTest, RenewDhcpClientTest003, TestSize.Level1)
+{
+    std::string iface = "test0";
+    int32_t ret = instance_->RenewDhcpClient(iface, false);
+    EXPECT_EQ(ret, ERR_NONE);
+}
 } // namespace NetsysNative
 } // namespace OHOS

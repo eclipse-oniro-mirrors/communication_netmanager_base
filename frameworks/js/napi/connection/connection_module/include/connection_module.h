@@ -105,6 +105,7 @@ public:
     static constexpr const char *FUNCTION_GET_SYSTEM_NET_PORT_STATES = "getSystemNetPortStates";
     static constexpr const char *FUNCTION_QUERY_PROBE_RESULT = "queryProbeResult";
     static constexpr const char *FUNCTION_QUERY_TRACE_ROUTE = "queryTraceRoute";
+    static constexpr const char *FUNCTION_RENEW_DHCP = "renewDhcp";
     static constexpr const char *INTERFACE_PACKETS_TYPE = "PacketsType";
     static constexpr const char *INTERFACE_SOCKS5_DNS_STRATEGY = "Socks5DnsStrategy";
 
@@ -204,6 +205,7 @@ private:
     static napi_value GetSystemNetPortStates(napi_env env, napi_callback_info info);
     static napi_value QueryTraceRoute(napi_env env, napi_callback_info info);
     static napi_value QueryProbeResult(napi_env env, napi_callback_info info);
+    static napi_value RenewDhcp(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::NetManagerStandard
 

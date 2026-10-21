@@ -136,6 +136,7 @@ private:
     int32_t OnDeleteVlanIp(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetConnectOwnerUid(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetSystemNetPortStates(MessageParcel &data, MessageParcel &reply);
+    int32_t OnRenewDhcp(MessageParcel &data, MessageParcel &reply);
 private:
     std::map<uint32_t, NetConnServiceFuncPer> memberFuncMap_;
 };

@@ -150,6 +150,7 @@ public:
     virtual int32_t DeleteVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask) = 0;
     virtual int32_t GetConnectOwnerUid(const NetConnInfo &netConnInfo, int32_t &ownerUid) = 0;
     virtual int32_t GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo) = 0;
+    virtual int32_t RenewDhcp(int32_t netId) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

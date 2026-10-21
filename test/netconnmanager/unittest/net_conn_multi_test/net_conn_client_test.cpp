@@ -2362,5 +2362,36 @@ HWTEST_F(NetConnClientTest, ResetRefreshState002, TestSize.Level1)
     EXPECT_TRUE(netConnClient->pendingRefreshCallbacks_.empty());
 }
 
+HWTEST_F(NetConnClientTest, RenewDhcpTest001, TestSize.Level1)
+{
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->NetConnService_ = mockNetConnService;
+    EXPECT_CALL(*mockNetConnService, RenewDhcp(1)).WillRepeatedly(Return(NETMANAGER_SUCCESS));
+    NetHandle handle;
+    handle.SetNetId(1);
+    auto ret = netConnClient->RenewDhcp(handle);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnClientTest, RenewDhcpTest002, TestSize.Level1)
+{
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->NetConnService_ = mockNetConnService;
+    EXPECT_CALL(*mockNetConnService, RenewDhcp(2)).WillRepeatedly(Return(NETMANAGER_ERR_INVALID_PARAMETER));
+    NetHandle handle;
+    handle.SetNetId(2);
+    auto ret = netConnClient->RenewDhcp(handle);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+}
+
+HWTEST_F(NetConnClientTest, RenewDhcpTest003, TestSize.Level1)
+{
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->NetConnService_ = nullptr;
+    NetHandle handle;
+    handle.SetNetId(1);
+    auto ret = netConnClient->RenewDhcp(handle);
+    EXPECT_EQ(ret, NETMANAGER_ERR_GET_PROXY_FAIL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -130,6 +130,18 @@ public:
         reply.WriteBool(true);
     }
 
+    void HandleRenewDhcpReply(MessageParcel &reply)
+    {
+        if (deadFlowReplyMode_ == DEAD_FLOW_REPLY_SKIP_RESULT) {
+            return;
+        }
+        if (deadFlowReplyMode_ == DEAD_FLOW_REPLY_RESULT_ERROR) {
+            reply.WriteInt32(NETMANAGER_ERR_INTERNAL);
+            return;
+        }
+        reply.WriteInt32(NETMANAGER_SUCCESS);
+    }
+
     int SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
     {
         switch (code) {
@@ -183,6 +195,9 @@ public:
                 break;
             case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEAD_FLOW_RESET_TARGET_BUNDLE):
                 HandleDeadFlowResetTargetBundleReply(reply);
+                break;
+            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_RENEW_DHCP):
+                HandleRenewDhcpReply(reply);
                 break;
             default:
                 if (deadFlowReplyMode_ == DEAD_FLOW_REPLY_SKIP_RESULT) {
@@ -1274,6 +1289,40 @@ HWTEST_F(NetConnServiceProxyTest, EnableVnicNetworkWriteInt32Fail, TestSize.Leve
     }
     int32_t ret = instance_->EnableVnicNetwork(linkInfo, uids);
     EXPECT_EQ(ret, NETMANAGER_ERR_WRITE_DATA_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RenewDhcpTest001, TestSize.Level1)
+{
+    int32_t ret = instance_->RenewDhcp(TEST_NETID);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RenewDhcpTest002, TestSize.Level1)
+{
+    remoteObj_->SetDeadFlowReplyMode(DEAD_FLOW_REPLY_SKIP_RESULT);
+    int32_t ret = instance_->RenewDhcp(TEST_NETID);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RenewDhcpTest003, TestSize.Level1)
+{
+    remoteObj_->SetErrorCode(NETMANAGER_ERR_INTERNAL);
+    int32_t ret = instance_->RenewDhcp(TEST_NETID);
+    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RenewDhcpTest004, TestSize.Level1)
+{
+    remoteObj_->SetDeadFlowReplyMode(DEAD_FLOW_REPLY_RESULT_ERROR);
+    int32_t ret = instance_->RenewDhcp(TEST_NETID);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, RenewDhcpTest005, TestSize.Level1)
+{
+    std::shared_ptr<NetConnServiceProxy> proxy = std::make_shared<NetConnServiceProxy>(sptr<IRemoteObject>());
+    int32_t ret = proxy->RenewDhcp(TEST_NETID);
+    EXPECT_EQ(ret, NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
 }
 }
 } // namespace NetManagerStandard

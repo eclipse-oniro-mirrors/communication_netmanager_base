@@ -58,6 +58,7 @@ private:
 #endif // SUPPORT_SYSVPN
     void InitVlanInterfaceMap();
     void InitOpToInterfaceMapExt();
+    void InitDhcpNatOpToInterfaceMapExt();
     void InitDnsServerOpToInterfaceMap();
     void InitNetDiagOpToInterfaceMap();
     void InitNetDnsDiagOpToInterfaceMap();
@@ -117,6 +118,7 @@ private:
     int32_t CmdInterfaceGetList(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStartDhcpClient(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStopDhcpClient(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdRenewDhcpClient(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStartDhcpService(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStopDhcpService(MessageParcel &data, MessageParcel &reply);
     int32_t CmdIpEnableForwarding(MessageParcel &data, MessageParcel &reply);

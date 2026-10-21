@@ -240,6 +240,15 @@ HWTEST_F(NetsysControllerServiceImplTest, RunRegisterMockApi, TestSize.Level1)
     EXPECT_EQ(list.size(), static_cast<uint32_t>(0));
 }
 
+HWTEST_F(NetsysControllerServiceImplTest, RenewDhcpClientTest001, TestSize.Level1)
+{
+    instance_->mockNetsysClient_.mockApi_.insert(MOCK_RENEWDHCPCLIENT_API);
+    int32_t ret = instance_->RenewDhcpClient("test0", false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = instance_->RenewDhcpClient("test0", true);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysControllerServiceImplTest, ServiceImplTest, TestSize.Level1)
 {
     std::vector<UidRange> uidRanges;

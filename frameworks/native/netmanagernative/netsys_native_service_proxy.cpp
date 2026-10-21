@@ -1425,6 +1425,33 @@ int32_t NetsysNativeServiceProxy::StopDhcpClient(const std::string &iface, bool 
     return ret;
 }
 
+int32_t NetsysNativeServiceProxy::RenewDhcpClient(const std::string &iface, bool bIpv6)
+{
+    NETNATIVE_LOGI("Begin to RenewDhcpClient");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(iface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(bIpv6)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret =
+        SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_RENEW_DHCP_CLIENT), data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", ret);
+        return IPC_INVOKER_ERR;
+    }
+    ret = reply.ReadInt32();
+    NETNATIVE_LOGI("End to RenewDhcpClient, ret =%{public}d", ret);
+    return ret;
+}
+
 int32_t NetsysNativeServiceProxy::StartDhcpService(const std::string &iface, const std::string &ipv4addr)
 {
     NETNATIVE_LOGI("Begin to StartDhcpService");

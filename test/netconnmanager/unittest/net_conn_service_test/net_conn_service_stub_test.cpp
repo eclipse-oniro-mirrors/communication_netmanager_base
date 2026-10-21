@@ -21,6 +21,7 @@
 #endif
 
 #include "common_net_conn_callback_test.h"
+#include "common_mock_netmanager_permission.h"
 #include "net_conn_service_stub_test.h"
 #include "refresh_http_proxy_callback_stub.h"
 #include "net_interface_callback_stub.h"
@@ -1707,6 +1708,49 @@ HWTEST_F(NetConnServiceStubTest, OnIsDeadFlowResetTargetBundleTest004, TestSize.
     EXPECT_TRUE(data.WriteString(std::string(257, 'a')));
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_DEAD_FLOW_RESET_TARGET_BUNDLE);
     EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+}
+
+/**
+ * @tc.name: OnRenewDhcpTest001
+ * @tc.desc: Test NetConnServiceStub OnRenewDhcp with valid netId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnRenewDhcpTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteInt32(TEST_INT32_VALUE));
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_RENEW_DHCP);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnRenewDhcpTest002
+ * @tc.desc: Test NetConnServiceStub OnRenewDhcp without netId, read data fail.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnRenewDhcpTest002, TestSize.Level1)
+{
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_RENEW_DHCP);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
+
+/**
+ * @tc.name: OnRenewDhcpTest003
+ * @tc.desc: Test NetConnServiceStub OnRenewDhcp without ENTERPRISE_MANAGE_NETWORK permission.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnRenewDhcpTest003, TestSize.Level1)
+{
+    SetMockCheckPermissionResult(false);
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteInt32(TEST_INT32_VALUE));
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_RENEW_DHCP);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    SetMockCheckPermissionResult(true);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

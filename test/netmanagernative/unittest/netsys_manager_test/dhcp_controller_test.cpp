@@ -114,5 +114,58 @@ HWTEST_F(DhcpControllerTest, TestErr, TestSize.Level1)
     ASSERT_TRUE(ret);
 }
 
+HWTEST_F(DhcpControllerTest, RenewClientTest001, TestSize.Level1)
+{
+    std::string emptyIface = "";
+    int32_t ret = instance_->RenewClient(emptyIface, false);
+    EXPECT_EQ(ret, static_cast<int32_t>(DHCP_INVALID_PARAM));
+    ret = instance_->RenewClient(emptyIface, true);
+    EXPECT_EQ(ret, static_cast<int32_t>(DHCP_INVALID_PARAM));
+
+    std::string maxLenIface(INTERFACE_MAX_LEN, 'a');
+    ret = instance_->RenewClient(maxLenIface, false);
+    EXPECT_EQ(ret, static_cast<int32_t>(DHCP_INVALID_PARAM));
+    ret = instance_->RenewClient(maxLenIface, true);
+    EXPECT_EQ(ret, static_cast<int32_t>(DHCP_INVALID_PARAM));
+
+    std::string longIface(INTERFACE_MAX_LEN + 32, 'a');
+    ret = instance_->RenewClient(longIface, false);
+    EXPECT_EQ(ret, static_cast<int32_t>(DHCP_INVALID_PARAM));
+    ret = instance_->RenewClient(longIface, true);
+    EXPECT_EQ(ret, static_cast<int32_t>(DHCP_INVALID_PARAM));
+}
+
+HWTEST_F(DhcpControllerTest, RenewClientTest002, TestSize.Level1)
+{
+    std::string iface = "test0";
+    int32_t ret = instance_->RenewClient(iface, false);
+    EXPECT_NE(ret, static_cast<int32_t>(DHCP_UNKNOWN_ERROR));
+    ret = instance_->RenewClient(iface, true);
+    EXPECT_NE(ret, static_cast<int32_t>(DHCP_UNKNOWN_ERROR));
+}
+
+HWTEST_F(DhcpControllerTest, RenewClientTest003, TestSize.Level1)
+{
+    auto controller = std::make_shared<DhcpController>();
+    EXPECT_FALSE(controller->dhcpClientInitialized_);
+    std::string iface = "wlan0";
+    int32_t ret = controller->RenewClient(iface, false);
+    EXPECT_NE(ret, static_cast<int32_t>(DHCP_UNKNOWN_ERROR));
+    EXPECT_TRUE(controller->dhcpClientInitialized_);
+    ret = controller->RenewClient(iface, true);
+    EXPECT_NE(ret, static_cast<int32_t>(DHCP_UNKNOWN_ERROR));
+    EXPECT_TRUE(controller->dhcpClientInitialized_);
+}
+
+HWTEST_F(DhcpControllerTest, RenewClientTest004, TestSize.Level1)
+{
+    auto controller = std::make_shared<DhcpController>();
+    std::string boundaryIface(INTERFACE_MAX_LEN - 1, 'b');
+    int32_t ret = controller->RenewClient(boundaryIface, false);
+    EXPECT_NE(ret, static_cast<int32_t>(DHCP_UNKNOWN_ERROR));
+    EXPECT_TRUE(controller->dhcpClientInitialized_);
+    ret = controller->RenewClient(boundaryIface, true);
+    EXPECT_NE(ret, static_cast<int32_t>(DHCP_UNKNOWN_ERROR));
+}
 } // namespace nmd
 } // namespace OHOS

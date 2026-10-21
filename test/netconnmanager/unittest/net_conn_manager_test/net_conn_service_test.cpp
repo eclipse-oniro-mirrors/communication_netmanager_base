@@ -38,6 +38,7 @@
 #include "net_probe_callback_test.h"
 #include "netmanager_base_test_security.h"
 #include "netsys_controller.h"
+#include "netsys_controller_service_impl.h"
 #include "parameters.h"
 #include "system_ability_definition.h"
 #include "ipc_skeleton.h"
@@ -77,6 +78,7 @@ constexpr const char *TEST_LONG_EXCLUSION_LIST =
 constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THREAD";
 constexpr int64_t TEST_UID = 1010;
 constexpr uint32_t TEST_NOTEXISTSUPPLIER = 1000;
+constexpr int32_t TEST_NOTEXIST_NETID = MAX_NET_ID;
 constexpr int32_t MAIN_USERID = 100;
 constexpr int32_t INVALID_USERID = 1;
 constexpr long SUCCESS_CODE = 204;
@@ -3285,5 +3287,112 @@ HWTEST_F(NetConnServiceTest, SetProxyOffTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 #endif // NETMANAGER_ENABLE_PAC_PROXY
+
+HWTEST_F(NetConnServiceTest, RenewDhcpTest001, TestSize.Level1)
+{
+    auto ret = NetConnService::GetInstance()->RenewDhcp(TEST_NOTEXIST_NETID);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetConnServiceTest, RenewDhcpTest002, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    uint32_t supplierId = 0;
+    int32_t ret = NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_CELLULAR,
+        "renewDhcpCellular", netCaps, supplierId);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    sptr<NetSupplier> supplier = NetConnService::GetInstance()->FindNetSupplier(supplierId);
+    ASSERT_NE(supplier, nullptr);
+
+    ret = NetConnService::GetInstance()->RenewDhcp(supplier->GetNetId());
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+    NetConnService::GetInstance()->UnregisterNetSupplier(supplierId);
+}
+
+HWTEST_F(NetConnServiceTest, RenewDhcpTest003, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    uint32_t supplierId = 0;
+    int32_t ret = NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_WIFI,
+        "renewDhcpWifiNoNetwork", netCaps, supplierId);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    sptr<NetSupplier> supplier = NetConnService::GetInstance()->FindNetSupplier(supplierId);
+    ASSERT_NE(supplier, nullptr);
+    supplier->SetNetwork(nullptr);
+    ret = NetConnService::GetInstance()->RenewDhcp(supplier->GetNetId());
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+    NetConnService::GetInstance()->UnregisterNetSupplier(supplierId);
+}
+
+HWTEST_F(NetConnServiceTest, RenewDhcpTest004, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    uint32_t supplierId = 0;
+    int32_t ret = NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_WIFI,
+        "renewDhcpWifiNoIface", netCaps, supplierId);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    sptr<NetSupplier> supplier = NetConnService::GetInstance()->FindNetSupplier(supplierId);
+    ASSERT_NE(supplier, nullptr);
+    ret = NetConnService::GetInstance()->RenewDhcp(supplier->GetNetId());
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+    NetConnService::GetInstance()->UnregisterNetSupplier(supplierId);
+}
+
+HWTEST_F(NetConnServiceTest, RenewDhcpTest005, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    uint32_t supplierId = 0;
+    int32_t ret = NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_WIFI,
+        "renewDhcpWifiFail", netCaps, supplierId);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    sptr<NetSupplier> supplier = NetConnService::GetInstance()->FindNetSupplier(supplierId);
+    ASSERT_NE(supplier, nullptr);
+    sptr<NetSupplierInfo> supplierInfo = new (std::nothrow) NetSupplierInfo();
+    ASSERT_NE(supplierInfo, nullptr);
+    supplierInfo->isAvailable_ = true;
+    ASSERT_EQ(NetConnService::GetInstance()->UpdateNetSupplierInfo(supplierId, supplierInfo), NETMANAGER_SUCCESS);
+    sptr<NetLinkInfo> netLinkInfo = new (std::nothrow) NetLinkInfo();
+    ASSERT_NE(netLinkInfo, nullptr);
+    netLinkInfo->ifaceName_ = "wlan0";
+    ASSERT_EQ(NetConnService::GetInstance()->UpdateNetLinkInfo(supplierId, netLinkInfo), NETMANAGER_SUCCESS);
+
+    auto netsysService = NetsysController::GetInstance().netsysService_;
+    NetsysController::GetInstance().netsysService_ = nullptr;
+    ret = NetConnService::GetInstance()->RenewDhcp(supplier->GetNetId());
+    NetsysController::GetInstance().netsysService_ = netsysService;
+    EXPECT_EQ(ret, NETSYS_NETSYSSERVICE_NULL);
+    NetConnService::GetInstance()->UnregisterNetSupplier(supplierId);
+}
+
+HWTEST_F(NetConnServiceTest, RenewDhcpTest006, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    uint32_t supplierId = 0;
+    int32_t ret = NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_WIFI,
+        "renewDhcpWifiNetworkOwner", netCaps, supplierId);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    sptr<NetSupplier> supplier = NetConnService::GetInstance()->FindNetSupplier(supplierId);
+    ASSERT_NE(supplier, nullptr);
+
+    uint32_t networkSupplierId = 0;
+    ret = NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_WIFI,
+        "renewDhcpWifiNetworkHolder", netCaps, networkSupplierId);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    sptr<NetSupplier> networkSupplier = NetConnService::GetInstance()->FindNetSupplier(networkSupplierId);
+    ASSERT_NE(networkSupplier, nullptr);
+
+    int32_t netId = networkSupplier->GetNetId();
+    supplier->SetNetwork(networkSupplier->GetNetwork());
+    networkSupplier->SetNetwork(nullptr);
+    ret = NetConnService::GetInstance()->RenewDhcp(netId);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+    NetConnService::GetInstance()->UnregisterNetSupplier(supplierId);
+    NetConnService::GetInstance()->UnregisterNetSupplier(networkSupplierId);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

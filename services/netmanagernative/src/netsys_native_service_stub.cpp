@@ -56,6 +56,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitBandwidthOpToInterfaceMapExt();
     InitFirewallOpToInterfaceMap();
     InitOpToInterfaceMapExt();
+    InitDhcpNatOpToInterfaceMapExt();
     InitVlanInterfaceMap();
     InitNetDiagOpToInterfaceMap();
     InitNetDnsDiagOpToInterfaceMap();
@@ -280,10 +281,16 @@ void NetsysNativeServiceStub::InitOpToInterfaceMapExt()
         &NetsysNativeServiceStub::CmdGetInterfaceConfig;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_GET_LIST)] =
         &NetsysNativeServiceStub::CmdInterfaceGetList;
+}
+
+void NetsysNativeServiceStub::InitDhcpNatOpToInterfaceMapExt()
+{
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_START_DHCP_CLIENT)] =
         &NetsysNativeServiceStub::CmdStartDhcpClient;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_STOP_DHCP_CLIENT)] =
         &NetsysNativeServiceStub::CmdStopDhcpClient;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_RENEW_DHCP_CLIENT)] =
+        &NetsysNativeServiceStub::CmdRenewDhcpClient;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_START_DHCP_SERVICE)] =
         &NetsysNativeServiceStub::CmdStartDhcpService;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_STOP_DHCP_SERVICE)] =
@@ -1323,6 +1330,16 @@ int32_t NetsysNativeServiceStub::CmdStopDhcpClient(MessageParcel &data, MessageP
     int32_t result = StopDhcpClient(iface, bIpv6);
     reply.WriteInt32(result);
     return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdRenewDhcpClient(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdRenewDhcpClient");
+    std::string iface = data.ReadString();
+    bool bIpv6 = data.ReadBool();
+    int32_t result = RenewDhcpClient(iface, bIpv6);
+    reply.WriteInt32(result);
+    return ERR_NONE;
 }
 
 int32_t NetsysNativeServiceStub::CmdStartDhcpService(MessageParcel &data, MessageParcel &reply)

@@ -262,6 +262,8 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMapExt()
         &NetConnServiceStub::OnGetConnectOwnerUid, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEAD_FLOW_RESET_TARGET_BUNDLE)] = {
         &NetConnServiceStub::OnIsDeadFlowResetTargetBundle, {Permission::INTERNET}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_RENEW_DHCP)] = {
+        &NetConnServiceStub::OnRenewDhcp, {Permission::ENTERPRISE_MANAGE_NETWORK}};
 }
 
 void NetConnServiceStub::InitVnicFuncToInterfaceMap()
@@ -2366,6 +2368,20 @@ int32_t NetConnServiceStub::OnGetSystemNetPortStates(MessageParcel &data, Messag
         }
     }
     // LCOV_EXCL_STOP
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnRenewDhcp(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_I("Enter OnRenewDhcp");
+    int32_t netId = 0;
+    if (!data.ReadInt32(netId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int32_t ret = RenewDhcp(netId);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
     return NETMANAGER_SUCCESS;
 }
 

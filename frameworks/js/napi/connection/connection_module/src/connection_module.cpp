@@ -251,6 +251,9 @@ static void AddCleanupHook(napi_env env)
     DECLARE_NAPI_FUNCTION(FUNCTION_QUERY_TRACE_ROUTE, QueryTraceRoute),          \
     DECLARE_NAPI_FUNCTION(FUNCTION_QUERY_PROBE_RESULT, QueryProbeResult),        \
 
+#define DEFINE_RENEW_DHCP_FUNCTIONS \
+    DECLARE_NAPI_FUNCTION(FUNCTION_RENEW_DHCP, RenewDhcp),
+
 std::initializer_list<napi_property_descriptor> ConnectionModule::createPropertyList()
 {
     std::initializer_list<napi_property_descriptor> functions = {
@@ -299,6 +302,7 @@ std::initializer_list<napi_property_descriptor> ConnectionModule::createProperty
         DEFINE_VLAN_FUNCTIONS
         DEFINE_PAC_FUNCTIONS
         DEFINE_TRACEROUTE_PING_FUNCTIONS
+        DEFINE_RENEW_DHCP_FUNCTIONS
     };
     return functions;
 }
@@ -930,6 +934,13 @@ napi_value ConnectionModule::QueryProbeResult(napi_env env, napi_callback_info i
     return ModuleTemplate::Interface<QueryProbeResultContext>(env, info, FUNCTION_QUERY_PROBE_RESULT, nullptr,
                                                               ConnectionAsyncWork::ExecQueryProbeResult,
                                                               ConnectionAsyncWork::QueryProbeResultCallback);
+}
+
+napi_value ConnectionModule::RenewDhcp(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::InterfaceSync<RenewDhcpContext>(env, info, FUNCTION_RENEW_DHCP, nullptr,
+                                                           ConnectionExec::ExecRenewDhcp,
+                                                           ConnectionExec::RenewDhcpCallback);
 }
 
 napi_value ConnectionModule::NetConnectionInterface::On(napi_env env, napi_callback_info info)

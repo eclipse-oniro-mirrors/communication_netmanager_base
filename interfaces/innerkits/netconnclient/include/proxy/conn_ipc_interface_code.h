@@ -109,6 +109,7 @@ enum class ConnInterfaceCode {
     CMD_NM_GET_SYSTEM_NET_PORT_STATES,
     CMD_NM_DEAD_FLOW_RESET_TARGET_BUNDLE,
     CMD_NM_REFRESH_GLOBAL_HTTP_PROXY,
+    CMD_NM_RENEW_DHCP,
 };
 
 enum class AdjCallbackInterfaceCode {
