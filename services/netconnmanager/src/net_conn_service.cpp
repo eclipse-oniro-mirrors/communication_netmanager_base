@@ -2346,8 +2346,8 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
             // if the valid userId is given. so load http proxy from specified user.
             LoadGlobalHttpProxy(SPECIFY, httpProxy);
         } else {
-            NETMGR_LOG_I("GetDefaultHttpProxy userId not owned by caller, fallback to LOCAL. "
-            "requested[%{public}d]", httpProxy.GetUserId());
+            NETMGR_LOG_I("GetDefaultHttpProxy userId not owned by caller, fallback to LOCAL."
+                "requested[%{public}d]", httpProxy.GetUserId());
             LoadGlobalHttpProxy(LOCAL, httpProxy);
         }
     } else {
