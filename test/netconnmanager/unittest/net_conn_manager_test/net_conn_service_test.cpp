@@ -880,6 +880,48 @@ HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest005, TestSize.Level1)
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
+/**
+ * @tc.name: GetDefaultHttpProxyTest006
+ * @tc.desc: Test NetConnService GetDefaultHttpProxy with root user id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest006, TestSize.Level1)
+{
+    int32_t bindNetId = NET_ID;
+    HttpProxy defaultHttpProxy;
+    defaultHttpProxy.SetUserId(0);
+    int32_t ret = NetConnService::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+/**
+ * @tc.name: GetDefaultHttpProxyTest007
+ * @tc.desc: Test NetConnService GetDefaultHttpProxy with a cross-account user id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest007, TestSize.Level1)
+{
+    int32_t bindNetId = NET_ID;
+    HttpProxy defaultHttpProxy;
+    defaultHttpProxy.SetUserId(101);
+    int32_t ret = NetConnService::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+/**
+ * @tc.name: GetDefaultHttpProxyTest008
+ * @tc.desc: Test NetConnService GetDefaultHttpProxy with a negative user id other than -1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest008, TestSize.Level1)
+{
+    int32_t bindNetId = NET_ID;
+    HttpProxy defaultHttpProxy;
+    defaultHttpProxy.SetUserId(-2);
+    int32_t ret = NetConnService::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
 HWTEST_F(NetConnServiceTest, GetLocalUserIdTest001, TestSize.Level1)
 {
     int32_t userId;
