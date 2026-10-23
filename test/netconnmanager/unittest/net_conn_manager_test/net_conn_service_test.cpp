@@ -976,6 +976,13 @@ HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest010, TestSize.Level1)
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceTest, GetLocalUserIdTest001, TestSize.Level1)
+{
+    int32_t userId;
+    int32_t ret = NetConnService::GetInstance()->GetLocalUserId(userId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 /**
  * @tc.name: RefreshGlobalHttpProxyTest001
  * @tc.desc: Test NetConnService RefreshGlobalHttpProxy with empty host.
