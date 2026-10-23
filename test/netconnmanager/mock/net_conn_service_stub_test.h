@@ -84,6 +84,16 @@ public:
         return 0;
     }
 
+    int32_t RegisterHttpProxyCallback(const sptr<IHttpProxyCallback> &callback) override
+    {
+        return 0;
+    }
+
+    int32_t UnregisterHttpProxyCallback(const sptr<IHttpProxyCallback> &callback) override
+    {
+        return 0;
+    }
+
     int32_t UpdateNetCaps(const std::set<NetCap> &netCaps, const uint32_t supplierId) override
     {
         return 0;

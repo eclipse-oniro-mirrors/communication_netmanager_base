@@ -39,6 +39,19 @@ void EventManager::AddListener(napi_env env, const std::string &type, napi_value
     listeners_.emplace_back(EventListener(env, type, callback, once, asyncCallback));
 }
 
+bool EventManager::AddListenerIfAbsent(napi_env env, const std::string &type, napi_value callback)
+{
+    std::unique_lock<std::shared_mutex> lock(mutexForListenersAndEmitByUv_);
+    auto it = std::find_if(listeners_.begin(), listeners_.end(), [&type, callback](const EventListener &listener) {
+        return listener.Match(type, callback);
+    });
+    if (it != listeners_.end()) {
+        return false;
+    }
+    listeners_.emplace_back(env, type, callback, false, false);
+    return true;
+}
+
 void EventManager::DeleteListener(const std::string &type, napi_value callback)
 {
     std::unique_lock<std::shared_mutex> lock(mutexForListenersAndEmitByUv_);

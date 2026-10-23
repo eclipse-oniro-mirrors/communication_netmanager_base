@@ -89,6 +89,8 @@ private:
     int32_t OnGetGlobalHttpProxy(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetDefaultHttpProxy(MessageParcel &data, MessageParcel &reply);
     int32_t OnRefreshGlobalHttpProxy(MessageParcel &data, MessageParcel &reply);
+    int32_t OnRegisterHttpProxyCallback(MessageParcel &data, MessageParcel &reply);
+    int32_t OnUnregisterHttpProxyCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetNetIdByIdentifier(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetAppNet(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetInterfaceCallback(MessageParcel &data, MessageParcel &reply);

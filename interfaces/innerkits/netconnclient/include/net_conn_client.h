@@ -36,6 +36,7 @@
 #include <shared_mutex>
 #include "net_conn_callback_stub.h"
 #include "refresh_http_proxy_callback_stub.h"
+#include "http_proxy_callback_stub.h"
 #include "net_trace_route_info.h"
 
 namespace ffrt {
@@ -462,7 +463,12 @@ public:
     int32_t FactoryResetNetwork();
     int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback);
     void RegisterAppHttpProxyCallback(std::function<void(const HttpProxy &httpProxy)> callback, uint32_t &callbackid);
+    void RegisterAppHttpProxyCallback(std::function<void(const HttpProxy &httpProxy)> callback, uint32_t &callbackid,
+        bool notifyEmptyProxy);
     void UnregisterAppHttpProxyCallback(uint32_t callbackid);
+    HttpProxy GetAppHttpProxy();
+    int32_t RegisterDefaultHttpProxyCallback(std::function<void(const HttpProxy &)> callback, uint32_t &callbackId);
+    void UnregisterDefaultHttpProxyCallback(uint32_t callbackId);
     int32_t SetAppHttpProxy(const HttpProxy &httpProxy);
      /**
      * Whether this url prefer cellular
@@ -617,6 +623,24 @@ private:
     std::mutex appHttpProxyCbMapMutex_;
     uint32_t currentCallbackId_ = 0;
     std::map<uint32_t, std::function<void(const HttpProxy &httpProxy)>> appHttpProxyCbMap_;
+    std::recursive_mutex httpProxyNotifyMutex_;
+    uint64_t appHttpProxyValueGeneration_ = 0;
+    std::mutex defaultHttpProxyCbMutex_;
+    std::map<uint32_t, std::function<void(const HttpProxy &)>> defaultHttpProxyCbMap_;
+    uint32_t currentDefaultCallbackId_ = 0;
+    sptr<HttpProxyCallbackStub> defaultHttpProxyCallbackStub_;
+    HttpProxy lastDefaultHttpProxy_;
+    bool hasLastDefaultHttpProxy_ = false;
+    uint64_t defaultHttpProxyValueGeneration_ = 0;
+    int32_t RegisterDefaultHttpProxyStub();
+    void RegisterDefaultHttpProxyCallbackWithCurrent(const std::function<void(const HttpProxy &)> &callback,
+        uint32_t &callbackId, bool firstCallback, const HttpProxy &current, std::unique_lock<std::mutex> &lock,
+        std::unique_lock<std::recursive_mutex> &notifyLock);
+    void NotifyRegisteredDefaultHttpProxyCallbacks(
+        const std::vector<std::pair<uint32_t, std::function<void(const HttpProxy &)>>> &callbacks,
+        const HttpProxy &httpProxy,
+        uint64_t generation);
+    void NotifyDefaultHttpProxyCallback();
     HttpProxy appHttpProxy_;
     std::mutex globalHttpProxyMutex_;
     HttpProxy globalHttpProxy_;

@@ -215,6 +215,10 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
         &NetConnServiceStub::OnGetDefaultHttpProxy, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REFRESH_GLOBAL_HTTP_PROXY)] = {
         &NetConnServiceStub::OnRefreshGlobalHttpProxy, {Permission::INTERNET}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_HTTP_PROXY_CALLBACK)] = {
+        &NetConnServiceStub::OnRegisterHttpProxyCallback, {Permission::GET_NETWORK_INFO}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_HTTP_PROXY_CALLBACK)] = {
+        &NetConnServiceStub::OnUnregisterHttpProxyCallback, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_ID_BY_IDENTIFIER)] = {
         &NetConnServiceStub::OnGetNetIdByIdentifier, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_INTERFACE_CONFIGURATION)] = {
@@ -1360,6 +1364,22 @@ int32_t NetConnServiceStub::OnRefreshGlobalHttpProxy(MessageParcel &data, Messag
     }
     // LCOV_EXCL_END
     return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnRegisterHttpProxyCallback(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    sptr<IHttpProxyCallback> callback = remote == nullptr ? nullptr : iface_cast<IHttpProxyCallback>(remote);
+    int32_t result = callback == nullptr ? NETMANAGER_ERR_LOCAL_PTR_NULL : RegisterHttpProxyCallback(callback);
+    return reply.WriteInt32(result) ? NETMANAGER_SUCCESS : NETMANAGER_ERR_WRITE_REPLY_FAIL;
+}
+
+int32_t NetConnServiceStub::OnUnregisterHttpProxyCallback(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    sptr<IHttpProxyCallback> callback = remote == nullptr ? nullptr : iface_cast<IHttpProxyCallback>(remote);
+    int32_t result = callback == nullptr ? NETMANAGER_ERR_LOCAL_PTR_NULL : UnregisterHttpProxyCallback(callback);
+    return reply.WriteInt32(result) ? NETMANAGER_SUCCESS : NETMANAGER_ERR_WRITE_REPLY_FAIL;
 }
 
 int32_t NetConnServiceStub::OnQueryTraceRoute(MessageParcel &data, MessageParcel &reply)

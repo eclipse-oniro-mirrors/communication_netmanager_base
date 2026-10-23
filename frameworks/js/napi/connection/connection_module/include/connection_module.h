@@ -60,6 +60,10 @@ public:
     static constexpr const char *FUNCTION_DELETE_CUSTOM_DNS_RULE = "removeCustomDnsRule";
     static constexpr const char *FUNCTION_DELETE_CUSTOM_DNS_RULES = "clearCustomDnsRules";
     static constexpr const char *FUNCTION_SET_APP_HTTP_PROXY = "setAppHttpProxy";
+    static constexpr const char *FUNCTION_ON_APP_HTTP_PROXY = "onAppHttpProxy";
+    static constexpr const char *FUNCTION_OFF_APP_HTTP_PROXY = "offAppHttpProxy";
+    static constexpr const char *FUNCTION_ON_DEFAULT_HTTP_PROXY = "onDefaultHttpProxy";
+    static constexpr const char *FUNCTION_OFF_DEFAULT_HTTP_PROXY = "offDefaultHttpProxy";
     static constexpr const char *FUNCTION_GET_APP_NET = "getAppNet";
     static constexpr const char *FUNCTION_GET_APP_NET_SYNC = "getAppNetSync";
     static constexpr const char *FUNCTION_SET_APP_NET = "setAppNet";
@@ -170,6 +174,10 @@ private:
     static napi_value RemoveCustomDnsRule(napi_env env, napi_callback_info info);
     static napi_value ClearCustomDnsRules(napi_env env, napi_callback_info info);
     static napi_value SetAppHttpProxy(napi_env env, napi_callback_info info);
+    static napi_value OnAppHttpProxy(napi_env env, napi_callback_info info);
+    static napi_value OffAppHttpProxy(napi_env env, napi_callback_info info);
+    static napi_value OnDefaultHttpProxy(napi_env env, napi_callback_info info);
+    static napi_value OffDefaultHttpProxy(napi_env env, napi_callback_info info);
     static napi_value GetAppNet(napi_env env, napi_callback_info info);
     static napi_value GetAppNetSync(napi_env env, napi_callback_info info);
     static napi_value SetAppNet(napi_env env, napi_callback_info info);

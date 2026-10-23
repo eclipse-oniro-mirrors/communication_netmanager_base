@@ -718,6 +718,42 @@ declare namespace connection {
   function setAppHttpProxy(httpProxy: HttpProxy): void;
 
   /**
+   * Registers a listener for application proxy changes and returns the current proxy when registered.
+   * @param { Callback<HttpProxy> } callback - Callback for the latest application proxy.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @stagemodelonly
+   * @since 26.2.0 dynamic&static
+   */
+  function onAppHttpProxy(callback: Callback<HttpProxy>): void;
+
+  /**
+   * Unregisters the specified application proxy listener, or all listeners when callback is omitted.
+   * @param { Callback<HttpProxy> } [callback] - Listener to unregister.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @stagemodelonly
+   * @since 26.2.0 dynamic&static
+   */
+  function offAppHttpProxy(callback?: Callback<HttpProxy>): void;
+
+  /**
+   * Registers a listener for default proxy changes and returns the current proxy when registered.
+   * @param { Callback<HttpProxy> } callback - Callback for the latest default proxy.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @stagemodelonly
+   * @since 26.2.0 dynamic&static
+   */
+  function onDefaultHttpProxy(callback: Callback<HttpProxy>): void;
+
+  /**
+   * Unregisters the specified default proxy listener, or all listeners when callback is omitted.
+   * @param { Callback<HttpProxy> } [callback] - Listener to unregister.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @stagemodelonly
+   * @since 26.2.0 dynamic&static
+   */
+  function offDefaultHttpProxy(callback?: Callback<HttpProxy>): void;
+
+  /**
    * Set a network independent global {@link HttpProxy} proxy settings.
    * @permission ohos.permission.CONNECTIVITY_INTERNAL
    * @param { HttpProxy } httpProxy Indicates the global proxy settings. For details, see {@link HttpProxy}.

@@ -67,6 +67,10 @@ HttpProxy GetGlobalHttpProxy(int32_t &ret);
 
 int32_t SetGlobalHttpProxy(const HttpProxy &httpProxy);
 int32_t SetAppHttpProxy(const HttpProxy &httpProxy);
+uint32_t RegisterAppHttpProxyCallback(uint64_t token);
+void UnregisterAppHttpProxyCallback(uint32_t callbackId);
+uint32_t RegisterDefaultHttpProxyCallback(uint64_t token, int32_t &ret);
+void UnregisterDefaultHttpProxyCallback(uint32_t callbackId);
 
 NetManagerStandard::NetConnClient &GetNetConnClient(int32_t &nouse);
 

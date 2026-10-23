@@ -27,6 +27,7 @@
 #include "net_conn_client.h"
 #include "net_conn_service.h"
 #include "net_conn_service_stub.h"
+#include "http_proxy_callback_stub.h"
 #include "net_interface_callback_stub.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_factoryreset_callback_stub.h"
@@ -1658,6 +1659,45 @@ void UnregisterPreAirplaneCallbackFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_PREAIRPLANE_CALLBACK), dataParcel);
 }
 
+void FuzzHttpProxyCallbackRequest(ConnInterfaceCode code, const uint8_t *data, size_t size,
+    const sptr<IRemoteObject> &callback)
+{
+    uint32_t requestCode = static_cast<uint32_t>(code);
+    MessageParcel missingObject;
+    if (WriteInterfaceToken(missingObject)) {
+        OnRemoteRequest(requestCode, missingObject);
+    }
+
+    MessageParcel malformedObject;
+    if (WriteInterfaceToken(malformedObject) && size > 0 && malformedObject.WriteBuffer(data, size)) {
+        OnRemoteRequest(requestCode, malformedObject);
+    }
+
+    MessageParcel wrongToken;
+    if (wrongToken.WriteInterfaceToken(u"invalid") && wrongToken.WriteRemoteObject(callback)) {
+        OnRemoteRequest(requestCode, wrongToken);
+    }
+
+    MessageParcel valid;
+    if (WriteInterfaceToken(valid) && valid.WriteRemoteObject(callback)) {
+        OnRemoteRequest(requestCode, valid);
+    }
+}
+
+void HttpProxyCallbackFuzzTest(const uint8_t *data, size_t size)
+{
+    if (data == nullptr) {
+        return;
+    }
+    sptr<HttpProxyCallbackStub> callback = new (std::nothrow) HttpProxyCallbackStub();
+    if (callback == nullptr) {
+        return;
+    }
+    sptr<IRemoteObject> remote = callback->AsObject();
+    FuzzHttpProxyCallbackRequest(ConnInterfaceCode::CMD_NM_REGISTER_HTTP_PROXY_CALLBACK, data, size, remote);
+    FuzzHttpProxyCallbackRequest(ConnInterfaceCode::CMD_NM_UNREGISTER_HTTP_PROXY_CALLBACK, data, size, remote);
+}
+
 void EnableDistributedClientNetFuzzTest(const uint8_t *data, size_t size)
 {
     std::string virnicAddr = NetConnGetString(STR_LEN);
@@ -2058,6 +2098,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetNetExtAttributeFuzzTest(data, size);
     OHOS::NetManagerStandard::UnregisterPreAirplaneCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::RegisterPreAirplaneCallbackFuzzTest(data, size);
+    OHOS::NetManagerStandard::HttpProxyCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::GetDefaultSupplierIdFuzzTest(data, size);
     OHOS::NetManagerStandard::IsPreferCellularUrlFuzzTest(data, size);
     OHOS::NetManagerStandard::GetSlotTypeFuzzTest(data, size);

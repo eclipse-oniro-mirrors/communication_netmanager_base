@@ -160,6 +160,14 @@ NetConnService::NetConnService()
 
 NetConnService::~NetConnService()
 {
+    decltype(httpProxyCallbacks_) callbacks;
+    {
+        std::lock_guard<std::mutex> lock(httpProxyCallbacksMutex_);
+        callbacks.swap(httpProxyCallbacks_);
+    }
+    for (const auto &item : callbacks) {
+        item.first->RemoveDeathRecipient(item.second.second);
+    }
     RemoveALLClientDeathRecipient();
     UnregisterNetDataShareObserver();
 }
@@ -800,6 +808,7 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId, bool ign
     netSuppliers_.erase(supplierId);
     netSupplierLock.unlock();
     FindBestNetworkForAllRequest();
+    NotifyHttpProxyChanged();
     NETMGR_LOG_I("UnregisterNetSupplier supplierId[%{public}d] out", supplierId);
     return NETMANAGER_SUCCESS;
 }
@@ -1364,6 +1373,7 @@ int32_t NetConnService::RestrictBackgroundChangedAsync(bool restrictBackground)
 
 void NetConnService::SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy)
 {
+    NotifyHttpProxyChanged();
     BroadcastInfo info;
     info.action = EventFwk::CommonEventSupport::COMMON_EVENT_HTTP_PROXY_CHANGE;
     info.data = "Global HttpProxy Changed";
@@ -1375,6 +1385,85 @@ void NetConnService::SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy)
     }
     param.emplace("UserId", std::to_string(userId));
     BroadcastManager::GetInstance().SendBroadcast(info, param);
+}
+
+void NetConnService::HttpProxyDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
+{
+    sptr<IRemoteObject> object = remote.promote();
+    std::shared_ptr<NetConnService> service = service_.lock();
+    if (object != nullptr && service != nullptr) {
+        service->RemoveHttpProxyCallback(object);
+    }
+}
+
+int32_t NetConnService::RegisterHttpProxyCallback(const sptr<IHttpProxyCallback> &callback)
+{
+    if (callback == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    sptr<IRemoteObject> remote = callback->AsObject();
+    if (remote == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::lock_guard<std::mutex> lock(httpProxyCallbacksMutex_);
+    if (httpProxyCallbacks_.find(remote) != httpProxyCallbacks_.end()) {
+        return NETMANAGER_SUCCESS;
+    }
+    sptr<HttpProxyDeathRecipient> recipient =
+        new (std::nothrow) HttpProxyDeathRecipient(shared_from_this());
+    if (recipient == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    if (!remote->AddDeathRecipient(recipient)) {
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+    httpProxyCallbacks_.emplace(remote, std::make_pair(callback, recipient));
+    return NETMANAGER_SUCCESS;
+}
+
+void NetConnService::RemoveHttpProxyCallback(const sptr<IRemoteObject> &remote)
+{
+    sptr<HttpProxyDeathRecipient> recipient;
+    {
+        std::lock_guard<std::mutex> lock(httpProxyCallbacksMutex_);
+        auto it = httpProxyCallbacks_.find(remote);
+        if (it == httpProxyCallbacks_.end()) {
+            return;
+        }
+        recipient = it->second.second;
+        httpProxyCallbacks_.erase(it);
+    }
+    remote->RemoveDeathRecipient(recipient);
+}
+
+int32_t NetConnService::UnregisterHttpProxyCallback(const sptr<IHttpProxyCallback> &callback)
+{
+    if (callback == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    sptr<IRemoteObject> remote = callback->AsObject();
+    if (remote == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    RemoveHttpProxyCallback(remote);
+    return NETMANAGER_SUCCESS;
+}
+
+void NetConnService::NotifyHttpProxyChanged()
+{
+    std::vector<sptr<IHttpProxyCallback>> callbacks;
+    {
+        std::lock_guard<std::mutex> lock(httpProxyCallbacksMutex_);
+        for (const auto &item : httpProxyCallbacks_) {
+            callbacks.emplace_back(item.second.first);
+        }
+    }
+    // Remote notification is performed without the subscriber lock to allow reentrant unregistration.
+    for (const auto &callback : callbacks) {
+        if (callback != nullptr) {
+            callback->OnHttpProxyChange();
+        }
+    }
 }
 
 int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
@@ -1543,11 +1632,20 @@ bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback, ui
     return FindSameCallback(callback, reqId, registerType, uid);
 }
 
+void NetConnService::NotifyNetworkSelectionChanged(bool defaultSupplierChanged)
+{
+    NotifyNetBearerTypeChange();
+    if (defaultSupplierChanged) {
+        NotifyHttpProxyChanged();
+    }
+}
+
 void NetConnService::FindBestNetworkForAllRequest()
 {
     std::shared_lock<std::shared_mutex> lock(uidActivateMutex_);
     NETMGR_LOG_I("FindBestNetworkForAllRequest Enter. netUidActivates_ size: [%{public}zu", netUidActivates_.size());
     sptr<NetSupplier> bestSupplier = nullptr;
+    bool defaultSupplierChanged = false;
     for (auto &uidIter : netUidActivates_) {
         for (auto &activate : uidIter.second) {
             if (!activate) {
@@ -1563,6 +1661,7 @@ void NetConnService::FindBestNetworkForAllRequest()
                          bestSupplier ? bestSupplier->GetNetSupplierIdent().c_str() : "null", activate->GetRequestId());
             if (activate == defaultNetActivate_) {
                 std::unique_lock<ffrt::shared_mutex> defaultLock(defaultNetSupplierMutex_);
+                defaultSupplierChanged |= (defaultNetSupplier_ != bestSupplier);
                 MakeDefaultNetWork(defaultNetSupplier_, bestSupplier);
             }
             sptr<NetSupplier> oldSupplier = activate->GetServiceSupply();
@@ -1587,7 +1686,8 @@ void NetConnService::FindBestNetworkForAllRequest()
         }
     }
 
-    NotifyNetBearerTypeChange();
+    lock.unlock();
+    NotifyNetworkSelectionChanged(defaultSupplierChanged);
 }
 
 uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,

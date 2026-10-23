@@ -64,6 +64,14 @@ constexpr const char *TEST_IFACE = "eth0";
 constexpr const char *PROXY_NAME = "123456789";
 constexpr const int32_t PROXY_NAME_SIZE = 9;
 constexpr const int32_t INVALID_VALUE = 100;
+constexpr uint16_t TEST_HTTP_PROXY_PORT = 8080;
+constexpr uint16_t TEST_APP_HTTP_PROXY_PORT = 9090;
+constexpr uint16_t TEST_UPDATED_HTTP_PROXY_PORT = 8081;
+constexpr int32_t NOTIFIED_TWICE = 2;
+constexpr int32_t NOTIFIED_THREE_TIMES = 3;
+constexpr int32_t NOTIFIED_FOUR_TIMES = 4;
+constexpr int32_t NOTIFIED_FIVE_TIMES = 5;
+constexpr char TEST_PROXY_CREDENTIAL[] = "secret";
 } // namespace
 
 class NetConnClientTest : public testing::Test {
@@ -1472,17 +1480,343 @@ HWTEST_F(NetConnClientTest, RegisterNetFactoryResetCallbackTest002, TestSize.Lev
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetConnClientTest, RegisterAppHttpProxyCallback001, TestSize.Level1)
+/**
+ * @tc.name: RegisterAppHttpProxyCallbackCompatibility
+ * @tc.desc: Test empty proxy replay for legacy and proxy change notification callers.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, RegisterAppHttpProxyCallbackCompatibility, TestSize.Level1)
 {
-    std::function<void(const HttpProxy &httpProxy)> callback;
-    uint32_t callbackid = 0;
-    NetConnClient::GetInstance().RegisterAppHttpProxyCallback(callback, callbackid);
-    EXPECT_EQ(callbackid, 0);
+    NetConnClient client;
+    int notifications = 0;
+    uint32_t callbackId = 0;
+    client.RegisterAppHttpProxyCallback({}, callbackId);
+    client.UnregisterAppHttpProxyCallback(callbackId);
+    auto callback = [&notifications](const HttpProxy &) { ++notifications; };
+    client.RegisterAppHttpProxyCallback(callback, callbackId);
+    EXPECT_EQ(notifications, 0);
+    client.UnregisterAppHttpProxyCallback(callbackId);
+    HttpProxy configured;
+    configured.SetHost("proxy.example");
+    client.SetAppHttpProxy(configured);
+    client.RegisterAppHttpProxyCallback(callback, callbackId);
+    EXPECT_EQ(notifications, 1);
+    client.UnregisterAppHttpProxyCallback(callbackId);
+    client.SetAppHttpProxy(HttpProxy());
+    client.RegisterAppHttpProxyCallback(callback, callbackId, true);
+    EXPECT_EQ(notifications, NOTIFIED_TWICE);
+    client.UnregisterAppHttpProxyCallback(callbackId);
+}
 
-    NetConnClient::GetInstance().UnregisterAppHttpProxyCallback(callbackid);
+/**
+ * @tc.name: AppHttpProxyChangeBranches
+ * @tc.desc: Test application HTTP proxy replay, deduplication, callback ID collision, and unregistration branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, AppHttpProxyChangeBranches, TestSize.Level1)
+{
+    NetConnClient client;
+    HttpProxy empty;
+    int first = 0;
+    int second = 0;
+    uint32_t firstId = 0;
+    uint32_t secondId = 0;
+    client.RegisterAppHttpProxyCallback([&first](const HttpProxy &) { ++first; }, firstId, true);
+    EXPECT_EQ(first, 1); // Empty proxy is replayed.
+    client.currentCallbackId_ = firstId; // Exercise callback ID collision handling.
+    EXPECT_EQ(client.SetAppHttpProxy(empty), NETMANAGER_SUCCESS);
+    EXPECT_EQ(first, 1);
+    HttpProxy configured;
+    configured.SetHost("proxy.example");
+    configured.SetPort(TEST_HTTP_PROXY_PORT);
+    EXPECT_EQ(client.SetAppHttpProxy(configured), NETMANAGER_SUCCESS);
+    EXPECT_EQ(first, NOTIFIED_TWICE);
+    client.RegisterAppHttpProxyCallback([&second](const HttpProxy &) { ++second; }, secondId, true);
+    EXPECT_NE(secondId, firstId);
+    EXPECT_EQ(second, 1); // Existing native replay is retained.
+    configured.SetExclusionList({"example.com"});
+    client.SetAppHttpProxy(configured);
+    EXPECT_EQ(first, NOTIFIED_THREE_TIMES);
+    EXPECT_EQ(second, NOTIFIED_TWICE);
+    client.UnregisterAppHttpProxyCallback(firstId);
+    client.SetAppHttpProxy(empty);
+    EXPECT_EQ(first, NOTIFIED_THREE_TIMES);
+    EXPECT_EQ(second, NOTIFIED_THREE_TIMES);
+    client.UnregisterAppHttpProxyCallback(secondId);
+}
 
-    NetConnClient::GetInstance().RegisterAppHttpProxyCallback(callback, callbackid);
-    EXPECT_EQ(callbackid, 1);
+/**
+ * @tc.name: AppHttpProxyReentrantChangeOrder
+ * @tc.desc: Test application HTTP proxy notification order when a callback changes the proxy again.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, AppHttpProxyReentrantChangeOrder, TestSize.Level1)
+{
+    NetConnClient client;
+    HttpProxy firstProxy;
+    firstProxy.SetHost("first.example");
+    HttpProxy latestProxy;
+    latestProxy.SetHost("latest.example");
+    bool changedAgain = false;
+    std::vector<std::string> secondCallbackHosts;
+    uint32_t firstId = 0;
+    uint32_t secondId = 0;
+    client.RegisterAppHttpProxyCallback([&](const HttpProxy &proxy) {
+        if (!changedAgain && proxy.GetHost() == firstProxy.GetHost()) {
+            changedAgain = true;
+            client.SetAppHttpProxy(latestProxy);
+        }
+    }, firstId, true);
+    client.RegisterAppHttpProxyCallback([&](const HttpProxy &proxy) {
+        secondCallbackHosts.emplace_back(proxy.GetHost());
+    }, secondId, true);
+    secondCallbackHosts.clear();
+
+    EXPECT_EQ(client.SetAppHttpProxy(firstProxy), NETMANAGER_SUCCESS);
+    ASSERT_EQ(secondCallbackHosts.size(), 1);
+    EXPECT_EQ(secondCallbackHosts.front(), latestProxy.GetHost());
+    client.UnregisterAppHttpProxyCallback(firstId);
+    client.UnregisterAppHttpProxyCallback(secondId);
+}
+
+/**
+ * @tc.name: AppHttpProxyUnregisterDuringNotification
+ * @tc.desc: Test that self-unregistration does not suppress the remaining proxy callbacks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, AppHttpProxyUnregisterDuringNotification, TestSize.Level1)
+{
+    NetConnClient client;
+    uint32_t firstId = 0;
+    uint32_t secondId = 0;
+    int first = 0;
+    int second = 0;
+    bool unregisterFirst = false;
+    client.RegisterAppHttpProxyCallback([&](const HttpProxy &) {
+        ++first;
+        if (unregisterFirst) {
+            client.UnregisterAppHttpProxyCallback(firstId);
+        }
+    }, firstId, true);
+    client.RegisterAppHttpProxyCallback([&second](const HttpProxy &) { ++second; }, secondId, true);
+    unregisterFirst = true;
+    HttpProxy proxy;
+    proxy.SetHost("proxy.example");
+    client.SetAppHttpProxy(proxy);
+    EXPECT_EQ(first, NOTIFIED_TWICE);
+    EXPECT_EQ(second, NOTIFIED_TWICE);
+    client.UnregisterAppHttpProxyCallback(secondId);
+}
+
+namespace {
+struct DefaultHttpProxyTestContext {
+    std::shared_ptr<NetConnClient> client = std::make_shared<NetConnClient>();
+    HttpProxy effective;
+    uint32_t firstId = 0;
+    uint32_t secondId = 0;
+    int first = 0;
+    int second = 0;
+    bool publicDataOnly = false;
+};
+
+void PrepareDefaultHttpProxyCallbacks(DefaultHttpProxyTestContext &context,
+    const sptr<MockINetConnService> &mockService)
+{
+    context.client->NetConnService_ = mockService;
+    EXPECT_CALL(*mockService, RegisterHttpProxyCallback(_)).Times(1).WillOnce(Return(NETMANAGER_SUCCESS));
+    EXPECT_CALL(*mockService, UnregisterHttpProxyCallback(_)).Times(1).WillOnce(Return(NETMANAGER_SUCCESS));
+    EXPECT_CALL(*mockService, GetDefaultHttpProxy(_, _)).WillRepeatedly(
+        Invoke([&context](int32_t, HttpProxy &out) {
+            out = context.effective;
+            return NETMANAGER_SUCCESS;
+        }));
+    auto firstCallback = [&context](const HttpProxy &) { ++context.first; };
+    EXPECT_EQ(context.client->RegisterDefaultHttpProxyCallback(firstCallback, context.firstId), NETMANAGER_SUCCESS);
+    EXPECT_EQ(context.first, 1); // Empty proxy is replayed.
+    context.client->currentDefaultCallbackId_ = context.firstId; // Exercise callback ID collision handling.
+    context.effective.SetHost("registration-race.example");
+    SecureData credential;
+    credential.append(TEST_PROXY_CREDENTIAL, sizeof(TEST_PROXY_CREDENTIAL) - 1);
+    context.effective.SetUserName(credential);
+    context.effective.SetPassword(credential);
+    auto secondCallback = [&context](const HttpProxy &proxy) {
+        ++context.second;
+        context.publicDataOnly = proxy.GetUsername().empty() && proxy.GetPassword().empty();
+    };
+    EXPECT_EQ(context.client->RegisterDefaultHttpProxyCallback(secondCallback, context.secondId), NETMANAGER_SUCCESS);
+    EXPECT_NE(context.secondId, context.firstId);
+    EXPECT_EQ(context.first, NOTIFIED_TWICE); // Deliver a change that raced with the second registration.
+    EXPECT_EQ(context.second, 1);
+    EXPECT_TRUE(context.publicDataOnly);
+    EXPECT_TRUE(context.client->lastDefaultHttpProxy_.GetUsername().empty());
+    EXPECT_TRUE(context.client->lastDefaultHttpProxy_.GetPassword().empty());
+}
+
+void VerifyDefaultHttpProxyNotifications(DefaultHttpProxyTestContext &context)
+{
+    context.client->defaultHttpProxyCallbackStub_->OnHttpProxyChange();
+    EXPECT_EQ(context.first, NOTIFIED_TWICE); // Unchanged value is suppressed.
+    context.effective.SetHost("proxy.example");
+    context.effective.SetPort(TEST_HTTP_PROXY_PORT);
+    context.client->defaultHttpProxyCallbackStub_->OnHttpProxyChange();
+    EXPECT_EQ(context.first, NOTIFIED_THREE_TIMES);
+    EXPECT_EQ(context.second, NOTIFIED_TWICE);
+    context.client->UnregisterDefaultHttpProxyCallback(context.firstId);
+    context.effective.SetExclusionList({"example.com"});
+    context.client->defaultHttpProxyCallbackStub_->OnHttpProxyChange();
+    EXPECT_EQ(context.first, NOTIFIED_THREE_TIMES);
+    EXPECT_EQ(context.second, NOTIFIED_THREE_TIMES);
+}
+
+void VerifyAppHttpProxyOverride(DefaultHttpProxyTestContext &context)
+{
+    HttpProxy appProxy;
+    appProxy.SetHost("app.proxy.example");
+    appProxy.SetPort(TEST_APP_HTTP_PROXY_PORT);
+    context.client->SetAppHttpProxy(appProxy);
+    EXPECT_EQ(context.second, NOTIFIED_FOUR_TIMES); // The effective default proxy now comes from the app override.
+    context.effective.SetPort(TEST_UPDATED_HTTP_PROXY_PORT);
+    context.client->defaultHttpProxyCallbackStub_->OnHttpProxyChange();
+    EXPECT_EQ(context.second, NOTIFIED_FOUR_TIMES); // A hidden system proxy change is suppressed.
+    context.client->SetAppHttpProxy(HttpProxy());
+    EXPECT_EQ(context.second, NOTIFIED_FIVE_TIMES); // Removing the app override exposes the latest system proxy.
+}
+} // namespace
+
+/**
+ * @tc.name: DefaultHttpProxyChangeBranches
+ * @tc.desc: Test default HTTP proxy replay, deduplication, public fields, and unregistration branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, DefaultHttpProxyChangeBranches, TestSize.Level1)
+{
+    DefaultHttpProxyTestContext context;
+    PrepareDefaultHttpProxyCallbacks(context, mockNetConnService);
+    VerifyDefaultHttpProxyNotifications(context);
+    VerifyAppHttpProxyOverride(context);
+    context.client->UnregisterDefaultHttpProxyCallback(context.secondId);
+    EXPECT_EQ(context.client->defaultHttpProxyCallbackStub_, nullptr);
+}
+
+/**
+ * @tc.name: DefaultHttpProxyReentrantChangeOrder
+ * @tc.desc: Test default HTTP proxy notification order when the effective proxy changes during a callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, DefaultHttpProxyReentrantChangeOrder, TestSize.Level1)
+{
+    auto client = std::make_shared<NetConnClient>();
+    client->NetConnService_ = mockNetConnService;
+    HttpProxy effective;
+    effective.SetHost("initial.example");
+    EXPECT_CALL(*mockNetConnService, RegisterHttpProxyCallback(_)).WillOnce(Return(NETMANAGER_SUCCESS));
+    EXPECT_CALL(*mockNetConnService, UnregisterHttpProxyCallback(_)).WillOnce(Return(NETMANAGER_SUCCESS));
+    EXPECT_CALL(*mockNetConnService, GetDefaultHttpProxy(_, _)).WillRepeatedly(
+        Invoke([&effective](int32_t, HttpProxy &out) {
+            out = effective;
+            return NETMANAGER_SUCCESS;
+        }));
+    HttpProxy latestProxy;
+    latestProxy.SetHost("latest.example");
+    bool changedAgain = false;
+    std::vector<std::string> secondCallbackHosts;
+    uint32_t firstId = 0;
+    uint32_t secondId = 0;
+    EXPECT_EQ(client->RegisterDefaultHttpProxyCallback([&](const HttpProxy &proxy) {
+        if (!changedAgain && proxy.GetHost() == "intermediate.example") {
+            changedAgain = true;
+            client->SetAppHttpProxy(latestProxy);
+        }
+    }, firstId), NETMANAGER_SUCCESS);
+    EXPECT_EQ(client->RegisterDefaultHttpProxyCallback([&](const HttpProxy &proxy) {
+        secondCallbackHosts.emplace_back(proxy.GetHost());
+    }, secondId), NETMANAGER_SUCCESS);
+    secondCallbackHosts.clear();
+
+    effective.SetHost("intermediate.example");
+    client->defaultHttpProxyCallbackStub_->OnHttpProxyChange();
+    ASSERT_EQ(secondCallbackHosts.size(), 1);
+    EXPECT_EQ(secondCallbackHosts.front(), latestProxy.GetHost());
+    client->UnregisterDefaultHttpProxyCallback(firstId);
+    client->UnregisterDefaultHttpProxyCallback(secondId);
+    client->SetAppHttpProxy(HttpProxy());
+}
+
+/**
+ * @tc.name: DefaultHttpProxyUnregisterDuringNotification
+ * @tc.desc: Test that self-unregistration does not suppress the remaining default proxy callbacks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, DefaultHttpProxyUnregisterDuringNotification, TestSize.Level1)
+{
+    auto client = std::make_shared<NetConnClient>();
+    client->NetConnService_ = mockNetConnService;
+    HttpProxy effective;
+    EXPECT_CALL(*mockNetConnService, RegisterHttpProxyCallback(_)).WillOnce(Return(NETMANAGER_SUCCESS));
+    EXPECT_CALL(*mockNetConnService, UnregisterHttpProxyCallback(_)).WillOnce(Return(NETMANAGER_SUCCESS));
+    EXPECT_CALL(*mockNetConnService, GetDefaultHttpProxy(_, _)).WillRepeatedly(
+        Invoke([&effective](int32_t, HttpProxy &out) {
+            out = effective;
+            return NETMANAGER_SUCCESS;
+        }));
+    uint32_t firstId = 0;
+    uint32_t secondId = 0;
+    int first = 0;
+    int second = 0;
+    bool unregisterFirst = false;
+    client->RegisterDefaultHttpProxyCallback([&](const HttpProxy &) {
+        ++first;
+        if (unregisterFirst) {
+            client->UnregisterDefaultHttpProxyCallback(firstId);
+        }
+    }, firstId);
+    client->RegisterDefaultHttpProxyCallback([&second](const HttpProxy &) { ++second; }, secondId);
+    unregisterFirst = true;
+    effective.SetHost("proxy.example");
+    client->defaultHttpProxyCallbackStub_->OnHttpProxyChange();
+    EXPECT_EQ(first, NOTIFIED_TWICE);
+    EXPECT_EQ(second, NOTIFIED_TWICE);
+    client->UnregisterDefaultHttpProxyCallback(secondId);
+}
+
+/**
+ * @tc.name: DefaultHttpProxyRegistrationFailure
+ * @tc.desc: Test null callback and remote registration failure branches for default HTTP proxy callbacks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, DefaultHttpProxyRegistrationFailure, TestSize.Level1)
+{
+    auto client = std::make_shared<NetConnClient>();
+    uint32_t callbackId = 0;
+    EXPECT_EQ(client->RegisterDefaultHttpProxyCallback({}, callbackId), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    client->NetConnService_ = mockNetConnService;
+    EXPECT_CALL(*mockNetConnService, RegisterHttpProxyCallback(_)).WillOnce(Return(NETMANAGER_ERR_INTERNAL));
+    EXPECT_EQ(client->RegisterDefaultHttpProxyCallback([](const HttpProxy &) {}, callbackId),
+        NETMANAGER_ERR_INTERNAL);
+    EXPECT_TRUE(client->defaultHttpProxyCbMap_.empty());
+    client->UnregisterDefaultHttpProxyCallback(callbackId);
+}
+
+/**
+ * @tc.name: DefaultHttpProxyQueryFailure
+ * @tc.desc: Test current proxy query failure during default HTTP proxy registration and notification.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, DefaultHttpProxyQueryFailure, TestSize.Level1)
+{
+    auto client = std::make_shared<NetConnClient>();
+    client->NetConnService_ = mockNetConnService;
+    EXPECT_CALL(*mockNetConnService, RegisterHttpProxyCallback(_)).WillOnce(Return(NETMANAGER_SUCCESS));
+    EXPECT_CALL(*mockNetConnService, GetDefaultHttpProxy(_, _)).WillRepeatedly(Return(NETMANAGER_ERR_INTERNAL));
+    EXPECT_CALL(*mockNetConnService, UnregisterHttpProxyCallback(_)).WillOnce(Return(NETMANAGER_SUCCESS));
+    uint32_t callbackId = 0;
+    int notifications = 0;
+    EXPECT_EQ(client->RegisterDefaultHttpProxyCallback(
+        [&notifications](const HttpProxy &) { ++notifications; }, callbackId), NETMANAGER_SUCCESS);
+    EXPECT_EQ(notifications, 0);
+    client->defaultHttpProxyCallbackStub_->OnHttpProxyChange();
+    EXPECT_EQ(notifications, 0);
+    client->UnregisterDefaultHttpProxyCallback(callbackId);
 }
 
 HWTEST_F(NetConnClientTest, SetAppHttpProxy001, TestSize.Level1)

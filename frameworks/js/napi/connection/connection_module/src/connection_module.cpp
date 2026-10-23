@@ -15,6 +15,11 @@
 
 #include "connection_module.h"
 
+#include <atomic>
+#include <condition_variable>
+#include <map>
+#include <mutex>
+
 #include "bindsocket_context.h"
 #include "connection_async_work.h"
 #include "connection_exec.h"
@@ -45,6 +50,7 @@
 #include "queryproberesult_context.h"
 #include "querytraceroute_context.h"
 #include "icu_helper.h"
+#include "net_conn_client.h"
 
 static constexpr const char *CONNECTION_MODULE_NAME = "net.connection";
 static thread_local uint64_t g_moduleId;
@@ -66,6 +72,219 @@ static thread_local uint64_t g_moduleId;
     DECLARE_NAPI_STATIC_PROPERTY(#type, NapiUtils::CreateUint32(env, static_cast<uint32_t>(NetConn_PacketsType::type)))
 
 namespace OHOS::NetManagerStandard {
+
+namespace {
+struct ProxyModuleState {
+    napi_env env = nullptr;
+    uint64_t moduleId = 0;
+    std::shared_ptr<EventManager> manager = std::make_shared<EventManager>();
+    std::atomic_bool active = true;
+    std::atomic_bool appReady = false;
+    std::atomic_bool defaultReady = false;
+    std::atomic<uint64_t> appGeneration = 0;
+    std::atomic<uint64_t> defaultGeneration = 0;
+    std::mutex dispatchMutex;
+    std::condition_variable dispatchCv;
+    uint32_t activeDispatches = 0;
+    bool hasAppCallback = false;
+    bool hasDefaultCallback = false;
+    uint32_t appCallbackId = 0;
+    uint32_t defaultCallbackId = 0;
+};
+
+class DispatchGuard final {
+public:
+    explicit DispatchGuard(ProxyModuleState &state) : state_(state) {}
+    DispatchGuard(const DispatchGuard &) = delete;
+    DispatchGuard &operator=(const DispatchGuard &) = delete;
+    ~DispatchGuard()
+    {
+        std::lock_guard<std::mutex> lock(state_.dispatchMutex);
+        --state_.activeDispatches;
+        if (state_.activeDispatches == 0) {
+            state_.dispatchCv.notify_all();
+        }
+    }
+
+private:
+    ProxyModuleState &state_;
+};
+
+std::mutex g_proxyModuleMutex;
+std::map<napi_env, std::shared_ptr<ProxyModuleState>> g_proxyModules;
+
+napi_value CreateProxyValue(napi_env env, const HttpProxy &proxy)
+{
+    napi_value result = NapiUtils::CreateObject(env);
+    NapiUtils::SetNamedProperty(env, result, "host", NapiUtils::CreateStringUtf8(env, proxy.GetHost()));
+    NapiUtils::SetNamedProperty(env, result, "port", NapiUtils::CreateInt32(env, proxy.GetPort()));
+    auto exclusions = proxy.GetExclusionList();
+    napi_value array = NapiUtils::CreateArray(env, exclusions.size());
+    uint32_t index = 0;
+    for (const auto &exclusion : exclusions) {
+        NapiUtils::SetArrayElement(env, array, index++, NapiUtils::CreateStringUtf8(env, exclusion));
+    }
+    NapiUtils::SetNamedProperty(env, result, "exclusionList", array);
+    return result;
+}
+
+void DispatchProxyChange(const std::weak_ptr<ProxyModuleState> &weakState, bool app, const HttpProxy &proxy)
+{
+    auto state = weakState.lock();
+    if (state == nullptr) {
+        return;
+    }
+    {
+        std::lock_guard<std::mutex> lock(state->dispatchMutex);
+        if (!state->active || (app ? !state->appReady : !state->defaultReady)) {
+            return;
+        }
+        ++state->activeDispatches;
+    }
+    DispatchGuard dispatchGuard(*state);
+    const char *event = app ? EVENT_APP_HTTP_PROXY_CHANGE : EVENT_DEFAULT_HTTP_PROXY_CHANGE;
+    uint64_t generation = app ? state->appGeneration.load() : state->defaultGeneration.load();
+    HttpProxy publicProxy;
+    publicProxy.SetHost(proxy.GetHost());
+    publicProxy.SetPort(proxy.GetPort());
+    publicProxy.SetExclusionList(proxy.GetExclusionList());
+    auto handler = [weakState, app, event, publicProxy, generation](napi_env env) {
+        auto current = weakState.lock();
+        if (current == nullptr || !current->active || (app ? !current->appReady : !current->defaultReady)) {
+            return;
+        }
+        uint64_t currentGeneration = app ? current->appGeneration.load() : current->defaultGeneration.load();
+        if (currentGeneration != generation) {
+            return;
+        }
+        current->manager->Emit(event, {NapiUtils::GetUndefined(env), CreateProxyValue(env, publicProxy)});
+    };
+    NapiUtils::CreateUvQueueWorkByModuleId(state->env, handler, state->moduleId);
+}
+
+void CleanupProxyModule(void *data)
+{
+    auto env = static_cast<napi_env>(data);
+    std::shared_ptr<ProxyModuleState> state;
+    {
+        std::lock_guard<std::mutex> lock(g_proxyModuleMutex);
+        auto it = g_proxyModules.find(env);
+        if (it == g_proxyModules.end()) {
+            return;
+        }
+        state = it->second;
+        g_proxyModules.erase(it);
+    }
+    state->active = false;
+    state->appReady = false;
+    state->defaultReady = false;
+    state->appGeneration.fetch_add(1);
+    state->defaultGeneration.fetch_add(1);
+    if (state->hasAppCallback) {
+        NetConnClient::GetInstance().UnregisterAppHttpProxyCallback(state->appCallbackId);
+    }
+    if (state->hasDefaultCallback) {
+        NetConnClient::GetInstance().UnregisterDefaultHttpProxyCallback(state->defaultCallbackId);
+    }
+    {
+        std::unique_lock<std::mutex> lock(state->dispatchMutex);
+        state->dispatchCv.wait(lock, [&state]() { return state->activeDispatches == 0; });
+    }
+    state->manager->DeleteAllListener();
+}
+
+std::shared_ptr<ProxyModuleState> GetProxyModuleState(napi_env env)
+{
+    std::lock_guard<std::mutex> lock(g_proxyModuleMutex);
+    auto it = g_proxyModules.find(env);
+    return it == g_proxyModules.end() ? nullptr : it->second;
+}
+
+napi_value OnProxy(napi_env env, napi_callback_info info, bool app)
+{
+    size_t argc = 2;
+    napi_value argv[2] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1 || NapiUtils::GetValueType(env, argv[0]) != napi_function) {
+        napi_throw_type_error(env, "401", "The callback must be a function.");
+        return nullptr;
+    }
+    auto state = GetProxyModuleState(env);
+    if (state == nullptr) {
+        return NapiUtils::GetUndefined(env);
+    }
+    const char *event = app ? EVENT_APP_HTTP_PROXY_CHANGE : EVENT_DEFAULT_HTTP_PROXY_CHANGE;
+    if (!state->manager->AddListenerIfAbsent(env, event, argv[0])) {
+        return NapiUtils::GetUndefined(env);
+    }
+    std::weak_ptr<ProxyModuleState> weakState = state;
+    if (app && !state->hasAppCallback) {
+        NetConnClient::GetInstance().RegisterAppHttpProxyCallback(
+            [weakState](const HttpProxy &proxy) { DispatchProxyChange(weakState, true, proxy); }, state->appCallbackId,
+            true);
+        state->hasAppCallback = true;
+        state->appGeneration.fetch_add(1);
+        state->appReady = true;
+    } else if (!app && !state->hasDefaultCallback) {
+        int32_t ret = NetConnClient::GetInstance().RegisterDefaultHttpProxyCallback(
+            [weakState](const HttpProxy &proxy) { DispatchProxyChange(weakState, false, proxy); },
+            state->defaultCallbackId);
+        if (ret != NETMANAGER_SUCCESS) {
+            state->manager->DeleteListener(event, argv[0]);
+            napi_throw_error(env, std::to_string(ret).c_str(), "Failed to subscribe to default proxy changes.");
+            return nullptr;
+        }
+        state->hasDefaultCallback = true;
+        state->defaultGeneration.fetch_add(1);
+        state->defaultReady = true;
+    }
+    HttpProxy current;
+    if (app) {
+        current = NetConnClient::GetInstance().GetAppHttpProxy();
+    } else if (NetConnClient::GetInstance().GetDefaultHttpProxy(current) != NETMANAGER_SUCCESS) {
+        return NapiUtils::GetUndefined(env);
+    }
+    napi_value arg = CreateProxyValue(env, current);
+    NapiUtils::CallFunction(env, NapiUtils::GetUndefined(env), argv[0], 1, &arg);
+    return NapiUtils::GetUndefined(env);
+}
+
+napi_value OffProxy(napi_env env, napi_callback_info info, bool app)
+{
+    size_t argc = 2;
+    napi_value argv[2] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_valuetype callbackType = argc == 1 ? NapiUtils::GetValueType(env, argv[0]) : napi_undefined;
+    if (argc > 1 || (argc == 1 && callbackType != napi_function && callbackType != napi_undefined)) {
+        napi_throw_type_error(env, "401", "The callback must be a function.");
+        return nullptr;
+    }
+    auto state = GetProxyModuleState(env);
+    if (state == nullptr) {
+        return NapiUtils::GetUndefined(env);
+    }
+    const char *event = app ? EVENT_APP_HTTP_PROXY_CHANGE : EVENT_DEFAULT_HTTP_PROXY_CHANGE;
+    if (argc == 0 || callbackType == napi_undefined) {
+        state->manager->DeleteListener(event);
+    } else {
+        state->manager->DeleteListener(event, argv[0]);
+    }
+    if (!state->manager->HasEventListener(event)) {
+        if (app && state->hasAppCallback) {
+            state->appReady = false;
+            state->appGeneration.fetch_add(1);
+            NetConnClient::GetInstance().UnregisterAppHttpProxyCallback(state->appCallbackId);
+            state->hasAppCallback = false;
+        } else if (!app && state->hasDefaultCallback) {
+            state->defaultReady = false;
+            state->defaultGeneration.fetch_add(1);
+            NetConnClient::GetInstance().UnregisterDefaultHttpProxyCallback(state->defaultCallbackId);
+            state->hasDefaultCallback = false;
+        }
+    }
+    return NapiUtils::GetUndefined(env);
+}
+} // namespace
 
 template <typename T> static bool ParseTypesArray(napi_env env, napi_value obj, std::set<T> &typeArray,
     std::function<bool(uint32_t)> isValid)
@@ -251,6 +470,17 @@ static void AddCleanupHook(napi_env env)
     DECLARE_NAPI_FUNCTION(FUNCTION_QUERY_TRACE_ROUTE, QueryTraceRoute),          \
     DECLARE_NAPI_FUNCTION(FUNCTION_QUERY_PROBE_RESULT, QueryProbeResult),        \
 
+#define DEFINE_HTTP_PROXY_FUNCTIONS \
+    DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEFAULT_HTTP_PROXY, GetDefaultHttpProxy),   \
+    DECLARE_NAPI_FUNCTION(FUNCTION_GET_GLOBAL_HTTP_PROXY, GetGlobalHttpProxy),     \
+    DECLARE_NAPI_FUNCTION(FUNCTION_SET_GLOBAL_HTTP_PROXY, SetGlobalHttpProxy),     \
+    DECLARE_NAPI_FUNCTION(FUNCTION_REFRESH_GLOBAL_HTTP_PROXY, RefreshGlobalHttpProxy), \
+    DECLARE_NAPI_FUNCTION(FUNCTION_SET_APP_HTTP_PROXY, SetAppHttpProxy),           \
+    DECLARE_NAPI_FUNCTION(FUNCTION_ON_APP_HTTP_PROXY, OnAppHttpProxy),             \
+    DECLARE_NAPI_FUNCTION(FUNCTION_OFF_APP_HTTP_PROXY, OffAppHttpProxy),           \
+    DECLARE_NAPI_FUNCTION(FUNCTION_ON_DEFAULT_HTTP_PROXY, OnDefaultHttpProxy),     \
+    DECLARE_NAPI_FUNCTION(FUNCTION_OFF_DEFAULT_HTTP_PROXY, OffDefaultHttpProxy),   \
+
 std::initializer_list<napi_property_descriptor> ConnectionModule::createPropertyList()
 {
     std::initializer_list<napi_property_descriptor> functions = {
@@ -267,14 +497,10 @@ std::initializer_list<napi_property_descriptor> ConnectionModule::createProperty
         DECLARE_NAPI_FUNCTION(FUNCTION_DISABLE_AIRPLANE_MODE, DisableAirplaneMode),
         DECLARE_NAPI_FUNCTION(FUNCTION_REPORT_NET_CONNECTED, ReportNetConnected),
         DECLARE_NAPI_FUNCTION(FUNCTION_REPORT_NET_DISCONNECTED, ReportNetDisconnected),
-        DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEFAULT_HTTP_PROXY, GetDefaultHttpProxy),
-        DECLARE_NAPI_FUNCTION(FUNCTION_GET_GLOBAL_HTTP_PROXY, GetGlobalHttpProxy),
-        DECLARE_NAPI_FUNCTION(FUNCTION_SET_GLOBAL_HTTP_PROXY, SetGlobalHttpProxy),
-        DECLARE_NAPI_FUNCTION(FUNCTION_REFRESH_GLOBAL_HTTP_PROXY, RefreshGlobalHttpProxy),
+        DEFINE_HTTP_PROXY_FUNCTIONS
         DECLARE_NAPI_FUNCTION(FUNCTION_SET_CUSTOM_DNS_RULE, AddCustomDnsRule),
         DECLARE_NAPI_FUNCTION(FUNCTION_DELETE_CUSTOM_DNS_RULE, RemoveCustomDnsRule),
         DECLARE_NAPI_FUNCTION(FUNCTION_DELETE_CUSTOM_DNS_RULES, ClearCustomDnsRules),
-        DECLARE_NAPI_FUNCTION(FUNCTION_SET_APP_HTTP_PROXY, SetAppHttpProxy),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_APP_NET, GetAppNet),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_APP_NET_SYNC, GetAppNetSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_SET_APP_NET, SetAppNet),
@@ -327,7 +553,40 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
     InitProperties(env, exports);
     InitTcpStates(env, exports);
     AddCleanupHook(env);
+    auto proxyState = std::make_shared<ProxyModuleState>();
+    proxyState->env = env;
+    proxyState->moduleId = g_moduleId;
+    {
+        std::lock_guard<std::mutex> lock(g_proxyModuleMutex);
+        g_proxyModules[env] = proxyState;
+    }
+    napi_status status = napi_add_env_cleanup_hook(env, CleanupProxyModule, env);
+    if (status != napi_ok) {
+        NETMANAGER_BASE_LOGE("Failed to add proxy module cleanup hook: %{public}d", status);
+        std::lock_guard<std::mutex> lock(g_proxyModuleMutex);
+        g_proxyModules.erase(env);
+    }
     return exports;
+}
+
+napi_value ConnectionModule::OnAppHttpProxy(napi_env env, napi_callback_info info)
+{
+    return OnProxy(env, info, true);
+}
+
+napi_value ConnectionModule::OffAppHttpProxy(napi_env env, napi_callback_info info)
+{
+    return OffProxy(env, info, true);
+}
+
+napi_value ConnectionModule::OnDefaultHttpProxy(napi_env env, napi_callback_info info)
+{
+    return OnProxy(env, info, false);
+}
+
+napi_value ConnectionModule::OffDefaultHttpProxy(napi_env env, napi_callback_info info)
+{
+    return OffProxy(env, info, false);
 }
 
 void ConnectionModule::InitClasses(napi_env env, napi_value exports)
