@@ -38,9 +38,31 @@
 #include "net_probe_callback_test.h"
 #include "netmanager_base_test_security.h"
 #include "netsys_controller.h"
+#include "os_account_manager.h"
 #include "parameters.h"
 #include "system_ability_definition.h"
 #include "ipc_skeleton.h"
+
+static int32_t g_mockOsAccountUserId = -1;
+static bool g_mockOsAccountFail = false;
+
+namespace OHOS {
+namespace AccountSA {
+ErrCode OsAccountManager::GetOsAccountLocalIdFromUid(const int uid, int &id)
+{
+    if (g_mockOsAccountFail) {
+        return ERR_ACCOUNT_COMMON_NOT_INIT_ERROR;
+    }
+    if (g_mockOsAccountUserId >= 0) {
+        id = g_mockOsAccountUserId;
+        return ERR_OK;
+    }
+    id = uid / 200000;
+    return ERR_OK;
+}
+}
+}
+
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -922,11 +944,36 @@ HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest008, TestSize.Level1)
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
-HWTEST_F(NetConnServiceTest, GetLocalUserIdTest001, TestSize.Level1)
+/**
+ * @tc.name: GetDefaultHttpProxyTest009
+ * @tc.desc: Test NetConnService GetDefaultHttpProxy with the caller's own user id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest009, TestSize.Level1)
 {
-    int32_t userId;
-    int32_t ret = NetConnService::GetInstance()->GetLocalUserId(userId);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    int32_t bindNetId = NET_ID;
+    HttpProxy defaultHttpProxy;
+    defaultHttpProxy.SetUserId(100);
+    g_mockOsAccountUserId = 100;
+    int32_t ret = NetConnService::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    g_mockOsAccountUserId = -1;
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+/**
+ * @tc.name: GetDefaultHttpProxyTest010
+ * @tc.desc: Test NetConnService GetDefaultHttpProxy when getting the local user id fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest010, TestSize.Level1)
+{
+    int32_t bindNetId = NET_ID;
+    HttpProxy defaultHttpProxy;
+    defaultHttpProxy.SetUserId(100);
+    g_mockOsAccountFail = true;
+    int32_t ret = NetConnService::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    g_mockOsAccountFail = false;
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
 /**
