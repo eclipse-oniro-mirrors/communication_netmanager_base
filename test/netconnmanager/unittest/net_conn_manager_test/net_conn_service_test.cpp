@@ -43,6 +43,7 @@
 #include "system_ability_definition.h"
 #include "ipc_skeleton.h"
 
+constexpr int32_t UID_TRANSFORM_DIVISOR = 200000;
 static int32_t g_mockOsAccountUserId = -1;
 static bool g_mockOsAccountFail = false;
 
@@ -57,12 +58,11 @@ ErrCode OsAccountManager::GetOsAccountLocalIdFromUid(const int uid, int &id)
         id = g_mockOsAccountUserId;
         return ERR_OK;
     }
-    id = uid / 200000;
+    id = uid / UID_TRANSFORM_DIVISOR;
     return ERR_OK;
 }
 }
 }
-
 
 namespace OHOS {
 namespace NetManagerStandard {
