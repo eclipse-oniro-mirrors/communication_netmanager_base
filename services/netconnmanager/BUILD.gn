@@ -145,6 +145,7 @@ ohos_shared_library("net_conn_manager") {
     sources += [
       "src/net_pac_local_proxy_server.cpp",
       "src/net_pac_manager.cpp",
+      "src/net_pac_proxy_controller.cpp",
       "src/pac_functions.cpp",
     ]
   }
@@ -286,6 +287,7 @@ ohos_static_library("net_conn_manager_static") {
     sources += [
       "src/net_pac_local_proxy_server.cpp",
       "src/net_pac_manager.cpp",
+      "src/net_pac_proxy_controller.cpp",
       "src/pac_functions.cpp",
     ]
   }

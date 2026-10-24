@@ -89,6 +89,12 @@ bool NetPACManager::InitPACScriptWithURL(const std::string &scriptUrl)
     return InitPACScript(g_script);
 }
 
+bool NetPACManager::LoadPACScript(const std::string &script)
+{
+    std::lock_guard<std::mutex> guard{pacMutex_};
+    return InitPACScript(script);
+}
+
 void NetPACManager::ReleasePACScript()
 {
     if (jerry_value_is_undefined(pacScriptVal_) == false) {
@@ -201,6 +207,14 @@ bool SetOptToCurlEasy(CURL *curl_handle, const std::string &url, std::string &da
 
 void NetPACManager::DownloadPACScript(const std::string &url)
 {
+    std::string data;
+    if (DownloadPACScript(url, data)) {
+        g_script = std::move(data);
+    }
+}
+
+bool NetPACManager::DownloadPACScript(const std::string &url, std::string &data)
+{
     struct CurlGlobalGuard {
         CurlGlobalGuard()
         {
@@ -213,7 +227,7 @@ void NetPACManager::DownloadPACScript(const std::string &url)
     } curlGuard;
     CURL *curl_handle = curl_easy_init();
     if (!curl_handle) {
-        return;
+        return false;
     }
     struct CurlHandleDeleter {
         void operator()(CURL *handle)
@@ -223,30 +237,28 @@ void NetPACManager::DownloadPACScript(const std::string &url)
         }
     };
     std::unique_ptr<CURL, CurlHandleDeleter> handleGuard(curl_handle);
-    std::string data;
     if (!SetOptToCurlEasy(curl_handle, url, data)) {
-        return;
+        return false;
     }
     CURLcode res = curl_easy_perform(curl_handle);
     if (res != CURLE_OK) {
         NETMGR_LOG_E("CURL perform failed: %{private}s", curl_easy_strerror(res));
-        return;
+        return false;
     }
     long responseCode = 0;
     curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &responseCode);
     if (responseCode != HTTP_CODE_200) {
         NETMGR_LOG_E("HTTP request failed with status code: %ld", responseCode);
-        return;
+        return false;
     }
     if (data.empty()) {
         NETMGR_LOG_E("Downloaded PAC script is empty");
-        return;
+        return false;
     }
     if (data.find("FindProxyForURL") == std::string::npos) {
         NETMGR_LOG_W("Downloaded content may not be a valid PAC script (no FindProxyForURL function found)");
     }
-    g_script = std::move(data);
-    return;
+    return true;
 }
 
 std::string NetPACManager::ParseHost(const std::string &url)

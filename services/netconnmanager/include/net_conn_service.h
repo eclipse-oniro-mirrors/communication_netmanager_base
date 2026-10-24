@@ -55,6 +55,7 @@
 #ifdef NETMANAGER_ENABLE_PAC_PROXY
 #include "net_pac_local_proxy_server.h"
 #include "net_pac_manager.h"
+#include "net_pac_proxy_controller.h"
 #endif
 namespace OHOS {
 namespace NetManagerStandard {
@@ -65,6 +66,9 @@ class NetConnService : public SystemAbility,
                        public NetConnServiceStub,
                        public std::enable_shared_from_this<NetConnService> {
     DECLARE_SYSTEM_ABILITY(NetConnService)
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+    friend class NetPacProxyController;
+#endif
 
     NetConnService();
     virtual ~NetConnService();
@@ -571,6 +575,7 @@ private:
     int32_t GetDefaultSupplierIdAsync(NetBearType bearerType, const std::string &ident,
         uint32_t& supplierId);
     void SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy);
+    void HandleNetLinkHttpProxyChange(const HttpProxy &oldHttpProxy, const HttpProxy &newHttpProxy);
     void RequestAllNetworkExceptDefault();
     void LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpProxy);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
@@ -717,6 +722,7 @@ private:
     std::mutex netPacManagerMutex_;
     std::shared_ptr<OHOS::NetManagerStandard::ProxyServer> netPACProxyServer_;
     std::mutex netPacProxyServerMutex_;
+    NetPacProxyController pacController_{*this};
 #endif
     std::shared_mutex uidLostDelayMutex_;
     std::set<uint32_t> uidLostDelaySet_;

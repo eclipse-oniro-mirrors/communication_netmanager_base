@@ -286,6 +286,27 @@ void UpdateNetLinkInfoFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_LINK_INFO), dataParcelNoSupplierId);
 }
 
+void UpdateNetLinkInfoWithPacUrlFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    sptr<NetLinkInfo> netLinkInfo = new (std::nothrow) NetLinkInfo();
+    if (netLinkInfo == nullptr) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    uint32_t supplierId = NetConnGetData<uint32_t>();
+    netLinkInfo->ifaceName_ = NetConnGetString(STR_LEN);
+    netLinkInfo->httpProxy_ = {NetConnGetString(STR_LEN), NetConnGetData<uint16_t>(), {NetConnGetString(STR_LEN)}};
+    netLinkInfo->httpProxy_.SetPacUrl(NetConnGetString(STR_LEN));
+    dataParcel.WriteUint32(supplierId);
+    netLinkInfo->Marshalling(dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_LINK_INFO), dataParcel);
+}
+
 void RegisterNetSupplierCallbackFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;
@@ -2000,6 +2021,7 @@ void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::DeleteVlanIpFuzzTest(data, size);
     OHOS::NetManagerStandard::GetConnectOwnerUidFuzzTest(data, size);
     OHOS::NetManagerStandard::GetSystemNetPortStates(data, size);
+    OHOS::NetManagerStandard::UpdateNetLinkInfoWithPacUrlFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

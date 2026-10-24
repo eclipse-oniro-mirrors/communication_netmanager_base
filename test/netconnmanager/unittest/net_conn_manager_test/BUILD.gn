@@ -104,6 +104,8 @@ ohos_unittest("net_conn_manager_test") {
 
   if(netmanager_base_enable_pac_proxy){
     defines += [ "NETMANAGER_ENABLE_PAC_PROXY" ]
+    sources += [ "net_pac_proxy_controller_test.cpp" ]
+    cflags_cc = [ "-fno-access-control" ]
   }
 
   if (enable_netmgr_debug) {

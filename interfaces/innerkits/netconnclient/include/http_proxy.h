@@ -40,6 +40,7 @@ public:
     [[nodiscard]] SecureData GetUsername() const;
     [[nodiscard]] SecureData GetPassword() const;
     [[nodiscard]] int32_t GetUserId() const;
+    [[nodiscard]] std::string GetPacUrl() const;
     [[nodiscard]] static std::optional<HttpProxy> FromString(const std::string &str);
     void inline SetHost(std::string &&host)
     {
@@ -67,6 +68,8 @@ public:
         userId_ = userId;
     }
 
+    void SetPacUrl(const std::string &pacUrl);
+
     bool operator==(const HttpProxy &httpProxy) const;
     bool operator!=(const HttpProxy &httpProxy) const;
     bool Marshalling(Parcel &parcel) const override;
@@ -79,6 +82,7 @@ private:
     SecureData password_;
     std::list<std::string> exclusionList_;
     int32_t userId_ = -1;
+    std::string pacUrl_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

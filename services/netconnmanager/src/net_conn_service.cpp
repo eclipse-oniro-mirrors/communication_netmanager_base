@@ -1134,6 +1134,12 @@ void NetConnService::UpdateNetSupplierInfoAsyncExpand(sptr<NetSupplier> &supplie
 {
     FindBestNetworkForAllRequest();
     if (!oldHttpProxy.GetHost().empty()) {
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+        if (pacController_.HasWifiPac()) {
+            pacController_.SendEffectiveProxyBroadcast();
+            return;
+        }
+#endif
         HttpProxy emptyProxy;
         SendHttpProxyChangeBroadcast(emptyProxy);
     }
@@ -1229,11 +1235,25 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
     if (!isDelayHandleFindBestNetwork_) {
         FindBestNetworkForAllRequest();
     }
-    if (oldHttpProxy != netLinkInfo->httpProxy_) {
-        SendHttpProxyChangeBroadcast(netLinkInfo->httpProxy_);
-    }
+    HandleNetLinkHttpProxyChange(oldHttpProxy, netLinkInfo->httpProxy_);
     NETMGR_LOG_D("UpdateNetLinkInfo service out.");
     return NETMANAGER_SUCCESS;
+}
+
+void NetConnService::HandleNetLinkHttpProxyChange(const HttpProxy &oldHttpProxy, const HttpProxy &newHttpProxy)
+{
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+    if (!oldHttpProxy.GetPacUrl().empty() || !newHttpProxy.GetPacUrl().empty() || pacController_.HasWifiPac()) {
+        if (oldHttpProxy != newHttpProxy) {
+            pacController_.Refresh();
+            pacController_.SendEffectiveProxyBroadcast();
+        }
+        return;
+    }
+#endif
+    if (oldHttpProxy != newHttpProxy) {
+        SendHttpProxyChangeBroadcast(newHttpProxy);
+    }
 }
 
 void NetConnService::HandlePreFindBestNetworkForDelay(uint32_t supplierId, const sptr<NetSupplier> &supplier,
@@ -2017,6 +2037,9 @@ void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<Net
     }
 
     oldSupplier = newSupplier;
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+    pacController_.Refresh();
+#endif
 }
 
 void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStatus netState)
@@ -2359,6 +2382,12 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
     auto network = FindNetwork(bindNetId);
     if (network != nullptr && network->IsConnected()) {
         httpProxy = network->GetHttpProxy();
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+        std::shared_lock<ffrt::shared_mutex> lock(defaultNetSupplierMutex_);
+        if (defaultNetSupplier_ != nullptr && defaultNetSupplier_->GetNetId() == bindNetId) {
+            pacController_.FillLocalProxy(bindNetId, httpProxy);
+        }
+#endif
         NETMGR_LOG_I("Return bound network's http proxy as default.");
         return NETMANAGER_SUCCESS;
     }
@@ -2366,6 +2395,9 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
     std::shared_lock<ffrt::shared_mutex> lock(defaultNetSupplierMutex_);
     if (defaultNetSupplier_ != nullptr) {
         defaultNetSupplier_->GetHttpProxy(httpProxy);
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+        pacController_.FillLocalProxy(defaultNetSupplier_->GetNetId(), httpProxy);
+#endif
         auto endTime = std::chrono::steady_clock::now();
         auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
         NETMGR_LOG_D("Use default http proxy, cost=%{public}lld",  durationNs.count());
@@ -2734,6 +2766,9 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
         }
         globalHttpProxyCache_.Erase(userId);
         SendHttpProxyChangeBroadcast(newHttpProxy);
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+        pacController_.Refresh();
+#endif
         UpdateGlobalHttpProxy(newHttpProxy);
     }
     if (!httpProxy.GetHost().empty()) {
@@ -2992,11 +3027,14 @@ uint32_t NetConnService::SetProxyOff()
     HttpProxy globalProxy;
     globalProxy.SetHost("");
     globalProxy.SetPort(0);
-    return SetGlobalHttpProxy(globalProxy);
+    uint32_t ret = SetGlobalHttpProxy(globalProxy);
+    pacController_.Refresh();
+    return ret;
 }
 
 uint32_t NetConnService::SetProxyAuto()
 {
+    auto wifiPacPause = pacController_.PauseWifiPac();
     std::string pacUrl;
     if (GetPacFileUrl(pacUrl) == NETMANAGER_SUCCESS) {
         if (!GetNetPacManager()->InitPACScriptWithURL(pacUrl)) {
@@ -3748,8 +3786,14 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
         UpdateGlobalHttpProxy(httpProxy);
         HandleDataShareMessage();
         RegisterNetDataShareObserver();
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+        pacController_.Refresh();
+#endif
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
         NETMGR_LOG_I("on receive user_switched");
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+        pacController_.Refresh();
+#endif
         HttpProxy curProxy;
         GetDefaultHttpProxy(INVALID_NET_ID, curProxy);
         SendHttpProxyChangeBroadcast(curProxy);
