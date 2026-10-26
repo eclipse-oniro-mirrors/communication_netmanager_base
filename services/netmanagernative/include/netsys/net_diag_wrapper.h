@@ -64,6 +64,8 @@ private:
     void ExtractIfaceMtu(const std::smatch &match, NetDiagIfaceConfig &ifaceInfo);
     void ExtractIfaceTxQueueLen(const std::smatch &match, NetDiagIfaceConfig &ifaceInfo);
     void ExtractIfaceTransDataBytes(const std::smatch &match, NetDiagIfaceConfig &ifaceInfo);
+    bool IsValidNetStatLine(const std::string &line);
+    size_t CountFields(const std::string &line);
 };
 } // namespace nmd
 } // namespace OHOS
