@@ -82,6 +82,11 @@ constexpr const char *IFCONFIG_OPTION_IFACE_DOWN = "down";
 
 constexpr const char *PING_NAME_DOES_NOT_RESOLVED = "Name does not resolve";
 constexpr const char *PING_NETWORK_UNREACHABLE = "Network unreachable";
+constexpr size_t MAX_LINE_LEN = 4096;
+constexpr int32_t MIN_FILED_NUM = 8;
+constexpr int32_t MAX_FILED_NUM = 9;
+constexpr int32_t UNIX_MIN_FILED_NUM = 6;
+constexpr int32_t UNIX_MAX_FILED_NUM = 12;
 } // namespace
 
 NetDiagWrapper::NetDiagWrapper() {}
@@ -140,6 +145,30 @@ int32_t NetDiagWrapper::GetRouteTable(std::list<NetDiagRouteTable> &routeTables)
     return NETMANAGER_SUCCESS;
 }
 
+bool NetDiagWrapper::IsValidNetStatLine(const std::string &line)
+{
+    if (line.empty() || line.size() > MAX_LINE_LEN) {
+        return false;
+    }
+    for (unsigned char c : line) {
+        if (c != ' ' && c != '\t' && (c < 0x21 || c > 0x7E)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+size_t NetDiagWrapper::CountFields(const std::string &line)
+{
+    std::istringstream iss(line);
+    std::string w;
+    size_t count = 0;
+    while (iss >> w) {
+        count++;
+    }
+    return count;
+}
+
 int32_t NetDiagWrapper::GetSocketsInfo(NetDiagProtocolType socketType, NetDiagSocketsInfo &socketsInfo)
 {
     std::string command = std::string(NETSTAT_CMD_PATH) + OPTION_SPACE;
@@ -175,13 +204,19 @@ int32_t NetDiagWrapper::GetSocketsInfo(NetDiagProtocolType socketType, NetDiagSo
     std::istringstream inStream(result);
     std::string line;
     while (std::getline(inStream, line)) {
+        if (!IsValidNetStatLine(line)) {
+            continue;
+        }
+        size_t filedNum = CountFields(line);
         std::smatch match;
-        if (std::regex_search(line, match, netProtoRegex)) {
+        if (filedNum >= MIN_FILED_NUM && filedNum <= MAX_FILED_NUM
+            && std::regex_search(line, match, netProtoRegex)) {
             ExtractNetProtoSocketsInfo(match, socketsInfo);
             continue;
         }
 
-        if (std::regex_search(line, match, unixRegex)) {
+        if (filedNum >= UNIX_MIN_FILED_NUM && filedNum <= UNIX_MAX_FILED_NUM
+            && std::regex_search(line, match, unixRegex)) {
             ExtractUnixSocketsInfo(match, socketsInfo);
         }
     }
