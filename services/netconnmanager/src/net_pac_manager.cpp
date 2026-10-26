@@ -109,6 +109,24 @@ static void ReleaseValues(const std::vector<jerry_value_t> &values)
     }
 }
 
+static PAC_STATUS HandleJerryStringValue(jerry_value_t call_result, std::string &proxy)
+{
+    PAC_STATUS status = PAC_OK;
+    jerry_size_t strSize = jerry_get_string_size(call_result);
+    if (strSize == 0) {
+        NETMGR_LOG_E("PAC result 0");
+    } else if (strSize <= MAX_PAC_PROXY_RESULT_LEN) {
+        std::string buffer(strSize, NULL_CHAR);
+        jerry_size_t copied = jerry_string_to_char_buffer(call_result,
+            reinterpret_cast<jerry_char_t *>(buffer.data()), strSize);
+        proxy.append(buffer, 0, copied);
+    } else {
+        status = PAC_SCRIPT_CALL_ERROR;
+        NETMGR_LOG_E("PAC result too long %{public}u", strSize);
+    }
+    return status;
+}
+
 PAC_STATUS NetPACManager::FindProxyForURL(const std::string &url, const std::string &hostStr, std::string &proxy)
 {
     if (!status_ && !InitPACScriptWithURL(scriptFileUrl_)) {
@@ -139,18 +157,7 @@ PAC_STATUS NetPACManager::FindProxyForURL(const std::string &url, const std::str
     PAC_STATUS status = PAC_OK;
     if (!jerry_value_is_error(call_result)) {
         if (jerry_value_is_string(call_result)) {
-            jerry_size_t strSize = jerry_get_string_size(call_result);
-            if (strSize == 0) {
-                NETMGR_LOG_E("PAC result 0");
-            } else if (strSize <= MAX_PAC_PROXY_RESULT_LEN) {
-                std::string buffer(strSize, NULL_CHAR);
-                jerry_size_t copied = jerry_string_to_char_buffer(call_result,
-                    reinterpret_cast<jerry_char_t *>(buffer.data()), strSize);
-                proxy.append(buffer, 0, copied);
-            } else {
-                status = PAC_SCRIPT_CALL_ERROR;
-                NETMGR_LOG_E("PAC result too long %{public}u", strSize);
-            }
+            status = HandleJerryStringValue(call_result, proxy);
         } else if (jerry_value_is_boolean(call_result)) {
             proxy.append(jerry_get_boolean_value(call_result) ? TRUE : FALSE);
         } else if (jerry_value_is_number(call_result)) {
