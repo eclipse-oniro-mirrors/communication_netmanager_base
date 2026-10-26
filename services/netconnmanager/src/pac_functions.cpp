@@ -571,12 +571,12 @@ static jerry_value_t JsDateRangeArg2NumNum(const jerry_value_t args[], struct tm
 static jerry_value_t JsDateRangeArg2NumStr(const jerry_value_t args[], struct tm *timeinfo)
 {
     int num = jerry_get_number_value(args[ARG_INDEX_0]);
-    char *str_buff = JerryStringToChar(args[ARG_INDEX_1]);
-    if (str_buff == nullptr) {
+    char *strBuff = JerryStringToChar(args[ARG_INDEX_1]);
+    if (strBuff == nullptr) {
         return jerry_create_boolean(false);
     }
-    if (strcmp((str_buff), GMT) == 0) {
-        free(str_buff);
+    if (strcmp((strBuff), GMT) == 0) {
+        free(strBuff);
         time_t rawtimeGmt;
         struct tm *timeinfoGmt;
         time(&rawtimeGmt);
@@ -587,8 +587,8 @@ static jerry_value_t JsDateRangeArg2NumStr(const jerry_value_t args[], struct tm
             return jerry_create_boolean(timeinfoGmt->tm_mday == num);
         }
     } else {
-        int mon = MonthAbbrToNumber((str_buff));
-        free(str_buff);
+        int mon = MonthAbbrToNumber((strBuff));
+        free(strBuff);
         return jerry_create_boolean(mon == timeinfo->tm_mon && num == timeinfo->tm_mday);
     }
 }
