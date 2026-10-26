@@ -71,6 +71,7 @@ constexpr const char *MONTH_NAMES[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN",
 constexpr size_t MONTH_COUNT = std::size(MONTH_NAMES);
 constexpr const char *DAY_NAMES[] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
 constexpr size_t DAY_COUNT = std::size(DAY_NAMES);
+constexpr size_t PAC_MAX_STR_LEN = 1024;
 using Checker = std::function<bool(const jerry_length_t argsCnt, const jerry_value_t args[])>;
 using Handler = std::function<jerry_value_t(const jerry_value_t args[], struct tm *timeinfo)>;
 } // namespace
@@ -88,7 +89,7 @@ static jerry_char_t *JERRY_CHAR(char *str)
 static char *JerryStringToChar(jerry_value_t strVal)
 {
     jerry_size_t strSize = jerry_get_string_size(strVal);
-    if (strSize > SIZE_MAX - 1) {
+    if (strSize > PAC_MAX_STR_LEN - 1) {
         return nullptr;
     }
     char *str = (char *)malloc(strSize + 1);
@@ -298,6 +299,9 @@ jerry_value_t PacFunctions::JsIsInNet(const jerry_value_t funcObjVal, const jerr
         free(mask);
         return jerry_create_boolean(result);
     } else {
+        free(ip);
+        free(net);
+        free(mask);
         return jerry_create_boolean(false);
     }
 }
@@ -467,18 +471,20 @@ static jerry_value_t JsDateRangeArg1Num(const jerry_value_t args[], struct tm *t
 static jerry_value_t JsDateRangeArg61(const jerry_value_t args[], struct tm *timeinfo)
 {
     int day0 = jerry_get_number_value(args[ARG_INDEX_0]);
-    jerry_size_t mon0_size = jerry_get_string_size(args[ARG_INDEX_1]);
-    jerry_char_t mon0_buff[mon0_size+1];
-    jerry_string_to_char_buffer(args[ARG_INDEX_1], mon0_buff, mon0_size);
-    mon0_buff[mon0_size] = NULL_CHAR;
-    int m0 = MonthAbbrToNumber((const char *)mon0_buff);
+    char *mon0 = JerryStringToChar(args[ARG_INDEX_1]);
+    int m0 = (mon0 != nullptr) ? MonthAbbrToNumber(mon0) : -1;
+    free(mon0);
+    if (m0 < 0) {
+        return jerry_create_boolean(false);
+    }
     int year0 = jerry_get_number_value(args[ARG_INDEX_2]);
     int day1 = jerry_get_number_value(args[ARG_INDEX_3]);
-    jerry_size_t mon1_size = jerry_get_string_size(args[ARG_INDEX_4]);
-    jerry_char_t mon1_buff[mon1_size+1];
-    jerry_string_to_char_buffer(args[ARG_INDEX_4], mon1_buff, mon1_size);
-    mon1_buff[mon1_size] = NULL_CHAR;
-    int m1 = MonthAbbrToNumber((const char *)mon1_buff);
+    char *mon1 = JerryStringToChar(args[ARG_INDEX_4]);
+    int m1 = (mon1 != nullptr) ? MonthAbbrToNumber(mon1) : -1;
+    free(mon1);
+    if (m1 < 0) {
+        return jerry_create_boolean(false);
+    }
     int year1 = jerry_get_number_value(args[ARG_INDEX_5]);
     int value0 = (year0) * TEN_THOUSAND + (m0 + 1) * HUNDRED + day0;
     int value1 = (year1) * TEN_THOUSAND + (m1 + 1) * HUNDRED + day1;
@@ -490,18 +496,20 @@ static jerry_value_t JsDateRangeArg61(const jerry_value_t args[], struct tm *tim
 static jerry_value_t JsDateRangeArg42(const jerry_value_t args[], struct tm *timeinfo)
 {
     int day0 = 1;
-    jerry_size_t mon0_size = jerry_get_string_size(args[ARG_INDEX_0]);
-    jerry_char_t mon0_buff[mon0_size+1];
-    jerry_string_to_char_buffer(args[ARG_INDEX_0], mon0_buff, mon0_size);
-    mon0_buff[mon0_size] = NULL_CHAR;
-    int m0 = MonthAbbrToNumber((const char *)mon0_buff);
+    char *mon0 = JerryStringToChar(args[ARG_INDEX_0]);
+    int m0 = (mon0 != nullptr) ? MonthAbbrToNumber(mon0) : -1;
+    free(mon0);
+    if (m0 < 0) {
+        return jerry_create_boolean(false);
+    }
     int year0 = jerry_get_number_value(args[ARG_INDEX_1]);
     int day1 = ARG_COUNT_31;
-    jerry_size_t mon1_size = jerry_get_string_size(args[ARG_INDEX_2]);
-    jerry_char_t mon1_buff[mon1_size+1];
-    jerry_string_to_char_buffer(args[ARG_INDEX_2], mon1_buff, mon1_size);
-    mon1_buff[mon1_size] = NULL_CHAR;
-    int m1 = MonthAbbrToNumber((const char *)mon1_buff);
+    char *mon1 = JerryStringToChar(args[ARG_INDEX_2]);
+    int m1 = (mon1 != nullptr) ? MonthAbbrToNumber(mon1) : -1;
+    free(mon1);
+    if (m1 < 0) {
+        return jerry_create_boolean(false);
+    }
     int year1 = jerry_get_number_value(args[ARG_INDEX_3]);
     int value0 = (year0) * TEN_THOUSAND + (m0 + 1) * HUNDRED + day0;
     int value1 = (year1) * TEN_THOUSAND + (m1 + 1) * HUNDRED + day1;
@@ -513,17 +521,19 @@ static jerry_value_t JsDateRangeArg42(const jerry_value_t args[], struct tm *tim
 static jerry_value_t JsDateRangeArg41(const jerry_value_t args[], struct tm *timeinfo)
 {
     int day0 = jerry_get_number_value(args[ARG_INDEX_0]);
-    jerry_size_t mon0_size = jerry_get_string_size(args[ARG_INDEX_1]);
-    jerry_char_t mon0_buff[mon0_size+1];
-    jerry_string_to_char_buffer(args[ARG_INDEX_1], mon0_buff, mon0_size);
-    mon0_buff[mon0_size] = NULL_CHAR;
-    int m0 = MonthAbbrToNumber((const char *)mon0_buff);
+    char *mon0 = JerryStringToChar(args[ARG_INDEX_1]);
+    int m0 = (mon0 != nullptr) ? MonthAbbrToNumber(mon0) : -1;
+    free(mon0);
+    if (m0 < 0) {
+        return jerry_create_boolean(false);
+    }
     int day1 = jerry_get_number_value(args[ARG_INDEX_2]);
-    jerry_size_t mon1_size = jerry_get_string_size(args[ARG_INDEX_3]);
-    jerry_char_t mon1_buff[mon1_size+1];
-    jerry_string_to_char_buffer(args[ARG_INDEX_3], mon1_buff, mon1_size);
-    mon1_buff[mon1_size] = NULL_CHAR;
-    int m1 = MonthAbbrToNumber((const char *)mon1_buff);
+    char *mon1 = JerryStringToChar(args[ARG_INDEX_3]);
+    int m1 = (mon1 != nullptr) ? MonthAbbrToNumber(mon1) : -1;
+    free(mon1);
+    if (m1 < 0) {
+        return jerry_create_boolean(false);
+    }
     int currentValue = (timeinfo->tm_mon + 1) * HUNDRED + timeinfo->tm_mday;
     int value0 = (m0 + 1) * HUNDRED + day0;
     int value1 = (m1 + 1) * HUNDRED + day1;
@@ -532,16 +542,18 @@ static jerry_value_t JsDateRangeArg41(const jerry_value_t args[], struct tm *tim
 
 static jerry_value_t JsDateRangeArg2StrStr(const jerry_value_t args[], struct tm *timeinfo)
 {
-    jerry_size_t mon0_size = jerry_get_string_size(args[ARG_INDEX_0]);
-    jerry_char_t mon0_buff[mon0_size+1];
-    jerry_string_to_char_buffer(args[ARG_INDEX_0], mon0_buff, mon0_size);
-    mon0_buff[mon0_size] = NULL_CHAR;
-    jerry_size_t mon1_size = jerry_get_string_size(args[ARG_INDEX_1]);
-    jerry_char_t mon1_buff[mon1_size+1];
-    jerry_string_to_char_buffer(args[ARG_INDEX_1], mon1_buff, mon1_size);
-    mon1_buff[mon1_size] = NULL_CHAR;
-    int m0 = MonthAbbrToNumber((const char *)mon0_buff);
-    int m1 = MonthAbbrToNumber((const char *)mon1_buff);
+    char *mon0 = JerryStringToChar(args[ARG_INDEX_0]);
+    int m0 = (mon0 != nullptr) ? MonthAbbrToNumber(mon0) : -1;
+    free(mon0);
+    if (m0 < 0) {
+        return jerry_create_boolean(false);
+    }
+    char *mon1 = JerryStringToChar(args[ARG_INDEX_1]);
+    int m1 = (mon1 != nullptr) ? MonthAbbrToNumber(mon1) : -1;
+    free(mon1);
+    if (m1 < 0) {
+        return jerry_create_boolean(false);
+    }
     return jerry_create_boolean(timeinfo->tm_mon >= m0 && timeinfo->tm_mon <= m1);
 }
 
@@ -559,11 +571,12 @@ static jerry_value_t JsDateRangeArg2NumNum(const jerry_value_t args[], struct tm
 static jerry_value_t JsDateRangeArg2NumStr(const jerry_value_t args[], struct tm *timeinfo)
 {
     int num = jerry_get_number_value(args[ARG_INDEX_0]);
-    jerry_size_t str_size = jerry_get_string_size(args[ARG_INDEX_1]);
-    jerry_char_t str_buff[str_size+1];
-    jerry_string_to_char_buffer(args[ARG_INDEX_1], str_buff, str_size);
-    str_buff[str_size] = NULL_CHAR;
-    if (strcmp((const char *)(str_buff), GMT) == 0) {
+    char *str_buff = JerryStringToChar(args[ARG_INDEX_1]);
+    if (str_buff == nullptr) {
+        return jerry_create_boolean(false);
+    }
+    if (strcmp((str_buff), GMT) == 0) {
+        free(str_buff);
         time_t rawtimeGmt;
         struct tm *timeinfoGmt;
         time(&rawtimeGmt);
@@ -574,7 +587,8 @@ static jerry_value_t JsDateRangeArg2NumStr(const jerry_value_t args[], struct tm
             return jerry_create_boolean(timeinfoGmt->tm_mday == num);
         }
     } else {
-        int mon = MonthAbbrToNumber((const char *)(str_buff));
+        int mon = MonthAbbrToNumber((str_buff));
+        free(str_buff);
         return jerry_create_boolean(mon == timeinfo->tm_mon && num == timeinfo->tm_mday);
     }
 }
@@ -623,15 +637,13 @@ static std::vector<Checker> jsDateRangeCheckers = {
 static jerry_value_t JsDateRangeArg3(const jerry_value_t args[], struct tm *timeinfo)
 {
     int day = jerry_get_number_value(args[0]);
-    jerry_size_t mon_size = jerry_get_string_size(args[1]);
-    jerry_char_t mon_buff[mon_size+11];
-    jerry_string_to_char_buffer(args[1], mon_buff, mon_size);
-    mon_buff[mon_size] = NULL_CHAR;
-    int month = MonthAbbrToNumber((const char *)mon_buff);
-    int year = jerry_get_number_value(args[2]);
+    char *monthChar = JerryStringToChar(args[1]);
+    int month = (monthChar != nullptr) ? MonthAbbrToNumber(monthChar) : -1;
+    free(monthChar);
     if (month < 0) {
         return jerry_create_boolean(false);
     }
+    int year = jerry_get_number_value(args[2]);
     return jerry_create_boolean(timeinfo->tm_mday == day && timeinfo->tm_mon == month &&
                                 timeinfo->tm_year + YEAR_BASE == year);
 }
@@ -708,15 +720,17 @@ static TimezoneResult ProcessTimezone(time_t rawtime, const jerry_value_t args[]
     if (argsCnt < ARG_COUNT_2 || !jerry_value_is_string(args[ARG_INDEX_1])) {
         return {timeinfo, useGMT, true};
     }
-    jerry_size_t str_size = jerry_get_string_size(args[ARG_INDEX_1]);
-    jerry_char_t str_buf[str_size+1];
-    jerry_string_to_char_buffer(args[ARG_INDEX_1], str_buf, str_size);
-    str_buf[str_size]  = NULL_CHAR;
-    if (strcmp((char *)str_buf, GMT) == 0) {
+    char *str_buf = JerryStringToChar(args[ARG_INDEX_1]);
+    if (str_buf == nullptr) {
+        return {nullptr, false, false};
+    }
+    if (strcmp(str_buf, GMT) == 0) {
         timeinfo = gmtime(&rawtime);
         useGMT = true;
+        free(str_buf);
         return {timeinfo, useGMT, true};
     }
+    free(str_buf);
     return {nullptr, false, false};
 }
 
@@ -816,18 +830,17 @@ static int ParseDayName(jerry_value_t dayArg)
     if (!jerry_value_is_string(dayArg)) {
         return -1;
     }
-    jerry_size_t strSize = jerry_get_string_size(dayArg);
-    if (strSize < 0) {
+    char *strBuf = JerryStringToChar(dayArg);
+    if (strBuf == nullptr) {
         return -1;
     }
-    char strBuf[strSize + 1];
-    jerry_string_to_char_buffer(dayArg, reinterpret_cast<jerry_char_t *>(strBuf), strSize);
-    strBuf[strSize] = NULL_CHAR;
     for (int i = 0; i < DAY_COUNT; i++) {
-        if (strcmp(reinterpret_cast<char *>(strBuf), DAY_NAMES[i]) == 0) {
+        if (strcmp(strBuf, DAY_NAMES[i]) == 0) {
+            free(strBuf);
             return i;
         }
     }
+    free(strBuf);
     return -1;
 }
 
@@ -855,14 +868,13 @@ static bool ShouldUseGmt(const jerry_value_t args[], jerry_length_t argsCnt)
     if (!jerry_value_is_string(lastArg)) {
         return false;
     }
-    jerry_size_t strSize = jerry_get_string_size(lastArg);
-    if (strSize == 0) {
+    char *str_buf = JerryStringToChar(lastArg);
+    if (str_buf == nullptr) {
         return false;
     }
-    char str_buf[strSize + 1];
-    jerry_string_to_char_buffer(lastArg, reinterpret_cast<jerry_char_t *>(str_buf), strSize);
-    str_buf[strSize] = NULL_CHAR;
-    return strcmp(str_buf, GMT) == 0;
+    bool result = (strcmp(str_buf, GMT) == 0);
+    free(str_buf);
+    return result;
 }
 
 struct DayRange {
