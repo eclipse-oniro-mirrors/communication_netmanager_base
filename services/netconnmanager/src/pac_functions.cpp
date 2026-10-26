@@ -720,17 +720,17 @@ static TimezoneResult ProcessTimezone(time_t rawtime, const jerry_value_t args[]
     if (argsCnt < ARG_COUNT_2 || !jerry_value_is_string(args[ARG_INDEX_1])) {
         return {timeinfo, useGMT, true};
     }
-    char *str_buf = JerryStringToChar(args[ARG_INDEX_1]);
-    if (str_buf == nullptr) {
+    char *strBuf = JerryStringToChar(args[ARG_INDEX_1]);
+    if (strBuf == nullptr) {
         return {nullptr, false, false};
     }
-    if (strcmp(str_buf, GMT) == 0) {
+    if (strcmp(strBuf, GMT) == 0) {
         timeinfo = gmtime(&rawtime);
         useGMT = true;
-        free(str_buf);
+        free(strBuf);
         return {timeinfo, useGMT, true};
     }
-    free(str_buf);
+    free(strBuf);
     return {nullptr, false, false};
 }
 
@@ -868,12 +868,12 @@ static bool ShouldUseGmt(const jerry_value_t args[], jerry_length_t argsCnt)
     if (!jerry_value_is_string(lastArg)) {
         return false;
     }
-    char *str_buf = JerryStringToChar(lastArg);
-    if (str_buf == nullptr) {
+    char *strBuf = JerryStringToChar(lastArg);
+    if (strBuf == nullptr) {
         return false;
     }
-    bool result = (strcmp(str_buf, GMT) == 0);
-    free(str_buf);
+    bool result = (strcmp(strBuf, GMT) == 0);
+    free(strBuf);
     return result;
 }
 
