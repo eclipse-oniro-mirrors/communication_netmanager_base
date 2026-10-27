@@ -2730,5 +2730,24 @@ HWTEST_F(NetworkTest, Nat464ServiceMaybeUpdateV6IfaceTest001, TestSize.Level1)
     EXPECT_EQ(nat464Service->v6Iface_, "eth1");
     EXPECT_EQ(nat464Service->v4TunIface_, "tunv4-eth1");
 }
+
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+HWTEST_F(NetworkTest, ForbidDetectionInSleepTest001, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
+    ASSERT_NE(network, nullptr);
+
+    network->UpdateForbidDetectionFlag(false);
+    network->NetDetectionForDnsHealth(false);
+    EXPECT_EQ(network->netMonitor_, nullptr);
+    EXPECT_EQ(network->StartDualStackProbeThread(), NETMANAGER_ERR_INTERNAL);
+
+    network->UpdateForbidDetectionFlag(true);
+    network->NetDetectionForDnsHealth(true);
+    EXPECT_EQ(network->netMonitor_, nullptr);
+    EXPECT_EQ(network->StartDualStackProbeThread(), NETMANAGER_ERR_INTERNAL);
+}
+#endif // FEATURE_SUPPORT_POWERMANAGER
 } // namespace NetManagerStandard
 } // namespace OHOS
