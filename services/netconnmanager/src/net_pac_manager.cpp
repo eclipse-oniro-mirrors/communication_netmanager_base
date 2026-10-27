@@ -32,6 +32,8 @@ const std::string TRUE = "true";
 const std::string FALSE = "false";
 const std::string EMPTY = "";
 constexpr int32_t HTTP_CODE_200 = 200;
+constexpr jerry_size_t MAX_PAC_PROXY_RESULT_LEN = 4096;
+constexpr int32_t PAC_SCRIPT_MAX_SIZE = 256 * 1024;
 } // namespace
 
 static std::string g_script;
@@ -107,6 +109,24 @@ static void ReleaseValues(const std::vector<jerry_value_t> &values)
     }
 }
 
+static PAC_STATUS HandleJerryStringValue(jerry_value_t call_result, std::string &proxy)
+{
+    PAC_STATUS status = PAC_OK;
+    jerry_size_t strSize = jerry_get_string_size(call_result);
+    if (strSize == 0) {
+        NETMGR_LOG_E("PAC result 0");
+    } else if (strSize <= MAX_PAC_PROXY_RESULT_LEN) {
+        std::string buffer(strSize, NULL_CHAR);
+        jerry_size_t copied = jerry_string_to_char_buffer(call_result,
+            reinterpret_cast<jerry_char_t *>(buffer.data()), strSize);
+        proxy.append(buffer, 0, copied);
+    } else {
+        status = PAC_SCRIPT_CALL_ERROR;
+        NETMGR_LOG_E("PAC result too long %{public}u", strSize);
+    }
+    return status;
+}
+
 PAC_STATUS NetPACManager::FindProxyForURL(const std::string &url, const std::string &hostStr, std::string &proxy)
 {
     if (!status_ && !InitPACScriptWithURL(scriptFileUrl_)) {
@@ -137,13 +157,7 @@ PAC_STATUS NetPACManager::FindProxyForURL(const std::string &url, const std::str
     PAC_STATUS status = PAC_OK;
     if (!jerry_value_is_error(call_result)) {
         if (jerry_value_is_string(call_result)) {
-            jerry_length_t strLength = jerry_get_string_length(call_result);
-            if (strLength > 0) {
-                char buffer[strLength + 1];
-                jerry_string_to_char_buffer(call_result, reinterpret_cast<jerry_char_t *>(buffer), strLength);
-                buffer[strLength] = NULL_CHAR;
-                proxy.append(buffer, strLength);
-            }
+            status = HandleJerryStringValue(call_result, proxy);
         } else if (jerry_value_is_boolean(call_result)) {
             proxy.append(jerry_get_boolean_value(call_result) ? TRUE : FALSE);
         } else if (jerry_value_is_number(call_result)) {
@@ -162,9 +176,27 @@ static size_t WriteToString(void *contents, size_t size, size_t nmemb, void *use
 {
     size_t realsize = size * nmemb;
     std::string *mem = static_cast<std::string *>(userp);
+    if (mem->size() + realsize > static_cast<size_t>(PAC_SCRIPT_MAX_SIZE)) {
+        return 0;
+    }
     mem->append(static_cast<char *>(contents), realsize);
-    g_script.append(static_cast<char *>(contents), realsize);
     return realsize;
+}
+
+bool SetOptToCurlEasy(CURL *curl_handle, const std::string &url, std::string &data)
+{
+    if (!curl_handle) {
+        return false;
+    }
+    curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteToString);
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, &data);
+    curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, USER_AGENT);
+    curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, 30L);
+    curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl_handle, CURLOPT_MAXFILESIZE_LARGE,
+        static_cast<curl_off_t>(PAC_SCRIPT_MAX_SIZE));
+    return true;
 }
 
 void NetPACManager::DownloadPACScript(const std::string &url)
@@ -192,21 +224,18 @@ void NetPACManager::DownloadPACScript(const std::string &url)
     };
     std::unique_ptr<CURL, CurlHandleDeleter> handleGuard(curl_handle);
     std::string data;
-    curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteToString);
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, &data);
-    curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, USER_AGENT);
-    curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, 30L);
-    curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
+    if (!SetOptToCurlEasy(curl_handle, url, data)) {
+        return;
+    }
     CURLcode res = curl_easy_perform(curl_handle);
     if (res != CURLE_OK) {
         NETMGR_LOG_E("CURL perform failed: %{private}s", curl_easy_strerror(res));
         return;
     }
-    int responseCode;
+    long responseCode = 0;
     curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &responseCode);
     if (responseCode != HTTP_CODE_200) {
-        NETMGR_LOG_E("HTTP request failed with status code: %d", responseCode);
+        NETMGR_LOG_E("HTTP request failed with status code: %ld", responseCode);
         return;
     }
     if (data.empty()) {
@@ -216,6 +245,7 @@ void NetPACManager::DownloadPACScript(const std::string &url)
     if (data.find("FindProxyForURL") == std::string::npos) {
         NETMGR_LOG_W("Downloaded content may not be a valid PAC script (no FindProxyForURL function found)");
     }
+    g_script = std::move(data);
     return;
 }
 
