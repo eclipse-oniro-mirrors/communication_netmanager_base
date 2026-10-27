@@ -604,6 +604,96 @@ int32_t NetLinkSocketDiag::ProcessSockDiagUidDumpResponse(uint8_t proto,
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetLinkSocketDiag::ProcessSockDiagTupleDumpResponse(uint8_t proto)
+{
+    NETNATIVE_LOG_D("ProcessSockDiagTupleDumpResponse");
+    char buf[KERNEL_BUFFER_SIZE] = {0};
+    ssize_t readBytes = read(dumpSock_, buf, sizeof(buf));
+    if (readBytes < 0) {
+        return NETMANAGER_ERROR;
+    }
+    while (readBytes > 0) {
+        int len = readBytes;
+        for (nlmsghdr *nlh = reinterpret_cast<nlmsghdr *>(buf); NLMSG_OK(nlh, len); nlh = NLMSG_NEXT(nlh, len)) {
+            if (nlh->nlmsg_type == NLMSG_ERROR) {
+                nlmsgerr *err = reinterpret_cast<nlmsgerr *>(NLMSG_DATA(nlh));
+                NETNATIVE_LOGE("Error netlink msg, errno:%{public}d, strerror:%{public}s", -err->error,
+                    strerror(-err->error));
+                return NETMANAGER_ERROR;
+            } else if (nlh->nlmsg_type == NLMSG_DONE) {
+                return NETMANAGER_SUCCESS;
+            } else {
+                const auto *msg = reinterpret_cast<inet_diag_msg *>(NLMSG_DATA(nlh));
+                ExecuteDestroySocket(proto, msg);
+            }
+        }
+        readBytes = read(dumpSock_, buf, sizeof(buf));
+        // LCOV_EXCL_START
+        if (readBytes < 0) {
+            NETNATIVE_LOGE("ProcessSockDiagTupleDumpResponse readBytes < 0, errno:%{public}d", errno);
+            return NETMANAGER_ERROR;
+        }
+        // LCOV_EXCL_STOP
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+bool NetLinkSocketDiag::EnsureNetlinkSocket()
+{
+    // Reuse the netlink sockets as long as both are valid. Each dump/destroy request is
+    // fully drained before returning, so no stale response is left for the next request.
+    if (dumpSock_ >= 0 && destroySock_ >= 0) {
+        return true;
+    }
+    return CreateNetlinkSocket();
+}
+
+int32_t NetLinkSocketDiag::DestroySocketByTuple(const SocketTuple &tuple)
+{
+    if (tuple.proto != IPPROTO_TCP) {
+        NETNATIVE_LOGE("DestroySocketByTuple unsupported proto:%{public}u", tuple.proto);
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    if (tuple.family != AF_INET && tuple.family != AF_INET6) {
+        NETNATIVE_LOGE("DestroySocketByTuple unsupported family:%{public}u", tuple.family);
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    if (!EnsureNetlinkSocket()) {
+        NETNATIVE_LOGE("Create netlink diag socket failed.");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    int32_t ret = SendTupleDumpRequest(tuple);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    return ProcessSockDiagTupleDumpResponse(tuple.proto);
+}
+
+int32_t NetLinkSocketDiag::SendTupleDumpRequest(const SocketTuple &tuple)
+{
+    SockDiagRequest request = {};
+    size_t requestLen = sizeof(request);
+    iovec iov;
+    iov.iov_base = &request;
+    iov.iov_len = requestLen;
+    request.nlh_.nlmsg_type = SOCK_DIAG_BY_FAMILY;
+    request.nlh_.nlmsg_flags = (NLM_F_REQUEST | NLM_F_DUMP);
+    request.nlh_.nlmsg_len = requestLen;
+
+    int32_t ret = MakeQueryUidRequestInfo(tuple.proto, tuple.family, tuple.localAddress, tuple.localPort,
+        tuple.remoteAddress, tuple.remotePort, request.req_);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("MakeQueryUidRequestInfo failed ret = %{public}d", ret);
+        return ret;
+    }
+    ssize_t writeLen = writev(dumpSock_, &iov, (sizeof(iov) / sizeof(iovec)));
+    if (writeLen != static_cast<ssize_t>(requestLen)) {
+        NETNATIVE_LOGE("Write dump request failed errno:%{public}d, strerror:%{public}s", errno, strerror(errno));
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return GetErrorFromKernel(dumpSock_);
+}
+
 void NetLinkSocketDiag::DestroyLiveSocketsWithUid(const std::string &ipAddr, uint32_t uid)
 {
     NETNATIVE_LOG_D("TCP-RST DestroyLiveSocketsWithUid, uid:%{public}d", uid);

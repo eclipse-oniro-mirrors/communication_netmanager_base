@@ -421,5 +421,201 @@ HWTEST_F(NetlinkSocketDiagTest, GetUdpNetPortStatesInfoV4Direct001, TestSize.Lev
     ASSERT_EQ(netPortStatesInfo.udpNetPortStatesInfo_.size(), 1U);
     EXPECT_EQ(netPortStatesInfo.udpNetPortStatesInfo_[0].udpLocalIp_, "192.168.1.20");
 }
+namespace {
+constexpr uint32_t TEST_LOCAL_PORT = 12345;
+constexpr uint32_t TEST_REMOTE_PORT = 51302;
+
+SocketTuple MakeTestSocketTuple(uint8_t proto = IPPROTO_TCP, uint8_t family = AF_INET)
+{
+    SocketTuple tuple;
+    tuple.proto = proto;
+    tuple.family = family;
+    tuple.localAddress = "127.0.0.1";
+    tuple.localPort = TEST_LOCAL_PORT;
+    tuple.remoteAddress = "127.0.0.1";
+    tuple.remotePort = TEST_REMOTE_PORT;
+    return tuple;
+}
+
+size_t FillNlMsgDone(char *buf)
+{
+    auto *nlh = reinterpret_cast<nlmsghdr *>(buf);
+    nlh->nlmsg_len = NLMSG_LENGTH(0);
+    nlh->nlmsg_type = NLMSG_DONE;
+    nlh->nlmsg_flags = 0;
+    nlh->nlmsg_seq = 0;
+    nlh->nlmsg_pid = 0;
+    return NLMSG_ALIGN(nlh->nlmsg_len);
+}
+
+size_t FillNlMsgError(char *buf, int32_t error)
+{
+    auto *nlh = reinterpret_cast<nlmsghdr *>(buf);
+    nlh->nlmsg_len = NLMSG_LENGTH(sizeof(nlmsgerr));
+    nlh->nlmsg_type = NLMSG_ERROR;
+    nlh->nlmsg_flags = 0;
+    nlh->nlmsg_seq = 0;
+    nlh->nlmsg_pid = 0;
+    auto *err = reinterpret_cast<nlmsgerr *>(NLMSG_DATA(nlh));
+    err->error = error;
+    return NLMSG_ALIGN(nlh->nlmsg_len);
+}
+
+size_t FillNlMsgSocket(char *buf)
+{
+    auto *nlh = reinterpret_cast<nlmsghdr *>(buf);
+    nlh->nlmsg_len = NLMSG_LENGTH(sizeof(inet_diag_msg));
+    nlh->nlmsg_type = 0x1234;
+    nlh->nlmsg_flags = 0;
+    nlh->nlmsg_seq = 0;
+    nlh->nlmsg_pid = 0;
+    auto *msg = reinterpret_cast<inet_diag_msg *>(NLMSG_DATA(nlh));
+    msg->idiag_family = AF_INET;
+    msg->idiag_state = 1;
+    msg->id.idiag_sport = htons(TEST_LOCAL_PORT);
+    msg->id.idiag_dport = htons(TEST_REMOTE_PORT);
+    return NLMSG_ALIGN(nlh->nlmsg_len);
+}
+} // namespace
+
+HWTEST_F(NetlinkSocketDiagTest, DestroySocketByTupleInvalidProto001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    EXPECT_EQ(netLinkSocketDiag.DestroySocketByTuple(MakeTestSocketTuple(IPPROTO_UDP)),
+        NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetlinkSocketDiagTest, DestroySocketByTupleInvalidFamily001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    EXPECT_EQ(netLinkSocketDiag.DestroySocketByTuple(MakeTestSocketTuple(IPPROTO_TCP, AF_UNSPEC)),
+        NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetlinkSocketDiagTest, DestroySocketByTupleInvalidAddress001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    SocketTuple tuple = MakeTestSocketTuple();
+    tuple.localAddress = "invalid";
+    EXPECT_EQ(netLinkSocketDiag.DestroySocketByTuple(tuple), NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetlinkSocketDiagTest, DestroySocketByTupleSuccess001, TestSize.Level1)
+{
+    int32_t dumpFds[2] = {-1, -1};
+    int32_t destroyFds[2] = {-1, -1};
+    ASSERT_EQ(socketpair(AF_UNIX, SOCK_DGRAM, 0, dumpFds), 0);
+    ASSERT_EQ(socketpair(AF_UNIX, SOCK_DGRAM, 0, destroyFds), 0);
+    // Inject a fake kernel dump response (one matched socket + DONE) into the dump peer.
+    char buf[512] = {0};
+    size_t len = FillNlMsgSocket(buf);
+    len += FillNlMsgDone(buf + len);
+    ASSERT_EQ(write(dumpFds[1], buf, len), static_cast<ssize_t>(len));
+
+    NetLinkSocketDiag netLinkSocketDiag;
+    netLinkSocketDiag.dumpSock_ = dumpFds[0];
+    netLinkSocketDiag.destroySock_ = destroyFds[0];
+    EXPECT_EQ(netLinkSocketDiag.DestroySocketByTuple(MakeTestSocketTuple()), NETMANAGER_SUCCESS);
+    EXPECT_EQ(netLinkSocketDiag.socketsDestroyed_, 1);
+
+    // Verify the SOCK_DESTROY request built from the dumped socket tuple.
+    NetLinkSocketDiag::SockDiagRequest destroyRequest = {};
+    ssize_t got = recv(destroyFds[1], &destroyRequest, sizeof(destroyRequest), MSG_DONTWAIT);
+    ASSERT_EQ(got, static_cast<ssize_t>(sizeof(destroyRequest)));
+    EXPECT_EQ(destroyRequest.nlh_.nlmsg_type, SOCK_DESTROY);
+    EXPECT_EQ(destroyRequest.req_.sdiag_family, AF_INET);
+    EXPECT_EQ(destroyRequest.req_.sdiag_protocol, IPPROTO_TCP);
+    EXPECT_EQ(destroyRequest.req_.id.idiag_sport, htons(TEST_LOCAL_PORT));
+    EXPECT_EQ(destroyRequest.req_.id.idiag_dport, htons(TEST_REMOTE_PORT));
+
+    close(dumpFds[1]);
+    close(destroyFds[1]);
+}
+
+HWTEST_F(NetlinkSocketDiagTest, EnsureNetlinkSocketReuse001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    ASSERT_TRUE(netLinkSocketDiag.CreateNetlinkSocket());
+    int32_t dumpSock = netLinkSocketDiag.dumpSock_;
+    int32_t destroySock = netLinkSocketDiag.destroySock_;
+    EXPECT_TRUE(netLinkSocketDiag.EnsureNetlinkSocket());
+    EXPECT_EQ(netLinkSocketDiag.dumpSock_, dumpSock);
+    EXPECT_EQ(netLinkSocketDiag.destroySock_, destroySock);
+}
+
+HWTEST_F(NetlinkSocketDiagTest, EnsureNetlinkSocketRecreate001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    ASSERT_TRUE(netLinkSocketDiag.CreateNetlinkSocket());
+    netLinkSocketDiag.dumpSock_ = -1;
+    EXPECT_TRUE(netLinkSocketDiag.EnsureNetlinkSocket());
+    EXPECT_GE(netLinkSocketDiag.dumpSock_, 0);
+    EXPECT_GE(netLinkSocketDiag.destroySock_, 0);
+}
+
+HWTEST_F(NetlinkSocketDiagTest, SendTupleDumpRequestWriteFail001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    netLinkSocketDiag.dumpSock_ = -1;
+    EXPECT_EQ(netLinkSocketDiag.SendTupleDumpRequest(MakeTestSocketTuple()), NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetlinkSocketDiagTest, SendTupleDumpRequestSuccess001, TestSize.Level1)
+{
+    int32_t fds[2] = {-1, -1};
+    ASSERT_EQ(socketpair(AF_UNIX, SOCK_DGRAM, 0, fds), 0);
+    NetLinkSocketDiag netLinkSocketDiag;
+    netLinkSocketDiag.dumpSock_ = fds[0];
+    EXPECT_EQ(netLinkSocketDiag.SendTupleDumpRequest(MakeTestSocketTuple()), NETMANAGER_SUCCESS);
+    close(fds[1]);
+}
+
+HWTEST_F(NetlinkSocketDiagTest, ProcessSockDiagTupleDumpResponseReadFail001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    netLinkSocketDiag.dumpSock_ = -1;
+    EXPECT_EQ(netLinkSocketDiag.ProcessSockDiagTupleDumpResponse(IPPROTO_TCP), NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetlinkSocketDiagTest, ProcessSockDiagTupleDumpResponseDone001, TestSize.Level1)
+{
+    int32_t fds[2] = {-1, -1};
+    ASSERT_EQ(socketpair(AF_UNIX, SOCK_DGRAM, 0, fds), 0);
+    char buf[256] = {0};
+    size_t len = FillNlMsgDone(buf);
+    ASSERT_EQ(write(fds[1], buf, len), static_cast<ssize_t>(len));
+    NetLinkSocketDiag netLinkSocketDiag;
+    netLinkSocketDiag.dumpSock_ = fds[0];
+    EXPECT_EQ(netLinkSocketDiag.ProcessSockDiagTupleDumpResponse(IPPROTO_TCP), NETMANAGER_SUCCESS);
+    close(fds[1]);
+}
+
+HWTEST_F(NetlinkSocketDiagTest, ProcessSockDiagTupleDumpResponseError001, TestSize.Level1)
+{
+    int32_t fds[2] = {-1, -1};
+    ASSERT_EQ(socketpair(AF_UNIX, SOCK_DGRAM, 0, fds), 0);
+    char buf[256] = {0};
+    size_t len = FillNlMsgError(buf, -EPERM);
+    ASSERT_EQ(write(fds[1], buf, len), static_cast<ssize_t>(len));
+    NetLinkSocketDiag netLinkSocketDiag;
+    netLinkSocketDiag.dumpSock_ = fds[0];
+    EXPECT_EQ(netLinkSocketDiag.ProcessSockDiagTupleDumpResponse(IPPROTO_TCP), NETMANAGER_ERROR);
+    close(fds[1]);
+}
+
+HWTEST_F(NetlinkSocketDiagTest, ProcessSockDiagTupleDumpResponseSocket001, TestSize.Level1)
+{
+    int32_t fds[2] = {-1, -1};
+    ASSERT_EQ(socketpair(AF_UNIX, SOCK_DGRAM, 0, fds), 0);
+    char buf[512] = {0};
+    size_t len = FillNlMsgSocket(buf);
+    len += FillNlMsgDone(buf + len);
+    ASSERT_EQ(write(fds[1], buf, len), static_cast<ssize_t>(len));
+    NetLinkSocketDiag netLinkSocketDiag;
+    netLinkSocketDiag.dumpSock_ = fds[0];
+    netLinkSocketDiag.destroySock_ = -1;
+    EXPECT_EQ(netLinkSocketDiag.ProcessSockDiagTupleDumpResponse(IPPROTO_TCP), NETMANAGER_SUCCESS);
+    close(fds[1]);
+}
 } // namespace nmd
 } // namespace OHOS

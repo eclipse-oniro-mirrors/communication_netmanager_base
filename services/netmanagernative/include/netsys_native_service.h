@@ -25,6 +25,8 @@
 #include "bpf_stats.h"
 #ifdef FEATURE_NET_FIREWALL_ENABLE
 #include "bpf_netfirewall.h"
+#include "ffrt.h"
+#include "netlink_socket_diag.h"
 #endif
 #include "dhcp_controller.h"
 #include "fwmark_network.h"
@@ -264,6 +266,10 @@ private:
     bool Init();
     void GetDumpMessage(std::string &message);
     void OnNetManagerRestart();
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    void RegisterFirewallEgressHandler();
+    void UnregisterFirewallEgressHandler();
+#endif
 
 private:
     enum ServiceRunningState {
@@ -285,6 +291,9 @@ private:
     std::shared_ptr<OHOS::nmd::NetDiagWrapper> netDiagWrapper = nullptr;
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     std::shared_ptr<OHOS::NetManagerStandard::NetsysBpfNetFirewall> bpfNetFirewall_ = nullptr;
+    std::shared_ptr<OHOS::nmd::NetLinkSocketDiag> socketDiag_ = nullptr;
+    std::shared_ptr<ffrt::queue> egressSocketCloseQueue_ = nullptr;
+    std::mutex egressHandlerMutex_;
 #endif
     std::unique_ptr<OHOS::nmd::ClatManager> clatManager_ = nullptr;
 
