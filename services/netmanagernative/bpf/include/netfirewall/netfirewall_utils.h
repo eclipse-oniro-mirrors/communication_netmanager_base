@@ -173,7 +173,12 @@ static __always_inline bool load_l4_protocol(const struct __sk_buff *skb, __u32 
  */
 static __always_inline bool load_l3_v4_addrs(const struct __sk_buff *skb, __u32 l3_nhoff, __be32 *saddr, __be32 *daddr)
 {
-    if (skb->family != AF_INET) {
+    /*
+     * Caller must ensure the packet is ipv4 format (see is_ipv4_format_skb()).
+     * AF_INET6 is allowed here for v4-mapped packets from dual-stack sockets.
+     * Do not replace this gate with is_ipv4_format_skb(): it was measured to grow the BPF stack frame
+     */
+    if (skb->family != AF_INET && skb->family != AF_INET6) {
         return false;
     }
 
