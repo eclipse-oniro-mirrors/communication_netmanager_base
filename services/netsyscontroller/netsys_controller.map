@@ -175,6 +175,7 @@
       "OHOS::NetManagerStandard::NetsysNativeClient::SetInterfaceUp(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetsysNativeClient::SetIptablesCommandForRes(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&, OHOS::NetsysNative::IptablesType)";
       "OHOS::NetManagerStandard::NetsysNativeClient::SetResolverConfig(unsigned short, unsigned short, unsigned char, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>> const&, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>> const&)";
+      "OHOS::NetManagerStandard::NetsysController::SetNetworkDnsFamilyCapability(unsigned short, bool, bool)";
       "OHOS::NetManagerStandard::NetsysNativeClient::ShareDnsSet(unsigned short)";
       "OHOS::NetManagerStandard::NetsysNativeClient::StartDnsProxyListen()";
       "OHOS::NetManagerStandard::NetsysNativeClient::UnregisterDnsResultCallback(OHOS::sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> const&)";

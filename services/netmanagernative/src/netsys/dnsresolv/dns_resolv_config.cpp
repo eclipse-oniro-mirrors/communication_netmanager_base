@@ -82,9 +82,9 @@ bool DnsResolvConfig::IsIpv6Enable()
     return isIpv6Enable_;
 }
 
-void DnsResolvConfig::EnableIpv4()
+void DnsResolvConfig::EnableIpv4(bool enable)
 {
-    isIpv4Enable_ = true;
+    isIpv4Enable_ = enable;
 }
 
 void DnsResolvConfig::SetClatDnsEnableIpv4(bool enable)

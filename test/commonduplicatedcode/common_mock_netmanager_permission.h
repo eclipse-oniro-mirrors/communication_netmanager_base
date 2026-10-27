@@ -20,6 +20,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 
 void SetMockCheckPermissionResult(bool result);
+void SetMockNetSysInternalPermissionResult(bool result);
 
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -20,6 +20,8 @@
 #define protected public
 #endif
 #include "common_net_diag_callback_test.h"
+#include "common_mock_netmanager_permission.h"
+#include "net_manager_constants.h"
 #include "common_notify_callback_test.h"
 #include "i_netsys_service.h"
 #include "net_dns_result_callback_stub.h"
@@ -70,6 +72,122 @@ void NetsysNativeServiceStubTest::TearDownTestCase() {}
 void NetsysNativeServiceStubTest::SetUp() {}
 
 void NetsysNativeServiceStubTest::TearDown() {}
+
+namespace {
+class DnsFamilyRecordingStub : public TestNetsysNativeServiceStub {
+public:
+    int32_t SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable) override
+    {
+        ++calls;
+        lastNetId = netId;
+        ipv4 = ipv4Enable;
+        ipv6 = ipv6Enable;
+        return result;
+    }
+
+    uint32_t calls = 0;
+    uint16_t lastNetId = 0;
+    bool ipv4 = false;
+    bool ipv6 = false;
+    int32_t result = NetManagerStandard::NETMANAGER_SUCCESS;
+};
+
+class DnsFamilyFailingAllocator : public Allocator {
+public:
+    void *Alloc(size_t size) override { return nullptr; }
+    void *Realloc(void *data, size_t size) override { return nullptr; }
+    void Dealloc(void *data) override {}
+};
+} // namespace
+
+class NetsysDnsFamilyStubTest : public testing::Test {
+public:
+    void SetUp() override { NetManagerStandard::SetMockNetSysInternalPermissionResult(true); }
+    void TearDown() override { NetManagerStandard::SetMockNetSysInternalPermissionResult(true); }
+
+    DnsFamilyRecordingStub stub;
+};
+
+HWTEST_F(NetsysDnsFamilyStubTest, PermissionDenied, TestSize.Level1)
+{
+    NetManagerStandard::SetMockNetSysInternalPermissionResult(false);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(stub.CmdSetNetworkDnsFamilyCapability(data, reply),
+        NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(stub.calls, 0u);
+    EXPECT_EQ(reply.GetDataSize(), 0u);
+}
+
+HWTEST_F(NetsysDnsFamilyStubTest, TruncatedFields, TestSize.Level1)
+{
+    // Fail each Read independently, including both short-circuit continuation paths.
+    for (uint32_t fields = 0; fields < 3; ++fields) {
+        SCOPED_TRACE(fields);
+        MessageParcel data;
+        MessageParcel reply;
+        if (fields >= 1) {
+            ASSERT_TRUE(data.WriteUint16(60123));
+        }
+        if (fields >= 2) {
+            ASSERT_TRUE(data.WriteBool(true));
+        }
+        EXPECT_EQ(stub.CmdSetNetworkDnsFamilyCapability(data, reply), ERR_FLATTEN_OBJECT);
+        EXPECT_EQ(stub.calls, 0u);
+        EXPECT_EQ(reply.GetDataSize(), 0u);
+    }
+}
+
+HWTEST_F(NetsysDnsFamilyStubTest, BooleanCombinations, TestSize.Level1)
+{
+    for (bool ipv4 : {false, true}) {
+        for (bool ipv6 : {false, true}) {
+            MessageParcel data;
+            MessageParcel reply;
+            ASSERT_TRUE(data.WriteUint16(60123));
+            ASSERT_TRUE(data.WriteBool(ipv4));
+            ASSERT_TRUE(data.WriteBool(ipv6));
+            EXPECT_EQ(stub.CmdSetNetworkDnsFamilyCapability(data, reply), NetManagerStandard::NETMANAGER_SUCCESS);
+            int32_t result = ERR_INVALID_DATA;
+            ASSERT_TRUE(reply.ReadInt32(result));
+            EXPECT_EQ(result, NetManagerStandard::NETMANAGER_SUCCESS);
+            EXPECT_EQ(stub.lastNetId, 60123);
+            EXPECT_EQ(stub.ipv4, ipv4);
+            EXPECT_EQ(stub.ipv6, ipv6);
+        }
+    }
+    EXPECT_EQ(stub.calls, 4u);
+}
+
+HWTEST_F(NetsysDnsFamilyStubTest, ServiceErrorInReply, TestSize.Level1)
+{
+    stub.result = -ENOENT;
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteUint16(UINT16_MAX));
+    ASSERT_TRUE(data.WriteBool(false));
+    ASSERT_TRUE(data.WriteBool(true));
+    EXPECT_EQ(stub.CmdSetNetworkDnsFamilyCapability(data, reply), NetManagerStandard::NETMANAGER_SUCCESS);
+    int32_t result = 0;
+    ASSERT_TRUE(reply.ReadInt32(result));
+    EXPECT_EQ(result, -ENOENT);
+    EXPECT_EQ(stub.calls, 1u);
+    EXPECT_EQ(stub.lastNetId, UINT16_MAX);
+}
+
+HWTEST_F(NetsysDnsFamilyStubTest, ReplyAllocationFailure, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteUint16(60123));
+    ASSERT_TRUE(data.WriteBool(true));
+    ASSERT_TRUE(data.WriteBool(false));
+    // Parcel takes ownership of this allocator; no process-wide allocation failure is injected.
+    ASSERT_TRUE(reply.SetAllocator(new DnsFamilyFailingAllocator()));
+    EXPECT_EQ(stub.CmdSetNetworkDnsFamilyCapability(data, reply), ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(stub.calls, 1u);
+    EXPECT_EQ(reply.GetDataSize(), 0u);
+}
 
 HWTEST_F(NetsysNativeServiceStubTest, CmdSetResolverConfig001, TestSize.Level1)
 {

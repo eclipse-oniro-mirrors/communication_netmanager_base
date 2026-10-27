@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <arpa/inet.h>
+#include <sys/socket.h>
 
 #include "dns_config_client.h"
 #include "dns_param_cache.h"
@@ -51,8 +52,8 @@ public:
     static void ProcSetCacheCommand(const std::string &name, uint16_t netId, AddrInfoWithTtl addrInfo[MAX_RESULTS],
                                     uint32_t resNum);
     static void ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId, uint32_t callingUid);
-    static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId);
-    static void ProcJudgeIpv4Command(int clientSockFd, uint16_t netId);
+    static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId, uint32_t uid);
+    static void ProcJudgeIpv4Command(int clientSockFd, uint16_t netId, uint32_t uid);
     static void ProcGetDefaultNetworkCommand(int clientSockFd);
     static void ProcBindSocketCommand(int32_t remoteFd, uint16_t netId);
     static void AddPublicDnsServers(ResolvConfig &sendData, size_t serverSize);
@@ -91,6 +92,68 @@ ResolvConfig DnsResolvListenTest::createResolvConfig(int num)
     }
 
     return resolvConfig;
+}
+
+class NetsysDnsFamilyListenTest : public testing::Test {
+public:
+    void SetUp() override
+    {
+        auto &cache = DnsParamCache::GetInstance();
+        savedDefault = cache.GetDefaultNetwork();
+        ASSERT_EQ(socketpair(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK, 0, sockets), 0);
+        ASSERT_EQ(cache.CreateCacheForNet(physicalNetId), 0);
+        ASSERT_EQ(cache.CreateCacheForNet(vpnNetId, true), 0);
+        cache.SetDefaultNetwork(physicalNetId);
+        ASSERT_EQ(cache.SetNetworkDnsFamilyCapability(physicalNetId, true, false), 0);
+        ASSERT_EQ(cache.SetNetworkDnsFamilyCapability(vpnNetId, false, true), 0);
+        ASSERT_EQ(cache.AddUidRange(vpnNetId, {{1000, 2000, 1, vpnNetId}}), 0);
+    }
+
+    void TearDown() override
+    {
+        auto &cache = DnsParamCache::GetInstance();
+        cache.DelUidRange(vpnNetId, {{1000, 2000, 1, vpnNetId}});
+        cache.DestroyNetworkCache(vpnNetId, true);
+        cache.DestroyNetworkCache(physicalNetId);
+        cache.SetDefaultNetwork(savedDefault);
+        for (int fd : sockets) {
+            if (fd >= 0) {
+                close(fd);
+            }
+        }
+    }
+
+    void ExpectReply(int32_t expected)
+    {
+        int32_t actual = -1;
+        ASSERT_EQ(recv(sockets[1], &actual, sizeof(actual), 0), static_cast<ssize_t>(sizeof(actual)));
+        EXPECT_EQ(actual, expected);
+    }
+
+    static constexpr uint16_t physicalNetId = 60128;
+    static constexpr uint16_t vpnNetId = 60129;
+    int32_t savedDefault = 0;
+    int sockets[2] = {-1, -1};
+};
+
+HWTEST_F(NetsysDnsFamilyListenTest, Ipv6ReplyUsesUidAndExplicitNetwork, TestSize.Level1)
+{
+    DnsResolvListenInternal::ProcJudgeIpv6Command(sockets[0], 0, 1000);
+    ExpectReply(1);
+    DnsResolvListenInternal::ProcJudgeIpv6Command(sockets[0], 0, 999);
+    ExpectReply(0);
+    DnsResolvListenInternal::ProcJudgeIpv6Command(sockets[0], physicalNetId, 1000);
+    ExpectReply(0);
+}
+
+HWTEST_F(NetsysDnsFamilyListenTest, Ipv4ReplyUsesUidAndExplicitNetwork, TestSize.Level1)
+{
+    DnsResolvListenInternal::ProcJudgeIpv4Command(sockets[0], 0, 1000);
+    ExpectReply(0);
+    DnsResolvListenInternal::ProcJudgeIpv4Command(sockets[0], 0, 999);
+    ExpectReply(1);
+    DnsResolvListenInternal::ProcJudgeIpv4Command(sockets[0], physicalNetId, 1000);
+    ExpectReply(1);
 }
 
 HWTEST_F(DnsResolvListenTest, StartListen_ShouldStartListening_WhenCalled, TestSize.Level0)
@@ -218,8 +281,9 @@ HWTEST_F(DnsResolvListenTest, ProcJudgeIpv6Command_EnableIpv6, TestSize.Level0)
 {
     int clientSockFd = 1;
     uint16_t netId = 100;
-    int enable = DnsParamCache::GetInstance().IsIpv6Enable(netId) ? 1 : 0;
-    dnsResolvListenInternal.ProcJudgeIpv6Command(clientSockFd, netId);
+    uint32_t uid = 0;
+    int enable = DnsParamCache::GetInstance().IsIpv6Enable(netId, uid) ? 1 : 0;
+    dnsResolvListenInternal.ProcJudgeIpv6Command(clientSockFd, netId, uid);
     EXPECT_EQ(enable, 0);
 }
 
@@ -243,8 +307,9 @@ HWTEST_F(DnsResolvListenTest, ProcJudgeIpv4Command_EnableIpv4, TestSize.Level0)
 {
     int clientSockFd = 1;
     uint16_t netId = 100;
-    int enable = DnsParamCache::GetInstance().IsIpv4Enable(netId) ? 1 : 0;
-    dnsResolvListenInternal.ProcJudgeIpv4Command(clientSockFd, netId);
+    uint32_t uid = 0;
+    int enable = DnsParamCache::GetInstance().IsIpv4Enable(netId, uid) ? 1 : 0;
+    dnsResolvListenInternal.ProcJudgeIpv4Command(clientSockFd, netId, uid);
     EXPECT_EQ(enable, 0);
 }
 }  // namespace OHOS::nmd

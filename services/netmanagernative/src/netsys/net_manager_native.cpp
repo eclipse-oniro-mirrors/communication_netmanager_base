@@ -762,6 +762,11 @@ int32_t NetManagerNative::DnsSetUserDefinedServerFlag(uint16_t netId, bool flag)
     return dnsManager_->SetUserDefinedServerFlag(netId, flag);
 }
 
+int32_t NetManagerNative::SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable)
+{
+    return dnsManager_->SetNetworkDnsFamilyCapability(netId, ipv4Enable, ipv6Enable);
+}
+
 int32_t NetManagerNative::FlushDnsCache(uint16_t netId)
 {
     return dnsManager_->FlushDnsCache(netId);

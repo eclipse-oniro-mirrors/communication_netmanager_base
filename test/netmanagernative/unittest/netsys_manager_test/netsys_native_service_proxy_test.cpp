@@ -16,6 +16,8 @@
 #include <gtest/gtest.h>
 
 #include "iservice_registry.h"
+#include "ipc_object_stub.h"
+#include "netsys_ipc_interface_code.h"
 #include "system_ability_definition.h"
 
 #include "bpf_def.h"
@@ -47,6 +49,33 @@ static constexpr uint64_t TEST_COOKIE = 1;
 static constexpr uint32_t TEST_STATS_TYPE1 = 0;
 static constexpr uint32_t TEST_STATS_TYPE2 = 2;
 namespace {
+// Exercise the production proxy without depending on the netsys SA installed on the board.
+class DnsFamilyRemote : public IPCObjectStub {
+public:
+    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
+    {
+        ++calls;
+        EXPECT_EQ(code, static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NETWORK_DNS_FAMILY_CAPABILITY));
+        EXPECT_EQ(data.ReadInterfaceToken(), INetsysService::GetDescriptor());
+        EXPECT_TRUE(data.ReadUint16(netId));
+        EXPECT_TRUE(data.ReadBool(ipv4));
+        EXPECT_TRUE(data.ReadBool(ipv6));
+        EXPECT_EQ(data.GetReadableBytes(), 0u);
+        if (writeReply) {
+            EXPECT_TRUE(reply.WriteInt32(result));
+        }
+        return transportResult;
+    }
+
+    uint32_t calls = 0;
+    uint16_t netId = 0;
+    bool ipv4 = false;
+    bool ipv6 = false;
+    bool writeReply = true;
+    int32_t result = NETMANAGER_SUCCESS;
+    int32_t transportResult = ERR_NONE;
+};
+
 sptr<NetsysNative::INetsysService> ConnManagerGetProxy()
 {
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -81,6 +110,49 @@ void NetsysNativeServiceProxyTest::TearDownTestCase() {}
 void NetsysNativeServiceProxyTest::SetUp() {}
 
 void NetsysNativeServiceProxyTest::TearDown() {}
+
+HWTEST_F(NetsysNativeServiceProxyTest, DnsFamilyCapabilityRoundTrip, TestSize.Level1)
+{
+    sptr<DnsFamilyRemote> remote = new DnsFamilyRemote();
+    // Call through the interface: proxy methods are hidden by the shared-library version script.
+    sptr<INetsysService> proxy = new NetsysNativeServiceProxy(remote);
+    for (bool ipv4 : {false, true}) {
+        for (bool ipv6 : {false, true}) {
+            EXPECT_EQ(proxy->SetNetworkDnsFamilyCapability(NETID, ipv4, ipv6), NETMANAGER_SUCCESS);
+            EXPECT_EQ(remote->netId, NETID);
+            EXPECT_EQ(remote->ipv4, ipv4);
+            EXPECT_EQ(remote->ipv6, ipv6);
+        }
+    }
+    remote->result = -ENOENT;
+    EXPECT_EQ(proxy->SetNetworkDnsFamilyCapability(UINT16_MAX, true, false), -ENOENT);
+    EXPECT_EQ(remote->netId, UINT16_MAX);
+    EXPECT_EQ(remote->calls, 5u);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, DnsFamilyCapabilityNullRemote, TestSize.Level1)
+{
+    sptr<INetsysService> proxy = new NetsysNativeServiceProxy(nullptr);
+    EXPECT_EQ(proxy->SetNetworkDnsFamilyCapability(NETID, true, true), ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, DnsFamilyCapabilitySendFailure, TestSize.Level1)
+{
+    sptr<DnsFamilyRemote> remote = new DnsFamilyRemote();
+    remote->transportResult = ERR_INVALID_DATA;
+    sptr<INetsysService> proxy = new NetsysNativeServiceProxy(remote);
+    EXPECT_EQ(proxy->SetNetworkDnsFamilyCapability(NETID, false, true), ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(remote->calls, 1u);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, DnsFamilyCapabilityMissingReply, TestSize.Level1)
+{
+    sptr<DnsFamilyRemote> remote = new DnsFamilyRemote();
+    remote->writeReply = false;
+    sptr<INetsysService> proxy = new NetsysNativeServiceProxy(remote);
+    EXPECT_EQ(proxy->SetNetworkDnsFamilyCapability(NETID, true, false), ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(remote->calls, 1u);
+}
 
 /**
  * @tc.name: AddInterfaceToNetworkTest001

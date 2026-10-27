@@ -23,6 +23,7 @@
 #endif
 
 #include "interface_manager.h"
+#include "iptables_wrapper.h"
 #include "netlink_socket_diag.cpp"
 #include "netlink_socket_diag.h"
 #include "netsys_controller.h"
@@ -30,6 +31,7 @@
 
 #include "common_notify_callback_test.h"
 #include "dns_config_client.h"
+#include "dns_param_cache.h"
 #include "net_stats_constants.h"
 #include "netsys_native_service.h"
 #ifdef FEATURE_NET_FIREWALL_ENABLE
@@ -63,6 +65,85 @@ void NetsysNativeServiceTest::TearDownTestCase() {}
 void NetsysNativeServiceTest::SetUp() {}
 
 void NetsysNativeServiceTest::TearDown() {}
+
+namespace {
+bool g_isolateDnsFamilyNetwork = false;
+}
+
+extern "C" int32_t RealClearRouteInfo(uint16_t, uint32_t)
+    __asm__("__real__ZN4OHOS3nmd14ClearRouteInfoEtj");
+extern "C" int32_t WrapClearRouteInfo(uint16_t, uint32_t)
+    __asm__("__wrap__ZN4OHOS3nmd14ClearRouteInfoEtj");
+extern "C" int32_t RealSendNetlinkMsg(nlmsghdr *, uint32_t)
+    __asm__("__real__ZN4OHOS3nmd22SendNetlinkMsgToKernelEP8nlmsghdrj");
+extern "C" int32_t WrapSendNetlinkMsg(nlmsghdr *, uint32_t)
+    __asm__("__wrap__ZN4OHOS3nmd22SendNetlinkMsgToKernelEP8nlmsghdrj");
+
+int32_t WrapClearRouteInfo(uint16_t type, uint32_t table)
+{
+    return g_isolateDnsFamilyNetwork ? 0 : RealClearRouteInfo(type, table);
+}
+
+int32_t WrapSendNetlinkMsg(nlmsghdr *message, uint32_t table)
+{
+    return g_isolateDnsFamilyNetwork ? 0 : RealSendNetlinkMsg(message, table);
+}
+
+class NetsysDnsFamilyServiceTest : public testing::Test {
+public:
+    void SetUp() override
+    {
+        // Suppress unrelated kernel operations during native-manager construction/destruction.
+        g_isolateDnsFamilyNetwork = true;
+        auto &iptables = nmd::IptablesWrapper::GetInstance();
+        savedIpv4Access = iptables->isIptablesSystemAccess_;
+        savedIpv6Access = iptables->isIp6tablesSystemAccess_;
+        iptables->isIptablesSystemAccess_ = false;
+        iptables->isIp6tablesSystemAccess_ = false;
+        ASSERT_EQ(nmd::DnsParamCache::GetInstance().CreateCacheForNet(testNetId), 0);
+    }
+
+    void TearDown() override
+    {
+        service.netsysService_.reset();
+        nmd::DnsParamCache::GetInstance().DestroyNetworkCache(testNetId);
+        auto &iptables = nmd::IptablesWrapper::GetInstance();
+        iptables->isIptablesSystemAccess_ = savedIpv4Access;
+        iptables->isIp6tablesSystemAccess_ = savedIpv6Access;
+        g_isolateDnsFamilyNetwork = false;
+    }
+
+    static constexpr uint16_t testNetId = 60124;
+    NetsysNativeService service;
+    bool savedIpv4Access = false;
+    bool savedIpv6Access = false;
+};
+
+HWTEST_F(NetsysDnsFamilyServiceTest, NullNativeService, TestSize.Level1)
+{
+    ASSERT_EQ(service.netsysService_, nullptr);
+    EXPECT_EQ(service.SetNetworkDnsFamilyCapability(testNetId, true, true), NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetsysDnsFamilyServiceTest, BooleanCombinationsReachCache, TestSize.Level1)
+{
+    service.netsysService_ = std::make_unique<nmd::NetManagerNative>();
+    auto &cache = nmd::DnsParamCache::GetInstance();
+    for (bool ipv4 : {false, true}) {
+        for (bool ipv6 : {false, true}) {
+            EXPECT_EQ(service.SetNetworkDnsFamilyCapability(testNetId, ipv4, ipv6), NETMANAGER_SUCCESS);
+            EXPECT_EQ(cache.IsIpv4Enable(testNetId), ipv4);
+            EXPECT_EQ(cache.IsIpv6Enable(testNetId), ipv6);
+        }
+    }
+}
+
+HWTEST_F(NetsysDnsFamilyServiceTest, MissingNetworkErrorPropagates, TestSize.Level1)
+{
+    service.netsysService_ = std::make_unique<nmd::NetManagerNative>();
+    ASSERT_EQ(nmd::DnsParamCache::GetInstance().DestroyNetworkCache(testNetId), 0);
+    EXPECT_EQ(service.SetNetworkDnsFamilyCapability(testNetId, true, true), -ENOENT);
+}
 
 HWTEST_F(NetsysNativeServiceTest, DumpTest001, TestSize.Level1)
 {

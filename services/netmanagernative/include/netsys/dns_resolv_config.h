@@ -59,7 +59,7 @@ public:
 
     bool IsIpv4Enable();
 
-    void EnableIpv4();
+    void EnableIpv4(bool enable = true);
 
     void SetUserDefinedServerFlag(bool flag);
 

@@ -1021,6 +1021,7 @@ public:
     virtual int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) = 0;
 
     virtual int32_t SetUserDefinedServerFlag(uint16_t netId, bool isUserDefinedServer) = 0;
+    virtual int32_t SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable) = 0;
 
 #ifdef SUPPORT_SYSVPN
     /**
