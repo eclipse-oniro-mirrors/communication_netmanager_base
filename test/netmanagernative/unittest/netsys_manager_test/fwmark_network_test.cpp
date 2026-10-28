@@ -63,6 +63,47 @@ std::shared_ptr<FwmarkClient> ManagerNative::GetFwmarkClient()
 }
 
 ManagerNative::~ManagerNative() {}
+
+// In-process replacement for FwmarkClient::BindSocket: sends the same SELECT_NETWORK
+// command to the in-test service handler (RunForClientFd) through a socketpair instead
+// of the real fwmarkd IPC socket, so the case does not depend on the runtime
+// environment (system fwmarkd state / SELinux policy of the su test domain).
+int32_t LocalBindSocket(int32_t socketFd, uint32_t netId)
+{
+    int32_t sv[2] = {-1, -1};
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) != 0) {
+        return -1;
+    }
+    FwmarkCommand cmd{};
+    cmd.cmdId = FwmarkCommand::SELECT_NETWORK;
+    cmd.netId = netId;
+    iovec iov = {.iov_base = &cmd, .iov_len = sizeof(cmd)};
+    union {
+        cmsghdr cmh;
+        char cmsg[CMSG_SPACE(sizeof(socketFd))];
+    } cmsgu{};
+    msghdr message{};
+    message.msg_iov = &iov;
+    message.msg_iovlen = 1;
+    message.msg_control = cmsgu.cmsg;
+    message.msg_controllen = sizeof(cmsgu.cmsg);
+    cmsghdr *const cmsgh = CMSG_FIRSTHDR(&message);
+    cmsgh->cmsg_len = CMSG_LEN(sizeof(socketFd));
+    cmsgh->cmsg_level = SOL_SOCKET;
+    cmsgh->cmsg_type = SCM_RIGHTS;
+    (void)memcpy_s(CMSG_DATA(cmsgh), CMSG_ALIGN(sizeof(socketFd)), &socketFd, sizeof(socketFd));
+    int32_t ret = sendmsg(sv[1], &message, 0);
+    if (ret < 0) {
+        close(sv[0]);
+        close(sv[1]);
+        return -1;
+    }
+    RunForClientFd(sv[0]); // in-process service-side handler
+    int32_t response = -1;
+    ret = read(sv[1], &response, sizeof(response));
+    close(sv[1]);
+    return (ret == static_cast<int32_t>(sizeof(response))) ? response : -1;
+}
 } // namespace
 class UnitTestFwmarkClient : public testing::Test {
 public:
@@ -89,11 +130,17 @@ void UnitTestFwmarkClient::TearDown() {}
 HWTEST_F(UnitTestFwmarkClient, BindSocketTest001, TestSize.Level1)
 {
     int32_t udpSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    int32_t ret = fwmarkClient->BindSocket(udpSocket, NETID_FIRST);
-    NETNATIVE_LOGI("UnitTestFwmarkClient BindSocketTest001 ret=%{public}d", ret);
+    ASSERT_GE(udpSocket, 0);
+    // Use the in-process service handler instead of the real fwmarkd IPC.
+    int32_t ret = LocalBindSocket(udpSocket, NETID_FIRST);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    Fwmark fwmark;
+    socklen_t fwmarkLen = sizeof(fwmark.intValue);
+    ASSERT_EQ(getsockopt(udpSocket, SOL_SOCKET, SO_MARK, &fwmark.intValue, &fwmarkLen), 0);
+    EXPECT_EQ(fwmark.netId, static_cast<uint16_t>(NETID_FIRST));
+    EXPECT_TRUE(fwmark.explicitlySelected);
     close(udpSocket);
     udpSocket = -1;
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -104,11 +151,17 @@ HWTEST_F(UnitTestFwmarkClient, BindSocketTest001, TestSize.Level1)
 HWTEST_F(UnitTestFwmarkClient, BindSocketTest002, TestSize.Level1)
 {
     int32_t tcpSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    int32_t ret = fwmarkClient->BindSocket(tcpSocket, NETID_SECOND);
-    NETNATIVE_LOGI("UnitTestFwmarkClient BindSocketTest002 ret=%{public}d", ret);
+    ASSERT_GE(tcpSocket, 0);
+    // Use the in-process service handler instead of the real fwmarkd IPC.
+    int32_t ret = LocalBindSocket(tcpSocket, NETID_SECOND);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    Fwmark fwmark;
+    socklen_t fwmarkLen = sizeof(fwmark.intValue);
+    ASSERT_EQ(getsockopt(tcpSocket, SOL_SOCKET, SO_MARK, &fwmark.intValue, &fwmarkLen), 0);
+    EXPECT_EQ(fwmark.netId, static_cast<uint16_t>(NETID_SECOND));
+    EXPECT_TRUE(fwmark.explicitlySelected);
     close(tcpSocket);
     tcpSocket = -1;
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -225,14 +278,25 @@ HWTEST_F(UnitTestFwmarkClient, SetMarkTest004, TestSize.Level1)
 {
     FwmarkCommand cmd;
     int32_t tcpSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    int32_t ret = fwmarkClient->BindSocket(tcpSocket, NETID_SECOND);
+    ASSERT_GE(tcpSocket, 0);
+    // Use the in-process service handler instead of the real fwmarkd IPC.
+    int32_t ret = LocalBindSocket(tcpSocket, NETID_SECOND);
     ASSERT_EQ(ret, 0);
+    // SetMark closes socketFd on completion; keep a dup to verify the mark afterwards.
+    int32_t dupSocket = dup(tcpSocket);
+    ASSERT_GE(dupSocket, 0);
     cmd.cmdId = FwmarkCommand::SELECT_NETWORK;
     cmd.netId = NETID_UNSET;
     ret = SetMark(&tcpSocket, &cmd);
-    close(tcpSocket);
-    tcpSocket = -1;
     EXPECT_EQ(ret, 0);
+    Fwmark fwmark;
+    socklen_t fwmarkLen = sizeof(fwmark.intValue);
+    ASSERT_EQ(getsockopt(dupSocket, SOL_SOCKET, SO_MARK, &fwmark.intValue, &fwmarkLen), 0);
+    EXPECT_EQ(fwmark.netId, 0U); // NETID_UNSET resets the selection bits
+    EXPECT_FALSE(fwmark.explicitlySelected);
+    EXPECT_FALSE(fwmark.protectedFromVpn);
+    close(dupSocket);
+    dupSocket = -1;
 }
 
 /**
@@ -244,14 +308,25 @@ HWTEST_F(UnitTestFwmarkClient, SetMarkTest005, TestSize.Level1)
 {
     FwmarkCommand cmd;
     int32_t tcpSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    int32_t ret = fwmarkClient->BindSocket(tcpSocket, NETID_SECOND);
+    ASSERT_GE(tcpSocket, 0);
+    // Use the in-process service handler instead of the real fwmarkd IPC.
+    int32_t ret = LocalBindSocket(tcpSocket, NETID_SECOND);
     ASSERT_EQ(ret, 0);
+    // SetMark closes socketFd on completion; keep a dup to verify the mark afterwards.
+    int32_t dupSocket = dup(tcpSocket);
+    ASSERT_GE(dupSocket, 0);
     cmd.cmdId = FwmarkCommand::SELECT_NETWORK;
     cmd.netId = 100;
     ret = SetMark(&tcpSocket, &cmd);
-    close(tcpSocket);
-    tcpSocket = -1;
     EXPECT_EQ(ret, 0);
+    Fwmark fwmark;
+    socklen_t fwmarkLen = sizeof(fwmark.intValue);
+    ASSERT_EQ(getsockopt(dupSocket, SOL_SOCKET, SO_MARK, &fwmark.intValue, &fwmarkLen), 0);
+    EXPECT_EQ(fwmark.netId, 100U);
+    EXPECT_TRUE(fwmark.explicitlySelected);
+    EXPECT_TRUE(fwmark.protectedFromVpn);
+    close(dupSocket);
+    dupSocket = -1;
 }
 
 /**
@@ -263,14 +338,24 @@ HWTEST_F(UnitTestFwmarkClient, SetMarkTest006, TestSize.Level1)
 {
     FwmarkCommand cmd;
     int32_t tcpSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    int32_t ret = fwmarkClient->BindSocket(tcpSocket, NETID_SECOND);
+    ASSERT_GE(tcpSocket, 0);
+    // Use the in-process service handler instead of the real fwmarkd IPC.
+    int32_t ret = LocalBindSocket(tcpSocket, NETID_SECOND);
     ASSERT_EQ(ret, 0);
+    // SetMark closes socketFd on completion; keep a dup to verify the mark afterwards.
+    int32_t dupSocket = dup(tcpSocket);
+    ASSERT_GE(dupSocket, 0);
     cmd.cmdId = FwmarkCommand::PROTECT_FROM_VPN;
     cmd.netId = 100;
     ret = SetMark(&tcpSocket, &cmd);
-    close(tcpSocket);
-    tcpSocket = -1;
     EXPECT_EQ(ret, 0);
+    Fwmark fwmark;
+    socklen_t fwmarkLen = sizeof(fwmark.intValue);
+    ASSERT_EQ(getsockopt(dupSocket, SOL_SOCKET, SO_MARK, &fwmark.intValue, &fwmarkLen), 0);
+    EXPECT_EQ(fwmark.netId, static_cast<uint16_t>(NETID_SECOND)); // PROTECT_FROM_VPN keeps the netId
+    EXPECT_TRUE(fwmark.protectedFromVpn);
+    close(dupSocket);
+    dupSocket = -1;
 }
 
 /**

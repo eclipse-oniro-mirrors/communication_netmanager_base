@@ -19,7 +19,18 @@
 
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_callback_test.h"
+// The fixture replaces the policy service proxy with a mock, which requires access to a
+// private member of NetPolicyClient.
+#ifdef GTEST_API_
+#define private public
+#endif
 #include "net_policy_client.h"
+#ifdef GTEST_API_
+#undef private
+#endif
+#include "common_mock_net_policy_service.h"
+#include "common_mock_netmanager_permission.h"
+#include "common_stateful_policy_service_mock.h"
 #include "net_policy_constants.h"
 #include "net_policy_inner_define.h"
 #include "netmanager_base_test_security.h"
@@ -35,14 +46,23 @@ public:
     void TearDown();
 
     sptr<NetPolicyCallbackTest> GetINetPolicyCallbackSample() const;
+    // Fixture scoped mock of the policy service: installed for the whole fixture so no
+    // test performs real IPC to SA 1152.
+    static inline sptr<MockINetPolicyService> mockService_ = nullptr;
+    static inline std::shared_ptr<PolicyServiceMockState> mockState_ = nullptr;
+    static inline sptr<INetPolicyService> savedService_ = nullptr;
 };
 
 void NetPolicySettingTest::SetUpTestCase()
 {
+    auto client = DelayedSingleton<NetPolicyClient>::GetInstance();
+    InstallStatefulPolicyServiceMock(mockService_, mockState_, savedService_, client->netPolicyService_);
 }
 
 void NetPolicySettingTest::TearDownTestCase()
 {
+    UninstallStatefulPolicyServiceMock(mockService_, mockState_, savedService_,
+                                       DelayedSingleton<NetPolicyClient>::GetInstance()->netPolicyService_);
 }
 void NetPolicySettingTest::SetUp() {}
 
@@ -85,7 +105,11 @@ HWTEST_F(NetPolicySettingTest, HasPermission, TestSize.Level1)
 
 HWTEST_F(NetPolicySettingTest, NoPermission, TestSize.Level1)
 {
+    // Without a token the permission check (mocked together with the service) must deny
+    // the request, same as the real service stub does for an unprivileged caller.
+    SetMockCheckPermissionResult(false);
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->CheckPermission();
+    SetMockCheckPermissionResult(true);
     EXPECT_EQ(result, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 } // namespace NetManagerStandard

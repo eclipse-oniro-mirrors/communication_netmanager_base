@@ -52,9 +52,19 @@ void NetSupplierTest::SetUpTestCase()
 
 void NetSupplierTest::TearDownTestCase() {}
 
-void NetSupplierTest::SetUp() {}
+void NetSupplierTest::SetUp()
+{
+    // Rebuild the supplier for each test case to avoid state leaking between test cases
+    // (e.g. isAcceptUnvaliad set by one case would change GetRealScore results of the next one).
+    std::set<NetCap> netCaps;
+    netCaps.insert(NET_CAPABILITY_INTERNET);
+    supplier = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps);
+}
 
-void NetSupplierTest::TearDown() {}
+void NetSupplierTest::TearDown()
+{
+    supplier = nullptr;
+}
 
 HWTEST_F(NetSupplierTest, GetSupplierCallbackTest001, TestSize.Level1)
 {
@@ -72,6 +82,11 @@ HWTEST_F(NetSupplierTest, GetSupplierCallbackTest002, TestSize.Level1)
 
 HWTEST_F(NetSupplierTest, UpdateNetSupplierInfoTest001, TestSize.Level1)
 {
+    // Self contained: the fixture rebuilds the supplier for every test case, so the
+    // callback must be registered here instead of relying on a previous test case.
+    sptr<INetSupplierCallback> callback = new (std::nothrow) NetSupplierCallbackStubTestCb();
+    ASSERT_NE(callback, nullptr);
+    supplier->RegisterSupplierCallback(callback);
     sptr<INetSupplierCallback> callBack = supplier->GetSupplierCallback();
     EXPECT_TRUE(callBack != nullptr);
 }
@@ -87,6 +102,12 @@ HWTEST_F(NetSupplierTest, UpdateNetLinkInfoTest001, TestSize.Level1)
 
 HWTEST_F(NetSupplierTest, SupplierConnectionTest001, TestSize.Level1)
 {
+    // Self contained: SupplierConnection requires a registered net controller, and the
+    // fixture rebuilds the supplier for every test case, so register one here instead of
+    // relying on a previous test case.
+    sptr<INetSupplierCallback> callback = new (std::nothrow) NetSupplierCallbackStubTestCb();
+    ASSERT_NE(callback, nullptr);
+    supplier->RegisterSupplierCallback(callback);
     NetLinkInfo netLinkInfo{};
     std::set<NetCap> netCaps;
     NetRequest netRequest;
@@ -97,8 +118,8 @@ HWTEST_F(NetSupplierTest, SupplierConnectionTest001, TestSize.Level1)
 
     supplier->netSupplierInfo_.isAvailable_ = false;
     supplier->netSupplierIdent_ = "simId";
-    sptr<INetSupplierCallback> callback;
-    supplier->netController_ = callback;
+    sptr<INetSupplierCallback> nullCallback;
+    supplier->netController_ = nullCallback;
     ret = supplier->SupplierConnection(netCaps, netRequest);
     EXPECT_FALSE(ret);
 }

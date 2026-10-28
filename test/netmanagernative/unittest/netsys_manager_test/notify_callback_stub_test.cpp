@@ -51,30 +51,37 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceAddressUpdated001, TestSize.Level1)
     std::string ifName = "test0";
     int32_t flags = 2;
     int32_t scope = 0;
-    MessageParcel data;
-    ASSERT_NE(data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
-    ASSERT_NE(data.WriteString(addr), false);
-    ASSERT_NE(data.WriteString(ifName), false);
-    ASSERT_NE(data.WriteUint32(flags), false);
-    ASSERT_NE(data.WriteUint32(scope), false);
-    MessageParcel reply;
     MessageOption option;
-    int32_t ret = notifyStub_->OnRemoteRequest(100, data, reply, option);
-    EXPECT_NE(ret, 0);
-
-    ret = notifyStub_->OnRemoteRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDRESS_UPDATED),
-                                       data, reply, option);
-    EXPECT_NE(ret, 0);
-
-    MessageParcel dataOk;
-    ASSERT_NE(dataOk.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
-    ASSERT_NE(dataOk.WriteString(addr), false);
-    ASSERT_NE(dataOk.WriteString(ifName), false);
-    ASSERT_NE(dataOk.WriteUint32(flags), false);
-    ASSERT_NE(dataOk.WriteUint32(scope), false);
-    ret = notifyStub_->OnRemoteRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDRESS_UPDATED),
-                                       dataOk, reply, option);
-    EXPECT_EQ(ret, 0);
+    // 1. An invalid request must be rejected. The interface token check runs before the
+    //    dispatch map lookup, and a map miss falls back to IPCObjectStub::OnRemoteRequest,
+    //    which is only valid inside an IPC worker thread (a direct call from the test
+    //    thread with an unknown code aborted with Signal 6 on device). So the unknown
+    //    code is combined with a mismatched token to verify the rejection path without
+    //    entering the IPC framework.
+    {
+        MessageParcel data;
+        ASSERT_NE(data.WriteInterfaceToken(u"ohos.netmanager.base.mismatched.descriptor"), false);
+        ASSERT_NE(data.WriteString(addr), false);
+        ASSERT_NE(data.WriteString(ifName), false);
+        ASSERT_NE(data.WriteUint32(flags), false);
+        ASSERT_NE(data.WriteUint32(scope), false);
+        MessageParcel reply;
+        int32_t ret = notifyStub_->OnRemoteRequest(100, data, reply, option);
+        EXPECT_NE(ret, 0);
+    }
+    // 2. A well-formed request must be dispatched and succeed.
+    {
+        MessageParcel dataOk;
+        ASSERT_NE(dataOk.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
+        ASSERT_NE(dataOk.WriteString(addr), false);
+        ASSERT_NE(dataOk.WriteString(ifName), false);
+        ASSERT_NE(dataOk.WriteUint32(flags), false);
+        ASSERT_NE(dataOk.WriteUint32(scope), false);
+        MessageParcel reply;
+        int32_t ret = notifyStub_->OnRemoteRequest(
+            static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDRESS_UPDATED), dataOk, reply, option);
+        EXPECT_EQ(ret, 0);
+    }
 }
 
 HWTEST_F(NotifyCallbackStubTest, OnInterfaceAddressRemoved001, TestSize.Level1)

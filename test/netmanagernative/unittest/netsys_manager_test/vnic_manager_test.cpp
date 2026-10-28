@@ -118,7 +118,10 @@ HWTEST_F(VnicManagerTest, CreateWithDestroyVnic002, TestSize.Level1)
     const std::string tunAddr = "192.168.1.100";
     int32_t prefix = 24;
     std::set<int32_t> uids;
-    for (int32_t i = 1; i <= 30; ++i) {
+    // MAX_VNIC_UID_ARRAY_SIZE is 1000 (see vnic_manager.cpp). Creating a vnic with
+    // more than 1000 uids must be rejected by parameter validation, without touching
+    // the kernel, so this case is deterministic in any environment.
+    for (int32_t i = 1; i <= 1001; ++i) {
         uids.insert(i);
     }
 

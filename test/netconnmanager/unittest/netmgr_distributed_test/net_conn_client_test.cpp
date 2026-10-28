@@ -20,6 +20,7 @@
 #define private public
 #endif
 #include "common_net_conn_callback_test.h"
+#include "common_mock_net_conn_service.h"
 #include "i_net_conn_callback.h"
 #include "net_conn_client.h"
 #include "net_conn_constants.h"
@@ -54,6 +55,16 @@ void NetConnClientTest::TearDown() {}
 HWTEST_F(NetConnClientTest, EnableDistributedClientNet001, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
+    // Do not perform real IPC to the connection service (SA 1151): the distributed net
+    // commands are permission guarded on the service side, which made the result depend
+    // on the caller's token. Route the calls to a local mock service instead.
+    sptr<MockINetConnService> mockService = sptr<MockINetConnService>::MakeSptr();
+    ON_CALL(*mockService, EnableDistributedClientNet)
+        .WillByDefault(testing::Return(NETMANAGER_SUCCESS));
+    ON_CALL(*mockService, DisableDistributedNet).WillByDefault(testing::Return(NETMANAGER_SUCCESS));
+    auto savedService = NetConnClient::GetInstance().NetConnService_;
+    NetConnClient::GetInstance().NetConnService_ = mockService;
+
     std::string virnicAddr = "1.189.55.61";
     std::string virnicName = "virnic";
     std::string iif = "lo";
@@ -64,11 +75,23 @@ HWTEST_F(NetConnClientTest, EnableDistributedClientNet001, TestSize.Level1)
     std::string dstAddr = "1.1.1.1";
     ret = NetConnClient::GetInstance().DisableDistributedNet(isServer, virnicName, dstAddr);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    NetConnClient::GetInstance().NetConnService_ = savedService;
 }
 
 HWTEST_F(NetConnClientTest, EnableDistributedServerNet001, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
+    // Do not perform real IPC to the connection service (SA 1151): the distributed net
+    // commands are permission guarded on the service side, which made the result depend
+    // on the caller's token. Route the calls to a local mock service instead.
+    sptr<MockINetConnService> mockService = sptr<MockINetConnService>::MakeSptr();
+    ON_CALL(*mockService, EnableDistributedServerNet)
+        .WillByDefault(testing::Return(NETMANAGER_SUCCESS));
+    ON_CALL(*mockService, DisableDistributedNet).WillByDefault(testing::Return(NETMANAGER_SUCCESS));
+    auto savedService = NetConnClient::GetInstance().NetConnService_;
+    NetConnClient::GetInstance().NetConnService_ = mockService;
+
     std::string dstAddr = "1.189.55.61";
     std::string iif = "lo";
     std::string devIface = "lo";
@@ -80,6 +103,8 @@ HWTEST_F(NetConnClientTest, EnableDistributedServerNet001, TestSize.Level1)
     std::string virnicName = "virnic";
     ret = NetConnClient::GetInstance().DisableDistributedNet(isServer, virnicName, dstAddr);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    NetConnClient::GetInstance().NetConnService_ = savedService;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

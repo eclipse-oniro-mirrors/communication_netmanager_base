@@ -14,6 +14,7 @@
  */
 
 #include <algorithm>
+#include <cerrno>
 #include <gtest/gtest.h>
 #ifdef GTEST_API_
 #define private public
@@ -22,6 +23,7 @@
 #include "interface_manager.h"
 #include "netsys_controller.h"
 #include "net_manager_constants.h"
+#include "common_test_env_check.h"
 namespace OHOS {
 namespace nmd {
 namespace {
@@ -119,6 +121,10 @@ HWTEST_F(InterfaceManagerTest, SetMtuTest004, TestSize.Level1)
 
 HWTEST_F(InterfaceManagerTest, SetMtuTest005, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "SetMtu/GetMtu require root and iface wlan0";
+    }
     std::string interfaceName = "wlan0";
     char *mtuValue = nullptr;
     auto ret = InterfaceManager::SetMtu(interfaceName.c_str(), mtuValue);
@@ -526,30 +532,44 @@ HWTEST_F(InterfaceManagerTest, AssembleIPv6Neighbor002, TestSize.Level1)
 
 HWTEST_F(InterfaceManagerTest, AddStaticArpTest001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "AddStaticArp requires root and iface wlan0";
+    }
     std::string ipAddr = "192.168.1.100";
     std::string macAddr = "aa:bb:cc:dd:ee:ff";
     std::string ifName = "wlan0";
+    // Clean up possible leftovers from a previous run so the adds are deterministic.
+    InterfaceManager::DelStaticArp(ipAddr, macAddr, ifName);
     auto ret = InterfaceManager::AddStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, 0);
 
     ipAddr = "192.168.1.101";
     macAddr = "aa:bb:cc:dd:00:ff";
     ifName = "wlan0";
+    InterfaceManager::DelStaticArp(ipAddr, macAddr, ifName);
     ret = InterfaceManager::AddStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(InterfaceManagerTest, DelStaticArpTest001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "DelStaticArp requires root and iface wlan0";
+    }
     std::string ipAddr = "192.168.1.100";
     std::string macAddr = "aa:bb:cc:dd:ee:ff";
     std::string ifName = "wlan0";
+    // Add the entries first so the deletes are deterministic and order-independent.
+    InterfaceManager::AddStaticArp(ipAddr, macAddr, ifName);
     auto ret = InterfaceManager::DelStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, 0);
 
     ipAddr = "192.168.1.101";
     macAddr = "aa:bb:cc:dd:00:ff";
     ifName = "wlan0";
+    InterfaceManager::AddStaticArp(ipAddr, macAddr, ifName);
     ret = InterfaceManager::DelStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, 0);
 }
@@ -573,13 +593,16 @@ HWTEST_F(InterfaceManagerTest, DelStaticIpv6AddrTest002, TestSize.Level1)
     std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
     std::string macAddr = "aa:bb:cc:dd:ee:ff";
     std::string ifName = "chba0";
+    // Add the neighbor entries first so the deletes are deterministic and order-independent.
+    InterfaceManager::AddStaticIpv6Addr(ipAddr, macAddr, ifName);
     auto ret = InterfaceManager::DelStaticIpv6Addr(ipAddr, macAddr, ifName);
-    EXPECT_TRUE(ret == 0 || ret == NETMANAGER_ERR_OPERATION_FAILED);
+    EXPECT_EQ(ret, 0);
 
     ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7335";
     macAddr = "aa:bb:cc:dd:00:ff";
     ifName = "chba0";
     ret = InterfaceManager::DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(InterfaceManagerTest, GetIfaceConfigTest004, TestSize.Level1)
@@ -629,12 +652,23 @@ HWTEST_F(InterfaceManagerTest, GetIpNeighTableTest003, TestSize.Level1)
 
 HWTEST_F(InterfaceManagerTest, CreateVlan001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "CreateVlan requires root and iface wlan0";
+    }
     std::string ifName = "rmnet0";
     uint32_t vlanId = 1;
     int32_t ret = InterfaceManager::CreateVlan(ifName, vlanId);
     ifName = "wlan0";
+    // Destroy a possible leftover vlan from a previous run so the create is deterministic.
+    InterfaceManager::DestroyVlan(ifName, vlanId);
     ret = InterfaceManager::CreateVlan(ifName, vlanId);
-    EXPECT_NE(ret, NETMANAGER_ERR_OPERATION_FAILED);
+    // Some device kernels do not register the 8021q rtnl link ops at all; RTM_NEWLINK then
+    // answers -EOPNOTSUPP (verified on the reference device via `ip link add link wlan0 name
+    // wlan0.1 type vlan id 1` -> "RTNETLINK answers: Not supported"). CreateVlan correctly
+    // relays the kernel verdict, so both outcomes are valid product behavior; requiring plain
+    // success would make this case depend on the kernel configuration of the test device.
+    EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == -EOPNOTSUPP);
 }
 
 HWTEST_F(InterfaceManagerTest, DestroyVlan001, TestSize.Level1)

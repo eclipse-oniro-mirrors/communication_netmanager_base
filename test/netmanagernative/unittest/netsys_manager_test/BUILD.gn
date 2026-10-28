@@ -143,6 +143,12 @@ ohos_unittest("netsys_native_manager_fault_through_test") {
     "net_manager_native_test.cpp",
     "notify_callback_proxy_test.cpp",
     "notify_callback_stub_test.cpp",
+    # The test subclasses NotifyCallbackStub from the exe; compiling the stub
+    # implementation into the binary as well keeps the virtual dispatch inside
+    # the exe. Without it the dispatch goes into the CFI-instrumented
+    # libnet_native_manager_if.z.so, whose cross-DSO CFI check aborts on the
+    # exe-defined override (Signal 6, suite produces no result xml).
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/notify_callback_stub.cpp",
   ]
 
   include_dirs = [
@@ -565,6 +571,7 @@ ohos_unittest("conn_manager_test") {
     "$FWMARK_CLIENT_DIR/include",
     "$NETMANAGERNATIVE_ROOT/include",
     "$NETMANAGERNATIVE_ROOT/include/netsys/wrapper",
+    "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf/include",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/src/netsys",
     "$NETSYSCONTROLLER_ROOT_DIR/include",

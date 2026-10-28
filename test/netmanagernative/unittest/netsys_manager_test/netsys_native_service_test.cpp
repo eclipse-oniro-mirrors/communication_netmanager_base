@@ -29,6 +29,8 @@
 #include "system_ability_definition.h"
 
 #include "common_notify_callback_test.h"
+#include "common_test_env_check.h"
+#include "bpf_path.h"
 #include "dns_config_client.h"
 #include "net_stats_constants.h"
 #include "netsys_native_service.h"
@@ -80,8 +82,12 @@ HWTEST_F(NetsysNativeServiceTest, SetResolverConfigTest001, TestSize.Level1)
     uint16_t testNetId = 154;
     uint16_t baseTimeoutMsec = 200;
     uint8_t retryCount = 3;
+    // SetResolverConfig returns -ENOENT for a netId without a resolver cache, so create
+    // (and afterwards destroy) the cache for this test's own netId to make it deterministic.
+    instance_->CreateNetworkCache(testNetId);
     int32_t ret = instance_->SetResolverConfig(testNetId, baseTimeoutMsec, retryCount, {}, {});
     EXPECT_EQ(ret, 0);
+    instance_->DestroyNetworkCache(testNetId);
 }
 
 HWTEST_F(NetsysNativeServiceTest, GetResolverConfigTest001, TestSize.Level1)
@@ -91,8 +97,12 @@ HWTEST_F(NetsysNativeServiceTest, GetResolverConfigTest001, TestSize.Level1)
     uint8_t retryCount = 3;
     std::vector<std::string> servers;
     std::vector<std::string> domains;
+    // GetResolverConfig returns -ENOENT for a netId without a resolver cache, so create
+    // (and afterwards destroy) the cache for this test's own netId to make it deterministic.
+    instance_->CreateNetworkCache(testNetId);
     int32_t ret = instance_->GetResolverConfig(testNetId, servers, domains, baseTimeoutMsec, retryCount);
     EXPECT_EQ(ret, 0);
+    instance_->DestroyNetworkCache(testNetId);
 }
 
 HWTEST_F(NetsysNativeServiceTest, CreateNetworkCacheTest001, TestSize.Level1)
@@ -440,6 +450,14 @@ HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceTest002, TestSize.Level1)
 
 HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceState001, TestSize.Level1)
 {
+    // The stats queries read the netsys BPF maps, which only exist on a device where the
+    // netsysnative BPF programs have been loaded.
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::FileExists(OHOS::NetManagerStandard::IFACE_STATS_MAP_PATH) ||
+        !OHOS::NetManagerStandard::TestEnvCheck::FileExists(OHOS::NetManagerStandard::APP_UID_STATS_MAP_PATH) ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "stats queries require root, the netsys BPF maps and iface wlan0";
+    }
     const std::string iface = "wlan0";
     const uint32_t appID = 303030;
 
@@ -543,6 +561,12 @@ HWTEST_F(NetsysNativeServiceTest, OnAddRemoveSystemAbilityTest001, TestSize.Leve
 
 HWTEST_F(NetsysNativeServiceTest, GetTotalStatsTest001, TestSize.Level1)
 {
+    // Reading total stats requires the netsys BPF maps, which only exist on a device where
+    // the netsysnative BPF programs have been loaded.
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::FileExists(OHOS::NetManagerStandard::IFACE_STATS_MAP_PATH)) {
+        GTEST_SKIP() << "GetTotalStats requires root and the netsys BPF maps";
+    }
     uint64_t stats = 0;
     uint32_t type = 1;
     auto ret = instance_->GetTotalStats(stats, type);
@@ -592,12 +616,24 @@ HWTEST_F(NetsysNativeServiceTest, GetAllStatsInfoTest001, TestSize.Level1)
 
 HWTEST_F(NetsysNativeServiceTest, DeleteStatsInfo001, TestSize.Level1)
 {
+    // Deleting uid stats requires the netsys BPF maps, which only exist on a device where
+    // the netsysnative BPF programs have been loaded.
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::FileExists(OHOS::NetManagerStandard::APP_UID_IF_STATS_MAP_PATH)) {
+        GTEST_SKIP() << "DeleteStatsInfo requires root and the netsys BPF maps";
+    }
     int32_t ret = instance_->DeleteStatsInfo(TEST_UID);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeServiceTest, GetAllSimStatsInfo001, TestSize.Level1)
 {
+    // Reading sim stats requires the netsys BPF maps, which only exist on a device where
+    // the netsysnative BPF programs have been loaded.
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::FileExists(OHOS::NetManagerStandard::APP_UID_SIM_STATS_MAP_PATH)) {
+        GTEST_SKIP() << "GetAllSimStatsInfo requires root and the netsys BPF maps";
+    }
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
     int32_t ret = instance_->GetAllSimStatsInfo(stats);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -605,6 +641,12 @@ HWTEST_F(NetsysNativeServiceTest, GetAllSimStatsInfo001, TestSize.Level1)
 
 HWTEST_F(NetsysNativeServiceTest, DeleteSimStatsInfo001, TestSize.Level1)
 {
+    // Deleting sim stats requires the netsys BPF maps, which only exist on a device where
+    // the netsysnative BPF programs have been loaded.
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::FileExists(OHOS::NetManagerStandard::APP_UID_SIM_STATS_MAP_PATH)) {
+        GTEST_SKIP() << "DeleteSimStatsInfo requires root and the netsys BPF maps";
+    }
     int32_t ret = instance_->DeleteSimStatsInfo(TEST_UID);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
@@ -674,7 +716,7 @@ HWTEST_F(NetsysNativeServiceTest, StaticIpv6AddrTest001, TestSize.Level1)
     int32_t ret = instance_->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
 
     ret = instance_->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
-    EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERR_OPERATION_FAILED);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeServiceTest, GetCookieStatsTest001, TestSize.Level1)
@@ -814,6 +856,10 @@ HWTEST_F(NetsysNativeServiceTest, UpdateNetworkSharingTypeTest001, TestSize.Leve
 
 HWTEST_F(NetsysNativeServiceTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "SetIpv6PrivacyExtensions requires root and iface wlan0";
+    }
     uint32_t on = 0;
     std::string interface = "wlan0";
     int32_t ret = instance_->SetIpv6PrivacyExtensions(interface, on);
@@ -824,6 +870,10 @@ HWTEST_F(NetsysNativeServiceTest, SetIpv6PrivacyExtensionsTest001, TestSize.Leve
 
 HWTEST_F(NetsysNativeServiceTest, SetEnableIpv6Test001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "SetEnableIpv6 requires root and iface wlan0";
+    }
     uint32_t on = 0;
     std::string interface = "wlan0";
     int32_t ret = instance_->SetEnableIpv6(interface, on, false);
@@ -842,6 +892,10 @@ HWTEST_F(NetsysNativeServiceTest, SetIpv6UidBlackListTest001, TestSize.Level1)
 
 HWTEST_F(NetsysNativeServiceTest, SetIpv6AutoConfTest001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "SetIpv6AutoConf requires root and iface wlan0";
+    }
     auto instance = std::make_shared<NetsysNativeService>(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
     uint32_t on = 0;
     std::string interface = "wlan0";
@@ -851,6 +905,12 @@ HWTEST_F(NetsysNativeServiceTest, SetIpv6AutoConfTest001, TestSize.Level1)
 
 HWTEST_F(NetsysNativeServiceTest, SetNetworkAccessPolicyTest001, TestSize.Level1)
 {
+    // Writing the access policy requires the netsys BPF maps, which only exist on a device
+    // where the netsysnative BPF programs have been loaded.
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::FileExists(OHOS::NetManagerStandard::APP_UID_PERMISSION_MAP_PATH)) {
+        GTEST_SKIP() << "SetNetworkAccessPolicy requires root and the netsys BPF maps";
+    }
     uint32_t uid = 0;
     NetworkAccessPolicy netAccessPolicy;
     netAccessPolicy.wifiAllow = false;
@@ -862,6 +922,12 @@ HWTEST_F(NetsysNativeServiceTest, SetNetworkAccessPolicyTest001, TestSize.Level1
 
 HWTEST_F(NetsysNativeServiceTest, DeleteNetworkAccessPolicyTest001, TestSize.Level1)
 {
+    // Deleting the access policy requires the netsys BPF maps, which only exist on a device
+    // where the netsysnative BPF programs have been loaded.
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::FileExists(OHOS::NetManagerStandard::APP_UID_PERMISSION_MAP_PATH)) {
+        GTEST_SKIP() << "DeleteNetworkAccessPolicy requires root and the netsys BPF maps";
+    }
     uint32_t uid = 0;
     int32_t ret = instance_->DeleteNetworkAccessPolicy(uid);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
@@ -869,6 +935,12 @@ HWTEST_F(NetsysNativeServiceTest, DeleteNetworkAccessPolicyTest001, TestSize.Lev
 
 HWTEST_F(NetsysNativeServiceTest, NotifyNetBearerTypeChangeTest001, TestSize.Level1)
 {
+    // Notifying the bearer type writes the netsys BPF maps, which only exist on a device
+    // where the netsysnative BPF programs have been loaded.
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::FileExists(OHOS::NetManagerStandard::NET_BEAR_TYPE_MAP_PATH)) {
+        GTEST_SKIP() << "NotifyNetBearerTypeChange requires root and the netsys BPF maps";
+    }
     std::set<NetManagerStandard::NetBearType> bearerTypes;
     bearerTypes.insert(NetManagerStandard::NetBearType::BEARER_CELLULAR);
     int32_t ret = instance_->NotifyNetBearerTypeChange(bearerTypes);
@@ -908,6 +980,13 @@ HWTEST_F(NetsysNativeServiceTest, SetBrokerUidAccessPolicyMapTest001, TestSize.L
 
 HWTEST_F(NetsysNativeServiceTest, SetBrokerUidAccessPolicyMapTest002, TestSize.Level1)
 {
+    // Writing broker uid policies requires the netsys BPF maps, which only exist on a
+    // device where the netsysnative BPF programs have been loaded.
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::FileExists(
+            OHOS::NetManagerStandard::BROKER_UID_ACCESS_POLICY_MAP_PATH)) {
+        GTEST_SKIP() << "SetBrokerUidAccessPolicyMap requires root and the netsys BPF maps";
+    }
     std::unordered_map<uint32_t, uint32_t> params;
     params.emplace(TEST_UID, TEST_UID);
     int32_t ret = instance_->SetBrokerUidAccessPolicyMap(params);

@@ -25,6 +25,8 @@
 #include "net_policy_client.h"
 #include "net_policy_firewall.h"
 #include "net_policy_rule.h"
+#include "common_mock_net_policy_service.h"
+#include "common_stateful_policy_service_mock.h"
 #include "netmanager_base_test_security.h"
 
 namespace OHOS {
@@ -47,6 +49,11 @@ public:
     void SetUp();
     void TearDown();
     sptr<NetPolicyCallbackTest> GetINetPolicyCallbackSample() const;
+    // Fixture scoped mock of the policy service: installed for the whole fixture so
+    // NetPolicyRule008 verifies the client callback path without real IPC to SA 1152.
+    static inline sptr<MockINetPolicyService> mockService_ = nullptr;
+    static inline std::shared_ptr<PolicyServiceMockState> mockState_ = nullptr;
+    static inline sptr<INetPolicyService> savedService_ = nullptr;
 };
 
 void UtNetPolicyRule::SetUpTestCase()
@@ -55,10 +62,14 @@ void UtNetPolicyRule::SetUpTestCase()
     g_netPolicyFirewallR = std::make_shared<NetPolicyFirewall>();
     g_netPolicyRule->Init();
     g_netPolicyRule->ResetPolicies();
+    auto client = DelayedSingleton<NetPolicyClient>::GetInstance();
+    InstallStatefulPolicyServiceMock(mockService_, mockState_, savedService_, client->netPolicyService_);
 }
 
 void UtNetPolicyRule::TearDownTestCase()
 {
+    UninstallStatefulPolicyServiceMock(mockService_, mockState_, savedService_,
+                                       DelayedSingleton<NetPolicyClient>::GetInstance()->netPolicyService_);
     g_netPolicyRule->TransPolicyToRule(TEST_UID2, NetUidPolicy::NET_POLICY_NONE);
     g_netPolicyRule->TransPolicyToRule(TEST_UID1, NetUidPolicy::NET_POLICY_NONE);
     g_netPolicyRule.reset();

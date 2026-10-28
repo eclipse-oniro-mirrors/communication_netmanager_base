@@ -28,6 +28,8 @@
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_callback_test.h"
 #include "net_policy_client.h"
+#include "common_mock_net_policy_service.h"
+#include "common_stateful_policy_service_mock.h"
 #include "net_policy_constants.h"
 #include "net_policy_inner_define.h"
 #include "net_policy_service.h"
@@ -66,14 +68,24 @@ public:
     void SetUp();
     void TearDown();
     sptr<NetPolicyCallbackTest> GetINetPolicyCallbackSample() const;
+    // Fixture scoped mock of the policy service: installed for the whole fixture so no
+    // test performs real IPC to SA 1152. State survives across the sequential tests,
+    // mirroring the persistence of the real service (Set* followed by Get*).
+    static inline sptr<MockINetPolicyService> mockService_ = nullptr;
+    static inline std::shared_ptr<PolicyServiceMockState> mockState_ = nullptr;
+    static inline sptr<INetPolicyService> savedService_ = nullptr;
 };
 
 void UtNetPolicyClient::SetUpTestCase()
 {
     g_netPolicyClient = DelayedSingleton<NetPolicyClient>::GetInstance();
+    InstallStatefulPolicyServiceMock(mockService_, mockState_, savedService_, g_netPolicyClient->netPolicyService_);
 }
 
-void UtNetPolicyClient::TearDownTestCase() {}
+void UtNetPolicyClient::TearDownTestCase()
+{
+    UninstallStatefulPolicyServiceMock(mockService_, mockState_, savedService_, g_netPolicyClient->netPolicyService_);
+}
 
 void UtNetPolicyClient::SetUp() {}
 
@@ -97,6 +109,9 @@ HWTEST_F(UtNetPolicyClient, SetPolicyByUid001, TestSize.Level1)
     sptr<ISystemAbilityManager> sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     sptr<IRemoteObject> remote = sam->CheckSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     deathRecipient.OnRemoteDied(remote);
+    // OnRemoteDied clears the client's service reference, so the fixture mock must be
+    // re-installed to keep verifying the client path without real IPC.
+    g_netPolicyClient->netPolicyService_ = mockService_;
     int32_t ret = g_netPolicyClient->SetPolicyByUid(TEST_UID, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
     std::cout << "NetPolicyClient001 SetPolicyByUid ret:" << ret << std::endl;
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
@@ -520,6 +535,10 @@ HWTEST_F(UtNetPolicyClient, CheckPermission001, TestSize.Level1)
 HWTEST_F(UtNetPolicyClient, SetNetworkAccessPolicy001, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
+    // The fixture-installed stateful policy service mock already answers
+    // SetNetworkAccessPolicy with NETMANAGER_SUCCESS, so the client path is verified
+    // without real IPC and without a local mock swap.
+
     NetworkAccessPolicy netAccessPolicy;
     netAccessPolicy.wifiAllow = false;
     netAccessPolicy.cellularAllow = false;

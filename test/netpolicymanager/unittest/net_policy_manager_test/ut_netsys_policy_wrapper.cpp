@@ -15,8 +15,15 @@
 
 #include <gtest/gtest.h>
 
+// The tests below replace the NetsysController service implementation with a mock-enabled
+// one, which requires access to private members of the controller and the implementation.
+#define private public
 #include "net_manager_constants.h"
 #include "netsys_policy_wrapper.h"
+#include "netsys_controller_service_impl.h"
+#include "mock_netsys_native_client.h"
+#include "common_netsys_controller_mock_guard.h"
+#undef private
 #include "iptables_type.h"
 
 namespace OHOS {
@@ -52,6 +59,10 @@ HWTEST_F(NetsysPolicyWrapperTest, RegisterNetsysCallbackTest001, TestSize.Level1
 
 HWTEST_F(NetsysPolicyWrapperTest, BandwidthEnableDataSaverTest001, TestSize.Level1)
 {
+    // NetsysController is compiled with NETMANAGER_TEST, so its service implementation
+    // is not initialised by default; install a mock-enabled one so the call does not
+    // reach netsysnative through real IPC and the result is deterministic.
+    NetsysControllerMockGuard netsysGuard({MOCK_BANDWIDTHENABLEDATASAVER_API});
     auto ret = instance_->BandwidthEnableDataSaver(false);
     EXPECT_LE(ret, 0);
 }
@@ -110,6 +121,10 @@ HWTEST_F(NetsysPolicyWrapperTest, PowerSaveUpdataAllowedListTest001, TestSize.Le
 
 HWTEST_F(NetsysPolicyWrapperTest, FirewallSetUidsAllowedListChainTest001, TestSize.Level1)
 {
+    // NetsysController is compiled with NETMANAGER_TEST, so its service implementation
+    // is not initialised by default; install a mock-enabled one so the call does not
+    // reach netsysnative through real IPC and the result is deterministic.
+    NetsysControllerMockGuard netsysGuard({MOCK_FIREWALLSETUIDSALLOWEDLISTCHAIN_API});
     uint32_t chain = 2;
     std::vector<uint32_t> uids;
     auto ret = instance_->FirewallSetUidsAllowedListChain(chain, uids);
@@ -118,6 +133,10 @@ HWTEST_F(NetsysPolicyWrapperTest, FirewallSetUidsAllowedListChainTest001, TestSi
 
 HWTEST_F(NetsysPolicyWrapperTest, FirewallSetUidsDeniedListChainTest001, TestSize.Level1)
 {
+    // NetsysController is compiled with NETMANAGER_TEST, so its service implementation
+    // is not initialised by default; install a mock-enabled one so the call does not
+    // reach netsysnative through real IPC and the result is deterministic.
+    NetsysControllerMockGuard netsysGuard({MOCK_FIREWALLSETUIDSDENIEDLISTCHAIN_API});
     uint32_t chain = 2;
     std::vector<uint32_t> uids;
     auto ret = instance_->FirewallSetUidsDeniedListChain(chain, uids);
@@ -126,6 +145,10 @@ HWTEST_F(NetsysPolicyWrapperTest, FirewallSetUidsDeniedListChainTest001, TestSiz
 
 HWTEST_F(NetsysPolicyWrapperTest, FirewallSetUidRuleTest001, TestSize.Level1)
 {
+    // NetsysController is compiled with NETMANAGER_TEST, so its service implementation
+    // is not initialised by default; install a mock-enabled one so the call does not
+    // reach netsysnative through real IPC and the result is deterministic.
+    NetsysControllerMockGuard netsysGuard({MOCK_FIREWALLSETUIDRULE_API});
     uint32_t chain = 2;
     uint32_t uid = 666;
     uint32_t firewallRule = 2;
@@ -135,6 +158,10 @@ HWTEST_F(NetsysPolicyWrapperTest, FirewallSetUidRuleTest001, TestSize.Level1)
 
 HWTEST_F(NetsysPolicyWrapperTest, FirewallEnableChainTest001, TestSize.Level1)
 {
+    // NetsysController is compiled with NETMANAGER_TEST, so its service implementation
+    // is not initialised by default; install a mock-enabled one so the call does not
+    // reach netsysnative through real IPC and the result is deterministic.
+    NetsysControllerMockGuard netsysGuard({MOCK_FIREWALLENABLECHAIN_API});
     uint32_t chain = 2;
     auto ret = instance_->FirewallEnableChain(chain, false);
     EXPECT_LE(ret, 0);
@@ -143,6 +170,8 @@ HWTEST_F(NetsysPolicyWrapperTest, FirewallEnableChainTest001, TestSize.Level1)
 
 HWTEST_F(NetsysPolicyWrapperTest, SetNetworkAccessPolicyTest001, TestSize.Level1)
 {
+    NetsysControllerMockGuard netsysGuard({MOCK_SETNETWORKACCESSPOLICY_API});
+
     uint32_t uid = 666;
     NetworkAccessPolicy netAccessPolicy;
     netAccessPolicy.wifiAllow = false;
@@ -154,6 +183,8 @@ HWTEST_F(NetsysPolicyWrapperTest, SetNetworkAccessPolicyTest001, TestSize.Level1
 
 HWTEST_F(NetsysPolicyWrapperTest, DeleteNetworkAccessPolicyTest001, TestSize.Level1)
 {
+    NetsysControllerMockGuard netsysGuard({MOCK_DELETENETWORKACCESSPOLICY_API});
+
     uint32_t uid = 666;
     auto ret = instance_->DeleteNetworkAccessPolicy(uid);
     EXPECT_GE(ret, NETMANAGER_SUCCESS);

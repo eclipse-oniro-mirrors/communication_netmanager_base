@@ -697,12 +697,19 @@ HWTEST_F(MultiVpnManagerTest, MultiVpnFdListenLifecycle001, TestSize.Level1)
         uint64_t one = 1;
         (void)write(stopFd, &one, sizeof(one));
     }
-    for (int32_t i = 0; i < 100; i++) {
+    // Inside the test process the listen thread can never obtain the "multivpnfd"
+    // control socket (the OHOS_SOCKET_multivpnfd env var is only set by init for the
+    // netsysnative service process), so StartMultiVpnSocketListen fails
+    // GetControlSocket and resets the listen state by itself. The reset timing
+    // depends on thread scheduling and hilog responsiveness; under the DT framework
+    // it can be delayed well past one second, so wait generously (bounded at 10s)
+    // instead of assuming a fast reset.
+    for (int32_t i = 0; i < 200; i++) {
         std::lock_guard<std::mutex> lock(instance.mutex_);
         if (!instance.multiVpnListeningFlag_) {
             break;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
     {
         std::lock_guard<std::mutex> lock(instance.mutex_);

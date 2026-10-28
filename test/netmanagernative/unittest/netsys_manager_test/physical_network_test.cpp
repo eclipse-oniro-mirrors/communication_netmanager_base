@@ -23,6 +23,7 @@
 #define protected public
 #include "interface_manager.h"
 #include "physical_network.h"
+#include "common_test_env_check.h"
 #undef private
 #undef protected
 
@@ -56,6 +57,10 @@ void PhysicalNetworkTest::TearDown() {}
 
 HWTEST_F(PhysicalNetworkTest, AddInterfaceTest001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "AddInterface requires root and iface wlan0";
+    }
     NETNATIVE_LOGI("AddInterfaceTest001 enter");
     PhysicalNetwork physicNetwork(2, NetworkPermission::PERMISSION_NETWORK);
     std::string interfaceName1 = "wlan0";
@@ -88,6 +93,10 @@ HWTEST_F(PhysicalNetworkTest, AddInterfaceTest001, TestSize.Level1)
 
 HWTEST_F(PhysicalNetworkTest, AddInterfaceTest002, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "AddInterface requires root and iface wlan0";
+    }
     std::string interfaceName = "test";
     auto ret = instance_->AddInterface(interfaceName);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
@@ -104,6 +113,10 @@ HWTEST_F(PhysicalNetworkTest, AddInterfaceTest002, TestSize.Level1)
 
 HWTEST_F(PhysicalNetworkTest, AddInterfaceTest003, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "AddInterface requires root and iface wlan0";
+    }
     instance_->interfaces_.clear();
     std::string interfaceName = "wlan0";
     instance_->isDefault_ = true;
@@ -113,6 +126,10 @@ HWTEST_F(PhysicalNetworkTest, AddInterfaceTest003, TestSize.Level1)
 
 HWTEST_F(PhysicalNetworkTest, AddInterfaceTest004, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "AddInterface requires root and iface wlan0";
+    }
     instance_->interfaces_.clear();
     std::string interfaceName = "wlan0";
     instance_->isDefault_ = false;
@@ -172,6 +189,9 @@ HWTEST_F(PhysicalNetworkTest, AddDefaultTest001, TestSize.Level1)
 
 HWTEST_F(PhysicalNetworkTest, RemoveDefaultTest001, TestSize.Level1)
 {
+    // Reset the shared fixture state so this test is order-independent: leftover
+    // interfaces from earlier tests would make RemoveDefault touch kernel routes.
+    instance_->interfaces_.clear();
     instance_->RemoveDefault();
     EXPECT_FALSE(instance_->isDefault_);
 }

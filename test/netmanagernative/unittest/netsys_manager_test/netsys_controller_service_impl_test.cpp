@@ -29,6 +29,8 @@
 #include "net_stats_constants.h"
 #include "netsys_controller.h"
 #include "netsys_controller_service_impl.h"
+#include "common_test_env_check.h"
+#include "common_netsys_controller_mock_guard.h"
 #include "common_mock_netsys_service.h"
 
 namespace OHOS {
@@ -52,7 +54,9 @@ public:
 
     void TearDown();
 
-    static inline std::shared_ptr<NetsysControllerServiceImpl> instance_ = nullptr;
+    // Use the test stub so the controller apis without a production in-process mock branch
+    // (see common_netsys_controller_mock_guard.h) can also be kept away from netsysnative.
+    static inline std::shared_ptr<NetsysControllerTestStub> instance_ = nullptr;
     sptr<NetsysNative::MockINetsysService> mockNetsysService_ = sptr<NetsysNative::MockINetsysService>::MakeSptr();
 
 private:
@@ -61,7 +65,7 @@ private:
 
 void NetsysControllerServiceImplTest::SetUpTestCase()
 {
-    instance_ = std::make_shared<NetsysControllerServiceImpl>();
+    instance_ = std::make_shared<NetsysControllerTestStub>();
     if (instance_) {
         instance_->mockNetsysClient_.mockApi_.clear();
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_NETWORKCREATEPHYSICAL_API);
@@ -87,6 +91,11 @@ void NetsysControllerServiceImplTest::SetUpTestCase()
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_STARTDHCPSERVICE_API);
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_STOPDHCPSERVICE_API);
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_CLOSESOCKETSUID_API);
+        // Add/DelStaticIpv6Addr must not reach the real netsysnative service either: the
+        // on-device service build may differ from the unit-test binary, and the real netlink
+        // result depends on the device kernel. Route them through the mock client.
+        instance_->mockNetsysClient_.mockApi_.insert(MOCK_ADDSTATICIPV6ADDR_API);
+        instance_->mockNetsysClient_.mockApi_.insert(MOCK_DELSTATICIPV6ADDR_API);
     }
 }
 
@@ -292,6 +301,12 @@ HWTEST_F(NetsysControllerServiceImplTest, SetInternetPermission, TestSize.Level1
 
 HWTEST_F(NetsysControllerServiceImplTest, ServiceImplTest002, TestSize.Level1)
 {
+    // AddStaticArp/DelStaticArp reach the real kernel through netsysnative and require the
+    // target interface to exist.
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "AddStaticArp/DelStaticArp require root and iface wlan0";
+    }
     std::string ipAddr = "192.168.1.100";
     std::string macAddr = "aa:bb:cc:dd:ee:ff";
     std::string ifName = "wlan0";
@@ -310,7 +325,7 @@ HWTEST_F(NetsysControllerServiceImplTest, AddStaticIpv6AddrTest001, TestSize.Lev
     auto ret = instance_->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
 
     ret = instance_->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerServiceImplTest, DelStaticIpv6AddrTest001, TestSize.Level1)
@@ -320,12 +335,16 @@ HWTEST_F(NetsysControllerServiceImplTest, DelStaticIpv6AddrTest001, TestSize.Lev
     std::string ifName = "chba0";
     auto ret = instance_->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
     ret = instance_->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
-    EXPECT_TRUE(ret == NetManagerStandard::NETMANAGER_SUCCESS || ret == NETMANAGER_ERR_OPERATION_FAILED);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest001, TestSize.Level1)
 {
     instance_->mockNetsysClient_.mockApi_.clear();
+    // SetResolverConfig/GetResolverConfig fail with -ENOENT on the real service for a netId
+    // without a resolver cache, so route these two calls through the mock client.
+    instance_->mockNetsysClient_.mockApi_.insert(MOCK_SETRESOLVERCONFIG_API);
+    instance_->mockNetsysClient_.mockApi_.insert(MOCK_GETRESOLVERICONFIG_API);
     int32_t netId = 0;
     int32_t permission = 0;
     auto ret = instance_->NetworkCreatePhysical(netId, permission);
@@ -571,6 +590,14 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
 HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest005, TestSize.Level1)
 {
     instance_->mockNetsysClient_.mockApi_.clear();
+    // The stats queries reach the netsysnative BPF maps on the real service, which only
+    // exist on a device where the BPF programs have been loaded, so route them through the
+    // mock client.
+    instance_->mockNetsysClient_.mockApi_.insert(MOCK_GETTOTALSTATS_API);
+    instance_->mockNetsysClient_.mockApi_.insert(MOCK_GETUIDSTATS_API);
+    instance_->mockNetsysClient_.mockApi_.insert(MOCK_DELETESTATSINFO_API);
+    instance_->mockNetsysClient_.mockApi_.insert(MOCK_DELETESIMSTATSINFO_API);
+    instance_->mockNetsysClient_.mockApi_.insert(MOCK_GETALLSTATSINFO_API);
     uint32_t firewallRule = 0;
     uint32_t chain = 0;
     std::vector<uint32_t> uidsParam = {};
@@ -635,6 +662,7 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
 
 HWTEST_F(NetsysControllerServiceImplTest, GetAllSimStatsInfo001, TestSize.Level1)
 {
+    instance_->mockNetsysClient_.mockApi_.insert(MOCK_GETALLSIMSTATSINFO_API);
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo = {};
     auto ret = instance_->GetAllSimStatsInfo(statsInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
@@ -642,22 +670,30 @@ HWTEST_F(NetsysControllerServiceImplTest, GetAllSimStatsInfo001, TestSize.Level1
 
 HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest006, TestSize.Level1)
 {
-    instance_->mockNetsysClient_.mockApi_.clear();
+    // The NetDiag calls reach the real netsysnative service; replace the remote service with
+    // a mock so the test does not depend on the environment (service reachable, /proc data).
+    EXPECT_CALL(*mockNetsysService_, NetDiagGetSocketsInfo(_, _)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mockNetsysService_, NetDiagGetInterfaceConfig(_, _)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mockNetsysService_, NetDiagUpdateInterfaceConfig(_, _, _)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mockNetsysService_, NetDiagSetInterfaceActiveState(_, _)).WillRepeatedly(Return(0));
+    auto netsysControllerServiceImpl = std::make_shared<NetsysControllerServiceImpl>();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+
     OHOS::NetsysNative::NetDiagProtocolType socketType = OHOS::NetsysNative::NetDiagProtocolType::PROTOCOL_TYPE_ALL;
     OHOS::NetsysNative::NetDiagSocketsInfo socketsInfo;
-    int32_t ret = instance_->NetDiagGetSocketsInfo(socketType, socketsInfo);
+    int32_t ret = netsysControllerServiceImpl->NetDiagGetSocketsInfo(socketType, socketsInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     std::list<OHOS::NetsysNative::NetDiagIfaceConfig> configsList;
     std::string ifaceName = "";
-    ret = instance_->NetDiagGetInterfaceConfig(configsList, ifaceName);
+    ret = netsysControllerServiceImpl->NetDiagGetInterfaceConfig(configsList, ifaceName);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     OHOS::NetsysNative::NetDiagIfaceConfig config;
-    ret = instance_->NetDiagUpdateInterfaceConfig(config, ifaceName, false);
+    ret = netsysControllerServiceImpl->NetDiagUpdateInterfaceConfig(config, ifaceName, false);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = instance_->NetDiagSetInterfaceActiveState(ifaceName, false);
+    ret = netsysControllerServiceImpl->NetDiagSetInterfaceActiveState(ifaceName, false);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -826,6 +862,7 @@ HWTEST_F(NetsysControllerServiceImplTest, SetIpv6AutoConfTest001, TestSize.Level
 
 HWTEST_F(NetsysControllerServiceImplTest, SetNetworkAccessPolicy001, TestSize.Level1)
 {
+    instance_->mockNetsysClient_.mockApi_.insert(MOCK_SETNETWORKACCESSPOLICY_API);
     uint32_t uid = 0;
     NetworkAccessPolicy netAccessPolicy;
     netAccessPolicy.wifiAllow = false;
@@ -837,6 +874,7 @@ HWTEST_F(NetsysControllerServiceImplTest, SetNetworkAccessPolicy001, TestSize.Le
 
 HWTEST_F(NetsysControllerServiceImplTest, NotifyNetBearerTypeChange001, TestSize.Level1)
 {
+    instance_->mockNetsysClient_.mockApi_.insert(MOCK_NOTIFYNETBEARERTYPECHANGE_API);
     std::set<NetManagerStandard::NetBearType> bearTypes;
     bearTypes.insert(NetManagerStandard::NetBearType::BEARER_CELLULAR);
     auto ret = instance_->NotifyNetBearerTypeChange(bearTypes);
@@ -845,6 +883,7 @@ HWTEST_F(NetsysControllerServiceImplTest, NotifyNetBearerTypeChange001, TestSize
 
 HWTEST_F(NetsysControllerServiceImplTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
 {
+    instance_->mockNetsysClient_.mockApi_.insert(MOCK_DELETENETWORKACCESSPOLICY_API);
     uint32_t uid = 0;
     auto ret = instance_->DeleteNetworkAccessPolicy(uid);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
@@ -867,6 +906,7 @@ HWTEST_F(NetsysControllerServiceImplTest, SetBrokerUidAccessPolicyMapTest001, Te
 
 HWTEST_F(NetsysControllerServiceImplTest, SetBrokerUidAccessPolicyMapTest002, TestSize.Level1)
 {
+    instance_->mockNetsysClient_.mockApi_.insert(MOCK_SETBROKERUIDACCESSPOLICYMAP_API);
     std::unordered_map<uint32_t, uint32_t> params;
     params.emplace(TEST_UID, TEST_UID);
     int32_t ret = instance_->SetBrokerUidAccessPolicyMap(params);
@@ -875,6 +915,7 @@ HWTEST_F(NetsysControllerServiceImplTest, SetBrokerUidAccessPolicyMapTest002, Te
 
 HWTEST_F(NetsysControllerServiceImplTest, DelBrokerUidAccessPolicyMapTest001, TestSize.Level1)
 {
+    instance_->mockNetsysClient_.mockApi_.insert(MOCK_DELBROKERUIDACCESSPOLICYMAP_API);
     int32_t ret = instance_->DelBrokerUidAccessPolicyMap(TEST_UID);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
@@ -893,7 +934,8 @@ HWTEST_F(NetsysControllerServiceImplTest, DeleteIncreaseTrafficMapTest002, TestS
 
 HWTEST_F(NetsysControllerServiceImplTest, ClearSimStatsBpfMap001, TestSize.Level1)
 {
-    auto netsysControllerServiceImpl = std::make_shared<NetsysControllerServiceImpl>();
+    auto netsysControllerServiceImpl = std::make_shared<NetsysControllerTestStub>();
+    netsysControllerServiceImpl->mockNetsysClient_.mockApi_.insert(MOCK_CLEARSIMSTATSBPFMAP_API);
     int32_t ret = netsysControllerServiceImpl->ClearSimStatsBpfMap();
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
@@ -920,28 +962,32 @@ HWTEST_F(NetsysControllerServiceImplTest, DelInterfaceAddressTest001, TestSize.L
 
 HWTEST_F(NetsysControllerServiceImplTest, SetNetStateTrafficMapTest001, TestSize.Level1)
 {
+    instance_->mockNetsysClient_.mockApi_.insert(MOCK_SETNETSTATETRAFFICMAP_API);
     uint8_t flag = 1;
     uint64_t availableTraffic = 1;
     int32_t ret = instance_->SetNetStateTrafficMap(flag, availableTraffic);
-    EXPECT_TRUE(ret == 300 || ret == 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerServiceImplTest, GetNetStateTrafficMapTest001, TestSize.Level1)
 {
+    instance_->mockNetsysClient_.mockApi_.insert(MOCK_GETNETSTATETRAFFICMAP_API);
     uint8_t flag = 1;
     uint64_t availableTraffic = 1;
     int32_t ret = instance_->GetNetStateTrafficMap(flag, availableTraffic);
-    EXPECT_TRUE(ret == 3 || ret == 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerServiceImplTest, ClearIncreaseTrafficMapTest001, TestSize.Level1)
 {
+    instance_->mockNetsysClient_.mockApi_.insert(MOCK_CLEARINCREASETRAFFICMAP_API);
     int32_t ret = instance_->ClearIncreaseTrafficMap();
-    EXPECT_TRUE(ret == 3 || ret == 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerServiceImplTest, UpdateIfIndexMapTest001, TestSize.Level1)
 {
+    instance_->mockNetsysClient_.mockApi_.insert(MOCK_UPDATEIFINDEXMAP_API);
     int8_t key = 1;
     uint64_t index = 1;
     int32_t ret = instance_->UpdateIfIndexMap(key, index);

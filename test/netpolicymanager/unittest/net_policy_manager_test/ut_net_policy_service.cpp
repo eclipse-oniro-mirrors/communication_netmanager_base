@@ -26,6 +26,9 @@
 #include "net_policy_rule.h"
 #include "net_policy_service.h"
 #include "net_policy_traffic.h"
+#include "netsys_controller_service_impl.h"
+#include "mock_netsys_native_client.h"
+#include "common_netsys_controller_mock_guard.h"
 #include "system_ability_definition.h"
 #include "netmanager_base_test_security.h"
 
@@ -368,6 +371,8 @@ HWTEST_F(UtNetPolicyService, OnAddSystemAbility001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyService, SetNetworkAccessPolicy01, TestSize.Level1)
 {
+    NetsysControllerMockGuard netsysGuard({MOCK_SETNETWORKACCESSPOLICY_API});
+
     int32_t uid = 666;
     NetworkAccessPolicy netAccessPolicy;
     netAccessPolicy.wifiAllow = false;
@@ -422,6 +427,8 @@ HWTEST_F(UtNetPolicyService, RemoveNetworkAccessPolicy01, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyService, DeleteNetworkAccessPolicy01, TestSize.Level1)
 {
+    NetsysControllerMockGuard netsysGuard({MOCK_DELETENETWORKACCESSPOLICY_API});
+
     int32_t uid = 666;
     auto ret = instance_->DeleteNetworkAccessPolicy(uid);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -434,6 +441,10 @@ HWTEST_F(UtNetPolicyService, DeleteNetworkAccessPolicy01, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed001, TestSize.Level1)
 {
+    // NetsysController is compiled with NETMANAGER_TEST, so its service implementation
+    // is not initialised by default; install a mock-enabled one so the call does not
+    // reach netsysnative through real IPC and the result is deterministic.
+    NetsysControllerMockGuard netsysGuard({MOCK_SETNICTRAFFICALLOWED_API});
     NetManagerBaseAccessToken token;
     std::vector<std::string> ifaceName = {"wlan0", "aaa"};
     auto ret = instance_->SetNicTrafficAllowed(ifaceName, false);
@@ -447,6 +458,10 @@ HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed002, TestSize.Level1)
 {
+    // NetsysController is compiled with NETMANAGER_TEST, so its service implementation
+    // is not initialised by default; install a mock-enabled one so the call does not
+    // reach netsysnative through real IPC and the result is deterministic.
+    NetsysControllerMockGuard netsysGuard({MOCK_SETNICTRAFFICALLOWED_API});
     NetManagerBaseAccessToken token;
     std::vector<std::string> ifaceName = {"wlan0", "aaa"};
     auto ret = instance_->SetNicTrafficAllowed(ifaceName, true);
@@ -460,6 +475,10 @@ HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed002, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed003, TestSize.Level1)
 {
+    // NetsysController is compiled with NETMANAGER_TEST, so its service implementation
+    // is not initialised by default; install a mock-enabled one so the call does not
+    // reach netsysnative through real IPC and the result is deterministic.
+    NetsysControllerMockGuard netsysGuard({MOCK_SETNICTRAFFICALLOWED_API});
     NetManagerBaseAccessToken token;
     std::vector<std::string> ifaceName = {"wlan0"};
     auto ret = instance_->SetNicTrafficAllowed(ifaceName, false);
@@ -473,6 +492,10 @@ HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed003, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed004, TestSize.Level1)
 {
+    // NetsysController is compiled with NETMANAGER_TEST, so its service implementation
+    // is not initialised by default; install a mock-enabled one so the call does not
+    // reach netsysnative through real IPC and the result is deterministic.
+    NetsysControllerMockGuard netsysGuard({MOCK_SETNICTRAFFICALLOWED_API});
     NetManagerBaseAccessToken token;
     std::vector<std::string> ifaceName = {"wlan0"};
     auto ret = instance_->SetNicTrafficAllowed(ifaceName, true);
@@ -486,6 +509,10 @@ HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed004, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed005, TestSize.Level1)
 {
+    // NetsysController is compiled with NETMANAGER_TEST, so its service implementation
+    // is not initialised by default; install a mock-enabled one so the call does not
+    // reach netsysnative through real IPC and the result is deterministic.
+    NetsysControllerMockGuard netsysGuard({MOCK_SETNICTRAFFICALLOWED_API});
     NetManagerBaseAccessToken token;
     std::vector<std::string> ifaceName = {};
     auto ret = instance_->SetNicTrafficAllowed(ifaceName, false);
@@ -499,6 +526,10 @@ HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed005, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed006, TestSize.Level1)
 {
+    // NetsysController is compiled with NETMANAGER_TEST, so its service implementation
+    // is not initialised by default; install a mock-enabled one so the call does not
+    // reach netsysnative through real IPC and the result is deterministic.
+    NetsysControllerMockGuard netsysGuard({MOCK_SETNICTRAFFICALLOWED_API});
     NetManagerBaseAccessToken token;
     std::vector<std::string> ifaceName = {};
     auto ret = instance_->SetNicTrafficAllowed(ifaceName, true);

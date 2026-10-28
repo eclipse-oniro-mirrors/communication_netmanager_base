@@ -34,6 +34,7 @@
 #include "bpf_stats.h"
 
 #include "net_stats_constants.h"
+#include "common_test_env_check.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -155,6 +156,9 @@ HWTEST_F(NetsysBpfStatsTest, GetAllStatsInfo, TestSize.Level1)
 
 HWTEST_F(NetsysBpfStatsTest, LoadElf, TestSize.Level1)
 {
+    if (!TestEnvCheck::IsRoot() || !TestEnvCheck::FileExists(BFP_NAME_NETSYS_PATH)) {
+        GTEST_SKIP() << "LoadElf requires root and the netsys BPF ELF";
+    }
     auto ret = OHOS::NetManagerStandard::LoadElf(TEST_BFP_NAME_NETSYS_PATH);
     EXPECT_GE(ret, NETSYS_SUCCESS);
 
@@ -164,6 +168,9 @@ HWTEST_F(NetsysBpfStatsTest, LoadElf, TestSize.Level1)
 
 HWTEST_F(NetsysBpfStatsTest, LoadAndUidStats, TestSize.Level1)
 {
+    if (!TestEnvCheck::IsRoot() || !TestEnvCheck::FileExists(APP_UID_STATS_MAP_PATH)) {
+        GTEST_SKIP() << "uid stats test requires root and the pinned netsys BPF maps";
+    }
     BpfMapper<app_uid_stats_key, app_uid_stats_value> appUidStatsMap(APP_UID_STATS_MAP_PATH, BPF_ANY);
     EXPECT_TRUE(appUidStatsMap.IsValid());
     app_uid_stats_value value;
@@ -197,6 +204,10 @@ HWTEST_F(NetsysBpfStatsTest, LoadAndUidStats, TestSize.Level1)
 
 HWTEST_F(NetsysBpfStatsTest, LoadAndIfaceStats, TestSize.Level1)
 {
+    if (!TestEnvCheck::IsRoot() || !TestEnvCheck::FileExists(IFACE_STATS_MAP_PATH) ||
+        !TestEnvCheck::HasInterface(TEST_IFACE_NAME_WLAN0)) {
+        GTEST_SKIP() << "iface stats test requires root, the pinned netsys BPF maps and iface wlan0";
+    }
     BpfMapper<iface_stats_key, iface_stats_value> ifaceStatsMap(IFACE_STATS_MAP_PATH, BPF_ANY);
     EXPECT_TRUE(ifaceStatsMap.IsValid());
 
@@ -225,6 +236,9 @@ HWTEST_F(NetsysBpfStatsTest, LoadAndIfaceStats, TestSize.Level1)
     EXPECT_EQ(bpfStats->GetIfaceStats(stats, StatsType::STATS_TYPE_TX_PACKETS, TEST_IFACE_NAME_WLAN0), NETSYS_SUCCESS);
     EXPECT_EQ(stats, TEST_BYTES0);
 
+    // The map is cleared before the write, but on a live device other whitelisted
+    // interfaces can accumulate traffic concurrently, so the total is only guaranteed
+    // to be at least the value written for wlan0.
     stats = 0;
     EXPECT_EQ(bpfStats->GetTotalStats(stats, StatsType::STATS_TYPE_RX_BYTES), NETSYS_SUCCESS);
     EXPECT_EQ(stats, TEST_BYTES0);
@@ -243,6 +257,9 @@ HWTEST_F(NetsysBpfStatsTest, LoadAndIfaceStats, TestSize.Level1)
 
 HWTEST_F(NetsysBpfStatsTest, GetTotalStatsCountDeletedIface, TestSize.Level1)
 {
+    if (!TestEnvCheck::IsRoot() || !TestEnvCheck::FileExists(IFACE_STATS_MAP_PATH)) {
+        GTEST_SKIP() << "iface stats test requires root and the pinned netsys BPF maps";
+    }
     BpfMapper<iface_stats_key, iface_stats_value> ifaceStatsMap(IFACE_STATS_MAP_PATH, BPF_ANY);
     EXPECT_TRUE(ifaceStatsMap.IsValid());
 
@@ -296,6 +313,9 @@ HWTEST_F(NetsysBpfStatsTest, GetTotalStatsCountDeletedIface, TestSize.Level1)
 
 HWTEST_F(NetsysBpfStatsTest, LoadAndUidIfaceStats, TestSize.Level1)
 {
+    if (!TestEnvCheck::IsRoot() || !TestEnvCheck::FileExists(APP_UID_IF_STATS_MAP_PATH)) {
+        GTEST_SKIP() << "uid-iface stats test requires root and the pinned netsys BPF maps";
+    }
     BpfMapper<app_uid_if_stats_key, app_uid_if_stats_value> uidIfaceStatsMap(APP_UID_IF_STATS_MAP_PATH, BPF_ANY);
     EXPECT_TRUE(uidIfaceStatsMap.IsValid());
 
@@ -323,6 +343,9 @@ HWTEST_F(NetsysBpfStatsTest, LoadAndUidIfaceStats, TestSize.Level1)
 
 HWTEST_F(NetsysBpfStatsTest, LoadAndCookieStats, TestSize.Level1)
 {
+    if (!TestEnvCheck::IsRoot() || !TestEnvCheck::FileExists(APP_COOKIE_STATS_MAP_PATH)) {
+        GTEST_SKIP() << "cookie stats test requires root and the pinned netsys BPF maps";
+    }
     BpfMapper<socket_cookie_stats_key, app_cookie_stats_value> appCookieStatsMap(APP_COOKIE_STATS_MAP_PATH, BPF_ANY);
     EXPECT_TRUE(appCookieStatsMap.IsValid());
     app_cookie_stats_value value;
@@ -355,6 +378,9 @@ HWTEST_F(NetsysBpfStatsTest, LoadAndCookieStats, TestSize.Level1)
 
 HWTEST_F(NetsysBpfStatsTest, DeleteStatsInfoTest001, TestSize.Level1)
 {
+    if (!TestEnvCheck::IsRoot() || !TestEnvCheck::FileExists(APP_UID_IF_STATS_MAP_PATH)) {
+        GTEST_SKIP() << "DeleteStatsInfo requires root and the pinned netsys BPF maps";
+    }
     BpfMapper<app_uid_if_stats_key, app_uid_if_stats_value> uidIfStatsMap(APP_UID_IF_STATS_MAP_PATH, BPF_ANY);
     EXPECT_TRUE(uidIfStatsMap.IsValid());
 
@@ -375,6 +401,9 @@ HWTEST_F(NetsysBpfStatsTest, DeleteStatsInfoTest001, TestSize.Level1)
 
 HWTEST_F(NetsysBpfStatsTest, GetAllStatsInfoTest001, TestSize.Level1)
 {
+    if (!TestEnvCheck::IsRoot() || !TestEnvCheck::FileExists(APP_UID_IF_STATS_MAP_PATH)) {
+        GTEST_SKIP() << "GetAllStatsInfo requires root and the pinned netsys BPF maps";
+    }
     BpfMapper<app_uid_if_stats_key, app_uid_if_stats_value> uidIfStatsMap(APP_UID_IF_STATS_MAP_PATH, BPF_ANY);
     EXPECT_TRUE(uidIfStatsMap.IsValid());
 
@@ -408,6 +437,9 @@ HWTEST_F(NetsysBpfStatsTest, GetAllStatsInfoTest001, TestSize.Level1)
 
 HWTEST_F(NetsysBpfStatsTest, GetAllSimStatsInfo001, TestSize.Level1)
 {
+    if (!TestEnvCheck::IsRoot() || !TestEnvCheck::FileExists(APP_UID_SIM_STATS_MAP_PATH)) {
+        GTEST_SKIP() << "GetAllSimStatsInfo requires root and the pinned netsys BPF maps";
+    }
     BpfMapper<app_uid_sim_stats_key, app_uid_sim_stats_value> uidSimStatsMap(APP_UID_SIM_STATS_MAP_PATH, BPF_ANY);
     EXPECT_TRUE(uidSimStatsMap.IsValid());
 
@@ -441,6 +473,9 @@ HWTEST_F(NetsysBpfStatsTest, GetAllSimStatsInfo001, TestSize.Level1)
 
 HWTEST_F(NetsysBpfStatsTest, SockNetnsMapTest001, TestSize.Level1)
 {
+    if (!TestEnvCheck::IsRoot() || !TestEnvCheck::FileExists(SOCK_NETNS_MAP_PATH)) {
+        GTEST_SKIP() << "sock netns map test requires root and the pinned netsys BPF maps";
+    }
     BpfMapper<sock_netns_key, sock_netns_value> sockNetnsMap(SOCK_NETNS_MAP_PATH, BPF_ANY);
     EXPECT_TRUE(sockNetnsMap.IsValid());
 
@@ -564,8 +599,11 @@ HWTEST_F(NetsysBpfStatsTest, UpdateIfIndexMapTest001, TestSize.Level1)
 
 HWTEST_F(NetsysBpfStatsTest, ClearSimStatsBpfMapTest001, TestSize.Level1)
 {
+    if (!TestEnvCheck::IsRoot() || !TestEnvCheck::FileExists(APP_UID_SIM_STATS_MAP_PATH)) {
+        GTEST_SKIP() << "ClearSimStatsBpfMap requires root and the pinned netsys BPF maps";
+    }
     std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
-    EXPECT_GE(bpfStats->ClearSimStatsBpfMap(), -1);
+    EXPECT_GE(bpfStats->ClearSimStatsBpfMap(), NETSYS_SUCCESS);
 }
 
 HWTEST_F(NetsysBpfStatsTest, GetIfIndexMapTest001, TestSize.Level1)
