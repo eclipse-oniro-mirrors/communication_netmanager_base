@@ -102,6 +102,9 @@ static __always_inline bool get_match_tuple(struct __sk_buff *skb, struct match_
     }
     tuple->dir = dir;
     tuple->family = skb->family;
+    if (tuple->family != AF_INET && is_ipv4_format_skb(skb)) {
+        tuple->family = AF_INET;
+    }
     __u32 sock_uid = bpf_get_socket_uid(skb);
     tuple->appuid = sock_uid;
     tuple->uid = get_user_id(sock_uid);
