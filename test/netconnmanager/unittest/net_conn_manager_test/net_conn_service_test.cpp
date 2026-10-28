@@ -3285,5 +3285,65 @@ HWTEST_F(NetConnServiceTest, SetProxyOffTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 #endif // NETMANAGER_ENABLE_PAC_PROXY
+
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+HWTEST_F(NetConnServiceTest, RegisterNetSupplierInSleepTest001, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    ASSERT_NE(netConnService, nullptr);
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+
+    netConnService->isInSleep_.store(true);
+    uint32_t sleepSupplierId = 0;
+    auto ret = netConnService->RegisterNetSupplierAsync(NetBearType::BEARER_WIFI, "sleepSupplierTest",
+        netCaps, sleepSupplierId, callingUid);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    auto sleepSupplier = netConnService->FindNetSupplier(sleepSupplierId);
+    ASSERT_NE(sleepSupplier, nullptr);
+    auto sleepNetwork = sleepSupplier->GetNetwork();
+    ASSERT_NE(sleepNetwork, nullptr);
+    EXPECT_TRUE(sleepNetwork->forbidDetectionFlag_.load());
+
+    netConnService->isInSleep_.store(false);
+    uint32_t awakeSupplierId = 0;
+    ret = netConnService->RegisterNetSupplierAsync(NetBearType::BEARER_WIFI, "awakeSupplierTest",
+        netCaps, awakeSupplierId, callingUid);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    auto awakeSupplier = netConnService->FindNetSupplier(awakeSupplierId);
+    ASSERT_NE(awakeSupplier, nullptr);
+    auto awakeNetwork = awakeSupplier->GetNetwork();
+    ASSERT_NE(awakeNetwork, nullptr);
+    EXPECT_FALSE(awakeNetwork->forbidDetectionFlag_.load());
+}
+
+HWTEST_F(NetConnServiceTest, StartAllNetDetectionAfterSleepTest001, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    ASSERT_NE(netConnService, nullptr);
+    auto eventRunner = AppExecFwk::EventRunner::Create("SLEEP_DETECTION_TEST");
+    ASSERT_NE(eventRunner, nullptr);
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(eventRunner);
+    ASSERT_NE(netConnService->netConnEventHandler_, nullptr);
+
+    netConnService->isInSleep_.store(true);
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    uint32_t supplierId = 0;
+    auto ret = netConnService->RegisterNetSupplierAsync(NetBearType::BEARER_WIFI, "sleepStartAllSupplierTest",
+        netCaps, supplierId, IPCSkeleton::GetCallingUid());
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    auto supplier = netConnService->FindNetSupplier(supplierId);
+    ASSERT_NE(supplier, nullptr);
+    auto network = supplier->GetNetwork();
+    ASSERT_NE(network, nullptr);
+    EXPECT_TRUE(network->forbidDetectionFlag_.load());
+
+    netConnService->isInSleep_.store(false);
+    netConnService->StartAllNetDetection();
+    EXPECT_FALSE(network->forbidDetectionFlag_.load());
+}
+#endif // FEATURE_SUPPORT_POWERMANAGER
 } // namespace NetManagerStandard
 } // namespace OHOS

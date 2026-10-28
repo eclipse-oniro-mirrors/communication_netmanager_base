@@ -604,6 +604,10 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
     }
     std::shared_ptr<Network> network = std::make_shared<Network>(
         netId, supplierId, bearerType, netConnEventHandler_);
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    bool isInSleep = isInSleep_.load();
+    network->UpdateForbidDetectionFlag(isInSleep);
+#endif
     network->SetNetCaps(netCaps);
     network->UpdateDualStackProbeTime(dualStackProbeTime_);
     network->SetNetDetectionHandler(std::bind(&NetConnService::HandleDetectionResult, shared_from_this(),
@@ -829,8 +833,8 @@ void NetConnService::StopAllNetDetection()
                 NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
                 continue;
             }
-            pNetwork->StopNetDetection();
             pNetwork->UpdateForbidDetectionFlag(true);
+            pNetwork->StopNetDetection();
         }
     });
 }
@@ -860,20 +864,20 @@ void NetConnService::HandlePowerMgrEvent(int code)
 {
     if (code == STATE_ENTER_FORCESLEEP || code == STATE_ENTER_SLEEP_NOT_FORCE) {
         NETMGR_LOG_I("on receive enter sleep, code %{public}d.", code);
+        isInSleep_.store(true);
         if (netConnEventHandler_) {
             netConnEventHandler_->PostSyncTask([this]() {
                 this->StopAllNetDetection();
             });
         }
-        isInSleep_.store(true);
     } else if (code == STATE_EXIT_FORCESLEEP || code == STATE_EXIT_SLEEP_NOT_FORCE) {
         NETMGR_LOG_I("on receive exit sleep, code %{public}d.", code);
+        isInSleep_.store(false);
         if (netConnEventHandler_) {
             netConnEventHandler_->PostSyncTask([this]() {
                 this->StartAllNetDetection();
             });
         }
-        isInSleep_.store(false);
     }
 }
 #endif
