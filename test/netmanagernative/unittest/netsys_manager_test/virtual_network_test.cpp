@@ -73,7 +73,7 @@ HWTEST_F(VirtualNetWorkTest, RemoveUids001, TestSize.Level1)
 HWTEST_F(VirtualNetWorkTest, AddInterface001, TestSize.Level1)
 {
     std::string iface = "wlan0";
-    auto result = instance_->AddInterface(iface);
+    auto result = instance_->AddInterface(iface, false);
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
 
@@ -88,7 +88,7 @@ HWTEST_F(VirtualNetWorkTest, AddInterface002, TestSize.Level1)
 {
     std::string iface = "wlan0";
     EXPECT_TRUE(instance_->interfaces_.insert(iface).second);
-    auto result = instance_->AddInterface(iface);
+    auto result = instance_->AddInterface(iface, false);
     EXPECT_EQ(result, NETMANAGER_ERROR);
 }
 
@@ -98,6 +98,65 @@ HWTEST_F(VirtualNetWorkTest, RemoveInterface002, TestSize.Level1)
     instance_->interfaces_.clear();
     auto result = instance_->RemoveInterface(iface);
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(VirtualNetWorkTest, AddInterfaceLocalNetworkRouted001, TestSize.Level1)
+{
+    std::string iface = "wlan_proxy0";
+    auto result = instance_->AddInterface(iface, true);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+    EXPECT_EQ(instance_->localNetworkRoutedInterfaces_.count(iface), 1);
+    result = instance_->AddInterface(iface, true);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+
+    result = instance_->RemoveInterface(iface);
+    EXPECT_TRUE(result == NETMANAGER_SUCCESS || result == NETMANAGER_ERROR);
+    if (result == NETMANAGER_SUCCESS) {
+        EXPECT_EQ(instance_->localNetworkRoutedInterfaces_.count(iface), 0);
+    }
+    instance_->interfaces_.erase(iface);
+    instance_->localNetworkRoutedInterfaces_.erase(iface);
+}
+
+HWTEST_F(VirtualNetWorkTest, AddInterfaceLocalNetworkRouted002, TestSize.Level1)
+{
+    std::string iface = "wlan_no_proxy0";
+    auto result = instance_->AddInterface(iface, false);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+    EXPECT_EQ(instance_->localNetworkRoutedInterfaces_.count(iface), 0);
+
+    result = instance_->RemoveInterface(iface);
+    EXPECT_TRUE(result == NETMANAGER_SUCCESS || result == NETMANAGER_ERROR);
+    EXPECT_EQ(instance_->localNetworkRoutedInterfaces_.count(iface), 0);
+    instance_->interfaces_.erase(iface);
+    instance_->localNetworkRoutedInterfaces_.erase(iface);
+
+    std::string notExistIface = "wlan_not_exist0";
+    result = instance_->RemoveInterface(notExistIface);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(VirtualNetWorkTest, AddInterfaceRouteFail001, TestSize.Level1)
+{
+    std::string iface = "wlan_test_interface_fail_0";
+    auto result = instance_->AddInterface(iface, false);
+
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+    EXPECT_EQ(instance_->interfaces_.count(iface), 0);
+    EXPECT_EQ(instance_->localNetworkRoutedInterfaces_.count(iface), 0);
+}
+
+HWTEST_F(VirtualNetWorkTest, RemoveInterfaceRouteFail001, TestSize.Level1)
+{
+    std::string iface = "wlan_test_interface_fail_1";
+    instance_->interfaces_.insert(iface);
+    instance_->localNetworkRoutedInterfaces_.erase(iface);
+
+    auto result = instance_->RemoveInterface(iface);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+
+    instance_->interfaces_.erase(iface);
+    instance_->localNetworkRoutedInterfaces_.erase(iface);
 }
 
 #ifdef SUPPORT_SYSVPN

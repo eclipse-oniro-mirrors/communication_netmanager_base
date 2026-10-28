@@ -47,6 +47,33 @@ void NetLinkInfoTest::SetUp() {}
 
 void NetLinkInfoTest::TearDown() {}
 
+HWTEST_F(NetLinkInfoTest, LocalNetworkRoutedParcelAndCopy, TestSize.Level1)
+{
+    for (bool enabled : {false, true}) {
+        sptr<NetLinkInfo> info = new NetLinkInfo();
+        EXPECT_FALSE(info->isLocalNetworkRouted_);
+        info->isLocalNetworkRouted_ = enabled;
+        NetLinkInfo copied(*info);
+        NetLinkInfo assigned;
+        assigned = copied;
+        EXPECT_EQ(assigned.isLocalNetworkRouted_, enabled);
+
+        Parcel parcel;
+        ASSERT_TRUE(assigned.Marshalling(parcel));
+        auto decoded = NetLinkInfo::Unmarshalling(parcel);
+        ASSERT_NE(decoded, nullptr);
+        EXPECT_EQ(decoded->isLocalNetworkRouted_, enabled);
+
+        Parcel staticParcel;
+        ASSERT_TRUE(NetLinkInfo::Marshalling(staticParcel, info));
+        decoded = NetLinkInfo::Unmarshalling(staticParcel);
+        ASSERT_NE(decoded, nullptr);
+        EXPECT_EQ(decoded->isLocalNetworkRouted_, enabled);
+        assigned.Initialize();
+        EXPECT_FALSE(assigned.isLocalNetworkRouted_);
+    }
+}
+
 sptr<NetLinkInfo> GetNetLinkInfo()
 {
     sptr<NetLinkInfo> netLinkInfo = (std::make_unique<NetLinkInfo>()).release();

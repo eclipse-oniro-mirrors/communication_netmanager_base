@@ -499,14 +499,16 @@ uint32_t RouteManager::FindVpnIdByInterfacename(VpnRuleIdType type, const std::s
 }
 #endif // SUPPORT_SYSVPN
 
-int32_t RouteManager::AddInterfaceToVirtualNetwork(int32_t netId, const std::string &interfaceName)
+int32_t RouteManager::AddInterfaceToVirtualNetwork(int32_t netId, const std::string &interfaceName,
+    bool isLocalNetworkRouted)
 {
-    return ModifyVirtualNetBasedRules(netId, interfaceName, true);
+    return ModifyVirtualNetBasedRules(netId, interfaceName, true, isLocalNetworkRouted);
 }
 
-int32_t RouteManager::RemoveInterfaceFromVirtualNetwork(int32_t netId, const std::string &interfaceName)
+int32_t RouteManager::RemoveInterfaceFromVirtualNetwork(int32_t netId, const std::string &interfaceName,
+    bool isLocalNetworkRouted)
 {
-    if (ModifyVirtualNetBasedRules(netId, interfaceName, false) != ROUTEMANAGER_SUCCESS) {
+    if (ModifyVirtualNetBasedRules(netId, interfaceName, false, isLocalNetworkRouted) != ROUTEMANAGER_SUCCESS) {
         return ROUTEMANAGER_ERROR;
     }
 #ifdef SUPPORT_SYSVPN
@@ -522,7 +524,8 @@ int32_t RouteManager::RemoveInterfaceFromVirtualNetwork(int32_t netId, const std
 #endif // SUPPORT_SYSVPN
 }
 
-int32_t RouteManager::ModifyVirtualNetBasedRules(int32_t netId, const std::string &ifaceName, bool add)
+int32_t RouteManager::ModifyVirtualNetBasedRules(int32_t netId, const std::string &ifaceName, bool add,
+    bool isLocalNetworkRouted)
 {
     NETNATIVE_LOGI("ModifyVirtualNetBasedRules,add===%{public}d", add);
     uint32_t table = GetRouteTableFromType(RouteManager::VPN_NETWORK, ifaceName);
@@ -532,7 +535,10 @@ int32_t RouteManager::ModifyVirtualNetBasedRules(int32_t netId, const std::strin
     }
 
     // If the rule fails to be added, continue to execute the next rule
-    int32_t ret = UpdateVpnOutputToLocalRule(ifaceName, add);
+    int32_t ret = ROUTEMANAGER_SUCCESS;
+    if (!isLocalNetworkRouted) {
+        ret = UpdateVpnOutputToLocalRule(ifaceName, add);
+    }
 #ifdef SUPPORT_SYSVPN
     ret += UpdateVpnSystemPermissionRule(netId, table, add, ifaceName);
     ret += UpdateExplicitNetworkRuleWithUid(netId, table, PERMISSION_NONE, UID_ROOT, UID_ROOT, add, ifaceName);

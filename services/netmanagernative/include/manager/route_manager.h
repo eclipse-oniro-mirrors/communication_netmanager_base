@@ -181,7 +181,8 @@ public:
      * @param interfaceName Output network device name of the route item
      * @return Returns 0, add interface to virtual network successfully, otherwise it will fail
      */
-    static int32_t AddInterfaceToVirtualNetwork(int32_t netId, const std::string &interfaceName);
+    static int32_t AddInterfaceToVirtualNetwork(int32_t netId, const std::string &interfaceName,
+        bool isLocalNetworkRouted = false);
 
     /**
      * Remove interface from virtual network
@@ -190,7 +191,8 @@ public:
      * @param interfaceName Output network device name of the route item
      * @return Returns 0, remove interface from virtual network successfully, otherwise it will fail
      */
-    static int32_t RemoveInterfaceFromVirtualNetwork(int32_t netId, const std::string &interfaceName);
+    static int32_t RemoveInterfaceFromVirtualNetwork(int32_t netId, const std::string &interfaceName,
+        bool isLocalNetworkRouted = false);
 
     static int32_t AddUsersToVirtualNetwork(int32_t netId, const std::string &interfaceName,
                                             const std::vector<NetManagerStandard::UidRange> &uidRanges);
@@ -375,7 +377,8 @@ private:
                                          bool add);
     static int32_t UpdateVirtualNetwork(int32_t netId, const std::string &interfaceName,
                                         const std::vector<NetManagerStandard::UidRange> &uidRanges, bool add);
-    static int32_t ModifyVirtualNetBasedRules(int32_t netId, const std::string &ifaceName, bool add);
+    static int32_t ModifyVirtualNetBasedRules(int32_t netId, const std::string &ifaceName, bool add,
+        bool isLocalNetworkRouted = false);
 
     static int32_t UpdateLocalNetwork(uint16_t netId, const std::string &interfaceName, bool add);
     static int32_t UpdateIncomingPacketMark(uint16_t netId, const std::string &interfaceName,

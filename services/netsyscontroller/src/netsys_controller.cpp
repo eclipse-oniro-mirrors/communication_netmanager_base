@@ -195,7 +195,8 @@ int32_t NetsysController::NetworkDelUids(int32_t netId, const std::vector<int32_
     return netsysService_->NetworkDelUids(netId, uidRanges);
 }
 
-int32_t NetsysController::NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType)
+int32_t NetsysController::NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType,
+    bool isLocalNetworkRouted)
 {
     NETMGR_LOG_I("Add network interface: netId[%{public}d], iface[%{public}s, bearerType[%{public}u]]", netId,
                  iface.c_str(), netBearerType);
@@ -205,7 +206,7 @@ int32_t NetsysController::NetworkAddInterface(int32_t netId, const std::string &
         return NETSYS_NETSYSSERVICE_NULL;
     }
     // LCOV_EXCL_STOP
-    return netsysService_->NetworkAddInterface(netId, iface, netBearerType);
+    return netsysService_->NetworkAddInterface(netId, iface, netBearerType, isLocalNetworkRouted);
 }
 
 int32_t NetsysController::NetworkRemoveInterface(int32_t netId, const std::string &iface)

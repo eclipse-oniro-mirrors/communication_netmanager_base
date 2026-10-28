@@ -774,6 +774,39 @@ HWTEST_F(RouteManagerTest, AddInterfaceToVirtualNetwork002, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 }
 
+HWTEST_F(RouteManagerTest, AddInterfaceToVirtualNetworkRouted001, TestSize.Level1)
+{
+    uint16_t testNetId = 154;
+    std::string testInterfaceName = "testProxy0";
+    auto ret = RouteManager::AddInterfaceToVirtualNetwork(testNetId, testInterfaceName, true);
+    EXPECT_EQ(ret, 0);
+
+    ret = RouteManager::RemoveInterfaceFromVirtualNetwork(testNetId, testInterfaceName, true);
+    EXPECT_TRUE(ret == 0 || ret == -1);
+}
+
+HWTEST_F(RouteManagerTest, AddInterfaceToVirtualNetworkRouted002, TestSize.Level1)
+{
+    uint16_t testNetId = 154;
+    std::string testInterfaceName = "testNoProxy0";
+    auto ret = RouteManager::AddInterfaceToVirtualNetwork(testNetId, testInterfaceName, false);
+    EXPECT_EQ(ret, 0);
+
+    ret = RouteManager::RemoveInterfaceFromVirtualNetwork(testNetId, testInterfaceName, false);
+    EXPECT_TRUE(ret == 0 || ret == -1);
+}
+
+HWTEST_F(RouteManagerTest, AddInterfaceToVirtualNetworkFail001, TestSize.Level1)
+{
+    uint16_t testNetId = 154;
+    std::string testInterfaceName = "testNameInterfaceFail0";
+    auto ret = RouteManager::AddInterfaceToVirtualNetwork(testNetId, testInterfaceName, false);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+
+    ret = RouteManager::RemoveInterfaceFromVirtualNetwork(testNetId, testInterfaceName, false);
+    EXPECT_EQ(ret, -1);
+}
+
 HWTEST_F(RouteManagerTest, EnableDistributedClientNet001, TestSize.Level1)
 {
     std::string virNicAddr;

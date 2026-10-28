@@ -126,7 +126,8 @@ public:
      * @param iface Network port device name
      * @return Return the return value of the netsys interface call
      */
-    int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType);
+    int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType,
+        bool isLocalNetworkRouted = false);
 
     /**
      * Delete network port device

@@ -956,7 +956,7 @@ int32_t NetsysNativeServiceProxy::InterfaceSetIffUp(const std::string &ifaceName
 }
 
 int32_t NetsysNativeServiceProxy::NetworkAddInterface(int32_t netId, const std::string &iface,
-                                                      NetBearType netBearerType)
+    NetBearType netBearerType, bool isLocalNetworkRouted)
 {
     NETNATIVE_LOGI("Begin to NetworkAddInterface");
     MessageParcel data;
@@ -969,7 +969,7 @@ int32_t NetsysNativeServiceProxy::NetworkAddInterface(int32_t netId, const std::
     if (!data.WriteString(iface)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteUint8(netBearerType)) {
+    if (!data.WriteUint8(netBearerType) || !data.WriteBool(isLocalNetworkRouted)) {
         return ERR_FLATTEN_OBJECT;
     }
 

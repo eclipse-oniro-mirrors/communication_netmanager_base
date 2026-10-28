@@ -41,7 +41,7 @@ public:
      *
      * @return Returns 0, successfully add an interface to a network, otherwise it will fail
      */
-    virtual int32_t AddInterface(std::string &) = 0;
+    virtual int32_t AddInterface(std::string &interfaceName, bool isLocalNetworkRouted = false) = 0;
 
     /**
      * Remove an interface from a network

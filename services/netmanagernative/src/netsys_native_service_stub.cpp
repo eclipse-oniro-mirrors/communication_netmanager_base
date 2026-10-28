@@ -1124,8 +1124,9 @@ int32_t NetsysNativeServiceStub::CmdNetworkAddInterface(MessageParcel &data, Mes
     int32_t netId = data.ReadInt32();
     std::string iface = data.ReadString();
     NetBearType netBearerType = static_cast<NetBearType>(data.ReadUint8());
+    bool isLocalNetworkRouted = data.ReadBool();
 
-    int32_t result = NetworkAddInterface(netId, iface, netBearerType);
+    int32_t result = NetworkAddInterface(netId, iface, netBearerType, isLocalNetworkRouted);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("NetworkAddInterface has recved result %{public}d", result);
 
