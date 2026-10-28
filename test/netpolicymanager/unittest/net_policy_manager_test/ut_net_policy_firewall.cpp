@@ -171,7 +171,7 @@ HWTEST_F(UtNetPolicyFirewall, SetDeviceIdleTrustlist001, TestSize.Level1)
     // The oversize precondition must not leak into later tests (e.g. HandleEvent001):
     // restore the device idle allowed list so cases stay independent of each other.
     netPolicyFirewall_->deviceIdleAllowedList_.clear();
- }
+    }
 }
 
 /**
