@@ -107,6 +107,7 @@ void NetsysNativeService::OnStop()
     manager_->StopListener();
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     bpfNetFirewall_->StopListener();
+    UnregisterFirewallEgressHandler();
     auto ret = OHOS::NetManagerStandard::UnloadElf(BFP_NAME_NETSYS_PATH);
     NETNATIVE_LOGI("UnloadElf is %{public}d", ret);
     if (ret == ElfLoadError::ELF_LOAD_ERR_NONE) {
@@ -184,6 +185,43 @@ bool NetsysNativeService::Init()
     AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     return true;
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+void NetsysNativeService::RegisterFirewallEgressHandler()
+{
+    std::lock_guard<std::mutex> guard(egressHandlerMutex_);
+    if (bpfNetFirewall_ == nullptr || socketDiag_ != nullptr || egressSocketCloseQueue_ != nullptr) {
+        return;
+    }
+    auto diag = std::make_shared<OHOS::nmd::NetLinkSocketDiag>();
+    auto queue = std::make_shared<ffrt::queue>("FirewallEgressSocketClose");
+    bpfNetFirewall_->RegisterInterceptHandler([diag, queue](
+        const OHOS::NetManagerStandard::InterceptRecord &record, uint8_t family) {
+        OHOS::nmd::SocketTuple tuple;
+        tuple.proto = IPPROTO_TCP;
+        tuple.family = family;
+        tuple.localAddress = record.localIp;
+        tuple.localPort = record.localPort;
+        tuple.remoteAddress = record.remoteIp;
+        tuple.remotePort = record.remotePort;
+        queue->submit([diag, tuple]() {
+            diag->DestroySocketByTuple(tuple);
+        });
+    });
+    socketDiag_ = diag;
+    egressSocketCloseQueue_ = queue;
+}
+
+void NetsysNativeService::UnregisterFirewallEgressHandler()
+{
+    std::lock_guard<std::mutex> guard(egressHandlerMutex_);
+    if (bpfNetFirewall_ != nullptr) {
+        bpfNetFirewall_->RegisterInterceptHandler(nullptr);
+    }
+    egressSocketCloseQueue_ = nullptr;
+    socketDiag_ = nullptr;
+}
+#endif
 
 void NetsysNativeService::OnNetManagerRestart()
 {
@@ -1122,6 +1160,7 @@ int32_t NetsysNativeService::SetFirewallRules(NetFirewallRuleType type,
 {
     NETNATIVE_LOGI("NetsysNativeService::SetFirewallRules: size=%{public}zu isFinish=%{public}" PRId32, ruleList.size(),
                    isFinish);
+    RegisterFirewallEgressHandler();
     int32_t ret = bpfNetFirewall_->SetFirewallRules(type, ruleList, isFinish);
     if (ret != NETSYS_SUCCESS) {
         NETNATIVE_LOGI("NetsysNativeService::SetFirewallRules: error ret:%{public}d", ret);
@@ -1135,6 +1174,7 @@ int32_t NetsysNativeService::SetFirewallDefaultAction(int32_t userId, FirewallRu
     FirewallRuleAction outDefault)
 {
     NETNATIVE_LOGI("NetsysNativeService::SetFirewallDefaultAction");
+    RegisterFirewallEgressHandler();
     int32_t ret = bpfNetFirewall_->SetFirewallDefaultAction(userId, inDefault, outDefault);
     return ret;
 }
@@ -1162,6 +1202,7 @@ int32_t NetsysNativeService::ClearFirewallRules(NetFirewallRuleType type)
         case NetFirewallRuleType::RULE_ALL:
             ret = bpfNetFirewall_->ClearFirewallRules(NetFirewallRuleType::RULE_ALL);
             ret += netsysService_->ClearFirewallRules(NetFirewallRuleType::RULE_ALL);
+            UnregisterFirewallEgressHandler();
             break;
         default:
             break;

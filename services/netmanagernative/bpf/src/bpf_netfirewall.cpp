@@ -849,6 +849,37 @@ int32_t NetsysBpfNetFirewall::UnregisterCallback(const sptr<NetsysNative::INetFi
     return -1;
 }
 
+void NetsysBpfNetFirewall::RegisterInterceptHandler(std::function<void(const InterceptRecord &, uint8_t)> handler)
+{
+    std::lock_guard<std::mutex> guard(handlerMutex_);
+    interceptHandler_ = std::move(handler);
+}
+
+void NetsysBpfNetFirewall::NotifyEgressIntercept(const InterceptEvent &info, const sptr<InterceptRecord> &record)
+{
+    if (info.dir != EGRESS || info.protocol != IPPROTO_TCP || record == nullptr) {
+        return;
+    }
+    std::function<void(const InterceptRecord &, uint8_t)> handler;
+    {
+        std::lock_guard<std::mutex> guard(handlerMutex_);
+        handler = interceptHandler_;
+    }
+    if (handler == nullptr) {
+        return;
+    }
+    InterceptRecord destroyRecord{};
+    destroyRecord.localIp = record->localIp;
+    destroyRecord.remoteIp = record->remoteIp;
+    destroyRecord.localPort = BitmapManager::Nstohl(info.dport);
+    destroyRecord.remotePort = BitmapManager::Nstohl(info.sport);
+    destroyRecord.protocol = record->protocol;
+    destroyRecord.appUid = record->appUid;
+    destroyRecord.time = record->time;
+    destroyRecord.domain = record->domain;
+    handler(destroyRecord, static_cast<uint8_t>(info.family));
+}
+
 void NetsysBpfNetFirewall::NotifyInterceptEvent(InterceptEvent *info)
 {
     if (!info) {
@@ -885,6 +916,7 @@ void NetsysBpfNetFirewall::NotifyInterceptEvent(InterceptEvent *info)
         record->remoteIp = srcIp;
     }
     record->domain = DecodeDomainFromKey(info->domainData);
+    NotifyEgressIntercept(*info, record);
     std::lock_guard<std::mutex> guard(callbackMutex_);
     for (auto callback : callbacks_) {
         callback->OnIntercept(record);

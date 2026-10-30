@@ -155,6 +155,14 @@ public:
     int32_t UnregisterCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
 
     /**
+     * Register an internal handler invoked for egress TCP intercept events.
+     * Only used inside netmanagernative to close the intercepted socket.
+     *
+     * @param handler handler invoked with the parsed intercept record and address family
+     */
+    void RegisterInterceptHandler(std::function<void(const InterceptRecord &, uint8_t family)> handler);
+
+    /**
      * Load SA on demand
      *
      * @param systemAbilityId id of SA want to load
@@ -247,6 +255,8 @@ private:
 
     void NotifyInterceptEvent(InterceptEvent *info);
 
+    void NotifyEgressIntercept(const InterceptEvent &info, const sptr<InterceptRecord> &record);
+
     static void ConntrackGcTask();
 
     uint64_t GetNowMs();
@@ -307,6 +317,8 @@ private:
     std::unique_ptr<std::thread> thread_;
     std::vector<sptr<NetsysNative::INetFirewallCallback>> callbacks_;
     std::mutex callbackMutex_;
+    std::function<void(const InterceptRecord &, uint8_t)> interceptHandler_;
+    std::mutex handlerMutex_;
     static std::atomic<bool> keepGc_;
     std::unique_ptr<std::thread> gcThread_;
     static std::unique_ptr<BpfMapper<CtKey, CtVaule>> ctRdMap_, ctWrMap_;

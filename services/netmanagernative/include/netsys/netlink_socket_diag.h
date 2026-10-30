@@ -34,6 +34,15 @@ namespace {
         DESTROY_DEFAULT,
     };
 }
+struct SocketTuple {
+    uint8_t proto = IPPROTO_TCP;
+    uint8_t family = AF_INET;
+    std::string localAddress;
+    uint32_t localPort = 0;
+    std::string remoteAddress;
+    uint32_t remotePort = 0;
+};
+
 class NetLinkSocketDiag final {
 public:
     NetLinkSocketDiag() = default;
@@ -58,6 +67,15 @@ public:
     void DestroyLiveSocketsWithUid(const std::string &ipAddr, uint32_t uid);
     int32_t GetConnectOwnerUid(uint8_t proto, uint8_t family, const std::string &localAddress, uint32_t localPort,
                                const std::string &remoteAddress, uint32_t remotePort, int32_t &uid);
+
+    /**
+     * Destroy the TCP socket matching the exact 5-tuple.
+     *
+     * @param tuple local/remote address and port (host byte order)
+     * @return The result of the method is returned.
+     */
+    int32_t DestroySocketByTuple(const SocketTuple &tuple);
+
     int32_t GetSystemNetPortStates(NetManagerStandard::NetPortStatesInfo &netPortStatesInfo);
     bool GetTcpNetPortStatesInfo(const inet_diag_msg* msg, NetManagerStandard::NetPortStatesInfo& netPortStatesInfo,
         const uint32_t pid);
@@ -82,6 +100,9 @@ private:
     void SockDiagDumpCallback(uint8_t proto, const inet_diag_msg *msg, const std::string &ipAddr, bool excludeLoopback);
     void SockDiagUidDumpCallback(uint8_t proto, const inet_diag_msg *msg, const DestroyFilter& destroy);
     int32_t ProcessSockDiagUidDumpResponse(uint8_t proto, const DestroyFilter& destroy);
+    int32_t SendTupleDumpRequest(const SocketTuple &tuple);
+    int32_t ProcessSockDiagTupleDumpResponse(uint8_t proto);
+    bool EnsureNetlinkSocket();
     bool CreateNetlinkSocketForQueryUid();
     int32_t QueryConnectOwnerUid(uint8_t proto, uint8_t family, const std::string &localAddress, uint32_t localPort,
                                  const std::string &remoteAddress, uint32_t remotePort, int32_t &uid);
