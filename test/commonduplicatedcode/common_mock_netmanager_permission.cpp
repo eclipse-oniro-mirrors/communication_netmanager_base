@@ -53,5 +53,11 @@ bool NetManagerPermission::CheckNetSysInternalPermission(const std::string &perm
     return true;
 }
 
+bool NetManagerPermission::CheckUidPermission(const std::vector<uint32_t> &allowedUids)
+{
+    NETMGR_LOG_D("allowedUids size: %{public}zu", allowedUids.size());
+    return true;
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

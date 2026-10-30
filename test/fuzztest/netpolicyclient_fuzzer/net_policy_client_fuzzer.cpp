@@ -14,6 +14,7 @@
  */
 
 #include <securec.h>
+#include <cstdlib>
 #include <thread>
 
 #include "i_net_policy_service.h"
@@ -107,6 +108,11 @@ void Init()
         DelayedSingleton<NetPolicyService>::GetInstance()->Init();
         g_isInited = true;
     }
+}
+
+void DestroyServiceInstance()
+{
+    DelayedSingleton<NetPolicyService>::DestroyInstance();
 }
 
 int32_t OnRemoteRequest(uint32_t code, MessageParcel &data)
@@ -794,6 +800,21 @@ void FactoryResetPoliciesFuzzTest(const uint8_t *data, size_t size)
 } // namespace NetManagerStandard
 } // namespace OHOS
 
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv)
+{
+    /* Pre-create the NetPolicyService singleton here so its static shared_ptr
+     * destructor is registered before the atexit handler below. Per the LIFO
+     * order of atexit, the handler runs first at process exit and destroys the
+     * service while the ffrt runtime is still alive. Without this, the static
+     * destructor of DelayedSingleton<NetPolicyService>::instance_ runs at the
+     * end of the exit chain and crashes in ffrt_queue_destroy
+     * (ffrt::BaseQueue::Stop, SIGSEGV on NULL), which also aborts the process
+     * before __gcov_dump writes the coverage data. */
+    OHOS::NetManagerStandard::Init();
+    atexit(OHOS::NetManagerStandard::DestroyServiceInstance);
+    return 0;
+}
+
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
@@ -815,6 +836,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::UnregisterNetPolicyCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::GetDeviceIdleTrustlistFuzzTest(data, size);
     OHOS::NetManagerStandard::GetBackgroundPolicyFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetBackgroundPolicyFuzzTest(data, size);
     OHOS::NetManagerStandard::SetPowerSavePolicyFuzzTest(data, size);
     OHOS::NetManagerStandard::CheckPermissionFuzzTest(data, size);
     OHOS::NetManagerStandard::SetNetworkAccessPolicyFuzzTest(data, size);

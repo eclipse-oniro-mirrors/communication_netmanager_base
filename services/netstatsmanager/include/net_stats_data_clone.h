@@ -22,8 +22,14 @@
 #include "ffrt.h"
 namespace OHOS {
 namespace NetManagerStandard {
+/* Redirected for test/fuzz binaries only; see net_stats_database_defines.h. */
+#ifdef NETMANAGER_TEST_DB_REDIRECT
+constexpr const char* NET_STATS_DATA_BACKUP_FILE =
+    "/data/local/tmp/netmanager_base_test_db/net_stats_data_backup.txt";
+#else
 constexpr const char* NET_STATS_DATA_BACKUP_FILE =
     "/data/service/el1/public/netmanager/net_stats_data_backup.txt";
+#endif
 class NetStatsDataClone {
 public:
     static NetStatsDataClone &GetInstance();
