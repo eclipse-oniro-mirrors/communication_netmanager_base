@@ -1315,6 +1315,56 @@ int32_t NetConnServiceProxy::RefreshGlobalHttpProxy(const sptr<IRefreshHttpProxy
     return ret;
 }
 
+int32_t NetConnServiceProxy::RegisterHttpProxyCallback(const sptr<IHttpProxyCallback> &callback)
+{
+    if (callback == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    sptr<IRemoteObject> remote = callback->AsObject();
+    if (remote == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!data.WriteRemoteObject(remote)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    MessageParcel reply;
+    int32_t ret = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_HTTP_PROXY_CALLBACK),
+        data, reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    return reply.ReadInt32(ret) ? ret : NETMANAGER_ERR_READ_REPLY_FAIL;
+}
+
+int32_t NetConnServiceProxy::UnregisterHttpProxyCallback(const sptr<IHttpProxyCallback> &callback)
+{
+    if (callback == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    sptr<IRemoteObject> remote = callback->AsObject();
+    if (remote == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!data.WriteRemoteObject(remote)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    MessageParcel reply;
+    int32_t ret = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_HTTP_PROXY_CALLBACK),
+        data, reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    return reply.ReadInt32(ret) ? ret : NETMANAGER_ERR_READ_REPLY_FAIL;
+}
+
 int32_t NetConnServiceProxy::SetPacUrl(const std::string &pacUrl)
 {
     auto fun = [&](uint32_t code, MessageParcel &data, MessageParcel &reply) {

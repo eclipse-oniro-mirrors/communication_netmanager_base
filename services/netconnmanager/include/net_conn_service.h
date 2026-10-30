@@ -37,6 +37,7 @@
 #include "net_conn_service_iface.h"
 #include "net_conn_service_stub.h"
 #include "i_refresh_http_proxy_callback.h"
+#include "i_http_proxy_callback.h"
 #include "net_supplier.h"
 #include "netsys_controller_callback.h"
 #include "network.h"
@@ -351,6 +352,8 @@ public:
     int32_t GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy) override;
 
     int32_t RefreshGlobalHttpProxy(const sptr<IRefreshHttpProxyCallback> &callback) override;
+    int32_t RegisterHttpProxyCallback(const sptr<IHttpProxyCallback> &callback) override;
+    int32_t UnregisterHttpProxyCallback(const sptr<IHttpProxyCallback> &callback) override;
 
     /**
      * Get net id by identifier
@@ -539,6 +542,7 @@ private:
                                  NetBearType supplierType, uint32_t uid);
     void SendAllRequestToNetwork(sptr<NetSupplier> supplier);
     void FindBestNetworkForAllRequest();
+    void NotifyNetworkSelectionChanged(bool defaultSupplierChanged);
     void MakeDefaultNetWork(sptr<NetSupplier> &oldService, sptr<NetSupplier> &newService);
     void NotFindBestSupplier(uint32_t reqId, const std::shared_ptr<NetActivate> &active,
                              const sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback);
@@ -696,6 +700,18 @@ private:
     bool refreshResultReady_ = false;
     std::condition_variable refreshResultCv_;
     std::set<sptr<IRefreshHttpProxyCallback>> refreshCallbacks_;
+    class HttpProxyDeathRecipient : public IRemoteObject::DeathRecipient {
+    public:
+        explicit HttpProxyDeathRecipient(const std::weak_ptr<NetConnService> &service) : service_(service) {}
+        void OnRemoteDied(const wptr<IRemoteObject> &remote) override;
+    private:
+        std::weak_ptr<NetConnService> service_;
+    };
+    std::mutex httpProxyCallbacksMutex_;
+    std::map<sptr<IRemoteObject>, std::pair<sptr<IHttpProxyCallback>, sptr<HttpProxyDeathRecipient>>>
+        httpProxyCallbacks_;
+    void RemoveHttpProxyCallback(const sptr<IRemoteObject> &remote);
+    void NotifyHttpProxyChanged();
     std::chrono::steady_clock::time_point lastRefreshTime_;
     HttpProxy lastRefreshProxy_;
     static constexpr uint32_t REFRESH_RATE_LIMIT_S = 10;

@@ -24,6 +24,7 @@
 #include "net_interface_callback_stub.h"
 #include "net_specifier.h"
 #include "refresh_http_proxy_callback_stub.h"
+#include "http_proxy_callback_stub.h"
 #include "net_all_capabilities.h"
 #include "net_conn_service_proxy.h"
 
@@ -301,6 +302,14 @@ public:
 };
 
 class NullObjectPreAirplaneCallback : public PreAirplaneCallbackTest {
+public:
+    sptr<IRemoteObject> AsObject() override
+    {
+        return nullptr;
+    }
+};
+
+class NullObjectHttpProxyCallback : public HttpProxyCallbackStub {
 public:
     sptr<IRemoteObject> AsObject() override
     {
@@ -736,6 +745,30 @@ HWTEST_F(NetConnServiceProxyTest, RefreshGlobalHttpProxyTest002, TestSize.Level1
     sptr<IRefreshHttpProxyCallback> callback = nullptr;
     int32_t ret = instance_->RefreshGlobalHttpProxy(callback);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: HttpProxyCallbackRequestBranches
+ * @tc.desc: Test HTTP proxy callback request parameter, IPC failure, and reply failure branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceProxyTest, HttpProxyCallbackRequestBranches, TestSize.Level1)
+{
+    EXPECT_EQ(instance_->RegisterHttpProxyCallback(nullptr), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(instance_->UnregisterHttpProxyCallback(nullptr), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    sptr<IHttpProxyCallback> nullObjectCallback = new NullObjectHttpProxyCallback();
+    EXPECT_EQ(instance_->RegisterHttpProxyCallback(nullObjectCallback), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(instance_->UnregisterHttpProxyCallback(nullObjectCallback), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    sptr<IHttpProxyCallback> callback = new HttpProxyCallbackStub();
+    EXPECT_EQ(instance_->RegisterHttpProxyCallback(callback), NETMANAGER_SUCCESS);
+    EXPECT_EQ(instance_->UnregisterHttpProxyCallback(callback), NETMANAGER_SUCCESS);
+    remoteObj_->SetErrorCode(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
+    EXPECT_EQ(instance_->RegisterHttpProxyCallback(callback), NETMANAGER_ERR_OPERATION_FAILED);
+    EXPECT_EQ(instance_->UnregisterHttpProxyCallback(callback), NETMANAGER_ERR_OPERATION_FAILED);
+    remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
+    remoteObj_->SetDeadFlowReplyMode(DEAD_FLOW_REPLY_SKIP_RESULT);
+    EXPECT_EQ(instance_->RegisterHttpProxyCallback(callback), NETMANAGER_ERR_READ_REPLY_FAIL);
+    EXPECT_EQ(instance_->UnregisterHttpProxyCallback(callback), NETMANAGER_ERR_READ_REPLY_FAIL);
 }
 
 /**

@@ -23,6 +23,7 @@
 #include "common_net_conn_callback_test.h"
 #include "net_conn_service_stub_test.h"
 #include "refresh_http_proxy_callback_stub.h"
+#include "http_proxy_callback_stub.h"
 #include "net_interface_callback_stub.h"
 #include "netmanager_base_test_security.h"
 #include "net_conn_types.h"
@@ -497,6 +498,30 @@ HWTEST_F(NetConnServiceStubTest, OnRefreshGlobalHttpProxyTest002, TestSize.Level
     EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REFRESH_GLOBAL_HTTP_PROXY);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: HttpProxyCallbackRequestBranches
+ * @tc.desc: Test registering and unregistering HTTP proxy callbacks through NetConnServiceStub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, HttpProxyCallbackRequestBranches, TestSize.Level1)
+{
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    EXPECT_EQ(SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REGISTER_HTTP_PROXY_CALLBACK), NETMANAGER_SUCCESS);
+
+    MessageParcel valid;
+    EXPECT_TRUE(valid.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    sptr<IHttpProxyCallback> callback = new HttpProxyCallbackStub();
+    EXPECT_TRUE(valid.WriteRemoteObject(callback->AsObject()));
+    EXPECT_EQ(SendRemoteRequest(valid, ConnInterfaceCode::CMD_NM_REGISTER_HTTP_PROXY_CALLBACK), NETMANAGER_SUCCESS);
+
+    MessageParcel unregister;
+    EXPECT_TRUE(unregister.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    EXPECT_TRUE(unregister.WriteRemoteObject(callback->AsObject()));
+    EXPECT_EQ(SendRemoteRequest(unregister, ConnInterfaceCode::CMD_NM_UNREGISTER_HTTP_PROXY_CALLBACK),
+        NETMANAGER_SUCCESS);
 }
 
 /**

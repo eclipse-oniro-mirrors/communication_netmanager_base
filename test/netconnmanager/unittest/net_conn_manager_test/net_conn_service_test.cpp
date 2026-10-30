@@ -28,6 +28,8 @@
 #include "net_conn_constants.h"
 #include "net_conn_service.h"
 #include "refresh_http_proxy_callback_stub.h"
+#include "http_proxy_callback_stub.h"
+#include "common_mock_net_remote_object_test.h"
 #include "net_conn_types.h"
 #include "net_detection_callback_test.h"
 #include "net_factoryreset_callback_stub.h"
@@ -88,6 +90,26 @@ sptr<INetConnCallback> g_callback = new (std::nothrow) NetConnCallbackStubCb();
 sptr<INetDetectionCallback> g_detectionCallback = new (std::nothrow) NetDetectionCallbackTest();
 uint32_t g_supplierId = 0;
 uint32_t g_vpnSupplierId = 0;
+
+class HttpProxyCallbackForTest : public HttpProxyCallbackStub {
+public:
+    explicit HttpProxyCallbackForTest(const sptr<IRemoteObject> &remote) : remote_(remote) {}
+    sptr<IRemoteObject> AsObject() override
+    {
+        return remote_;
+    }
+
+private:
+    sptr<IRemoteObject> remote_;
+};
+
+class RejectDeathRecipientRemote : public MockNetIRemoteObject {
+public:
+    bool AddDeathRecipient(const sptr<DeathRecipient> &recipient) override
+    {
+        return false;
+    }
+};
 } // namespace
 
 class NetConnServiceTest : public testing::Test {
@@ -3285,6 +3307,57 @@ HWTEST_F(NetConnServiceTest, SetProxyOffTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 #endif // NETMANAGER_ENABLE_PAC_PROXY
+
+/**
+ * @tc.name: HttpProxyCallbackBranches
+ * @tc.desc: Test HTTP proxy callback registration, notification, removal, and remote death branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceTest, HttpProxyCallbackBranches, TestSize.Level1)
+{
+    auto service = std::make_shared<NetConnService>();
+    EXPECT_EQ(service->RegisterHttpProxyCallback(nullptr), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(service->UnregisterHttpProxyCallback(nullptr), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    sptr<IHttpProxyCallback> nullRemoteCallback = new HttpProxyCallbackForTest(nullptr);
+    EXPECT_EQ(service->RegisterHttpProxyCallback(nullRemoteCallback), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(service->UnregisterHttpProxyCallback(nullRemoteCallback), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    service->NotifyHttpProxyChanged(); // Empty subscriber branch.
+
+    sptr<IRemoteObject> rejectedRemote = new RejectDeathRecipientRemote();
+    sptr<IHttpProxyCallback> rejectedCallback = new HttpProxyCallbackForTest(rejectedRemote);
+    EXPECT_EQ(service->RegisterHttpProxyCallback(rejectedCallback), NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
+
+    sptr<IRemoteObject> remote = new MockNetIRemoteObject();
+    sptr<HttpProxyCallbackForTest> stub = new HttpProxyCallbackForTest(remote);
+    int notifications = 0;
+    stub->SetCallback([&notifications]() { ++notifications; });
+    sptr<IHttpProxyCallback> callback = stub;
+    EXPECT_EQ(service->RegisterHttpProxyCallback(callback), NETMANAGER_SUCCESS);
+    EXPECT_EQ(service->RegisterHttpProxyCallback(callback), NETMANAGER_SUCCESS); // Duplicate branch.
+    service->NotifyHttpProxyChanged();
+    EXPECT_EQ(notifications, 1);
+    EXPECT_EQ(service->UnregisterHttpProxyCallback(callback), NETMANAGER_SUCCESS);
+    EXPECT_EQ(service->UnregisterHttpProxyCallback(callback), NETMANAGER_SUCCESS); // Missing branch.
+    service->NotifyHttpProxyChanged();
+    EXPECT_EQ(notifications, 1);
+
+    EXPECT_EQ(service->RegisterHttpProxyCallback(callback), NETMANAGER_SUCCESS);
+    auto recipient = service->httpProxyCallbacks_.at(remote).second;
+    wptr<IRemoteObject> weakRemote(remote);
+    recipient->OnRemoteDied(weakRemote);
+    EXPECT_TRUE(service->httpProxyCallbacks_.empty());
+    service->NotifyHttpProxyChanged();
+    EXPECT_EQ(notifications, 1);
+    wptr<IRemoteObject> emptyRemote;
+    recipient->OnRemoteDied(emptyRemote); // Null promotion branch.
+    sptr<NetConnService::HttpProxyDeathRecipient> expiredServiceRecipient =
+        new NetConnService::HttpProxyDeathRecipient(std::weak_ptr<NetConnService>());
+    expiredServiceRecipient->OnRemoteDied(weakRemote); // Expired service branch.
+    service->httpProxyCallbacks_.emplace(remote,
+        std::make_pair(sptr<IHttpProxyCallback>(nullptr), sptr<NetConnService::HttpProxyDeathRecipient>(nullptr)));
+    service->NotifyHttpProxyChanged(); // Defensive null callback branch.
+    service->httpProxyCallbacks_.clear();
+}
 
 #ifdef FEATURE_SUPPORT_POWERMANAGER
 HWTEST_F(NetConnServiceTest, RegisterNetSupplierInSleepTest001, TestSize.Level1)
