@@ -571,7 +571,16 @@ void NetStatsCached::WriteUidStats()
         }
         if (info.userId_ != curDefaultUserId_ && info.userId_ != SYSTEM_DEFAULT_USERID &&
             info.userId_ != curPrivateUserId_) {
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+            {
+                std::lock_guard<std::mutex> lock(mutex_);
+                if (validUserIds_.find(info.userId_) == validUserIds_.end()) {
+                    info.flag_ = STATS_DATA_FLAG_UNINSTALLED;
+                }
+            }
+#else
             info.flag_ = STATS_DATA_FLAG_UNINSTALLED;
+#endif
         }
     });
     auto handler = std::make_unique<NetStatsDataHandler>();
@@ -1226,6 +1235,22 @@ void NetStatsCached::SetCurDefaultUserId(int32_t userId)
     NETMGR_LOG_I("set defaultUserId: %{public}d", userId);
     curDefaultUserId_ = userId;
 }
+
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+void NetStatsCached::AddValidUserId(int32_t userId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    NETMGR_LOG_I("AddValidUserId: %{public}d", userId);
+    validUserIds_.insert(userId);
+}
+
+void NetStatsCached::RemoveValidUserId(int32_t userId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    NETMGR_LOG_I("RemoveValidUserId: %{public}d", userId);
+    validUserIds_.erase(userId);
+}
+#endif
 
 void NetStatsCached::ForceUpdateHistoryData(int32_t simId, int32_t beginDate, uint64_t historyData)
 {

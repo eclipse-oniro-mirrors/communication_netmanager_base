@@ -461,6 +461,9 @@ void NetStatsService::InitPrivateUserId()
         AccountSA::OsAccountType accountType;
         AccountSA::OsAccountManager::GetOsAccountType(info.GetLocalId(), accountType);
         NETMGR_LOG_I("InitPrivateUserId, info: %{public}d", info.GetLocalId());
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+        netStatsCached_->AddValidUserId(info.GetLocalId());
+#endif
         if (accountType == AccountSA::OsAccountType::PRIVATE) {
             netStatsCached_->SetCurPrivateUserId(info.GetLocalId());
             netStatsCached_->SetPrivateStatus(true);
@@ -478,12 +481,22 @@ int32_t NetStatsService::ProcessOsAccountChanged(int32_t userId, AccountSA::OsAc
     if (state == AccountSA::OsAccountState::CREATED) {
         AccountSA::OsAccountType accountType;
         AccountSA::OsAccountManager::GetOsAccountType(userId, accountType);
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+        netStatsCached_->AddValidUserId(userId);
+#endif
         if (accountType == AccountSA::OsAccountType::PRIVATE) {
             netStatsCached_->SetCurPrivateUserId(userId);
             netStatsCached_->SetPrivateStatus(true);
         }
         return 0;
     }
+
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+    if (state == AccountSA::OsAccountState::REMOVED) {
+        netStatsCached_->RemoveValidUserId(userId);
+    }
+#endif
+
     if (state == AccountSA::OsAccountState::STOPPING || state ==  AccountSA::OsAccountState::STOPPED ||
         state ==  AccountSA::OsAccountState::REMOVED) {
         if (netStatsCached_->GetCurPrivateUserId() != userId) {
