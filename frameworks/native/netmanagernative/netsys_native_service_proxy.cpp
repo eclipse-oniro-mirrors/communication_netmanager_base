@@ -4122,6 +4122,34 @@ int32_t NetsysNativeServiceProxy::SetUserDefinedServerFlag(uint16_t netId, bool 
     return ret;
 }
 
+int32_t NetsysNativeServiceProxy::SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data) || !data.WriteUint16(netId) || !data.WriteBool(ipv4Enable) ||
+        !data.WriteBool(ipv6Enable)) {
+        NETNATIVE_LOGE("SetNetworkDnsFamilyCapability write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("SetNetworkDnsFamilyCapability remote is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NETWORK_DNS_FAMILY_CAPABILITY), data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("SetNetworkDnsFamilyCapability SendRequest failed: %{public}d", error);
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t result = ERR_INVALID_DATA;
+    if (!reply.ReadInt32(result)) {
+        NETNATIVE_LOGE("SetNetworkDnsFamilyCapability read result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
 int32_t NetsysNativeServiceProxy::FlushDnsCache(uint16_t netId)
 {
     NETNATIVE_LOG_D("Begin to FlushDnsCache");

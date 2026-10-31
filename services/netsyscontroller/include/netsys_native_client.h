@@ -1045,6 +1045,7 @@ public:
     int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status);
 
     int32_t SetUserDefinedServerFlag(uint16_t netId, bool isUserDefinedServer);
+    int32_t SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable);
 
     int32_t CreateVlan(const std::string &ifName, uint32_t vlanId);
     int32_t DestroyVlan(const std::string &ifName, uint32_t vlanId);

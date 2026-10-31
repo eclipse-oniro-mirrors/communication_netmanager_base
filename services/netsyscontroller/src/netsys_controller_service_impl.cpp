@@ -1078,6 +1078,14 @@ int32_t NetsysControllerServiceImpl::SetUserDefinedServerFlag(uint16_t netId, bo
     return netsysClient_->SetUserDefinedServerFlag(netId, isUserDefinedServer);
 }
 
+int32_t NetsysControllerServiceImpl::SetNetworkDnsFamilyCapability(
+    uint16_t netId, bool ipv4Enable, bool ipv6Enable)
+{
+    NETMGR_LOG_I("SetNetworkDnsFamilyCapability netId[%{public}u], ipv4[%{public}d], ipv6[%{public}d]",
+        netId, ipv4Enable, ipv6Enable);
+    return netsysClient_->SetNetworkDnsFamilyCapability(netId, ipv4Enable, ipv6Enable);
+}
+
 int32_t NetsysControllerServiceImpl::FlushDnsCache(uint16_t netId)
 {
     if (mockNetsysClient_.CheckMockApi(MOCK_FLUSHDNSCACHE_API)) {

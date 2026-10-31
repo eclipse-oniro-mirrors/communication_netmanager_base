@@ -769,6 +769,11 @@ public:
         return 0;
     }
 
+    int32_t SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable) override
+    {
+        return 0;
+    }
+
     int32_t FlushDnsCache(uint16_t netId) override
     {
         return 0;

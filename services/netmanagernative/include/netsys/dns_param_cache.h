@@ -72,11 +72,16 @@ public:
 
     bool IsIpv6Enable(uint16_t netId);
 
+    bool IsIpv6Enable(uint16_t netId, uint32_t uid);
+
     void EnableIpv6(uint16_t netId, bool enable = true);
 
     bool IsIpv4Enable(uint16_t netId);
 
+    bool IsIpv4Enable(uint16_t netId, uint32_t uid);
+
     void EnableIpv4(uint16_t netId);
+    int32_t SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable);
     void SetClatDnsEnableIpv4(int32_t netId, bool enable);
 
     int32_t AddUidRange(uint32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges);

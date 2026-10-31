@@ -189,6 +189,26 @@ bool DnsParamCache::IsIpv6Enable(uint16_t netId)
     return it->second.IsIpv6Enable();
 }
 
+bool DnsParamCache::IsIpv6Enable(uint16_t netId, uint32_t uid)
+{
+    if (netId != 0) {
+        return IsIpv6Enable(netId);
+    }
+
+    std::lock_guard<ffrt::mutex> uidLock(uidRangeMutex_);
+    std::lock_guard<ffrt::mutex> cacheLock(cacheMutex_);
+    for (const auto &range : vpnUidRanges_) {
+        if (static_cast<int64_t>(uid) >= range.begin_ && static_cast<int64_t>(uid) <= range.end_) {
+            auto it = serverConfigMap_.find(range.netId_);
+            if (it != serverConfigMap_.end()) {
+                return it->second.IsIpv6Enable();
+            }
+        }
+    }
+    auto it = serverConfigMap_.find(defaultNetId_);
+    return it != serverConfigMap_.end() && it->second.IsIpv6Enable();
+}
+
 void DnsParamCache::EnableIpv4(uint16_t netId)
 {
     std::lock_guard<ffrt::mutex> guard(cacheMutex_);
@@ -230,6 +250,44 @@ bool DnsParamCache::IsIpv4Enable(uint16_t netId)
         return false;
     }
     return it->second.IsIpv4Enable() || it->second.IsClatIpv4Enable();
+}
+
+bool DnsParamCache::IsIpv4Enable(uint16_t netId, uint32_t uid)
+{
+    if (netId != 0) {
+        return IsIpv4Enable(netId);
+    }
+
+    std::lock_guard<ffrt::mutex> uidLock(uidRangeMutex_);
+    std::lock_guard<ffrt::mutex> cacheLock(cacheMutex_);
+    for (const auto &range : vpnUidRanges_) {
+        if (static_cast<int64_t>(uid) >= range.begin_ && static_cast<int64_t>(uid) <= range.end_) {
+            auto it = serverConfigMap_.find(range.netId_);
+            if (it != serverConfigMap_.end()) {
+                return it->second.IsIpv4Enable() || it->second.IsClatIpv4Enable();
+            }
+        }
+    }
+    auto it = serverConfigMap_.find(defaultNetId_);
+    return it != serverConfigMap_.end() && (it->second.IsIpv4Enable() || it->second.IsClatIpv4Enable());
+}
+
+int32_t DnsParamCache::SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable)
+{
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
+    auto it = serverConfigMap_.find(netId);
+    if (it == serverConfigMap_.end()) {
+        NETNATIVE_LOGE("SetNetworkDnsFamilyCapability failed, netid:%{public}d does not exist", netId);
+        return -ENOENT;
+    }
+    if (it->second.IsIpv4Enable() != ipv4Enable || it->second.IsIpv6Enable() != ipv6Enable) {
+        it->second.GetCache().Clear();
+        it->second.ClearNodataCache();
+        it->second.ClearIpv6UidBlackList();
+    }
+    it->second.EnableIpv4(ipv4Enable);
+    it->second.EnableIpv6(ipv6Enable);
+    return 0;
 }
 
 int32_t DnsParamCache::GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,

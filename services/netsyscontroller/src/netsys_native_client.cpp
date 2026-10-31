@@ -2207,6 +2207,16 @@ int32_t NetsysNativeClient::SetUserDefinedServerFlag(uint16_t netId, bool isUser
     return proxy->SetUserDefinedServerFlag(netId, isUserDefinedServer);
 }
 
+int32_t NetsysNativeClient::SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("SetNetworkDnsFamilyCapability proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetNetworkDnsFamilyCapability(netId, ipv4Enable, ipv6Enable);
+}
+
 int32_t NetsysNativeClient::FlushDnsCache(uint16_t netId)
 {
     auto proxy = GetProxy();

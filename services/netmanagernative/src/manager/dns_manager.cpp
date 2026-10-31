@@ -333,6 +333,13 @@ int32_t DnsManager::SetUserDefinedServerFlag(uint16_t netId, bool flag)
     return DnsParamCache::GetInstance().SetUserDefinedServerFlag(netId, flag);
 }
 
+int32_t DnsManager::SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable)
+{
+    NETNATIVE_LOGI("SetNetworkDnsFamilyCapability netId[%{public}d], ipv4[%{public}d], ipv6[%{public}d]",
+        netId, ipv4Enable, ipv6Enable);
+    return DnsParamCache::GetInstance().SetNetworkDnsFamilyCapability(netId, ipv4Enable, ipv6Enable);
+}
+
 int32_t DnsManager::FlushDnsCache(uint16_t netId)
 {
     NETNATIVE_LOGI("manager_FlushDnsCache netId[%{public}d]", netId);

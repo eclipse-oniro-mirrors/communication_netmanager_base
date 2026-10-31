@@ -189,6 +189,157 @@ HWTEST_F(DNSParamCacheTest, EnableIpv4Test01, TestSize.Level1)
     dnsParCache.DestroyNetworkCache(netId);
 }
 
+HWTEST_F(DNSParamCacheTest, SetNetworkDnsFamilyCapabilityTest001, TestSize.Level1)
+{
+    DnsParamCache dnsParCache;
+    constexpr uint16_t netId = 100;
+    EXPECT_EQ(dnsParCache.SetNetworkDnsFamilyCapability(netId, true, true), -ENOENT);
+    ASSERT_EQ(dnsParCache.CreateCacheForNet(netId), 0);
+    EXPECT_EQ(dnsParCache.SetNetworkDnsFamilyCapability(netId, true, false), 0);
+    EXPECT_TRUE(dnsParCache.IsIpv4Enable(netId));
+    EXPECT_FALSE(dnsParCache.IsIpv6Enable(netId));
+    EXPECT_EQ(dnsParCache.SetNetworkDnsFamilyCapability(netId, false, true), 0);
+    EXPECT_FALSE(dnsParCache.IsIpv4Enable(netId));
+    EXPECT_TRUE(dnsParCache.IsIpv6Enable(netId));
+}
+
+HWTEST_F(DNSParamCacheTest, DnsFamilyCapabilitySelectVpnByUidTest001, TestSize.Level1)
+{
+    DnsParamCache dnsParCache;
+    constexpr uint16_t defaultNetId = 100;
+    constexpr uint16_t vpnNetId = 200;
+    constexpr uint32_t vpnUid = 1500;
+    ASSERT_EQ(dnsParCache.CreateCacheForNet(defaultNetId), 0);
+    ASSERT_EQ(dnsParCache.CreateCacheForNet(vpnNetId, true), 0);
+    dnsParCache.SetDefaultNetwork(defaultNetId);
+    ASSERT_EQ(dnsParCache.SetNetworkDnsFamilyCapability(defaultNetId, true, false), 0);
+    ASSERT_EQ(dnsParCache.SetNetworkDnsFamilyCapability(vpnNetId, false, true), 0);
+    std::vector<NetManagerStandard::UidRange> ranges = {{1000, 2000, 1, vpnNetId}};
+    ASSERT_EQ(dnsParCache.AddUidRange(vpnNetId, ranges), 0);
+
+    EXPECT_FALSE(dnsParCache.IsIpv4Enable(0, vpnUid));
+    EXPECT_TRUE(dnsParCache.IsIpv6Enable(0, vpnUid));
+    EXPECT_TRUE(dnsParCache.IsIpv4Enable(0, 999));
+    EXPECT_FALSE(dnsParCache.IsIpv6Enable(0, 999));
+    EXPECT_TRUE(dnsParCache.IsIpv4Enable(defaultNetId, vpnUid));
+    EXPECT_FALSE(dnsParCache.IsIpv6Enable(defaultNetId, vpnUid));
+}
+
+HWTEST_F(DNSParamCacheTest, DnsFamilyCapabilitySelectVpnPriorityTest001, TestSize.Level1)
+{
+    DnsParamCache dnsParCache;
+    constexpr uint16_t lowPriorityNetId = 200;
+    constexpr uint16_t highPriorityNetId = 201;
+    ASSERT_EQ(dnsParCache.CreateCacheForNet(lowPriorityNetId, true), 0);
+    ASSERT_EQ(dnsParCache.CreateCacheForNet(highPriorityNetId, true), 0);
+    ASSERT_EQ(dnsParCache.SetNetworkDnsFamilyCapability(lowPriorityNetId, true, false), 0);
+    ASSERT_EQ(dnsParCache.SetNetworkDnsFamilyCapability(highPriorityNetId, false, true), 0);
+    ASSERT_EQ(dnsParCache.AddUidRange(lowPriorityNetId, {{1000, 2000, 1, lowPriorityNetId}}), 0);
+    ASSERT_EQ(dnsParCache.AddUidRange(highPriorityNetId, {{1000, 2000, 2, highPriorityNetId}}), 0);
+
+    EXPECT_FALSE(dnsParCache.IsIpv4Enable(0, 1500));
+    EXPECT_TRUE(dnsParCache.IsIpv6Enable(0, 1500));
+}
+
+HWTEST_F(DNSParamCacheTest, DnsFamilyCapabilityCacheInvalidationTest001, TestSize.Level1)
+{
+    DnsParamCache dnsParCache;
+    constexpr uint16_t netId = 100;
+    constexpr uint32_t uid = 1000;
+    const std::string host = "vpn.example";
+    ASSERT_EQ(dnsParCache.CreateCacheForNet(netId), 0);
+    ASSERT_EQ(dnsParCache.SetNetworkDnsFamilyCapability(netId, true, false), 0);
+
+    AddrInfo addrInfo{};
+    dnsParCache.SetDnsCache(netId, uid, host, addrInfo);
+    dnsParCache.SetNodataCache(netId, uid, host);
+    std::vector<int32_t> netIds = {netId};
+    dnsParCache.SetIpv6UidBlackList(netIds, uid);
+    ASSERT_FALSE(dnsParCache.GetDnsCache(netId, uid, host).empty());
+    ASSERT_TRUE(dnsParCache.IsInNodataCache(netId, uid, host));
+    ASSERT_TRUE(dnsParCache.IsInIpv6UidBlackList(netId, uid));
+
+    EXPECT_EQ(dnsParCache.SetNetworkDnsFamilyCapability(netId, true, false), 0);
+    EXPECT_FALSE(dnsParCache.GetDnsCache(netId, uid, host).empty());
+    EXPECT_TRUE(dnsParCache.IsInNodataCache(netId, uid, host));
+    EXPECT_TRUE(dnsParCache.IsInIpv6UidBlackList(netId, uid));
+
+    EXPECT_EQ(dnsParCache.SetNetworkDnsFamilyCapability(netId, false, true), 0);
+    EXPECT_TRUE(dnsParCache.GetDnsCache(netId, uid, host).empty());
+    EXPECT_FALSE(dnsParCache.IsInNodataCache(netId, uid, host));
+    EXPECT_FALSE(dnsParCache.IsInIpv6UidBlackList(netId, uid));
+}
+
+HWTEST_F(DNSParamCacheTest, DnsFamilyCapabilityMissingVpnFallbackTest001, TestSize.Level1)
+{
+    DnsParamCache dnsParCache;
+    constexpr uint16_t defaultNetId = 100;
+    constexpr uint16_t missingVpnNetId = 200;
+    constexpr uint32_t vpnUid = 1500;
+    ASSERT_EQ(dnsParCache.CreateCacheForNet(defaultNetId), 0);
+    dnsParCache.SetDefaultNetwork(defaultNetId);
+    ASSERT_EQ(dnsParCache.SetNetworkDnsFamilyCapability(defaultNetId, true, false), 0);
+    ASSERT_EQ(dnsParCache.AddUidRange(missingVpnNetId, {{1000, 2000, 1, missingVpnNetId}}), 0);
+
+    EXPECT_TRUE(dnsParCache.IsIpv4Enable(0, vpnUid));
+    EXPECT_FALSE(dnsParCache.IsIpv6Enable(0, vpnUid));
+    ASSERT_EQ(dnsParCache.DestroyNetworkCache(defaultNetId), 0);
+    EXPECT_FALSE(dnsParCache.IsIpv4Enable(0, vpnUid));
+    EXPECT_FALSE(dnsParCache.IsIpv6Enable(0, vpnUid));
+}
+
+HWTEST_F(DNSParamCacheTest, DnsFamilyCapabilityUidBoundariesAndClatTest001, TestSize.Level1)
+{
+    DnsParamCache dnsParCache;
+    constexpr uint16_t vpnNetId = 200;
+    ASSERT_EQ(dnsParCache.CreateCacheForNet(vpnNetId, true), 0);
+    ASSERT_EQ(dnsParCache.SetNetworkDnsFamilyCapability(vpnNetId, false, true), 0);
+    dnsParCache.SetClatDnsEnableIpv4(vpnNetId, true);
+    ASSERT_EQ(dnsParCache.AddUidRange(vpnNetId, {{1000, 2000, 1, vpnNetId}}), 0);
+
+    for (uint32_t uid : {1000U, 2000U}) {
+        EXPECT_TRUE(dnsParCache.IsIpv4Enable(0, uid));
+        EXPECT_TRUE(dnsParCache.IsIpv6Enable(0, uid));
+    }
+    EXPECT_FALSE(dnsParCache.IsIpv4Enable(0, 999));
+    EXPECT_FALSE(dnsParCache.IsIpv6Enable(0, 2001));
+    EXPECT_TRUE(dnsParCache.IsIpv4Enable(vpnNetId, 999));
+    EXPECT_TRUE(dnsParCache.IsIpv6Enable(vpnNetId, 999));
+}
+
+HWTEST_F(DNSParamCacheTest, DnsFamilyCapabilityIpv4AndClatFallbackMatrix, TestSize.Level1)
+{
+    DnsParamCache cache;
+    constexpr uint16_t defaultNetId = 60126;
+    constexpr uint16_t vpnNetId = 60127;
+    constexpr uint32_t vpnUid = 1500;
+    ASSERT_EQ(cache.CreateCacheForNet(defaultNetId), 0);
+    ASSERT_EQ(cache.CreateCacheForNet(vpnNetId, true), 0);
+    cache.SetDefaultNetwork(defaultNetId);
+    ASSERT_EQ(cache.AddUidRange(vpnNetId, {{1000, 2000, 1, vpnNetId}}), 0);
+
+    for (bool ipv4 : {false, true}) {
+        for (bool clat : {false, true}) {
+            SCOPED_TRACE(ipv4);
+            SCOPED_TRACE(clat);
+            ASSERT_EQ(cache.SetNetworkDnsFamilyCapability(defaultNetId, ipv4, false), 0);
+            ASSERT_EQ(cache.SetNetworkDnsFamilyCapability(vpnNetId, ipv4, true), 0);
+            cache.SetClatDnsEnableIpv4(defaultNetId, clat);
+            cache.SetClatDnsEnableIpv4(vpnNetId, clat);
+            EXPECT_EQ(cache.IsIpv4Enable(0, vpnUid), ipv4 || clat);
+            EXPECT_EQ(cache.IsIpv4Enable(0, 999), ipv4 || clat);
+            EXPECT_EQ(cache.IsIpv4Enable(0, 2001), ipv4 || clat);
+            EXPECT_EQ(cache.IsIpv4Enable(defaultNetId, vpnUid), ipv4 || clat);
+            EXPECT_TRUE(cache.IsIpv6Enable(0, vpnUid));
+            EXPECT_FALSE(cache.IsIpv6Enable(0, 999));
+        }
+    }
+    ASSERT_EQ(cache.SetNetworkDnsFamilyCapability(defaultNetId, true, true), 0);
+    EXPECT_TRUE(cache.IsIpv6Enable(0, 999));
+    EXPECT_TRUE(cache.IsIpv6Enable(0, UINT32_MAX));
+    EXPECT_TRUE(cache.IsIpv4Enable(0, UINT32_MAX));
+}
+
 HWTEST_F(DNSParamCacheTest, GetResolverConfigTest05, TestSize.Level1)
 {
     DnsParamCache dnsParCache;

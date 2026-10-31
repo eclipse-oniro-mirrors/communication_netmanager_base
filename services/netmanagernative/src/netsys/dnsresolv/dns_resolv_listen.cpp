@@ -79,8 +79,8 @@ private:
     static void ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId, uint32_t uid);
     static void ProcSetNodataCacheCommand(const std::string &name, uint16_t netId, uint32_t uid);
     static void ProcGetNodataCacheCommand(int clientSockFd, uint16_t netId, const std::string &name, uint32_t uid);
-    static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId);
-    static void ProcJudgeIpv4Command(int clientSockFd, uint16_t netId);
+    static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId, uint32_t uid);
+    static void ProcJudgeIpv4Command(int clientSockFd, uint16_t netId, uint32_t uid);
     static void ProcGetDefaultNetworkCommand(int clientSockFd);
     static void ProcBindSocketCommand(int32_t remoteFd, uint16_t netId);
     static void AddPublicDnsServers(ResolvConfig &sendData, size_t serverSize);
@@ -355,17 +355,17 @@ void DnsResolvListenInternal::ProcGetNodataCacheCommand(int clientSockFd, uint16
         "skipAAAA: %{public}d", netId, name.c_str(), uid, skipAAAA);
 }
 
-void DnsResolvListenInternal::ProcJudgeIpv6Command(int clientSockFd, uint16_t netId)
+void DnsResolvListenInternal::ProcJudgeIpv6Command(int clientSockFd, uint16_t netId, uint32_t uid)
 {
-    int enable = DnsParamCache::GetInstance().IsIpv6Enable(netId) ? 1 : 0;
+    int enable = DnsParamCache::GetInstance().IsIpv6Enable(netId, uid) ? 1 : 0;
     if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&enable), sizeof(int))) {
         DNS_CONFIG_PRINT("send failed");
     }
 }
 
-void DnsResolvListenInternal::ProcJudgeIpv4Command(int clientSockFd, uint16_t netId)
+void DnsResolvListenInternal::ProcJudgeIpv4Command(int clientSockFd, uint16_t netId, uint32_t uid)
 {
-    int enable = DnsParamCache::GetInstance().IsIpv4Enable(netId) ? 1 : 0;
+    int enable = DnsParamCache::GetInstance().IsIpv4Enable(netId, uid) ? 1 : 0;
     if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&enable), sizeof(int))) {
         DNS_CONFIG_PRINT("send failed");
     }
@@ -466,7 +466,7 @@ ReceiverRunner DnsResolvListenInternal::ProcCommand()
                                      ProcPostDnsThreadResult(static_cast<uint16_t>(info->netId)));
                 return FixedLengthReceiverState::CONTINUE;
             case JUDGE_IPV6:
-                ProcJudgeIpv6Command(fd, netId);
+                ProcJudgeIpv6Command(fd, netId, peerUid);
                 return FixedLengthReceiverState::DATA_ENOUGH;
             case GET_DEFAULT_NETWORK:
                 ProcGetDefaultNetworkCommand(fd);
@@ -483,7 +483,7 @@ ReceiverRunner DnsResolvListenInternal::ProcCommand()
                                      ProcPostDnsThreadAbnormal());
                 return FixedLengthReceiverState::CONTINUE;
             case JUDGE_IPV4:
-                ProcJudgeIpv4Command(fd, netId);
+                ProcJudgeIpv4Command(fd, netId, peerUid);
                 return FixedLengthReceiverState::DATA_ENOUGH;
             default:
                 return FixedLengthReceiverState::ONERROR;

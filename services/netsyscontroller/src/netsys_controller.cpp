@@ -1758,6 +1758,15 @@ int32_t NetsysController::SetUserDefinedServerFlag(uint16_t netId, bool isUserDe
     return netsysService_->SetUserDefinedServerFlag(netId, isUserDefinedServer);
 }
 
+int32_t NetsysController::SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("SetNetworkDnsFamilyCapability netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetNetworkDnsFamilyCapability(netId, ipv4Enable, ipv6Enable);
+}
+
 #ifdef SUPPORT_SYSVPN
 int32_t NetsysController::ProcessVpnStage(NetsysNative::SysVpnStageCode stage, const std::string &message)
 {

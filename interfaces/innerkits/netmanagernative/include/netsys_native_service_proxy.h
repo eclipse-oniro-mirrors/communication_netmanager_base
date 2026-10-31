@@ -179,6 +179,7 @@ public:
     int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps) override;
     int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) override;
     int32_t SetUserDefinedServerFlag(uint16_t netId, bool isUserDefinedServer) override;
+    int32_t SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable) override;
     int32_t RegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback) override;
     int32_t UnRegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback) override;
     int32_t FlushDnsCache(uint16_t netId) override;
