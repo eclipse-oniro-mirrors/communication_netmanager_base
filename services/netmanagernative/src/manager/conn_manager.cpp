@@ -294,7 +294,7 @@ bool ConnManager::IsVirtualInterface(const std::string &interfaceName)
 }
 
 int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interfaceName,
-                                           NetManagerStandard::NetBearType netBearerType)
+    NetManagerStandard::NetBearType netBearerType, bool isLocalNetworkRouted)
 {
     NETNATIVE_LOG_D(
         "Entry ConnManager::AddInterfaceToNetwork netId:%{public}d, interfaceName:%{public}s, netBearerType: "
@@ -320,7 +320,7 @@ int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interface
             std::lock_guard<std::mutex> lock(interfaceNameMutex_);
             physicalInterfaceName_[netId] = interfaceName;
         }
-        return nw->AddInterface(interfaceName);
+        return nw->AddInterface(interfaceName, isLocalNetworkRouted);
     }
     return NETMANAGER_ERROR;
 }

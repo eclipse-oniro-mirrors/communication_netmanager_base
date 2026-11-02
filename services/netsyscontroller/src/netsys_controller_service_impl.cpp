@@ -107,14 +107,14 @@ int32_t NetsysControllerServiceImpl::NetworkDelUids(int32_t netId, const std::ve
 }
 
 int32_t NetsysControllerServiceImpl::NetworkAddInterface(int32_t netId, const std::string &iface,
-                                                         NetBearType netBearerType)
+    NetBearType netBearerType, bool isLocalNetworkRouted)
 {
     NETMGR_LOG_I("Add network interface: netId[%{public}d], iface[%{public}s]", netId,
                  iface.c_str());
     if (mockNetsysClient_.CheckMockApi(MOCK_NETWORKADDINTERFACE_API)) {
         return mockNetsysClient_.NetworkAddInterface(netId, iface, netBearerType);
     }
-    return netsysClient_->NetworkAddInterface(netId, iface, netBearerType);
+    return netsysClient_->NetworkAddInterface(netId, iface, netBearerType, isLocalNetworkRouted);
 }
 
 int32_t NetsysControllerServiceImpl::NetworkRemoveInterface(int32_t netId, const std::string &iface)

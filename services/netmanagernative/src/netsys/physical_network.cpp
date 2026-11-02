@@ -48,8 +48,9 @@ void PhysicalNetwork::RemoveDefault()
     isDefault_ = false;
 }
 
-int32_t PhysicalNetwork::AddInterface(std::string &interfaceName)
+int32_t PhysicalNetwork::AddInterface(std::string &interfaceName, bool isLocalNetworkRouted)
 {
+    (void)isLocalNetworkRouted;
     NETNATIVE_LOGI("AddInterface %{public}s", interfaceName.c_str());
     std::lock_guard<std::mutex> lock(mutex_);
     if (interfaces_.find(interfaceName) != interfaces_.end()) {

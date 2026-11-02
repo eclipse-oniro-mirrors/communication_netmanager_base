@@ -65,6 +65,21 @@ HWTEST_F(RouteManagerExtTest, AddInterfaceToVirtualNetwork003, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 }
 
+HWTEST_F(RouteManagerExtTest, AddInterfaceToVirtualNetworkRoutedFail001, TestSize.Level1)
+{
+    bool oldVpnCallMode = RouteManager::vpnSysCall_.load();
+    int32_t result = RouteManager::SetVpnCallMode(TEST_EXT_VPN_CALL);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+
+    uint16_t testNetId = 154;
+    std::string testInterfaceName = "xfrm-vpn4294966296";
+    auto ret = RouteManager::AddInterfaceToVirtualNetwork(testNetId, testInterfaceName, true);
+    EXPECT_EQ(ret, -1);
+    ret = RouteManager::RemoveInterfaceFromVirtualNetwork(testNetId, testInterfaceName, true);
+    EXPECT_EQ(ret, -1);
+    RouteManager::vpnSysCall_.store(oldVpnCallMode);
+}
+
 HWTEST_F(RouteManagerExtTest, RemoveInterfaceFromVirtualNetwork002, TestSize.Level1)
 {
     int32_t result = RouteManager::SetVpnCallMode(TEST_EXT_VPN_CALL);

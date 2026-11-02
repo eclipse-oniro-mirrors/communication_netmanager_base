@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "ipc_object_stub.h"
 #include "iservice_registry.h"
 #include "ipc_object_stub.h"
 #include "netsys_ipc_interface_code.h"
@@ -74,6 +75,15 @@ public:
     bool writeReply = true;
     int32_t result = NETMANAGER_SUCCESS;
     int32_t transportResult = ERR_NONE;
+};
+
+class FakeRemoteObject : public IPCObjectStub {
+public:
+    FakeRemoteObject() : IPCObjectStub(u"FakeRemoteObject") {}
+    int OnRemoteRequest(uint32_t, MessageParcel &, MessageParcel &, MessageOption &) override
+    {
+        return ERR_INVALID_DATA;
+    }
 };
 
 sptr<NetsysNative::INetsysService> ConnManagerGetProxy()
@@ -176,6 +186,41 @@ HWTEST_F(NetsysNativeServiceProxyTest, AddInterfaceToNetworkTest001, TestSize.Le
 
     netsysNativeService->NetworkAddInterface(NETID, INTERFACENAME, BEARER_DEFAULT);
     netsysNativeService->AddInterfaceAddress(INTERFACENAME, "192.168.113.209", 24);
+}
+
+/**
+ * @tc.name: NetworkAddInterfaceWriteFail001
+ * @tc.desc: Test both failure branches of NetworkAddInterface parcel writing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetsysNativeServiceProxyTest, NetworkAddInterfaceWriteFail001, TestSize.Level1)
+{
+    sptr<IRemoteObject> remote = new FakeRemoteObject();
+    sptr<NetsysNativeServiceProxy> proxy = new NetsysNativeServiceProxy(remote);
+    ASSERT_NE(proxy, nullptr);
+
+    // Fill the parcel so that WriteUint8 fails. 204708 bytes plus the fixed header reaches 200K.
+    std::string uint8FailIface(204708, 'a');
+    MessageParcel checkUint8;
+    ASSERT_TRUE(checkUint8.WriteInterfaceToken(NetsysNativeServiceProxy::GetDescriptor()));
+    ASSERT_TRUE(checkUint8.WriteInt32(NETID));
+    ASSERT_TRUE(checkUint8.WriteString(uint8FailIface));
+    EXPECT_FALSE(checkUint8.WriteUint8(static_cast<uint8_t>(BEARER_DEFAULT)));
+
+    int32_t ret = proxy->NetworkAddInterface(NETID, uint8FailIface, BEARER_DEFAULT, true);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+
+    // WriteUint8 consumes the last 4 writable bytes, then WriteBool fails.
+    std::string boolFailIface(204704, 'a');
+    MessageParcel checkBool;
+    ASSERT_TRUE(checkBool.WriteInterfaceToken(NetsysNativeServiceProxy::GetDescriptor()));
+    ASSERT_TRUE(checkBool.WriteInt32(NETID));
+    ASSERT_TRUE(checkBool.WriteString(boolFailIface));
+    ASSERT_TRUE(checkBool.WriteUint8(static_cast<uint8_t>(BEARER_DEFAULT)));
+    EXPECT_FALSE(checkBool.WriteBool(true));
+
+    ret = proxy->NetworkAddInterface(NETID, boolFailIface, BEARER_DEFAULT, true);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
 }
 
 /**

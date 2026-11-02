@@ -184,7 +184,8 @@ public:
         return 0;
     }
 
-    int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType) override
+    int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType,
+        bool isLocalNetworkRouted) override
     {
         return 0;
     }
