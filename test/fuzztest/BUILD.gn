@@ -25,7 +25,15 @@ group("fuzztest") {
     "netstatsclient_fuzzer:fuzztest",
     "updatenetcaps_fuzzer:fuzztest",
     "enablevnicnetwork_fuzzer:fuzztest",
-    "netsysnetfirewall_fuzzer:fuzztest"
+    "netsysnetfirewall_fuzzer:fuzztest",
+    "netsysnetwork_fuzzer:fuzztest",
+    "netsysinterface_fuzzer:fuzztest",
+    "netsysstaticaddr_fuzzer:fuzztest",
+    "netsysvlan_fuzzer:fuzztest",
+    "netsysdns_fuzzer:fuzztest",
+    "netsysstats_fuzzer:fuzztest",
+    "netsysbandwidth_fuzzer:fuzztest",
+    "netsysmisc_fuzzer:fuzztest"
   ]
   if (netmanager_base_enable_feature_net_firewall) {
     deps += [ "nfqueue_fuzzer:fuzztest" ]

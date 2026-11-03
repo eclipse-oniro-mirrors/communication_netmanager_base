@@ -102,7 +102,12 @@ void EnableVnicNetworkFuzzTest(const uint8_t *data, size_t size)
 
     int32_t uidSize = GetData<int32_t>() % 23;
     dataParcel.WriteInt32(uidSize);
-    for (uint32_t i = 0; i < uidSize; i++) {
+    /* uidSize may be negative (e.g. 0xFFFFFFFF bytes read as int32_t). Keep the
+     * negative value in the parcel to exercise the stub's rejection path, but
+     * use a signed loop counter: comparing an unsigned counter against a
+     * negative int32_t promotes it to ~4 billion iterations, which floods
+     * Parcel::WriteInt32 error logs and hangs the fuzzer on hilog flow control. */
+    for (int32_t i = 0; i < uidSize; i++) {
         int32_t uid = GetData<int32_t>();
         dataParcel.WriteInt32(uid);
     }

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <array>
 #include <securec.h>
 #include <thread>
 
@@ -44,7 +45,7 @@ static constexpr uint8_t WITHOUT_THIRD_PARM_MODEL = 3;
 static constexpr uint8_t WITHOUT_FOURTH_PARM_MODEL = 4;
 static constexpr int32_t MAX_JUMP_NUMBER = 30;
 size_t g_baseFuzzSize = 0;
-size_t g_baseFuzzPos;
+size_t g_baseFuzzPos = 0;
 constexpr size_t STR_LEN = 10;
 } // namespace
 
@@ -52,7 +53,8 @@ template <class T> T NetConnGetData()
 {
     T object{};
     size_t netConnSize = sizeof(object);
-    if (g_baseFuzzData == nullptr || netConnSize > g_baseFuzzSize - g_baseFuzzPos) {
+    if (g_baseFuzzData == nullptr || g_baseFuzzPos >= g_baseFuzzSize ||
+        netConnSize > g_baseFuzzSize - g_baseFuzzPos) {
         return object;
     }
     errno_t ret = memcpy_s(&object, netConnSize, g_baseFuzzData + g_baseFuzzPos, netConnSize);
@@ -65,24 +67,29 @@ template <class T> T NetConnGetData()
 
 std::string NetConnGetString(int strlen)
 {
-    char cstr[strlen];
-    cstr[strlen - 1] = '\0';
+    if (strlen <= 0 || static_cast<size_t>(strlen) > STR_LEN) {
+        return {};
+    }
+    std::array<char, STR_LEN> cstr {};
     for (int i = 0; i < strlen - 1; i++) {
         cstr[i] = NetConnGetData<char>();
     }
-    std::string str(cstr);
-    return str;
+    cstr[strlen - 1] = '\0';
+    return std::string(cstr.data());
 }
 
 SecureData GetSecureDataFromData(int8_t strlen)
 {
     SecureData secureData;
-    char cstr[strlen];
-    cstr[strlen - 1] = '\0';
+    if (strlen <= 0 || static_cast<size_t>(strlen) > STR_LEN) {
+        return secureData;
+    }
+    std::array<char, STR_LEN> cstr {};
     for (int i = 0; i < strlen - 1; i++) {
         cstr[i] = NetConnGetData<char>();
     }
-    secureData.append(cstr, strlen-1);
+    cstr[strlen - 1] = '\0';
+    secureData.append(cstr.data(), strlen - 1);
     return secureData;
 }
 
@@ -387,6 +394,37 @@ void RegisterNetConnCallbackBySpecifierFuzzTest(const uint8_t *data, size_t size
                     dataParcelNoRemoteObject);
 }
 
+void RequestNetConnectionFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
+    if (netSpecifier == nullptr || callback == nullptr) {
+        return;
+    }
+    uint32_t timeoutMS = NetConnGetData<uint32_t>();
+
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    netSpecifier->Marshalling(dataParcel);
+    dataParcel.WriteUint32(timeoutMS);
+    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REQUEST_NET_CONNECTION), dataParcel);
+
+    // 缺 remoteObject 变体：覆盖 stub 端 remote == nullptr 早退分支
+    MessageParcel dataParcelNoRemoteObject;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoRemoteObject)) {
+        return;
+    }
+    netSpecifier->Marshalling(dataParcelNoRemoteObject);
+    dataParcelNoRemoteObject.WriteUint32(timeoutMS);
+
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REQUEST_NET_CONNECTION), dataParcelNoRemoteObject);
+}
+
 void RegisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
 {
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
@@ -433,7 +471,7 @@ void UnregisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_CONN_CALLBACK), dataParcel);
     
     MessageParcel dataParcelNoRemoteObject;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoRemoteObject)) {
         return;
     }
 
@@ -468,7 +506,6 @@ void GetConnectionPropertiesFuzzTest(const uint8_t *data, size_t size)
     if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoNetId)) {
         return;
     }
-    dataParcelNoNetId.WriteInt32(netId);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_CONNECTION_PROPERTIES), dataParcelNoNetId);
 }
 
@@ -567,7 +604,6 @@ void NetDetectionFuzzTest(const uint8_t *data, size_t size)
     if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoNetId)) {
         return;
     }
-    dataParcelNoNetId.WriteInt32(netId);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_NET_DETECTION), dataParcelNoNetId);
 }
 
@@ -692,10 +728,6 @@ void RegisterNetInterfaceCallbackFuzzTest(const uint8_t *data, size_t size)
     if (!WriteInterfaceToken(dataParcelNoRemoteObject)) {
         return;
     }
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
-    dataParcelNoRemoteObject.WriteRemoteObject(callback->AsObject().GetRefPtr());
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_INTERFACE_CALLBACK),
                     dataParcelNoRemoteObject);
 }
@@ -724,10 +756,6 @@ void UnregisterNetInterfaceCallbackFuzzTest(const uint8_t *data, size_t size)
     if (!WriteInterfaceToken(dataParcelNoRemoteObject)) {
         return;
     }
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
-    dataParcelNoRemoteObject.WriteRemoteObject(callback->AsObject().GetRefPtr());
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_INTERFACE_CALLBACK),
                     dataParcelNoRemoteObject);
 }
@@ -779,7 +807,7 @@ void SetInternetPermissionFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    dataParcel.WriteUint32(uid);
+    dataParcelNoAllow.WriteUint32(uid);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERNET_PERMISSION), dataParcelNoAllow);
 }
 
@@ -938,7 +966,7 @@ void UnRegisterNetDetectionCallbackFuzzTest(const uint8_t *data, size_t size)
                     dataParcelNoNetId);
 
     MessageParcel dataParcelNoRemoteObject;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoRemoteObject)) {
         return;
     }
 
@@ -988,7 +1016,7 @@ void GetSpecificNetByIdentFuzzTest(const uint8_t *data, size_t size)
     if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoBearerType)) {
         return;
     }
-    dataParcel.WriteString(ident);
+    dataParcelNoBearerType.WriteString(ident);
 
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET_BY_IDENT), dataParcelNoBearerType);
 
@@ -996,7 +1024,7 @@ void GetSpecificNetByIdentFuzzTest(const uint8_t *data, size_t size)
     if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoIdent)) {
         return;
     }
-    dataParcel.WriteUint32(bearerType);
+    dataParcelNoIdent.WriteUint32(bearerType);
 
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET_BY_IDENT), dataParcelNoIdent);
 }
@@ -1284,15 +1312,15 @@ void DelStaticArpFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_ARP), dataParcel);
 
     MessageParcel dataParcelNoIpAddr;
-    StaticArpProcessNoIpAddr(data, size, dataParcel);
+    StaticArpProcessNoIpAddr(data, size, dataParcelNoIpAddr);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_ARP), dataParcelNoIpAddr);
 
     MessageParcel dataParcelNoMacAddr;
-    StaticArpProcessNoMacAddr(data, size, dataParcel);
+    StaticArpProcessNoMacAddr(data, size, dataParcelNoMacAddr);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_ARP), dataParcelNoMacAddr);
 
     MessageParcel dataParcelNoIfName;
-    StaticArpProcessNoIfName(data, size, dataParcel);
+    StaticArpProcessNoIfName(data, size, dataParcelNoIfName);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_ARP), dataParcelNoIfName);
 }
 
@@ -1372,15 +1400,15 @@ void DelStaticIpv6FuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_IPV6), dataParcel);
 
     MessageParcel dataParcelNoIpAddr;
-    StaticIpv6ProcessNoIpAddr(data, size, dataParcel);
+    StaticIpv6ProcessNoIpAddr(data, size, dataParcelNoIpAddr);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_IPV6), dataParcelNoIpAddr);
 
     MessageParcel dataParcelNoMacAddr;
-    StaticIpv6ProcessNoMacAddr(data, size, dataParcel);
+    StaticIpv6ProcessNoMacAddr(data, size, dataParcelNoMacAddr);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_IPV6), dataParcelNoMacAddr);
 
     MessageParcel dataParcelNoIfName;
-    StaticIpv6ProcessNoIfName(data, size, dataParcel);
+    StaticIpv6ProcessNoIfName(data, size, dataParcelNoIfName);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_IPV6), dataParcelNoIfName);
 }
 
@@ -1587,12 +1615,12 @@ void UpdateSupplierScoreFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE), dataParcelWithAllParam);
 
     MessageParcel dataParcelWithOutFirstParam;
-    StaticUpdateSupplierScoreProcess(data, size, dataParcelWithAllParam, WITHOUT_FIRST_PARM_MODEL);
+    StaticUpdateSupplierScoreProcess(data, size, dataParcelWithOutFirstParam, WITHOUT_FIRST_PARM_MODEL);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE),
         dataParcelWithOutFirstParam);
 
     MessageParcel dataParcelWithOutSecondParam;
-    StaticUpdateSupplierScoreProcess(data, size, dataParcelWithAllParam, WITHOUT_SECOND_PARM_MODEL);
+    StaticUpdateSupplierScoreProcess(data, size, dataParcelWithOutSecondParam, WITHOUT_SECOND_PARM_MODEL);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE),
         dataParcelWithOutSecondParam);
 }
@@ -1627,17 +1655,17 @@ void GetDefaultSupplierIdFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_SUPPLIER_ID), dataParcelWithAllParam);
 
     MessageParcel dataParcelWithOutFirstParam;
-    StaticDefaultSupplierIdProcess(data, size, dataParcelWithAllParam, WITHOUT_FIRST_PARM_MODEL);
+    StaticDefaultSupplierIdProcess(data, size, dataParcelWithOutFirstParam, WITHOUT_FIRST_PARM_MODEL);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_SUPPLIER_ID),
                     dataParcelWithOutFirstParam);
 
     MessageParcel dataParcelWithOutSecondParam;
-    StaticDefaultSupplierIdProcess(data, size, dataParcelWithAllParam, WITHOUT_SECOND_PARM_MODEL);
+    StaticDefaultSupplierIdProcess(data, size, dataParcelWithOutSecondParam, WITHOUT_SECOND_PARM_MODEL);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_SUPPLIER_ID),
                     dataParcelWithOutSecondParam);
 
     MessageParcel dataParcelWithOutThirdParam;
-    StaticDefaultSupplierIdProcess(data, size, dataParcelWithAllParam, WITHOUT_THIRD_PARM_MODEL);
+    StaticDefaultSupplierIdProcess(data, size, dataParcelWithOutThirdParam, WITHOUT_THIRD_PARM_MODEL);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_SUPPLIER_ID),
                     dataParcelWithOutThirdParam);
 }
@@ -1790,7 +1818,6 @@ void CloseSocketsUidTest(const uint8_t *data, size_t size)
         NETMGR_LOG_D("DelInterfaceAddressFuzzTest write token failed or invalid parameter.");
         return;
     }
-    dataParcelNoIfName.WriteString(ipAddr);
     dataParcelNoIfName.WriteUint32(uid);
 
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_CLOSE_SOCKETS_UID), dataParcelNoIfName);
@@ -2044,6 +2071,117 @@ void GetConnectOwnerUidFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_CONNECT_OWNER_UID), dataParcel);
 }
 
+// innerkit 进程内直调接口（无 IPC 命令入口，netmanager_ext 等系统组件直调）。
+// 覆盖缺口治理 ② 类：GetDefaultNetSupplierId / GetAllNetRequest / UpdateNetRequestControlState /
+// RegisterNetRequestControlFunc / UpdateUidDeadFlowReset / RegUnRegisterNetProbeCallback /
+// DualStackProbe / UpdateDualStackProbeTime。
+class DualStackProbeCallbackTest : public IDualStackProbeCallback {
+public:
+    int32_t OnHandleDualStackProbeResult(DualStackProbeResultCode result) override
+    {
+        return 0;
+    }
+};
+
+void EnsureConnServiceInited()
+{
+    if (!g_isInited) {
+        Init();
+    }
+}
+
+NetRequest MakeNetRequestFromData()
+{
+    NetRequest request;
+    request.uid = NetConnGetData<uint32_t>();
+    request.requestId = NetConnGetData<uint32_t>();
+    request.ident = NetConnGetString(STR_LEN);
+    return request;
+}
+
+void GetDefaultNetSupplierIdDirectFuzzTest(const uint8_t *data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    EnsureConnServiceInited();
+    (void)DelayedSingleton<NetConnService>::GetInstance()->GetDefaultNetSupplierId();
+}
+
+void GetAllNetRequestDirectFuzzTest(const uint8_t *data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    EnsureConnServiceInited();
+    std::vector<NetRequest> netRequests;
+    (void)DelayedSingleton<NetConnService>::GetInstance()->GetAllNetRequest(netRequests);
+}
+
+void UpdateNetRequestControlStateDirectFuzzTest(const uint8_t *data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    EnsureConnServiceInited();
+    std::vector<NetRequest> netRequests;
+    netRequests.push_back(MakeNetRequestFromData());
+    (void)DelayedSingleton<NetConnService>::GetInstance()->UpdateNetRequestControlState(netRequests);
+}
+
+void RegisterNetRequestControlFuncDirectFuzzTest(const uint8_t *data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    EnsureConnServiceInited();
+    auto func = [](const NetRequest &request) { return false; };
+    (void)DelayedSingleton<NetConnService>::GetInstance()->RegisterNetRequestControlFunc(func);
+}
+
+void UpdateUidDeadFlowResetDirectFuzzTest(const uint8_t *data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    EnsureConnServiceInited();
+    std::vector<std::string> bundleNameVec;
+    bundleNameVec.push_back(NetConnGetString(STR_LEN));
+    (void)DelayedSingleton<NetConnService>::GetInstance()->UpdateUidDeadFlowReset(bundleNameVec);
+}
+
+void RegUnRegisterNetProbeCallbackDirectFuzzTest(const uint8_t *data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    EnsureConnServiceInited();
+    int32_t netId = static_cast<int32_t>(NetConnGetData<uint32_t>());
+    bool isReg = (NetConnGetData<uint32_t>() % 2) != 0;
+    std::shared_ptr<IDualStackProbeCallback> callback = std::make_shared<DualStackProbeCallbackTest>();
+    (void)DelayedSingleton<NetConnService>::GetInstance()->RegUnRegisterNetProbeCallback(netId, callback, isReg);
+}
+
+void DualStackProbeDirectFuzzTest(const uint8_t *data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    EnsureConnServiceInited();
+    uint32_t netId = NetConnGetData<uint32_t>();
+    (void)DelayedSingleton<NetConnService>::GetInstance()->DualStackProbe(netId);
+}
+
+void UpdateDualStackProbeTimeDirectFuzzTest(const uint8_t *data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    EnsureConnServiceInited();
+    int32_t probeTime = NetConnGetData<int32_t>();
+    (void)DelayedSingleton<NetConnService>::GetInstance()->UpdateDualStackProbeTime(probeTime);
+}
+
 void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
 {
     OHOS::NetManagerStandard::SetInterfaceUpFuzzTest(data, size);
@@ -2077,6 +2215,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::UpdateNetSupplierInfoFuzzTest(data, size);
     OHOS::NetManagerStandard::UpdateNetLinkInfoFuzzTest(data, size);
     OHOS::NetManagerStandard::RegisterNetConnCallbackBySpecifierFuzzTest(data, size);
+    OHOS::NetManagerStandard::RequestNetConnectionFuzzTest(data, size);
     OHOS::NetManagerStandard::RegisterNetConnCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::UnregisterNetConnCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::GetDefaultNetFuzzTest(data, size);
@@ -2114,6 +2253,14 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::DisableDistributedNetFuzzTest(data, size);
     OHOS::NetManagerStandard::CloseSocketsUidTest(data, size);
     OHOS::NetManagerStandard::SetReuseSupplierIdFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetDefaultNetSupplierIdDirectFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetAllNetRequestDirectFuzzTest(data, size);
+    OHOS::NetManagerStandard::UpdateNetRequestControlStateDirectFuzzTest(data, size);
+    OHOS::NetManagerStandard::RegisterNetRequestControlFuncDirectFuzzTest(data, size);
+    OHOS::NetManagerStandard::UpdateUidDeadFlowResetDirectFuzzTest(data, size);
+    OHOS::NetManagerStandard::RegUnRegisterNetProbeCallbackDirectFuzzTest(data, size);
+    OHOS::NetManagerStandard::DualStackProbeDirectFuzzTest(data, size);
+    OHOS::NetManagerStandard::UpdateDualStackProbeTimeDirectFuzzTest(data, size);
     OHOS::NetManagerStandard::LLVMFuzzerTestOneInputNew(data, size);
     OHOS::NetManagerStandard::UpdateSupplierScoreFuzzTest(data, size);
     OHOS::NetManagerStandard::SetNetExtAttributeFuzzTest(data, size);

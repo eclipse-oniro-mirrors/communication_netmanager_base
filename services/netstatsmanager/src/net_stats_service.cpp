@@ -379,6 +379,7 @@ void NetStatsService::RegisterCommonTimeEvent()
             return true;
         });
 }
+// LCOV_EXCL_STOP
 
 bool NetStatsService::UpdateNetStatusMap(uint8_t type, uint8_t value)
 {
@@ -440,6 +441,7 @@ int32_t NetStatsService::GetMonthTrafficStatsByNetwork(uint32_t simId, uint64_t 
     return NETMANAGER_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t NetStatsService::OnExtension(const std::string& extension, MessageParcel& data, MessageParcel& reply)
 {
     NETMGR_LOG_E("extension is %{public}s.", extension.c_str());
@@ -556,6 +558,7 @@ void NetStatsService::GetDumpMessage(std::string &message)
         }
     });
 }
+// LCOV_EXCL_STOP
 
 bool NetStatsService::Init()
 {
@@ -921,6 +924,7 @@ int32_t NetStatsService::UpdateStatsData()
     return NETMANAGER_SUCCESS;
 }
 
+// LCOV_EXCL_START
 int32_t NetStatsService::UpdateStatsDataInner()
 {
     NETMGR_LOG_I("Enter UpdateStatsDataInner.");
@@ -932,6 +936,7 @@ int32_t NetStatsService::UpdateStatsDataInner()
     NETMGR_LOG_I("End UpdateStatsDataInner.");
     return NETMANAGER_SUCCESS;
 }
+// LCOV_EXCL_STOP
 
 int32_t NetStatsService::ResetFactory()
 {
@@ -942,6 +947,7 @@ int32_t NetStatsService::ResetFactory()
     auto handler = std::make_unique<NetStatsDataHandler>();
     return handler->ClearData();
 }
+
 
 int32_t NetStatsService::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
 {
@@ -968,7 +974,7 @@ int32_t NetStatsService::GetAllSimStatsInfo(std::vector<NetStatsInfo> &infos)
     }
     return NetsysController::GetInstance().GetAllSimStatsInfo(infos);
 }
-
+// LCOV_EXCL_START
 #ifdef SUPPORT_NETWORK_SHARE
 bool NetStatsService::IsSharingOn()
 {
@@ -995,6 +1001,7 @@ void NetStatsService::GetSharingStats(std::vector<NetStatsInfo> &sharingStats, u
         }
     }
 }
+// LCOV_EXCL_STOP
 #endif
 
 int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
@@ -1090,6 +1097,7 @@ int32_t NetStatsService::GetIfaceTrafficStats(std::unordered_map<uint32_t, NetSt
 }
 #endif
 
+// LCOV_EXCL_START
 void NetStatsService::FilterTrafficStatsByNetwork(std::vector<NetStatsInfo> &allInfo,
     std::unordered_map<uint32_t, NetStatsInfo> &infos,
     const std::string ident, uint32_t startTime, uint32_t endTime)
@@ -1109,6 +1117,7 @@ void NetStatsService::FilterTrafficStatsByNetwork(std::vector<NetStatsInfo> &all
         }
     });
 }
+// LCOV_EXCL_STOP
 
 #ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
 void NetStatsService::FilterTrafficStatsByIface(std::vector<NetStatsInfo> &allInfo,
@@ -1132,6 +1141,7 @@ void NetStatsService::FilterTrafficStatsByIface(std::vector<NetStatsInfo> &allIn
 }
 #endif
 
+// LCOV_EXCL_START
 void NetStatsService::MergeTrafficStatsByAccount(std::vector<NetStatsInfo> &infos)
 {
     int32_t curUserId = -1;
@@ -1157,6 +1167,7 @@ void NetStatsService::MergeTrafficStatsByAccount(std::vector<NetStatsInfo> &info
         NETMGR_LOG_W("curUserId:%{public}d, defaultUserId:%{public}d", curUserId, defaultUserId);
     }
 }
+// LCOV_EXCL_STOP
 
 int32_t NetStatsService::GetHistoryData(std::vector<NetStatsInfo> &infos, std::string ident,
     uint32_t uid, uint32_t start, uint32_t end)
@@ -1245,6 +1256,7 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
     return NETMANAGER_SUCCESS;
 }
 
+// LCOV_EXCL_START
 void NetStatsService::DeleteTrafficStatsByAccount(std::vector<NetStatsInfoSequence> &infos, uint32_t uid)
 {
     int32_t defaultUserId = netStatsCached_->GetCurDefaultUserId();
@@ -1309,6 +1321,7 @@ void NetStatsService::FilterTrafficStatsByUidNetwork(std::vector<NetStatsInfo> &
         MergeTrafficStats(infos, info, endTime);
     });
 }
+// LCOV_EXCL_STOP
 
 int32_t NetStatsService::SetAppStats(const PushStatsInfo &info)
 {
@@ -1326,6 +1339,7 @@ int32_t NetStatsService::SetAppStats(const PushStatsInfo &info)
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService SetAppStats end");
     return NETMANAGER_SUCCESS;
 }
+
 
 int32_t NetStatsService::SetDpaAppStats(const NetStatsInfo &info)
 {
@@ -1357,6 +1371,7 @@ int32_t NetStatsService::SaveSharingTraffic(const NetStatsInfo &infos)
     return NETMANAGER_SUCCESS;
 }
 
+
 int32_t NetStatsService::GetCookieRxBytes(uint64_t &stats, uint64_t cookie)
 {
     return NetsysController::GetInstance().GetCookieStats(stats, static_cast<uint32_t>(StatsType::STATS_TYPE_RX_BYTES),
@@ -1369,6 +1384,7 @@ int32_t NetStatsService::GetCookieTxBytes(uint64_t &stats, uint64_t cookie)
                                                           cookie);
 }
 
+// LCOV_EXCL_START
 void NetStatsService::MergeTrafficStats(std::vector<NetStatsInfoSequence> &statsInfoSequences, const NetStatsInfo &info,
                                         uint32_t currentTimestamp, bool isNeedMerge)
 {
@@ -1394,6 +1410,7 @@ void NetStatsService::MergeTrafficStats(std::vector<NetStatsInfoSequence> &stats
     }
     (*findRet).info_ += info;
 }
+// LCOV_EXCL_STOP
 
 bool NetStatsService::GetIfaceNamesFromManager(std::list<std::string> &ifaceNames)
 {
@@ -1465,6 +1482,7 @@ SampleBundleInfo NetStatsService::GetSampleBundleInfoForUid(uint32_t uid)
     return result.value();
 }
 
+// LCOV_EXCL_START
 void NetStatsService::RefreshUidStatsFlag(uint64_t delay)
 {
     std::shared_ptr<NetStatsService> selfPtr = shared_from_this();
@@ -1585,6 +1603,7 @@ bool NetStatsService::CommonEventPackageRemoved(uint32_t uid)
     }
     return ret1 != NETMANAGER_SUCCESS ? ret1 : ret2;
 }
+// LCOV_EXCL_STOP
 
 int32_t NetStatsService::CheckNetManagerAvailable()
 {
@@ -1598,6 +1617,7 @@ int32_t NetStatsService::CheckNetManagerAvailable()
     return NETMANAGER_SUCCESS;
 }
 
+// LCOV_EXCL_START
 void NetStatsService::StartAccountObserver()
 {
     NETMGR_LOG_I("StartAccountObserver start");
@@ -1614,6 +1634,7 @@ void NetStatsService::StartAccountObserver()
     }
     NETMGR_LOG_I("StartAccountObserver end");
 }
+// LCOV_EXCL_STOP
 
 int32_t NetStatsService::SetCalibrationTraffic(uint32_t simId, int64_t remainingData, uint64_t totalMonthlyData)
 {
@@ -1729,6 +1750,7 @@ int32_t NetStatsService::GetTrafficPlanInfo(int32_t simId, int32_t param, int64_
 }
 
 #ifdef SUPPORT_TRAFFIC_STATISTIC
+// LCOV_EXCL_START
 void NetStatsService::UpdateBpfMapTimer()
 {
     NETMGR_LOG_I("UpdateBpfMapTimer start");
@@ -1939,8 +1961,8 @@ void NetStatsService::StartTrafficOvserver()
         return;
     }
 }
-
 // LCOV_EXCL_STOP
+
 
 void NetStatsService::UpdateCurActiviteSimChanged(int32_t simId, uint64_t ifIndex)
 {

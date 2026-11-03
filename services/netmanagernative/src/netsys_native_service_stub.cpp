@@ -33,7 +33,9 @@ using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetsysNative {
 namespace {
+#ifdef SUPPORT_SYSVPN
 constexpr int32_t MAX_VNIC_UID_ARRAY_SIZE = 20;
+#endif
 constexpr int32_t MAX_VNICTUN_UID_ARRAY_SIZE = 1000;
 constexpr int32_t MAX_FLAG_NUM = 64;
 constexpr int32_t MAX_DNS_CONFIG_SIZE = 7;
@@ -506,6 +508,10 @@ int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &d
         NETNATIVE_LOGE("Cannot response request %d: unknown tranction", code);
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
+#ifndef NETMANAGER_FUZZ_TEST_ENABLE
+    // NETMANAGER_FUZZ_TEST_ENABLE is only defined in fuzz test targets. The uid whitelist /
+    // EDM uid hard-checks are skipped for fuzzing so that fuzz input can reach the command
+    // handlers. Product builds are not affected (macro is never defined there).
     auto uid = IPCSkeleton::GetCallingUid();
     if (std::find(uids_.begin(), uids_.end(), uid) == uids_.end()) {
         NETNATIVE_LOGE("This uid connot use netsys %{public}d", uid);
@@ -523,6 +529,7 @@ int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &d
         }
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
+#endif
 
     const std::u16string descriptor = NetsysNativeServiceStub::GetDescriptor();
     const std::u16string remoteDescriptor = data.ReadInterfaceToken();

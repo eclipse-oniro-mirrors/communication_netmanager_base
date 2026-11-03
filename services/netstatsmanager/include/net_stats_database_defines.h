@@ -24,8 +24,21 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace NetStatsDatabaseDefines {
+/* NETMANAGER_TEST_DB_REDIRECT is defined only on the testonly target
+ * net_stats_manager_static (see services/netstatsmanager/BUILD.gn). It keeps
+ * test/fuzz binaries (which run as root on real devices) away from the real
+ * netmanager statistics databases under /data/service/el1/public/netmanager,
+ * redirecting them to a scratch directory instead. Product binaries are built
+ * from the shared library target and never define this macro.
+ */
+#ifdef NETMANAGER_TEST_DB_REDIRECT
+constexpr const char *NET_STATS_DATABASE_PATH = "/data/local/tmp/netmanager_base_test_db/net_stats_data.db";
+constexpr const char *NET_STATS_DATABASE_BACK_PATH =
+    "/data/local/tmp/netmanager_base_test_db/net_stats_data_back.db";
+#else
 constexpr const char *NET_STATS_DATABASE_PATH = "/data/service/el1/public/netmanager/net_stats_data.db";
 constexpr const char *NET_STATS_DATABASE_BACK_PATH = "/data/service/el1/public/netmanager/net_stats_data_back.db";
+#endif
 constexpr const char *VERSION_TABLE_CREATE_PARAM =
     "Name CHAR(20) NOT NULL UNIQUE,"
     "Version INTEGER NOT NULL DEFAULT 0";

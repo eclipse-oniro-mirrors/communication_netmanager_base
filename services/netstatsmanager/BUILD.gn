@@ -222,6 +222,12 @@ ohos_static_library("net_stats_manager_static") {
     "LOG_DOMAIN = 0xD0015B0",
     "UNITTEST_FORBID_FFRT",
     "NETMANAGER_TEST",
+    # Test/fuzz binaries run as root on real devices; keep their statistics
+    # database writes (net_stats_database_defines.h / net_stats_rdb.h /
+    # net_stats_data_clone.h) away from the real netmanager databases under
+    # /data/service/el1/public/netmanager. This target is testonly and is not
+    # linked into any product binary.
+    "NETMANAGER_TEST_DB_REDIRECT",
   ]
 
   if (netmanager_base_enable_netsys_access_policy_diag_listen) {

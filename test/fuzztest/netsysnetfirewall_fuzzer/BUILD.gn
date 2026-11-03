@@ -54,6 +54,9 @@ ohos_fuzztest("NetSysNetFirewallFuzzTest") {
 
   sources = [
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode/common_mock_netmanager_permission.cpp",
+    # Compiled locally with NETMANAGER_FUZZ_TEST_ENABLE so the stub's inline uid checks are
+    # skipped for fuzzing. The copy in netsys_native_manager_static is replaced at link time.
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys_native_service_stub.cpp",
     "netsys_netfirewall_fuzzer.cpp"
   ]
 
@@ -70,6 +73,7 @@ ohos_fuzztest("NetSysNetFirewallFuzzTest") {
     "LOG_DOMAIN=0xD004100",
     "private = public",
     "protected = public",
+    "NETMANAGER_FUZZ_TEST_ENABLE",
   ]
 
   external_deps = [
