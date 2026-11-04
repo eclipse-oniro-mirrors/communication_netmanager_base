@@ -512,6 +512,11 @@ int32_t NetManagerNative::DnsDestroyNetworkCache(uint16_t netId, bool isVpnNet)
     return dnsManager_->DestroyNetworkCache(netId, isVpnNet);
 }
 
+int32_t NetManagerNative::SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains)
+{
+    return dnsManager_->SetPresetDomains(domains);
+}
+
 int32_t NetManagerNative::BandwidthEnableDataSaver(bool enable)
 {
     return bandwidthManager_->EnableDataSaver(enable);

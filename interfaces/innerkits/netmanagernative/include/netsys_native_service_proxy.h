@@ -201,6 +201,7 @@ public:
                                int32_t &ownerUid) override;
     int32_t GetSystemNetPortStates(NetManagerStandard::NetPortStatesInfo &netPortStatesInfo) override;
     int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid) override;
+    int32_t SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains) override;
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     sptr<NfqCtx> NfqOpen() override;
     int32_t NfqClose(sptr<NfqCtx> &ctx) override;

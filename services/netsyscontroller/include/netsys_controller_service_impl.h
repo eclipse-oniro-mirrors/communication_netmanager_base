@@ -1069,6 +1069,7 @@ public:
     int32_t SetInternetAccessByIpForWifiShare(
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName) override;
     int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid) override;
+    int32_t SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains) override;
 private:
     MockNetsysNativeClient mockNetsysClient_;
     std::shared_ptr<NetsysNativeClient> netsysClient_;

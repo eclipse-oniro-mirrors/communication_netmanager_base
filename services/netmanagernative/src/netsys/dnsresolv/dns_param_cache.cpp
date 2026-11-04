@@ -12,9 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <algorithm>
-#include "netmanager_base_common_utils.h"
 #include "dns_param_cache.h"
+#include <algorithm>
+#include <cctype>
+#include <set>
+#include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
@@ -34,9 +36,139 @@ void GetVectorData(const std::vector<std::string> &data, std::string &result)
 }
 constexpr int RES_TIMEOUT = 4000;    // min. milliseconds between retries
 constexpr int RES_DEFAULT_RETRY = 2; // Default
+constexpr uint32_t DECIMAL_BASE = 10;
+
+std::vector<std::string> ExtractIpStrings(const AddrInfo &addrInfo)
+{
+    std::vector<std::string> ipAddresses;
+    char ipStr[INET6_ADDRSTRLEN] = {0};
+    if (addrInfo.aiFamily == AF_INET) {
+        if (inet_ntop(AF_INET, &addrInfo.aiAddr.sin.sin_addr, ipStr, sizeof(ipStr)) != nullptr) {
+            ipAddresses.push_back(ipStr);
+        }
+    } else if (addrInfo.aiFamily == AF_INET6) {
+        if (inet_ntop(AF_INET6, &addrInfo.aiAddr.sin6.sin6_addr, ipStr, sizeof(ipStr)) != nullptr) {
+            ipAddresses.push_back(ipStr);
+        }
+    }
+    return ipAddresses;
+}
+
+// The resolv client sends the cache key name as "host serv ai_family ai_flags ai_protocol ai_socktype"
+// (MakeKey in netsys_client.c) with an embedded trailing NUL, while preset domain matching expects the
+// bare host. Host names cannot contain spaces, so strip the decoration before matching, otherwise
+// both the exact compare and the suffix match always fail.
+std::string GetBareHostName(const std::string &name)
+{
+    std::string host = name;
+    if (!host.empty() && host.back() == '\0') {
+        host.pop_back();
+    }
+    size_t spacePos = host.find(' ');
+    if (spacePos != std::string::npos) {
+        host.resize(spacePos);
+    }
+    return host;
+}
 } // namespace
 
-DnsParamCache::DnsParamCache() : defaultNetId_(0) {}
+DnsParamCache::DnsParamCache() : defaultNetId_(0)
+{
+}
+
+bool DnsParamCache::IsValidPresetDomain(const std::string &domain)
+{
+    if (domain.empty() || domain.size() > DNS_DOMAIN_NAME_SIZE) {
+        return false;
+    }
+    for (char c : domain) {
+        if (!isalnum(static_cast<unsigned char>(c)) && c != '.' && c != '-') {
+            return false;
+        }
+    }
+    return true;
+}
+
+void DnsParamCache::SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains)
+{
+    size_t uidNum = domains.size();
+    // Drop invalid entries at the door: an abnormally long or malformed domain must not
+    // reside in presetDomains_ and participate in the per-host matching
+    std::map<uint32_t, std::vector<std::string>> validDomains;
+    for (const auto &item : domains) {
+        std::vector<std::string> accepted;
+        for (const auto &domain : item.second) {
+            if (!IsValidPresetDomain(domain)) {
+                NETNATIVE_LOGE("SetPresetDomains skip invalid preset domain, uid:%{public}u, size:%{public}zu",
+                               item.first, domain.size());
+                continue;
+            }
+            accepted.push_back(domain);
+        }
+        if (!accepted.empty()) {
+            validDomains[item.first] = accepted;
+        }
+    }
+    {
+        std::lock_guard<ffrt::mutex> guard(presetDomainsMutex_);
+        presetDomains_ = std::move(validDomains);
+        // dns_ip_to_domain_map is written only by the preset domain pipeline and SetPresetDomains is
+        // a full replacement, so stale entries of removed domains (including the empty case) must be
+        // cleared while holding the same lock to serialize with TrySyncPresetDomainIp
+        ClearPresetDomainIps();
+        if (!presetDomains_.empty()) {
+            // Cached results of the newly delivered preset domains may contain AAAA records resolved
+            // while the domain was not preset, which would bypass the skip-AAAA single A query on
+            // cache hit, so purge them to force fresh single A queries
+            ClearPresetDomainDnsCache();
+        }
+    }
+    NETNATIVE_LOGI("SetPresetDomains uid num:%{public}zu", uidNum);
+}
+
+std::map<uint32_t, std::vector<std::string>> DnsParamCache::GetPresetDomains() const
+{
+    // Return by value: a const reference would dangle after the lock is released and race with
+    // SetPresetDomains, the map is small so the copy cost is acceptable
+    std::lock_guard<ffrt::mutex> guard(presetDomainsMutex_);
+    return presetDomains_;
+}
+
+bool DnsParamCache::IsPresetDomainLocked(uint32_t uid, const std::string &hostName) const
+{
+    auto uidIter = presetDomains_.find(uid);
+    if (uidIter == presetDomains_.end()) {
+        return false;
+    }
+    // The resolv client sends the host name with a trailing NUL (nameLen = strlen + 1), and the
+    // receiver keeps it verbatim in the std::string. Trim it before matching, otherwise both the
+    // exact compare and the dot-separator index of the suffix match are shifted and always fail
+    std::string host = hostName;
+    if (!host.empty() && host.back() == '\0') {
+        host.pop_back();
+    }
+    // Trim the optional trailing dot of an FQDN before matching
+    if (!host.empty() && host.back() == '.') {
+        host.pop_back();
+    }
+    for (const auto &presetDomain : uidIter->second) {
+        if (host == presetDomain) {
+            return true;
+        }
+        if (host.length() > presetDomain.length() + 1 &&
+            host.compare(host.length() - presetDomain.length(), presetDomain.length(), presetDomain) == 0 &&
+            host[host.length() - presetDomain.length() - 1] == '.') {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool DnsParamCache::IsPresetDomain(uint32_t uid, const std::string &hostName) const
+{
+    std::lock_guard<ffrt::mutex> guard(presetDomainsMutex_);
+    return IsPresetDomainLocked(uid, hostName);
+}
 
 DnsParamCache &DnsParamCache::GetInstance()
 {
@@ -385,55 +517,49 @@ int32_t DnsParamCache::GetDefaultNetwork() const
     return defaultNetId_;
 }
 
-void DnsParamCache::SetDnsCache(uint16_t netId, uint32_t uid, const std::string &hostName, const AddrInfo &addrInfo)
+void DnsParamCache::SetDnsCacheCommon(uint16_t netId, uint32_t uid, const std::string &hostName,
+                                      const AddrInfo &addrInfo, uint32_t ttl)
 {
     if (netId == 0) {
         netId = defaultNetId_;
     }
-    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
-    auto it = serverConfigMap_.find(netId);
-    if (it == serverConfigMap_.end()) {
-        DNS_CONFIG_PRINT("SetDnsCache failed: netid is not have netid:%{public}d,", netId);
-        return;
-    }
+    {
+        std::lock_guard<ffrt::mutex> guard(cacheMutex_);
+        auto it = serverConfigMap_.find(netId);
+        if (it == serverConfigMap_.end()) {
+            DNS_CONFIG_PRINT("SetDnsCache failed: netid is not have netid:%{public}d,", netId);
+            return;
+        }
 
-    // LCOV_EXCL_START
-    AddrInfoWithTtl addrInfoWithTtl;
-    if (memcpy_s(&addrInfoWithTtl.addrInfo, sizeof(addrInfoWithTtl.addrInfo), &addrInfo,
-                 sizeof(addrInfo)) != 0) {
-        return;
+        // LCOV_EXCL_START
+        AddrInfoWithTtl addrInfoWithTtl;
+        if (memcpy_s(&addrInfoWithTtl.addrInfo, sizeof(addrInfoWithTtl.addrInfo), &addrInfo,
+                     sizeof(addrInfo)) != 0) {
+            return;
+        }
+        // LCOV_EXCL_STOP
+        addrInfoWithTtl.ttl = ttl;
+
+        it->second.GetCache().Put(MakeCacheKey(uid, hostName), addrInfoWithTtl);
     }
-    // LCOV_EXCL_STOP
-    addrInfoWithTtl.ttl = DEFAULT_DELAYED_COUNT;
-    it->second.GetCache().Put(MakeCacheKey(uid, hostName), addrInfoWithTtl);
+    // Bpf sync is done outside cacheMutex_ to keep the hot critical section short
+    TrySyncPresetDomainIp(uid, hostName, ExtractIpStrings(addrInfo));
+}
+
+void DnsParamCache::SetDnsCache(uint16_t netId, uint32_t uid, const std::string &hostName, const AddrInfo &addrInfo)
+{
+    SetDnsCacheCommon(netId, uid, hostName, addrInfo, DEFAULT_DELAYED_COUNT);
 }
 
 void DnsParamCache::SetDnsCache(uint16_t netId, uint32_t uid, const std::string &hostName,
                                 const AddrInfoWithTtl &addrInfo)
 {
-    if (netId == 0) {
-        netId = defaultNetId_;
-    }
     uint32_t ttl = addrInfo.ttl;
     if (ttl == 0) {
         return;
     }
-    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
-    auto it = serverConfigMap_.find(netId);
-    if (it == serverConfigMap_.end()) {
-        DNS_CONFIG_PRINT("SetDnsCache failed: netid is not have netid:%{public}d,", netId);
-        return;
-    }
-
-    // LCOV_EXCL_START
-    AddrInfoWithTtl addrInfoWithTtl;
-    if (memcpy_s(&addrInfoWithTtl.addrInfo, sizeof(addrInfoWithTtl.addrInfo), &addrInfo.addrInfo,
-                 sizeof(addrInfo.addrInfo)) != 0) {
-        return;
-    }
-    // LCOV_EXCL_STOP
-    addrInfoWithTtl.ttl = ttl > DEFAULT_DELAYED_COUNT ? ttl : DEFAULT_DELAYED_COUNT;
-    it->second.GetCache().Put(MakeCacheKey(uid, hostName), addrInfoWithTtl);
+    SetDnsCacheCommon(netId, uid, hostName, addrInfo.addrInfo,
+                      ttl > DEFAULT_DELAYED_COUNT ? ttl : DEFAULT_DELAYED_COUNT);
 }
 
 std::vector<AddrInfo> DnsParamCache::GetDnsCache(uint16_t netId, uint32_t uid, const std::string &hostName)
@@ -442,18 +568,27 @@ std::vector<AddrInfo> DnsParamCache::GetDnsCache(uint16_t netId, uint32_t uid, c
         netId = defaultNetId_;
     }
 
-    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
-    auto it = serverConfigMap_.find(netId);
-    if (it == serverConfigMap_.end()) {
-        DNS_CONFIG_PRINT("GetDnsCache failed: netid is not have netid:%{public}d,", netId);
-        return {};
+    std::vector<AddrInfoWithTtl> infos;
+    {
+        std::lock_guard<ffrt::mutex> guard(cacheMutex_);
+        auto it = serverConfigMap_.find(netId);
+        if (it == serverConfigMap_.end()) {
+            DNS_CONFIG_PRINT("GetDnsCache failed: netid is not have netid:%{public}d,", netId);
+            return {};
+        }
+        infos = it->second.GetCache().Get(MakeCacheKey(uid, hostName));
     }
 
-    auto infos = it->second.GetCache().Get(MakeCacheKey(uid, hostName));
     std::vector<AddrInfo> addrInfo;
-    for (auto info : infos) {
+    std::vector<std::string> ipAddresses;
+    for (const auto &info : infos) {
         addrInfo.push_back(info.addrInfo);
+        auto ips = ExtractIpStrings(info.addrInfo);
+        ipAddresses.insert(ipAddresses.end(), ips.begin(), ips.end());
     }
+    // Cache hit does not trigger a real dns query, so re-sync the preset domain ips into the bpf map
+    // here to keep the bpf map consistent with the still valid dns cache
+    TrySyncPresetDomainIp(uid, hostName, ipAddresses);
     return addrInfo;
 }
 
@@ -853,5 +988,147 @@ bool DnsParamCache::IsInIpv6UidBlackList(uint16_t netId, uint32_t uid)
         NETNATIVE_LOGI("IsInIpv6UidBlackList netid:%{public}d, uid:%{public}d", netId, uid);
     }
     return enable;
+}
+
+bool DnsParamCache::IsInSkipIpv6UidPerHost(uint16_t netId, uint32_t uid, const std::string &hostName)
+{
+    if (netId == 0) {
+        netId = defaultNetId_;
+    }
+    // Shortcut on the hot DNS query path: if no preset domain is configured there is no need to
+    // open the BPF map at all
+    {
+        std::lock_guard<ffrt::mutex> lock(presetDomainsMutex_);
+        if (presetDomains_.empty()) {
+            return false;
+        }
+        if (!IsPresetDomainLocked(uid, hostName)) {
+            return false;
+        }
+    }
+    // 仅适用于 wifi 和蜂窝网络
+    OHOS::NetManagerStandard::BpfMapper<net_index, net_interface_name_id> netIdAndIfaceMap(
+        OHOS::NetManagerStandard::NET_INDEX_AND_IFACE_MAP_PATH, BPF_ANY);
+    if (netIdAndIfaceMap.IsValid()) {
+        net_interface_name_id bearType = NETWORK_BEARER_TYPE_INITIAL;
+        net_index key = static_cast<net_index>(netId);
+        if (netIdAndIfaceMap.Read(key, bearType) == 0 &&
+            bearType != NETWORK_BEARER_TYPE_WIFI && bearType != NETWORK_BEARER_TYPE_CELLULAR) {
+            NETNATIVE_LOGI("IsInSkipIpv6UidPerHost not wifi or cellular, netId:%{public}d, bearType:%{public}u",
+                netId, bearType);
+            return false;
+        }
+    }
+    NETNATIVE_LOGI("IsInSkipIpv6UidPerHost hit, netId:%{public}d, uid:%{public}u", netId, uid);
+    return true;
+}
+
+void DnsParamCache::TrySyncPresetDomainIp(uint32_t uid, const std::string &hostName,
+                                          const std::vector<std::string> &ipAddresses)
+{
+    if (ipAddresses.empty()) {
+        return;
+    }
+    std::string host = GetBareHostName(hostName);
+    std::lock_guard<ffrt::mutex> guard(presetDomainsMutex_);
+    if (!IsPresetDomainLocked(uid, host)) {
+        return;
+    }
+    NETNATIVE_LOG_D("TrySyncPresetDomainIp preset domain hit, uid:%{public}u", uid);
+    WritePresetDomainIps(ipAddresses);
+}
+
+int32_t DnsParamCache::WritePresetDomainIps(const std::vector<std::string> &ipAddresses)
+{
+    // Convert and deduplicate first: non-IPv4 (e.g. IPv6) is not supported by the map, if nothing
+    // is convertible there is no need to open the map at all
+    std::set<uint32_t> ipKeys;
+    for (const auto &ip : ipAddresses) {
+        struct in_addr addr;
+        if (inet_pton(AF_INET, ip.c_str(), &addr) != 1) {
+            continue;
+        }
+        ipKeys.emplace(addr.s_addr);
+    }
+    if (ipKeys.empty()) {
+        return 0;
+    }
+
+    // Create IP exists mapper
+    OHOS::NetManagerStandard::BpfMapper<dns_ip_to_domain_key, dns_ip_exists_value> ipExistsMap(
+        OHOS::NetManagerStandard::DNS_IP_TO_DOMAIN_MAP_PATH, BPF_ANY);
+    if (!ipExistsMap.IsValid()) {
+        NETNATIVE_LOGE("WritePresetDomainIps: ipExistsMap is not valid");
+        return -1;
+    }
+
+    // Write IP to map, key is in network byte order
+    for (const auto &ipKey : ipKeys) {
+        dns_ip_to_domain_key key = {};
+        key.ipAddr = ipKey;
+
+        // Simple value: just a flag to prove the key exists
+        dns_ip_exists_value value = {};
+        value.flag = 1;
+
+        ipExistsMap.Write(key, value, BPF_ANY);
+    }
+    return 0;
+}
+
+void DnsParamCache::ClearPresetDomainIps()
+{
+    // Create IP exists mapper
+    OHOS::NetManagerStandard::BpfMapper<dns_ip_to_domain_key, dns_ip_exists_value> ipExistsMap(
+        OHOS::NetManagerStandard::DNS_IP_TO_DOMAIN_MAP_PATH, BPF_ANY);
+    if (!ipExistsMap.IsValid()) {
+        NETNATIVE_LOGE("ClearPresetDomainIps: ipExistsMap is not valid");
+        return;
+    }
+
+    auto keys = ipExistsMap.GetAllKeys();
+    int32_t clearNum = 0;
+    for (const auto &key : keys) {
+        if (ipExistsMap.Delete(key) == 0) {
+            clearNum++;
+        } else {
+            NETNATIVE_LOGE("ClearPresetDomainIps: failed to delete IP mapping, errno:%{public}d", errno);
+        }
+    }
+    NETNATIVE_LOGI("ClearPresetDomainIps total:%{public}zu cleared:%{public}d", keys.size(), clearNum);
+}
+
+bool DnsParamCache::IsPresetCacheKey(const std::string &cacheKey) const
+{
+    // Cache key format is MakeCacheKey(uid, hostName) = "<uid>|<hostName>", where hostName is the
+    // decorated resolv cache key "host serv ai_family ai_flags ai_protocol ai_socktype" (MakeKey in
+    // netsys_client.c), so the decoration must be stripped before preset domain matching, otherwise
+    // the purge never matches any real entry
+    size_t delim = cacheKey.find('|');
+    if (delim == std::string::npos || delim == 0) {
+        return false;
+    }
+    uint32_t uid = 0;
+    for (size_t i = 0; i < delim; ++i) {
+        if (cacheKey[i] < '0' || cacheKey[i] > '9') {
+            return false;
+        }
+        uid = uid * DECIMAL_BASE + static_cast<uint32_t>(cacheKey[i] - '0');
+    }
+    std::string hostName = GetBareHostName(cacheKey.substr(delim + 1));
+    return IsPresetDomainLocked(uid, hostName);
+}
+
+void DnsParamCache::ClearPresetDomainDnsCache()
+{
+    // Caller holds presetDomainsMutex_, lock order is presetDomainsMutex_ -> cacheMutex_ (no
+    // reverse nesting exists anywhere else)
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
+    int32_t clearNum = 0;
+    for (auto &netIter : serverConfigMap_) {
+        clearNum += static_cast<int32_t>(netIter.second.GetCache().RemoveIf(
+            [this](const std::string &cacheKey) { return IsPresetCacheKey(cacheKey); }));
+    }
+    NETNATIVE_LOGI("ClearPresetDomainDnsCache cleared:%{public}d", clearNum);
 }
 } // namespace OHOS::nmd

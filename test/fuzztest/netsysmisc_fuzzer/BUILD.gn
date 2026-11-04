@@ -26,6 +26,7 @@ ohos_fuzztest("NetsysMiscFuzzTest") {
   include_dirs = [
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include",
+    "$NETMANAGERNATIVE_ROOT/bpf/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$NETMANAGERNATIVE_ROOT/include",
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
@@ -67,6 +68,7 @@ ohos_fuzztest("NetsysMiscFuzzTest") {
   external_deps = [
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",

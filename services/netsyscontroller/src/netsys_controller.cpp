@@ -1662,6 +1662,17 @@ int32_t NetsysController::SetIpv6UidBlackList(std::vector<int32_t> &netIds, int3
     return netsysService_->SetIpv6UidBlackList(netIds, uid);
 }
 
+int32_t NetsysController::SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains)
+{
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("SetPresetDomains netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->SetPresetDomains(domains);
+}
+
 int32_t NetsysController::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
 {
     // LCOV_EXCL_START This will never happen.

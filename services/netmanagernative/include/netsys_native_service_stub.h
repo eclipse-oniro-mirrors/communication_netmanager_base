@@ -219,6 +219,7 @@ private:
     int32_t CmdGetConnectOwnerUid(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetSystemNetPortStates(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetIpv6UidBlackList(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetPresetDomains(MessageParcel &data, MessageParcel &reply);
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     int32_t CmdNfqOpen(MessageParcel &data, MessageParcel &reply);

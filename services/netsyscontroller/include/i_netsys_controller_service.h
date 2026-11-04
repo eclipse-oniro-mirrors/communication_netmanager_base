@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <map>
 
 #include "dns_config_client.h"
 #include "interface_type.h"
@@ -1063,6 +1064,7 @@ public:
                                        int32_t &ownerUid) = 0;
     virtual int32_t GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo) = 0;
     virtual int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid) = 0;
+    virtual int32_t SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains) = 0;
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     virtual sptr<NetsysNative::NfqCtx> NfqOpen() = 0;
     virtual int32_t NfqClose(sptr<NetsysNative::NfqCtx> &ctx) = 0;

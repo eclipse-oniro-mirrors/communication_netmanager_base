@@ -814,6 +814,11 @@ public:
     {
         return 0;
     }
+
+    int32_t SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains) override
+    {
+        return 0;
+    }
 };
 }
 }

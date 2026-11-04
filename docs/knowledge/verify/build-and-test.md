@@ -47,6 +47,7 @@
 | `NfQueueFuzzTest` | nfqueue 数据面回调（**仅 `netmanager_base_enable_feature_net_firewall=true` 时入组**） |
 | `CommonFuzzTest` | 公共工具/权限入口 |
 | `EnableVnicNetworkFuzzTest` | netsys vnic 使能分支 |
+| `SetPresetDomainsFuzzTest` | netsys 预置域名 IPC 命令（`NETSYS_SET_PRESET_DOMAINS` stub 解包红区） |
 | `IsDeadFlowResetTargetBundleFuzzTest` | 死流复位目标判定分支 |
 | `NetBaseBranchFuzzTest` | netsys 分支综合入口 |
 | `UpdateNetCapsFuzzTest` | 网络能力更新分支 |

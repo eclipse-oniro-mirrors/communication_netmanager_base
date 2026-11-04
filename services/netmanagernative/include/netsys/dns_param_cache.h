@@ -18,12 +18,18 @@
 
 #include <iostream>
 #include <map>
+#include <vector>
+#include <string>
+#include <arpa/inet.h>
 
 #include "ffrt.h"
 #include "rwlock.h"
 #include "dns_resolv_config.h"
 #include "netnative_log_wrapper.h"
 #include "uid_range.h"
+#include "bpf_path.h"
+#include "bpf_def.h"
+#include "bpf_mapper.h"
 #ifdef FEATURE_NET_FIREWALL_ENABLE
 #include "netfirewall_parcel.h"
 #include "i_netfirewall_callback.h"
@@ -127,6 +133,15 @@ public:
     // ipv6 uid black list methods
     void SetIpv6UidBlackList(std::vector<int32_t> &netIds, uint32_t uid);
     bool IsInIpv6UidBlackList(uint16_t netId, uint32_t uid);
+    // IsInSkipIpv6UidPerHost
+    bool IsInSkipIpv6UidPerHost(uint16_t netId, uint32_t uid, const std::string &hostName);
+    // preset domain cache methods
+    void SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains);
+    std::map<uint32_t, std::vector<std::string>> GetPresetDomains() const;
+    bool IsPresetDomain(uint32_t uid, const std::string &hostName) const;
+    // A preset domain must be non-empty, no longer than DNS_DOMAIN_NAME_SIZE,
+    // and consist of letters, digits, '.' and '-' only
+    static bool IsValidPresetDomain(const std::string &domain);
 
 private:
     DnsParamCache();
@@ -135,6 +150,24 @@ private:
     {
         return std::to_string(uid) + "|" + hostName;
     }
+
+    void SetDnsCacheCommon(uint16_t netId, uint32_t uid, const std::string &hostName,
+                           const AddrInfo &addrInfo, uint32_t ttl);
+
+    // Locking contract: the caller must hold presetDomainsMutex_ (reads shared presetDomains_
+    // without taking the mutex itself)
+    bool IsPresetDomainLocked(uint32_t uid, const std::string &hostName) const;
+
+    void TrySyncPresetDomainIp(uint32_t uid, const std::string &hostName,
+                               const std::vector<std::string> &ipAddresses);
+
+    int32_t WritePresetDomainIps(const std::vector<std::string> &ipAddresses);
+
+    static void ClearPresetDomainIps();
+
+    bool IsPresetCacheKey(const std::string &cacheKey) const;
+
+    void ClearPresetDomainDnsCache();
 
     std::vector<NetManagerStandard::UidRange> vpnUidRanges_;
 
@@ -157,6 +190,10 @@ private:
                                 uint8_t &retryCount);
 
     int32_t GetUserDefinedVpnServerFlag(uint32_t uid, bool &flag);
+
+    // preset domain cache
+    std::map<uint32_t, std::vector<std::string>> presetDomains_;
+    mutable ffrt::mutex presetDomainsMutex_;
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     int32_t GetUserId(int32_t appUid);
 

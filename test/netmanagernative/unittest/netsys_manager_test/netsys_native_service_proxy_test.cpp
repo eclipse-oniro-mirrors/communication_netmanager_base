@@ -104,6 +104,39 @@ sptr<NetsysNative::INetsysService> ConnManagerGetProxy()
     }
     return proxy;
 }
+
+// Local stub remote used to drive proxy error branches in-process
+class NetsysNativeTestRemoteStub : public OHOS::IPCObjectStub {
+public:
+    NetsysNativeTestRemoteStub() : IPCObjectStub(u"") {}
+    ~NetsysNativeTestRemoteStub() override = default;
+
+    int32_t OnRemoteRequest(uint32_t code, OHOS::MessageParcel &data, OHOS::MessageParcel &reply,
+                            OHOS::MessageOption &option) override
+    {
+        if (code == static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_PRESET_DOMAINS)) {
+            if (sendRequestErr != ERR_NONE) {
+                return sendRequestErr;
+            }
+            if (!replyValid) {
+                return ERR_NONE;
+            }
+            reply.WriteInt32(0);
+        }
+        return ERR_NONE;
+    }
+
+    int32_t sendRequestErr = ERR_NONE;
+    bool replyValid = true;
+};
+
+// Built in a noinline factory so that calls dispatch virtually through the exported vtable,
+// instead of direct references to proxy symbols which are pruned by the version script
+__attribute__((noinline)) OHOS::sptr<OHOS::NetsysNative::INetsysService> CreateLocalTestProxy(
+    const OHOS::sptr<OHOS::IRemoteObject> &remote)
+{
+    return new NetsysNativeServiceProxy(remote);
+}
 } // namespace
 class NetsysNativeServiceProxyTest : public testing::Test {
 public:
@@ -574,6 +607,55 @@ HWTEST_F(NetsysNativeServiceProxyTest, SetIpv6UidBlackListTest001, TestSize.Leve
     std::vector<int32_t> netIds = {};
     int32_t ret = netsysNativeService->SetIpv6UidBlackList(netIds, uid);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, SetPresetDomainsTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000138] = {"example.com"};
+    int32_t ret = netsysNativeService->SetPresetDomains(presetDomains);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, SetPresetDomainsTest002, TestSize.Level1)
+{
+    // In-process stub with multi-uid multi-domain map - covers proxy full serialize loop deterministically
+    sptr<NetsysNativeTestRemoteStub> remote = new NetsysNativeTestRemoteStub();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = CreateLocalTestProxy(remote);
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000138] = {"example.com"};
+    presetDomains[20000139] = {"a.example.com", "b.example.com"};
+    int32_t ret = netsysNativeService->SetPresetDomains(presetDomains);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, SetPresetDomainsTest003, TestSize.Level1)
+{
+    // In-process stub returns SendRequest error - covers proxy branch: error != ERR_NONE
+    sptr<NetsysNativeTestRemoteStub> remote = new NetsysNativeTestRemoteStub();
+    remote->sendRequestErr = IPC_INVOKER_ERR;
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = CreateLocalTestProxy(remote);
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000138] = {"example.com"};
+    int32_t ret = netsysNativeService->SetPresetDomains(presetDomains);
+    EXPECT_EQ(ret, IPC_INVOKER_ERR);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, SetPresetDomainsTest004, TestSize.Level1)
+{
+    // In-process stub writes no reply - covers proxy branch: reply.ReadInt32 failed
+    sptr<NetsysNativeTestRemoteStub> remote = new NetsysNativeTestRemoteStub();
+    remote->replyValid = false;
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = CreateLocalTestProxy(remote);
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000138] = {"example.com"};
+    int32_t ret = netsysNativeService->SetPresetDomains(presetDomains);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeServiceProxyTest, SetIpv6AutoConfTest001, TestSize.Level1)

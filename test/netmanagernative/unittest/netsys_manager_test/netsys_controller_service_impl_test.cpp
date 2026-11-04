@@ -812,6 +812,30 @@ HWTEST_F(NetsysControllerServiceImplTest, SetIpv6UidBlackListTest001, TestSize.L
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysControllerServiceImplTest, SetPresetDomainsTest001, TestSize.Level1)
+{
+    EXPECT_CALL(*mockNetsysService_, SetPresetDomains(_)).WillRepeatedly(Return(0));
+    auto netsysControllerServiceImpl = std::make_shared<NetsysControllerServiceImpl>();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000138] = {"example.com", "test.com"};
+    int32_t ret = netsysControllerServiceImpl->SetPresetDomains(presetDomains);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, SetPresetDomainsTest002, TestSize.Level1)
+{
+    // Empty preset domains map - covers NetsysControllerServiceImpl::SetPresetDomains with empty input
+    EXPECT_CALL(*mockNetsysService_, SetPresetDomains(_)).WillRepeatedly(Return(0));
+    auto netsysControllerServiceImpl = std::make_shared<NetsysControllerServiceImpl>();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    int32_t ret = netsysControllerServiceImpl->SetPresetDomains(presetDomains);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysControllerServiceImplTest, SetIpv6AutoConfTest001, TestSize.Level1)
 {
     EXPECT_CALL(*mockNetsysService_, SetIpv6AutoConf(_, _)).WillRepeatedly(Return(0));
