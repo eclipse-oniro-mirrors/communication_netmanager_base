@@ -501,7 +501,7 @@ HWTEST_F(NetConnServiceStubTest, OnRefreshGlobalHttpProxyTest002, TestSize.Level
     sptr<IRefreshHttpProxyCallback> callback = new RefreshHttpProxyCallbackStub();
     EXPECT_TRUE(data.WriteRemoteObject(callback->AsObject().GetRefPtr()));
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REFRESH_GLOBAL_HTTP_PROXY);
-+   EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
