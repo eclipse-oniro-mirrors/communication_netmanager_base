@@ -128,6 +128,375 @@ uint32_t *Bitmap::Get()
     return bitmap_;
 }
 
+void Ip4RuleMap::OrForEach(const Bitmap &bitmap)
+{
+    for (auto &item : ruleBitmapVec_) {
+        item.bitmap.Or(bitmap);
+    }
+}
+
+uint32_t Ip4RuleMap::GetNetworkAddress(uint32_t addr, uint32_t mask)
+{
+    if (mask == 0) {
+        return 0;
+    }
+    return addr & (0xFFFFFFFF << (IPV4_MAX_PREFIXLEN - mask));
+}
+
+void Ip4RuleMap::CollectCandidates(Ip4RuleInsertContext &ctx, std::vector<size_t> &candidates, bool &shouldInsert)
+{
+    auto exactIt = exactIndex_.find(ctx.exactKey);
+    if (exactIt != exactIndex_.end()) {
+        candidates.emplace_back(exactIt->second);
+        shouldInsert = false;
+    }
+    for (uint32_t prefix = 0; prefix < ctx.mask; ++prefix) {
+        uint32_t net = GetNetworkAddress(ctx.addr, prefix);
+        auto it = byPrefix_[prefix].find(net);
+        if (it != byPrefix_[prefix].end()) {
+            candidates.insert(candidates.end(), it->second.begin(), it->second.end());
+        }
+    }
+    auto containedIt = containedAt_[ctx.mask].find(ctx.networkAddr);
+    if (containedIt != containedAt_[ctx.mask].end()) {
+        for (size_t index : containedIt->second) {
+            if (ruleBitmapVec_[index].mask > ctx.mask) {
+                candidates.emplace_back(index);
+            }
+        }
+    }
+    std::sort(candidates.begin(), candidates.end());
+    candidates.erase(std::unique(candidates.begin(), candidates.end()), candidates.end());
+}
+
+void Ip4RuleMap::MergeCandidates(
+    Ip4RuleInsertContext &ctx, Bitmap &bitmapCopy, const std::vector<size_t> &candidates, bool &shouldInsert)
+{
+    for (size_t index : candidates) {
+        auto &item = ruleBitmapVec_[index];
+        uint32_t existingIp = ntohl(item.data);
+        uint32_t existingNetworkAddr = GetNetworkAddress(existingIp, item.mask);
+        if (item.data == ctx.netOrderAddr && item.mask == ctx.mask) {
+            item.bitmap.Or(bitmapCopy);
+            shouldInsert = false;
+        }
+        if (ctx.mask < item.mask && GetNetworkAddress(existingIp, ctx.mask) == ctx.networkAddr) {
+            item.bitmap.Or(bitmapCopy);
+        }
+        if (ctx.mask > item.mask && GetNetworkAddress(existingIp, item.mask) == existingNetworkAddr) {
+            bitmapCopy.Or(item.bitmap);
+        }
+    }
+}
+
+void Ip4RuleMap::InsertRuleBitmap(Ip4RuleInsertContext &ctx, Bitmap &bitmapCopy)
+{
+    Ip4RuleBitmap ruleBitmap;
+    ruleBitmap.data = ctx.netOrderAddr;
+    ruleBitmap.mask = ctx.mask;
+    ruleBitmap.bitmap = std::move(bitmapCopy);
+    ruleBitmapVec_.emplace_back(std::move(ruleBitmap));
+    size_t index = ruleBitmapVec_.size() - 1;
+    exactIndex_[ctx.exactKey] = index;
+    byPrefix_[ctx.mask][ctx.networkAddr].emplace_back(index);
+    for (uint32_t prefix = 0; prefix <= ctx.mask; ++prefix) {
+        containedAt_[prefix][GetNetworkAddress(ctx.addr, prefix)].emplace_back(index);
+    }
+}
+
+void Ip4RuleMap::OrInsert(uint32_t addr, uint32_t mask, Bitmap &bitmap)
+{
+    if (mask > IPV4_MAX_PREFIXLEN) {
+        mask = IPV4_MAX_PREFIXLEN;
+    }
+    uint32_t netOrderAddr = htonl(addr);
+    uint32_tnetworkAddr = GetNetworkAddress(addr, mask);
+    bool shouldInsert = true;
+    Bitmap bitmapCopy(bitmap);
+    
+    Ip4RuleInsertContext ctx = {
+        addr,
+        mask,
+        netOrderAddr,
+        networkAddr,
+        (static_cast<uint64_t>(mask) << 32) | netOrderAddr,
+    };
+
+    std::vector<size_t> candidates;
+    CollectCandidates(ctx, candidates, shouldInsert);
+    MergeCandidates(ctx, bitmapCopy, candidates, shouldInsert);
+    if (shouldInsert) {
+        InsertRuleBitmap(ctx, bitmapCopy);
+    }
+}
+
+void Ip4RuleMap::Clear()
+{
+    ruleBitmapVec_.clear();
+    exactIndex_.clear();
+    for (auto &bucket : byPrefix_) {
+        bucket.clear();
+    }
+    for (auto &bucket : containedAt_) {
+        bucket.clear();
+    }
+}
+
+std::vector<Ip4RuleBitmap> &Ip4RuleMap::Get()
+{
+    return ruleBitmapVec_;
+}
+
+void Ip6RuleMap::OrForEach(const Bitmap &bitmap)
+{
+    for (auto &item : ruleBitmapVec_) {
+        item.bitmap.Or(bitmap);
+    }
+}
+
+void Ip6RuleMap::GetNetworkAddress(in6_addr addr, int prefixLen, in6_addr &out)
+{
+    if (prefixLen < 0 || prefixLen > IPV6_MAX_PREFIXLEN) {
+        return;
+    }
+    if (prefixLen == 0) {
+        return;
+    }
+    int quotient = prefixLen / 8;
+    int remainder = prefixLen % 8;
+    for (int i = 0; i < quotient; i++) {
+        out.s6_addr[i] = addr.s6_addr[i] & 0xff;
+    }
+    if (remainder) {
+        out.s6_addr[quotient] = addr.s6_addr[quotient] & (~(0xff >> remainder));
+    }
+}
+
+static Ip6ExactKey MakeIp6ExactKey(const in6_addr &networkAddr, uint32_t prefixlen)
+{
+    Ip6ExactKey key;
+    key.prefixlen = prefixlen;
+    if (memcpy_s(key.net.data, sizeof(key.net.data), networkAddr.s6_addr, sizeof(networkAddr.s6_addr)) != EOK) {
+        return key;
+    }
+    return key;
+}
+
+void Ip6RuleMap::OrInsert(const in6_addr &addr, uint32_t prefixlen, Bitmap &bitmap)
+{
+    if (prefixlen > IPV6_MAX_PREFIXLEN) {
+        prefixlen = IPV6_MAX_PREFIXLEN;
+    }
+    in6_addr networkAddr = {};
+    GetNetworkAddress(addr, static_cast<int>(prefixlen), networkAddr);
+    Ip6ExactKey key = MakeIp6ExactKey(networkAddr, prefixlen);
+    auto it = exactIndex_.find(key);
+    if (it != exactIndex_.end()) {
+        ruleBitmapVec_[it->second].bitmap.Or(bitmap);
+        return;
+    }
+    Ip6RuleBitmap ruleBitmap;
+    ruleBitmap.data = networkAddr;
+    ruleBitmap.prefixlen = prefixlen;
+    ruleBitmap.bitmap = bitmap;
+    ruleBitmapVec_.emplace_back(std::move(ruleBitmap));
+    exactIndex_[key] = ruleBitmapVec_.size() - 1;
+    if (!activePrefix_[prefixlen]) {
+        activePrefix_[prefixlen] = true;
+        ++activePrefixCount_;
+    }
+    finalized_ = false;
+}
+
+void Ip6RuleMap::Finalize()
+{
+    if (finalized_) {
+        return;
+    }
+    if (activePrefixCount_ <= 1) {
+        finalized_ = true;
+        return;
+    }
+    for (auto &item : ruleBitmapVec_) {
+        for (uint32_t prefix = 0; prefix < item.prefixlen; ++prefix) {
+            if (!activePrefix_[prefix]) {
+                continue;
+            }
+            in6_addr ancestorNet = {};
+            GetNetworkAddress(item.data, static_cast<int>(prefix), ancestorNet);
+            auto it = exactIndex_.find(MakeIp6ExactKey(ancestorNet, prefix));
+            if (it != exactIndex_.end()) {
+                item.bitmap.Or(ruleBitmapVec_[it->second].bitmap);
+            }
+        }
+    }
+    finalized_ = true;
+}
+
+void Ip6RuleMap::Clear()
+{
+    ruleBitmapVec_.clear();
+    exactIndex_.clear();
+    activePrefix_.fill(false);
+    activePrefixCount_ = 0;
+    finalized_ = false;
+}
+
+std::vector<Ip6RuleBitmap> &Ip6RuleMap::Get()
+{
+    Finalize();
+    return ruleBitmapVec_;
+}
+
+void BpfPortMap::OrForEach(const Bitmap &bitmap)
+{
+    for (auto &item : ruleBitmapVec_) {
+        item.bitmap.Or(bitmap);
+    }
+}
+
+void BpfPortMap::OrInsert(uint16_t start, uint32_t mask, Bitmap &bitmap)
+{
+    uint64_t key = (static_cast<uint64_t>(mask) << 16) | start;
+    auto it = index_.find(key);
+    if (it == index_.end()) {
+        portRuleBitmap tmp;
+        tmp.prefixlen = mask;
+        tmp.data = start;
+        tmp.bitmap = bitmap;
+        size_t index = ruleBitmapVec_.size();
+        ruleBitmapVec_.push_back(std::move(tmp));
+        index_[key] = index;
+    } else {
+        ruleBitmapVec_[it->second].bitmap.Or(bitmap);
+    }
+}
+
+void BpfPortMap::Clear()
+{
+    ruleBitmapVec_.clear();
+    index_.clear();
+}
+
+std::vector<portRuleBitmap> &BpfPortMap::Get()
+{
+    return ruleBitmapVec_;
+}
+
+void SegmentBitmapMap::AddMap(uint16_t start, uint16_t end, const Bitmap& bitmap)
+{
+    if (start > end) {
+        return;
+    }
+    std::vector<size_t> intersectIndices;
+    CollectIntersectIndices(start, end, intersectIndices);
+
+    std::vector<SegmentBitmap> newSegments;
+    ProcessIntersections(start, end, bitmap, intersectIndices, newSegments);
+
+    RemoveSegments(intersectIndices);
+    InsertNewSegments(newSegments);
+}
+
+std::vector<SegmentBitmap>& SegmentBitmapMap::GetMap()
+{
+    return segments_;
+}
+
+void SegmentBitmapMap::CollectIntersectIndices(uint16_t start, uint16_t end, std::vector<size_t>& indices) const
+{
+    for (size_t i = 0; i < segments_.size(); ++i) {
+        const auto& seg = segments_[i];
+        if (!(end < seg.start || start > seg.end)) {
+            indices.push_back(i);
+        }
+    }
+}
+
+void SegmentBitmapMap::RemoveSegments(const std::vector<size_t>& indices)
+{
+    std::vector<size_t> sortedIndices = indices;
+    std::sort(sortedIndices.rbegin(), sortedIndices.rend());
+
+    for (size_t idx : sortedIndices) {
+        if (idx < segments_.size()) {
+            segments_.erase(segments_.begin() + idx);
+        }
+    }
+}
+
+void SegmentBitmapMap::ProcessIntersections(uint16_t targetStart, uint16_t targetEnd, const Bitmap& targetBitmap,
+                                            const std::vector<size_t>& intersectIndices,
+                                            std::vector<SegmentBitmap>& newSegments)
+{
+    std::vector<SegmentBitmap> intersectSegs;
+    for (size_t idx : intersectIndices) {
+        intersectSegs.push_back(segments_[idx]);
+    }
+    std::sort(intersectSegs.begin(), intersectSegs.end(),
+              [](const SegmentBitmap& a, const SegmentBitmap& b) {
+                  return a.start < b.start;
+              });
+
+    uint16_t currentPos = targetStart;
+    for (const auto& seg : intersectSegs) {
+        if (currentPos < seg.start) {
+            addSegment(currentPos, seg.start - 1, targetBitmap, newSegments);
+            currentPos = seg.start;
+        }
+
+        if (seg.start < currentPos) {
+            addSegment(seg.start, currentPos - 1, seg.bitmap, newSegments);
+        }
+
+        uint16_t overlapEnd = std::min(targetEnd, seg.end);
+        Bitmap mergedBitmap = seg.bitmap;
+        mergedBitmap.Or(targetBitmap);
+        addSegment(currentPos, overlapEnd, mergedBitmap, newSegments);
+
+        if (overlapEnd == UINT16_MAX) {
+            return;
+        }
+
+        currentPos = overlapEnd + 1;
+
+        if (currentPos <= seg.end) {
+            addSegment(currentPos, seg.end, seg.bitmap, newSegments);
+        }
+
+        if (currentPos > targetEnd) {
+            break;
+        }
+    }
+
+    if (currentPos <= targetEnd) {
+        addSegment(currentPos, targetEnd, targetBitmap, newSegments);
+    }
+}
+
+void SegmentBitmapMap::addSegment(uint16_t start, uint16_t end, const Bitmap& bitmap,
+                                  std::vector<SegmentBitmap>& segments)
+{
+    if (start > end) {
+        return;
+    }
+    segments.push_back({start, end, bitmap});
+}
+
+void SegmentBitmapMap::InsertNewSegments(const std::vector<SegmentBitmap>& newSegments)
+{
+    for (const auto& seg : newSegments) {
+        if (!seg.isValid()) {
+            continue;
+        }
+        auto it = std::lower_bound(segments_.begin(), segments_.end(), seg,
+            [](const SegmentBitmap& a, const SegmentBitmap& b) {
+                return a.start < b.start;
+            });
+        segments_.insert(it, seg);
+    }
+}
+
 uint16_t BitmapManager::Hltons(uint32_t n)
 {
     return htons((uint16_t)(n & 0x0000ffff));
@@ -670,50 +1039,113 @@ void IpParamParser::ChangeIp6Start(uint32_t startBit, in6_addr &addr)
     }
 }
 
-int32_t IpParamParser::GetIp6AndMask(const in6_addr &addr6Start, const in6_addr &addr6End, std::vector<Ip6Data> &list)
+namespace {
+constexpr size_t IP6_RANGE_CACHE_MAX = 1024;
+
+struct Ip6RangeKey {
+    uint8_t start[IPV6_BYTE_COUNT] = {};
+    uint8_t end[IPV6_BYTE_COUNT] = {};
+
+    bool operator == (const Ip6RangeKey &other) const
+    {
+        return memcmp(start, other.start, sizeof(start)) == 0 &&
+            memcmp(end, other.end, sizeof(end)) == 0;
+    }
+};
+
+struct Ip6RangeKeyHash {
+    size_t operator () (const Ip6RangeKey &key) const
+    {
+        size_t hash = FNV_OFFSET_BASIS_64;
+        const uint8_t *bytes = reinterpret_cast<const uint8_t *>(&key);
+        for (size_t i = 0; i < sizeof(key.start) + sizeof(key.end); ++i) {
+            hash ^= bytes[i];
+            hash *= FNV_PRIME_64;
+        }
+        return hash;
+    }
+};
+
+std::mutex g_ip6RangeCacheMutex;
+std::unordered_map<Ip6RangeKey, std::vector<Ip6Data>, Ip6RangeKeyHash> g_ip6RangeCache;
+} // namespace
+
+static int32_t ComputeIp6AndMask(const in6_addr &addr6Start, const in6_addr &addr6End, std::vector<Ip6Data> &list)
 {
     int32_t ret = memcmp(&addr6Start, &addr6End, sizeof(addr6Start));
     if (ret > 0) {
         NETNATIVE_LOGW("GetIp6AndMask fail ret=%{public}d", ret);
         return NETFIREWALL_ERR;
     } else if (ret == 0) {
-        AddIp6(addr6Start, IPV6_MAX_PREFIXLEN, list);
+        IpParamParser::AddIp6(addr6Start, IPV6_MAX_PREFIXLEN, list);
         return NETFIREWALL_SUCCESS;
     }
-    uint32_t prefixlen = GetIp6Prefixlen(addr6Start, addr6End);
+    uint32_t prefixlen = IpParamParser::GetIp6Prefixlen(addr6Start, addr6End);
     in6_addr tmpAddr;
     memcpy_s(&tmpAddr, sizeof(tmpAddr), &addr6Start, sizeof(addr6Start));
-    uint32_t off = RfindIp6(addr6Start, prefixlen, IPV6_BIT_COUNT - 1, 1);
+    uint32_t off = IpParamParser::RfindIp6(addr6Start, prefixlen, IPV6_BIT_COUNT - 1, 1);
     if (off != IPV6_BIT_COUNT) {
-        AddIp6(tmpAddr, off + 1, list);
-        ChangeIp6Start(off + 1, tmpAddr);
-        off = RfindIp6(addr6Start, prefixlen, off, 0);
+        IpParamParser::AddIp6(tmpAddr, off + 1, list);
+        IpParamParser::ChangeIp6Start(off + 1, tmpAddr);
+        off = IpParamParser::RfindIp6(addr6Start, prefixlen, off, 0);
         while (off != IPV6_BIT_COUNT && off != prefixlen) {
-            AddIp6(tmpAddr, off + 1, list);
-            ChangeIp6Start(off + 1, tmpAddr);
-            off = RfindIp6(addr6Start, prefixlen, off - 1, 0);
+            IpParamParser::AddIp6(tmpAddr, off + 1, list);
+            IpParamParser::ChangeIp6Start(off + 1, tmpAddr);
+            off = IpParamParser::RfindIp6(addr6Start, prefixlen, off - 1, 0);
         }
     } else if (off == IPV6_BIT_COUNT) {
-        if (RfindIp6(addr6End, prefixlen, IPV6_BIT_COUNT - 1, 0) == IPV6_BIT_COUNT) {
-            AddIp6(addr6Start, prefixlen, list);
+        if (IpParamParser::RfindIp6(addr6End, prefixlen, IPV6_BIT_COUNT - 1, 0) == IPV6_BIT_COUNT) {
+            IpParamParser::AddIp6(addr6Start, prefixlen, list);
             return NETFIREWALL_SUCCESS;
         }
     }
-    off = FindIp6(addr6End, prefixlen, 1);
+    off = IpParamParser::FindIp6(addr6End, prefixlen, 1);
     if (off == IPV6_BIT_COUNT) {
         NETNATIVE_LOGW("GetIp6AndMask off equal 128");
         return NETFIREWALL_ERR;
     }
-    off = FindIp6(addr6End, off + 1, 1);
+    off = IpParamParser::FindIp6(addr6End, off + 1, 1);
     while (off != IPV6_BIT_COUNT) {
-        AddIp6(tmpAddr, off + 1, list);
-        ChangeIp6Start(off + 1, tmpAddr);
-        off = FindIp6(addr6End, off + 1, 1);
+        IpParamParser::AddIp6(tmpAddr, off + 1, list);
+        IpParamParser::ChangeIp6Start(off + 1, tmpAddr);
+        off = IpParamParser::FindIp6(addr6End, off + 1, 1);
     }
     ret = memcmp(&tmpAddr, &addr6End, sizeof(addr6Start));
     if (ret == 0) {
-        AddIp6(tmpAddr, IPV6_MAX_PREFIXLEN, list);
+        IpParamParser::AddIp6(tmpAddr, IPV6_MAX_PREFIXLEN, list);
     }
+    return NETFIREWALL_SUCCESS;
+}
+
+int32_t IpParamParser::GetIp6AndMask(const in6_addr &addr6Start, const in6_addr &addr6End, std::vector<Ip6Data> &list)
+{
+    Ip6RangeKey key;
+    if (memcpy_s(key.start, sizeof(key.start), addr6Start.s6_addr, sizeof(addr6Start.s6_addr)) != EOK ||
+        memcpy_s(key.end, sizeof(key.end), addr6End.s6_addr, sizeof(addr6End.s6_addr)) != EOK) {
+        return ComputeIp6AndMask(addr6Start, addr6End, list);
+    }
+
+    {
+        std::lock_guard<std::mutex> guard(g_ip6RangeCacheMutex);
+        auto it = g_ip6RangeCache.find(key);
+        if (it != g_ip6RangeCache.end()) {
+            list.insert(list.end(), it->second.begin(), it->second.end());
+            return NETFIREWALL_SUCCESS;
+        }
+    }
+
+    size_t offset = list.size();
+    int32_t ret = ComputeIp6AndMask(addr6Start, addr6End, list);
+    if (ret != NETFIREWALL_SUCCESS) {
+        return ret;
+    }
+
+    std::vector<Ip6Data> expanded(list.begin() + offset, list.end());
+    std::lock_guard<std::mutex> guard(g_ip6RangeCacheMutex);
+    if (g_ip6RangeCache.size() >= IP6_RANGE_CACHE_MAX) {
+        g_ip6RangeCache.clear();
+    }
+    g_ip6RangeCache.emplace(key, std::move(expanded));
     return NETFIREWALL_SUCCESS;
 }
 } // namespace NetManagerStandard

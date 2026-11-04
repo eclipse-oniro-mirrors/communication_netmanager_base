@@ -248,6 +248,26 @@ public:
         }
     }
 
+    BpfMapper<Key, Value>(const BpfMapper<Key, Value> &) = delete;
+    BpfMapper<Key, Value> &operator=(const BpfMapper<Key, Value> &) = delete;
+
+    BpfMapper<Key, Value>(BpfMapper<Key, Value> &&other) noexcept : mapFd_(other.mapFd_)
+    {
+        other.mapFd_ = NETMANAGER_ERROR;
+    }
+
+    BpfMapper<Key, Value> &operator=(BpfMapper<Key, Value> &&other) noexcept
+    {
+        if (this != &other) {
+            if (mapFd_ != NETMANAGER_ERROR) {
+                close(mapFd_);
+            }
+            mapFd_ = other.mapFd_;
+            other.mapFd_ = NETMANAGER_ERROR;
+        }
+        return *this;
+    }
+
     /**
      * Is has map fd
      *
