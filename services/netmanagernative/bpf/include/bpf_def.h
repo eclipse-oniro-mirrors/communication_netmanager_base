@@ -109,4 +109,19 @@ typedef __u32 app_uid_key;
 
 typedef __u8 traffic_notify_flag;
 typedef __u64 traffic_value;
+
+// DNS domain cache begin
+enum { DNS_DOMAIN_NAME_SIZE = 64 };
+
+// IP to domain reverse mapping (for BPF lookup by IP)
+typedef struct {
+    __u32 ipAddr;  // IPv4 address in network byte order
+} dns_ip_to_domain_key;
+
+// Simple value to prove the key exists
+typedef struct {
+    __u32 flag;  // Just a flag to prove the key exists
+} dns_ip_exists_value;
+// DNS domain cache end
+
 #endif /* NETMANAGER_BASE_BPF_DEF_H */

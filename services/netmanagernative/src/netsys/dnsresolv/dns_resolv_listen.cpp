@@ -78,6 +78,7 @@ private:
                                     AddrInfoWithTtl addrInfo[MAX_RESULTS], uint32_t resNum);
     static void ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId, uint32_t uid);
     static void ProcSetNodataCacheCommand(const std::string &name, uint16_t netId, uint32_t uid);
+
     static void ProcGetNodataCacheCommand(int clientSockFd, uint16_t netId, const std::string &name, uint32_t uid);
     static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId, uint32_t uid);
     static void ProcJudgeIpv4Command(int clientSockFd, uint16_t netId, uint32_t uid);
@@ -325,6 +326,7 @@ void DnsResolvListenInternal::ProcSetCacheCommand(const std::string &name, uint1
 {
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     DnsParamCache::GetInstance().SetCallingUid(uid);
+
 #endif
 
     std::sort(addrInfo, addrInfo + resNum, [](const AddrInfoWithTtl &a, const AddrInfoWithTtl &b) {
@@ -347,12 +349,13 @@ void DnsResolvListenInternal::ProcGetNodataCacheCommand(int clientSockFd, uint16
 {
     int isInNodataCache = DnsParamCache::GetInstance().IsInNodataCache(netId, uid, name) ? 1 : 0;
     int isInIpv6UidBlackList = DnsParamCache::GetInstance().IsInIpv6UidBlackList(netId, uid) ? 1 : 0;
-    int skipAAAA = (isInNodataCache != 0 || isInIpv6UidBlackList != 0) ? 1 : 0;
+    int isInSkipIpv6UidPerHost = DnsParamCache::GetInstance().IsInSkipIpv6UidPerHost(netId, uid, name) ? 1 : 0;
+    int skipAAAA = (isInNodataCache != 0 || isInIpv6UidBlackList != 0 || isInSkipIpv6UidPerHost != 0) ? 1 : 0;
     if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&skipAAAA), sizeof(int))) {
         DNS_CONFIG_PRINT("send failed");
     }
-    DNS_CONFIG_PRINT("ProcGetNodataCacheCommand end, netId: %{public}d, host: %{public}s, uid: %{public}d, "
-        "skipAAAA: %{public}d", netId, name.c_str(), uid, skipAAAA);
+    NETNATIVE_LOGI("ProcGetNodataCacheCommand, netId: %{public}d, uid: %{public}d, skipAAAA: %{public}d", netId, uid,
+                   skipAAAA);
 }
 
 void DnsResolvListenInternal::ProcJudgeIpv6Command(int clientSockFd, uint16_t netId, uint32_t uid)

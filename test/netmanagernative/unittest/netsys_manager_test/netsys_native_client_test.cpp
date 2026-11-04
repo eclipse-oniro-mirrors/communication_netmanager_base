@@ -498,6 +498,24 @@ HWTEST_F(NetsysNativeClientTest, SetIpv6UidBlackListTest001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysNativeClientTest, SetPresetDomainsTest001, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000138] = {"example.com"};
+    int32_t ret = nativeClient->SetPresetDomains(presetDomains);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, SetPresetDomainsTest002, TestSize.Level1)
+{
+    // Empty preset domains map - covers NetsysNativeClient::SetPresetDomains with empty input
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    int32_t ret = nativeClient->SetPresetDomains(presetDomains);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysNativeClientTest, SetIpv6AutoConfTest001, TestSize.Level1)
 {
     auto nativeClient = std::make_shared<NetsysNativeClient>();

@@ -1118,6 +1118,13 @@ int32_t NetsysNativeService::SetIpv6UidBlackList(std::vector<int32_t> &netIds, i
     return result;
 }
 
+int32_t NetsysNativeService::SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains)
+{
+    int32_t result = netsysService_->SetPresetDomains(domains);
+    NETNATIVE_LOG_D("SetPresetDomains result=%{public}d", result);
+    return result;
+}
+
 int32_t NetsysNativeService::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
 {
     int32_t result = netsysService_->SetIpv6AutoConf(interfaceName, on);

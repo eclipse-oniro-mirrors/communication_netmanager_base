@@ -13,13 +13,20 @@
  * limitations under the License.
  */
 
+#include <arpa/inet.h>
 #include <gtest/gtest.h>
+#include <linux/bpf.h>
+#include <sys/syscall.h>
+#include <unistd.h>
 
 #ifdef GTEST_API_
 #define private public
 #define protected public
 #endif
 
+#include "bpf_def.h"
+#include "bpf_mapper.h"
+#include "bpf_path.h"
 #include "dns_config_client.h"
 #include "dns_param_cache.h"
 #include "netnative_log_wrapper.h"
@@ -1357,6 +1364,663 @@ HWTEST_F(DNSParamCacheTest, IsInIpv6UidBlackListTest003, TestSize.Level1)
     dnsParCache.FlushDnsCache(netId);
     ret = dnsParCache.IsInIpv6UidBlackList(netId, uid);
     EXPECT_FALSE(ret);
+    dnsParCache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DNSParamCacheTest, SetPresetDomainsTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetPresetDomainsTest001 enter");
+    DnsParamCache dnsParCache;
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000001] = {"example.com", "test.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+    const auto &retDomains = dnsParCache.GetPresetDomains();
+    EXPECT_EQ(retDomains.size(), 1u);
+    auto iter = retDomains.find(20000001);
+    ASSERT_NE(iter, retDomains.end());
+    EXPECT_EQ(iter->second.size(), 2u);
+    EXPECT_EQ(iter->second[0], "example.com");
+    EXPECT_EQ(iter->second[1], "test.com");
+}
+
+HWTEST_F(DNSParamCacheTest, SetPresetDomainsTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetPresetDomainsTest002 enter");
+    DnsParamCache dnsParCache;
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000001] = {"example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+    // Overwrite with new data - covers SetPresetDomains assignment branch
+    std::map<uint32_t, std::vector<std::string>> newPresetDomains;
+    newPresetDomains[20000002] = {"new.example.com"};
+    dnsParCache.SetPresetDomains(newPresetDomains);
+    const auto &retDomains = dnsParCache.GetPresetDomains();
+    EXPECT_EQ(retDomains.size(), 1u);
+    EXPECT_EQ(retDomains.find(20000001), retDomains.end());
+    auto iter = retDomains.find(20000002);
+    ASSERT_NE(iter, retDomains.end());
+    EXPECT_EQ(iter->second[0], "new.example.com");
+}
+
+HWTEST_F(DNSParamCacheTest, SetPresetDomainsTest003, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetPresetDomainsTest003 enter");
+    DnsParamCache dnsParCache;
+    // Invalid domains are filtered out and never reside in presetDomains_
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    // Oversized domain: one char longer than DNS_DOMAIN_NAME_SIZE
+    presetDomains[20000001] = {"example.com", std::string(DNS_DOMAIN_NAME_SIZE + 1, 'a')};
+    // All domains invalid: the uid entry itself must be dropped
+    presetDomains[20000002] = {"exam_ple.com", "example.com/path"};
+    dnsParCache.SetPresetDomains(presetDomains);
+    const auto &retDomains = dnsParCache.GetPresetDomains();
+    EXPECT_EQ(retDomains.size(), 1u);
+    EXPECT_EQ(retDomains.find(20000002), retDomains.end());
+    auto iter = retDomains.find(20000001);
+    ASSERT_NE(iter, retDomains.end());
+    EXPECT_EQ(iter->second, std::vector<std::string>({"example.com"}));
+    // The filtered domains do not match any host
+    EXPECT_FALSE(dnsParCache.IsPresetDomain(20000001, std::string(DNS_DOMAIN_NAME_SIZE + 1, 'a')));
+    EXPECT_FALSE(dnsParCache.IsPresetDomain(20000002, "example.com/path"));
+}
+
+HWTEST_F(DNSParamCacheTest, IsValidPresetDomainTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsValidPresetDomainTest001 enter");
+    // Valid: letters, digits, '.' and '-'
+    EXPECT_TRUE(DnsParamCache::IsValidPresetDomain("example.com"));
+    EXPECT_TRUE(DnsParamCache::IsValidPresetDomain("www.example-1.com"));
+    EXPECT_TRUE(DnsParamCache::IsValidPresetDomain(std::string(DNS_DOMAIN_NAME_SIZE, 'a')));
+    // Invalid: empty, oversized, illegal characters
+    EXPECT_FALSE(DnsParamCache::IsValidPresetDomain(""));
+    EXPECT_FALSE(DnsParamCache::IsValidPresetDomain(std::string(DNS_DOMAIN_NAME_SIZE + 1, 'a')));
+    EXPECT_FALSE(DnsParamCache::IsValidPresetDomain("exam_ple.com"));
+    EXPECT_FALSE(DnsParamCache::IsValidPresetDomain("example.com/path"));
+    EXPECT_FALSE(DnsParamCache::IsValidPresetDomain("example com"));
+}
+
+HWTEST_F(DNSParamCacheTest, IsPresetDomainTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsPresetDomainTest001 enter");
+    DnsParamCache dnsParCache;
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000001] = {"example.com", "test.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+    // Exact match
+    EXPECT_TRUE(dnsParCache.IsPresetDomain(20000001, "example.com"));
+    // Uid not in preset domains - covers IsPresetDomain branch: uidIter == end
+    EXPECT_FALSE(dnsParCache.IsPresetDomain(20000002, "example.com"));
+    // Host not in preset domain list
+    EXPECT_FALSE(dnsParCache.IsPresetDomain(20000001, "notpreset.com"));
+}
+
+HWTEST_F(DNSParamCacheTest, IsPresetDomainTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsPresetDomainTest002 enter");
+    DnsParamCache dnsParCache;
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000001] = {"example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+    // Suffix match with dot separator - covers IsPresetDomain suffix branch
+    EXPECT_TRUE(dnsParCache.IsPresetDomain(20000001, "www.example.com"));
+    EXPECT_TRUE(dnsParCache.IsPresetDomain(20000001, "a.b.example.com"));
+    // Trailing dot of an FQDN is trimmed before matching
+    EXPECT_TRUE(dnsParCache.IsPresetDomain(20000001, "www.example.com."));
+    // Plain substring must not match: preset "example.com" must not hit these hosts
+    EXPECT_FALSE(dnsParCache.IsPresetDomain(20000001, "example.com.cn"));
+    EXPECT_FALSE(dnsParCache.IsPresetDomain(20000001, "evil-example.com.attacker.com"));
+    EXPECT_FALSE(dnsParCache.IsPresetDomain(20000001, "www.example.com.attacker.com"));
+    EXPECT_FALSE(dnsParCache.IsPresetDomain(20000001, "notexample.com"));
+}
+
+HWTEST_F(DNSParamCacheTest, IsInSkipIpv6UidPerHostTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsInSkipIpv6UidPerHostTest001 enter");
+    DnsParamCache dnsParCache;
+    // No preset domains set - covers IsInSkipIpv6UidPerHost branch: uidIter == end
+    bool ret = dnsParCache.IsInSkipIpv6UidPerHost(60000, 20000001, "www.example.com");
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(DNSParamCacheTest, IsInSkipIpv6UidPerHostTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsInSkipIpv6UidPerHostTest002 enter");
+    DnsParamCache dnsParCache;
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000001] = {"example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+    // Use a netId which is not registered in net_index map, bearer check is skipped and preset domain matched
+    bool ret = dnsParCache.IsInSkipIpv6UidPerHost(60000, 20000001, "www.example.com");
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(DNSParamCacheTest, IsInSkipIpv6UidPerHostTest003, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsInSkipIpv6UidPerHostTest003 enter");
+    DnsParamCache dnsParCache;
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000001] = {"example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+    // Host not matched
+    bool ret = dnsParCache.IsInSkipIpv6UidPerHost(60000, 20000001, "www.notpreset.com");
+    EXPECT_FALSE(ret);
+    // netId is 0, covers branch: netId = defaultNetId_
+    ret = dnsParCache.IsInSkipIpv6UidPerHost(0, 20000001, "www.example.com");
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(DNSParamCacheTest, SetDnsCachePresetDomainTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetDnsCachePresetDomainTest001 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    uint32_t uid = 20000001;
+    std::string hostName = "www.preset.example.com";
+    dnsParCache.CreateCacheForNet(netId);
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[uid] = {"preset.example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+
+    // Covers SetDnsCacheCommon with AF_INET addr and preset domain matched
+    AddrInfo addrInfo = {};
+    addrInfo.aiFamily = AF_INET;
+    addrInfo.aiAddr.sin.sin_family = AF_INET;
+    inet_pton(AF_INET, "10.10.10.10", &addrInfo.aiAddr.sin.sin_addr);
+    dnsParCache.SetDnsCache(netId, uid, hostName, addrInfo);
+    std::vector<AddrInfo> retAddrInfo = dnsParCache.GetDnsCache(netId, uid, hostName);
+    EXPECT_EQ(retAddrInfo.size(), 1u);
+    EXPECT_EQ(retAddrInfo[0].aiFamily, AF_INET);
+    dnsParCache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DNSParamCacheTest, SetDnsCachePresetDomainTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetDnsCachePresetDomainTest002 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    uint32_t uid = 20000001;
+    std::string hostName = "www.preset.example.com";
+    dnsParCache.CreateCacheForNet(netId);
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[uid] = {"preset.example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+
+    // Covers SetDnsCacheCommon with AF_INET6 addr and preset domain matched
+    AddrInfo addrInfo = {};
+    addrInfo.aiFamily = AF_INET6;
+    addrInfo.aiAddr.sin6.sin6_family = AF_INET6;
+    inet_pton(AF_INET6, "fe80::1", &addrInfo.aiAddr.sin6.sin6_addr);
+    AddrInfoWithTtl addrInfoWithTtl = {};
+    addrInfoWithTtl.addrInfo = addrInfo;
+    addrInfoWithTtl.ttl = 300;
+    dnsParCache.SetDnsCache(netId, uid, hostName, addrInfoWithTtl);
+    std::vector<AddrInfo> retAddrInfo = dnsParCache.GetDnsCache(netId, uid, hostName);
+    EXPECT_EQ(retAddrInfo.size(), 1u);
+    EXPECT_EQ(retAddrInfo[0].aiFamily, AF_INET6);
+    dnsParCache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DNSParamCacheTest, SetDnsCachePresetDomainTest003, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetDnsCachePresetDomainTest003 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    uint32_t uid = 20000001;
+    std::string hostName = "www.preset.example.com";
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[uid] = {"preset.example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+
+    // NetId has no cache created - covers SetDnsCacheCommon branch: serverConfigMap_ find failed
+    AddrInfo addrInfo = {};
+    addrInfo.aiFamily = AF_INET;
+    addrInfo.aiAddr.sin.sin_family = AF_INET;
+    inet_pton(AF_INET, "10.10.10.10", &addrInfo.aiAddr.sin.sin_addr);
+    dnsParCache.SetDnsCache(netId, uid, hostName, addrInfo);
+    std::vector<AddrInfo> retAddrInfo = dnsParCache.GetDnsCache(netId, uid, hostName);
+    EXPECT_EQ(retAddrInfo.size(), 0u);
+}
+
+HWTEST_F(DNSParamCacheTest, SetDnsCachePresetDomainTest004, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetDnsCachePresetDomainTest004 enter");
+    DnsParamCache dnsParCache;
+    int32_t defaultNetId = 1;
+    uint32_t uid = 20000001;
+    std::string hostName = "www.preset.example.com";
+    dnsParCache.SetDefaultNetwork(defaultNetId);
+    dnsParCache.CreateCacheForNet(static_cast<uint16_t>(defaultNetId));
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[uid] = {"preset.example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+
+    // NetId is 0 - covers SetDnsCacheCommon branch: netId = defaultNetId_
+    AddrInfo addrInfo = {};
+    addrInfo.aiFamily = AF_INET;
+    addrInfo.aiAddr.sin.sin_family = AF_INET;
+    inet_pton(AF_INET, "10.10.10.10", &addrInfo.aiAddr.sin.sin_addr);
+    dnsParCache.SetDnsCache(0, uid, hostName, addrInfo);
+    std::vector<AddrInfo> retAddrInfo = dnsParCache.GetDnsCache(static_cast<uint16_t>(defaultNetId), uid, hostName);
+    EXPECT_EQ(retAddrInfo.size(), 1u);
+    dnsParCache.DestroyNetworkCache(static_cast<uint16_t>(defaultNetId));
+}
+
+HWTEST_F(DNSParamCacheTest, SetDnsCachePresetDomainTest005, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetDnsCachePresetDomainTest005 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    uint32_t uid = 20000001;
+    std::string hostName = "www.preset.example.com";
+    dnsParCache.CreateCacheForNet(netId);
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[uid] = {"preset.example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+
+    // Ttl is 0 - covers SetDnsCache(AddrInfoWithTtl) branch: ttl == 0 return
+    AddrInfo addrInfo = {};
+    addrInfo.aiFamily = AF_INET;
+    addrInfo.aiAddr.sin.sin_family = AF_INET;
+    inet_pton(AF_INET, "10.10.10.10", &addrInfo.aiAddr.sin.sin_addr);
+    AddrInfoWithTtl addrInfoWithTtl = {};
+    addrInfoWithTtl.addrInfo = addrInfo;
+    addrInfoWithTtl.ttl = 0;
+    dnsParCache.SetDnsCache(netId, uid, hostName, addrInfoWithTtl);
+    std::vector<AddrInfo> retAddrInfo = dnsParCache.GetDnsCache(netId, uid, hostName);
+    EXPECT_EQ(retAddrInfo.size(), 0u);
+    dnsParCache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DNSParamCacheTest, SetDnsCachePresetDomainTest006, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetDnsCachePresetDomainTest006 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    uint32_t uid = 20000001;
+    std::string hostName = "www.preset.example.com";
+    dnsParCache.CreateCacheForNet(netId);
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[uid] = {"preset.example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+
+    // Ttl is less than DEFAULT_DELAYED_COUNT - covers SetDnsCache(AddrInfoWithTtl) branch: ttl <= DEFAULT
+    AddrInfo addrInfo = {};
+    addrInfo.aiFamily = AF_INET;
+    addrInfo.aiAddr.sin.sin_family = AF_INET;
+    inet_pton(AF_INET, "10.10.10.10", &addrInfo.aiAddr.sin.sin_addr);
+    AddrInfoWithTtl addrInfoWithTtl = {};
+    addrInfoWithTtl.addrInfo = addrInfo;
+    addrInfoWithTtl.ttl = 1;
+    dnsParCache.SetDnsCache(netId, uid, hostName, addrInfoWithTtl);
+    std::vector<AddrInfo> retAddrInfo = dnsParCache.GetDnsCache(netId, uid, hostName);
+    EXPECT_EQ(retAddrInfo.size(), 1u);
+    dnsParCache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DNSParamCacheTest, SetDnsCachePresetDomainTest007, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetDnsCachePresetDomainTest007 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    uint32_t uid = 20000001;
+    std::string hostName = "www.preset.example.com";
+    dnsParCache.CreateCacheForNet(netId);
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[uid] = {"preset.example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+
+    // AiFamily is neither AF_INET nor AF_INET6 - covers SetDnsCacheCommon branch: no ip write
+    AddrInfo addrInfo = {};
+    addrInfo.aiFamily = AF_UNSPEC;
+    dnsParCache.SetDnsCache(netId, uid, hostName, addrInfo);
+    std::vector<AddrInfo> retAddrInfo = dnsParCache.GetDnsCache(netId, uid, hostName);
+    EXPECT_EQ(retAddrInfo.size(), 1u);
+    dnsParCache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DNSParamCacheTest, SetDnsCachePresetDomainTest008, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetDnsCachePresetDomainTest008 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    uint32_t uid = 20000001;
+    std::string hostName = "www.notpreset.example.com";
+    dnsParCache.CreateCacheForNet(netId);
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[uid] = {"preset.example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+
+    // Host is not preset domain - covers SetDnsCacheCommon branch: IsPresetDomain returns false
+    AddrInfo addrInfo = {};
+    addrInfo.aiFamily = AF_INET;
+    addrInfo.aiAddr.sin.sin_family = AF_INET;
+    inet_pton(AF_INET, "10.10.10.10", &addrInfo.aiAddr.sin.sin_addr);
+    dnsParCache.SetDnsCache(netId, uid, hostName, addrInfo);
+    std::vector<AddrInfo> retAddrInfo = dnsParCache.GetDnsCache(netId, uid, hostName);
+    EXPECT_EQ(retAddrInfo.size(), 1u);
+    dnsParCache.DestroyNetworkCache(netId);
+}
+
+HWTEST_F(DNSParamCacheTest, IsInSkipIpv6UidPerHostTest004, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsInSkipIpv6UidPerHostTest004 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 60000;
+    uint32_t uid = 20000001;
+    // Uid is in preset domains but domain list is empty - covers loop end without match
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[uid] = {};
+    dnsParCache.SetPresetDomains(presetDomains);
+    bool ret = dnsParCache.IsInSkipIpv6UidPerHost(netId, uid, "www.example.com");
+    EXPECT_FALSE(ret);
+    EXPECT_FALSE(dnsParCache.IsPresetDomain(uid, "www.example.com"));
+}
+
+HWTEST_F(DNSParamCacheTest, IsInSkipIpv6UidPerHostTest005, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsInSkipIpv6UidPerHostTest005 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 60001;
+    uint32_t uid = 20000001;
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[uid] = {"example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+
+    // Write a bearer type which is neither wifi nor cellular for netId - covers
+    // IsInSkipIpv6UidPerHost branch: early return false before preset domain check
+    OHOS::NetManagerStandard::BpfMapper<net_index, net_interface_name_id> netIdAndIfaceMap(
+        OHOS::NetManagerStandard::NET_INDEX_AND_IFACE_MAP_PATH, BPF_ANY);
+    if (!netIdAndIfaceMap.IsValid()) {
+        GTEST_LOG_(INFO) << "net index and iface map is invalid, skip bear type branch check";
+    }
+    net_index key = static_cast<net_index>(netId);
+    net_interface_name_id bearType = NETWORK_BEARER_TYPE_INITIAL;
+    int32_t writeRet = netIdAndIfaceMap.Write(key, bearType, BPF_ANY);
+    bool ret = dnsParCache.IsInSkipIpv6UidPerHost(netId, uid, "www.example.com");
+    if (writeRet == 0) {
+        EXPECT_FALSE(ret);
+        netIdAndIfaceMap.Delete(key);
+    } else {
+        // Map write failed, bear type of netId is unknown, host matches preset domain
+        EXPECT_TRUE(ret);
+    }
+}
+
+HWTEST_F(DNSParamCacheTest, IsInSkipIpv6UidPerHostTest006, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsInSkipIpv6UidPerHostTest006 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 60002;
+    uint32_t uid = 20000001;
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[uid] = {"example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+
+    // Write a wifi bearer type for netId - covers IsInSkipIpv6UidPerHost branch:
+    // bear type is wifi or cellular, fall through to preset domain check and match
+    OHOS::NetManagerStandard::BpfMapper<net_index, net_interface_name_id> netIdAndIfaceMap(
+        OHOS::NetManagerStandard::NET_INDEX_AND_IFACE_MAP_PATH, BPF_ANY);
+    if (!netIdAndIfaceMap.IsValid()) {
+        GTEST_LOG_(INFO) << "net index and iface map is invalid, skip bear type branch check";
+    }
+    net_index key = static_cast<net_index>(netId);
+    net_interface_name_id bearType = NETWORK_BEARER_TYPE_WIFI;
+    int32_t writeRet = netIdAndIfaceMap.Write(key, bearType, BPF_ANY);
+    bool ret = dnsParCache.IsInSkipIpv6UidPerHost(netId, uid, "www.example.com");
+    if (writeRet == 0) {
+        EXPECT_TRUE(ret);
+        netIdAndIfaceMap.Delete(key);
+    } else {
+        // Map write failed, bear type of netId is unknown, host matches preset domain
+        EXPECT_TRUE(ret);
+    }
+}
+
+namespace {
+// The dns ip to domain map is not pinned by any component on device, create and pin it for the test.
+// mapFd is set to the created map fd, or -1 when the map was already pinned by a previous test.
+bool CreateOrPinDnsIpToDomainMap(const std::string &mapPath, int &mapFd)
+{
+    mapFd = -1;
+    OHOS::NetManagerStandard::BpfMapper<dns_ip_to_domain_key, dns_ip_exists_value> existedMap(
+        mapPath.c_str(), BPF_ANY);
+    if (existedMap.IsValid()) {
+        return true;
+    }
+    union bpf_attr createAttr = {};
+    createAttr.map_type = BPF_MAP_TYPE_HASH;
+    createAttr.key_size = sizeof(dns_ip_to_domain_key);
+    createAttr.value_size = sizeof(dns_ip_exists_value);
+    createAttr.max_entries = 16;
+    mapFd = static_cast<int>(syscall(__NR_bpf, BPF_MAP_CREATE, &createAttr, sizeof(createAttr)));
+    if (mapFd < 0) {
+        return false;
+    }
+    union bpf_attr pinAttr = {};
+    pinAttr.pathname = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(mapPath.c_str()));
+    pinAttr.bpf_fd = static_cast<uint32_t>(mapFd);
+    if (syscall(__NR_bpf, BPF_OBJ_PIN, &pinAttr, sizeof(pinAttr)) != 0) {
+        close(mapFd);
+        mapFd = -1;
+        return false;
+    }
+    return true;
+}
+
+// Cleanup the map pinned by CreateOrPinDnsIpToDomainMap, a no-op when the map already existed
+void UnlinkTestBpfMap(int mapFd, const std::string &mapPath)
+{
+    if (mapFd >= 0) {
+        close(mapFd);
+        unlink(mapPath.c_str());
+    }
+}
+} // namespace
+
+HWTEST_F(DNSParamCacheTest, TrySyncPresetDomainIpWithCacheKeyTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("TrySyncPresetDomainIpWithCacheKeyTest001 enter");
+    DnsParamCache dnsParCache;
+    uint32_t uid = 20000001;
+    uint16_t netId = 1;
+    dnsParCache.CreateCacheForNet(netId);
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[uid] = {"example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+
+    // The dns ip to domain map is not pinned by any component on host, create and pin it here
+    std::string mapPath = OHOS::NetManagerStandard::DNS_IP_TO_DOMAIN_MAP_PATH;
+    int mapFd = -1;
+    ASSERT_TRUE(CreateOrPinDnsIpToDomainMap(mapPath, mapFd)) << "create or find dns ip to domain map failed";
+
+    // The resolv client (MakeKey in netsys_client.c) sends the decorated cache key
+    // "host serv ai_family ai_flags ai_protocol ai_socktype" as the name for SET_CACHE,
+    // so the preset domain match must strip the decoration to hit "example.com"
+    AddrInfo addrInfo = {};
+    addrInfo.aiFamily = AF_INET;
+    addrInfo.aiAddr.sin.sin_family = AF_INET;
+    addrInfo.aiAddr.sin.sin_addr.s_addr = inet_addr("10.10.10.10");
+    AddrInfoWithTtl addrInfoWithTtl = {};
+    addrInfoWithTtl.addrInfo = addrInfo;
+    addrInfoWithTtl.ttl = 300;
+    dnsParCache.SetDnsCache(netId, uid, "example.com 443 0 0 6 1", addrInfoWithTtl);
+
+    OHOS::NetManagerStandard::BpfMapper<dns_ip_to_domain_key, dns_ip_exists_value> verifyMap(
+        mapPath.c_str(), BPF_ANY);
+    dns_ip_to_domain_key verifyKey = {};
+    verifyKey.ipAddr = inet_addr("10.10.10.10");
+    dns_ip_exists_value verifyValue = {};
+    ASSERT_TRUE(verifyMap.IsValid());
+    EXPECT_EQ(verifyMap.Read(verifyKey, verifyValue), 0);
+    EXPECT_EQ(verifyValue.flag, 1u);
+
+    UnlinkTestBpfMap(mapFd, mapPath);
+}
+
+HWTEST_F(DNSParamCacheTest, SetPresetDomainsClearIpMapTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetPresetDomainsClearIpMapTest001 enter");
+    DnsParamCache dnsParCache;
+    std::string mapPath = OHOS::NetManagerStandard::DNS_IP_TO_DOMAIN_MAP_PATH;
+    int mapFd = -1;
+    ASSERT_TRUE(CreateOrPinDnsIpToDomainMap(mapPath, mapFd)) << "create or find dns ip to domain map failed";
+
+    dns_ip_to_domain_key key = {};
+    key.ipAddr = inet_addr("10.10.10.10");
+    dns_ip_exists_value value = {};
+    value.flag = 1;
+    OHOS::NetManagerStandard::BpfMapper<dns_ip_to_domain_key, dns_ip_exists_value> writeMap(
+        mapPath.c_str(), BPF_ANY);
+    ASSERT_TRUE(writeMap.IsValid());
+    EXPECT_EQ(writeMap.Write(key, value, BPF_ANY), 0);
+
+    // SetPresetDomains is a full replacement, stale entries must be cleared
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000001] = {"example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+    OHOS::NetManagerStandard::BpfMapper<dns_ip_to_domain_key, dns_ip_exists_value> verifyMap(
+        mapPath.c_str(), BPF_ANY);
+    ASSERT_TRUE(verifyMap.IsValid());
+    dns_ip_exists_value verifyValue = {};
+    EXPECT_NE(verifyMap.Read(key, verifyValue), 0);
+
+    // Empty preset domains (cloud config removed) also clears the map
+    EXPECT_EQ(writeMap.Write(key, value, BPF_ANY), 0);
+    dnsParCache.SetPresetDomains({});
+    EXPECT_NE(verifyMap.Read(key, verifyValue), 0);
+
+    UnlinkTestBpfMap(mapFd, mapPath);
+}
+
+HWTEST_F(DNSParamCacheTest, GetDnsCacheSyncPresetDomainIpTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("GetDnsCacheSyncPresetDomainIpTest001 enter");
+    DnsParamCache dnsParCache;
+    std::string mapPath = OHOS::NetManagerStandard::DNS_IP_TO_DOMAIN_MAP_PATH;
+    int mapFd = -1;
+    ASSERT_TRUE(CreateOrPinDnsIpToDomainMap(mapPath, mapFd)) << "create or find dns ip to domain map failed";
+
+    uint16_t netId = 1;
+    uint32_t uid = 20000001;
+    std::string hostName = "www.preset.example.com";
+    dnsParCache.CreateCacheForNet(netId);
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[uid] = {"preset.example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+
+    AddrInfo addrInfo = {};
+    addrInfo.aiFamily = AF_INET;
+    addrInfo.aiAddr.sin.sin_family = AF_INET;
+    inet_pton(AF_INET, "10.10.10.10", &addrInfo.aiAddr.sin.sin_addr);
+    dnsParCache.SetDnsCache(netId, uid, hostName, addrInfo);
+
+    dns_ip_to_domain_key key = {};
+    key.ipAddr = inet_addr("10.10.10.10");
+    OHOS::NetManagerStandard::BpfMapper<dns_ip_to_domain_key, dns_ip_exists_value> opMap(
+        mapPath.c_str(), BPF_ANY);
+    ASSERT_TRUE(opMap.IsValid());
+    dns_ip_exists_value verifyValue = {};
+    EXPECT_EQ(opMap.Read(key, verifyValue), 0);
+    EXPECT_EQ(verifyValue.flag, 1u);
+
+    // Simulate entry loss (lru eviction or map clear), cache hit re-syncs it into the map
+    EXPECT_EQ(opMap.Delete(key), 0);
+    EXPECT_NE(opMap.Read(key, verifyValue), 0);
+    std::vector<AddrInfo> retAddrInfo = dnsParCache.GetDnsCache(netId, uid, hostName);
+    EXPECT_EQ(retAddrInfo.size(), 1u);
+    EXPECT_EQ(opMap.Read(key, verifyValue), 0);
+    EXPECT_EQ(verifyValue.flag, 1u);
+
+    dnsParCache.DestroyNetworkCache(netId);
+    UnlinkTestBpfMap(mapFd, mapPath);
+}
+
+HWTEST_F(DNSParamCacheTest, SetPresetDomainsClearDnsCacheTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("SetPresetDomainsClearDnsCacheTest001 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    uint32_t uid = 20000001;
+    // The resolv client (MakeKey in netsys_client.c) sends the decorated cache key
+    // "host serv ai_family ai_flags ai_protocol ai_socktype" as the name for both SET_CACHE
+    // and GET_CACHE, so the cache entries and lookups here must use the decorated form to
+    // exercise the real protocol format
+    std::string hostName = "www.preset.example.com 443 0 0 6 1";
+    std::string normalHost = "www.normal.example.com";
+    dnsParCache.CreateCacheForNet(netId);
+
+    // Cache results (including AAAA records) while the domain is not preset
+    AddrInfo addrInfo = {};
+    addrInfo.aiFamily = AF_INET6;
+    addrInfo.aiAddr.sin6.sin6_family = AF_INET6;
+    inet_pton(AF_INET6, "fe80::42", &addrInfo.aiAddr.sin6.sin6_addr);
+    dnsParCache.SetDnsCache(netId, uid, hostName, addrInfo);
+    dnsParCache.SetDnsCache(netId, uid, normalHost, addrInfo);
+    EXPECT_EQ(dnsParCache.GetDnsCache(netId, uid, hostName).size(), 1u);
+    EXPECT_EQ(dnsParCache.GetDnsCache(netId, uid, normalHost).size(), 1u);
+
+    // Non-empty preset domains delivery purges the cached entries of the preset uid+domain
+    // so that subsequent dns queries only do single A queries
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[uid] = {"preset.example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+    EXPECT_EQ(dnsParCache.GetDnsCache(netId, uid, hostName).size(), 0u);
+    // Entries of non-preset hosts are kept
+    EXPECT_EQ(dnsParCache.GetDnsCache(netId, uid, normalHost).size(), 1u);
+
+    dnsParCache.DestroyNetworkCache(netId);
+}
+
+/**
+ * @tc.number: IsPresetCacheKeyTest001
+ * @tc.name: Test IsPresetCacheKey branch parsing
+ * @tc.desc: Verify cache key parsing: no delimiter, delimiter at head, non-digit uid, preset hit and miss
+ */
+HWTEST_F(DNSParamCacheTest, IsPresetCacheKeyTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsPresetCacheKeyTest001 enter");
+    DnsParamCache dnsParCache;
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000001] = {"example.com"};
+    dnsParCache.SetPresetDomains(presetDomains);
+    // No delimiter - covers IsPresetCacheKey branch: find('|') == npos
+    EXPECT_FALSE(dnsParCache.IsPresetCacheKey("www.example.com"));
+    // Delimiter at position 0 - covers IsPresetCacheKey branch: empty uid part
+    EXPECT_FALSE(dnsParCache.IsPresetCacheKey("|www.example.com"));
+    // Non-digit uid part - covers IsPresetCacheKey branch: uid parsing fails
+    EXPECT_FALSE(dnsParCache.IsPresetCacheKey("12a|www.example.com"));
+    // Decorated resolv cache key of a preset host - covers the hit branch
+    EXPECT_TRUE(dnsParCache.IsPresetCacheKey("20000001|www.example.com 443 0 0 6 1"));
+    // Trailing NUL of the resolv cache key is trimmed before matching
+    std::string keyWithNul = "20000001|example.com";
+    keyWithNul += '\0';
+    EXPECT_TRUE(dnsParCache.IsPresetCacheKey(keyWithNul));
+    // Decorated resolv cache key of a non-preset host - covers the miss branch
+    EXPECT_FALSE(dnsParCache.IsPresetCacheKey("20000001|www.notpreset.com 443 0 0 6 1"));
+}
+
+/**
+ * @tc.number: GetDnsCacheDefaultNetIdTest001
+ * @tc.name: Test GetDnsCache with netId 0
+ * @tc.desc: Verify GetDnsCache falls back to defaultNetId_ when netId is 0
+ */
+HWTEST_F(DNSParamCacheTest, GetDnsCacheDefaultNetIdTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("GetDnsCacheDefaultNetIdTest001 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    uint32_t uid = 20000001;
+    std::string hostName = "www.example.com";
+    dnsParCache.SetDefaultNetwork(netId);
+    dnsParCache.CreateCacheForNet(netId);
+    AddrInfo addrInfo = {};
+    addrInfo.aiFamily = AF_INET;
+    addrInfo.aiAddr.sin.sin_family = AF_INET;
+    inet_pton(AF_INET, "10.10.10.10", &addrInfo.aiAddr.sin.sin_addr);
+    dnsParCache.SetDnsCache(netId, uid, hostName, addrInfo);
+    // netId 0 falls back to the default network - covers GetDnsCache branch: netId = defaultNetId_
+    std::vector<AddrInfo> retAddrInfo = dnsParCache.GetDnsCache(0, uid, hostName);
+    EXPECT_EQ(retAddrInfo.size(), 1u);
     dnsParCache.DestroyNetworkCache(netId);
 }
 

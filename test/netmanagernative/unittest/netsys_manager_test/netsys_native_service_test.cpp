@@ -1226,6 +1226,22 @@ HWTEST_F(NetsysNativeServiceTest, StopClat001, TestSize.Level1)
     EXPECT_GE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysNativeServiceTest, SetPresetDomainsTest001, TestSize.Level1)
+{
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000138] = {"example.com", "test.com"};
+    int32_t ret = instance_->SetPresetDomains(presetDomains);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetPresetDomainsTest002, TestSize.Level1)
+{
+    // Empty preset domains map - covers SetPresetDomains with empty input
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    int32_t ret = instance_->SetPresetDomains(presetDomains);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 #ifdef FEATURE_NET_FIREWALL_ENABLE
 HWTEST_F(NetsysNativeServiceTest, NfqOpenTest001, TestSize.Level1)
 {

@@ -356,5 +356,13 @@ int32_t DnsManager::SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t ui
     DnsParamCache::GetInstance().SetIpv6UidBlackList(netIds, static_cast<uint32_t>(uid));
     return 0;
 }
+
+int32_t DnsManager::SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains)
+{
+    NETNATIVE_LOGI("manager_SetPresetDomains uid num:%{public}zu", domains.size());
+    DnsParamCache::GetInstance().SetPresetDomains(domains);
+    return 0;
+}
+
 } // namespace nmd
 } // namespace OHOS

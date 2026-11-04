@@ -27,6 +27,7 @@
 #include "net_dns_result_callback_stub.h"
 #include "netnative_log_wrapper.h"
 #include "mock_netsys_native_service_stub.h"
+#include "bpf_def.h"
 #ifdef FEATURE_NET_FIREWALL_ENABLE
 #include "netfirewall_parcel.h"
 #endif
@@ -185,6 +186,196 @@ HWTEST_F(NetsysDnsFamilyStubTest, ReplyAllocationFailure, TestSize.Level1)
     // Parcel takes ownership of this allocator; no process-wide allocation failure is injected.
     ASSERT_TRUE(reply.SetAllocator(new DnsFamilyFailingAllocator()));
     EXPECT_EQ(stub.CmdSetNetworkDnsFamilyCapability(data, reply), ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(stub.calls, 1u);
+    EXPECT_EQ(reply.GetDataSize(), 0u);
+}
+
+namespace {
+class PresetDomainsRecordingStub : public TestNetsysNativeServiceStub {
+public:
+    int32_t SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains) override
+    {
+        ++calls;
+        lastDomains = domains;
+        return result;
+    }
+
+    uint32_t calls = 0;
+    std::map<uint32_t, std::vector<std::string>> lastDomains;
+    int32_t result = NetManagerStandard::NETMANAGER_SUCCESS;
+};
+} // namespace
+
+class NetsysPresetDomainsStubTest : public testing::Test {
+public:
+    void SetUp() override { NetManagerStandard::SetMockNetSysInternalPermissionResult(true); }
+    void TearDown() override { NetManagerStandard::SetMockNetSysInternalPermissionResult(true); }
+
+    PresetDomainsRecordingStub stub;
+};
+
+HWTEST_F(NetsysPresetDomainsStubTest, PresetDomainsPermissionDenied, TestSize.Level1)
+{
+    NetManagerStandard::SetMockNetSysInternalPermissionResult(false);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(stub.calls, 0u);
+    EXPECT_EQ(reply.GetDataSize(), 0u);
+}
+
+HWTEST_F(NetsysPresetDomainsStubTest, PresetDomainsParseFailures, TestSize.Level1)
+{
+    // Mirror the stub limits MAX_PRESET_UID_NUM / MAX_DOMAIN_NUM (both 128)
+    constexpr int32_t MAX_PRESET_UID_NUM = 128;
+    constexpr int32_t MAX_DOMAIN_NUM = 128;
+    // Each block fails exactly one read or one range check in ReadPresetDomainsFromParcel
+    {
+        // Nothing written - read uid num failed
+        MessageParcel data;
+        MessageParcel reply;
+        EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), ERR_FLATTEN_OBJECT);
+    }
+    {
+        // Negative uid num
+        MessageParcel data;
+        MessageParcel reply;
+        ASSERT_TRUE(data.WriteInt32(-1));
+        EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), ERR_FLATTEN_OBJECT);
+    }
+    {
+        // Uid num exceeds MAX_PRESET_UID_NUM
+        MessageParcel data;
+        MessageParcel reply;
+        ASSERT_TRUE(data.WriteInt32(MAX_PRESET_UID_NUM + 1));
+        EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), ERR_FLATTEN_OBJECT);
+    }
+    {
+        // Uid num without uid - read uid failed
+        MessageParcel data;
+        MessageParcel reply;
+        ASSERT_TRUE(data.WriteInt32(1));
+        EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), ERR_FLATTEN_OBJECT);
+    }
+    {
+        // Uid without domain num - read domain num failed
+        MessageParcel data;
+        MessageParcel reply;
+        ASSERT_TRUE(data.WriteInt32(1));
+        ASSERT_TRUE(data.WriteUint32(20000001));
+        EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), ERR_FLATTEN_OBJECT);
+    }
+    {
+        // Negative domain num
+        MessageParcel data;
+        MessageParcel reply;
+        ASSERT_TRUE(data.WriteInt32(1));
+        ASSERT_TRUE(data.WriteUint32(20000001));
+        ASSERT_TRUE(data.WriteInt32(-1));
+        EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), ERR_FLATTEN_OBJECT);
+    }
+    {
+        // Domain num exceeds MAX_DOMAIN_NUM
+        MessageParcel data;
+        MessageParcel reply;
+        ASSERT_TRUE(data.WriteInt32(1));
+        ASSERT_TRUE(data.WriteUint32(20000001));
+        ASSERT_TRUE(data.WriteInt32(MAX_DOMAIN_NUM + 1));
+        EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), ERR_FLATTEN_OBJECT);
+    }
+    {
+        // Empty domain string
+        MessageParcel data;
+        MessageParcel reply;
+        ASSERT_TRUE(data.WriteInt32(1));
+        ASSERT_TRUE(data.WriteUint32(20000001));
+        ASSERT_TRUE(data.WriteInt32(1));
+        ASSERT_TRUE(data.WriteString(""));
+        EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), ERR_FLATTEN_OBJECT);
+    }
+    EXPECT_EQ(stub.calls, 0u);
+}
+
+HWTEST_F(NetsysPresetDomainsStubTest, PresetDomainsSkipInvalid, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInt32(1));
+    ASSERT_TRUE(data.WriteUint32(20000001));
+    ASSERT_TRUE(data.WriteInt32(3));
+    // Longer than DNS_DOMAIN_NAME_SIZE - skipped by the charset validation
+    ASSERT_TRUE(data.WriteString(std::string(DNS_DOMAIN_NAME_SIZE + 1, 'a')));
+    // Character outside letters/digits/'.'/'-' - skipped by the charset validation
+    ASSERT_TRUE(data.WriteString("exam_ple.com"));
+    // Valid domain - kept
+    ASSERT_TRUE(data.WriteString("example.com"));
+    EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(stub.calls, 1u);
+    ASSERT_EQ(stub.lastDomains.size(), 1u);
+    EXPECT_EQ(stub.lastDomains[20000001], std::vector<std::string>({"example.com"}));
+    int32_t result = 0;
+    ASSERT_TRUE(reply.ReadInt32(result));
+    EXPECT_EQ(result, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysPresetDomainsStubTest, PresetDomainsMultipleUids, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInt32(2));
+    ASSERT_TRUE(data.WriteUint32(20000001));
+    ASSERT_TRUE(data.WriteInt32(1));
+    ASSERT_TRUE(data.WriteString("example.com"));
+    ASSERT_TRUE(data.WriteUint32(20000002));
+    ASSERT_TRUE(data.WriteInt32(2));
+    ASSERT_TRUE(data.WriteString("a.example.com"));
+    ASSERT_TRUE(data.WriteString("b.example.com"));
+    EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(stub.calls, 1u);
+    ASSERT_EQ(stub.lastDomains.size(), 2u);
+    EXPECT_EQ(stub.lastDomains[20000001], std::vector<std::string>({"example.com"}));
+    EXPECT_EQ(stub.lastDomains[20000002], std::vector<std::string>({"a.example.com", "b.example.com"}));
+}
+
+HWTEST_F(NetsysPresetDomainsStubTest, PresetDomainsEmptyMap, TestSize.Level1)
+{
+    // Uid num is 0 - the empty domains map clears all preset domains in SetPresetDomains
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInt32(0));
+    EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(stub.calls, 1u);
+    EXPECT_TRUE(stub.lastDomains.empty());
+}
+
+HWTEST_F(NetsysPresetDomainsStubTest, PresetDomainsServiceErrorInReply, TestSize.Level1)
+{
+    stub.result = -ENOENT;
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInt32(1));
+    ASSERT_TRUE(data.WriteUint32(20000001));
+    ASSERT_TRUE(data.WriteInt32(1));
+    ASSERT_TRUE(data.WriteString("example.com"));
+    // The service error code is written into the reply, the stub still returns success
+    EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), NetManagerStandard::NETMANAGER_SUCCESS);
+    int32_t result = 0;
+    ASSERT_TRUE(reply.ReadInt32(result));
+    EXPECT_EQ(result, -ENOENT);
+    EXPECT_EQ(stub.calls, 1u);
+}
+
+HWTEST_F(NetsysPresetDomainsStubTest, PresetDomainsReplyAllocationFailure, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInt32(1));
+    ASSERT_TRUE(data.WriteUint32(20000001));
+    ASSERT_TRUE(data.WriteInt32(1));
+    ASSERT_TRUE(data.WriteString("example.com"));
+    // Parcel takes ownership of this allocator; no process-wide allocation failure is injected.
+    ASSERT_TRUE(reply.SetAllocator(new DnsFamilyFailingAllocator()));
+    EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), ERR_FLATTEN_OBJECT);
     EXPECT_EQ(stub.calls, 1u);
     EXPECT_EQ(reply.GetDataSize(), 0u);
 }

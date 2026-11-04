@@ -990,6 +990,12 @@ int32_t NetsysControllerServiceImpl::SetIpv6UidBlackList(std::vector<int32_t> &n
     return netsysClient_->SetIpv6UidBlackList(netIds, uid);
 }
 
+int32_t NetsysControllerServiceImpl::SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains)
+{
+    NETMGR_LOG_I("SetPresetDomains: uid num: %{public}zu", domains.size());
+    return netsysClient_->SetPresetDomains(domains);
+}
+
 int32_t NetsysControllerServiceImpl::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
 {
     NETMGR_LOG_D("SetIpv6AutoConf: interfaceName=%{public}s on=%{public}d", interfaceName.c_str(), on);

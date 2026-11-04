@@ -639,5 +639,10 @@ int32_t MockNetsysNativeClient::SetIpv6UidBlackList(std::vector<int32_t> &netIds
 {
     return 0;
 }
+
+int32_t MockNetsysNativeClient::SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains)
+{
+    return 0;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

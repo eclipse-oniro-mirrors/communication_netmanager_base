@@ -27,6 +27,7 @@ ohos_fuzztest("NetsysBandwidthFuzzTest") {
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
+    "$NETMANAGERNATIVE_ROOT/bpf/include",
     "$NETMANAGERNATIVE_ROOT/include",
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
     "$NETMANAGER_BASE_ROOT/test/netmanagernative/unittest/netsys_manager_test",
@@ -67,6 +68,7 @@ ohos_fuzztest("NetsysBandwidthFuzzTest") {
   external_deps = [
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",

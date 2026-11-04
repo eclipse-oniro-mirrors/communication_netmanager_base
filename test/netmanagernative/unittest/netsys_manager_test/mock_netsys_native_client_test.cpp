@@ -254,6 +254,15 @@ HWTEST_F(MockNetsysNativeClientTest, MockNetsysNativeClientBranchTest005, TestSi
     std::vector<int32_t> netIds = {};
     ret = nativeClient_.SetIpv6UidBlackList(netIds, uid);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000138] = {"example.com"};
+    ret = nativeClient_.SetPresetDomains(presetDomains);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    std::map<uint32_t, std::vector<std::string>> emptyPresetDomains;
+    ret = nativeClient_.SetPresetDomains(emptyPresetDomains);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

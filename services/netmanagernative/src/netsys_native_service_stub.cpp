@@ -25,6 +25,7 @@
 #include "netmanager_base_permission.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_stub.h"
+#include "dns_param_cache.h"
 #include "securec.h"
 #include "i_net_dns_result_callback.h"
 #include "netsys_traffic_callback_proxy.h"
@@ -48,7 +49,54 @@ constexpr uint32_t MAX_ROUTES_ARRAY_SIZE = 1024;
 constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
 constexpr uint32_t MAX_SHARING_TYPE_SIZE = 32;
 constexpr int32_t MAX_NETID_ARRAY_SIZE = 6;
+constexpr int32_t MAX_DOMAIN_NUM = 128;
+constexpr int32_t MAX_PRESET_UID_NUM = 128;
 constexpr int32_t INVALID_UID = -1;
+
+int32_t ReadPresetDomainsFromParcel(MessageParcel &data, std::map<uint32_t, std::vector<std::string>> &domainsMap)
+{
+    int32_t uidNum = 0;
+    if (!data.ReadInt32(uidNum)) {
+        NETNATIVE_LOGE("CmdSetPresetDomains read uid num failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (uidNum < 0 || uidNum > MAX_PRESET_UID_NUM) {
+        NETNATIVE_LOGE("CmdSetPresetDomains invalid uid num:%{public}d", uidNum);
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (int32_t uidIndex = 0; uidIndex < uidNum; uidIndex++) {
+        uint32_t uid = 0;
+        if (!data.ReadUint32(uid)) {
+            NETNATIVE_LOGE("CmdSetPresetDomains read uid failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+        int32_t domainNum = 0;
+        if (!data.ReadInt32(domainNum)) {
+            NETNATIVE_LOGE("CmdSetPresetDomains read domain num failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+        if (domainNum < 0 || domainNum > MAX_DOMAIN_NUM) {
+            NETNATIVE_LOGE("CmdSetPresetDomains invalid domain num:%{public}d", domainNum);
+            return ERR_FLATTEN_OBJECT;
+        }
+        std::vector<std::string> domains;
+        for (int32_t index = 0; index < domainNum; index++) {
+            std::string domain = data.ReadString();
+            if (domain.empty()) {
+                NETNATIVE_LOGE("CmdSetPresetDomains read domain failed");
+                return ERR_FLATTEN_OBJECT;
+            }
+            if (!nmd::DnsParamCache::IsValidPresetDomain(domain)) {
+                NETNATIVE_LOGE("CmdSetPresetDomains skip invalid domain, uid:%{public}u, size:%{public}zu", uid,
+                               domain.size());
+                continue;
+            }
+            domains.emplace_back(domain);
+        }
+        domainsMap[uid] = domains;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
 } // namespace
 
 NetsysNativeServiceStub::NetsysNativeServiceStub()
@@ -148,6 +196,8 @@ void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdGetConnectOwnerUid;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_UID_BLACK_LIST)] =
         &NetsysNativeServiceStub::CmdSetIpv6UidBlackList;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_PRESET_DOMAINS)] =
+        &NetsysNativeServiceStub::CmdSetPresetDomains;
 }
 
 void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
@@ -2590,6 +2640,26 @@ int32_t NetsysNativeServiceStub::CmdSetIpv6UidBlackList(MessageParcel &data, Mes
     int32_t result = SetIpv6UidBlackList(netIds, uid);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write CmdSetIpv6UidBlackList result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetPresetDomains(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdSetPresetDomains CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+    std::map<uint32_t, std::vector<std::string>> domainsMap;
+    int32_t parseResult = ReadPresetDomainsFromParcel(data, domainsMap);
+    if (parseResult != NetManagerStandard::NETMANAGER_SUCCESS) {
+        return parseResult;
+    }
+    int32_t result = SetPresetDomains(domainsMap);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write CmdSetPresetDomains result failed");
         return ERR_FLATTEN_OBJECT;
     }
     return NetManagerStandard::NETMANAGER_SUCCESS;

@@ -18,6 +18,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <unordered_set>
 #include <cstring>
 #include <netdb.h>
@@ -475,6 +476,7 @@ public:
     int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on, bool needRestart);
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid);
     int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid);
+    int32_t SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains);
     /**
      * @brief Flush DNS cache.
      *

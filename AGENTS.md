@@ -152,7 +152,7 @@ services 组：`netmanager_base_services`；全量测试聚合组：`//foundatio
 | 网络连接管理（services/netconnmanager、frameworks/native/netconnclient） | `net_conn_manager_test`、`net_conn_service_test`、`net_conn_multi_test`、`net_supplier_test`、`netconnclient_fuzzer` |
 | 策略/防火墙（netpolicymanager） | `net_policy_service_test`、`net_policy_manager_test`、`firewall_manager_test`、`bandwidth_manager_test`、`netpolicyclient_fuzzer` |
 | 流量统计（netstatsmanager） | `net_stats_manager_test`、`net_stats_service_new_test`、`net_stats_cached_service_test`、`netsys_bpf_stats_test`、`netstatsclient_fuzzer` |
-| netsysnative / 内核通道（netmanagernative、netsyscontroller） | `netsys_native_manager_test`、`netsys_controller_test`、`netsys_dnsresolv_test`、`netsysnetfirewall_fuzzer`、`enablevnicnetwork_fuzzer`（fuzzer 实名见 build-and-test.md §2.2；`nfqueue_fuzzer` 受防火墙开关门控） |
+| netsysnative / 内核通道（netmanagernative、netsyscontroller） | `netsys_native_manager_test`、`netsys_controller_test`、`netsys_dnsresolv_test`、`netsysnetfirewall_fuzzer`、`setpresetdomains_fuzzer`、`enablevnicnetwork_fuzzer`（fuzzer 实名见 build-and-test.md §2.2；`nfqueue_fuzzer` 受防火墙开关门控） |
 | BPF 数据面（bpf/） | `netsys_bpf_stats_test`、`netsysnetfirewall_fuzzer`、`updatenetcaps_fuzzer` |
 | napi / 公共工具 | `netmanager_utils_test`、`common_fuzzer` + 对应模块 client fuzzer |
 | IPC 权限/错误码 | 对应模块测试 + 全部新增 case 补进对应 fuzzer |

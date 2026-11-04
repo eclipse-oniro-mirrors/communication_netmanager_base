@@ -126,6 +126,7 @@ public:
                                  uint16_t &baseTimeoutMsec, uint8_t &retryCount);
     int32_t DnsCreateNetworkCache(uint16_t netid, bool isVpnNet = false);
     int32_t DnsDestroyNetworkCache(uint16_t netId, bool isVpnNet = false);
+    int32_t SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains);
     int32_t BandwidthEnableDataSaver(bool enable);
     int32_t BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes);
     int32_t BandwidthRemoveIfaceQuota(const std::string &ifName);

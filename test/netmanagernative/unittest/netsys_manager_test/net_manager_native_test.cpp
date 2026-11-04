@@ -645,5 +645,21 @@ HWTEST_F(NetManagerNativeTest, SetEnableIpv6_EnableIpv6_CallsSharing, TestSize.L
     EXPECT_GE(ret, NETMANAGER_ERROR);
 }
 
+HWTEST_F(NetManagerNativeTest, SetPresetDomains001, TestSize.Level1)
+{
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000138] = {"example.com", "test.com"};
+    auto ret = instance_->SetPresetDomains(presetDomains);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetManagerNativeTest, SetPresetDomains002, TestSize.Level1)
+{
+    // Empty preset domains map - covers NetManagerNative::SetPresetDomains with empty input
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    auto ret = instance_->SetPresetDomains(presetDomains);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 } // namespace nmd
 } // namespace OHOS

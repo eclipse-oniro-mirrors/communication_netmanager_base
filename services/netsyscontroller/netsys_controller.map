@@ -180,6 +180,7 @@
       "OHOS::NetManagerStandard::NetsysNativeClient::StartDnsProxyListen()";
       "OHOS::NetManagerStandard::NetsysNativeClient::UnregisterDnsResultCallback(OHOS::sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> const&)";
       "OHOS::NetManagerStandard::NetsysController::NetworkAddRoutes(int, std::__h::vector<OHOS::nmd::NetworkRouteInfo, std::__h::allocator<OHOS::nmd::NetworkRouteInfo>> const&)";
+      "OHOS::NetManagerStandard::NetsysController::SetPresetDomains(std::__h::map<unsigned int, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>, std::__h::less<unsigned int>, std::__h::allocator<std::__h::pair<unsigned int const, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>>>> const&)";
     };
   local:
    *;

@@ -82,6 +82,23 @@ public:
         nodeList_.clear();
     }
 
+    template <class Pred> size_t RemoveIf(Pred pred)
+    {
+        std::lock_guard<std::mutex> guard(mutex_);
+
+        size_t removed = 0;
+        for (auto it = nodeList_.begin(); it != nodeList_.end();) {
+            if (pred(it->key)) {
+                cache_.erase(it->key);
+                it = nodeList_.erase(it);
+                removed++;
+            } else {
+                ++it;
+            }
+        }
+        return removed;
+    }
+
 private:
     struct Node {
         std::string key;

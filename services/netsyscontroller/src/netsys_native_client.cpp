@@ -2061,6 +2061,18 @@ int32_t NetsysNativeClient::SetIpv6UidBlackList(std::vector<int32_t> &netIds, in
     return proxy->SetIpv6UidBlackList(netIds, uid);
 }
 
+int32_t NetsysNativeClient::SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains)
+{
+    auto proxy = GetProxy();
+    // LCOV_EXCL_START
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("SetPresetDomains proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    return proxy->SetPresetDomains(domains);
+}
+
 int32_t NetsysNativeClient::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
 {
     auto proxy = GetProxy();

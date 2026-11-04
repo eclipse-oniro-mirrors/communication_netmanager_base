@@ -21,9 +21,11 @@
 #endif
 #include "common_net_diag_callback_test.h"
 #include "common_notify_callback_test.h"
+#include "bpf_def.h"
 #include "i_netsys_service.h"
 #include "net_dns_result_callback_stub.h"
 #include "netnative_log_wrapper.h"
+#include "netmanager_base_test_security.h"
 #include "netsys_native_service_stub.h"
 
 namespace OHOS {
@@ -703,6 +705,14 @@ public:
         return 0;
     }
 
+    static inline std::map<uint32_t, std::vector<std::string>> lastPresetDomains_;
+
+    int32_t SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains) override
+    {
+        lastPresetDomains_ = domains;
+        return 0;
+    }
+
     int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override
     {
         return 0;
@@ -836,6 +846,9 @@ public:
 
 void NetsysNativeServiceStubTest::SetUpTestCase()
 {
+    // CmdSetPresetDomains enforces CheckNetSysInternalPermission(NETSYS_INTERNAL), so a native
+    // token holding the permission is required for the command branches to be reachable
+    static NetManagerStandard::NetManagerBaseAccessToken token;
     notifyStub_ = std::make_shared<TestNetsysNativeServiceStub>();
 }
 
@@ -1040,6 +1053,146 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetIpv6UidBlackList004, TestSize.Level1
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdSetIpv6UidBlackList(data, reply);
     EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetPresetDomains001, TestSize.Level1)
+{
+    uint32_t uid = 20000138;
+    std::vector<std::string> domains = {"example.com", "test.com"};
+
+    MessageParcel data;
+    ASSERT_NE(data.WriteInt32(1), false);
+    ASSERT_NE(data.WriteUint32(uid), false);
+    ASSERT_NE(data.WriteInt32(domains.size()), false);
+    for (const std::string &iter : domains) {
+        if (!data.WriteString(iter)) {
+            return;
+        }
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetPresetDomains(data, reply);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    int32_t result = 0;
+    ASSERT_NE(reply.ReadInt32(result), false);
+    EXPECT_EQ(result, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetPresetDomains002, TestSize.Level1)
+{
+    // Empty parcel - covers CmdSetPresetDomains branch: read uid num failed
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetPresetDomains(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetPresetDomains003, TestSize.Level1)
+{
+    // Invalid negative uid num - covers CmdSetPresetDomains branch: uidNum < 0
+    MessageParcel data;
+    ASSERT_NE(data.WriteInt32(-1), false);
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetPresetDomains(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetPresetDomains004, TestSize.Level1)
+{
+    // Uid num exceeds MAX_DOMAIN_NUM - covers CmdSetPresetDomains branch: uidNum > MAX_DOMAIN_NUM
+    MessageParcel data;
+    ASSERT_NE(data.WriteInt32(129), false);
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetPresetDomains(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetPresetDomains005, TestSize.Level1)
+{
+    // Missing domain num - covers CmdSetPresetDomains branch: read domain num failed
+    MessageParcel data;
+    ASSERT_NE(data.WriteInt32(1), false);
+    ASSERT_NE(data.WriteUint32(20000138), false);
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetPresetDomains(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetPresetDomains006, TestSize.Level1)
+{
+    // Invalid negative domain num - covers CmdSetPresetDomains branch: domainNum < 0
+    MessageParcel data;
+    ASSERT_NE(data.WriteInt32(1), false);
+    ASSERT_NE(data.WriteUint32(20000138), false);
+    ASSERT_NE(data.WriteInt32(-1), false);
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetPresetDomains(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetPresetDomains007, TestSize.Level1)
+{
+    // Domain num exceeds MAX_DOMAIN_NUM - covers CmdSetPresetDomains branch: domainNum > MAX_DOMAIN_NUM
+    MessageParcel data;
+    ASSERT_NE(data.WriteInt32(1), false);
+    ASSERT_NE(data.WriteUint32(20000138), false);
+    ASSERT_NE(data.WriteInt32(129), false);
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetPresetDomains(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetPresetDomains008, TestSize.Level1)
+{
+    // Empty domain string - covers CmdSetPresetDomains branch: domain.empty()
+    MessageParcel data;
+    ASSERT_NE(data.WriteInt32(1), false);
+    ASSERT_NE(data.WriteUint32(20000138), false);
+    ASSERT_NE(data.WriteInt32(1), false);
+    ASSERT_NE(data.WriteString(""), false);
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetPresetDomains(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetPresetDomains009, TestSize.Level1)
+{
+    // Domain longer than DNS_DOMAIN_NAME_SIZE - covers CmdSetPresetDomains branch: skip invalid domain
+    MessageParcel data;
+    ASSERT_NE(data.WriteInt32(1), false);
+    ASSERT_NE(data.WriteUint32(20000138), false);
+    ASSERT_NE(data.WriteInt32(2), false);
+    ASSERT_NE(data.WriteString(std::string(DNS_DOMAIN_NAME_SIZE + 1, 'a')), false);
+    ASSERT_NE(data.WriteString("example.com"), false);
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetPresetDomains(data, reply);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    int32_t result = 0;
+    ASSERT_NE(reply.ReadInt32(result), false);
+    EXPECT_EQ(result, NetManagerStandard::NETMANAGER_SUCCESS);
+    // The oversized domain is skipped and only the valid one is delivered
+    ASSERT_EQ(TestNetsysNativeServiceStub::lastPresetDomains_.size(), 1u);
+    EXPECT_EQ(TestNetsysNativeServiceStub::lastPresetDomains_[20000138], std::vector<std::string>({"example.com"}));
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetPresetDomains010, TestSize.Level1)
+{
+    // Domain with characters outside letters/digits/'.'/'-' - covers the charset validation branch
+    MessageParcel data;
+    ASSERT_NE(data.WriteInt32(2), false);
+    ASSERT_NE(data.WriteUint32(20000138), false);
+    ASSERT_NE(data.WriteInt32(1), false);
+    ASSERT_NE(data.WriteString("exam_ple.com"), false);
+    ASSERT_NE(data.WriteUint32(20000139), false);
+    ASSERT_NE(data.WriteInt32(1), false);
+    ASSERT_NE(data.WriteString("example.org"), false);
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetPresetDomains(data, reply);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    // The invalid-charset domain is skipped; the uid keeps an empty vector at the stub layer
+    ASSERT_EQ(TestNetsysNativeServiceStub::lastPresetDomains_.size(), 2u);
+    EXPECT_TRUE(TestNetsysNativeServiceStub::lastPresetDomains_[20000138].empty());
+    EXPECT_EQ(TestNetsysNativeServiceStub::lastPresetDomains_[20000139], std::vector<std::string>({"example.org"}));
 }
 } // namespace NetsysNative
 } // namespace OHOS

@@ -25,6 +25,7 @@ group("fuzztest") {
     "netstatsclient_fuzzer:fuzztest",
     "updatenetcaps_fuzzer:fuzztest",
     "enablevnicnetwork_fuzzer:fuzztest",
+    "setpresetdomains_fuzzer:fuzztest",
     "netsysnetfirewall_fuzzer:fuzztest",
     "netsysnetwork_fuzzer:fuzztest",
     "netsysinterface_fuzzer:fuzztest",
