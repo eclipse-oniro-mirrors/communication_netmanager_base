@@ -26,6 +26,7 @@
 | 模块目录 | target 实名 |
 |---|---|
 | netconnmanager | `net_conn_manager_test`、`net_conn_service_test`、`net_conn_service_regional_test`、`net_conn_multi_test`、`net_conn_multi_vnic_test`、`net_supplier_test`、`net_factoryreset_callback_test`、`net_info_test`、`netmgr_distributed_test`、`net_access_policy_database_test`（布局在 netpolicymanager，见下）、`net_pac_manager_test`、`net_client_pac_file_url_test`、`local_proxy_server_test`、`pac_http_test`、`proxy_switch_mode_test`、`networkshare_manager_test` |
+| nethttpclient | `net_http_client_test`（共享 HTTP 客户端 `utils/net_http_client`：同步/异步/超时/取消/代理/TLS/resolve 注入） |
 | netpolicymanager | `net_policy_service_test`、`net_policy_service_nocfi_test`、`net_policy_manager_test`、`net_access_policy_database_test` |
 | netstatsmanager | `net_stats_manager_test`、`net_stats_service_new_test`、`net_stats_cached_service_test`、`net_stats_service_common_test`、`net_stats_traffic_plan_service_test`、`net_stats_data_clone_test`、`net_stats_mock_data` |
 | netmanagernative | `netsys_native_manager_test`（同 BUILD 内另有 `netsys_native_manager_fault_through_test`、`netsys_native_manager_netsys_native_service_test`）、`netsys_controller_test`、`netsys_native_client_test`、`netsys_native_service_proxy_test`、`netsys_dnsresolv_test`、`netsys_dnsresolv_mock_test`、`firewall_manager_test`、`firewall_manager_class_test`、`bandwidth_manager_test`、`bandwidth_manager_class_test`、`netsys_netfirewall_test`、`netsys_wrapper_test`、`netsys_distributed_test`、`resolver_config_test`、`conn_manager_test`、`nat464_clat_test`、`wearable_distributed_net_manager_test`、`suffix_match_trie_test` |

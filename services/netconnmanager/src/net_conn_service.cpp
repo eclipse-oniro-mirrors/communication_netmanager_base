@@ -43,6 +43,7 @@
 #include "net_policy_client.h"
 #include "net_datashare_utils.h"
 #include "net_http_proxy_tracker.h"
+#include "net_http_client.h"
 #include "net_manager_center.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
@@ -2724,18 +2725,29 @@ int32_t NetConnService::SetAirplaneMode(bool state)
     return NETMANAGER_SUCCESS;
 }
 
-long NetConnService::PerformProxyCurlProbe(CURL *curl)
+long NetConnService::PerformProxyProbe(const HttpProxy &tempProxy)
 {
-    long responseCode = 0;
-    if (curl == nullptr) {
-        return responseCode;
+    std::string httpUrl;
+    GetHttpUrlFromConfig(httpUrl);
+    if (httpUrl.empty()) {
+        NETMGR_LOG_E("ActiveHttpProxy thread get url failed!");
+        return 0;
     }
-    auto ret = curl_easy_perform(curl);
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
-    NETMGR_LOG_D("ActiveHttpProxy ret: %{public}d, code: %{public}d",
-                 static_cast<int>(ret), static_cast<int32_t>(responseCode));
-    curl_easy_cleanup(curl);
-    return responseCode;
+    NetHttp::HttpRequest request;
+    request.url = httpUrl;
+    request.timeoutMs = AUTH_TIME_OUT * 1000;
+    NetHttp::HttpProxyConfig proxyConfig;
+    proxyConfig.host = tempProxy.host_;
+    proxyConfig.port = tempProxy.port_;
+    proxyConfig.username = tempProxy.username_;
+    proxyConfig.password = tempProxy.password_;
+    /* Historical behavior: the proxy keep-alive probe does not force a tunnel. */
+    proxyConfig.useTunnel = false;
+    request.proxy = proxyConfig;
+    NetHttp::HttpResponse response = NetHttp::NetHttpClient::GetInstance().Execute(request);
+    NETMGR_LOG_D("ActiveHttpProxy ret: %{public}d, code: %{public}d", response.rawCurlCode,
+                 response.IsTransportSuccess() ? response.responseCode : 0);
+    return response.IsTransportSuccess() ? response.responseCode : 0;
 }
 
 void NetConnService::NotifyRefreshGlobalHttpProxyResult(long responseCode)
@@ -2773,7 +2785,7 @@ void NetConnService::ActiveHttpProxy()
     uint32_t retryTimes = RETRY_TIMES;
     while (httpProxyThreadNeedRun_.load()) {
         NETMGR_LOG_D("Keep global http-proxy active every 2 minutes");
-        CURL *curl = nullptr;
+        long responseCode = 0;
         HttpProxy tempProxy;
         {
             auto userInfoHelp = NetProxyUserinfo::GetInstance();
@@ -2781,37 +2793,9 @@ void NetConnService::ActiveHttpProxy()
             userInfoHelp.GetHttpProxyHostPass(tempProxy);
         }
         if (!tempProxy.host_.empty() && !tempProxy.username_.empty()) {
-            curl = curl_easy_init();
-            SetCurlOptions(curl, tempProxy);
+            responseCode = PerformProxyProbe(tempProxy);
         }
-        long responseCode = PerformProxyCurlProbe(curl);
         WaitForNextActiveCycle(retryTimes, responseCode);
-    }
-}
-
-void NetConnService::SetCurlOptions(CURL *curl, HttpProxy tempProxy)
-{
-    if (curl == nullptr) {
-        NETMGR_LOG_E("curl is nullptr");
-        return;
-    }
-    std::string httpUrl;
-    GetHttpUrlFromConfig(httpUrl);
-    if (httpUrl.empty()) {
-        NETMGR_LOG_E("ActiveHttpProxy thread get url failed!");
-        return;
-    }
-    auto proxyType = (tempProxy.host_.find("https://") != std::string::npos) ? CURLPROXY_HTTPS : CURLPROXY_HTTP;
-    curl_easy_setopt(curl, CURLOPT_URL, httpUrl.c_str());
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, AUTH_TIME_OUT);
-    curl_easy_setopt(curl, CURLOPT_PROXY, tempProxy.host_.c_str());
-    curl_easy_setopt(curl, CURLOPT_PROXYPORT, tempProxy.port_);
-    curl_easy_setopt(curl, CURLOPT_PROXYTYPE, proxyType);
-    curl_easy_setopt(curl, CURLOPT_PROXYUSERNAME, tempProxy.username_.c_str());
-    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-    curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
-    if (!tempProxy.password_.empty()) {
-        curl_easy_setopt(curl, CURLOPT_PROXYPASSWORD, tempProxy.password_.c_str());
     }
 }
 

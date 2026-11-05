@@ -20,6 +20,7 @@ group("common_target") {
     ":net_data_share",
     ":net_manager_common",
     "napi_utils:napi_utils",
+    "net_http_client:net_http_client",
   ]
 }
 
@@ -33,6 +34,13 @@ config("netmgr_common_config") {
     "$INNERKITS_ROOT/netpolicyclient/include",
     "$INNERKITS_ROOT/netstatsclient/include",
   ]
+}
+
+config("netmanager_base_log_config") {
+  # Standalone log config: exposes the shared hilog wrapper header only, so
+  # leaf libraries (e.g. net_http_client) can log through netmanager_base_log.h
+  # without depending on the whole netmgr_common_config.
+  include_dirs = [ "common_utils/include" ]
 }
 
 ohos_shared_library("net_manager_common") {

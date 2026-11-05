@@ -19,10 +19,10 @@
 
 #include "net_base_branch_fuzzer.h"
 
-#include "curl/curl.h"
 #include "net_mgr_log_wrapper.h"
 
 #define private public
+#include "net_http_client.h"
 #include "net_http_probe.h"
 #include "net_policy_rule.h"
 
@@ -100,26 +100,25 @@ void NetHttpProbeBranchFuzzTest(const uint8_t *data, size_t size)
     std::string httpUrl = GetStringFromData(STR_LEN);
     std::string httpsUrl = GetStringFromData(STR_LEN);
     instance_->SendProbe(PROBE_HTTP_HTTPS, httpUrl, httpsUrl);
-    instance_->CheckCurlGlobalInitState();
     ProbeType probeType = ProbeType::PROBE_HTTP_HTTPS;
-    instance_->InitHttpCurl(probeType);
-    instance_->CleanHttpCurl();
     instance_->ExtractDomainFormUrl(httpUrl);
     std::string testString = "";
     instance_->GetAddrInfo(testString);
-    instance_->SetResolveOption(probeType, testString, testString, testId);
-    instance_->SetResolveOption(probeType, "test", testString, testId);
+    NetHttp::HttpRequest request;
+    instance_->AppendResolve(request, testString, testString, testId);
+    instance_->AppendResolve(request, "test", testString, testId);
     testString = GetStringFromData(STR_LEN);
     instance_->GetAddrInfo(testString);
-    instance_->SetCurlOptions(probeType, httpUrl, httpsUrl);
-    CURL *curl = nullptr;
-    instance_->SetHttpOptions(probeType, curl, testString);
+    instance_->BuildHttpRequest(probeType, testString, request);
     bool useHttpProxy = GetNetBranchFuzzData<bool>();
-    instance_->SetProxyOption(probeType, useHttpProxy);
-    instance_->SetResolveOption(probeType, testString, testString, testId);
-    instance_->SendDnsProbe(probeType, testString, testString, useHttpProxy);
-    instance_->SendHttpProbeRequest();
-    instance_->RecvHttpProbeResponse();
+    instance_->SetProxyOption(probeType, request, useHttpProxy);
+    instance_->SendDnsProbe(probeType, testString, request, useHttpProxy);
+    NetHttp::HttpResponse response;
+    instance_->CheckRespCode(response);
+    instance_->CheckSuccessRespCode(response, testId);
+    instance_->CheckClientErrorRespCode(response, testId);
+    NetHttp::HttpProxyConfig proxyConfig;
+    instance_->FillProxyUserInfo(proxyConfig);
     instance_->LoadProxy(testString, testId);
 }
 

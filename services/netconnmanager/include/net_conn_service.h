@@ -524,7 +524,6 @@ private:
         SPECIFY,
     };
     bool Init();
-    void SetCurlOptions(CURL *curl, HttpProxy tempProxy);
     void GetHttpUrlFromConfig(std::string &httpUrl);
     std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");
     sptr<NetSupplier> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident,
@@ -591,7 +590,7 @@ private:
     int32_t PrepareRefreshGlobalHttpProxy(const HttpProxy &currentProxy,
         const sptr<IRefreshHttpProxyCallback> &callback);
     void ExecuteRefreshInFfrt(const HttpProxy &currentProxy);
-    long PerformProxyCurlProbe(CURL *curl);
+    long PerformProxyProbe(const HttpProxy &tempProxy);
     void NotifyRefreshGlobalHttpProxyResult(long responseCode);
     void WaitForNextActiveCycle(uint32_t &retryTimes, long responseCode);
     void DecreaseNetConnCallbackCntForUid(const uint32_t callingUid,
