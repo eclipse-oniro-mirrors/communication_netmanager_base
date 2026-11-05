@@ -17,11 +17,11 @@
 #define NETMANAGER_BASE_LRU_CACHE_H
 
 #include <list>
-#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
+#include "ffrt.h"
 namespace OHOS::NetManagerStandard {
 static constexpr const size_t DEFAULT_CAPABILITY = 100;
 template <typename T> class LRUCache {
@@ -30,7 +30,7 @@ public:
 
     std::vector<T> Get(const std::string &key)
     {
-        std::lock_guard<std::mutex> guard(mutex_);
+        std::lock_guard<ffrt::mutex> guard(mutex_);
 
         if (cache_.find(key) == cache_.end()) {
             return {};
@@ -43,7 +43,7 @@ public:
 
     void Put(const std::string &key, const T &value)
     {
-        std::lock_guard<std::mutex> guard(mutex_);
+        std::lock_guard<ffrt::mutex> guard(mutex_);
 
         if (cache_.find(key) == cache_.end()) {
             AddNode(Node(key, {value}));
@@ -63,7 +63,7 @@ public:
 
     void Delete(const std::string &key)
     {
-        std::lock_guard<std::mutex> guard(mutex_);
+        std::lock_guard<ffrt::mutex> guard(mutex_);
 
         if (cache_.find(key) == cache_.end()) {
             return;
@@ -76,7 +76,7 @@ public:
 
     void Clear()
     {
-        std::lock_guard<std::mutex> guard(mutex_);
+        std::lock_guard<ffrt::mutex> guard(mutex_);
 
         cache_.clear();
         nodeList_.clear();
@@ -84,7 +84,7 @@ public:
 
     template <class Pred> size_t RemoveIf(Pred pred)
     {
-        std::lock_guard<std::mutex> guard(mutex_);
+        std::lock_guard<ffrt::mutex> guard(mutex_);
 
         size_t removed = 0;
         for (auto it = nodeList_.begin(); it != nodeList_.end();) {
@@ -134,7 +134,7 @@ private:
         cache_.erase(node.key);
     }
 
-    std::mutex mutex_;
+    ffrt::mutex mutex_;
     std::unordered_map<std::string, typename std::list<Node>::iterator> cache_;
     std::list<Node> nodeList_;
     size_t capacity_;
