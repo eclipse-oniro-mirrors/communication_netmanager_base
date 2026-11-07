@@ -1731,6 +1731,9 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
             NETMGR_LOG_D("Supplier[%{public}d] is not connected or not match request.", iter->second->GetSupplierId());
             continue;
         }
+        if (isDelayHandleFindBestNetwork_ && iter->second->GetSupplierId() == delaySupplierId_) {
+            continue;
+        }
         int score = iter->second->GetRealScore();
         if (score > bestScore) {
             bestScore = score;
@@ -2159,7 +2162,7 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStat
     NETMGR_LOG_I("HandleDetectionResult IsInFirstTimeDetecting[%{public}d]", isFirstTimeDetect);
     if (curNetSupplierType != BEARER_DEFAULT && curNetSupplierType != BEARER_CELLULAR) {
         RemoveDelayNetwork();
-    } else if (isFirstTimeDetect && supplier->IsOnceSuppress()) {
+    } else if (isFirstTimeDetect || supplier->IsOnceSuppress() ) {
         HandlePreFindBestNetworkForDelay(supplierId, supplier, isFirstTimeDetect);
     }
     if (delaySupplierId_ == supplierId &&
