@@ -2162,7 +2162,7 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStat
     NETMGR_LOG_I("HandleDetectionResult IsInFirstTimeDetecting[%{public}d]", isFirstTimeDetect);
     if (curNetSupplierType != BEARER_DEFAULT && curNetSupplierType != BEARER_CELLULAR) {
         RemoveDelayNetwork();
-    } else if (isFirstTimeDetect || supplier->IsOnceSuppress() ) {
+    } else if (isFirstTimeDetect || supplier->IsOnceSuppress()) {
         HandlePreFindBestNetworkForDelay(supplierId, supplier, isFirstTimeDetect);
     }
     if (delaySupplierId_ == supplierId &&
