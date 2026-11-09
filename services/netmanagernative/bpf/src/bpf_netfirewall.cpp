@@ -901,15 +901,8 @@ void NetsysBpfNetFirewall::NotifyEgressIntercept(const InterceptEvent &info, con
     if (handler == nullptr) {
         return;
     }
-    InterceptRecord destroyRecord{};
-    destroyRecord.localIp = record->localIp;
-    destroyRecord.remoteIp = record->remoteIp;
-    destroyRecord.localPort = BitmapManager::Nstohl(info.dport);
-    destroyRecord.remotePort = BitmapManager::Nstohl(info.sport);
-    destroyRecord.protocol = record->protocol;
-    destroyRecord.appUid = record->appUid;
-    destroyRecord.time = record->time;
-    destroyRecord.domain = record->domain;
+    // Only for EGRESS: the packet source is the local socket endpoint, so the record tuple can be used directly.
+    InterceptRecord destroyRecord = *record;
     handler(destroyRecord, static_cast<uint8_t>(info.family));
 }
 
@@ -920,8 +913,6 @@ void NetsysBpfNetFirewall::NotifyInterceptEvent(InterceptEvent *info)
     }
     sptr<InterceptRecord> record = sptr<InterceptRecord>::MakeSptr();
     record->time = static_cast<decltype(record->time)>(GetNowMs());
-    record->localPort = BitmapManager::Nstohl(info->sport);
-    record->remotePort = BitmapManager::Nstohl(info->dport);
     record->protocol = static_cast<uint16_t>(info->protocol);
     record->appUid = (int32_t)info->appuid;
     std::string srcIp;
@@ -944,9 +935,14 @@ void NetsysBpfNetFirewall::NotifyInterceptEvent(InterceptEvent *info)
     if (info->dir == INGRESS) {
         record->localIp = srcIp;
         record->remoteIp = dstIp;
+        record->localPort = BitmapManager::Nstohl(info->sport);
+        record->remotePort = BitmapManager::Nstohl(info->dport);
     } else {
+        // The BPF tuple of EGRESS has swapped both addresses and ports, so the destination is the local end.
         record->localIp = dstIp;
         record->remoteIp = srcIp;
+        record->localPort = BitmapManager::Nstohl(info->dport);
+        record->remotePort = BitmapManager::Nstohl(info->sport);
     }
     record->domain = DecodeDomainFromKey(info->domainData);
     NotifyEgressIntercept(*info, record);
