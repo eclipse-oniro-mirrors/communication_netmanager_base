@@ -1731,7 +1731,10 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
             NETMGR_LOG_D("Supplier[%{public}d] is not connected or not match request.", iter->second->GetSupplierId());
             continue;
         }
-        if (isDelayHandleFindBestNetwork_ && iter->second->GetSupplierId() == delaySupplierId_) {
+        if (isDelayHandleFindBestNetwork_ && iter->second->GetSupplierId() == delaySupplierId_ &&
+            iter->second->GetSupplierId() != GetDefaultNetSupplierId()) {
+            NETMGR_LOG_D("Supplier[%{public}d] is delayed and not default net supplier, skip it.",
+                         iter->second->GetSupplierId());
             continue;
         }
         int score = iter->second->GetRealScore();
