@@ -1733,7 +1733,7 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
         }
         if (isDelayHandleFindBestNetwork_ && iter->second->GetSupplierId() == delaySupplierId_ &&
             iter->second->GetSupplierId() != GetDefaultNetSupplierId()) {
-            NETMGR_LOG_D("Supplier[%{public}d] is delayed and not default net supplier, skip it.",
+            NETMGR_LOG_D("Supplier[%{public}d] is delayed and not default net supplier",
                          iter->second->GetSupplierId());
             continue;
         }
