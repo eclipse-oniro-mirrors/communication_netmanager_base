@@ -45,12 +45,13 @@
 NetConnService（创建/触发探测）
   → services/netconnmanager/src/net_monitor.cpp（NetMonitor，615 行：探测状态机与重试调度）
   → services/netconnmanager/src/probe_thread.cpp（probe_thread，190 行：探测线程封装）
-  → services/netconnmanager/src/net_http_probe.cpp（NetHttpProbe，824 行：基于 curl 的 HTTP 探测实现）
+  → services/netconnmanager/src/net_http_probe.cpp（NetHttpProbe，512 行：HTTP 探测实现，经 utils/net_http_client 的 NetHttpClient 发起请求）
   → 结果回填：net_http_probe_result.cpp（探测结果）→ NetMonitor 更新网络 VALIDATED/PORTAL/INVALID 能力位
   → 上报 CMD_NM_NET_DETECTION_RESPONSE 回 NetConnService → 应用回调（netAvailable/netCapabilitiesChanged）
 ```
 
 - 探测线程独立于主服务线程运行，**curl 全局状态与探测结果共享变量存在跨线程访问**——历史上探测线程 curl 崩溃被定位为内存序问题（提交 **2103f660**，"网络探测的线程curl出现crash，推测内存序"，DTS2024122016392）。改动 `probe_thread.cpp`/`net_http_probe.cpp` 的共享变量时必须使用原子/std::atomic 或锁，并跑并发回归。
+- `net_http_probe.cpp` 自 2026-11 起不再直接持有 curl 句柄：探测/PAC 下载/代理保活统一经共享 HTTP 客户端 `utils/net_http_client`（`NetHttp::NetHttpClient`，curl easy/multi 封装，同步 `Execute` + 异步 `Submit`，引擎线程空闲即退出、回调不持锁）。curl 细节全部收敛在 `libnet_http_client.so`，业务层只做请求构造与响应判定；新增 HTTP 调用方应复用该客户端而不是散写 curl。
 - `net_dual_stack_probe.cpp`（双栈探测）与 `net_trace_route_probe.cpp`（ traceroute）是探测族的扩展实现，与 `net_http_probe.cpp` 共用线程封装。
 - 探测事件：`NET_CONN_MONITOR_FAULT`/`NET_CONN_MONITOR_STAT`（hisysevent.yaml）。
 

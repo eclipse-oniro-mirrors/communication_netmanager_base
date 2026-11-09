@@ -63,7 +63,6 @@ public:
 
     PAC_STATUS FindProxyForURL(const std::string &url, const std::string &host, std::string &proxy);
 
-    void DownloadPACScript(const std::string &url);
     static bool DownloadPACScript(const std::string &url, std::string &data);
 
     std::string ParseHost(const std::string &url);

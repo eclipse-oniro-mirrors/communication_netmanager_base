@@ -26,6 +26,7 @@
 
 #include "network.h"
 #include "nat464_service.h"
+#include "net_http_client.h"
 #include "net_http_probe_result.h"
 #include "probe_thread.h"
 #include "net_connection.h"
@@ -43,8 +44,6 @@ constexpr const char *LOCAL_ROUTE_IPV6_DESTINATION = "::";
 constexpr int32_t SUCCESS_CODE = 204;
 constexpr int32_t PORTAL_CODE_MIN = 200;
 constexpr int32_t PORTAL_CODE_MAX = 399;
-constexpr size_t CURL_MAX_SIZE = 1024;
-constexpr size_t CURL_MAX_NITEMS = 100;
 constexpr int32_t HTTP_OK_CODE = 200;
 constexpr int32_t DEFAULT_CONTENT_LENGTH_VALUE = -1;
 constexpr int32_t MIN_VALID_CONTENT_LENGTH_VALUE = 5;
@@ -53,8 +52,8 @@ constexpr int32_t PORTAL_CODE = 302;
 constexpr int32_t HTTP_RES_CODE_BAD_REQUEST = 400;
 constexpr int32_t HTTP_RES_CODE_CLIENT_ERRORS_MAX = 499;
 const std::string CONNECTION_CLOSE_VALUE = "close";
-const std::string CONNECTION_KEY = "Connection:";
-const std::string CONTENT_LENGTH_KEY = "Content-Length:";
+const std::string CONNECTION_KEY = "connection";
+const std::string CONTENT_LENGTH_KEY = "content-length";
 const std::string KEY_WORDS_REDIRECTION = "location.replace";
 const std::string HTML_TITLE_HTTP_EN = "http://";
 const std::string HTML_TITLE_HTTPS_EN = "https://";
@@ -1479,39 +1478,20 @@ HWTEST_F(NetworkTest, UpdateGlobalHttpProxyTest002, TestSize.Level1)
     EXPECT_NE(network->netMonitor_, nullptr);
 }
 
-HWTEST_F(NetworkTest, CurlGlobalCleanupTest001, TestSize.Level1)
+HWTEST_F(NetworkTest, ClearProbeResultTest001, TestSize.Level1)
 {
     uint32_t netId = 1;
     NetLinkInfo netLinkInfo;
     ProbeType probeType = PROBE_HTTP;
     auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_CELLULAR, netLinkInfo, probeType);
     EXPECT_NE(probe, nullptr);
-    probe->useCurlCount_ = 0;
-    probe->CurlGlobalCleanup();
-}
-
-HWTEST_F(NetworkTest, CleanHttpCurlTest001, TestSize.Level1)
-{
-    uint32_t netId = 1;
-    NetLinkInfo netLinkInfo;
-    ProbeType probeType = PROBE_HTTP;
-    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_CELLULAR, netLinkInfo, probeType);
-    probe->httpCurl_ = curl_easy_init();
-    EXPECT_NE(probe->httpCurl_, nullptr);
-    probe->curlMulti_ = nullptr;
-    probe->CleanHttpCurl();
-}
-
-HWTEST_F(NetworkTest, CleanHttpCurlTest002, TestSize.Level1)
-{
-    uint32_t netId = 1;
-    NetLinkInfo netLinkInfo;
-    ProbeType probeType = PROBE_HTTP;
-    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_CELLULAR, netLinkInfo, probeType);
-    probe->httpsCurl_ = curl_easy_init();
-    EXPECT_NE(probe->httpsCurl_, nullptr);
-    probe->curlMulti_ = nullptr;
-    probe->CleanHttpCurl();
+    probe->httpProbeResult_ = {SUCCESS_CODE, "http://example.com"};
+    probe->httpsProbeResult_ = {PORTAL_CODE, "http://example.com/portal"};
+    EXPECT_EQ(probe->GetHttpProbeResult().GetCode(), SUCCESS_CODE);
+    EXPECT_EQ(probe->GetHttpsProbeResult().GetCode(), PORTAL_CODE);
+    probe->ClearProbeResult();
+    EXPECT_EQ(probe->GetHttpProbeResult().GetCode(), 0);
+    EXPECT_EQ(probe->GetHttpsProbeResult().GetCode(), 0);
 }
 
 HWTEST_F(NetworkTest, ExtractDomainFormUrlTest001, TestSize.Level1)
@@ -1525,68 +1505,41 @@ HWTEST_F(NetworkTest, ExtractDomainFormUrlTest001, TestSize.Level1)
     EXPECT_EQ(ret, "example.com");
 }
 
-HWTEST_F(NetworkTest, HeaderCallbackTest001, TestSize.Level1)
+HWTEST_F(NetworkTest, AppendResolveTest001, TestSize.Level1)
 {
     uint32_t netId = 1;
     NetLinkInfo netLinkInfo;
     ProbeType probeType = PROBE_HTTP;
     auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_CELLULAR, netLinkInfo, probeType);
-    char* buffer = nullptr;
-    size_t size = CURL_MAX_SIZE;
-    size_t nitems = CURL_MAX_NITEMS + 1;
-    void* userdata = nullptr;
-    auto ret = probe->HeaderCallback(buffer, size, nitems, userdata);
-    EXPECT_EQ(ret, 0);
+    NetHttp::HttpRequest request;
+    EXPECT_FALSE(probe->AppendResolve(request, "", "192.168.1.1", 0));
+    EXPECT_TRUE(request.resolves.empty());
+    EXPECT_FALSE(probe->AppendResolve(request, "example.com", "", 0));
+    EXPECT_TRUE(probe->AppendResolve(request, "example.com", "192.168.1.1", 80));
+    ASSERT_EQ(request.resolves.size(), 1UL);
+    EXPECT_EQ(request.resolves[0], "example.com:80:192.168.1.1");
 }
 
-HWTEST_F(NetworkTest, HeaderCallbackTest002, TestSize.Level1)
+HWTEST_F(NetworkTest, BuildHttpRequestTest001, TestSize.Level1)
 {
     uint32_t netId = 1;
     NetLinkInfo netLinkInfo;
-    ProbeType probeType = PROBE_HTTP;
-    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_CELLULAR, netLinkInfo, probeType);
-    char* buffer = nullptr;
-    size_t size = 1;
-    size_t nitems = 1;
-    void* userdata = nullptr;
-    auto ret = probe->HeaderCallback(buffer, size, nitems, userdata);
-    EXPECT_EQ(ret, size * nitems);
-}
-
-HWTEST_F(NetworkTest, HeaderCallbackTest003, TestSize.Level1)
-{
-    uint32_t netId = 1;
-    NetLinkInfo netLinkInfo;
-    ProbeType probeType = PROBE_HTTP;
-    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_CELLULAR, netLinkInfo, probeType);
-    char* buffer = nullptr;
-    size_t size = 1;
-    size_t nitems = 1;
-    std::string data;
-    void* userdata = static_cast<void*>(&data);
-    auto ret = probe->HeaderCallback(buffer, size, nitems, userdata);
-    EXPECT_EQ(ret, size * nitems);
-
-    char buf[10] = "1";
-    ret = probe->HeaderCallback(buf, size, nitems, userdata);
-    EXPECT_EQ(ret, size * nitems);
-    EXPECT_EQ(data, "1");
-}
-
-HWTEST_F(NetworkTest, SetHttpOptionsTest001, TestSize.Level1)
-{
-    uint32_t netId = 1;
-    NetLinkInfo netLinkInfo;
-    ProbeType probeType = PROBE_HTTPS;
-    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_CELLULAR, netLinkInfo, probeType);
+    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_CELLULAR, netLinkInfo, ProbeType::PROBE_HTTPS);
     std::string url;
-    CURL *curl = curl_easy_init();
-    auto ret = probe->SetHttpOptions(probeType, curl, url);
-    EXPECT_FALSE(ret);
+    NetHttp::HttpRequest request;
+    EXPECT_FALSE(probe->BuildHttpRequest(ProbeType::PROBE_HTTPS, url, request));
 
+    probe->ipAddrList_ = "192.168.1.1";
     url = "http://example.com";
-    ret = probe->SetHttpOptions(probeType, curl, url);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(probe->BuildHttpRequest(ProbeType::PROBE_HTTPS, url, request));
+    probe->ipAddrList_ = "";
+    EXPECT_EQ(request.url, url);
+    EXPECT_EQ(request.method, NetHttp::HttpMethod::GET);
+    EXPECT_TRUE(request.forbidReuse);
+    EXPECT_FALSE(request.tls.verifyPeer);
+    EXPECT_EQ(request.tls.minVersion, NetHttp::TlsVersion::TLS_V1_2);
+    EXPECT_FALSE(request.proxy.has_value());
+    EXPECT_FALSE(request.resolves.empty());
 }
 
 HWTEST_F(NetworkTest, SetProxyOptionTest001, TestSize.Level1)
@@ -1596,12 +1549,15 @@ HWTEST_F(NetworkTest, SetProxyOptionTest001, TestSize.Level1)
     ProbeType probeType = PROBE_HTTPS;
     auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
     std::string url = "http://";
-    bool useHttpProxy = true;
+    NetHttp::HttpRequest request;
     probe->globalHttpProxy_.host_ = url;
     probe->globalHttpProxy_.port_ = 1;
+    bool useHttpProxy = true;
     EXPECT_TRUE(probe->defaultUseGlobalHttpProxy_);
-    auto ret = probe->SetProxyOption(probeType, useHttpProxy);
+    auto ret = probe->SetProxyOption(probeType, request, useHttpProxy);
     EXPECT_TRUE(ret);
+    EXPECT_FALSE(useHttpProxy);
+    EXPECT_FALSE(request.proxy.has_value());
 }
 
 HWTEST_F(NetworkTest, SetProxyOptionTest002, TestSize.Level1)
@@ -1611,67 +1567,72 @@ HWTEST_F(NetworkTest, SetProxyOptionTest002, TestSize.Level1)
     ProbeType probeType = PROBE_HTTP;
     auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
     std::string url = "http://192.168.1.1";
-    bool useHttpProxy = true;
+    NetHttp::HttpRequest request;
     probe->globalHttpProxy_.host_ = url;
     probe->globalHttpProxy_.port_ = 1;
-    EXPECT_EQ(probe->httpCurl_, nullptr);
+    bool useHttpProxy = false;
     EXPECT_TRUE(probe->defaultUseGlobalHttpProxy_);
-    auto ret = probe->SetProxyOption(probeType, useHttpProxy);
-    EXPECT_FALSE(ret);
-
-    probe->httpCurl_ = curl_easy_init();
-    EXPECT_NE(probe->httpCurl_, nullptr);
-    ret = probe->SetProxyOption(probeType, useHttpProxy);
+    auto ret = probe->SetProxyOption(probeType, request, useHttpProxy);
     EXPECT_TRUE(ret);
+    EXPECT_TRUE(useHttpProxy);
+    ASSERT_TRUE(request.proxy.has_value());
+    EXPECT_EQ(request.proxy->host, url);
+    EXPECT_EQ(request.proxy->port, 1);
+    EXPECT_TRUE(request.proxy->useTunnel);
+    ASSERT_EQ(request.resolves.size(), 1UL);
+    EXPECT_EQ(request.resolves[0], "192.168.1.1:1:192.168.1.1");
 }
 
 HWTEST_F(NetworkTest, SetProxyOptionTest003, TestSize.Level1)
 {
     uint32_t netId = 1;
     NetLinkInfo netLinkInfo;
-    ProbeType probeType = PROBE_HTTPS;
-    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
+    ProbeType probeType = PROBE_HTTP;
+    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_CELLULAR, netLinkInfo, probeType);
     std::string url = "http://192.168.1.1";
-    bool useHttpProxy = true;
+    NetHttp::HttpRequest request;
     probe->globalHttpProxy_.host_ = url;
     probe->globalHttpProxy_.port_ = 1;
-    EXPECT_EQ(probe->httpCurl_, nullptr);
+    bool useHttpProxy = true;
     EXPECT_TRUE(probe->defaultUseGlobalHttpProxy_);
-    auto ret = probe->SetProxyOption(probeType, useHttpProxy);
-    EXPECT_FALSE(ret);
-
-    probe->httpCurl_ = curl_easy_init();
-    EXPECT_NE(probe->httpCurl_, nullptr);
-    ret = probe->SetProxyOption(probeType, useHttpProxy);
-    EXPECT_FALSE(ret);
+    auto ret = probe->SetProxyOption(probeType, request, useHttpProxy);
+    EXPECT_TRUE(ret);
+    EXPECT_FALSE(useHttpProxy);
+    EXPECT_FALSE(request.proxy.has_value());
 }
 
-HWTEST_F(NetworkTest, SetProxyInfoTest001, TestSize.Level1)
+HWTEST_F(NetworkTest, FillProxyUserInfoTest001, TestSize.Level1)
 {
     uint32_t netId = 1;
     NetLinkInfo netLinkInfo;
     ProbeType probeType = PROBE_HTTP;
     auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
-    CURL *curlHandler = nullptr;
-    std::string proxyHost = "http://192.168.1.1";
-    int32_t proxyPort = 1;
-    auto ret = probe->SetProxyInfo(curlHandler, proxyHost, proxyPort);
-    EXPECT_FALSE(ret);
-
-    probe->httpCurl_ = curl_easy_init();
-    EXPECT_NE(probe->httpCurl_, nullptr);
-    ret = probe->SetProxyInfo(curlHandler, proxyHost, proxyPort);
-    EXPECT_FALSE(ret);
+    /* Seed the persistent store with a known row first so this test does not
+     * depend on state left by other tests or by previous runs on the device. */
+    HttpProxy seedProxy = {"127.0.0.1", 8080, {}};
+    SecureData seedUser;
+    seedUser.append("seeduser", strlen("seeduser"));
+    SecureData seedPass;
+    seedPass.append("seedpass", strlen("seedpass"));
+    seedProxy.SetUserName(seedUser);
+    seedProxy.SetPassword(seedPass);
+    NetProxyUserinfo::GetInstance().SaveHttpProxyHostPass(seedProxy);
+    /* Saving a proxy without credentials is specified as a no-op: the
+     * previously stored row must survive untouched. */
+    HttpProxy httpProxy = {"127.0.0.1", 8080, {}};
+    NetProxyUserinfo::GetInstance().SaveHttpProxyHostPass(httpProxy);
+    NetHttp::HttpProxyConfig proxyConfig;
+    probe->FillProxyUserInfo(proxyConfig);
+    EXPECT_EQ(proxyConfig.username, "seeduser");
+    EXPECT_EQ(proxyConfig.password, "seedpass");
 }
 
-HWTEST_F(NetworkTest, SetUserInfoTest001, TestSize.Level1)
+HWTEST_F(NetworkTest, FillProxyUserInfoTest002, TestSize.Level1)
 {
     uint32_t netId = 1;
     NetLinkInfo netLinkInfo;
     ProbeType probeType = PROBE_HTTP;
     auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
-    CURL *curlHandler = curl_easy_init();
-    ASSERT_NE(curlHandler, nullptr);
     HttpProxy httpProxy = {"127.0.0.1", 8080, {}};
     SecureData username;
     username.append("testuser", strlen("testuser"));
@@ -1680,67 +1641,73 @@ HWTEST_F(NetworkTest, SetUserInfoTest001, TestSize.Level1)
     httpProxy.SetUserName(username);
     httpProxy.SetPassword(password);
     NetProxyUserinfo::GetInstance().SaveHttpProxyHostPass(httpProxy);
-    auto ret = probe->SetUserInfo(curlHandler);
-    EXPECT_TRUE(ret);
-    curl_easy_cleanup(curlHandler);
+    NetHttp::HttpProxyConfig proxyConfig;
+    probe->FillProxyUserInfo(proxyConfig);
+    EXPECT_EQ(proxyConfig.username, "testuser");
+    EXPECT_EQ(proxyConfig.password, "testpass");
 }
 
-HWTEST_F(NetworkTest, SetUserInfoTest002, TestSize.Level1)
+HWTEST_F(NetworkTest, FillProxyUserInfoTest003, TestSize.Level1)
 {
     uint32_t netId = 1;
     NetLinkInfo netLinkInfo;
     ProbeType probeType = PROBE_HTTP;
     auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
-    CURL *curlHandler = curl_easy_init();
-    ASSERT_NE(curlHandler, nullptr);
+    /* Seed the persistent store with a known row first so this test does not
+     * depend on state left by other tests or by previous runs on the device. */
+    HttpProxy seedProxy = {"127.0.0.1", 8080, {}};
+    SecureData seedUser;
+    seedUser.append("seeduser", strlen("seeduser"));
+    SecureData seedPass;
+    seedPass.append("seedpass", strlen("seedpass"));
+    seedProxy.SetUserName(seedUser);
+    seedProxy.SetPassword(seedPass);
+    NetProxyUserinfo::GetInstance().SaveHttpProxyHostPass(seedProxy);
+    /* A partial save (username without password) is specified as a no-op: the
+     * previously stored row must survive untouched. */
     HttpProxy httpProxy = {"127.0.0.1", 8080, {}};
     SecureData username;
     username.append("testuser", strlen("testuser"));
     httpProxy.SetUserName(username);
     NetProxyUserinfo::GetInstance().SaveHttpProxyHostPass(httpProxy);
-    auto ret = probe->SetUserInfo(curlHandler);
-    EXPECT_TRUE(ret);
-    curl_easy_cleanup(curlHandler);
+    NetHttp::HttpProxyConfig proxyConfig;
+    probe->FillProxyUserInfo(proxyConfig);
+    EXPECT_EQ(proxyConfig.username, "seeduser");
+    EXPECT_EQ(proxyConfig.password, "seedpass");
 }
 
-HWTEST_F(NetworkTest, SetResolveOptionTest001, TestSize.Level1)
+HWTEST_F(NetworkTest, SendDnsProbeTest001, TestSize.Level1)
 {
     uint32_t netId = 1;
     NetLinkInfo netLinkInfo;
-    ProbeType probeType = PROBE_HTTP_HTTPS;
-    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
-    std::string domain = "test";
-    std::string ipAddress = "test";
-    int32_t port = 1;
-    auto ret = probe->SetResolveOption(probeType, domain, ipAddress, port);
+    ProbeType probeType = PROBE_HTTP;
+    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_CELLULAR, netLinkInfo, probeType);
+    NetHttp::HttpRequest request;
+    bool useProxy = true;
+    auto ret = probe->SendDnsProbe(probeType, "", request, useProxy);
     EXPECT_TRUE(ret);
+
+    useProxy = false;
+    ret = probe->SendDnsProbe(probeType, "", request, useProxy);
+    EXPECT_FALSE(ret);
+
+    probe->ipAddrList_ = "192.168.1.1";
+    ret = probe->SendDnsProbe(probeType, "http://example.com", request, useProxy);
+    probe->ipAddrList_ = "";
+    EXPECT_TRUE(ret);
+    EXPECT_FALSE(request.resolves.empty());
 }
 
-HWTEST_F(NetworkTest, GetHeaderFieldTest001, TestSize.Level1)
+HWTEST_F(NetworkTest, NetDetectionTest001, TestSize.Level1)
 {
     uint32_t netId = 1;
     NetLinkInfo netLinkInfo;
     ProbeType probeType = PROBE_HTTP;
     auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
-    std::string key = "test";
-    auto ret = probe->GetHeaderField(key);
-    EXPECT_EQ(ret, "");
-}
-
-HWTEST_F(NetworkTest, GetHeaderFieldTest002, TestSize.Level1)
-{
-    uint32_t netId = 1;
-    NetLinkInfo netLinkInfo;
-    ProbeType probeType = PROBE_HTTP;
-    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
-    probe->respHeader_ = "test";
-    std::string key = "1";
-    auto ret = probe->GetHeaderField(key);
-    EXPECT_EQ(ret, "");
-
-    key = "t";
-    ret = probe->GetHeaderField(key);
-    EXPECT_NE(ret, "");
+    PortalResponse resp;
+    EXPECT_FALSE(probe->NetDetection("", resp));
+    EXPECT_FALSE(probe->NetDetection(std::string(MAX_URL_LEN + 1, 'a'), resp));
+    EXPECT_FALSE(probe->NetDetection("http://127.0.0.1:1/portal", resp));
 }
 
 HWTEST_F(NetworkTest, CheckRespCodeTest001, TestSize.Level1)
@@ -1749,9 +1716,11 @@ HWTEST_F(NetworkTest, CheckRespCodeTest001, TestSize.Level1)
     NetLinkInfo netLinkInfo;
     ProbeType probeType = PROBE_HTTP;
     auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
-    int32_t respCode = HTTP_RES_CODE_CLIENT_ERRORS_MAX + 1;
-    auto ret = probe->CheckRespCode(respCode);
-    EXPECT_EQ(ret, respCode);
+    NetHttp::HttpResponse response;
+    response.errCode = NetHttp::NetHttpErrorCode::SUCCESS;
+    response.responseCode = HTTP_RES_CODE_CLIENT_ERRORS_MAX + 1;
+    auto ret = probe->CheckRespCode(response);
+    EXPECT_EQ(ret, HTTP_RES_CODE_CLIENT_ERRORS_MAX + 1);
 }
 
 HWTEST_F(NetworkTest, CheckRespCodeTest002, TestSize.Level1)
@@ -1760,16 +1729,18 @@ HWTEST_F(NetworkTest, CheckRespCodeTest002, TestSize.Level1)
     NetLinkInfo netLinkInfo;
     ProbeType probeType = PROBE_HTTPS;
     auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
-    int32_t respCode = HTTP_OK_CODE;
-    auto ret = probe->CheckRespCode(respCode);
+    NetHttp::HttpResponse response;
+    response.errCode = NetHttp::NetHttpErrorCode::SUCCESS;
+    response.responseCode = HTTP_OK_CODE;
+    auto ret = probe->CheckRespCode(response);
     EXPECT_EQ(ret, FAIL_CODE);
 
-    probe->respHeader_ = "test";
-    ret = probe->CheckRespCode(respCode);
+    response.headers["server"] = "test";
+    ret = probe->CheckRespCode(response);
     EXPECT_EQ(ret, HTTP_OK_CODE);
 
-    probe->respHeader_ = CONTENT_LENGTH_KEY + "1\r\n";
-    ret = probe->CheckRespCode(respCode);
+    response.headers[CONTENT_LENGTH_KEY] = "1";
+    ret = probe->CheckRespCode(response);
     EXPECT_EQ(ret, FAIL_CODE);
 }
 
@@ -1779,14 +1750,16 @@ HWTEST_F(NetworkTest, CheckRespCodeTest003, TestSize.Level1)
     NetLinkInfo netLinkInfo;
     ProbeType probeType = PROBE_HTTPS;
     auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
-    int32_t respCode = HTTP_OK_CODE;
-    probe->respHeader_ =  CONTENT_LENGTH_KEY + "123\r\n";
-    probe->respHeader_ += CONNECTION_KEY + CONNECTION_CLOSE_VALUE + "\r\n";
-    auto ret = probe->CheckRespCode(respCode);
+    NetHttp::HttpResponse response;
+    response.errCode = NetHttp::NetHttpErrorCode::SUCCESS;
+    response.responseCode = HTTP_OK_CODE;
+    response.headers[CONTENT_LENGTH_KEY] = "123";
+    response.headers[CONNECTION_KEY] = CONNECTION_CLOSE_VALUE;
+    auto ret = probe->CheckRespCode(response);
     EXPECT_EQ(ret, HTTP_OK_CODE);
 
     probe->probeType_ = PROBE_HTTP;
-    ret = probe->CheckRespCode(respCode);
+    ret = probe->CheckRespCode(response);
     EXPECT_EQ(ret, FAIL_CODE);
 }
 
@@ -1796,17 +1769,17 @@ HWTEST_F(NetworkTest, CheckClientErrorRespCodeTest001, TestSize.Level1)
     NetLinkInfo netLinkInfo;
     ProbeType probeType = PROBE_HTTP;
     auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
+    NetHttp::HttpResponse response;
     int32_t respCode = HTTP_RES_CODE_BAD_REQUEST;
-    auto ret = probe->CheckClientErrorRespCode(respCode);
+    auto ret = probe->CheckClientErrorRespCode(response, respCode);
     EXPECT_EQ(ret, HTTP_RES_CODE_BAD_REQUEST);
 
-    strcpy_s(probe->errBuffer, CURL_ERROR_SIZE, HTML_TITLE_HTTP_EN.c_str());
-    ret = probe->CheckClientErrorRespCode(respCode);
+    response.errMessage = HTML_TITLE_HTTP_EN;
+    ret = probe->CheckClientErrorRespCode(response, respCode);
     EXPECT_EQ(ret, HTTP_RES_CODE_BAD_REQUEST);
 
-    std::string errMsg = HTML_TITLE_HTTPS_EN + KEY_WORDS_REDIRECTION;
-    strcpy_s(probe->errBuffer, CURL_ERROR_SIZE, errMsg.c_str());
-    ret = probe->CheckClientErrorRespCode(respCode);
+    response.errMessage = HTML_TITLE_HTTPS_EN + KEY_WORDS_REDIRECTION;
+    ret = probe->CheckClientErrorRespCode(response, respCode);
     EXPECT_EQ(ret, PORTAL_CODE);
 }
 
@@ -1816,21 +1789,22 @@ HWTEST_F(NetworkTest, CheckSuccessRespCodeTest001, TestSize.Level1)
     NetLinkInfo netLinkInfo;
     ProbeType probeType = PROBE_HTTP;
     auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
+    NetHttp::HttpResponse response;
     int32_t respCode = HTTP_RES_CODE_BAD_REQUEST;
-    auto ret = probe->CheckSuccessRespCode(respCode);
+    auto ret = probe->CheckSuccessRespCode(response, respCode);
     EXPECT_EQ(ret, HTTP_RES_CODE_BAD_REQUEST);
- 
-    probe->respHeader_ = "";
+
     respCode = SUCCESS_CODE;
-    ret = probe->CheckSuccessRespCode(respCode);
-    EXPECT_GE(ret, PORTAL_CODE);
- 
-    probe->respHeader_ = "X-Hwcloud-ReqId:12345678910";
-    respCode = SUCCESS_CODE;
-    probe->CheckSuccessRespCode(respCode);
- 
-    probe->respHeader_ = "X-Hwcloud-ReqId:40483ead9aeb8af136beb74071f1365f";
-    probe->CheckSuccessRespCode(respCode);
+    ret = probe->CheckSuccessRespCode(response, respCode);
+    EXPECT_EQ(ret, SUCCESS_CODE);
+
+    probe->SetXReqId("X-Hwcloud-ReqId", 11);
+    ret = probe->CheckSuccessRespCode(response, respCode);
+    EXPECT_EQ(ret, FAIL_CODE);
+
+    response.headers["x-hwcloud-reqid"] = "12345678910";
+    ret = probe->CheckSuccessRespCode(response, respCode);
+    EXPECT_EQ(ret, SUCCESS_CODE);
 }
 
 HWTEST_F(NetworkTest, OH_NetConn_GetAddrInfoTest001, TestSize.Level1)

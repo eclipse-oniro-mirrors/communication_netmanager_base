@@ -16,8 +16,7 @@
 #ifndef NET_HTTP_PROBE_H
 #define NET_HTTP_PROBE_H
 
-#include <curl/curl.h>
-#include <curl/easy.h>
+#include <atomic>
 #include <map>
 #include <mutex>
 #include <string>
@@ -27,6 +26,11 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace NetHttp {
+struct HttpRequest;
+struct HttpResponse;
+struct HttpProxyConfig;
+} // namespace NetHttp
 enum ProbeType : uint32_t {
     PROBE_HTTP = 1,
     PROBE_HTTPS = 2,
@@ -35,6 +39,13 @@ enum ProbeType : uint32_t {
     PROBE_HTTPS_FALLBACK = 5
 };
 
+/*
+ * Http probe business layer: builds probe requests (url / proxy / dns
+ * pre-resolution / iface binding), drives them through the shared
+ * NetHttp::NetHttpClient and judges the raw response (204 + XReqId success,
+ * redirect portal, content-length sanity). All curl handling lives in
+ * libnet_http_client, this class holds no curl state.
+ */
 class NetHttpProbe {
 public:
     NetHttpProbe(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
@@ -53,53 +64,32 @@ public:
     void SetXReqId(const std::string& xReqId, int8_t xReqIdLen);
 
 private:
-    static bool CurlGlobalInit();
-    static void CurlGlobalCleanup();
-
-    bool CheckCurlGlobalInitState();
-    void CleanHttpCurl();
+    bool ExecuteProbe(ProbeType type, const std::string &url, NetHttpProbeResult &result);
+    bool BuildHttpRequest(ProbeType type, const std::string &url, NetHttp::HttpRequest &request);
+    bool SetProxyOption(ProbeType probeType, NetHttp::HttpRequest &request, bool &useProxy);
+    void FillProxyUserInfo(NetHttp::HttpProxyConfig &proxyConfig);
+    bool SendDnsProbe(ProbeType probeType, const std::string &url, NetHttp::HttpRequest &request,
+                      const bool useProxy);
+    bool AppendResolve(NetHttp::HttpRequest &request, const std::string &domain, const std::string &ipAddress,
+                       int32_t port);
     void ClearProbeResult();
     std::string ExtractDomainFormUrl(const std::string &url);
     std::string GetAddrInfo(const std::string &domain);
-    bool InitHttpCurl(ProbeType probeType);
-    bool SetCurlOptions(ProbeType probeType, const std::string &httpUrl, const std::string &httpsUrl);
-    bool SetHttpOptions(ProbeType probeType, CURL *curl, const std::string &url);
-    bool SetProxyOption(ProbeType probeType, bool &useProxy);
-    bool SetResolveOption(ProbeType probeType, const std::string &domain, const std::string &ipAddress, int32_t port);
-    bool SendDnsProbe(ProbeType probeType, const std::string &httpUrl, const std::string &httpsUrl,
-                      const bool useProxy);
-    void SendHttpProbeRequest();
-    void RecvHttpProbeResponse();
     int32_t LoadProxy(std::string &proxyHost, int32_t &proxyPort);
-    bool SetUserInfo(CURL *curlHandler);
-    bool SetProxyInfo(CURL *curlHandler, const std::string &proxyHost, int32_t proxyPort);
-    static size_t HeaderCallback(char* buffer, size_t size, size_t nitems, void* userdata);
-    int32_t CheckRespCode(int32_t respCode);
-    std::string GetHeaderField(const std::string key);
-    int32_t CheckSuccessRespCode(int32_t respCode);
-    int32_t CheckClientErrorRespCode(int32_t respCode);
+    int32_t CheckRespCode(const NetHttp::HttpResponse &response);
+    int32_t CheckSuccessRespCode(const NetHttp::HttpResponse &response, int32_t respCode);
+    int32_t CheckClientErrorRespCode(const NetHttp::HttpResponse &response, int32_t respCode);
 
 private:
-    static std::mutex initCurlMutex_;
-    static int32_t useCurlCount_;
-
     std::mutex proxyMtx_;
-    bool isCurlInit_ = false;
     std::atomic<bool> defaultUseGlobalHttpProxy_ = true;
     uint32_t netId_ = 0;
     NetBearType netBearType_ = BEARER_DEFAULT;
     NetLinkInfo netLinkInfo_;
     HttpProxy globalHttpProxy_;
-    CURLM *curlMulti_ = nullptr;
-    CURL *httpCurl_ = nullptr;
-    CURL *httpsCurl_ = nullptr;
-    curl_slist *httpResolveList_ = nullptr;
-    curl_slist *httpsResolveList_ = nullptr;
     NetHttpProbeResult httpProbeResult_;
     NetHttpProbeResult httpsProbeResult_;
-    std::string respHeader_;
     ProbeType probeType_;
-    char errBuffer[CURL_ERROR_SIZE] = {0};
     std::string ipAddrList_ = "";
     std::string xReqId_;
     int8_t xReqIdLen_ = -1;

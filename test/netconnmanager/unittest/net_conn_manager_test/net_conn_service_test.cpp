@@ -1089,21 +1089,30 @@ HWTEST_F(NetConnServiceTest, IsRefreshRateLimitedTest006, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetConnServiceTest, PerformProxyCurlProbeTest001, TestSize.Level1)
+HWTEST_F(NetConnServiceTest, PerformProxyProbeTest001, TestSize.Level1)
 {
     auto &service = NetConnService::GetInstance();
-    long code = service->PerformProxyCurlProbe(nullptr);
+    HttpProxy tempProxy;
+    tempProxy.host_ = "http://127.0.0.1";
+    tempProxy.port_ = 1;
+    long code = service->PerformProxyProbe(tempProxy);
     EXPECT_EQ(code, 0);
 }
 
-HWTEST_F(NetConnServiceTest, PerformProxyCurlProbeTest002, TestSize.Level1)
+HWTEST_F(NetConnServiceTest, PerformProxyProbeTest002, TestSize.Level1)
 {
     auto &service = NetConnService::GetInstance();
-    CURL *curl = nullptr;
-    curl = curl_easy_init();
-    long code = service->PerformProxyCurlProbe(curl);
-    curl_easy_cleanup(curl);
-    EXPECT_NE(code, SUCCESS_CODE);
+    HttpProxy tempProxy;
+    tempProxy.host_ = "https://127.0.0.1";
+    tempProxy.port_ = 1;
+    SecureData username;
+    username.append("testuser", 8);
+    tempProxy.username_ = username;
+    SecureData password;
+    password.append("testpass", 8);
+    tempProxy.password_ = password;
+    long code = service->PerformProxyProbe(tempProxy);
+    EXPECT_EQ(code, 0);
 }
 
 HWTEST_F(NetConnServiceTest, NotifyRefreshGlobalHttpProxyResultTest001, TestSize.Level1)

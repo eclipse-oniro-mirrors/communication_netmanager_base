@@ -57,6 +57,7 @@ ohos_fuzztest("NetBaseBranchFuzzTest") {
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netpolicymanager:net_policy_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$NETMANAGER_BASE_ROOT/utils/net_http_client:net_http_client",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]
 
