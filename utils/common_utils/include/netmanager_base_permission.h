@@ -42,6 +42,7 @@ static constexpr const char *GET_IP_MAC_INFO = "ohos.permission.GET_IP_MAC_INFO"
 static constexpr const char *SEND_MESSAGE = "ohos.permission.SEND_MESSAGES";
 static constexpr const char *CONNECTIVITY_USE_RESTRICTED_NETWORKS =
                                                             "ohos.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS";
+static constexpr const char *ENTERPRISE_VPN = "ohos.permission.ENTERPRISE_VPN";
 } // namespace Permission
 
 class NetManagerPermission {
