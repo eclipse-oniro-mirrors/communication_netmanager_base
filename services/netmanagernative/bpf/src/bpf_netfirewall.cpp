@@ -194,9 +194,33 @@ void NetsysBpfNetFirewall::StopConntrackGc()
 void NetsysBpfNetFirewall::SetBpfLoaded(bool load)
 {
     isBpfLoaded_ = load;
+    InvalidateAllSnapshots();
     if (isBpfLoaded_) {
         WriteLoopBackBpfMap();
     }
+}
+
+void NetsysBpfNetFirewall::InvalidateIpSnapshots(NetFirewallRuleDirection direction)
+{
+    bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
+    std::lock_guard<std::mutex> snapshotGuard(snapshotMutex_);
+    appliedSnapshots_.erase(GET_MAP_PATH(ingress, saddr));
+    appliedSnapshots_.erase(GET_MAP_PATH(ingress, saddr6));
+    appliedSnapshots_.erase(GET_MAP_PATH(ingress, daddr));
+    appliedSnapshots_.erase(GET_MAP_PATH(ingress, daddr6));
+    appliedSnapshots_.erase(GET_MAP_PATH(ingress, sport));
+    appliedSnapshots_.erase(GET_MAP_PATH(ingress, dport));
+    appliedSnapshots_.erase(GET_MAP_PATH(ingress, proto));
+    appliedSnapshots_.erase(GET_MAP_PATH(ingress, appuid));
+    appliedSnapshots_.erase(GET_MAP_PATH(ingress, uid));
+    appliedSnapshots_.erase(GET_MAP_PATH(ingress, action));
+    appliedSnapshots_.erase(GET_MAP_PATH(ingress, iface));
+}
+
+void NetsysBpfNetFirewall::InvalidateAllSnapshots()
+{
+    std::lock_guard<std::mutex> snapshotGuard(snapshotMutex_);
+    appliedSnapshots_.clear();
 }
 
 int32_t NetsysBpfNetFirewall::WriteLoopBackBpfMap()
@@ -261,6 +285,8 @@ int32_t NetsysBpfNetFirewall::ClearFirewallRules(NetFirewallRuleType type)
             firewallIpRules_.clear();
             ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_IN);
             ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_OUT);
+            InvalidateIpSnapshots(NetFirewallRuleDirection::RULE_IN);
+            InvalidateIpSnapshots(NetFirewallRuleDirection::RULE_OUT);
             break;
         }
         case NetFirewallRuleType::RULE_DOMAIN: {
@@ -276,6 +302,7 @@ int32_t NetsysBpfNetFirewall::ClearFirewallRules(NetFirewallRuleType type)
             firewallIpRules_.clear();
             ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_IN);
             ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_OUT);
+            InvalidateAllSnapshots();
             firewallDomainRules_.clear();
             ClearDomainRules();
             ClearFirewallDefaultAction();
@@ -297,7 +324,6 @@ int32_t NetsysBpfNetFirewall::SetBpfFirewallRules(const std::vector<sptr<NetFire
         return ret;
     }
     int res = 0;
-    ClearBpfFirewallRules(direction);
     res += WriteSrcIpv4BpfMap(manager, direction);
     res += WriteSrcIpv6BpfMap(manager, direction);
     res += WriteDstIpv4BpfMap(manager, direction);
@@ -525,6 +551,17 @@ int32_t NetsysBpfNetFirewall::ClearFirewallDefaultAction()
     return NETFIREWALL_SUCCESS;
 }
 
+int32_t NetsysBpfNetFirewall::ClearConntrackMap()
+{
+    CtKey ctKey;
+    CtVaule ctVal;
+    if (ClearBpfMap(MAP_PATH(CT_MAP), ctKey, ctVal) != 0) {
+        NETNATIVE_LOGE("ClearConntrackMap: clear ct map failed");
+        return NETFIREWALL_ERR;
+    }
+    return NETFIREWALL_SUCCESS;
+}
+
 int32_t NetsysBpfNetFirewall::SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
     FirewallRuleAction outDefault)
 {
@@ -541,9 +578,7 @@ int32_t NetsysBpfNetFirewall::SetFirewallDefaultAction(int32_t userId, FirewallR
     }
     CtKey ctKey;
     CtVaule ctVal;
-    if (ClearBpfMap(MAP_PATH(CT_MAP), ctKey, ctVal) != 0) {
-        NETNATIVE_LOGE("SetFirewallDefaultAction: clear ct map failed");
-    }
+    (void)ClearConntrackMap();
     return NETFIREWALL_SUCCESS;
 }
 
@@ -571,7 +606,8 @@ int32_t NetsysBpfNetFirewall::WriteSrcIpv4BpfMap(BitmapManager &manager, NetFire
         return -1;
     }
     bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
-    int32_t res = 0;
+    std::vector<std::pair<Ipv4LpmKey, RuleCode>> desired;
+    desired.reserve(srcIp4Map.size());
     for (const auto &node : srcIp4Map) {
         Bitmap val = node.bitmap;
         RuleCode rule = {0};
@@ -583,9 +619,9 @@ int32_t NetsysBpfNetFirewall::WriteSrcIpv4BpfMap(BitmapManager &manager, NetFire
         Ipv4LpmKey key = { 0 };
         key.prefixlen = node.mask;
         key.data = static_cast<Ip4Key>(node.data);
-        res += WriteBpfMap(GET_MAP_PATH(ingress, saddr), key, rule);
+        desired.emplace_back(key, rule);
     }
-    return res;
+    return ReconcileBpfMap(GET_MAP_PATH(ingress, saddr), desired, false);
 }
 
 int32_t NetsysBpfNetFirewall::WriteSrcIpv6BpfMap(BitmapManager &manager, NetFirewallRuleDirection direction)
@@ -596,7 +632,8 @@ int32_t NetsysBpfNetFirewall::WriteSrcIpv6BpfMap(BitmapManager &manager, NetFire
         return -1;
     }
     bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
-    int32_t res = 0;
+    std::vector<std::pair<Ipv6LpmKey, RuleCode>> desired;
+    desired.reserve(srcIp6Map.size());
     for (const auto &node : srcIp6Map) {
         Bitmap val = node.bitmap;
         RuleCode rule = {0};
@@ -608,61 +645,61 @@ int32_t NetsysBpfNetFirewall::WriteSrcIpv6BpfMap(BitmapManager &manager, NetFire
         Ipv6LpmKey key = { 0 };
         key.prefixlen = node.prefixlen;
         key.data = static_cast<Ip6Key>(node.data);
-        res += WriteBpfMap(GET_MAP_PATH(ingress, saddr6), key, rule);
+        desired.emplace_back(key, rule);
     }
-    return res;
+    return ReconcileBpfMap(GET_MAP_PATH(ingress, saddr6), desired, false);
 }
 
 int32_t NetsysBpfNetFirewall::WriteDstIpv4BpfMap(BitmapManager &manager, NetFirewallRuleDirection direction)
 {
     std::vector<Ip4RuleBitmap> &dstIp4Map = manager.GetDstIp4Map();
-    int32_t res = 0;
     if (dstIp4Map.empty()) {
         NETNATIVE_LOGE("WriteDstIp4BpfMap: dstIp4Map is empty");
         return -1;
-    } else {
-        bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
-        for (const auto &node : dstIp4Map) {
-            Bitmap val = node.bitmap;
-            RuleCode rule = {0};
-            if (memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode)) != EOK) {
-                NETNATIVE_LOGE("WriteDstIpv4BpfMap: memcpy_s failed");
-                return -1;
-            }
-
-            Ipv4LpmKey key = { 0 };
-            key.prefixlen = node.mask;
-            key.data = static_cast<Ip4Key>(node.data);
-            res += WriteBpfMap(GET_MAP_PATH(ingress, daddr), key, rule);
-        }
     }
-    return res;
+    bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
+    std::vector<std::pair<Ipv4LpmKey, RuleCode>> desired;
+    desired.reserve(dstIp4Map.size());
+    for (const auto &node : dstIp4Map) {
+        Bitmap val = node.bitmap;
+        RuleCode rule = {0};
+        if (memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode)) != EOK) {
+            NETNATIVE_LOGE("WriteDstIpv4BpfMap: memcpy_s failed");
+            return -1;
+        }
+
+        Ipv4LpmKey key = { 0 };
+        key.prefixlen = node.mask;
+        key.data = static_cast<Ip4Key>(node.data);
+        desired.emplace_back(key, rule);
+    }
+    return ReconcileBpfMap(GET_MAP_PATH(ingress, daddr), desired, false);
 }
 
 int32_t NetsysBpfNetFirewall::WriteDstIpv6BpfMap(BitmapManager &manager, NetFirewallRuleDirection direction)
 {
     std::vector<Ip6RuleBitmap> &dstIp6Map = manager.GetDstIp6Map();
-    int32_t res = 0;
     if (dstIp6Map.empty()) {
         NETNATIVE_LOGE("WriteDstIp6BpfMap: dstIp6Map is empty");
         return -1;
-    } else {
-        bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
-        for (const auto &node : dstIp6Map) {
-            Bitmap val = node.bitmap;
-            RuleCode rule = {0};
-            if (memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode)) != EOK) {
-                NETNATIVE_LOGE("WriteDstIpv6BpfMap: memcpy_s failed");
-                return -1;
-            }
-
-            Ipv6LpmKey key = { 0 };
-            key.prefixlen = node.prefixlen;
-            key.data = static_cast<Ip6Key>(node.data);
-            res += WriteBpfMap(GET_MAP_PATH(ingress, daddr6), key, rule);
-        }
     }
-    return res;
+    bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
+    std::vector<std::pair<Ipv6LpmKey, RuleCode>> desired;
+    desired.reserve(dstIp6Map.size());
+    for (const auto &node : dstIp6Map) {
+        Bitmap val = node.bitmap;
+        RuleCode rule = {0};
+        if (memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode)) != EOK) {
+            NETNATIVE_LOGE("WriteDstIpv6BpfMap: memcpy_s failed");
+            return -1;
+        }
+
+        Ipv6LpmKey key = { 0 };
+        key.prefixlen = node.prefixlen;
+        key.data = static_cast<Ip6Key>(node.data);
+        desired.emplace_back(key, rule);
+    }
+    return ReconcileBpfMap(GET_MAP_PATH(ingress, daddr6), desired, false);
 }
 
 int32_t NetsysBpfNetFirewall::WritePortBpfMap(BpfPortMap &portMap, const char *path)
@@ -670,28 +707,23 @@ int32_t NetsysBpfNetFirewall::WritePortBpfMap(BpfPortMap &portMap, const char *p
     if (path == nullptr || *path == '\0') {
         return -1;
     }
-    int32_t res = 0;
     if (portMap.Get().empty()) {
         NETNATIVE_LOGE("WriteSrcPortBpfMap: portMap is empty");
         return -1;
-    } else {
-        BpfMapper<PortKey, RuleCode> map(path, BPF_F_WRONLY);
-        if (!map.IsValid()) {
-            NETNATIVE_LOGE("WriteBpfMap: map invalid: %{public}s", path);
-            return -1;
-        }
-        for (const auto &pair : portMap.Get()) {
-            PortKey key;
-            key.prefixlen = pair.prefixlen;
-            key.data = pair.data;
-            Bitmap val = pair.bitmap;
-            RuleCode rule;
-            memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
-            NETNATIVE_LOG_D("sport_map=%{public}u", key.data);
-            res += map.Write(key, rule, BPF_ANY) == 0 ? 0 : -1;
-        }
     }
-    return res;
+    std::vector<std::pair<PortKey, RuleCode>> desired;
+    desired.reserve(portMap.Get().size());
+    for (const auto &pair : portMap.Get()) {
+        PortKey key = {};
+        key.prefixlen = pair.prefixlen;
+        key.data = pair.data;
+        Bitmap val = pair.bitmap;
+        RuleCode rule = {0};
+        memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
+        NETNATIVE_LOG_D("sport_map=%{public}u", key.data);
+        desired.emplace_back(key, rule);
+    }
+    return ReconcileBpfMap(path, desired, false);
 }
 
 int32_t NetsysBpfNetFirewall::WriteSrcPortBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction)
@@ -709,97 +741,98 @@ int32_t NetsysBpfNetFirewall::WriteDstPortBpfMap(BitmapManager &manager, NetFire
 int32_t NetsysBpfNetFirewall::WriteProtoBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction)
 {
     BpfProtoMap &protoMap = manager.GetProtoMap();
-    int32_t res = 0;
     if (protoMap.Empty()) {
         NETNATIVE_LOGE("WriteProtoBpfMap: protoMap is empty");
         return -1;
-    } else {
-        bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
-        for (const auto &pair : protoMap.Get()) {
-            ProtoKey key = pair.first;
-            Bitmap val = pair.second;
-            RuleCode rule;
-            memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
-            NETNATIVE_LOG_D("proto_map=%{public}u", key);
-            res += WriteBpfMap(GET_MAP_PATH(ingress, proto), key, rule);
-        }
     }
-    return res;
+    bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
+    std::vector<std::pair<ProtoKey, RuleCode>> desired;
+    desired.reserve(protoMap.Get().size());
+    for (const auto &pair : protoMap.Get()) {
+        ProtoKey key = pair.first;
+        Bitmap val = pair.second;
+        RuleCode rule = {0};
+        memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
+        NETNATIVE_LOG_D("proto_map=%{public}u", key);
+        desired.emplace_back(key, rule);
+    }
+    return ReconcileBpfMap(GET_MAP_PATH(ingress, proto), desired, false);
 }
 
 int32_t NetsysBpfNetFirewall::WriteAppUidBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction)
 {
     BpfAppUidMap &appIdMap = manager.GetAppIdMap();
-    int32_t res = 0;
     if (appIdMap.Empty()) {
         NETNATIVE_LOGE("WriteAppUidBpfMap: appIdMap is empty");
         return -1;
-    } else {
-        bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
-        for (const auto &pair : appIdMap.Get()) {
-            AppUidKey key = pair.first;
-            Bitmap val = pair.second;
-            RuleCode rule;
-            memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
-            NETNATIVE_LOG_D("appuid_map=%{public}u", key);
-            res += WriteBpfMap(GET_MAP_PATH(ingress, appuid), key, rule);
-        }
     }
-    return res;
+    bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
+    std::vector<std::pair<AppUidKey, RuleCode>> desired;
+    desired.reserve(appIdMap.Get().size());
+    for (const auto &pair : appIdMap.Get()) {
+        AppUidKey key = pair.first;
+        Bitmap val = pair.second;
+        RuleCode rule = {0};
+        memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
+        NETNATIVE_LOG_D("appuid_map=%{public}u", key);
+        desired.emplace_back(key, rule);
+    }
+    return ReconcileBpfMap(GET_MAP_PATH(ingress, appuid), desired, false);
 }
 
 int32_t NetsysBpfNetFirewall::WriteUidBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction)
 {
     BpfUidMap &uidMap = manager.GetUidMap();
-    int32_t res = 0;
     if (uidMap.Empty()) {
         NETNATIVE_LOGE("WriteUidBpfMap: uidMap is empty");
         return -1;
-    } else {
-        bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
-        for (const auto &pair : uidMap.Get()) {
-            UidKey key = pair.first;
-            Bitmap val = pair.second;
-            RuleCode rule;
-            memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
-            NETNATIVE_LOG_D("uidMap=%{public}u", key);
-            res += WriteBpfMap(GET_MAP_PATH(ingress, uid), key, rule);
-        }
     }
-    return res;
+    bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
+    std::vector<std::pair<UidKey, RuleCode>> desired;
+    desired.reserve(uidMap.Get().size());
+    for (const auto &pair : uidMap.Get()) {
+        UidKey key = pair.first;
+        Bitmap val = pair.second;
+        RuleCode rule = {0};
+        memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
+        NETNATIVE_LOG_D("uidMap=%{public}u", key);
+        desired.emplace_back(key, rule);
+    }
+    return ReconcileBpfMap(GET_MAP_PATH(ingress, uid), desired, false);
 }
 
 int32_t NetsysBpfNetFirewall::WriteActionBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction)
 {
     BpfActionMap &actionMap = manager.GetActionMap();
-    int32_t res = 0;
     if (actionMap.Empty()) {
         NETNATIVE_LOGE("WriteActionBpfMap: actionMap is empty");
         return -1;
-    } else {
-        bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
-        for (const auto &pair : actionMap.Get()) {
-            ActionKey key = pair.first;
-            Bitmap val = pair.second;
-            RuleCode rule;
-            memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
-            NETNATIVE_LOG_D("action_map=%{public}u", val.Get()[0]);
-            res += WriteBpfMap(GET_MAP_PATH(ingress, action), key, rule);
-        }
     }
-    return res;
+    bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
+    std::vector<std::pair<ActionKey, RuleCode>> desired;
+    desired.reserve(actionMap.Get().size());
+    for (const auto &pair : actionMap.Get()) {
+        ActionKey key = pair.first;
+        Bitmap val = pair.second;
+        RuleCode rule = {0};
+        memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
+        NETNATIVE_LOG_D("action_map=%{public}u", val.Get()[0]);
+        desired.emplace_back(key, rule);
+    }
+    return ReconcileBpfMap(GET_MAP_PATH(ingress, action), desired, false);
 }
 
 int32_t NetsysBpfNetFirewall::WriteInterfaceBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction)
 {
     BpfInterfaceMap &interfaceMap = manager.GetInterfaceMap();
-    int32_t res = 0;
     if (interfaceMap.Empty()) {
         NETNATIVE_LOGE("WriteInterfaceBpfMap: interfaceMap is empty");
         return -1;
     }
 
     bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
+    std::vector<std::pair<interface_key, RuleCode>> desired;
+    desired.reserve(interfaceMap.Get().size());
     for (const auto &pair : interfaceMap.Get()) {
         const std::string &devName = pair.first;
         Bitmap val = pair.second;
@@ -815,11 +848,11 @@ int32_t NetsysBpfNetFirewall::WriteInterfaceBpfMap(BitmapManager &manager, NetFi
             continue;
         }
 
-        RuleCode rule;
+        RuleCode rule = {0};
         memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
-        res += WriteBpfMap(GET_MAP_PATH(ingress, iface), ifKey, rule);
+        desired.emplace_back(ifKey, rule);
     }
-    return res;
+    return ReconcileBpfMap(GET_MAP_PATH(ingress, iface), desired, false);
 }
 
 int32_t NetsysBpfNetFirewall::RegisterCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
