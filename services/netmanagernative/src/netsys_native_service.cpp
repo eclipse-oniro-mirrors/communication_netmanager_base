@@ -32,6 +32,7 @@
 #include "system_vpn_wrapper.h"
 #endif // SUPPORT_SYSVPN
 #include "bpf_ring_buffer.h"
+#include "xcollie/ipc_full.h"
 #ifdef FEATURE_NET_FIREWALL_ENABLE
 #include <linux/netlink.h>
 #endif
@@ -52,6 +53,7 @@ constexpr const int32_t NFQA_HWADDR = 9;
 constexpr const int32_t NFQA_PAYLOAD = 10;
 constexpr const int32_t BUFFER_SIZE = 256;
 constexpr const int32_t DEFAULT_MTU = 1500;
+constexpr const int32_t IPC_FULL_CHECK_INTERVAL = 30;
 constexpr const uint32_t NFQUEUE_MAXLEN = 0xFFFF;
 #define NFQ_CMD_NONE      0
 #define NFQ_CMD_BIND      1
@@ -183,6 +185,9 @@ bool NetsysNativeService::Init()
 #endif
     NetsysBpfRingBuffer::ListenNetworkStatsEvent();
     AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
+    if (!HiviewDFX::IpcFull::GetInstance().AddIpcFull(IPC_FULL_CHECK_INTERVAL, HiviewDFX::XCOLLIE_FLAG_RECOVERY)) {
+        NETNATIVE_LOGE("add ipc full failed");
+    }
     return true;
 }
 
