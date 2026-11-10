@@ -618,6 +618,7 @@ private:
     sptr<NetConnClient::NetConnCallbackManager> FindConnCallbackManager(NetConnCallbackManagerMap &managerMap,
         const sptr<NetSpecifier> &netSpecifier);
     bool IsCallbackExist(const sptr<INetConnCallback> &callback);
+    void DrainCallbackQueue();
 
 private:
     std::mutex appHttpProxyCbMapMutex_;

@@ -448,6 +448,8 @@ int32_t NetConnClient::UnregisterNetConnCallback(const sptr<INetConnCallback> &c
     }
     int32_t ret1 = UnRegisterNetConnCallbackManager(callback, netConnCallbackManagerMap_);
     int32_t ret2 = UnRegisterNetConnCallbackManager(callback, systemNetConnCallbackManagerMap_);
+    locker.unlock();
+    DrainCallbackQueue();
 
     return (ret1 == NETMANAGER_SUCCESS && ret2 == NETMANAGER_SUCCESS) ? NETMANAGER_SUCCESS
                                                                       : (ret1 == NETMANAGER_SUCCESS ? ret2 : ret1);
@@ -696,6 +698,21 @@ int32_t NetConnClient::SetAirplaneMode(bool state)
     }
 
     return proxy->SetAirplaneMode(state);
+}
+
+void NetConnClient::DrainCallbackQueue()
+{
+    std::shared_ptr<ffrt::queue> queue = ffrtQueue_;
+    if (queue == nullptr) {
+        NETMGR_LOG_E("ffrtQueue_ is nullptr");
+        return;
+    }
+    ffrt::task_handle handle = queue->submit_h([]() {});
+    if (handle == nullptr) {
+        NETMGR_LOG_E("DrainCallbackQueue submit barrier task failed");
+        return;
+    }
+    queue->wait(handle);
 }
 
 void NetConnClient::RecoverCallbackAndGlobalProxy()
