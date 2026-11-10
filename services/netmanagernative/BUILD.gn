@@ -251,6 +251,7 @@ ohos_static_library("netsys_native_manager_static") {
     "c_utils:utils",
     "dhcp:dhcp_sdk",
     "eventhandler:libeventhandler",
+    "hicollie:libhicollie",
     "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
