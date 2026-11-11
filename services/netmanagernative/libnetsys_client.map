@@ -1,0 +1,56 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# 接口面跨多个公共头（netsys_client.h 的 Poll 族 + DNS resolver client 头的 NetSys* 族）。
+# 消费方：netstack(libhttp_client/libhttp/libcurl_shared_http3)、appspawn(DisallowInternet)、
+# netsys_native_manager。文件内全局数据 g_dnsReport* / g_lastDnsQueryPollSendTime 未在任何
+# 头文件声明，属实现细节，予以隐藏。
+{
+  global:
+    extern "C" {
+      addr_to_string;
+      DisallowInternet;
+      FillBasicAddrInfo;
+      FillBasicDnsServerInfo;
+      FillDnsServerInfo;
+      FillQueryParam;
+      GetQueryFailCause;
+      HandleQueryAbnormalReport;
+      IsAllCname;
+      IsAllNoAnswer;
+      IsAllowInternet;
+      IsFailCauseAllowedReport;
+      IsLoopbackAddr;
+      IsSystemUid;
+      MakeDefaultDnsServer;
+      MakeNonBlock;
+      NetsysPostDnsAbnormal;
+      NetSysBindSocket;
+      NetSysGetDefaultNetwork;
+      NetSysGetNodataCache;
+      NetSysGetResolvCache;
+      NetSysGetResolvConf;
+      NetSysGetResolvConfExt;
+      NetSysIsIpv4Enable;
+      NetSysIsIpv6Enable;
+      NetSysPostDnsQueryResult;
+      NetSysPostDnsResult;
+      NetSysSetNodataCache;
+      NetSysSetResolvCache;
+      Poll;
+      PollRecvData;
+      PollSendData;
+    };
+  local:
+    *;
+};

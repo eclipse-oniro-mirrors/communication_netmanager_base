@@ -26,6 +26,8 @@ config("net_policy_manager_config") {
 }
 
 ohos_shared_library("net_policy_manager") {
+  version_script = "libnet_policy_manager.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -285,6 +287,8 @@ ohos_static_library("net_policy_manager_static_no_cfi") {
 
 
 ohos_shared_library("net_access_policy_dialog") {
+  version_script = "libnet_access_policy_dialog.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true

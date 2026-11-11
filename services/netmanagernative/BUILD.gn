@@ -132,6 +132,8 @@ if (netmanager_base_enable_feature_wearable_distributed_net) {
 }
 
 ohos_shared_library("netsys_native_manager") {
+  version_script = "libnetsys_native_manager.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -308,6 +310,8 @@ config("netsys_client_public_config") {
 }
 
 ohos_shared_library("netsys_client") {
+  version_script = "libnetsys_client.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true

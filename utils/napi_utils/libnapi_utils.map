@@ -1,0 +1,160 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# innerkit 支撑库：保留 BaseContext/EventManager/EventListener 等自有符号（napi 模块与 netstack napi 层引用），隐藏 std 实例与 ffrt 模板实例。
+# 注意：通配条目不能带引号（带引号按字面精确匹配，不触发通配）。含 size_t/uint64_t/int64_t 形参的符号使用"前缀*"通配——arm32 与 arm64 的 mangled 名不同（unsigned int/unsigned long long vs unsigned long），带签名的精确条目只命中单一平台，会导致另一平台 -Wl,--no-undefined 链接失败。
+{
+  global:
+    extern "C++" {
+      "OHOS::NetManagerStandard::BaseContext::SetParseOK(bool)";
+      "OHOS::NetManagerStandard::BaseContext::SetCallback(napi_value__*)";
+      "OHOS::NetManagerStandard::BaseContext::SetErrorCode(int)";
+      "OHOS::NetManagerStandard::BaseContext::CreatePromise()";
+      "OHOS::NetManagerStandard::BaseContext::DeleteCallback()";
+      "OHOS::NetManagerStandard::BaseContext::SetNeedPromise(bool)";
+      "OHOS::NetManagerStandard::BaseContext::CreateAsyncWork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, void (*)(napi_env__*, void*), void (*)(napi_env__*, napi_status, void*))";
+      "OHOS::NetManagerStandard::BaseContext::DeleteAsyncWork()";
+      "OHOS::NetManagerStandard::BaseContext::SetReleaseVersion(unsigned int)";
+      "OHOS::NetManagerStandard::BaseContext::SetNeedThrowException(bool)";
+      "OHOS::NetManagerStandard::BaseContext::Emit(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::pair<napi_value__*, napi_value__*> const&)";
+      "OHOS::NetManagerStandard::BaseContext::SetError(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::BaseContext::SetExecOK(bool)";
+      "OHOS::NetManagerStandard::BaseContext::BaseContext(napi_env__*, std::__h::shared_ptr<OHOS::NetManagerStandard::EventManager>&)";
+      "OHOS::NetManagerStandard::BaseContext::BaseContext(napi_env__*, std::__h::shared_ptr<OHOS::NetManagerStandard::EventManager>&)";
+      "OHOS::NetManagerStandard::BaseContext::~BaseContext()";
+      "OHOS::NetManagerStandard::BaseContext::~BaseContext()";
+      "OHOS::NetManagerStandard::BaseContext::~BaseContext()";
+      "OHOS::NetManagerStandard::EventManager::AddListener(napi_env__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, napi_value__*, bool, bool)";
+      "OHOS::NetManagerStandard::EventManager::AddListenerIfAbsent(napi_env__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, napi_value__*)";
+      "OHOS::NetManagerStandard::EventManager::DeleteListener(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::EventManager::DeleteListener(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, napi_value__*)";
+      "OHOS::NetManagerStandard::EventManager::HasEventListener(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::EventManager::DeleteAllListener()";
+      OHOS::NetManagerStandard::EventManager::EmitByUvWithModuleId*;
+      "OHOS::NetManagerStandard::EventManager::Emit(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::pair<napi_value__*, napi_value__*> const&)";
+      "OHOS::NetManagerStandard::EventManager::SetRef(napi_ref__*)";
+      "OHOS::NetManagerStandard::EventManager::GetData()";
+      "OHOS::NetManagerStandard::EventManager::SetData(void*)";
+      "OHOS::NetManagerStandard::EventManager::EmitByUv(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, void*, void (*)(uv_work_s*, int))";
+      "OHOS::NetManagerStandard::EventManager::EventManager()";
+      "OHOS::NetManagerStandard::EventManager::EventManager()";
+      "OHOS::NetManagerStandard::EventListener::operator=(OHOS::NetManagerStandard::EventListener const&)";
+      "OHOS::NetManagerStandard::EventListener::EventListener(napi_env__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, napi_value__*, bool, bool)";
+      "OHOS::NetManagerStandard::EventListener::EventListener(OHOS::NetManagerStandard::EventListener const&)";
+      "OHOS::NetManagerStandard::EventListener::EventListener(napi_env__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, napi_value__*, bool, bool)";
+      "OHOS::NetManagerStandard::EventListener::EventListener(OHOS::NetManagerStandard::EventListener const&)";
+      "OHOS::NetManagerStandard::EventListener::~EventListener()";
+      "OHOS::NetManagerStandard::EventListener::~EventListener()";
+      "OHOS::NetManagerStandard::UvWorkWrapper::UvWorkWrapper(void*, napi_env__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::shared_ptr<OHOS::NetManagerStandard::EventManager>)";
+      "OHOS::NetManagerStandard::UvWorkWrapper::UvWorkWrapper(void*, napi_env__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::shared_ptr<OHOS::NetManagerStandard::EventManager>)";
+      "OHOS::NetManagerStandard::ModuleTemplate::DefineClass(napi_env__*, napi_value__*, std::initializer_list<napi_property_descriptor> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      OHOS::NetManagerStandard::ModuleTemplate::NewInstance*;
+      "OHOS::NetManagerStandard::ModuleTemplate::On(napi_env__*, napi_callback_info__*, std::initializer_list<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>> const&, bool)";
+      "OHOS::NetManagerStandard::ModuleTemplate::Off(napi_env__*, napi_callback_info__*, std::initializer_list<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>> const&)";
+      "OHOS::NetManagerStandard::ModuleTemplate::Once(napi_env__*, napi_callback_info__*, std::initializer_list<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>> const&, bool)";
+      "OHOS::NetManagerStandard::HiAppEventReport::AddProcessor()";
+      "OHOS::NetManagerStandard::HiAppEventReport::ReportSdkEvent(int, int)";
+      "OHOS::NetManagerStandard::HiAppEventReport::HiAppEventReport(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>)";
+      "OHOS::NetManagerStandard::HiAppEventReport::HiAppEventReport(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>)";
+      "OHOS::NetManagerStandard::HiAppEventReport::~HiAppEventReport()";
+      "OHOS::NetManagerStandard::HiAppEventReport::~HiAppEventReport()";
+      "OHOS::NetManagerStandard::NapiUtils::CloseScope(napi_env__*, napi_handle_scope__*)";
+      "OHOS::NetManagerStandard::NapiUtils::GetBoolean(napi_env__*, bool)";
+      "OHOS::NetManagerStandard::NapiUtils::IsEnvValid(napi_env__*)";
+      OHOS::NetManagerStandard::NapiUtils::CreateArray*;
+      "OHOS::NetManagerStandard::NapiUtils::CreateInt32(napi_env__*, int)";
+      OHOS::NetManagerStandard::NapiUtils::CreateInt64*;
+      "OHOS::NetManagerStandard::NapiUtils::SetEnvValid(napi_env__*)";
+      OHOS::NetManagerStandard::NapiUtils::CallFunction*;
+      "OHOS::NetManagerStandard::NapiUtils::CreateObject(napi_env__*)";
+      "OHOS::NetManagerStandard::NapiUtils::CreateUint32(napi_env__*, unsigned int)";
+      "OHOS::NetManagerStandard::NapiUtils::GetReference(napi_env__*, napi_ref__*)";
+      "OHOS::NetManagerStandard::NapiUtils::GetUndefined(napi_env__*)";
+      "OHOS::NetManagerStandard::NapiUtils::GetValueType(napi_env__*, napi_value__*)";
+      "OHOS::NetManagerStandard::NapiUtils::CreateFunction(napi_env__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, napi_value__* (*)(napi_env__*, napi_callback_info__*), void*)";
+      "OHOS::NetManagerStandard::NapiUtils::GetArrayLength(napi_env__*, napi_value__*)";
+      "OHOS::NetManagerStandard::NapiUtils::UvHandlerQueue::Pop()";
+      "OHOS::NetManagerStandard::NapiUtils::UvHandlerQueue::Push(std::__h::function<void (napi_env__*)> const&)";
+      "OHOS::NetManagerStandard::NapiUtils::CreateReference(napi_env__*, napi_value__*)";
+      "OHOS::NetManagerStandard::NapiUtils::DeleteReference(napi_env__*, napi_ref__*)";
+      "OHOS::NetManagerStandard::NapiUtils::GetArrayElement(napi_env__*, napi_value__*, unsigned int)";
+      "OHOS::NetManagerStandard::NapiUtils::GetBooleanValue(napi_env__*, napi_value__*)";
+      "OHOS::NetManagerStandard::NapiUtils::SetArrayElement(napi_env__*, napi_value__*, unsigned int, napi_value__*)";
+      "OHOS::NetManagerStandard::NapiUtils::CreateStringUtf8(napi_env__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NapiUtils::DefineProperties(napi_env__*, napi_value__*, std::initializer_list<napi_property_descriptor> const&)";
+      "OHOS::NetManagerStandard::NapiUtils::GetInt32Property(napi_env__*, napi_value__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NapiUtils::GetInt64Property(napi_env__*, napi_value__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NapiUtils::GetNamedProperty(napi_env__*, napi_value__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NapiUtils::GetPropertyNames(napi_env__*, napi_value__*)";
+      "OHOS::NetManagerStandard::NapiUtils::HasNamedProperty(napi_env__*, napi_value__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NapiUtils::SetInt32Property(napi_env__*, napi_value__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
+      OHOS::NetManagerStandard::NapiUtils::SetInt64Property*;
+      "OHOS::NetManagerStandard::NapiUtils::SetNamedProperty(napi_env__*, napi_value__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, napi_value__*)";
+      OHOS::NetManagerStandard::NapiUtils::CreateArrayBuffer*;
+      "OHOS::NetManagerStandard::NapiUtils::CreateUvQueueWork(napi_env__*, void*, void (*)(uv_work_s*, int))";
+      "OHOS::NetManagerStandard::NapiUtils::GetInt32FromValue(napi_env__*, napi_value__*)";
+      "OHOS::NetManagerStandard::NapiUtils::GetInt64FromValue(napi_env__*, napi_value__*)";
+      "OHOS::NetManagerStandard::NapiUtils::GetUint32Property(napi_env__*, napi_value__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NapiUtils::HandleNapiCleanUp(void*)";
+      "OHOS::NetManagerStandard::NapiUtils::HookForEnvCleanup(void*)";
+      "OHOS::NetManagerStandard::NapiUtils::SetUint32Property(napi_env__*, napi_value__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
+      "OHOS::NetManagerStandard::NapiUtils::CreateErrorMessage(napi_env__*, int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NapiUtils::GetBooleanProperty(napi_env__*, napi_value__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NapiUtils::GetUint32FromValue(napi_env__*, napi_value__*)";
+      "OHOS::NetManagerStandard::NapiUtils::GetValueFromGlobal(napi_env__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NapiUtils::SetBooleanProperty(napi_env__*, napi_value__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool)";
+      "OHOS::NetManagerStandard::NapiUtils::ValueIsArrayBuffer(napi_env__*, napi_value__*)";
+      "OHOS::NetManagerStandard::NapiUtils::CreateUvHandlerQueue(napi_env__*)";
+      "OHOS::NetManagerStandard::NapiUtils::CreateEnumConstructor(napi_env__*, napi_callback_info__*)";
+      "OHOS::NetManagerStandard::NapiUtils::GetStringPropertyUtf8(napi_env__*, napi_value__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NapiUtils::SetStringPropertyUtf8(napi_env__*, napi_value__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NapiUtils::GetStringFromValueUtf8(napi_env__*, napi_value__*)";
+      "OHOS::NetManagerStandard::NapiUtils::GetVectorUint8Property(napi_env__*, napi_value__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::vector<unsigned char, std::__h::allocator<unsigned char>>&)";
+      "OHOS::NetManagerStandard::NapiUtils::SetVectorUint8Property(napi_env__*, napi_value__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::vector<unsigned char, std::__h::allocator<unsigned char>> const&)";
+      "OHOS::NetManagerStandard::NapiUtils::GetSecureDataPropertyUtf8(napi_env__*, napi_value__*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NapiUtils::GetSecureDataFromValueUtf8(napi_env__*, napi_value__*)";
+      OHOS::NetManagerStandard::NapiUtils::CreateUvQueueWorkByModuleId*;
+      OHOS::NetManagerStandard::NapiUtils::GetInfoFromArrayBufferValue*;
+      "OHOS::NetManagerStandard::NapiUtils::IsArray(napi_env__*, napi_value__*)";
+      "OHOS::NetManagerStandard::NapiUtils::GetGlobal(napi_env__*)";
+      "OHOS::NetManagerStandard::NapiUtils::OpenScope(napi_env__*)";
+      "OHOS::NetManagerStandard::BaseContext::GetManager() const";
+      "OHOS::NetManagerStandard::BaseContext::GetCallback() const";
+      "OHOS::NetManagerStandard::BaseContext::GetDeferred() const";
+      "OHOS::NetManagerStandard::BaseContext::GetErrorCode() const";
+      "OHOS::NetManagerStandard::BaseContext::IsNeedPromise() const";
+      "OHOS::NetManagerStandard::BaseContext::GetErrorMessage() const";
+      "OHOS::NetManagerStandard::BaseContext::GetAsyncWorkName() const";
+      "OHOS::NetManagerStandard::BaseContext::GetReleaseVersion() const";
+      "OHOS::NetManagerStandard::BaseContext::IsNeedThrowException() const";
+      "OHOS::NetManagerStandard::BaseContext::GetEnv() const";
+      "OHOS::NetManagerStandard::BaseContext::IsExecOK() const";
+      "OHOS::NetManagerStandard::BaseContext::IsParseOK() const";
+      "OHOS::NetManagerStandard::EventManager::GetRef() const";
+      "OHOS::NetManagerStandard::EventListener::GetCallbackRef() const";
+      "OHOS::NetManagerStandard::EventListener::IsAsyncCallback() const";
+      OHOS::NetManagerStandard::EventListener::EmitByUvByModuleId*;
+      OHOS::NetManagerStandard::EventListener::Emit*;
+      "OHOS::NetManagerStandard::EventListener::Match(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, napi_value__*) const";
+      "OHOS::NetManagerStandard::EventListener::GetEnv() const";
+      "OHOS::NetManagerStandard::EventListener::EmitByUv(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, void*, void (*)(uv_work_s*, int)) const";
+      "OHOS::NetManagerStandard::EventListener::MatchOnce(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&) const";
+      "OHOS::NetManagerStandard::EventListener::MatchType(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&) const";
+      "vtable for OHOS::NetManagerStandard::BaseContext";
+      "vtable for std::__h::__shared_ptr_emplace<OHOS::NetManagerStandard::EventManager, std::__h::allocator<OHOS::NetManagerStandard::EventManager>>";
+      "vtable for std::__h::__shared_ptr_emplace<OHOS::NetManagerStandard::HiAppEventReport, std::__h::allocator<OHOS::NetManagerStandard::HiAppEventReport>>";
+      "vtable for std::__h::__shared_ptr_emplace<OHOS::NetManagerStandard::NapiUtils::UvHandlerQueue, std::__h::allocator<OHOS::NetManagerStandard::NapiUtils::UvHandlerQueue>>";
+    };
+  local:
+    *;
+};

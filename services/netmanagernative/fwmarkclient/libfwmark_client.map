@@ -1,0 +1,43 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# 导出面依据：
+# 1) 头文件 netsys_sock_client.h / fwmark_client.h 的 C 接口；
+# 2) musl libc 运行时 dlopen 本库并 dlsym 前缀 ohos_socket_hook_ 的 5 个符号
+#    （third_party/musl/src/hook/linux/musl_socket_preinit.c），漏导出=全网 socket 崩溃；
+# 3) OHOS::nmd::FwmarkClient 类方法被 libnet_conn_manager_if / libnetsys_client /
+#    libnetsys_native_manager / libnet_vpn_manager_if 等跨 DSO 引用。
+{
+  global:
+    extern "C" {
+      BindSocket;
+      GetNetForApp;
+      SetNetForApp;
+      SetProtectFromVpn;
+      ohos_socket_hook_finalize;
+      ohos_socket_hook_get_hook_flag;
+      ohos_socket_hook_initialize;
+      ohos_socket_hook_set_hook_flag;
+      ohos_socket_hook_socket;
+    };
+    extern "C++" {
+      "OHOS::nmd::FwmarkClient::BindSocket(int, unsigned int)";
+      "OHOS::nmd::FwmarkClient::HandleError(int, int, int)";
+      "OHOS::nmd::FwmarkClient::ProtectFromVpn(int)";
+      "OHOS::nmd::FwmarkClient::Send(OHOS::nmd::FwmarkCommand*, int)";
+      "OHOS::nmd::FwmarkClient::FwmarkClient()";
+      "OHOS::nmd::FwmarkClient::~FwmarkClient()";
+    };
+  local:
+    *;
+};

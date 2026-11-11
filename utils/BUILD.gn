@@ -44,6 +44,8 @@ config("netmanager_base_log_config") {
 }
 
 ohos_shared_library("net_manager_common") {
+  version_script = "libnet_manager_common.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -123,6 +125,8 @@ config("netmgr_datashare_config") {
 }
 
 ohos_shared_library("net_data_share") {
+  version_script = "libnet_data_share.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -168,6 +172,8 @@ ohos_shared_library("net_data_share") {
 }
 
 ohos_shared_library("net_bundle_utils") {
+  version_script = "libnet_bundle_utils.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true

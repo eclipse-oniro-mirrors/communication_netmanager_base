@@ -55,6 +55,8 @@ ohos_bpf("netsys") {
 }
 
 ohos_shared_library("netsys_bpf_utils") {
+  version_script = "libnetsys_bpf_utils.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true

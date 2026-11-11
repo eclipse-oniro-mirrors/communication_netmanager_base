@@ -33,6 +33,8 @@ config("net_stats_manager_config") {
 }
 
 ohos_shared_library("net_stats_manager") {
+  version_script = "libnet_stats_manager.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true

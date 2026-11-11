@@ -73,6 +73,8 @@ ohos_shared_library("connection") {
 }
 
 ohos_shared_library("connection_if") {
+  version_script = "libconnection_if.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true
