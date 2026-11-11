@@ -40,9 +40,31 @@
 #include "net_probe_callback_test.h"
 #include "netmanager_base_test_security.h"
 #include "netsys_controller.h"
+#include "os_account_manager.h"
 #include "parameters.h"
 #include "system_ability_definition.h"
 #include "ipc_skeleton.h"
+
+constexpr int32_t UID_TRANSFORM_DIVISOR = 200000;
+static int32_t g_mockOsAccountUserId = -1;
+static bool g_mockOsAccountFail = false;
+
+namespace OHOS {
+namespace AccountSA {
+ErrCode OsAccountManager::GetOsAccountLocalIdFromUid(const int uid, int &id)
+{
+    if (g_mockOsAccountFail) {
+        return ERR_ACCOUNT_COMMON_NOT_INIT_ERROR;
+    }
+    if (g_mockOsAccountUserId >= 0) {
+        id = g_mockOsAccountUserId;
+        return ERR_OK;
+    }
+    id = uid / UID_TRANSFORM_DIVISOR;
+    return ERR_OK;
+}
+}
+}
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -899,6 +921,80 @@ HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest005, TestSize.Level1)
     HttpProxy defaultHttpProxy;
     defaultHttpProxy.SetUserId(INVALID_USERID);
     int32_t ret = NetConnService::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+/**
+ * @tc.name: GetDefaultHttpProxyTest006
+ * @tc.desc: Test NetConnService GetDefaultHttpProxy with root user id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest006, TestSize.Level1)
+{
+    int32_t bindNetId = NET_ID;
+    HttpProxy defaultHttpProxy;
+    defaultHttpProxy.SetUserId(0);
+    int32_t ret = NetConnService::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+/**
+ * @tc.name: GetDefaultHttpProxyTest007
+ * @tc.desc: Test NetConnService GetDefaultHttpProxy with a cross-account user id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest007, TestSize.Level1)
+{
+    int32_t bindNetId = NET_ID;
+    HttpProxy defaultHttpProxy;
+    defaultHttpProxy.SetUserId(101);
+    int32_t ret = NetConnService::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+/**
+ * @tc.name: GetDefaultHttpProxyTest008
+ * @tc.desc: Test NetConnService GetDefaultHttpProxy with a negative user id other than -1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest008, TestSize.Level1)
+{
+    int32_t bindNetId = NET_ID;
+    HttpProxy defaultHttpProxy;
+    defaultHttpProxy.SetUserId(-2);
+    int32_t ret = NetConnService::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+/**
+ * @tc.name: GetDefaultHttpProxyTest009
+ * @tc.desc: Test NetConnService GetDefaultHttpProxy with the caller's own user id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest009, TestSize.Level1)
+{
+    int32_t bindNetId = NET_ID;
+    HttpProxy defaultHttpProxy;
+    defaultHttpProxy.SetUserId(100);
+    g_mockOsAccountUserId = 100;
+    int32_t ret = NetConnService::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    g_mockOsAccountUserId = -1;
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+/**
+ * @tc.name: GetDefaultHttpProxyTest010
+ * @tc.desc: Test NetConnService GetDefaultHttpProxy when getting the local user id fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest010, TestSize.Level1)
+{
+    int32_t bindNetId = NET_ID;
+    HttpProxy defaultHttpProxy;
+    defaultHttpProxy.SetUserId(100);
+    g_mockOsAccountFail = true;
+    int32_t ret = NetConnService::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    g_mockOsAccountFail = false;
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
