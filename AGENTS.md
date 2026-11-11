@@ -55,7 +55,7 @@
 | 并发 / 死锁 / 竞态模式 | [concurrency-failure-modes.md](docs/knowledge/expert/concurrency-failure-modes.md) |
 | 架构不变量 | [architecture-invariants.md](docs/knowledge/expert/architecture-invariants.md) |
 | 历史高危修复台账 | [historical-failures.md](docs/knowledge/expert/historical-failures.md) |
-| 编译与测试命令 | [build-and-test.md](docs/knowledge/verify/build-and-test.md) |
+| 构建与测试命令 | [build-and-test.md](docs/knowledge/verify/build-and-test.md) |
 | 验证循环与 Done 定义 | [verification-loop.md](docs/knowledge/verify/verification-loop.md) |
 
 ## 4. 词汇触发路由
@@ -133,19 +133,37 @@ Agent 在编辑任何文件前，**必须在回复中显式回答以下三项**�
 
 ## 7. 构建和验证
 
-### 7.1 编译
+### 7.1 构建（裸脚本 `build_system.sh` + `CBuild` 分布式构建，不使用 `build.sh`）
+
+极速空间构建机上直接用裸脚本构建，由 `CBuild` 客户端提交分布式构建（`build.sh --product-name rk3568` 那套命令在本环境不可用）：
 
 ```bash
-# SA 目标
-./build.sh --product-name rk3568 --build-target net_conn_manager --ccache
-./build.sh --product-name rk3568 --build-target net_policy_manager --ccache
-./build.sh --product-name rk3568 --build-target net_stats_manager --ccache
-./build.sh --product-name rk3568 --build-target netmanagernative --ccache
+cd /srv/workspace/<基线工作区>/code
+CBuild ./build_system.sh --abi-type generic_generic_arm_64only --device-type general_all_phone_standard \
+  --ccache --build-target netmanager_base --build-variant root
 ```
 
-services 组：`netmanager_base_services`；全量测试聚合组：`//foundation/communication/netmanager_base/test:unittest`。完整命令与 target 实名表见 [build-and-test.md](docs/knowledge/verify/build-and-test.md)。
+- 常用子目标（gn 实名，`--build-target` 可重复传）：`net_conn_manager`、`net_policy_manager`、`net_stats_manager`、`netmanagernative`；services 组：`netmanager_base_services`；全量测试聚合组：`//foundation/communication/netmanager_base/test:unittest`。
+- 分布式构建排队 + 编译耗时较长（空 out 全量约 45 分钟以上）：**等待/超时时间直接拉长**，后台执行并轮询日志（`nohup ... > /tmp/build.log 2>&1 &`），不要因等待超时中途终止。
+- 完整 target 实名表见 [build-and-test.md](docs/knowledge/verify/build-and-test.md)。
 
 ### 7.2 按任务类型的验证表（改动 → 必跑测试）
+
+**怎么跑（DT 框架 `test/testfwk/developer_test`，参考 dt-test 约定）**
+
+```bash
+# 1) 先编测试产物：§7.1 同一条命令，把 --build-target 换成下表中的测试 target
+# 2) 再跑（框架固定在 <源码根>/test/testfwk/developer_test 下执行）
+cd /srv/workspace/<基线工作区>/code/test/testfwk/developer_test
+./start.sh run -t UT -p system_arm64_default -tp netmanager_base  # 整部件
+./start.sh run -t UT -p system_arm64_default -tp netmanager_base -ts net_conn_service_test  # 单套件
+./start.sh run -t FUZZ -p system_arm64_default -tp netmanager_base -ts netconnclient_fuzzer  # 模糊
+```
+
+- `-p` 非交互必传 `system_arm64_default`（不传默认 phone 会解析错 out 目录；本工作区经 `out/ohos_config.json` 兜底到 `out/generic_generic_arm_64only/general_all_phone_standard`）；`-t` 取 `UT`/`FUZZ`；`-ts` 多套件在 native 侧用逗号分隔（分号只对 HAP/XTS 生效）。
+- 失败用例从 `reports/<时间戳>/summary_report.xml` 取 `classname`+`name`，用 `-tc Class.case` 重跑（`--retry` 只在交互模式有效，一次性调用必报 No history command exsit）。
+- 结论看 `grep "Summary result" <log>`；设备先 `hdc list targets` 可见再跑（`config/user_config.xml` 未配 ip/port 时用它），看不到设备先查设备/hdc server，不要反复重跑。
+- 整部件 UT / 任何 FUZZ 必须后台：`setsid nohup ./start.sh run ... > /tmp/dt.log 2>&1 < /dev/null &`（不用 setsid 会被工具超时连带杀掉），轮询 `pgrep -f "python3 -m main"`；单次执行超 ~61 分钟会被宿主静默终止，长任务按 ≤6 模块分批（FUZZ 每 fuzzer 默认 300s）。
 
 | 改动区域 | 必跑测试 target |
 |---|---|
@@ -159,7 +177,7 @@ services 组：`netmanager_base_services`；全量测试聚合组：`//foundatio
 
 ### 7.3 Done 定义（全部满足才算完成）
 
-1. 编译成功（上述命令无错误；开关相关代码两种配置都过）。
+1. 构建成功（§7.1 命令无错误；开关相关代码两种配置都过）。
 2. §7.2 对应测试全部通过。
 3. LSP/静态检查无新增 error、无新增编译警告。
 4. 未破坏 `interfaces/` 基线（SDK/NDK/innerkits 四套绑定逐面核对）。
@@ -188,5 +206,5 @@ docs/knowledge/
 - **新失效模式**（线上/测试新发现的崩溃、死锁、泄漏形态）必须回写 `expert/historical-failures.md`，并在 `routing/task-routing.md` 与 `code_map/crash 类场景` 增加路由条目。
 - 新增 SA/目录/测试 target：更新对应 `code_map/` 文档与本文 §2、§7 表格。
 - 新增术语/命令字/权限：更新 `vocabulary-routing.md` 与本文 §4 表格。
-- 修改编译命令/测试 target：同步 `verify/build-and-test.md`、`verification-loop.md` 与本文 §7。
+- 修改构建命令/测试 target：同步 `verify/build-and-test.md`、`verification-loop.md` 与本文 §7。
 - 知识文档只增不删；过期内容标注 `已废弃` 并保留原文（历史教训不可丢弃）。
