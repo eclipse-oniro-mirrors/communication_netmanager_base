@@ -720,6 +720,7 @@ declare namespace connection {
   /**
    * Registers a listener for application proxy changes and returns the current proxy when registered.
    * @param { Callback<HttpProxy> } callback - Callback for the latest application proxy.
+   * @throws { BusinessError } 401 - Parameter error.
    * @syscap SystemCapability.Communication.NetManager.Core
    * @stagemodelonly
    * @since 26.2.0 dynamic&static
@@ -729,6 +730,7 @@ declare namespace connection {
   /**
    * Unregisters the specified application proxy listener, or all listeners when callback is omitted.
    * @param { Callback<HttpProxy> } [callback] - Listener to unregister.
+   * @throws { BusinessError } 401 - Parameter error.
    * @syscap SystemCapability.Communication.NetManager.Core
    * @stagemodelonly
    * @since 26.2.0 dynamic&static
@@ -737,7 +739,10 @@ declare namespace connection {
 
   /**
    * Registers a listener for default proxy changes and returns the current proxy when registered.
+   * @permission ohos.permission.GET_NETWORK_INFO
    * @param { Callback<HttpProxy> } callback - Callback for the latest default proxy.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 401 - Parameter error.
    * @syscap SystemCapability.Communication.NetManager.Core
    * @stagemodelonly
    * @since 26.2.0 dynamic&static
@@ -746,7 +751,9 @@ declare namespace connection {
 
   /**
    * Unregisters the specified default proxy listener, or all listeners when callback is omitted.
+   * @permission ohos.permission.GET_NETWORK_INFO
    * @param { Callback<HttpProxy> } [callback] - Listener to unregister.
+   * @throws { BusinessError } 401 - Parameter error.
    * @syscap SystemCapability.Communication.NetManager.Core
    * @stagemodelonly
    * @since 26.2.0 dynamic&static
