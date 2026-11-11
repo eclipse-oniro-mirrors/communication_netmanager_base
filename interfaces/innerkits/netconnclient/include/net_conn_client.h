@@ -16,6 +16,7 @@
 #ifndef NET_CONN_MANAGER_H
 #define NET_CONN_MANAGER_H
 
+#include <functional>
 #include <map>
 #include <string>
 
@@ -197,6 +198,17 @@ public:
      * @return Returns 0, successfully unregister net connection callback, otherwise it will fail
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
+     * @note Quiesce guarantee:
+     * 1. Called outside the callback dispatch context: after this method returns, no task referencing
+     *    the callback remains in the dispatch queue (including sptr teardown held by unexecuted tasks),
+     *    so the caller may safely release the callback implementation resources afterwards (including
+     *    dlclose of the library implementing the callback).
+     * 2. Called inside a callback (i.e. within the callback dispatch context): only the unregistration
+     *    itself takes effect, the quiesce guarantee does NOT hold (drain is skipped to avoid
+     *    self-deadlock on the serial dispatch queue). The callback code itself and the sptr teardown of
+     *    unexecuted dispatch tasks still run inside the callback implementation library, so dlclose
+     *    right after unregistering is NOT supported in this case. Scenarios requiring dlclose must
+     *    unregister outside the callback dispatch context.
      */
     int32_t UnregisterNetConnCallback(const sptr<INetConnCallback> &callback);
 
@@ -619,6 +631,24 @@ private:
         const sptr<NetSpecifier> &netSpecifier);
     bool IsCallbackExist(const sptr<INetConnCallback> &callback);
     void DrainCallbackQueue();
+     /**
+     * Set while the thread is dispatching user callbacks on ffrtQueue_ (RAII, via InCallbackDispatch
+     * inside SubmitDispatch). The flag set condition strictly coincides with the drain deadlock
+     * condition, so a false positive only skips one drain, introducing no hang.
+     */
+    class InCallbackDispatch {
+    public:
+        InCallbackDispatch()
+        {
+            tlsInCallbackDispatch_ = true;
+        }
+        ~InCallbackDispatch()
+        {
+            tlsInCallbackDispatch_ = false;
+        }
+        InCallbackDispatch(const InCallbackDispatch &) = delete;
+        InCallbackDispatch &operator=(const InCallbackDispatch &) = delete;
+    };
 
 private:
     std::mutex appHttpProxyCbMapMutex_;
@@ -670,6 +700,7 @@ private:
     static inline std::mutex instanceMtx_;
     static inline std::shared_ptr<NetConnClient> instance_ = nullptr;
     std::shared_ptr<ffrt::queue> ffrtQueue_ = nullptr;
+    static thread_local bool tlsInCallbackDispatch_ =  false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
