@@ -611,6 +611,7 @@ private:
         std::list<sptr<INetConnCallback>> netConnCallbackList_;
         bool isNetStateUpdated_ = false;
         std::shared_ptr<ffrt::queue> ffrtQueue_ = nullptr;
+        void SubmitDispatch(std::function<void()> body);
     };
 
 private:
