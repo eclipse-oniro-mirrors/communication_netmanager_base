@@ -32,12 +32,17 @@ constexpr const char *CELLULAR_IFACE_1 = "rmnet1";
 constexpr const char *CELLULAR_IFACE_2 = "rmnet2";
 constexpr const char *CELLULAR_IFACE_3 = "rmnet3";
 constexpr const char *VIRNIC_IFACE = "virnic";
+constexpr const char *VIRNIC_IFACE_4 = "virnic4";
+constexpr const char *VIRNIC_IFACE_5 = "virnic5";
+constexpr const char *VIRNIC_IFACE_6 = "virnic6";
+constexpr const char *VIRNIC_IFACE_7 = "virnic7";
 constexpr const char *WIFI_IFACE = "wlan0";
 constexpr const char *WIFI_IFACE_1 = "wlan1";
 constexpr const char *ETH_IFACE_0 = "eth0";
 constexpr const char *ETH_IFACE_1 = "eth1";
 std::set<std::string> IFACE_NAME_SET { CELLULAR_IFACE, CELLULAR_IFACE_1, CELLULAR_IFACE_2, CELLULAR_IFACE_3,
-    VIRNIC_IFACE, WIFI_IFACE, WIFI_IFACE_1, ETH_IFACE_0, ETH_IFACE_1 };
+    VIRNIC_IFACE, WIFI_IFACE, WIFI_IFACE_1, ETH_IFACE_0, ETH_IFACE_1,
+    VIRNIC_IFACE_4, VIRNIC_IFACE_5, VIRNIC_IFACE_6, VIRNIC_IFACE_7 };
 }
 int32_t NetsysBpfStats::GetNumberFromStatsValue(uint64_t &stats, StatsType statsType, const stats_value &value)
 {
