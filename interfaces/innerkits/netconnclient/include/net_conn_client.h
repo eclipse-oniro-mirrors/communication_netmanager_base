@@ -701,7 +701,7 @@ private:
     static inline std::mutex instanceMtx_;
     static inline std::shared_ptr<NetConnClient> instance_ = nullptr;
     std::shared_ptr<ffrt::queue> ffrtQueue_ = nullptr;
-    static inline thread_local bool tlsInCallbackDispatch_ =  false;
+    static inline thread_local bool tlsInCallbackDispatch_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
