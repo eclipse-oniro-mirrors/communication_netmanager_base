@@ -632,11 +632,11 @@ private:
         const sptr<NetSpecifier> &netSpecifier);
     bool IsCallbackExist(const sptr<INetConnCallback> &callback);
     void DrainCallbackQueue();
-     /**
-     * Set while the thread is dispatching user callbacks on ffrtQueue_ (RAII, via InCallbackDispatch
-     * inside SubmitDispatch). The flag set condition strictly coincides with the drain deadlock
-     * condition, so a false positive only skips one drain, introducing no hang.
-     */
+    /**
+    * Set while the thread is dispatching user callbacks on ffrtQueue_ (RAII, via InCallbackDispatch
+    * inside SubmitDispatch). The flag set condition strictly coincides with the drain deadlock
+    * condition, so a false positive only skips one drain, introducing no hang.
+    */
     class InCallbackDispatch {
     public:
         InCallbackDispatch()
