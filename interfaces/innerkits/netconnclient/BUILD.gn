@@ -156,6 +156,8 @@ config("socket_permission_config") {
 }
 
 ohos_shared_library("socket_permission") {
+  version_script = "libsocket_permission.map"
+
   cflags = common_cflags
   cflags_cc = common_cflags
 
@@ -180,6 +182,8 @@ config("net_security_config_if_config") {
 }
 
 ohos_shared_library("net_security_config_if") {
+  version_script = "libnet_security_config_if.map"
+
   cflags = common_cflags
   cflags_cc = common_cflags
   branch_protector_ret = "pac_ret"

@@ -44,6 +44,8 @@ config("net_conn_manager_static_config") {
 }
 
 ohos_shared_library("net_conn_manager") {
+  version_script = "libnet_conn_manager.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true

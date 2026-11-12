@@ -19,6 +19,8 @@ config("net_connection_config"){
 }
 
 ohos_shared_library("net_connection") {
+  version_script = "libnet_connection.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true

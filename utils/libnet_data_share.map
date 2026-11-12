@@ -1,0 +1,50 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# innerkit 支撑库：保留 NetDataShareHelperUtils/Iface 全部符号，隐藏 __gcov_*/fn_list/__emutls/std 实例。
+{
+  global:
+    extern "C++" {
+      "OHOS::NetManagerStandard::NetDataShareHelperUtils::RegisterObserver(OHOS::Uri const&, std::__h::function<void ()> const&)";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtils::UnregisterObserver(OHOS::Uri const&, int)";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtils::CreateDataShareHelper()";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtils::RegisterSettingsObserver(OHOS::Uri const&, OHOS::sptr<OHOS::AAFwk::IDataAbilityObserver> const&)";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtils::UnRegisterSettingsObserver(OHOS::Uri const&, OHOS::sptr<OHOS::AAFwk::IDataAbilityObserver> const&)";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtils::Query(OHOS::Uri&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtils::Delete(OHOS::Uri&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtils::Insert(OHOS::Uri&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtils::Update(OHOS::Uri&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtils::NetDataShareHelperUtils()";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtils::NetDataShareHelperUtils()";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtilsIface::RegisterObserver(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::function<void ()> const&)";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtilsIface::UnregisterObserver(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtilsIface::dataShareHelperUtils_";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtilsIface::RegisterSettingsObserver(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::function<void ()> const&)";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtilsIface::UnRegisterSettingsObserver(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::function<void ()> const&)";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtilsIface::Query(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtilsIface::Delete(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtilsIface::Insert(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetDataShareHelperUtilsIface::Update(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "construction vtable for OHOS::IRemoteStub<OHOS::AAFwk::IDataAbilityObserver>-in-OHOS::NetManagerStandard::NetDataAbilityObserver";
+      "construction vtable for OHOS::IPCObjectStub-in-OHOS::NetManagerStandard::NetDataAbilityObserver";
+      "construction vtable for OHOS::IRemoteObject-in-OHOS::NetManagerStandard::NetDataAbilityObserver";
+      "construction vtable for OHOS::AAFwk::DataAbilityObserverStub-in-OHOS::NetManagerStandard::NetDataAbilityObserver";
+      "construction vtable for OHOS::IRemoteBroker-in-OHOS::NetManagerStandard::NetDataAbilityObserver";
+      "construction vtable for OHOS::AAFwk::IDataAbilityObserver-in-OHOS::NetManagerStandard::NetDataAbilityObserver";
+      "construction vtable for OHOS::Parcelable-in-OHOS::NetManagerStandard::NetDataAbilityObserver";
+      "vtable for OHOS::NetManagerStandard::NetDataAbilityObserver";
+      "vtable for OHOS::DataShare::DataSharePredicates";
+    };
+  local:
+    *;
+};

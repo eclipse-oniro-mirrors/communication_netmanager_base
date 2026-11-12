@@ -1,0 +1,42 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NDK 库（libnet_connection.so，面向三方应用 native 开发）：
+# 1) OH_NetConn* / OHOS_NetConn* 为 NDK 头文件（interfaces/kits/c/netconnclient/include）
+#    声明的公共 API，前缀通配保证 SDK 演进新增 API 不漏导出；
+# 2) NetProbe::QueryProbeResult 被 libconnection_if 跨 DSO 引用；
+# 3) NetConnClient::instance_/instanceMtx_ 及其守卫变量：头文件 inline 单例定义于本库，
+#    应用侧 include 展开后引用，必须保留；
+# 4) Conv* 转换函数 / NetConnCallbackManager / NetConnCallbackStubAdapter / splitStr /
+#    histogram instance / std 内联实例 / __gcov_* 等均为实现细节或第三方泄漏，隐藏。
+# 例外：InvokeRefreshCallback / Conv2TraceRouteInfo / Conv2TraceRouteInfoRtt 三个内部
+# 函数被 net_conn_manager_test（network_test.cpp）白盒直调且本测试链接本 so——不导出
+# 则符号被 LTO 内联删除、测试链接 undefined（2026-11-03 回归实测），必须保留导出；
+# 以 mangled 名登记，精确无误匹配。其余 Conv* 无测试/跨 DSO 引用，保持隐藏。
+{
+  global:
+    OH_NetConn*;
+    OHOS_NetConn*;
+    _ZN4OHOS18NetManagerStandard19Conv2TraceRouteInfoERKNSt3__h12basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEEPNS0_22NetConn_TraceRouteInfoEj;
+    _ZN4OHOS18NetManagerStandard21InvokeRefreshCallbackEPFviPK17NetConn_HttpProxyPvEiRKNS0_9HttpProxyES4_;
+    _ZN4OHOS18NetManagerStandard22Conv2TraceRouteInfoRttERKNSt3__h12basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEEPA4_j;
+    extern "C++" {
+      "OHOS::NetManagerStandard::NetConnClient::instance_";
+      "OHOS::NetManagerStandard::NetConnClient::instanceMtx_";
+      "guard variable for OHOS::NetManagerStandard::NetConnClient::instance_";
+      "guard variable for OHOS::NetManagerStandard::NetConnClient::instanceMtx_";
+      "OHOS::NetManagerStandard::NetProbe::QueryProbeResult(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&, int, OHOS::NetManagerStandard::NetConn_ProbeResultInfo&)";
+    };
+  local:
+    *;
+};

@@ -20,6 +20,8 @@ config("fwmark_client_config") {
   ]
 }
 ohos_shared_library("fwmark_client") {
+  version_script = "libfwmark_client.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true
