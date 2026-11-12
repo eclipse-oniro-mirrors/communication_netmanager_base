@@ -41,7 +41,7 @@ config("netmanager_base_log_config") {
   # leaf libraries (e.g. net_http_client) can log through netmanager_base_log.h
   # without depending on the whole netmgr_common_config.
   include_dirs = [ "common_utils/include" ]
-}
+}false
 
 ohos_shared_library("net_manager_common") {
   sanitize = {
@@ -203,6 +203,7 @@ ohos_shared_library("net_bundle_utils") {
   }
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
