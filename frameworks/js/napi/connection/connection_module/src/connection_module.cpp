@@ -164,7 +164,12 @@ void DispatchProxyChange(const std::weak_ptr<ProxyModuleState> &weakState, bool 
 
 void CleanupProxyModule(void *data)
 {
-    auto env = static_cast<napi_env>(data);
+    auto envWrapper = static_cast<napi_env *>(data);
+    if (envWrapper == nullptr) {
+        return;
+    }
+    auto env = *envWrapper;
+    delete envWrapper;
     std::shared_ptr<ProxyModuleState> state;
     {
         std::lock_guard<std::mutex> lock(g_proxyModuleMutex);
@@ -553,6 +558,12 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
     InitProperties(env, exports);
     InitTcpStates(env, exports);
     AddCleanupHook(env);
+    auto envWrapper = new (std::nothrow) napi_env;
+    if (envWrapper == nullptr) {
+        NETMANAGER_BASE_LOGE("Proxy module env wrapper allocation failed");
+        return exports;
+    }
+    *envWrapper = env;
     auto proxyState = std::make_shared<ProxyModuleState>();
     proxyState->env = env;
     proxyState->moduleId = g_moduleId;
@@ -560,9 +571,10 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
         std::lock_guard<std::mutex> lock(g_proxyModuleMutex);
         g_proxyModules[env] = proxyState;
     }
-    napi_status status = napi_add_env_cleanup_hook(env, CleanupProxyModule, env);
+    napi_status status = napi_add_env_cleanup_hook(env, CleanupProxyModule, envWrapper);
     if (status != napi_ok) {
         NETMANAGER_BASE_LOGE("Failed to add proxy module cleanup hook: %{public}d", status);
+        delete envWrapper;
         std::lock_guard<std::mutex> lock(g_proxyModuleMutex);
         g_proxyModules.erase(env);
     }
