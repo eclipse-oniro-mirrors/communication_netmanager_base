@@ -1361,6 +1361,13 @@ int32_t NetStatsService::SetDpaAppStats(const NetStatsInfo &info)
 int32_t NetStatsService::SaveSharingTraffic(const NetStatsInfo &infos)
 {
     NETMGR_LOG_D("Enter SaveSharingTraffic");
+    int32_t checkPermission = CheckNetManagerAvailable();
+    // LCOV_EXCL_START
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("CheckNetManagerAvailable failed. ret: %{public}d", checkPermission);
+        return checkPermission;
+    }
+    // LCOV_EXCL_STOP
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService SaveSharingTraffic start");
     if (netStatsCached_ == nullptr) {
         NETMGR_LOG_E("Cached is nullptr");
