@@ -41,6 +41,7 @@ NetLinkInfo::NetLinkInfo(const NetLinkInfo &linkInfo)
     isUserDefinedDnsServer_ = linkInfo.isUserDefinedDnsServer_;
     isIpv4LinkValid_ = linkInfo.isIpv4LinkValid_;
     isIpv6LinkValid_ = linkInfo.isIpv6LinkValid_;
+    isLocalNetworkRouted_ = linkInfo.isLocalNetworkRouted_;
 }
 
 NetLinkInfo &NetLinkInfo::operator=(const NetLinkInfo &linkInfo)
@@ -57,6 +58,7 @@ NetLinkInfo &NetLinkInfo::operator=(const NetLinkInfo &linkInfo)
     isUserDefinedDnsServer_ = linkInfo.isUserDefinedDnsServer_;
     isIpv4LinkValid_ = linkInfo.isIpv4LinkValid_;
     isIpv6LinkValid_ = linkInfo.isIpv6LinkValid_;
+    isLocalNetworkRouted_ = linkInfo.isLocalNetworkRouted_;
     return *this;
 }
 
@@ -132,7 +134,7 @@ bool NetLinkInfo::Marshalling(Parcel &parcel) const
         NETMGR_LOG_E("Write http proxy to parcel failed");
         return false;
     }
-    return true;
+    return parcel.WriteBool(isLocalNetworkRouted_);
 }
 
 sptr<NetLinkInfo> NetLinkInfo::Unmarshalling(Parcel &parcel)
@@ -203,7 +205,7 @@ bool NetLinkInfo::ReadInfoFromParcel(Parcel &parcel, sptr<NetLinkInfo> &ptr)
     if (!HttpProxy::Unmarshalling(parcel, ptr->httpProxy_)) {
         return false;
     }
-    return true;
+    return parcel.ReadBool(ptr->isLocalNetworkRouted_);
 }
 
 bool NetLinkInfo::Marshalling(Parcel &parcel, const sptr<NetLinkInfo> &object)
@@ -236,7 +238,7 @@ bool NetLinkInfo::Marshalling(Parcel &parcel, const sptr<NetLinkInfo> &object)
         NETMGR_LOG_E("Write http proxy to parcel failed");
         return false;
     }
-    return true;
+    return parcel.WriteBool(object->isLocalNetworkRouted_);
 }
 
 void NetLinkInfo::Initialize()
@@ -249,6 +251,7 @@ void NetLinkInfo::Initialize()
     mtu_ = 0;
     tcpBufferSizes_ = "";
     ident_ = "";
+    isLocalNetworkRouted_ = false;
 }
 
 bool NetLinkInfo::HasNetAddr(const INetAddr &netAddr) const
@@ -268,6 +271,7 @@ bool NetLinkInfo::operator==(const NetLinkInfo &info) const
     out = out && (tcpBufferSizes_ == info.tcpBufferSizes_);
     out = out && (ident_ == info.ident_);
     out = out && (httpProxy_ == info.httpProxy_);
+    out = out && (isLocalNetworkRouted_ == info.isLocalNetworkRouted_);
     return out;
 }
 

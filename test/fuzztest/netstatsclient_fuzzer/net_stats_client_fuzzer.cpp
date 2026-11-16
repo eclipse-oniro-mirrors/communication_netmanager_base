@@ -127,7 +127,7 @@ void CheckParamVaild(MessageParcel &dataParcel, const uint8_t *data, size_t size
 
 void RegisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if (data == nullptr) {
+    if (data == nullptr || size == 0) {
         return;
     }
 
@@ -137,18 +137,18 @@ void RegisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
     }
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
-        return;
-    }
+    // CheckParamVaild 内部已写 interface token，此处不得再显式写一次：
+    // 原实现为 [token][token][RemoteObject]，stub 的 ReadRemoteObject 读到第二个
+    // token 而非回调对象，iface_cast 失败早退（Round A 实证仅 1 次穿透）
     CheckParamVaild(dataParcel, data, size);
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_REGISTER_NET_STATS_CALLBACK), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_REGISTER_NET_STATS_CALLBACK), dataParcel);
 }
 
 void UnregisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if (data == nullptr) {
+    if (data == nullptr || size == 0) {
         return;
     }
 
@@ -158,13 +158,13 @@ void UnregisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
     }
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
-        return;
-    }
-    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+    // 统一为 [token(由 CheckParamVaild 内写)][RemoteObject] 的净序：
+    // 原实现把 token 追加在 RemoteObject 之后形成尾部冗余（stub 忽略尾部、
+    // 恰好能工作，Round A 实证 24 次命中），此处仅清理为规范序
     CheckParamVaild(dataParcel, data, size);
+    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_UNREGISTER_NET_STATS_CALLBACK), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_UNREGISTER_NET_STATS_CALLBACK), dataParcel);
 }
 
 __attribute__((no_sanitize("cfi"))) void GetIfaceRxBytesFuzzTest(const uint8_t *data, size_t size)
@@ -174,7 +174,7 @@ __attribute__((no_sanitize("cfi"))) void GetIfaceRxBytesFuzzTest(const uint8_t *
     std::string interfaceName = NetStatsGetString(STR_LEN);
     dataParcel.WriteString(interfaceName);
 
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_RXBYTES), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_IFACE_RX_BYTES), dataParcel);
 }
 
 void GetIfaceTxBytesFuzzTest(const uint8_t *data, size_t size)
@@ -184,7 +184,7 @@ void GetIfaceTxBytesFuzzTest(const uint8_t *data, size_t size)
     std::string interfaceName = NetStatsGetString(STR_LEN);
     dataParcel.WriteString(interfaceName);
 
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_TXBYTES), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_IFACE_TX_BYTES), dataParcel);
 }
 
 void GetUidRxBytesFuzzTest(const uint8_t *data, size_t size)
@@ -194,7 +194,7 @@ void GetUidRxBytesFuzzTest(const uint8_t *data, size_t size)
     uint32_t uid = NetStatsGetData<uint32_t>();
     dataParcel.WriteUint32(uid);
 
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_RXBYTES), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_UID_RX_BYTES), dataParcel);
 }
 
 void GetUidTxBytesFuzzTest(const uint8_t *data, size_t size)
@@ -204,35 +204,35 @@ void GetUidTxBytesFuzzTest(const uint8_t *data, size_t size)
     uint32_t uid = NetStatsGetData<uint32_t>();
     dataParcel.WriteUint32(uid);
 
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_TXBYTES), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_UID_TX_BYTES), dataParcel);
 }
 
 void GetCellularRxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_RXBYTES), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_CELLULAR_RX_BYTES), dataParcel);
 }
 
 void GetCellularTxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_TXBYTES), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_CELLULAR_TX_BYTES), dataParcel);
 }
 
 void GetAllRxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_RXBYTES), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_ALL_RX_BYTES), dataParcel);
 }
 
 void GetAllTxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_TXBYTES), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_ALL_TX_BYTES), dataParcel);
 }
 
 void GetIfaceStatsDetailFuzzTest(const uint8_t *data, size_t size)
@@ -243,7 +243,7 @@ void GetIfaceStatsDetailFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteUint64(NetStatsGetData<uint64_t>());
     dataParcel.WriteUint64(NetStatsGetData<uint64_t>());
 
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_STATS_DETAIL), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_IFACE_STATS_DETAIL), dataParcel);
 }
 
 void GetUidStatsDetailFuzzTest(const uint8_t *data, size_t size)
@@ -255,7 +255,7 @@ void GetUidStatsDetailFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteUint64(NetStatsGetData<uint64_t>());
     dataParcel.WriteUint64(NetStatsGetData<uint64_t>());
 
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_STATS_DETAIL), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_UID_STATS_DETAIL), dataParcel);
 }
 
 void UpdateIfacesStatsFuzzTest(const uint8_t *data, size_t size)
@@ -273,23 +273,24 @@ void UpdateIfacesStatsFuzzTest(const uint8_t *data, size_t size)
     stats.txBytes_ = NetStatsGetData<uint64_t>();
     stats.rxPackets_ = NetStatsGetData<uint64_t>();
     stats.txPackets_ = NetStatsGetData<uint64_t>();
-    stats.Marshalling(dataParcel);
+    // ReadParcelable 需先读 int32 size 前缀，必须用 WriteParcelable 而非裸 Marshalling
+    dataParcel.WriteParcelable(&stats);
 
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_IFACES_STATS), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_UPDATE_IFACES_STATS), dataParcel);
 }
 
 void UpdateStatsDataFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_STATS_DATA), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_UPDATE_STATS_DATA), dataParcel);
 }
 
 void ResetFactoryFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_RESET_FACTORY), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_RESET_FACTORY), dataParcel);
 }
 
 void GetCookieRxBytesFuzzTest(const uint8_t *data, size_t size)
@@ -299,7 +300,7 @@ void GetCookieRxBytesFuzzTest(const uint8_t *data, size_t size)
     uint64_t cookie = NetStatsGetData<uint64_t>();
     dataParcel.WriteUint32(cookie);
 
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_RXBYTES), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_COOKIE_RX_BYTES), dataParcel);
 }
 
 void GetCookieTxBytesFuzzTest(const uint8_t *data, size_t size)
@@ -309,31 +310,34 @@ void GetCookieTxBytesFuzzTest(const uint8_t *data, size_t size)
     uint64_t cookie = NetStatsGetData<uint64_t>();
     dataParcel.WriteUint32(cookie);
 
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_TXBYTES), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_COOKIE_TX_BYTES), dataParcel);
 }
 
 void SetAppStatsFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
-    uint32_t uid = NetStatsGetData<uint32_t>();
-    std::string iface = NetStatsGetString(STR_LEN);
-    dataParcel.WriteUint32(uid);
-    dataParcel.WriteString(iface);
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_APP_STATS), dataParcel);
+    PushStatsInfo info;
+    info.uid_ = NetStatsGetData<uint32_t>();
+    info.iface_ = NetStatsGetString(STR_LEN);
+    info.rxBytes_ = NetStatsGetData<uint64_t>();
+    info.txBytes_ = NetStatsGetData<uint64_t>();
+    dataParcel.WriteParcelable(&info);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_SET_APP_STATS), dataParcel);
 }
 
 void GetTrafficStatsByNetworkFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
-    uint32_t type = NetStatsGetData<uint32_t>();
-    uint32_t startTime = NetStatsGetData<uint64_t>();
-    uint32_t endTime = NetStatsGetData<uint64_t>();
-    dataParcel.WriteUint32(type);
-    dataParcel.WriteUint64(startTime);
-    dataParcel.WriteUint64(endTime);
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_NETWORK), dataParcel);
+    // stub 端 ReadParcelable<NetStatsNetwork>：需 WriteParcelable 写 size 前缀 + 字段
+    NetStatsNetwork network;
+    network.type_ = NetStatsGetData<uint32_t>();
+    network.startTime_ = NetStatsGetData<uint64_t>();
+    network.endTime_ = NetStatsGetData<uint64_t>();
+    network.simId_ = NetStatsGetData<uint32_t>();
+    dataParcel.WriteParcelable(&network);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_TRAFFIC_STATS_BY_NETWORK), dataParcel);
 }
 
 void GetTrafficStatsByUidNetworkFuzzTest(const uint8_t *data, size_t size)
@@ -341,12 +345,14 @@ void GetTrafficStatsByUidNetworkFuzzTest(const uint8_t *data, size_t size)
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
     uint32_t uid = NetStatsGetData<uint32_t>();
-    uint32_t startTime = NetStatsGetData<uint64_t>();
-    uint32_t endTime = NetStatsGetData<uint64_t>();
+    NetStatsNetwork network;
+    network.type_ = NetStatsGetData<uint32_t>();
+    network.startTime_ = NetStatsGetData<uint64_t>();
+    network.endTime_ = NetStatsGetData<uint64_t>();
+    network.simId_ = NetStatsGetData<uint32_t>();
     dataParcel.WriteUint32(uid);
-    dataParcel.WriteUint64(startTime);
-    dataParcel.WriteUint64(endTime);
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_UID_NETWORK), dataParcel);
+    dataParcel.WriteParcelable(&network);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_TRAFFIC_STATS_BY_UID_NETWORK), dataParcel);
 }
 
 void GetMonthTrafficStatsByNetworkFuzzTest(const uint8_t *data, size_t size)
@@ -357,7 +363,7 @@ void GetMonthTrafficStatsByNetworkFuzzTest(const uint8_t *data, size_t size)
     uint32_t usedData = NetStatsGetData<uint64_t>();
     dataParcel.WriteUint32(simId);
     dataParcel.WriteUint64(usedData);
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_MONTH_TRAFFIC_STATS_BY_NETWORK), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_MONTH_TRAFFIC_STATS_BY_NETWORK), dataParcel);
 }
 
 void SetCalibrationTrafficFuzzTest(const uint8_t *data, size_t size)
@@ -370,7 +376,7 @@ void SetCalibrationTrafficFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteUint32(simId);
     dataParcel.WriteInt64(remainData);
     dataParcel.WriteUint64(tatalData);
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_CALIBRATION_TRAFFIC), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_SET_CALIBRATION_TRAFFIC), dataParcel);
 }
 
 void SetTrafficPlanInfoFuzzTest(const uint8_t *data, size_t size)
@@ -383,7 +389,7 @@ void SetTrafficPlanInfoFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteInt32(simId);
     dataParcel.WriteInt32(param);
     dataParcel.WriteInt64(value);
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_TRAFFIC_PLAN_INFO), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_SET_TRAFFIC_PLAN_INFO), dataParcel);
 }
 
 void GetTrafficPlanInfoFuzzTest(const uint8_t *data, size_t size)
@@ -394,7 +400,55 @@ void GetTrafficPlanInfoFuzzTest(const uint8_t *data, size_t size)
     int32_t param = NetStatsGetData<int32_t>();
     dataParcel.WriteInt32(simId);
     dataParcel.WriteInt32(param);
-    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_PLAN_INFO), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_TRAFFIC_PLAN_INFO), dataParcel);
+}
+} // namespace NetManagerStandard
+} // namespace OHOS
+
+namespace OHOS {
+namespace NetManagerStandard {
+void GetAllStatsInfoFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    CheckParamVaild(dataParcel, data, size);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_ALL_STATS_INFO), dataParcel);
+}
+
+void GetAllSimStatsInfoFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    CheckParamVaild(dataParcel, data, size);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_ALL_SIM_STATS_INFO), dataParcel);
+}
+
+void SetDpaAppStatsFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    CheckParamVaild(dataParcel, data, size);
+    // stub 端 ReadParcelable<NetStatsInfo>：需 WriteParcelable 写 size 前缀 + 字段
+    NetStatsInfo info;
+    info.iface_ = NetStatsGetString(STR_LEN);
+    info.uid_ = NetStatsGetData<uint32_t>();
+    info.date_ = NetStatsGetData<uint64_t>();
+    info.rxBytes_ = NetStatsGetData<uint64_t>();
+    info.txBytes_ = NetStatsGetData<uint64_t>();
+    dataParcel.WriteParcelable(&info);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_SET_DPA_APP_STATS), dataParcel);
+}
+
+void SaveSharingTrafficFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    CheckParamVaild(dataParcel, data, size);
+    // stub 端 ReadParcelable<NetStatsInfo>：需 WriteParcelable 写 size 前缀 + 字段
+    NetStatsInfo infos;
+    infos.iface_ = NetStatsGetString(STR_LEN);
+    infos.uid_ = NetStatsGetData<uint32_t>();
+    infos.date_ = NetStatsGetData<uint64_t>();
+    infos.rxBytes_ = NetStatsGetData<uint64_t>();
+    infos.txBytes_ = NetStatsGetData<uint64_t>();
+    dataParcel.WriteParcelable(&infos);
+    OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_SAVE_SHARING_TRAFFIC), dataParcel);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
@@ -415,6 +469,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetIfaceStatsDetailFuzzTest(data, size);
     OHOS::NetManagerStandard::GetUidStatsDetailFuzzTest(data, size);
     OHOS::NetManagerStandard::UpdateIfacesStatsFuzzTest(data, size);
+    OHOS::NetManagerStandard::UpdateStatsDataFuzzTest(data, size);
     OHOS::NetManagerStandard::ResetFactoryFuzzTest(data, size);
     OHOS::NetManagerStandard::GetCookieRxBytesFuzzTest(data, size);
     OHOS::NetManagerStandard::GetCookieTxBytesFuzzTest(data, size);
@@ -425,5 +480,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::SetCalibrationTrafficFuzzTest(data, size);
     OHOS::NetManagerStandard::SetTrafficPlanInfoFuzzTest(data, size);
     OHOS::NetManagerStandard::GetTrafficPlanInfoFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetAllStatsInfoFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetAllSimStatsInfoFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetDpaAppStatsFuzzTest(data, size);
+    OHOS::NetManagerStandard::SaveSharingTrafficFuzzTest(data, size);
     return 0;
 }

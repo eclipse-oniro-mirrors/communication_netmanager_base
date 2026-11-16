@@ -17,9 +17,11 @@
 #define NETMANAGER_EXT_BPF_NET_FIREWALL_H
 
 #include <netdb.h>
+#include <array>
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <unordered_set>
 #include <chrono>
 #include <functional>
 #include <atomic>
@@ -155,6 +157,14 @@ public:
     int32_t UnregisterCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
 
     /**
+     * Register an internal handler invoked for egress TCP intercept events.
+     * Only used inside netmanagernative to close the intercepted socket.
+     *
+     * @param handler handler invoked with the parsed intercept record and address family
+     */
+    void RegisterInterceptHandler(std::function<void(const InterceptRecord &, uint8_t family)> handler);
+
+    /**
      * Load SA on demand
      *
      * @param systemAbilityId id of SA want to load
@@ -186,6 +196,13 @@ public:
      * @return 0 if success or -1 if an error occurred
      */
     int32_t ClearFirewallDefaultAction();
+
+    /**
+     * clear conntrack map
+     *
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t ClearConntrackMap();
 
 private:
     template <typename Key, typename Value> int ClearBpfMap(const char *path, const Key &key, Value &val)
@@ -229,6 +246,113 @@ private:
         return 0;
     }
 
+    struct BpfMapSnapshot {
+        bool valid = false;
+        std::unordered_map<std::string, std::string> entries;
+    };
+
+    template <typename Key> static std::string KeyToBytes(const Key &key)
+    {
+        return std::string(reinterpret_cast<const char *>(&key), sizeof(Key));
+    }
+
+    template <typename Key> static Key KeyFromBytes(const std::string &bytes)
+    {
+        Key key{};
+        if (bytes.size() == sizeof(Key)) {
+            (void)memcpy_s(&key, sizeof(Key), bytes.data(), sizeof(Key));
+        }
+        return key;
+    }
+
+    template <typename Value> static std::string ValueToBytes(const Value &value)
+    {
+        return std::string(reinterpret_cast<const char *>(&value), sizeof(Value));
+    }
+
+    template <typename Key, typename Value>
+    int32_t ReconcileBpfMap(const char *path, const std::vector<std::pair<Key, Value>> &desired, bool forceFull)
+    {
+        if (path == nullptr || *path == '\0') {
+            return -1;
+        }
+        std::lock_guard<std::mutex> snapshotGuard(snapshotMutex_);
+        BpfMapSnapshot &snapshot = appliedSnapshots_[path];
+        BpfMapper<Key, Value> map(path, 0);
+        if (!map.IsValid()) {
+            NETNATIVE_LOGE("ReconcileBpfMap: map invalid: %{public}s", path);
+            return -1;
+        }
+        if (!snapshot.valid || forceFull) {
+            return ReconcileBpfMapFull(map, path, desired, snapshot);
+        }
+        return ReconcileBpfMapDelta(map, path, desired, snapshot);
+    }
+
+    template <typename Key, typename Value>
+    int32_t ReconcileBpfMapFull(BpfMapper<Key, Value> &map, const char *path,
+        const std::vector<std::pair<Key, Value>> &desired, BpfMapSnapshot &snapshot)
+    {
+        std::vector<Key> oldKeys = map.GetAllKeys();
+        if (!oldKeys.empty() && map.Clear(oldKeys) != 0) {
+            NETNATIVE_LOGE("ReconcileBpfMap: clear failed: %{public}s", path);
+            return -1;
+        }
+        std::unordered_map<std::string, std::string> entries;
+        entries.reserve(desired.size());
+        for (const auto &item : desired) {
+            if (map.Write(item.first, item.second, BPF_ANY) != 0) {
+                NETNATIVE_LOGE("ReconcileBpfMap: write failed: %{public}s", path);
+                return -1;
+            }
+            entries[KeyToBytes(item.first)] = ValueToBytes(item.second);
+        }
+        snapshot.entries = std::move(entries);
+        snapshot.valid = true;
+        return 0;
+    }
+
+    template <typename Key, typename Value>
+    int32_t ReconcileBpfMapDelta(BpfMapper<Key, Value> &map, const char *path,
+        const std::vector<std::pair<Key, Value>> &desired, BpfMapSnapshot &snapshot)
+    {
+        std::unordered_set<std::string> desiredKeys;
+        desiredKeys.reserve(desired.size());
+        for (const auto &item : desired) {
+            std::string keyBytes = KeyToBytes(item.first);
+            std::string valueBytes = ValueToBytes(item.second);
+            desiredKeys.emplace(keyBytes);
+            auto it = snapshot.entries.find(keyBytes);
+            if (it == snapshot.entries.end() || it->second != valueBytes) {
+                if (map.Write(item.first, item.second, BPF_ANY) != 0) {
+                    NETNATIVE_LOGE("ReconcileBpfMap: update failed: %{public}s", path);
+                    return -1;
+                }
+                snapshot.entries[keyBytes] = std::move(valueBytes);
+            }
+        }
+        return ReconcileBpfMapDeleteStale(map, path, desiredKeys, snapshot);
+    }
+
+    template <typename Key, typename Value>
+    int32_t ReconcileBpfMapDeleteStale(BpfMapper<Key, Value> &map, const char *path,
+        const std::unordered_set<std::string> &desiredKeys, BpfMapSnapshot &snapshot)
+    {
+        for (auto it = snapshot.entries.begin(); it != snapshot.entries.end();) {
+            if (desiredKeys.find(it->first) == desiredKeys.end()) {
+                Key key = KeyFromBytes<Key>(it->first);
+                if (map.Delete(key) != 0) {
+                    NETNATIVE_LOGE("ReconcileBpfMap: delete failed: %{public}s", path);
+                    return -1;
+                }
+                it = snapshot.entries.erase(it);
+            } else {
+                ++it;
+            }
+        }
+        return 0;
+    }
+
     NetsysBpfNetFirewall();
 
     static void StartConntrackGcThread(void);
@@ -247,11 +371,17 @@ private:
 
     void NotifyInterceptEvent(InterceptEvent *info);
 
+    void NotifyEgressIntercept(const InterceptEvent &info, const sptr<InterceptRecord> &record);
+
     static void ConntrackGcTask();
 
     uint64_t GetNowMs();
 
     void ClearBpfFirewallRules(NetFirewallRuleDirection direction);
+
+    void InvalidateIpSnapshots(NetFirewallRuleDirection direction);
+
+    void InvalidateAllSnapshots();
 
     int32_t WriteSrcIpv4BpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 
@@ -307,12 +437,16 @@ private:
     std::unique_ptr<std::thread> thread_;
     std::vector<sptr<NetsysNative::INetFirewallCallback>> callbacks_;
     std::mutex callbackMutex_;
+    std::function<void(const InterceptRecord &, uint8_t)> interceptHandler_;
+    std::mutex handlerMutex_;
     static std::atomic<bool> keepGc_;
     std::unique_ptr<std::thread> gcThread_;
     static std::unique_ptr<BpfMapper<CtKey, CtVaule>> ctRdMap_, ctWrMap_;
     std::vector<sptr<NetFirewallIpRule>> firewallIpRules_;
     std::vector<sptr<NetFirewallDomainRule>> firewallDomainRules_;
     std::mutex rulesMutex_;
+    std::mutex snapshotMutex_;
+    std::unordered_map<std::string, BpfMapSnapshot> appliedSnapshots_;
 };
 } // namespace OHOS::NetManagerStandard
 #endif /* NETMANAGER_EXT_BPF_NET_FIREWALL_H */

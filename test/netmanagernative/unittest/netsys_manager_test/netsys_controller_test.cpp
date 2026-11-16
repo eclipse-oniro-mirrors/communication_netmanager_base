@@ -1320,6 +1320,32 @@ HWTEST_F(NetsysControllerTest, SetIpv6UidBlackListTest002, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 
+HWTEST_F(NetsysControllerTest, SetPresetDomainsTest001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+    netsysController->netsysService_ = netsysControllerServiceImpl;
+
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000138] = {"example.com"};
+    int32_t ret = netsysController->SetPresetDomains(presetDomains);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, SetPresetDomainsTest002, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+    netsysController->netsysService_ = nullptr;
+
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000138] = {"example.com"};
+    int32_t ret = netsysController->SetPresetDomains(presetDomains);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
 HWTEST_F(NetsysControllerTest, SetIpv6AutoConfTest001, TestSize.Level1)
 {
     auto netsysController = std::make_shared<NetsysController>();
@@ -1829,6 +1855,22 @@ HWTEST_F(NetsysControllerTest, SetUserDefinedServerFlag001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
     ret = netsysController->StopClat(interfaceName);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, SetNetworkDnsFamilyCapability001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    ASSERT_NE(netsysController, nullptr);
+    EXPECT_EQ(netsysController->SetNetworkDnsFamilyCapability(100, true, false),
+        NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    auto service = sptr<NetsysControllerServiceImpl>::MakeSptr();
+    ASSERT_NE(service, nullptr);
+    service->netsysClient_->netsysNativeService_ = mockNetsysService_;
+    netsysController->netsysService_ = service;
+    EXPECT_CALL(*mockNetsysService_, SetNetworkDnsFamilyCapability(100, true, false))
+        .WillOnce(testing::Return(-ENOENT));
+    EXPECT_EQ(netsysController->SetNetworkDnsFamilyCapability(100, true, false), -ENOENT);
 }
 
 HWTEST_F(NetsysControllerTest, SetDnsCacheTest02, TestSize.Level1)

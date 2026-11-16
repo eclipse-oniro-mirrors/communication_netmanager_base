@@ -27,6 +27,9 @@ constexpr const char *LOCAL_ROUTE_NEXT_HOP = "0.0.0.0";
 constexpr const char *LOCAL_ROUTE_IPV6_DESTINATION = "::";
 constexpr const char *TEST_IPV4_ADDR = "127.0.0.1";
 constexpr size_t PARCEL_OVERFLOW_STRING_SIZE = 204800;
+constexpr size_t MAX_PAC_URL_LENGTH = 2048;
+constexpr size_t OVERSIZE_PAC_URL_LENGTH = MAX_PAC_URL_LENGTH + 1;
+constexpr int32_t PAC_TEST_USER_ID = 100;
 } // namespace
 class NetLinkInfoTest : public testing::Test {
 public:
@@ -43,6 +46,33 @@ void NetLinkInfoTest::TearDownTestCase() {}
 void NetLinkInfoTest::SetUp() {}
 
 void NetLinkInfoTest::TearDown() {}
+
+HWTEST_F(NetLinkInfoTest, LocalNetworkRoutedParcelAndCopy, TestSize.Level1)
+{
+    for (bool enabled : {false, true}) {
+        sptr<NetLinkInfo> info = new NetLinkInfo();
+        EXPECT_FALSE(info->isLocalNetworkRouted_);
+        info->isLocalNetworkRouted_ = enabled;
+        NetLinkInfo copied(*info);
+        NetLinkInfo assigned;
+        assigned = copied;
+        EXPECT_EQ(assigned.isLocalNetworkRouted_, enabled);
+
+        Parcel parcel;
+        ASSERT_TRUE(assigned.Marshalling(parcel));
+        auto decoded = NetLinkInfo::Unmarshalling(parcel);
+        ASSERT_NE(decoded, nullptr);
+        EXPECT_EQ(decoded->isLocalNetworkRouted_, enabled);
+
+        Parcel staticParcel;
+        ASSERT_TRUE(NetLinkInfo::Marshalling(staticParcel, info));
+        decoded = NetLinkInfo::Unmarshalling(staticParcel);
+        ASSERT_NE(decoded, nullptr);
+        EXPECT_EQ(decoded->isLocalNetworkRouted_, enabled);
+        assigned.Initialize();
+        EXPECT_FALSE(assigned.isLocalNetworkRouted_);
+    }
+}
 
 sptr<NetLinkInfo> GetNetLinkInfo()
 {
@@ -682,6 +712,75 @@ HWTEST_F(NetLinkInfoTest, ToStringLinkValidTest, TestSize.Level1)
     netLinkInfo->isIpv6LinkValid_ = true;
     str = netLinkInfo->ToStringLinkValid("ToStringLinkValidTest");
     ASSERT_TRUE(!str.empty());
+}
+HWTEST_F(NetLinkInfoTest, PacUrlMarshallingTest, TestSize.Level1)
+{
+    auto original = GetNetLinkInfo();
+    original->httpProxy_ = HttpProxy();
+    original->httpProxy_.SetPacUrl("http://192.168.1.2/wifi.pac");
+    MessageParcel parcel;
+    ASSERT_TRUE(original->Marshalling(parcel));
+    sptr<NetLinkInfo> restored = NetLinkInfo::Unmarshalling(parcel);
+    ASSERT_NE(restored, nullptr);
+    EXPECT_EQ(restored->httpProxy_.GetPacUrl(), original->httpProxy_.GetPacUrl());
+    EXPECT_TRUE(restored->httpProxy_.GetHost().empty());
+    EXPECT_EQ(restored->httpProxy_.GetPort(), 0);
+}
+
+HWTEST_F(NetLinkInfoTest, PacUrlCompareAndClearTest, TestSize.Level1)
+{
+    HttpProxy first;
+    HttpProxy second;
+    EXPECT_EQ(first, second);
+    first.SetPacUrl("http://192.168.1.2/wifi.pac");
+    EXPECT_NE(first, second);
+    second.SetPacUrl(first.GetPacUrl());
+    EXPECT_EQ(first, second);
+    first.SetPacUrl("");
+    EXPECT_NE(first, second);
+    EXPECT_TRUE(first.GetPacUrl().empty());
+}
+
+HWTEST_F(NetLinkInfoTest, PacUrlSetterLengthBoundaryTest, TestSize.Level1)
+{
+    HttpProxy proxy;
+    const std::string maximumUrl(MAX_PAC_URL_LENGTH, 'a');
+    proxy.SetPacUrl(maximumUrl);
+    EXPECT_EQ(proxy.GetPacUrl(), maximumUrl);
+    proxy.SetPacUrl(std::string(OVERSIZE_PAC_URL_LENGTH, 'b'));
+    EXPECT_EQ(proxy.GetPacUrl(), maximumUrl);
+    MessageParcel parcel;
+    ASSERT_TRUE(proxy.Marshalling(parcel));
+    HttpProxy restored;
+    ASSERT_TRUE(HttpProxy::Unmarshalling(parcel, restored));
+    EXPECT_EQ(restored.GetPacUrl(), maximumUrl);
+}
+
+HWTEST_F(NetLinkInfoTest, PacUrlOversizeParcelTest, TestSize.Level1)
+{
+    MessageParcel parcel;
+    ASSERT_TRUE(parcel.WriteString(""));
+    ASSERT_TRUE(parcel.WriteUint16(0));
+    ASSERT_TRUE(parcel.WriteInt32(PAC_TEST_USER_ID));
+    ASSERT_TRUE(parcel.WriteUint32(0));
+    ASSERT_TRUE(parcel.WriteString(""));
+    ASSERT_TRUE(parcel.WriteString(""));
+    ASSERT_TRUE(parcel.WriteString(std::string(OVERSIZE_PAC_URL_LENGTH, 'x')));
+    HttpProxy restored;
+    EXPECT_FALSE(HttpProxy::Unmarshalling(parcel, restored));
+}
+
+HWTEST_F(NetLinkInfoTest, PacUrlMissingParcelFieldTest, TestSize.Level1)
+{
+    MessageParcel parcel;
+    ASSERT_TRUE(parcel.WriteString(""));
+    ASSERT_TRUE(parcel.WriteUint16(0));
+    ASSERT_TRUE(parcel.WriteInt32(PAC_TEST_USER_ID));
+    ASSERT_TRUE(parcel.WriteUint32(0));
+    ASSERT_TRUE(parcel.WriteString(""));
+    ASSERT_TRUE(parcel.WriteString(""));
+    HttpProxy restored;
+    EXPECT_FALSE(HttpProxy::Unmarshalling(parcel, restored));
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

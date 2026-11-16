@@ -599,5 +599,232 @@ HWTEST_F(NetsysBpfNetFirewallTest, ClearDomainRules001, TestSize.Level0)
     bpfNet->ClearDomainRules();
     EXPECT_NE(bpfNet, nullptr);
 }
+
+namespace {
+struct InterceptCapture {
+    bool called = false;
+    uint16_t localPort = 0;
+    uint16_t remotePort = 0;
+    uint16_t protocol = 0;
+    uint8_t family = 0;
+    std::string localIp;
+    std::string remoteIp;
+    int32_t appUid = 0;
+    std::string domain;
+};
+
+InterceptEvent MakeEgressTcpEvent()
+{
+    InterceptEvent info{};
+    info.dir = EGRESS;
+    info.protocol = IPPROTO_TCP;
+    info.family = AF_INET6;
+    int sport = 51302;
+    int dport = 12345;
+    info.sport = htons(sport);
+    info.dport = htons(dport);
+    return info;
+}
+
+class TestInterceptCallbackStub : public OHOS::NetsysNative::NetFirewallCallbackStub {
+public:
+    int32_t OnIntercept(OHOS::sptr<InterceptRecord> &record) override
+    {
+        if (record == nullptr) {
+            return -1;
+        }
+        called = true;
+        localIp = record->localIp;
+        remoteIp = record->remoteIp;
+        localPort = record->localPort;
+        remotePort = record->remotePort;
+        return 0;
+    }
+
+    bool called = false;
+    std::string localIp;
+    std::string remoteIp;
+    uint16_t localPort = 0;
+    uint16_t remotePort = 0;
+};
+} // namespace
+
+HWTEST_F(NetsysBpfNetFirewallTest, RegisterInterceptHandler001, TestSize.Level1)
+{
+    auto bpfNet = NetsysBpfNetFirewall::GetInstance();
+    InterceptCapture capture;
+    bpfNet->RegisterInterceptHandler([&capture](const InterceptRecord &record, uint8_t family) {
+        capture.called = true;
+        capture.localPort = record.localPort;
+        capture.remotePort = record.remotePort;
+        capture.protocol = record.protocol;
+        capture.family = family;
+        capture.localIp = record.localIp;
+        capture.remoteIp = record.remoteIp;
+        capture.appUid = record.appUid;
+        capture.domain = record.domain;
+    });
+
+    OHOS::sptr<InterceptRecord> record = OHOS::sptr<InterceptRecord>::MakeSptr();
+    record->localIp = "2001:db8::1";
+    record->remoteIp = "2001:db8::2";
+    record->localPort = 12345;
+    record->remotePort = 51302;
+    record->protocol = IPPROTO_TCP;
+    record->appUid = 1001;
+    record->time = 123;
+    record->domain = "example.com";
+
+    bpfNet->NotifyEgressIntercept(MakeEgressTcpEvent(), record);
+    EXPECT_TRUE(capture.called);
+    EXPECT_EQ(capture.localPort, 12345);
+    EXPECT_EQ(capture.remotePort, 51302);
+    EXPECT_EQ(capture.protocol, IPPROTO_TCP);
+    EXPECT_EQ(capture.family, AF_INET6);
+    EXPECT_EQ(capture.localIp, "2001:db8::1");
+    EXPECT_EQ(capture.remoteIp, "2001:db8::2");
+    EXPECT_EQ(capture.appUid, 1001);
+    EXPECT_EQ(capture.domain, "example.com");
+    bpfNet->RegisterInterceptHandler(nullptr);
+}
+
+HWTEST_F(NetsysBpfNetFirewallTest, NotifyInterceptEventEgress001, TestSize.Level1)
+{
+    auto bpfNet = NetsysBpfNetFirewall::GetInstance();
+    InterceptCapture handlerCapture;
+    bpfNet->RegisterInterceptHandler([&handlerCapture](const InterceptRecord &record, uint8_t family) {
+        handlerCapture.called = true;
+        handlerCapture.localPort = record.localPort;
+        handlerCapture.remotePort = record.remotePort;
+        handlerCapture.localIp = record.localIp;
+        handlerCapture.remoteIp = record.remoteIp;
+        handlerCapture.family = family;
+    });
+    OHOS::sptr<TestInterceptCallbackStub> callback = OHOS::sptr<TestInterceptCallbackStub>::MakeSptr();
+    OHOS::sptr<OHOS::NetsysNative::INetFirewallCallback> baseCallback = callback;
+    ASSERT_EQ(bpfNet->RegisterCallback(baseCallback), 0);
+
+    InterceptEvent info{};
+    info.dir = EGRESS;
+    info.family = AF_INET;
+    info.protocol = IPPROTO_TCP;
+    info.sport = htons(443);
+    info.dport = htons(51302);
+    ASSERT_EQ(inet_pton(AF_INET, "93.184.216.34", &info.ipv4.saddr), 1);
+    ASSERT_EQ(inet_pton(AF_INET, "192.168.1.5", &info.ipv4.daddr), 1);
+    bpfNet->NotifyInterceptEvent(&info);
+
+    EXPECT_TRUE(callback->called);
+    EXPECT_EQ(callback->localIp, "192.168.1.5");
+    EXPECT_EQ(callback->localPort, 51302);
+    EXPECT_EQ(callback->remoteIp, "93.184.216.34");
+    EXPECT_EQ(callback->remotePort, 443);
+    EXPECT_TRUE(handlerCapture.called);
+    EXPECT_EQ(handlerCapture.localIp, "192.168.1.5");
+    EXPECT_EQ(handlerCapture.localPort, 51302);
+    EXPECT_EQ(handlerCapture.remoteIp, "93.184.216.34");
+    EXPECT_EQ(handlerCapture.remotePort, 443);
+    EXPECT_EQ(handlerCapture.family, AF_INET);
+
+    bpfNet->RegisterInterceptHandler(nullptr);
+    bpfNet->UnregisterCallback(baseCallback);
+}
+
+HWTEST_F(NetsysBpfNetFirewallTest, NotifyInterceptEventIngress001, TestSize.Level1)
+{
+    auto bpfNet = NetsysBpfNetFirewall::GetInstance();
+    bool handlerCalled = false;
+    bpfNet->RegisterInterceptHandler([&handlerCalled](const InterceptRecord &, uint8_t) {
+        handlerCalled = true;
+    });
+    OHOS::sptr<TestInterceptCallbackStub> callback = OHOS::sptr<TestInterceptCallbackStub>::MakeSptr();
+    OHOS::sptr<OHOS::NetsysNative::INetFirewallCallback> baseCallback = callback;
+    ASSERT_EQ(bpfNet->RegisterCallback(baseCallback), 0);
+
+    InterceptEvent info{};
+    info.dir = INGRESS;
+    info.family = AF_INET;
+    info.protocol = IPPROTO_TCP;
+    info.sport = htons(80);
+    info.dport = htons(5684);
+    ASSERT_EQ(inet_pton(AF_INET, "192.168.8.116", &info.ipv4.saddr), 1);
+    ASSERT_EQ(inet_pton(AF_INET, "192.168.1.5", &info.ipv4.daddr), 1);
+    bpfNet->NotifyInterceptEvent(&info);
+
+    EXPECT_TRUE(callback->called);
+    EXPECT_EQ(callback->localIp, "192.168.8.116");
+    EXPECT_EQ(callback->localPort, 80);
+    EXPECT_EQ(callback->remoteIp, "192.168.1.5");
+    EXPECT_EQ(callback->remotePort, 5684);
+    EXPECT_FALSE(handlerCalled);
+
+    bpfNet->RegisterInterceptHandler(nullptr);
+    bpfNet->UnregisterCallback(baseCallback);
+}
+
+HWTEST_F(NetsysBpfNetFirewallTest, NotifyEgressInterceptIngress001, TestSize.Level1)
+{
+    auto bpfNet = NetsysBpfNetFirewall::GetInstance();
+    bool called = false;
+    bpfNet->RegisterInterceptHandler([&called](const InterceptRecord &, uint8_t) {
+        called = true;
+    });
+    InterceptEvent info = MakeEgressTcpEvent();
+    info.dir = INGRESS;
+    bpfNet->NotifyEgressIntercept(info, OHOS::sptr<InterceptRecord>::MakeSptr());
+    EXPECT_FALSE(called);
+    bpfNet->RegisterInterceptHandler(nullptr);
+}
+
+HWTEST_F(NetsysBpfNetFirewallTest, NotifyEgressInterceptUdp001, TestSize.Level1)
+{
+    auto bpfNet = NetsysBpfNetFirewall::GetInstance();
+    bool called = false;
+    bpfNet->RegisterInterceptHandler([&called](const InterceptRecord &, uint8_t) {
+        called = true;
+    });
+    InterceptEvent info = MakeEgressTcpEvent();
+    info.protocol = IPPROTO_UDP;
+    bpfNet->NotifyEgressIntercept(info, OHOS::sptr<InterceptRecord>::MakeSptr());
+    EXPECT_FALSE(called);
+    bpfNet->RegisterInterceptHandler(nullptr);
+}
+
+HWTEST_F(NetsysBpfNetFirewallTest, NotifyEgressInterceptNullRecord001, TestSize.Level1)
+{
+    auto bpfNet = NetsysBpfNetFirewall::GetInstance();
+    bool called = false;
+    bpfNet->RegisterInterceptHandler([&called](const InterceptRecord &, uint8_t) {
+        called = true;
+    });
+    bpfNet->NotifyEgressIntercept(MakeEgressTcpEvent(), nullptr);
+    EXPECT_FALSE(called);
+    bpfNet->RegisterInterceptHandler(nullptr);
+}
+
+HWTEST_F(NetsysBpfNetFirewallTest, NotifyEgressInterceptNoHandler001, TestSize.Level1)
+{
+    auto bpfNet = NetsysBpfNetFirewall::GetInstance();
+    bpfNet->RegisterInterceptHandler(nullptr);
+    bpfNet->NotifyEgressIntercept(MakeEgressTcpEvent(), OHOS::sptr<InterceptRecord>::MakeSptr());
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(NetsysBpfNetFirewallTest, RegisterInterceptHandlerOverwrite001, TestSize.Level1)
+{
+    auto bpfNet = NetsysBpfNetFirewall::GetInstance();
+    bool firstCalled = false;
+    bool secondCalled = false;
+    bpfNet->RegisterInterceptHandler([&firstCalled](const InterceptRecord &, uint8_t) {
+        firstCalled = true;
+    });
+    bpfNet->RegisterInterceptHandler([&secondCalled](const InterceptRecord &, uint8_t) {
+        secondCalled = true;
+    });
+    bpfNet->NotifyEgressIntercept(MakeEgressTcpEvent(), OHOS::sptr<InterceptRecord>::MakeSptr());
+    EXPECT_FALSE(firstCalled);
+    EXPECT_TRUE(secondCalled);
+    bpfNet->RegisterInterceptHandler(nullptr);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

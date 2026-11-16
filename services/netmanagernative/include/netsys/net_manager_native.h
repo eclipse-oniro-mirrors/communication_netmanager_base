@@ -68,7 +68,8 @@ public:
     int32_t DisableDistributedNet(bool isServer, const std::string &virnicName, const std::string &dstAddr);
     int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges);
     int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges);
-    int32_t NetworkAddInterface(int32_t netId, std::string iface, NetBearType netBearerType);
+    int32_t NetworkAddInterface(int32_t netId, std::string iface, NetBearType netBearerType,
+        bool isLocalNetworkRouted = false);
     int32_t NetworkRemoveInterface(int32_t netId, std::string iface);
 
     MarkMaskParcel GetFwmarkForNetwork(int32_t netId);
@@ -125,6 +126,7 @@ public:
                                  uint16_t &baseTimeoutMsec, uint8_t &retryCount);
     int32_t DnsCreateNetworkCache(uint16_t netid, bool isVpnNet = false);
     int32_t DnsDestroyNetworkCache(uint16_t netId, bool isVpnNet = false);
+    int32_t SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains);
     int32_t BandwidthEnableDataSaver(bool enable);
     int32_t BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes);
     int32_t BandwidthRemoveIfaceQuota(const std::string &ifName);
@@ -168,6 +170,7 @@ public:
     int32_t ClearFirewallAllRules();
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid);
     int32_t DnsSetUserDefinedServerFlag(uint16_t netId, bool flag);
+    int32_t SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable);
     int32_t FlushDnsCache(uint16_t netId);
 #ifdef SUPPORT_SYSVPN
     int32_t UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add);

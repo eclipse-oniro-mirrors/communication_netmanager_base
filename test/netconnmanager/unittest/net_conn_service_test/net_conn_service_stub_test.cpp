@@ -24,6 +24,7 @@
 #include "common_mock_netmanager_permission.h"
 #include "net_conn_service_stub_test.h"
 #include "refresh_http_proxy_callback_stub.h"
+#include "http_proxy_callback_stub.h"
 #include "net_interface_callback_stub.h"
 #include "netmanager_base_test_security.h"
 #include "net_conn_types.h"
@@ -58,6 +59,7 @@ public:
     void TearDown();
     static inline std::shared_ptr<NetConnServiceStub> instance_ = std::make_shared<MockNetConnServiceStub>();
     static int32_t SendRemoteRequest(MessageParcel &data, ConnInterfaceCode code);
+    static int32_t SendRemoteRequest(MessageParcel &data, ConnInterfaceCode code, MessageParcel &reply);
 };
 
 void NetConnServiceStubTest::SetUpTestCase() {}
@@ -71,6 +73,12 @@ void NetConnServiceStubTest::TearDown() {}
 int32_t NetConnServiceStubTest::SendRemoteRequest(MessageParcel &data, ConnInterfaceCode code)
 {
     MessageParcel reply;
+    MessageOption option;
+    return instance_->OnRemoteRequest(static_cast<uint32_t>(code), data, reply, option);
+}
+
+int32_t NetConnServiceStubTest::SendRemoteRequest(MessageParcel &data, ConnInterfaceCode code, MessageParcel &reply)
+{
     MessageOption option;
     return instance_->OnRemoteRequest(static_cast<uint32_t>(code), data, reply, option);
 }
@@ -498,6 +506,30 @@ HWTEST_F(NetConnServiceStubTest, OnRefreshGlobalHttpProxyTest002, TestSize.Level
     EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REFRESH_GLOBAL_HTTP_PROXY);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: HttpProxyCallbackRequestBranches
+ * @tc.desc: Test registering and unregistering HTTP proxy callbacks through NetConnServiceStub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, HttpProxyCallbackRequestBranches, TestSize.Level1)
+{
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    EXPECT_EQ(SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REGISTER_HTTP_PROXY_CALLBACK), NETMANAGER_SUCCESS);
+
+    MessageParcel valid;
+    EXPECT_TRUE(valid.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    sptr<IHttpProxyCallback> callback = new HttpProxyCallbackStub();
+    EXPECT_TRUE(valid.WriteRemoteObject(callback->AsObject()));
+    EXPECT_EQ(SendRemoteRequest(valid, ConnInterfaceCode::CMD_NM_REGISTER_HTTP_PROXY_CALLBACK), NETMANAGER_SUCCESS);
+
+    MessageParcel unregister;
+    EXPECT_TRUE(unregister.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    EXPECT_TRUE(unregister.WriteRemoteObject(callback->AsObject()));
+    EXPECT_EQ(SendRemoteRequest(unregister, ConnInterfaceCode::CMD_NM_UNREGISTER_HTTP_PROXY_CALLBACK),
+        NETMANAGER_SUCCESS);
 }
 
 /**
@@ -1720,10 +1752,13 @@ HWTEST_F(NetConnServiceStubTest, OnRenewDhcpTest001, TestSize.Level1)
     MessageParcel data;
     EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
     EXPECT_TRUE(data.WriteInt32(TEST_INT32_VALUE));
-    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_RENEW_DHCP);
+    MessageParcel reply;
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_RENEW_DHCP, reply);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    int32_t replyRet = -1;
+    ASSERT_TRUE(reply.ReadInt32(replyRet));
+    EXPECT_EQ(replyRet, NETMANAGER_SUCCESS);
 }
-
 /**
  * @tc.name: OnRenewDhcpTest002
  * @tc.desc: Test NetConnServiceStub OnRenewDhcp without netId, read data fail.
@@ -1748,8 +1783,17 @@ HWTEST_F(NetConnServiceStubTest, OnRenewDhcpTest003, TestSize.Level1)
     MessageParcel data;
     EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
     EXPECT_TRUE(data.WriteInt32(TEST_INT32_VALUE));
-    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_RENEW_DHCP);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    MessageParcel reply;
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_RENEW_DHCP, reply);
+    // OnRemoteRequest falls through to IPCObjectStub when the permission check fails: the denial is
+    // written into the reply parcel while the non-zero stub return value makes
+    // NetConnServiceProxy::RemoteSendRequest collapse it into NETMANAGER_ERR_OPERATION_FAILED(2100002)
+    // without ever reading this parcel. So this case only proves the stub-side fact; it does NOT prove
+    // that a JS caller can ever observe 201 (see RenewDhcpTest003 in net_conn_service_proxy_test.cpp).
+    EXPECT_EQ(ret, IPC_STUB_UNKNOW_TRANS_ERR);
+    int32_t replyRet = -1;
+    ASSERT_TRUE(reply.ReadInt32(replyRet));
+    EXPECT_EQ(replyRet, NETMANAGER_ERR_PERMISSION_DENIED);
     SetMockCheckPermissionResult(true);
 }
 } // namespace NetManagerStandard

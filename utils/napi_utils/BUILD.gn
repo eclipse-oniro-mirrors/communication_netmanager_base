@@ -40,6 +40,8 @@ config("napi_utils_public_config") {
 }
 
 ohos_shared_library("napi_utils") {
+  version_script = "libnapi_utils.map"
+
   sources = [
     "src/base_context.cpp",
     "src/event_listener.cpp",

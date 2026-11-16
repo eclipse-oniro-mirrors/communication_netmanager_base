@@ -175,6 +175,51 @@ int32_t SetAppHttpProxy(const HttpProxy &httpProxy)
     return NetManagerStandard::NetConnClient::GetInstance().SetAppHttpProxy(nativeHttpProxy);
 }
 
+static HttpProxy ConvertPublicHttpProxy(const NetManagerStandard::HttpProxy &httpProxy)
+{
+    auto exclusionList = rust::vec<rust::string>();
+    for (const auto &item : httpProxy.GetExclusionList()) {
+        exclusionList.push_back(rust::String(item));
+    }
+    return HttpProxy{
+        .host = httpProxy.GetHost(),
+        .port = httpProxy.GetPort(),
+        .username = "",
+        .password = "",
+        .exclusionList = exclusionList,
+    };
+}
+
+uint32_t RegisterAppHttpProxyCallback(uint64_t token)
+{
+    uint32_t callbackId = 0;
+    NetManagerStandard::NetConnClient::GetInstance().RegisterAppHttpProxyCallback(
+        [token](const NetManagerStandard::HttpProxy &httpProxy) {
+            execute_app_http_proxy_changed(token, ConvertPublicHttpProxy(httpProxy));
+        }, callbackId, true);
+    return callbackId;
+}
+
+void UnregisterAppHttpProxyCallback(uint32_t callbackId)
+{
+    NetManagerStandard::NetConnClient::GetInstance().UnregisterAppHttpProxyCallback(callbackId);
+}
+
+uint32_t RegisterDefaultHttpProxyCallback(uint64_t token, int32_t &ret)
+{
+    uint32_t callbackId = 0;
+    ret = NetManagerStandard::NetConnClient::GetInstance().RegisterDefaultHttpProxyCallback(
+        [token](const NetManagerStandard::HttpProxy &httpProxy) {
+            execute_default_http_proxy_changed(token, ConvertPublicHttpProxy(httpProxy));
+        }, callbackId);
+    return callbackId;
+}
+
+void UnregisterDefaultHttpProxyCallback(uint32_t callbackId)
+{
+    NetManagerStandard::NetConnClient::GetInstance().UnregisterDefaultHttpProxyCallback(callbackId);
+}
+
 NetManagerStandard::NetConnClient &GetNetConnClient(int32_t &nouse)
 {
     return NetManagerStandard::NetConnClient::GetInstance();

@@ -137,7 +137,7 @@ private:
     std::mutex nat464Mutex_;
     uint64_t lastDetectTime_ = 0;
 #ifdef FEATURE_SUPPORT_POWERMANAGER
-    bool forbidDetectionFlag_ = false;
+    std::atomic<bool> forbidDetectionFlag_ = false;
 #endif
     bool isNeedResume_ = false;
     bool isScreenOn_ = true;

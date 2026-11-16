@@ -32,7 +32,7 @@ private:
     {
         return "LOCAL";
     };
-    int32_t AddInterface(std::string &interfaceName) override;
+    int32_t AddInterface(std::string &interfaceName, bool isLocalNetworkRouted) override;
     int32_t RemoveInterface(std::string &interfaceName) override;
 };
 } // namespace nmd

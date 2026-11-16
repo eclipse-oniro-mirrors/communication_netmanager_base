@@ -42,7 +42,10 @@ ohos_fuzztest("IsDeadFlowResetTargetBundleFuzzTest") {
 
   ldflags = [ "-flto" ]
 
-  sources = [ "is_dead_flow_reset_target_bundle_fuzzer.cpp" ]
+  sources = [
+    "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode/common_mock_netmanager_permission.cpp",
+    "is_dead_flow_reset_target_bundle_fuzzer.cpp",
+  ]
 
   deps = [
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if_static",

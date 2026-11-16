@@ -110,6 +110,8 @@ enum class ConnInterfaceCode {
     CMD_NM_DEAD_FLOW_RESET_TARGET_BUNDLE,
     CMD_NM_REFRESH_GLOBAL_HTTP_PROXY,
     CMD_NM_RENEW_DHCP,
+    CMD_NM_REGISTER_HTTP_PROXY_CALLBACK,
+    CMD_NM_UNREGISTER_HTTP_PROXY_CALLBACK,
 };
 
 enum class AdjCallbackInterfaceCode {
@@ -165,6 +167,10 @@ enum class FactoryResetCallbackInterfaceCode {
 
 enum class RefreshHttpProxyCallbackInterfaceCode {
     ON_REFRESH_HTTP_PROXY_RESULT,
+};
+
+enum class HttpProxyCallbackInterfaceCode {
+    ON_HTTP_PROXY_CHANGE,
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

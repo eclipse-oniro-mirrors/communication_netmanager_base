@@ -33,6 +33,8 @@
 #include "net_manager_center.h"
 #include "net_mgr_log_wrapper.h"
 #include "netsys_controller.h"
+#include "parameter.h"
+#include "parameters.h"
 #include "system_ability_definition.h"
 
 namespace OHOS {
@@ -95,5 +97,88 @@ HWTEST_F(NetConnServiceTest, ActiveHttpProxy001, TestSize.Level1)
     EXPECT_FALSE(NetConnService::GetInstance()->isFallbackProbeWithProxy_);
 }
 
+HWTEST_F(NetConnServiceTest, FindBestNetworkForRequestDelay001, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    std::set<NetCap> netCaps = {NET_CAPABILITY_INTERNET};
+    auto netSupplier = sptr<NetSupplier>::MakeSptr(NetBearType::BEARER_WIFI, "delayTest", netCaps);
+    netSupplier->supplierId_ = 1;
+    auto network = std::make_shared<Network>(100, 1, NetBearType::BEARER_WIFI, nullptr);
+    network->UpdateNetConnState(NET_CONN_STATE_CONNECTED);
+    netSupplier->SetNetwork(network);
+    netConnService->netSuppliers_.emplace(1, netSupplier);
+    auto netSpecifier = sptr<NetSpecifier>::MakeSptr();
+    netSpecifier->SetCapability(NET_CAPABILITY_INTERNET);
+    auto callback = sptr<NetConnCallbackStubCb>::MakeSptr();
+    auto active = netConnService->CreateNetActivateRequest(netSpecifier, callback, 0, 0, 1099);
+    sptr<NetSupplier> bestSupplier = nullptr;
+    netConnService->isDelayHandleFindBestNetwork_ = true;
+    netConnService->delaySupplierId_ = 1;
+    netConnService->FindBestNetworkForRequest(bestSupplier, active);
+    EXPECT_EQ(bestSupplier, nullptr);
+    netConnService->isDelayHandleFindBestNetwork_ = true;
+    netConnService->delaySupplierId_ = 999;
+    netConnService->FindBestNetworkForRequest(bestSupplier, active);
+    EXPECT_EQ(bestSupplier, netSupplier);
+    netConnService->isDelayHandleFindBestNetwork_ = false;
+    netConnService->delaySupplierId_ = 1;
+    netConnService->FindBestNetworkForRequest(bestSupplier, active);
+    EXPECT_EQ(bestSupplier, netSupplier);
+    netConnService->netSuppliers_.clear();
+}
+
+HWTEST_F(NetConnServiceTest, FindBestNetworkForRequestDelay002, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    std::set<NetCap> netCaps = {NET_CAPABILITY_INTERNET};
+    auto delaySupplier = sptr<NetSupplier>::MakeSptr(NetBearType::BEARER_WIFI, "delayTest", netCaps);
+    delaySupplier->supplierId_ = 1;
+    auto delayNetwork = std::make_shared<Network>(100, 1, NetBearType::BEARER_WIFI, nullptr);
+    delayNetwork->UpdateNetConnState(NET_CONN_STATE_CONNECTED);
+    delaySupplier->SetNetwork(delayNetwork);
+    auto normalSupplier = sptr<NetSupplier>::MakeSptr(NetBearType::BEARER_CELLULAR, "normalTest", netCaps);
+    normalSupplier->supplierId_ = 2;
+    auto normalNetwork = std::make_shared<Network>(101, 2, NetBearType::BEARER_CELLULAR, nullptr);
+    normalNetwork->UpdateNetConnState(NET_CONN_STATE_CONNECTED);
+    normalSupplier->SetNetwork(normalNetwork);
+    netConnService->netSuppliers_.emplace(1, delaySupplier);
+    netConnService->netSuppliers_.emplace(2, normalSupplier);
+    auto netSpecifier = sptr<NetSpecifier>::MakeSptr();
+    netSpecifier->SetCapability(NET_CAPABILITY_INTERNET);
+    auto callback = sptr<NetConnCallbackStubCb>::MakeSptr();
+    auto active = netConnService->CreateNetActivateRequest(netSpecifier, callback, 0, 0, 1099);
+    netConnService->isDelayHandleFindBestNetwork_ = true;
+    netConnService->delaySupplierId_ = 1;
+    sptr<NetSupplier> bestSupplier = nullptr;
+    netConnService->FindBestNetworkForRequest(bestSupplier, active);
+    EXPECT_EQ(bestSupplier, normalSupplier);
+    netConnService->netSuppliers_.clear();
+}
+
+HWTEST_F(NetConnServiceTest, HandleDetectionResultDelay001, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    std::string ident;
+    std::set<NetCap> netCaps = {NET_CAPABILITY_INTERNET};
+    netConnService->defaultNetSupplier_ = new NetSupplier(NetBearType::BEARER_CELLULAR, ident, netCaps);
+    auto supplier = sptr<NetSupplier>::MakeSptr(NetBearType::BEARER_WIFI, ident, netCaps);
+    supplier->supplierId_ = 1;
+    netConnService->netSuppliers_.emplace(1, supplier);
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
+    OHOS::system::SetParameter("persist.booster.enable_wifi_delay_weak_signal", "true");
+    netConnService->HandleDetectionResult(1, VERIFICATION_STATE);
+    EXPECT_TRUE(netConnService->isDelayHandleFindBestNetwork_);
+    EXPECT_EQ(netConnService->delaySupplierId_.load(), 1U);
+    netConnService->isDelayHandleFindBestNetwork_ = false;
+    netConnService->delaySupplierId_ = 0;
+    netConnService->HandleDetectionResult(1, VERIFICATION_STATE);
+    EXPECT_FALSE(netConnService->isDelayHandleFindBestNetwork_);
+    supplier->SetOnceSuppress();
+    netConnService->isDelayHandleFindBestNetwork_ = false;
+    netConnService->HandleDetectionResult(1, VERIFICATION_STATE);
+    EXPECT_FALSE(netConnService->isDelayHandleFindBestNetwork_);
+    OHOS::system::SetParameter("persist.booster.enable_wifi_delay_weak_signal", "false");
+    netConnService->netSuppliers_.clear();
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

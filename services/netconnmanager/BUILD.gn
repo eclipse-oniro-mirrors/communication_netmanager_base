@@ -35,7 +35,17 @@ config("net_conn_manager_config") {
   }
 }
 
+config("net_conn_manager_static_config") {
+  defines = []
+
+  if (netmanager_base_feature_support_powermanager) {
+    defines += [ "FEATURE_SUPPORT_POWERMANAGER" ]
+  }
+}
+
 ohos_shared_library("net_conn_manager") {
+  version_script = "libnet_conn_manager.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -68,6 +78,7 @@ ohos_shared_library("net_conn_manager") {
     "src/net_trace_route_probe.cpp",
     "src/stub/net_conn_callback_proxy.cpp",
     "src/stub/refresh_http_proxy_callback_proxy.cpp",
+    "src/stub/http_proxy_callback_proxy.cpp",
     "src/stub/net_conn_service_stub.cpp",
     "src/stub/net_detection_callback_proxy.cpp",
     "src/stub/net_factoryreset_callback_proxy.cpp",
@@ -85,6 +96,7 @@ ohos_shared_library("net_conn_manager") {
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETMANAGER_BASE_ROOT/utils:net_data_share",
+    "$NETMANAGER_BASE_ROOT/utils/net_http_client:net_http_client",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
     "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
   ]
@@ -137,6 +149,7 @@ ohos_shared_library("net_conn_manager") {
     sources += [
       "src/net_pac_local_proxy_server.cpp",
       "src/net_pac_manager.cpp",
+      "src/net_pac_proxy_controller.cpp",
       "src/pac_functions.cpp",
     ]
   }
@@ -222,6 +235,7 @@ ohos_static_library("net_conn_manager_static") {
     "src/net_trace_route_probe.cpp",
     "src/stub/net_conn_callback_proxy.cpp",
     "src/stub/refresh_http_proxy_callback_proxy.cpp",
+    "src/stub/http_proxy_callback_proxy.cpp",
     "src/stub/net_conn_service_stub.cpp",
     "src/stub/net_detection_callback_proxy.cpp",
     "src/stub/net_factoryreset_callback_proxy.cpp",
@@ -229,7 +243,10 @@ ohos_static_library("net_conn_manager_static") {
     "src/stub/net_supplier_callback_proxy.cpp",
   ]
 
-  public_configs = [ ":net_conn_manager_config" ]
+  public_configs = [
+    ":net_conn_manager_config",
+    ":net_conn_manager_static_config",
+  ]
 
   deps = [
     "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if",
@@ -238,6 +255,7 @@ ohos_static_library("net_conn_manager_static") {
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETMANAGER_BASE_ROOT/utils:net_data_share",
+    "$NETMANAGER_BASE_ROOT/utils/net_http_client:net_http_client",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]
 
@@ -275,6 +293,7 @@ ohos_static_library("net_conn_manager_static") {
     sources += [
       "src/net_pac_local_proxy_server.cpp",
       "src/net_pac_manager.cpp",
+      "src/net_pac_proxy_controller.cpp",
       "src/pac_functions.cpp",
     ]
   }

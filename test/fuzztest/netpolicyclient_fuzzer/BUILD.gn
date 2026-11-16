@@ -50,6 +50,9 @@ ohos_fuzztest("NetPolicyClientFuzzTest") {
   sources = [
     "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode/common_mock_netmanager_permission.cpp",
+    # Compiled locally with NETMANAGER_FUZZ_TEST_ENABLE so the stub's inline uid checks are
+    # skipped for fuzzing. The copy in net_policy_manager_static is replaced at link time.
+    "$NETPOLICYMANAGER_SOURCE_DIR/src/stub/net_policy_service_stub.cpp",
     "net_policy_client_fuzzer.cpp",
   ]
 
@@ -65,6 +68,7 @@ ohos_fuzztest("NetPolicyClientFuzzTest") {
     "HI_LOG_ENABLE",
     "DH_LOG_TAG=\"NetPolicyClientFuzzTest\"",
     "LOG_DOMAIN=0xD004100",
+    "NETMANAGER_FUZZ_TEST_ENABLE",
   ]
 
   external_deps = [

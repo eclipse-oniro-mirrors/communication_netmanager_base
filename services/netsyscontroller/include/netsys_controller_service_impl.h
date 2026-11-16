@@ -74,7 +74,8 @@ public:
      * @param iface Network port device name
      * @return Return the return value of the netsys interface call
      */
-    int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType) override;
+    int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType,
+        bool isLocalNetworkRouted) override;
 
     /**
      * Delete network port device
@@ -911,6 +912,7 @@ public:
     int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) override;
 
     int32_t SetUserDefinedServerFlag(uint16_t netId, bool isUserDefinedServer) override;
+    int32_t SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable) override;
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     /**
@@ -1075,6 +1077,7 @@ public:
     int32_t SetInternetAccessByIpForWifiShare(
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName) override;
     int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid) override;
+    int32_t SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains) override;
 private:
     MockNetsysNativeClient mockNetsysClient_;
     std::shared_ptr<NetsysNativeClient> netsysClient_;

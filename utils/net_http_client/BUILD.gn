@@ -1,0 +1,55 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
+
+config("net_http_client_config") {
+  include_dirs = [ "include" ]
+}
+
+ohos_shared_library("net_http_client") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
+  cflags = common_cflags
+  cflags_cc = common_cflags
+
+  sources = [
+    "src/http_easy_handle.cpp",
+    "src/http_engine.cpp",
+    "src/net_http_client.cpp",
+  ]
+
+  version_script = "libnet_http_client.map"
+
+  public_configs = [ ":net_http_client_config" ]
+
+  configs = [ "$NETMANAGER_BASE_ROOT/utils:netmanager_base_log_config" ]
+
+  defines = [ "NETMGR_LOG_TAG = \"NetHttpClient\"" ]
+
+  external_deps = [
+    "curl:curl_shared",
+    "hilog:libhilog",
+  ]
+
+  innerapi_tags = [ "platformsdk" ]
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}

@@ -16,6 +16,7 @@
 #ifndef NET_CONN_MANAGER_H
 #define NET_CONN_MANAGER_H
 
+#include <functional>
 #include <map>
 #include <string>
 
@@ -36,6 +37,7 @@
 #include <shared_mutex>
 #include "net_conn_callback_stub.h"
 #include "refresh_http_proxy_callback_stub.h"
+#include "http_proxy_callback_stub.h"
 #include "net_trace_route_info.h"
 
 namespace ffrt {
@@ -196,6 +198,17 @@ public:
      * @return Returns 0, successfully unregister net connection callback, otherwise it will fail
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
+     * @note Quiesce guarantee:
+     * 1. Called outside the callback dispatch context: after this method returns, no task referencing
+     *    the callback remains in the dispatch queue (including sptr teardown held by unexecuted tasks),
+     *    so the caller may safely release the callback implementation resources afterwards (including
+     *    dlclose of the library implementing the callback).
+     * 2. Called inside a callback (i.e. within the callback dispatch context): only the unregistration
+     *    itself takes effect, the quiesce guarantee does NOT hold (drain is skipped to avoid
+     *    self-deadlock on the serial dispatch queue). The callback code itself and the sptr teardown of
+     *    unexecuted dispatch tasks still run inside the callback implementation library, so dlclose
+     *    right after unregistering is NOT supported in this case. Scenarios requiring dlclose must
+     *    unregister outside the callback dispatch context.
      */
     int32_t UnregisterNetConnCallback(const sptr<INetConnCallback> &callback);
 
@@ -462,7 +475,12 @@ public:
     int32_t FactoryResetNetwork();
     int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback);
     void RegisterAppHttpProxyCallback(std::function<void(const HttpProxy &httpProxy)> callback, uint32_t &callbackid);
+    void RegisterAppHttpProxyCallback(std::function<void(const HttpProxy &httpProxy)> callback, uint32_t &callbackid,
+        bool notifyEmptyProxy);
     void UnregisterAppHttpProxyCallback(uint32_t callbackid);
+    HttpProxy GetAppHttpProxy();
+    int32_t RegisterDefaultHttpProxyCallback(std::function<void(const HttpProxy &)> callback, uint32_t &callbackId);
+    void UnregisterDefaultHttpProxyCallback(uint32_t callbackId);
     int32_t SetAppHttpProxy(const HttpProxy &httpProxy);
      /**
      * Whether this url prefer cellular
@@ -594,6 +612,7 @@ private:
         std::list<sptr<INetConnCallback>> netConnCallbackList_;
         bool isNetStateUpdated_ = false;
         std::shared_ptr<ffrt::queue> ffrtQueue_ = nullptr;
+        int32_t SubmitDispatch(std::function<void()> body);
     };
 
 private:
@@ -613,11 +632,48 @@ private:
     sptr<NetConnClient::NetConnCallbackManager> FindConnCallbackManager(NetConnCallbackManagerMap &managerMap,
         const sptr<NetSpecifier> &netSpecifier);
     bool IsCallbackExist(const sptr<INetConnCallback> &callback);
+    void DrainCallbackQueue();
+    /**
+    * Set while the thread is dispatching user callbacks on ffrtQueue_ (RAII, via InCallbackDispatch
+    * inside SubmitDispatch). The flag set condition strictly coincides with the drain deadlock
+    * condition, so a false positive only skips one drain, introducing no hang.
+    */
+    class InCallbackDispatch {
+    public:
+        InCallbackDispatch()
+        {
+            tlsInCallbackDispatch_ = true;
+        }
+        ~InCallbackDispatch()
+        {
+            tlsInCallbackDispatch_ = false;
+        }
+        InCallbackDispatch(const InCallbackDispatch &) = delete;
+        InCallbackDispatch &operator=(const InCallbackDispatch &) = delete;
+    };
 
 private:
     std::mutex appHttpProxyCbMapMutex_;
     uint32_t currentCallbackId_ = 0;
     std::map<uint32_t, std::function<void(const HttpProxy &httpProxy)>> appHttpProxyCbMap_;
+    std::recursive_mutex httpProxyNotifyMutex_;
+    uint64_t appHttpProxyValueGeneration_ = 0;
+    std::mutex defaultHttpProxyCbMutex_;
+    std::map<uint32_t, std::function<void(const HttpProxy &)>> defaultHttpProxyCbMap_;
+    uint32_t currentDefaultCallbackId_ = 0;
+    sptr<HttpProxyCallbackStub> defaultHttpProxyCallbackStub_;
+    HttpProxy lastDefaultHttpProxy_;
+    bool hasLastDefaultHttpProxy_ = false;
+    uint64_t defaultHttpProxyValueGeneration_ = 0;
+    int32_t RegisterDefaultHttpProxyStub();
+    void RegisterDefaultHttpProxyCallbackWithCurrent(const std::function<void(const HttpProxy &)> &callback,
+        uint32_t &callbackId, bool firstCallback, const HttpProxy &current, std::unique_lock<std::mutex> &lock,
+        std::unique_lock<std::recursive_mutex> &notifyLock);
+    void NotifyRegisteredDefaultHttpProxyCallbacks(
+        const std::vector<std::pair<uint32_t, std::function<void(const HttpProxy &)>>> &callbacks,
+        const HttpProxy &httpProxy,
+        uint64_t generation);
+    void NotifyDefaultHttpProxyCallback();
     HttpProxy appHttpProxy_;
     std::mutex globalHttpProxyMutex_;
     HttpProxy globalHttpProxy_;
@@ -646,6 +702,7 @@ private:
     static inline std::mutex instanceMtx_;
     static inline std::shared_ptr<NetConnClient> instance_ = nullptr;
     std::shared_ptr<ffrt::queue> ffrtQueue_ = nullptr;
+    static inline thread_local bool tlsInCallbackDispatch_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

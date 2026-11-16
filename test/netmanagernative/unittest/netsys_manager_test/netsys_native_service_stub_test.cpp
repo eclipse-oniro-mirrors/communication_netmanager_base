@@ -20,11 +20,14 @@
 #define protected public
 #endif
 #include "common_net_diag_callback_test.h"
+#include "common_mock_netmanager_permission.h"
+#include "net_manager_constants.h"
 #include "common_notify_callback_test.h"
 #include "i_netsys_service.h"
 #include "net_dns_result_callback_stub.h"
 #include "netnative_log_wrapper.h"
 #include "mock_netsys_native_service_stub.h"
+#include "bpf_def.h"
 #ifdef FEATURE_NET_FIREWALL_ENABLE
 #include "netfirewall_parcel.h"
 #endif
@@ -70,6 +73,312 @@ void NetsysNativeServiceStubTest::TearDownTestCase() {}
 void NetsysNativeServiceStubTest::SetUp() {}
 
 void NetsysNativeServiceStubTest::TearDown() {}
+
+namespace {
+class DnsFamilyRecordingStub : public TestNetsysNativeServiceStub {
+public:
+    int32_t SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable) override
+    {
+        ++calls;
+        lastNetId = netId;
+        ipv4 = ipv4Enable;
+        ipv6 = ipv6Enable;
+        return result;
+    }
+
+    uint32_t calls = 0;
+    uint16_t lastNetId = 0;
+    bool ipv4 = false;
+    bool ipv6 = false;
+    int32_t result = NetManagerStandard::NETMANAGER_SUCCESS;
+};
+
+class DnsFamilyFailingAllocator : public Allocator {
+public:
+    void *Alloc(size_t size) override { return nullptr; }
+    void *Realloc(void *data, size_t size) override { return nullptr; }
+    void Dealloc(void *data) override {}
+};
+} // namespace
+
+class NetsysDnsFamilyStubTest : public testing::Test {
+public:
+    void SetUp() override { NetManagerStandard::SetMockNetSysInternalPermissionResult(true); }
+    void TearDown() override { NetManagerStandard::SetMockNetSysInternalPermissionResult(true); }
+
+    DnsFamilyRecordingStub stub;
+};
+
+HWTEST_F(NetsysDnsFamilyStubTest, PermissionDenied, TestSize.Level1)
+{
+    NetManagerStandard::SetMockNetSysInternalPermissionResult(false);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(stub.CmdSetNetworkDnsFamilyCapability(data, reply),
+        NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(stub.calls, 0u);
+    EXPECT_EQ(reply.GetDataSize(), 0u);
+}
+
+HWTEST_F(NetsysDnsFamilyStubTest, TruncatedFields, TestSize.Level1)
+{
+    // Fail each Read independently, including both short-circuit continuation paths.
+    for (uint32_t fields = 0; fields < 3; ++fields) {
+        SCOPED_TRACE(fields);
+        MessageParcel data;
+        MessageParcel reply;
+        if (fields >= 1) {
+            ASSERT_TRUE(data.WriteUint16(60123));
+        }
+        if (fields >= 2) {
+            ASSERT_TRUE(data.WriteBool(true));
+        }
+        EXPECT_EQ(stub.CmdSetNetworkDnsFamilyCapability(data, reply), ERR_FLATTEN_OBJECT);
+        EXPECT_EQ(stub.calls, 0u);
+        EXPECT_EQ(reply.GetDataSize(), 0u);
+    }
+}
+
+HWTEST_F(NetsysDnsFamilyStubTest, BooleanCombinations, TestSize.Level1)
+{
+    for (bool ipv4 : {false, true}) {
+        for (bool ipv6 : {false, true}) {
+            MessageParcel data;
+            MessageParcel reply;
+            ASSERT_TRUE(data.WriteUint16(60123));
+            ASSERT_TRUE(data.WriteBool(ipv4));
+            ASSERT_TRUE(data.WriteBool(ipv6));
+            EXPECT_EQ(stub.CmdSetNetworkDnsFamilyCapability(data, reply), NetManagerStandard::NETMANAGER_SUCCESS);
+            int32_t result = ERR_INVALID_DATA;
+            ASSERT_TRUE(reply.ReadInt32(result));
+            EXPECT_EQ(result, NetManagerStandard::NETMANAGER_SUCCESS);
+            EXPECT_EQ(stub.lastNetId, 60123);
+            EXPECT_EQ(stub.ipv4, ipv4);
+            EXPECT_EQ(stub.ipv6, ipv6);
+        }
+    }
+    EXPECT_EQ(stub.calls, 4u);
+}
+
+HWTEST_F(NetsysDnsFamilyStubTest, ServiceErrorInReply, TestSize.Level1)
+{
+    stub.result = -ENOENT;
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteUint16(UINT16_MAX));
+    ASSERT_TRUE(data.WriteBool(false));
+    ASSERT_TRUE(data.WriteBool(true));
+    EXPECT_EQ(stub.CmdSetNetworkDnsFamilyCapability(data, reply), NetManagerStandard::NETMANAGER_SUCCESS);
+    int32_t result = 0;
+    ASSERT_TRUE(reply.ReadInt32(result));
+    EXPECT_EQ(result, -ENOENT);
+    EXPECT_EQ(stub.calls, 1u);
+    EXPECT_EQ(stub.lastNetId, UINT16_MAX);
+}
+
+HWTEST_F(NetsysDnsFamilyStubTest, ReplyAllocationFailure, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteUint16(60123));
+    ASSERT_TRUE(data.WriteBool(true));
+    ASSERT_TRUE(data.WriteBool(false));
+    // Parcel takes ownership of this allocator; no process-wide allocation failure is injected.
+    ASSERT_TRUE(reply.SetAllocator(new DnsFamilyFailingAllocator()));
+    EXPECT_EQ(stub.CmdSetNetworkDnsFamilyCapability(data, reply), ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(stub.calls, 1u);
+    EXPECT_EQ(reply.GetDataSize(), 0u);
+}
+
+namespace {
+class PresetDomainsRecordingStub : public TestNetsysNativeServiceStub {
+public:
+    int32_t SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains) override
+    {
+        ++calls;
+        lastDomains = domains;
+        return result;
+    }
+
+    uint32_t calls = 0;
+    std::map<uint32_t, std::vector<std::string>> lastDomains;
+    int32_t result = NetManagerStandard::NETMANAGER_SUCCESS;
+};
+} // namespace
+
+class NetsysPresetDomainsStubTest : public testing::Test {
+public:
+    void SetUp() override { NetManagerStandard::SetMockNetSysInternalPermissionResult(true); }
+    void TearDown() override { NetManagerStandard::SetMockNetSysInternalPermissionResult(true); }
+
+    PresetDomainsRecordingStub stub;
+};
+
+HWTEST_F(NetsysPresetDomainsStubTest, PresetDomainsPermissionDenied, TestSize.Level1)
+{
+    NetManagerStandard::SetMockNetSysInternalPermissionResult(false);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(stub.calls, 0u);
+    EXPECT_EQ(reply.GetDataSize(), 0u);
+}
+
+HWTEST_F(NetsysPresetDomainsStubTest, PresetDomainsParseFailures, TestSize.Level1)
+{
+    // Mirror the stub limits MAX_PRESET_UID_NUM / MAX_DOMAIN_NUM (both 128)
+    constexpr int32_t MAX_PRESET_UID_NUM = 128;
+    constexpr int32_t MAX_DOMAIN_NUM = 128;
+    // Each block fails exactly one read or one range check in ReadPresetDomainsFromParcel
+    {
+        // Nothing written - read uid num failed
+        MessageParcel data;
+        MessageParcel reply;
+        EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), ERR_FLATTEN_OBJECT);
+    }
+    {
+        // Negative uid num
+        MessageParcel data;
+        MessageParcel reply;
+        ASSERT_TRUE(data.WriteInt32(-1));
+        EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), ERR_FLATTEN_OBJECT);
+    }
+    {
+        // Uid num exceeds MAX_PRESET_UID_NUM
+        MessageParcel data;
+        MessageParcel reply;
+        ASSERT_TRUE(data.WriteInt32(MAX_PRESET_UID_NUM + 1));
+        EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), ERR_FLATTEN_OBJECT);
+    }
+    {
+        // Uid num without uid - read uid failed
+        MessageParcel data;
+        MessageParcel reply;
+        ASSERT_TRUE(data.WriteInt32(1));
+        EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), ERR_FLATTEN_OBJECT);
+    }
+    {
+        // Uid without domain num - read domain num failed
+        MessageParcel data;
+        MessageParcel reply;
+        ASSERT_TRUE(data.WriteInt32(1));
+        ASSERT_TRUE(data.WriteUint32(20000001));
+        EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), ERR_FLATTEN_OBJECT);
+    }
+    {
+        // Negative domain num
+        MessageParcel data;
+        MessageParcel reply;
+        ASSERT_TRUE(data.WriteInt32(1));
+        ASSERT_TRUE(data.WriteUint32(20000001));
+        ASSERT_TRUE(data.WriteInt32(-1));
+        EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), ERR_FLATTEN_OBJECT);
+    }
+    {
+        // Domain num exceeds MAX_DOMAIN_NUM
+        MessageParcel data;
+        MessageParcel reply;
+        ASSERT_TRUE(data.WriteInt32(1));
+        ASSERT_TRUE(data.WriteUint32(20000001));
+        ASSERT_TRUE(data.WriteInt32(MAX_DOMAIN_NUM + 1));
+        EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), ERR_FLATTEN_OBJECT);
+    }
+    {
+        // Empty domain string
+        MessageParcel data;
+        MessageParcel reply;
+        ASSERT_TRUE(data.WriteInt32(1));
+        ASSERT_TRUE(data.WriteUint32(20000001));
+        ASSERT_TRUE(data.WriteInt32(1));
+        ASSERT_TRUE(data.WriteString(""));
+        EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), ERR_FLATTEN_OBJECT);
+    }
+    EXPECT_EQ(stub.calls, 0u);
+}
+
+HWTEST_F(NetsysPresetDomainsStubTest, PresetDomainsSkipInvalid, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInt32(1));
+    ASSERT_TRUE(data.WriteUint32(20000001));
+    ASSERT_TRUE(data.WriteInt32(3));
+    // Longer than DNS_DOMAIN_NAME_SIZE - skipped by the charset validation
+    ASSERT_TRUE(data.WriteString(std::string(DNS_DOMAIN_NAME_SIZE + 1, 'a')));
+    // Character outside letters/digits/'.'/'-' - skipped by the charset validation
+    ASSERT_TRUE(data.WriteString("exam_ple.com"));
+    // Valid domain - kept
+    ASSERT_TRUE(data.WriteString("example.com"));
+    EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(stub.calls, 1u);
+    ASSERT_EQ(stub.lastDomains.size(), 1u);
+    EXPECT_EQ(stub.lastDomains[20000001], std::vector<std::string>({"example.com"}));
+    int32_t result = 0;
+    ASSERT_TRUE(reply.ReadInt32(result));
+    EXPECT_EQ(result, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysPresetDomainsStubTest, PresetDomainsMultipleUids, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInt32(2));
+    ASSERT_TRUE(data.WriteUint32(20000001));
+    ASSERT_TRUE(data.WriteInt32(1));
+    ASSERT_TRUE(data.WriteString("example.com"));
+    ASSERT_TRUE(data.WriteUint32(20000002));
+    ASSERT_TRUE(data.WriteInt32(2));
+    ASSERT_TRUE(data.WriteString("a.example.com"));
+    ASSERT_TRUE(data.WriteString("b.example.com"));
+    EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(stub.calls, 1u);
+    ASSERT_EQ(stub.lastDomains.size(), 2u);
+    EXPECT_EQ(stub.lastDomains[20000001], std::vector<std::string>({"example.com"}));
+    EXPECT_EQ(stub.lastDomains[20000002], std::vector<std::string>({"a.example.com", "b.example.com"}));
+}
+
+HWTEST_F(NetsysPresetDomainsStubTest, PresetDomainsEmptyMap, TestSize.Level1)
+{
+    // Uid num is 0 - the empty domains map clears all preset domains in SetPresetDomains
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInt32(0));
+    EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(stub.calls, 1u);
+    EXPECT_TRUE(stub.lastDomains.empty());
+}
+
+HWTEST_F(NetsysPresetDomainsStubTest, PresetDomainsServiceErrorInReply, TestSize.Level1)
+{
+    stub.result = -ENOENT;
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInt32(1));
+    ASSERT_TRUE(data.WriteUint32(20000001));
+    ASSERT_TRUE(data.WriteInt32(1));
+    ASSERT_TRUE(data.WriteString("example.com"));
+    // The service error code is written into the reply, the stub still returns success
+    EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), NetManagerStandard::NETMANAGER_SUCCESS);
+    int32_t result = 0;
+    ASSERT_TRUE(reply.ReadInt32(result));
+    EXPECT_EQ(result, -ENOENT);
+    EXPECT_EQ(stub.calls, 1u);
+}
+
+HWTEST_F(NetsysPresetDomainsStubTest, PresetDomainsReplyAllocationFailure, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInt32(1));
+    ASSERT_TRUE(data.WriteUint32(20000001));
+    ASSERT_TRUE(data.WriteInt32(1));
+    ASSERT_TRUE(data.WriteString("example.com"));
+    // Parcel takes ownership of this allocator; no process-wide allocation failure is injected.
+    ASSERT_TRUE(reply.SetAllocator(new DnsFamilyFailingAllocator()));
+    EXPECT_EQ(stub.CmdSetPresetDomains(data, reply), ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(stub.calls, 1u);
+    EXPECT_EQ(reply.GetDataSize(), 0u);
+}
 
 HWTEST_F(NetsysNativeServiceStubTest, CmdSetResolverConfig001, TestSize.Level1)
 {

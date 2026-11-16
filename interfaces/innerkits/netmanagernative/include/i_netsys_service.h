@@ -18,6 +18,8 @@
 #include <netdb.h>
 #include <string>
 #include <set>
+#include <map>
+#include <vector>
 #include <unordered_map>
 
 #include "dns_config_client.h"
@@ -131,7 +133,8 @@ public:
                                         int32_t prefixLength, int socketType) = 0;
     virtual int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress) = 0;
     virtual int32_t InterfaceSetIffUp(const std::string &ifaceName) = 0;
-    virtual int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType) = 0;
+    virtual int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType,
+        bool isLocalNetworkRouted = false) = 0;
     virtual int32_t NetworkRemoveInterface(int32_t netId, const std::string &iface) = 0;
     virtual int32_t NetworkDestroy(int32_t netId, bool isVpnNet = false) = 0;
     virtual int32_t CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
@@ -247,6 +250,7 @@ public:
     virtual int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps) = 0;
     virtual int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) = 0;
     virtual int32_t SetUserDefinedServerFlag(uint16_t netId, bool flag) = 0;
+    virtual int32_t SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable) = 0;
     virtual int32_t FlushDnsCache(uint16_t netId) = 0;
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
     virtual int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add) = 0;
@@ -263,6 +267,7 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
     virtual int32_t NetworkAddRoutes(int32_t netId, const std::vector<nmd::NetworkRouteInfo> &infos) = 0;
     virtual int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid) = 0;
+    virtual int32_t SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains) = 0;
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     virtual sptr<NfqCtx> NfqOpen() = 0;
     virtual int32_t NfqClose(sptr<NfqCtx> &ctx) = 0;

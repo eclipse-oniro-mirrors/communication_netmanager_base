@@ -195,7 +195,8 @@ int32_t NetsysController::NetworkDelUids(int32_t netId, const std::vector<int32_
     return netsysService_->NetworkDelUids(netId, uidRanges);
 }
 
-int32_t NetsysController::NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType)
+int32_t NetsysController::NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType,
+    bool isLocalNetworkRouted)
 {
     NETMGR_LOG_I("Add network interface: netId[%{public}d], iface[%{public}s, bearerType[%{public}u]]", netId,
                  iface.c_str(), netBearerType);
@@ -205,7 +206,7 @@ int32_t NetsysController::NetworkAddInterface(int32_t netId, const std::string &
         return NETSYS_NETSYSSERVICE_NULL;
     }
     // LCOV_EXCL_STOP
-    return netsysService_->NetworkAddInterface(netId, iface, netBearerType);
+    return netsysService_->NetworkAddInterface(netId, iface, netBearerType, isLocalNetworkRouted);
 }
 
 int32_t NetsysController::NetworkRemoveInterface(int32_t netId, const std::string &iface)
@@ -1673,6 +1674,17 @@ int32_t NetsysController::SetIpv6UidBlackList(std::vector<int32_t> &netIds, int3
     return netsysService_->SetIpv6UidBlackList(netIds, uid);
 }
 
+int32_t NetsysController::SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains)
+{
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("SetPresetDomains netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->SetPresetDomains(domains);
+}
+
 int32_t NetsysController::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
 {
     // LCOV_EXCL_START This will never happen.
@@ -1768,6 +1780,15 @@ int32_t NetsysController::SetUserDefinedServerFlag(uint16_t netId, bool isUserDe
         return NETSYS_NETSYSSERVICE_NULL;
     }
     return netsysService_->SetUserDefinedServerFlag(netId, isUserDefinedServer);
+}
+
+int32_t NetsysController::SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("SetNetworkDnsFamilyCapability netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetNetworkDnsFamilyCapability(netId, ipv4Enable, ipv6Enable);
 }
 
 #ifdef SUPPORT_SYSVPN

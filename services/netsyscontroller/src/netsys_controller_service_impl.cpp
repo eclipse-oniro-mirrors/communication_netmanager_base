@@ -107,14 +107,14 @@ int32_t NetsysControllerServiceImpl::NetworkDelUids(int32_t netId, const std::ve
 }
 
 int32_t NetsysControllerServiceImpl::NetworkAddInterface(int32_t netId, const std::string &iface,
-                                                         NetBearType netBearerType)
+    NetBearType netBearerType, bool isLocalNetworkRouted)
 {
     NETMGR_LOG_I("Add network interface: netId[%{public}d], iface[%{public}s]", netId,
                  iface.c_str());
     if (mockNetsysClient_.CheckMockApi(MOCK_NETWORKADDINTERFACE_API)) {
         return mockNetsysClient_.NetworkAddInterface(netId, iface, netBearerType);
     }
-    return netsysClient_->NetworkAddInterface(netId, iface, netBearerType);
+    return netsysClient_->NetworkAddInterface(netId, iface, netBearerType, isLocalNetworkRouted);
 }
 
 int32_t NetsysControllerServiceImpl::NetworkRemoveInterface(int32_t netId, const std::string &iface)
@@ -999,6 +999,12 @@ int32_t NetsysControllerServiceImpl::SetIpv6UidBlackList(std::vector<int32_t> &n
     return netsysClient_->SetIpv6UidBlackList(netIds, uid);
 }
 
+int32_t NetsysControllerServiceImpl::SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains)
+{
+    NETMGR_LOG_I("SetPresetDomains: uid num: %{public}zu", domains.size());
+    return netsysClient_->SetPresetDomains(domains);
+}
+
 int32_t NetsysControllerServiceImpl::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
 {
     NETMGR_LOG_D("SetIpv6AutoConf: interfaceName=%{public}s on=%{public}d", interfaceName.c_str(), on);
@@ -1085,6 +1091,14 @@ int32_t NetsysControllerServiceImpl::SetUserDefinedServerFlag(uint16_t netId, bo
 {
     NETMGR_LOG_D("SetUserDefinedServerFlag isUserDefinedServer = %{public}d", isUserDefinedServer);
     return netsysClient_->SetUserDefinedServerFlag(netId, isUserDefinedServer);
+}
+
+int32_t NetsysControllerServiceImpl::SetNetworkDnsFamilyCapability(
+    uint16_t netId, bool ipv4Enable, bool ipv6Enable)
+{
+    NETMGR_LOG_I("SetNetworkDnsFamilyCapability netId[%{public}u], ipv4[%{public}d], ipv6[%{public}d]",
+        netId, ipv4Enable, ipv6Enable);
+    return netsysClient_->SetNetworkDnsFamilyCapability(netId, ipv4Enable, ipv6Enable);
 }
 
 int32_t NetsysControllerServiceImpl::FlushDnsCache(uint16_t netId)

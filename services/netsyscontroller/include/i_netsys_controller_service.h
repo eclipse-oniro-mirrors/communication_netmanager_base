@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <map>
 
 #include "dns_config_client.h"
 #include "interface_type.h"
@@ -101,7 +102,8 @@ public:
      * @param iface Network port device name
      * @return Return the return value of the netsys interface call
      */
-    virtual int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType) = 0;
+    virtual int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType,
+        bool isLocalNetworkRouted = false) = 0;
 
     /**
      * Delete network port device
@@ -1029,6 +1031,7 @@ public:
     virtual int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) = 0;
 
     virtual int32_t SetUserDefinedServerFlag(uint16_t netId, bool isUserDefinedServer) = 0;
+    virtual int32_t SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable) = 0;
 
 #ifdef SUPPORT_SYSVPN
     /**
@@ -1069,6 +1072,7 @@ public:
                                        int32_t &ownerUid) = 0;
     virtual int32_t GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo) = 0;
     virtual int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid) = 0;
+    virtual int32_t SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains) = 0;
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     virtual sptr<NetsysNative::NfqCtx> NfqOpen() = 0;
     virtual int32_t NfqClose(sptr<NetsysNative::NfqCtx> &ctx) = 0;

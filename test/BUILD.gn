@@ -18,6 +18,7 @@ group("unittest") {
   deps = [
     "netcommon:unittest",
     "netconnmanager:unittest",
+    "nethttpclient:unittest",
     "netmanagerconnection:unittest",
     "netmanagernative:unittest",
     "netmanagerutils:unittest",

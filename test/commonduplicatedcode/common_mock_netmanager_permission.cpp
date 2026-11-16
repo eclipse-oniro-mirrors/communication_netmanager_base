@@ -22,11 +22,17 @@ namespace NetManagerStandard {
 
 namespace {
 bool g_mockCheckPermissionResult = true;
+bool g_mockNetSysInternalPermissionResult = true;
 } // namespace
 
 void SetMockCheckPermissionResult(bool result)
 {
     g_mockCheckPermissionResult = result;
+}
+
+void SetMockNetSysInternalPermissionResult(bool result)
+{
+    g_mockNetSysInternalPermissionResult = result;
 }
 
 bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissionName)
@@ -50,6 +56,12 @@ bool NetManagerPermission::IsSystemCaller()
 bool NetManagerPermission::CheckNetSysInternalPermission(const std::string &permissionName)
 {
     NETMGR_LOG_D("permissionName: %{public}s", permissionName.c_str());
+    return g_mockNetSysInternalPermissionResult;
+}
+
+bool NetManagerPermission::CheckUidPermission(const std::vector<uint32_t> &allowedUids)
+{
+    NETMGR_LOG_D("allowedUids size: %{public}zu", allowedUids.size());
     return true;
 }
 

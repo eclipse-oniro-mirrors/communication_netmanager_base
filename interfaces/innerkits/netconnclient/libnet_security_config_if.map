@@ -1,0 +1,59 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# innerkit 支撑库：保留 NetworkSecurityConfig 自有符号（netstack 网络安全配置解析引用），隐藏 std 实例与泄漏。
+{
+  global:
+    extern "C++" {
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::DumpConfigs()";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::GetInstance()";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::TrustUserCa()";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ReadCertFile(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::TrustUser0Ca()";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ValidateDate(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::IsPinOpenMode(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::GetJsonProfile()";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::IsUserDnsCache()";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonConfig(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonPinSet(cJSON const*, OHOS::NetManagerStandard::PinSet&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::GetRehasedCAPath(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::IsCACertFileName(char const*)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonDomains(cJSON const*, std::__h::vector<OHOS::NetManagerStandard::Domain, std::__h::allocator<OHOS::NetManagerStandard::Domain>>&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::GetJsonFromBundle(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::BuildRehasedCAPath(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::GetCAFilesFromPath(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonBaseConfig(cJSON const*, OHOS::NetManagerStandard::BaseConfig&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ReHashCAPathForX509(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::GetPinSetForHostName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::GetRehashedCADirName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::IsCleartextPermitted(bool&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::IsCleartextPermitted(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonComponentCfg(cJSON const*, std::__h::unordered_map<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, bool, std::__h::hash<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::equal_to<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const, bool>>>&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonComponentCfg(cJSON const*, std::__h::unordered_map<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, bool, std::__h::hash<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::equal_to<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const, bool>>>&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonTrustAnchors(cJSON const*, OHOS::NetManagerStandard::TrustAnchors&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonDomainConfigs(cJSON const*, std::__h::vector<OHOS::NetManagerStandard::DomainConfig, std::__h::allocator<OHOS::NetManagerStandard::DomainConfig>>&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::CreateRehashedCertFiles()";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::AddSurfixToCACertFileName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::less<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::IsCleartextCfgByComponent(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::IsPinOpenModeVerifyRootCa(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::GetTrustAnchorsForHostName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonCleartextPermitted(cJSON const*, bool&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::GetConfig()";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::NetworkSecurityConfig()";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::NetworkSecurityConfig()";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::~NetworkSecurityConfig()";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::~NetworkSecurityConfig()";
+    };
+  local:
+    *;
+};

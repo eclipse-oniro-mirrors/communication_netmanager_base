@@ -427,7 +427,8 @@ void Network::UpdateInterfaces(const NetLinkInfo &newNetLinkInfo)
     int32_t ret = NETMANAGER_SUCCESS;
     // Call netsys to add and remove interface
     if (!newNetLinkInfo.ifaceName_.empty()) {
-        ret = NetsysController::GetInstance().NetworkAddInterface(netId_, newNetLinkInfo.ifaceName_, netSupplierType_);
+        ret = NetsysController::GetInstance().NetworkAddInterface(netId_, newNetLinkInfo.ifaceName_, netSupplierType_,
+            netSupplierType_ == BEARER_VPN && newNetLinkInfo.isLocalNetworkRouted_);
         if (ret != NETMANAGER_SUCCESS) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_ADD_NET_INTERFACE_FAILED);
         }
@@ -833,7 +834,7 @@ void Network::StartNetDetection(bool needReport)
 
     NETMGR_LOG_D("Enter StartNetDetection");
 #ifdef FEATURE_SUPPORT_POWERMANAGER
-    if (forbidDetectionFlag_) {
+    if (forbidDetectionFlag_.load()) {
         NETMGR_LOG_W("Sleep status, forbid detection");
         return;
     }
@@ -847,7 +848,7 @@ void Network::StartNetDetection(bool needReport)
 #ifdef FEATURE_SUPPORT_POWERMANAGER
 void Network::UpdateForbidDetectionFlag(bool forbidDetectionFlag)
 {
-    forbidDetectionFlag_ = forbidDetectionFlag;
+    forbidDetectionFlag_.store(forbidDetectionFlag);
 }
 #endif
 
@@ -859,6 +860,12 @@ void Network::SetNetCaps(const std::set<NetCap> &netCaps)
 
 void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
 {
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    if (forbidDetectionFlag_.load()) {
+        NETMGR_LOG_W("Sleep status, forbid dns health detection");
+        return;
+    }
+#endif
 #ifndef IP_CMD_QUICK_CONFIG
     if (!IsConnected()) {
         NETMGR_LOG_W("Network[%{public}d] is not connected, stop dns health detection", netId_);
@@ -1177,6 +1184,12 @@ void Network::SetScreenState(bool isScreenOn)
 
 int32_t Network::StartDualStackProbeThread()
 {
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    if (forbidDetectionFlag_.load()) {
+        NETMGR_LOG_W("Sleep status, forbid dual stack probe");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+#endif
     std::shared_lock<std::shared_mutex> lockMonitor(netMonitorMutex_);
     if (netMonitor_) {
         return netMonitor_->StartDualStackProbeThread();

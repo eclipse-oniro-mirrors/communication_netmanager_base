@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
+#include <array>
 #include <securec.h>
 #include <thread>
 
 #include "net_base_branch_fuzzer.h"
 
-#include "curl/curl.h"
 #include "net_mgr_log_wrapper.h"
 
 #define private public
+#include "net_http_client.h"
 #include "net_http_probe.h"
 #include "net_policy_rule.h"
 
@@ -30,7 +31,7 @@ namespace NetManagerStandard {
 namespace {
 const uint8_t *g_baseBranchFuzzData = nullptr;
 size_t g_baseBranchFuzzSize = 0;
-size_t g_baseBranchFuzzPos;
+size_t g_baseBranchFuzzPos = 0;
 constexpr int TWO = 2;
 constexpr size_t STR_LEN = 10;
 } // namespace
@@ -39,7 +40,8 @@ template <class T> T GetNetBranchFuzzData()
 {
     T object{};
     size_t objectSize = sizeof(object);
-    if (g_baseBranchFuzzData == nullptr || objectSize > g_baseBranchFuzzSize - g_baseBranchFuzzPos) {
+    if (g_baseBranchFuzzData == nullptr || g_baseBranchFuzzPos >= g_baseBranchFuzzSize ||
+        objectSize > g_baseBranchFuzzSize - g_baseBranchFuzzPos) {
         return object;
     }
     errno_t ret = memcpy_s(&object, objectSize, g_baseBranchFuzzData + g_baseBranchFuzzPos, objectSize);
@@ -52,24 +54,29 @@ template <class T> T GetNetBranchFuzzData()
 
 std::string GetStringFromData(int strlen)
 {
-    char cstr[strlen];
-    cstr[strlen - 1] = '\0';
+    if (strlen <= 0 || static_cast<size_t>(strlen) > STR_LEN) {
+        return {};
+    }
+    std::array<char, STR_LEN> cstr {};
     for (int i = 0; i < strlen - 1; i++) {
         cstr[i] = GetNetBranchFuzzData<char>();
     }
-    std::string str(cstr);
-    return str;
+    cstr[strlen - 1] = '\0';
+    return std::string(cstr.data());
 }
 
 SecureData GetSecureDataFromData(int8_t strlen)
 {
     SecureData secureData;
-    char cstr[strlen];
-    cstr[strlen - 1] = '\0';
+    if (strlen <= 0 || static_cast<size_t>(strlen) > STR_LEN) {
+        return secureData;
+    }
+    std::array<char, STR_LEN> cstr {};
     for (int i = 0; i < strlen - 1; i++) {
         cstr[i] = GetNetBranchFuzzData<char>();
     }
-    secureData.append(cstr, strlen - 1);
+    cstr[strlen - 1] = '\0';
+    secureData.append(cstr.data(), strlen - 1);
     return secureData;
 }
 
@@ -86,39 +93,38 @@ void NetHttpProbeBranchFuzzTest(const uint8_t *data, size_t size)
     std::string host = GetStringFromData(STR_LEN);
     HttpProxy httpProxy = {host, 0, {}};
     NetLinkInfo info;
-    std::string ifaceName = std::string(reinterpret_cast<const char*>(data), size);
+    std::string ifaceName = GetStringFromData(STR_LEN);
     info.ifaceName_ = ifaceName;
     instance_->netLinkInfo_ = info;
     instance_->UpdateGlobalHttpProxy(httpProxy);
     std::string httpUrl = GetStringFromData(STR_LEN);
     std::string httpsUrl = GetStringFromData(STR_LEN);
     instance_->SendProbe(PROBE_HTTP_HTTPS, httpUrl, httpsUrl);
-    instance_->CheckCurlGlobalInitState();
     ProbeType probeType = ProbeType::PROBE_HTTP_HTTPS;
-    instance_->InitHttpCurl(probeType);
-    instance_->CleanHttpCurl();
     instance_->ExtractDomainFormUrl(httpUrl);
     std::string testString = "";
     instance_->GetAddrInfo(testString);
-    instance_->SetResolveOption(probeType, testString, testString, testId);
-    instance_->SetResolveOption(probeType, "test", testString, testId);
+    NetHttp::HttpRequest request;
+    instance_->AppendResolve(request, testString, testString, testId);
+    instance_->AppendResolve(request, "test", testString, testId);
     testString = GetStringFromData(STR_LEN);
     instance_->GetAddrInfo(testString);
-    instance_->SetCurlOptions(probeType, httpUrl, httpsUrl);
-    CURL *curl = nullptr;
-    instance_->SetHttpOptions(probeType, curl, testString);
+    instance_->BuildHttpRequest(probeType, testString, request);
     bool useHttpProxy = GetNetBranchFuzzData<bool>();
-    instance_->SetProxyOption(probeType, useHttpProxy);
-    instance_->SetResolveOption(probeType, testString, testString, testId);
-    instance_->SendDnsProbe(probeType, testString, testString, useHttpProxy);
-    instance_->SendHttpProbeRequest();
-    instance_->RecvHttpProbeResponse();
+    instance_->SetProxyOption(probeType, request, useHttpProxy);
+    instance_->SendDnsProbe(probeType, testString, request, useHttpProxy);
+    NetHttp::HttpResponse response;
+    instance_->CheckRespCode(response);
+    instance_->CheckSuccessRespCode(response, testId);
+    instance_->CheckClientErrorRespCode(response, testId);
+    NetHttp::HttpProxyConfig proxyConfig;
+    instance_->FillProxyUserInfo(proxyConfig);
     instance_->LoadProxy(testString, testId);
 }
 
 void NetPolicyRuleBranchFuzzTest(const uint8_t *data, size_t size)
 {
-    if (data == nullptr) {
+    if (data == nullptr || size == 0) {
         return;
     }
     bool isForeground = (static_cast<int>(data[0]) % TWO) ? true : false;

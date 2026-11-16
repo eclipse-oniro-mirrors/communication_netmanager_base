@@ -68,6 +68,8 @@ ohos_static_library("policy_ani_static") {
 }
 
 ohos_rust_shared_library("policy_ani") {
+  version_script = "libpolicy_ani.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true

@@ -26,6 +26,11 @@ namespace nmd {
 static constexpr const char *DEFAULT_STR_SUBNET = "255.255.255.0";
 static constexpr const char *DEFAULT_STR_STARTIP = ".3";
 static constexpr const char *DEFAULT_STR_ENDIP = ".254";
+// Placeholder session key used by RenewClient() to trigger dhcp client initialization. It is NOT a real
+// iface name: the dhcp service dispatches results by the real iface (wlan0/eth0) registered by the
+// wifi/ethernet owner, so this key never matches a result. It only keeps dhcpClientPtr non-null so that
+// RenewClient can reuse StartDhcpClient(config) to re-run DHCP for renewal. Do not remove it until the
+// dhcp repo provides a dedicated renew API.
 static constexpr const char *DHCP_CLIENT_SESSION_IFNAME = "nm-dhcp-client-session";
 DhcpController *DhcpController::DhcpControllerResultNotify::dhcpController_ = nullptr;
 
@@ -155,9 +160,17 @@ int32_t DhcpController::RenewClient(const std::string &iface, bool bIpv6)
         NETNATIVE_LOGE("strncpy_s config.ifname failed.");
         return static_cast<int32_t>(DHCP_UNKNOWN_ERROR);
     }
-    std::lock_guard<std::mutex> locker(dhcpApiMutex_);
+    std::lock_guard<ffrt::mutex> locker(dhcpApiMutex_);
     DhcpErrorCode ret = DHCP_SUCCESS;
     if (!dhcpClientInitialized_) {
+        clientEvent.OnIpSuccessChanged = DhcpControllerResultNotify::OnSuccess;
+        clientEvent.OnIpFailChanged = DhcpControllerResultNotify::OnFailed;
+        dhcpResultNotify_->SetDhcpController(this);
+        // Placeholder registration only: DHCP_CLIENT_SESSION_IFNAME never matches a real iface, so a
+        // renew result is delivered to the callback registered by the owner of the real iface
+        // (wifi/ethernet), not to DhcpController::Process. The renewal itself is carried out by
+        // StartDhcpClient() below (the DHCP API has no renew interface), so this block must not be
+        // treated as a working result path.
         ret = RegisterDhcpClientCallBack(DHCP_CLIENT_SESSION_IFNAME, &clientEvent);
         if (ret != DHCP_SUCCESS) {
             NETNATIVE_LOGE("RegisterDhcpClientCallBack for renew session failed, ret[%{public}d]", ret);
@@ -167,6 +180,7 @@ int32_t DhcpController::RenewClient(const std::string &iface, bool bIpv6)
     }
     ret = StartDhcpClient(config);
     if (ret != DHCP_SUCCESS) {
+        dhcpClientInitialized_ = false;
         NETNATIVE_LOGE("Start dhcp client failed, ret[%{public}d]", ret);
     }
     return static_cast<int32_t>(ret);

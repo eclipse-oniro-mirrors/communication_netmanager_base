@@ -32,6 +32,7 @@ public:
     EventManager();
 
     void AddListener(napi_env env, const std::string &type, napi_value callback, bool once, bool asyncCallback);
+    bool AddListenerIfAbsent(napi_env env, const std::string &type, napi_value callback);
     void DeleteListener(const std::string &type, napi_value callback);
     void Emit(const std::string &type, const std::pair<napi_value, napi_value> &argv);
     void SetData(void *data);

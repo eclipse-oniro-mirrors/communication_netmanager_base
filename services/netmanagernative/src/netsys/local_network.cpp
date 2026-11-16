@@ -24,8 +24,9 @@ using namespace NetManagerStandard;
 
 LocalNetwork::LocalNetwork(uint16_t netId) : NetsysNetwork(netId) {}
 
-int32_t LocalNetwork::AddInterface(std::string &interfaceName)
+int32_t LocalNetwork::AddInterface(std::string &interfaceName, bool isLocalNetworkRouted)
 {
+    (void)isLocalNetworkRouted;
     NETNATIVE_LOGI("Entry LocalNetwork::AddInterface %{public}s", interfaceName.c_str());
     std::lock_guard locker(mutex_);
     if (interfaces_.find(interfaceName) != interfaces_.end()) {

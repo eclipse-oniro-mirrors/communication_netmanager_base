@@ -21,7 +21,10 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <mutex>
 #include <arpa/inet.h>
+#include <algorithm>
+#include <array>
 #include <cstdio>
 #include <cstring>
 
@@ -170,6 +173,14 @@ const uint32_t IPV4_BIT_COUNT = 32;
 const uint32_t IPV6_BYTE_COUNT = 16;
 const uint32_t IPV6_SEGMENT_COUNT = 8;
 const uint32_t VALUE_ONE = 1;
+// FNV-1a 64-bit hash parameters, used by Ip6 key hashing
+const uint64_t FNV_OFFSET_BASIS_64 = 14695981039346656037ULL;
+const uint64_t FNV_PRIME_64 = 1099511628211ULL;
+// golden ratio constant for boost::hash_combine style seed mixing
+const uint64_t HASH_COMBINE_GOLDEN_RATIO_64 = 0x9e3779b97f4a7c15ULL;
+// shift amounts of the boost::hash_combine style seed mixing formula
+const int HASH_COMBINE_LEFT_SHIFT_BITS = 6;
+const int HASH_COMBINE_RIGHT_SHIFT_BITS = 2;
 
 struct Ip4Data {
     uint32_t mask;
@@ -313,6 +324,48 @@ struct portRule {
 using Ip4RuleBitmapVector = std::vector<Ip4RuleBitmap>;
 using Ip6RuleBitmapVector = std::vector<Ip6RuleBitmap>;
 
+struct Ip6AddrKey {
+    uint8_t data[IPV6_BYTE_COUNT] = {};
+
+    bool operator == (const Ip6AddrKey &other) const
+    {
+        return memcmp(data, other.data, sizeof(data)) == 0;
+    }
+};
+
+struct Ip6AddrKeyHash {
+    size_t operator () (const Ip6AddrKey &key) const
+    {
+        size_t hash = FNV_OFFSET_BASIS_64;
+        for (size_t i = 0; i < IPV6_BYTE_COUNT; ++i) {
+            hash ^= key.data[i];
+            hash *= FNV_PRIME_64;
+        }
+        return hash;
+    }
+};
+
+struct Ip6ExactKey {
+    uint32_t prefixlen = 0;
+    Ip6AddrKey net;
+
+    bool operator == (const Ip6ExactKey &other) const
+    {
+        return prefixlen == other.prefixlen && net == other.net;
+    }
+};
+
+struct Ip6ExactKeyHash {
+    size_t operator () (const Ip6ExactKey &key) const
+    {
+        size_t hash = Ip6AddrKeyHash()(key.net);
+        hash ^= static_cast<size_t>(key.prefixlen) +
+            HASH_COMBINE_GOLDEN_RATIO_64 + (hash << HASH_COMBINE_LEFT_SHIFT_BITS) +
+            (hash >> HASH_COMBINE_RIGHT_SHIFT_BITS);
+        return hash;
+    }
+};
+
 class Ip4RuleMap {
 public:
     /**
@@ -320,13 +373,7 @@ public:
      *
      * @param bitmap rule bitmap
      */
-    void OrForEach(const Bitmap &bitmap)
-    {
-        auto it = ruleBitmapVec_.begin();
-        for (; it != ruleBitmapVec_.end(); ++it) {
-            it->bitmap.Or(bitmap);
-        }
-    }
+    void OrForEach(const Bitmap &bitmap);
 
     /**
      * if addr and mask not exist in vector, save value to vector, otherwise or bitmap
@@ -335,61 +382,22 @@ public:
      * @param mask ip mask
      * @param bitmap rule bitmap
      */
-    void OrInsert(uint32_t addr, uint32_t mask, Bitmap &bitmap)
-    {
-        if (mask > IPV4_MAX_PREFIXLEN) {
-            mask =  IPV4_MAX_PREFIXLEN;
-        }
-        uint32_t netOrderAddr = htonl(addr);
-        uint32_t networkAddr = GetNetworkAddress(addr, mask);
-        bool shouldInsert = true;
-        Bitmap bitmapCopy(bitmap);
+    void OrInsert(uint32_t addr, uint32_t mask, Bitmap &bitmap);
 
-        for (auto it = ruleBitmapVec_.begin(); it != ruleBitmapVec_.end(); ++it) {
-            uint32_t existingIp = ntohl(it->data);
-            uint32_t existingNetworkAddr = GetNetworkAddress(existingIp, it->mask);
+    void Clear();
 
-            // 情况1：完全相同的规则
-            if (it->data == netOrderAddr && it->mask == mask) {
-                it->bitmap.Or(bitmapCopy);  // 老bitmap 或上 新bitmap副本
-                shouldInsert = false;
-            }
-            
-            // 情况2：新规则掩码更小
-            if (mask < it->mask) {
-                if (GetNetworkAddress(existingIp, mask) == networkAddr) {
-                    it->bitmap.Or(bitmapCopy);  // 老规则bitmap 或上 新规则bitmap副本
-                }
-            }
-            
-            // 情况3：新规则掩码更大
-            if (mask > it->mask) {
-                if (GetNetworkAddress(addr, it->mask) == existingNetworkAddr) {
-                    bitmapCopy.Or(it->bitmap);  // 新规则bitmap副本 或上 老规则bitmap
-                }
-            }
-        }
-        // 如果需要插入新规则
-        if (shouldInsert) {
-            Ip4RuleBitmap ruleBitmap;
-            ruleBitmap.data = netOrderAddr;
-            ruleBitmap.mask = mask;
-            ruleBitmap.bitmap = std::move(bitmapCopy);
-            ruleBitmapVec_.emplace_back(std::move(ruleBitmap));
-        }
-    }
-
-    void Clear()
-    {
-        ruleBitmapVec_.clear();
-    }
-
-    std::vector<Ip4RuleBitmap> &Get()
-    {
-        return ruleBitmapVec_;
-    }
+    std::vector<Ip4RuleBitmap> &Get();
 
 private:
+    // derived inputs shared by OrInsert helper functions
+    struct Ip4RuleInsertContext {
+        uint32_t addr;
+        uint32_t mask;
+        uint32_t netOrderAddr;
+        uint32_t networkAddr;
+        uint64_t exactKey;
+    };
+
     /**
      * get value from ip & mask by network byte order
      *
@@ -397,19 +405,20 @@ private:
      * @param mask ip mask
      * @return mask uint32 value by network byte order
      */
-    inline uint32_t GetNetworkAddress(uint32_t addr, uint32_t mask)
-    {
-        if (mask > IPV4_MAX_PREFIXLEN) {
-            mask =  IPV4_MAX_PREFIXLEN;
-        }
-        if (mask == 0) {
-            return 0;
-        }
-        return addr & (0xFFFFFFFF << (IPV4_MAX_PREFIXLEN - mask));
-    }
+    uint32_t GetNetworkAddress(uint32_t addr, uint32_t mask);
+
+    void CollectCandidates(const Ip4RuleInsertContext &ctx, std::vector<size_t> &candidates, bool &shouldInsert);
+
+    void MergeCandidates(const Ip4RuleInsertContext &ctx, Bitmap &bitmapCopy, const std::vector<size_t> &candidates,
+                         bool &shouldInsert);
+
+    void InsertRuleBitmap(const Ip4RuleInsertContext &ctx, Bitmap &bitmapCopy);
 
 private:
     std::vector<Ip4RuleBitmap> ruleBitmapVec_;
+    std::unordered_map<uint64_t, size_t> exactIndex_;
+    std::array<std::unordered_map<uint32_t, std::vector<size_t>>, IPV4_MAX_PREFIXLEN + 1> byPrefix_;
+    std::array<std::unordered_map<uint32_t, std::vector<size_t>>, IPV4_MAX_PREFIXLEN + 1> containedAt_;
 };
 
 class Ip6RuleMap {
@@ -419,13 +428,7 @@ public:
      *
      * @param bitmap rule bitmap
      */
-    void OrForEach(const Bitmap &bitmap)
-    {
-        auto it = ruleBitmapVec_.begin();
-        for (; it != ruleBitmapVec_.end(); ++it) {
-            it->bitmap.Or(bitmap);
-        }
-    }
+    void OrForEach(const Bitmap &bitmap);
 
     /**
      * if addr and prefixlen not exist in vector, save value to vector, otherwise or bitmap
@@ -434,63 +437,27 @@ public:
      * @param prefixlen ip6 prefixlen
      * @param bitmap rule bitmap
      */
-    void OrInsert(const in6_addr &addr, uint32_t prefixlen, Bitmap &bitmap)
-    {
-        std::vector<Ip6RuleBitmapVector::iterator> matches;
-        in6_addr networkAddr = {};
-        GetNetworkAddress(addr, prefixlen, networkAddr);
-        for (auto it = ruleBitmapVec_.begin(); it != ruleBitmapVec_.end(); ++it) {
-            in6_addr otherNetworkAddr = {};
-            GetNetworkAddress(it->data, it->prefixlen, otherNetworkAddr);
-            if (!memcmp(&addr, &(it->data), sizeof(in6_addr)) ||
-                !memcmp(&networkAddr, &otherNetworkAddr, sizeof(in6_addr))) {
-                matches.emplace_back(it);
-            }
-        }
-        if (matches.empty()) {
-            Ip6RuleBitmap ruleBitmap;
-            ruleBitmap.data = addr;
-            ruleBitmap.prefixlen = prefixlen;
-            ruleBitmap.bitmap = bitmap;
-            ruleBitmapVec_.emplace_back(std::move(ruleBitmap));
-        } else {
-            for (const auto &it : matches) {
-                it->bitmap.Or(bitmap);
-            }
-        }
-    }
+    void OrInsert(const in6_addr &addr, uint32_t prefixlen, Bitmap &bitmap);
 
-    void Clear()
-    {
-        ruleBitmapVec_.clear();
-    }
+    void Clear();
 
-    std::vector<Ip6RuleBitmap> &Get()
-    {
-        return ruleBitmapVec_;
-    }
+    std::vector<Ip6RuleBitmap> &Get();
 
 private:
-    void GetNetworkAddress(in6_addr addr, int prefixLen, in6_addr &out)
-    {
-        if (prefixLen < 0 || prefixLen > IPV6_MAX_PREFIXLEN) {
-            return; /* out 保持零 — 非法前缀不得碰 s6_addr */
-        }
-        if (prefixLen == 0) {
-            return; /* /0 网络键全零；out 已是 {} */
-        }
-        int quotient = prefixLen / 8;
-        int remainder = prefixLen % 8;
-        for (int i = 0; i < quotient; i++) {
-            out.s6_addr[i] = addr.s6_addr[i] & 0xff;
-        }
-        if (remainder) {
-            out.s6_addr[quotient] = addr.s6_addr[quotient] & (~(0xff >> remainder));
-        }
-    }
+    void GetNetworkAddress(in6_addr addr, int prefixLen, in6_addr &out);
+
+    /**
+     * merge ancestor prefix bitmaps into contained entries, so that LPM longest-match
+     * still observes every wider rule that covers the queried address.
+     */
+    void Finalize();
 
 private:
     std::vector<Ip6RuleBitmap> ruleBitmapVec_;
+    std::unordered_map<Ip6ExactKey, size_t, Ip6ExactKeyHash> exactIndex_;
+    std::array<bool, IPV6_MAX_PREFIXLEN + 1> activePrefix_ = {};
+    uint32_t activePrefixCount_ = 0;
+    bool finalized_ = false;
 };
 
 class BpfPortMap {
@@ -500,13 +467,7 @@ public:
      *
      * @param bitmap rule bitmap
      */
-    void OrForEach(const Bitmap &bitmap)
-    {
-        auto it = ruleBitmapVec_.begin();
-        for (; it != ruleBitmapVec_.end(); ++it) {
-            it->bitmap.Or(bitmap);
-        }
-    }
+    void OrForEach(const Bitmap &bitmap);
 
     /**
      * if addr and mask not exist in vector, save value to vector, otherwise or bitmap
@@ -515,33 +476,15 @@ public:
      * @param mask port mask
      * @param bitmap rule bitmap
      */
-    void OrInsert(uint16_t start, uint32_t mask, Bitmap &bitmap)
-    {
-        for (auto it = ruleBitmapVec_.begin(); it != ruleBitmapVec_.end(); ++it) {
-            if (it->data == start && it->prefixlen == mask) {
-                it->bitmap.Or(bitmap);
-                return;
-            }
-        }
-        portRuleBitmap tmp;
-        tmp.prefixlen = mask;
-        tmp.data = start;
-        tmp.bitmap = bitmap;
-        ruleBitmapVec_.push_back(tmp);
-    }
+    void OrInsert(uint16_t start, uint32_t mask, Bitmap &bitmap);
 
-    void Clear()
-    {
-        ruleBitmapVec_.clear();
-    }
+    void Clear();
 
-    std::vector<portRuleBitmap> &Get()
-    {
-        return ruleBitmapVec_;
-    }
+    std::vector<portRuleBitmap> &Get();
 
 private:
     std::vector<portRuleBitmap> ruleBitmapVec_;
+    std::unordered_map<uint64_t, size_t> index_;
 };
 
 struct SegmentBitmap {
@@ -562,119 +505,22 @@ public:
      * @param end end of segment
      * @param bitmap rule itmap
      */
-    void AddMap(uint16_t start, uint16_t end, const Bitmap& bitmap)
-    {
-        if (start > end) {
-            return;
-        }
-        std::vector<size_t> intersectIndices;
-        CollectIntersectIndices(start, end, intersectIndices);
+    void AddMap(uint16_t start, uint16_t end, const Bitmap& bitmap);
 
-        std::vector<SegmentBitmap> newSegments;
-        ProcessIntersections(start, end, bitmap, intersectIndices, newSegments);
-
-        RemoveSegments(intersectIndices);
-        InsertNewSegments(newSegments);
-    }
-
-    std::vector<SegmentBitmap>& GetMap()
-    {
-        return segments_;
-    }
+    std::vector<SegmentBitmap>& GetMap();
 
 private:
-    void CollectIntersectIndices(uint16_t start, uint16_t end, std::vector<size_t>& indices) const
-    {
-        for (size_t i = 0; i < segments_.size(); ++i) {
-            const auto& seg = segments_[i];
-            if (!(end < seg.start || start > seg.end)) {
-                indices.push_back(i);
-            }
-        }
-    }
+    void CollectIntersectIndices(uint16_t start, uint16_t end, std::vector<size_t>& indices) const;
 
-    void RemoveSegments(const std::vector<size_t>& indices)
-    {
-        std::vector<size_t> sortedIndices = indices;
-        std::sort(sortedIndices.rbegin(), sortedIndices.rend());
-
-        for (size_t idx : sortedIndices) {
-            if (idx < segments_.size()) {
-                segments_.erase(segments_.begin() + idx);
-            }
-        }
-    }
+    void RemoveSegments(const std::vector<size_t>& indices);
 
     void ProcessIntersections(uint16_t targetStart, uint16_t targetEnd, const Bitmap& targetBitmap,
                               const std::vector<size_t>& intersectIndices,
-                              std::vector<SegmentBitmap>& newSegments)
-    {
-        std::vector<SegmentBitmap> intersectSegs;
-        for (size_t idx : intersectIndices) {
-            intersectSegs.push_back(segments_[idx]);
-        }
-        std::sort(intersectSegs.begin(), intersectSegs.end(),
-                  [](const SegmentBitmap& a, const SegmentBitmap& b) {
-                      return a.start < b.start;
-                  });
+                              std::vector<SegmentBitmap>& newSegments);
 
-        uint16_t currentPos = targetStart;
-        for (const auto& seg : intersectSegs) {
-            if (currentPos < seg.start) {
-                addSegment(currentPos, seg.start - 1, targetBitmap, newSegments);
-                currentPos = seg.start;
-            }
+    void addSegment(uint16_t start, uint16_t end, const Bitmap& bitmap, std::vector<SegmentBitmap>& segments);
 
-            if (seg.start < currentPos) {
-                addSegment(seg.start, currentPos - 1, seg.bitmap, newSegments);
-            }
-
-            uint16_t overlapEnd = std::min(targetEnd, seg.end);
-            Bitmap mergedBitmap = seg.bitmap;
-            mergedBitmap.Or(targetBitmap);
-            addSegment(currentPos, overlapEnd, mergedBitmap, newSegments);
-
-            if (overlapEnd == UINT16_MAX) {
-                return;
-            }
-
-            currentPos = overlapEnd + 1;
-
-            if (currentPos <= seg.end) {
-                addSegment(currentPos, seg.end, seg.bitmap, newSegments);
-            }
-
-            if (currentPos > targetEnd) {
-                break;
-            }
-        }
-
-        if (currentPos <= targetEnd) {
-            addSegment(currentPos, targetEnd, targetBitmap, newSegments);
-        }
-    }
-
-    void addSegment(uint16_t start, uint16_t end, const Bitmap& bitmap, std::vector<SegmentBitmap>& segments)
-    {
-        if (start > end) {
-            return;
-        }
-        segments.push_back({start, end, bitmap});
-    }
-
-    void InsertNewSegments(const std::vector<SegmentBitmap>& newSegments)
-    {
-        for (const auto& seg : newSegments) {
-            if (!seg.isValid()) {
-                continue;
-            }
-            auto it = std::lower_bound(segments_.begin(), segments_.end(), seg,
-                [](const SegmentBitmap& a, const SegmentBitmap& b) {
-                    return a.start < b.start;
-                });
-            segments_.insert(it, seg);
-        }
-    }
+    void InsertNewSegments(const std::vector<SegmentBitmap>& newSegments);
 
 private:
     std::vector<SegmentBitmap> segments_;

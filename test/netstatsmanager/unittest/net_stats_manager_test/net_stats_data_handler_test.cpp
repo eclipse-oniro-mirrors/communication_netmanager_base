@@ -26,6 +26,7 @@
 #include "net_stats_data_handler.h"
 #include "net_stats_database_defines.h"
 #include "net_stats_database_helper.h"
+#include "net_stats_db_schema_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -140,6 +141,7 @@ public:
 
 void NetStatsDataHandlerTest::SetUpTestCase()
 {
+    EnsureNetStatsDbSchema();
     CreateMockStatsData();
 }
 

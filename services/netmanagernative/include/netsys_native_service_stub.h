@@ -203,6 +203,7 @@ private:
     int32_t CmdDelBrokerUidAccessPolicyMap(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetNicTrafficAllowed(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetUserDefinedServerFlag(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetNetworkDnsFamilyCapability(MessageParcel &data, MessageParcel &reply);
     int32_t CmdRegisterNetsysTrafficCallback(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUnRegisterNetsysTrafficCallback(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetNetStatusMap(MessageParcel &data, MessageParcel &reply);
@@ -220,6 +221,7 @@ private:
     int32_t CmdGetConnectOwnerUid(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetSystemNetPortStates(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetIpv6UidBlackList(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetPresetDomains(MessageParcel &data, MessageParcel &reply);
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     int32_t CmdNfqOpen(MessageParcel &data, MessageParcel &reply);

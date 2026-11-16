@@ -21,6 +21,7 @@
 #include "net_mgr_log_wrapper.h"
 #include "netmanager_base_common_utils.h"
 #include "net_stats_database_defines.h"
+#include "net_stats_db_schema_utils.h"
 #include "net_stats_history.h"
 
 namespace OHOS {
@@ -40,7 +41,10 @@ public:
     void TearDown();
 };
 
-void NetStatsHistoryTest::SetUpTestCase() {}
+void NetStatsHistoryTest::SetUpTestCase()
+{
+    EnsureNetStatsDbSchema();
+}
 
 void NetStatsHistoryTest::TearDownTestCase() {}
 

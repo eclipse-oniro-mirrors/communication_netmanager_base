@@ -138,10 +138,13 @@ HWTEST_F(DhcpControllerTest, RenewClientTest001, TestSize.Level1)
 HWTEST_F(DhcpControllerTest, RenewClientTest002, TestSize.Level1)
 {
     std::string iface = "test0";
+    // Assert the exact success code instead of "anything but UNKNOWN". Both the session registration
+    // and StartDhcpClient succeed in the UT environment, which is the same prerequisite
+    // RenewClientTest003/004 already rely on when they assert dhcpClientInitialized_ == true.
     int32_t ret = instance_->RenewClient(iface, false);
-    EXPECT_NE(ret, static_cast<int32_t>(DHCP_UNKNOWN_ERROR));
+    EXPECT_EQ(ret, static_cast<int32_t>(DHCP_SUCCESS));
     ret = instance_->RenewClient(iface, true);
-    EXPECT_NE(ret, static_cast<int32_t>(DHCP_UNKNOWN_ERROR));
+    EXPECT_EQ(ret, static_cast<int32_t>(DHCP_SUCCESS));
 }
 
 HWTEST_F(DhcpControllerTest, RenewClientTest003, TestSize.Level1)
@@ -150,10 +153,20 @@ HWTEST_F(DhcpControllerTest, RenewClientTest003, TestSize.Level1)
     EXPECT_FALSE(controller->dhcpClientInitialized_);
     std::string iface = "wlan0";
     int32_t ret = controller->RenewClient(iface, false);
-    EXPECT_NE(ret, static_cast<int32_t>(DHCP_UNKNOWN_ERROR));
+    EXPECT_EQ(ret, static_cast<int32_t>(DHCP_SUCCESS));
+    // The callback entry is wired when the placeholder session is registered. It does not make renew
+    // results reach DhcpController::Process (DHCP_CLIENT_SESSION_IFNAME never matches a real iface),
+    // but it must still be wired because RegisterDhcpClientCallBack is what initializes the dhcp client
+    // handle. The wiring may be done in the constructor or at the entry of RenewClient, so verify it
+    // after the first renewal.
+    EXPECT_EQ(controller->clientEvent.OnIpSuccessChanged,
+              DhcpController::DhcpControllerResultNotify::OnSuccess);
+    EXPECT_EQ(controller->clientEvent.OnIpFailChanged,
+              DhcpController::DhcpControllerResultNotify::OnFailed);
+    EXPECT_EQ(DhcpController::DhcpControllerResultNotify::dhcpController_, controller.get());
     EXPECT_TRUE(controller->dhcpClientInitialized_);
     ret = controller->RenewClient(iface, true);
-    EXPECT_NE(ret, static_cast<int32_t>(DHCP_UNKNOWN_ERROR));
+    EXPECT_EQ(ret, static_cast<int32_t>(DHCP_SUCCESS));
     EXPECT_TRUE(controller->dhcpClientInitialized_);
 }
 
@@ -162,10 +175,23 @@ HWTEST_F(DhcpControllerTest, RenewClientTest004, TestSize.Level1)
     auto controller = std::make_shared<DhcpController>();
     std::string boundaryIface(INTERFACE_MAX_LEN - 1, 'b');
     int32_t ret = controller->RenewClient(boundaryIface, false);
-    EXPECT_NE(ret, static_cast<int32_t>(DHCP_UNKNOWN_ERROR));
+    EXPECT_EQ(ret, static_cast<int32_t>(DHCP_SUCCESS));
     EXPECT_TRUE(controller->dhcpClientInitialized_);
+    EXPECT_EQ(controller->clientEvent.OnIpSuccessChanged,
+              DhcpController::DhcpControllerResultNotify::OnSuccess);
+    EXPECT_EQ(controller->clientEvent.OnIpFailChanged,
+              DhcpController::DhcpControllerResultNotify::OnFailed);
+    // A second renew must reuse the initialized session instead of re-registering it. Clear the wired
+    // callbacks first: the registration block would restore both pointers if it ran again, so keeping
+    // them null after the second call proves RegisterDhcpClientCallBack is invoked only once across the
+    // two renewals (dhcpClientInitialized_ alone cannot distinguish "reused" from "registered again").
+    controller->clientEvent.OnIpSuccessChanged = nullptr;
+    controller->clientEvent.OnIpFailChanged = nullptr;
     ret = controller->RenewClient(boundaryIface, true);
-    EXPECT_NE(ret, static_cast<int32_t>(DHCP_UNKNOWN_ERROR));
+    EXPECT_EQ(ret, static_cast<int32_t>(DHCP_SUCCESS));
+    EXPECT_EQ(controller->clientEvent.OnIpSuccessChanged, nullptr);
+    EXPECT_EQ(controller->clientEvent.OnIpFailChanged, nullptr);
+    EXPECT_TRUE(controller->dhcpClientInitialized_);
 }
 } // namespace nmd
 } // namespace OHOS

@@ -16,6 +16,7 @@
 mod bridge;
 mod connection;
 mod error_code;
+mod http_proxy_register;
 mod log;
 pub mod wrapper;
 
@@ -33,6 +34,10 @@ ani_constructor!(
         "getGlobalHttpProxySync": connection::get_global_http_proxy,
         "setGlobalHttpProxySync": connection::set_global_http_proxy,
         "setAppHttpProxySync": connection::set_app_http_proxy,
+        "onAppHttpProxySync": http_proxy_register::on_app_http_proxy,
+        "offAppHttpProxySync": http_proxy_register::off_app_http_proxy,
+        "onDefaultHttpProxySync": http_proxy_register::on_default_http_proxy,
+        "offDefaultHttpProxySync": http_proxy_register::off_default_http_proxy,
         "enableAirplaneModeSync": connection::enable_airplane_mode,
         "disableAirplaneModeSync": connection::disable_airplane_mode,
         "getAppNetSync": connection::get_app_net,

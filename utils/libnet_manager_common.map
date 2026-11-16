@@ -1,0 +1,133 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# innerkit 支撑库（bundle.json inner_kits）：保守收敛——保留全部 OHOS::NetManagerStandard 自有符号（跨仓消费方 40+，含 netstack/netmanager_ext/telephony），隐藏 std 内联实例、__gcov_*/fn_list、ffrt 模板实例等泄漏。
+# 注意：通配条目不能带引号（带引号按字面精确匹配，不触发通配）。含 uint64_t/int64_t 形参的符号使用"前缀*"通配——arm32 与 arm64 的 mangled 名不同，带签名的精确条目只命中单一平台。
+{
+  global:
+    extern "C++" {
+      "OHOS::NetManagerStandard::CommonUtils::DeleteFile(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::IpToString(unsigned int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
+      "OHOS::NetManagerStandard::CommonUtils::IsSim2Anco(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::IsValidIPV4(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::IsValidIPV6(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      OHOS::NetManagerStandard::CommonUtils::StrToUint64*;
+      "OHOS::NetManagerStandard::CommonUtils::MaskIpMiddle(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::GetAddrFamily(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::GetIpv6Prefix(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned char)";
+      "OHOS::NetManagerStandard::CommonUtils::GetMaskLength(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::Ipv4PrefixLen(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::Ipv6PrefixLen(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::IsValidDomain(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::ToAnonymousIp(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool)";
+      "OHOS::NetManagerStandard::CommonUtils::UrlRegexParse(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::CheckIfaceName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::ConvertToInt64(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::GetGatewayAddr(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::IsValidAddress(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::GenRandomNumber()";
+      "OHOS::NetManagerStandard::CommonUtils::GetMaskByLength(unsigned int)";
+      "OHOS::NetManagerStandard::CommonUtils::IsIPv6LinkLocal(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::IsUrlRegexValid(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::AnonymousIpInStr(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::HOST_DOMAIN_TLDS";
+      "OHOS::NetManagerStandard::CommonUtils::InsertCharBefore(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, char, char, char)";
+      "OHOS::NetManagerStandard::CommonUtils::IsSameNaturalDay(unsigned int, unsigned int)";
+      "OHOS::NetManagerStandard::CommonUtils::ReplaceCharacters(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::ConvertIpv4Address(unsigned int)";
+      "OHOS::NetManagerStandard::CommonUtils::ConvertIpv4Address(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::g_commonUtilsMutex";
+      "OHOS::NetManagerStandard::CommonUtils::GetHostnameFromURL(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::ForbideSetIpforward()";
+      "OHOS::NetManagerStandard::CommonUtils::ExtractDomainFormUrl(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::ForkExecChildProcess(int const*, int, std::__h::vector<char const*, std::__h::allocator<char const*>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::ReadFromChildProcess(int const*, int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>*)";
+      "OHOS::NetManagerStandard::CommonUtils::ExtractMetaRefreshUrl(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::ForkExecParentProcess(int const*, int, int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>*)";
+      "OHOS::NetManagerStandard::CommonUtils::HasInternetPermission()";
+      "OHOS::NetManagerStandard::CommonUtils::SerializeStringVector(std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::IsInstallSourceFromSim(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::IsUsableGlobalIpv6Addr(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::IsInstallSourceFromSim2(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::RemoveDeleteControlFlag(int)";
+      "OHOS::NetManagerStandard::CommonUtils::AnonymizeIptablesCommand(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::GetTodayMidnightTimestamp(int, int, int)";
+      "OHOS::NetManagerStandard::CommonUtils::RemoveDeleteControlFromPath(char const*)";
+      "OHOS::NetManagerStandard::CommonUtils::IsNeedDisplayTrafficAncoList()";
+      "OHOS::NetManagerStandard::CommonUtils::Trim(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::IsSim(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::Strip(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, char)";
+      "OHOS::NetManagerStandard::CommonUtils::IsSim2(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::IpToInt(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int&)";
+      "OHOS::NetManagerStandard::CommonUtils::ToLower(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::ForkExec(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>*)";
+      "OHOS::NetManagerStandard::CommonUtils::MaskIpv4(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&, bool)";
+      "OHOS::NetManagerStandard::CommonUtils::MaskIpv6(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&, bool)";
+      "OHOS::NetManagerStandard::CommonUtils::ParseInt(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int*)";
+      "OHOS::NetManagerStandard::CommonUtils::StrToInt(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
+      "OHOS::NetManagerStandard::CommonUtils::FormatCmd(std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::IsSimAnco(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::CommonUtils::StrToBool(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool)";
+      OHOS::NetManagerStandard::CommonUtils::StrToLong*;
+      "OHOS::NetManagerStandard::CommonUtils::StrToUint(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
+      "OHOS::NetManagerStandard::CommonUtils::WriteFile(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::EventReport::SendMonitorFaultEvent(OHOS::NetManagerStandard::EventInfo const&)";
+      "OHOS::NetManagerStandard::EventReport::SendRequestFaultEvent(OHOS::NetManagerStandard::EventInfo const&)";
+      "OHOS::NetManagerStandard::EventReport::SendSupplierFaultEvent(OHOS::NetManagerStandard::EventInfo const&)";
+      "OHOS::NetManagerStandard::EventReport::SendMonitorBehaviorEvent(OHOS::NetManagerStandard::EventInfo const&)";
+      "OHOS::NetManagerStandard::EventReport::SendRequestBehaviorEvent(OHOS::NetManagerStandard::EventInfo const&)";
+      "OHOS::NetManagerStandard::EventReport::SendPortalDetectInfoEvent(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::EventReport::SendSupplierBehaviorEvent(OHOS::NetManagerStandard::EventInfo const&)";
+      "OHOS::NetManagerStandard::EventReport::SendNetworkPolicyChangeEvent(unsigned int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetmanagerHiTrace::NetmanagerStartSyncTrace(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetmanagerHiTrace::NetmanagerFinishSyncTrace(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetmanagerHiTrace::NetmanagerStartAsyncTrace(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
+      "OHOS::NetManagerStandard::NetmanagerHiTrace::NetmanagerFinishAsyncTrace(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
+      OHOS::NetManagerStandard::NetmanagerSysTimer::SetInterval*;
+      "OHOS::NetManagerStandard::NetmanagerSysTimer::SetWantAgent(std::__h::shared_ptr<OHOS::AbilityRuntime::WantAgent::WantAgent>)";
+      "OHOS::NetManagerStandard::NetmanagerSysTimer::SetCallbackInfo(std::__h::function<void ()> const&)";
+      "OHOS::NetManagerStandard::NetmanagerSysTimer::SetType(int const&)";
+      "OHOS::NetManagerStandard::NetmanagerSysTimer::OnTrigger()";
+      "OHOS::NetManagerStandard::NetmanagerSysTimer::SetRepeat(bool)";
+      OHOS::NetManagerStandard::NetmanagerSysTimer::NetmanagerSysTimer*;
+      "OHOS::NetManagerStandard::NetmanagerSysTimer::NetmanagerSysTimer()";
+      "OHOS::NetManagerStandard::NetmanagerSysTimer::~NetmanagerSysTimer()";
+      "OHOS::NetManagerStandard::NetmanagerSysTimer::~NetmanagerSysTimer()";
+      "OHOS::NetManagerStandard::NetmanagerSysTimer::~NetmanagerSysTimer()";
+      "OHOS::NetManagerStandard::TinyCountDownLatch::Await()";
+      "OHOS::NetManagerStandard::TinyCountDownLatch::GetCount()";
+      "OHOS::NetManagerStandard::TinyCountDownLatch::CountDown()";
+      "OHOS::NetManagerStandard::TinyCountDownLatch::TinyCountDownLatch(int)";
+      "OHOS::NetManagerStandard::TinyCountDownLatch::TinyCountDownLatch(int)";
+      "OHOS::NetManagerStandard::NetManagerPermission::GetApiVersion()";
+      "OHOS::NetManagerStandard::NetManagerPermission::IsSystemCaller()";
+      "OHOS::NetManagerStandard::NetManagerPermission::CheckPermission(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetManagerPermission::CheckUidPermission(std::__h::vector<unsigned int, std::__h::allocator<unsigned int>> const&)";
+      "OHOS::NetManagerStandard::NetManagerPermission::CheckPermissionWithCache(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetBaseErrorCodeConvertor::ConvertErrorCode(int&)";
+      "OHOS::NetManagerStandard::Base64::Decode(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::Base64::Encode(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::HiviewDFX::HiSysEvent::Domain::COMMUNICATION";
+      "OHOS::HiviewDFX::HiSysEvent::Domain::NETMANAGER_STANDARD";
+      "vtable for OHOS::NetManagerStandard::NetmanagerSysTimer";
+      "vtable for OHOS::HiviewDFX::Encoded::StringEncodedParam";
+      "vtable for OHOS::HiviewDFX::Encoded::SignedVarintEncodedParam<int, (void*)0>";
+      "vtable for OHOS::HiviewDFX::Encoded::UnsignedVarintEncodedParam<unsigned int, (void*)0>";
+      "vtable for std::__h::__shared_ptr_emplace<OHOS::HiviewDFX::Encoded::StringEncodedParam, std::__h::allocator<OHOS::HiviewDFX::Encoded::StringEncodedParam>>";
+      "vtable for std::__h::__shared_ptr_emplace<OHOS::HiviewDFX::Encoded::SignedVarintEncodedParam<int, (void*)0>, std::__h::allocator<OHOS::HiviewDFX::Encoded::SignedVarintEncodedParam<int, (void*)0>>>";
+      "vtable for std::__h::__shared_ptr_emplace<OHOS::HiviewDFX::Encoded::UnsignedVarintEncodedParam<unsigned int, (void*)0>, std::__h::allocator<OHOS::HiviewDFX::Encoded::UnsignedVarintEncodedParam<unsigned int, (void*)0>>>";
+    };
+  local:
+    *;
+};

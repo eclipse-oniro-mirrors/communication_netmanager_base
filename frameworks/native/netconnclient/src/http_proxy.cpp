@@ -77,10 +77,24 @@ int32_t HttpProxy::GetUserId() const
     return userId_;
 }
 
+std::string HttpProxy::GetPacUrl() const
+{
+    return pacUrl_;
+}
+
+void HttpProxy::SetPacUrl(const std::string &pacUrl)
+{
+    if (pacUrl.size() > MAX_URL_SIZE) {
+        NETMGR_LOG_E("HttpProxy: SetPacUrl: pacUrl length is invalid");
+        return;
+    }
+    pacUrl_ = pacUrl;
+}
+
 bool HttpProxy::operator==(const HttpProxy &httpProxy) const
 {
     return (host_ == httpProxy.host_ && port_ == httpProxy.port_ && exclusionList_ == httpProxy.exclusionList_ &&
-            username_ == httpProxy.username_ && password_ == httpProxy.password_);
+            username_ == httpProxy.username_ && password_ == httpProxy.password_ && pacUrl_ == httpProxy.pacUrl_);
 }
 
 bool HttpProxy::operator!=(const HttpProxy &httpProxy) const
@@ -120,6 +134,9 @@ bool HttpProxy::Marshalling(Parcel &parcel) const
         return false;
     }
     if (!parcel.WriteString(password_)) {
+        return false;
+    }
+    if (!parcel.WriteString(pacUrl_)) {
         return false;
     }
     return true;
@@ -169,6 +186,13 @@ bool HttpProxy::Unmarshalling(Parcel &parcel, HttpProxy &httpProxy)
     httpProxy = {host, port, exclusionList};
     httpProxy.SetUserId(userId);
     if (!parcel.ReadString(httpProxy.username_) || !parcel.ReadString(httpProxy.password_)) {
+        return false;
+    }
+    if (!parcel.ReadString(httpProxy.pacUrl_)) {
+        return false;
+    }
+    if (httpProxy.pacUrl_.size() > MAX_URL_SIZE) {
+        NETMGR_LOG_E("HttpProxy: Unmarshalling: pacUrl length is invalid");
         return false;
     }
     return true;

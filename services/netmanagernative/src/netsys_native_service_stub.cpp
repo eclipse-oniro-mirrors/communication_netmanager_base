@@ -25,6 +25,7 @@
 #include "netmanager_base_permission.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_stub.h"
+#include "dns_param_cache.h"
 #include "securec.h"
 #include "i_net_dns_result_callback.h"
 #include "netsys_traffic_callback_proxy.h"
@@ -33,7 +34,9 @@ using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetsysNative {
 namespace {
+#ifdef SUPPORT_SYSVPN
 constexpr int32_t MAX_VNIC_UID_ARRAY_SIZE = 20;
+#endif
 constexpr int32_t MAX_VNICTUN_UID_ARRAY_SIZE = 1000;
 constexpr int32_t MAX_FLAG_NUM = 64;
 constexpr int32_t MAX_DNS_CONFIG_SIZE = 7;
@@ -46,7 +49,54 @@ constexpr uint32_t MAX_ROUTES_ARRAY_SIZE = 1024;
 constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
 constexpr uint32_t MAX_SHARING_TYPE_SIZE = 32;
 constexpr int32_t MAX_NETID_ARRAY_SIZE = 6;
+constexpr int32_t MAX_DOMAIN_NUM = 128;
+constexpr int32_t MAX_PRESET_UID_NUM = 128;
 constexpr int32_t INVALID_UID = -1;
+
+int32_t ReadPresetDomainsFromParcel(MessageParcel &data, std::map<uint32_t, std::vector<std::string>> &domainsMap)
+{
+    int32_t uidNum = 0;
+    if (!data.ReadInt32(uidNum)) {
+        NETNATIVE_LOGE("CmdSetPresetDomains read uid num failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (uidNum < 0 || uidNum > MAX_PRESET_UID_NUM) {
+        NETNATIVE_LOGE("CmdSetPresetDomains invalid uid num:%{public}d", uidNum);
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (int32_t uidIndex = 0; uidIndex < uidNum; uidIndex++) {
+        uint32_t uid = 0;
+        if (!data.ReadUint32(uid)) {
+            NETNATIVE_LOGE("CmdSetPresetDomains read uid failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+        int32_t domainNum = 0;
+        if (!data.ReadInt32(domainNum)) {
+            NETNATIVE_LOGE("CmdSetPresetDomains read domain num failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+        if (domainNum < 0 || domainNum > MAX_DOMAIN_NUM) {
+            NETNATIVE_LOGE("CmdSetPresetDomains invalid domain num:%{public}d", domainNum);
+            return ERR_FLATTEN_OBJECT;
+        }
+        std::vector<std::string> domains;
+        for (int32_t index = 0; index < domainNum; index++) {
+            std::string domain = data.ReadString();
+            if (domain.empty()) {
+                NETNATIVE_LOGE("CmdSetPresetDomains read domain failed");
+                return ERR_FLATTEN_OBJECT;
+            }
+            if (!nmd::DnsParamCache::IsValidPresetDomain(domain)) {
+                NETNATIVE_LOGE("CmdSetPresetDomains skip invalid domain, uid:%{public}u, size:%{public}zu", uid,
+                               domain.size());
+                continue;
+            }
+            domains.emplace_back(domain);
+        }
+        domainsMap[uid] = domains;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
 } // namespace
 
 NetsysNativeServiceStub::NetsysNativeServiceStub()
@@ -147,6 +197,8 @@ void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdGetConnectOwnerUid;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_UID_BLACK_LIST)] =
         &NetsysNativeServiceStub::CmdSetIpv6UidBlackList;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_PRESET_DOMAINS)] =
+        &NetsysNativeServiceStub::CmdSetPresetDomains;
 }
 
 void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
@@ -325,6 +377,8 @@ void NetsysNativeServiceStub::InitDnsServerOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdSetUserDefinedServerFlag;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FLUSH_DNS_CACHE)] =
         &NetsysNativeServiceStub::CmdFlushDnsCache;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NETWORK_DNS_FAMILY_CAPABILITY)] =
+        &NetsysNativeServiceStub::CmdSetNetworkDnsFamilyCapability;
 }
 
 void NetsysNativeServiceStub::InitNetDiagOpToInterfaceMap()
@@ -511,6 +565,10 @@ int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &d
         NETNATIVE_LOGE("Cannot response request %d: unknown tranction", code);
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
+#ifndef NETMANAGER_FUZZ_TEST_ENABLE
+    // NETMANAGER_FUZZ_TEST_ENABLE is only defined in fuzz test targets. The uid whitelist /
+    // EDM uid hard-checks are skipped for fuzzing so that fuzz input can reach the command
+    // handlers. Product builds are not affected (macro is never defined there).
     auto uid = IPCSkeleton::GetCallingUid();
     if (std::find(uids_.begin(), uids_.end(), uid) == uids_.end()) {
         NETNATIVE_LOGE("This uid connot use netsys %{public}d", uid);
@@ -528,6 +586,7 @@ int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &d
         }
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
+#endif
 
     const std::u16string descriptor = NetsysNativeServiceStub::GetDescriptor();
     const std::u16string remoteDescriptor = data.ReadInterfaceToken();
@@ -1129,8 +1188,9 @@ int32_t NetsysNativeServiceStub::CmdNetworkAddInterface(MessageParcel &data, Mes
     int32_t netId = data.ReadInt32();
     std::string iface = data.ReadString();
     NetBearType netBearerType = static_cast<NetBearType>(data.ReadUint8());
+    bool isLocalNetworkRouted = data.ReadBool();
 
-    int32_t result = NetworkAddInterface(netId, iface, netBearerType);
+    int32_t result = NetworkAddInterface(netId, iface, netBearerType, isLocalNetworkRouted);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("NetworkAddInterface has recved result %{public}d", result);
 
@@ -2602,6 +2662,26 @@ int32_t NetsysNativeServiceStub::CmdSetIpv6UidBlackList(MessageParcel &data, Mes
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
+int32_t NetsysNativeServiceStub::CmdSetPresetDomains(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdSetPresetDomains CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+    std::map<uint32_t, std::vector<std::string>> domainsMap;
+    int32_t parseResult = ReadPresetDomainsFromParcel(data, domainsMap);
+    if (parseResult != NetManagerStandard::NETMANAGER_SUCCESS) {
+        return parseResult;
+    }
+    int32_t result = SetPresetDomains(domainsMap);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write CmdSetPresetDomains result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
 int32_t NetsysNativeServiceStub::CmdSetIpv6AutoConf(MessageParcel &data, MessageParcel &reply)
 {
     std::string interfaceName = data.ReadString();
@@ -2942,6 +3022,28 @@ int32_t NetsysNativeServiceStub::CmdSetUserDefinedServerFlag(MessageParcel &data
     int32_t result = SetUserDefinedServerFlag(netId, flag);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write CmdSetUserDefinedServerFlag result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetNetworkDnsFamilyCapability(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("SetNetworkDnsFamilyCapability permission denied");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+    uint16_t netId = 0;
+    bool ipv4Enable = false;
+    bool ipv6Enable = false;
+    if (!data.ReadUint16(netId) || !data.ReadBool(ipv4Enable) || !data.ReadBool(ipv6Enable)) {
+        NETNATIVE_LOGE("SetNetworkDnsFamilyCapability read parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t result = SetNetworkDnsFamilyCapability(netId, ipv4Enable, ipv6Enable);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("SetNetworkDnsFamilyCapability write result failed");
         return ERR_FLATTEN_OBJECT;
     }
     return NetManagerStandard::NETMANAGER_SUCCESS;

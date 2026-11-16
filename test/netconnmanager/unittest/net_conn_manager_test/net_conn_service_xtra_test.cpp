@@ -20,8 +20,6 @@
 #define protected public
 #endif
 
-#include <curl/curl.h>
-
 #include "common_net_conn_callback_test.h"
 #include "common_mock_netmanager_permission.h"
 #include "http_proxy.h"
@@ -562,45 +560,44 @@ HWTEST_F(NetConnServiceExtTest, SetAirplaneModeTest003, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
-HWTEST_F(NetConnServiceExtTest, SetCurlOptionsTest001, TestSize.Level1)
+HWTEST_F(NetConnServiceExtTest, PerformProxyProbeTest001, TestSize.Level1)
 {
     auto netConnService = std::make_shared<NetConnService>();
     EXPECT_FALSE(netConnService->registerToService_);
     HttpProxy tempProxy;
-    netConnService->SetCurlOptions(nullptr, tempProxy);
+    tempProxy.host_ = "http://127.0.0.1";
+    tempProxy.port_ = 1;
+    long code = netConnService->PerformProxyProbe(tempProxy);
+    EXPECT_EQ(code, 0);
 }
 
-HWTEST_F(NetConnServiceExtTest, SetCurlOptionsTest002, TestSize.Level1)
+HWTEST_F(NetConnServiceExtTest, PerformProxyProbeTest002, TestSize.Level1)
 {
     auto netConnService = std::make_shared<NetConnService>();
-    CURL *curl = curl_easy_init();
-    ASSERT_NE(curl, nullptr);
     HttpProxy tempProxy;
-    tempProxy.host_ = "http://127.0.0.1";
-    tempProxy.port_ = 8080;
+    tempProxy.host_ = "https://127.0.0.1";
+    tempProxy.port_ = 1;
     SecureData username;
-    username.append("testuser", strlen("testuser"));
+    username.append("testuser", 8);
     tempProxy.username_ = username;
     SecureData password;
-    password.append("testpass", strlen("testpass"));
+    password.append("testpass", 8);
     tempProxy.password_ = password;
-    netConnService->SetCurlOptions(curl, tempProxy);
-    curl_easy_cleanup(curl);
+    long code = netConnService->PerformProxyProbe(tempProxy);
+    EXPECT_EQ(code, 0);
 }
 
-HWTEST_F(NetConnServiceExtTest, SetCurlOptionsTest003, TestSize.Level1)
+HWTEST_F(NetConnServiceExtTest, PerformProxyProbeTest003, TestSize.Level1)
 {
     auto netConnService = std::make_shared<NetConnService>();
-    CURL *curl = curl_easy_init();
-    ASSERT_NE(curl, nullptr);
     HttpProxy tempProxy;
     tempProxy.host_ = "http://127.0.0.1";
-    tempProxy.port_ = 8080;
+    tempProxy.port_ = 1;
     SecureData username;
-    username.append("testuser", strlen("testuser"));
+    username.append("testuser", 8);
     tempProxy.username_ = username;
-    netConnService->SetCurlOptions(curl, tempProxy);
-    curl_easy_cleanup(curl);
+    long code = netConnService->PerformProxyProbe(tempProxy);
+    EXPECT_EQ(code, 0);
 }
 
 HWTEST_F(NetConnServiceExtTest, GetHttpUrlFromConfigTest001, TestSize.Level1)

@@ -45,8 +45,12 @@
       "OHOS::NetManagerStandard::NetConnClient::InterfaceSetIffUp(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetConnClient::SetGlobalHttpProxy(OHOS::NetManagerStandard::HttpProxy const&)";
       "OHOS::NetManagerStandard::NetConnClient::SetAppHttpProxy(OHOS::NetManagerStandard::HttpProxy const&)";
+      "OHOS::NetManagerStandard::NetConnClient::GetAppHttpProxy()";
       "OHOS::NetManagerStandard::NetConnClient::UnregisterAppHttpProxyCallback(unsigned int)";
       "OHOS::NetManagerStandard::NetConnClient::RegisterAppHttpProxyCallback(std::__h::function<void (OHOS::NetManagerStandard::HttpProxy const&)>, unsigned int&)";
+      "OHOS::NetManagerStandard::NetConnClient::RegisterAppHttpProxyCallback(std::__h::function<void (OHOS::NetManagerStandard::HttpProxy const&)>, unsigned int&, bool)";
+      "OHOS::NetManagerStandard::NetConnClient::RegisterDefaultHttpProxyCallback(std::__h::function<void (OHOS::NetManagerStandard::HttpProxy const&)>, unsigned int&)";
+      "OHOS::NetManagerStandard::NetConnClient::UnregisterDefaultHttpProxyCallback(unsigned int)";
       "OHOS::NetManagerStandard::NetConnClient::SetPacUrl(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetConnClient::GetPacUrl(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
       "OHOS::NetManagerStandard::NetConnClient::QueryTraceRoute(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int, int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&, bool)";

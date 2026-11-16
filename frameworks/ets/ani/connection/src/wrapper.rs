@@ -12,6 +12,9 @@
 // limitations under the License.
 
 use crate::connection::ConnCallback;
+pub use crate::http_proxy_register::{
+    execute_app_http_proxy_changed, execute_default_http_proxy_changed,
+};
 use cxx::{let_cxx_string, UniquePtr};
 use ffi::{NetBlockStatusInfo, NetCapabilityInfo, NetConnectionPropertyInfo, NetHandle};
 
@@ -88,6 +91,27 @@ impl NetConnClient {
             return Err(ret);
         }
         Ok(())
+    }
+
+    pub fn register_app_http_proxy_callback(token: u64) -> u32 {
+        ffi::RegisterAppHttpProxyCallback(token)
+    }
+
+    pub fn unregister_app_http_proxy_callback(callback_id: u32) {
+        ffi::UnregisterAppHttpProxyCallback(callback_id);
+    }
+
+    pub fn register_default_http_proxy_callback(token: u64) -> Result<u32, i32> {
+        let mut ret = 0;
+        let callback_id = ffi::RegisterDefaultHttpProxyCallback(token, &mut ret);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(callback_id)
+    }
+
+    pub fn unregister_default_http_proxy_callback(callback_id: u32) {
+        ffi::UnregisterDefaultHttpProxyCallback(callback_id);
     }
 
     pub fn get_app_net() -> Result<i32, i32> {
@@ -935,6 +959,9 @@ pub mod ffi {
     extern "Rust" {
         type ConnCallback;
 
+        pub fn execute_app_http_proxy_changed(token: u64, proxy: HttpProxy);
+        pub fn execute_default_http_proxy_changed(token: u64, proxy: HttpProxy);
+
         fn on_net_available(&self, handle: NetHandle) -> i32;
         fn on_net_block_status_change(&self, status: NetBlockStatusInfo) -> i32;
         fn on_net_capabilities_change(&self, cap: NetCapabilityInfo) -> i32;
@@ -968,6 +995,10 @@ pub mod ffi {
         fn GetGlobalHttpProxy(ret: &mut i32) -> HttpProxy;
         fn SetGlobalHttpProxy(proxy: &HttpProxy) -> i32;
         fn SetAppHttpProxy(proxy: &HttpProxy) -> i32;
+        fn RegisterAppHttpProxyCallback(token: u64) -> u32;
+        fn UnregisterAppHttpProxyCallback(callback_id: u32);
+        fn RegisterDefaultHttpProxyCallback(token: u64, ret: &mut i32) -> u32;
+        fn UnregisterDefaultHttpProxyCallback(callback_id: u32);
 
         fn GetNetConnClient(_: &mut i32) -> Pin<&'static mut NetConnClient>;
 

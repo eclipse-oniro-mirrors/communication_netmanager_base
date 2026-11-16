@@ -49,10 +49,10 @@ HWTEST_F(LocalNetworkTest, AddInterfaceTest001, TestSize.Level1)
     NETNATIVE_LOGI("AddInterfaceTest001 enter");
     LocalNetwork localNetwork(1);
     std::string interfaceName = "waln0";
-    int32_t ret = localNetwork.AddInterface(interfaceName);
+    int32_t ret = localNetwork.AddInterface(interfaceName, false);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     localNetwork.interfaces_.insert(interfaceName);
-    ret = localNetwork.AddInterface(interfaceName);
+    ret = localNetwork.AddInterface(interfaceName, false);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     ret = localNetwork.RemoveInterface(interfaceName);
     localNetwork.interfaces_.clear();

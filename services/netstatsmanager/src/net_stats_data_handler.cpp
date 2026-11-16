@@ -22,6 +22,21 @@
 #include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
 
+#ifdef NETMANAGER_TEST_DB_REDIRECT
+#include <sys/stat.h>
+namespace {
+/* Test/fuzz binaries link this testonly static library with the redirected
+ * database paths (see net_stats_database_defines.h). The scratch directory
+ * must exist before any database open; do it at load time so every binary
+ * linking this translation unit (fuzz and unittest alike) is covered.
+ * Product binaries never define NETMANAGER_TEST_DB_REDIRECT. */
+__attribute__((constructor)) void EnsureTestDbDirExists()
+{
+    mkdir("/data/local/tmp/netmanager_base_test_db", 0755); // EEXIST is fine
+}
+} // namespace
+#endif
+
 namespace OHOS {
 namespace NetManagerStandard {
 using namespace NetStatsDatabaseDefines;

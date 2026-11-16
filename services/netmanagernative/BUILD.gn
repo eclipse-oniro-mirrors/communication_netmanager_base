@@ -132,6 +132,8 @@ if (netmanager_base_enable_feature_wearable_distributed_net) {
 }
 
 ohos_shared_library("netsys_native_manager") {
+  version_script = "libnetsys_native_manager.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -182,6 +184,7 @@ ohos_shared_library("netsys_native_manager") {
     "dhcp:dhcp_sdk",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "hicollie:libhicollie",
     "init:libbegetutil",
     "ipc:ipc_core",
     "iptables:iptables",
@@ -250,6 +253,7 @@ ohos_static_library("netsys_native_manager_static") {
     "c_utils:utils",
     "dhcp:dhcp_sdk",
     "eventhandler:libeventhandler",
+    "hicollie:libhicollie",
     "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
@@ -306,6 +310,8 @@ config("netsys_client_public_config") {
 }
 
 ohos_shared_library("netsys_client") {
+  version_script = "libnetsys_client.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true

@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <map>
 #include <mutex>
+#include <set>
 #include <vector>
 #include <shared_mutex>
 
@@ -128,6 +129,12 @@ public:
     int32_t GetCurDefaultUserId();
 
     void SetCurDefaultUserId(int32_t userId);
+
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+    void AddValidUserId(int32_t userId);
+
+    void RemoveValidUserId(int32_t userId);
+#endif
 
     void Reset();
 
@@ -353,6 +360,9 @@ private:
     bool isDisplayTrafficAncoList = false;
     int32_t curPrivateUserId_ = -1;
     int32_t curDefaultUserId_ = -1;
+#ifdef FEATURE_ENABLE_AUTOMOTIVE_TRAFFIC_STAT
+    std::set<int32_t> validUserIds_;
+#endif
     std::map<uint32_t, HistoryData> cellularHistoryData_;
     std::shared_mutex cellularHistoryDataMutex_;
     bool isPrivateSpaceExist_ = false;

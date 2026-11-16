@@ -25,6 +25,8 @@
 #include "bpf_stats.h"
 #ifdef FEATURE_NET_FIREWALL_ENABLE
 #include "bpf_netfirewall.h"
+#include "ffrt.h"
+#include "netlink_socket_diag.h"
 #endif
 #include "dhcp_controller.h"
 #include "fwmark_network.h"
@@ -97,7 +99,8 @@ public:
                                 int32_t prefixLength, int socketType) override;
     int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress) override;
     int32_t InterfaceSetIffUp(const std::string &ifaceName) override;
-    int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType) override;
+    int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType,
+        bool isLocalNetworkRouted) override;
     int32_t NetworkRemoveInterface(int32_t netId, const std::string &iface) override;
     int32_t NetworkDestroy(int32_t netId, bool isVpnNet = false) override;
     int32_t CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
@@ -213,6 +216,7 @@ public:
     int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) override;
     int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override;
     int32_t SetUserDefinedServerFlag(uint16_t netId, bool flag) override;
+    int32_t SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable) override;
     int32_t FlushDnsCache(uint16_t netId) override;
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
     int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add) override;
@@ -227,6 +231,7 @@ public:
                                int32_t &ownerUid) override;
     int32_t GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo) override;
     int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid) override;
+    int32_t SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains) override;
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     sptr<NfqCtx> NfqOpen() override;
     int32_t NfqClose(sptr<NfqCtx> &ctx) override;
@@ -265,6 +270,10 @@ private:
     bool Init();
     void GetDumpMessage(std::string &message);
     void OnNetManagerRestart();
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    void RegisterFirewallEgressHandler();
+    void UnregisterFirewallEgressHandler();
+#endif
 
 private:
     enum ServiceRunningState {
@@ -286,6 +295,9 @@ private:
     std::shared_ptr<OHOS::nmd::NetDiagWrapper> netDiagWrapper = nullptr;
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     std::shared_ptr<OHOS::NetManagerStandard::NetsysBpfNetFirewall> bpfNetFirewall_ = nullptr;
+    std::shared_ptr<OHOS::nmd::NetLinkSocketDiag> socketDiag_ = nullptr;
+    std::shared_ptr<ffrt::queue> egressSocketCloseQueue_ = nullptr;
+    std::mutex egressHandlerMutex_;
 #endif
     std::unique_ptr<OHOS::nmd::ClatManager> clatManager_ = nullptr;
 

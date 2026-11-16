@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <arpa/inet.h>
+#include <sys/socket.h>
 
 #include "dns_config_client.h"
 #include "dns_param_cache.h"
@@ -51,8 +52,9 @@ public:
     static void ProcSetCacheCommand(const std::string &name, uint16_t netId, AddrInfoWithTtl addrInfo[MAX_RESULTS],
                                     uint32_t resNum);
     static void ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId, uint32_t callingUid);
-    static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId);
-    static void ProcJudgeIpv4Command(int clientSockFd, uint16_t netId);
+    static void ProcGetNodataCacheCommand(int clientSockFd, uint16_t netId, const std::string &name, uint32_t uid);
+    static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId, uint32_t uid);
+    static void ProcJudgeIpv4Command(int clientSockFd, uint16_t netId, uint32_t uid);
     static void ProcGetDefaultNetworkCommand(int clientSockFd);
     static void ProcBindSocketCommand(int32_t remoteFd, uint16_t netId);
     static void AddPublicDnsServers(ResolvConfig &sendData, size_t serverSize);
@@ -91,6 +93,170 @@ ResolvConfig DnsResolvListenTest::createResolvConfig(int num)
     }
 
     return resolvConfig;
+}
+
+class NetsysDnsFamilyListenTest : public testing::Test {
+public:
+    void SetUp() override
+    {
+        auto &cache = DnsParamCache::GetInstance();
+        savedDefault = cache.GetDefaultNetwork();
+        ASSERT_EQ(socketpair(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK, 0, sockets), 0);
+        ASSERT_EQ(cache.CreateCacheForNet(physicalNetId), 0);
+        ASSERT_EQ(cache.CreateCacheForNet(vpnNetId, true), 0);
+        cache.SetDefaultNetwork(physicalNetId);
+        ASSERT_EQ(cache.SetNetworkDnsFamilyCapability(physicalNetId, true, false), 0);
+        ASSERT_EQ(cache.SetNetworkDnsFamilyCapability(vpnNetId, false, true), 0);
+        ASSERT_EQ(cache.AddUidRange(vpnNetId, {{1000, 2000, 1, vpnNetId}}), 0);
+    }
+
+    void TearDown() override
+    {
+        auto &cache = DnsParamCache::GetInstance();
+        cache.DelUidRange(vpnNetId, {{1000, 2000, 1, vpnNetId}});
+        cache.DestroyNetworkCache(vpnNetId, true);
+        cache.DestroyNetworkCache(physicalNetId);
+        cache.SetDefaultNetwork(savedDefault);
+        for (int fd : sockets) {
+            if (fd >= 0) {
+                close(fd);
+            }
+        }
+    }
+
+    static constexpr uint16_t physicalNetId = 60128;
+    static constexpr uint16_t vpnNetId = 60129;
+    int32_t savedDefault = 0;
+    int sockets[2] = {-1, -1};
+};
+
+HWTEST_F(NetsysDnsFamilyListenTest, Ipv6ReplyUsesUidAndExplicitNetwork, TestSize.Level1)
+{
+    int32_t reply = -1;
+    DnsResolvListenInternal::ProcJudgeIpv6Command(sockets[0], 0, 1000);
+    ASSERT_EQ(recv(sockets[1], &reply, sizeof(reply), 0), static_cast<ssize_t>(sizeof(reply)));
+    EXPECT_EQ(reply, 1);
+    DnsResolvListenInternal::ProcJudgeIpv6Command(sockets[0], 0, 999);
+    ASSERT_EQ(recv(sockets[1], &reply, sizeof(reply), 0), static_cast<ssize_t>(sizeof(reply)));
+    EXPECT_EQ(reply, 0);
+    DnsResolvListenInternal::ProcJudgeIpv6Command(sockets[0], physicalNetId, 1000);
+    ASSERT_EQ(recv(sockets[1], &reply, sizeof(reply), 0), static_cast<ssize_t>(sizeof(reply)));
+    EXPECT_EQ(reply, 0);
+}
+
+HWTEST_F(NetsysDnsFamilyListenTest, Ipv4ReplyUsesUidAndExplicitNetwork, TestSize.Level1)
+{
+    int32_t reply = -1;
+    DnsResolvListenInternal::ProcJudgeIpv4Command(sockets[0], 0, 1000);
+    ASSERT_EQ(recv(sockets[1], &reply, sizeof(reply), 0), static_cast<ssize_t>(sizeof(reply)));
+    EXPECT_EQ(reply, 0);
+    DnsResolvListenInternal::ProcJudgeIpv4Command(sockets[0], 0, 999);
+    ASSERT_EQ(recv(sockets[1], &reply, sizeof(reply), 0), static_cast<ssize_t>(sizeof(reply)));
+    EXPECT_EQ(reply, 1);
+    DnsResolvListenInternal::ProcJudgeIpv4Command(sockets[0], physicalNetId, 1000);
+    ASSERT_EQ(recv(sockets[1], &reply, sizeof(reply), 0), static_cast<ssize_t>(sizeof(reply)));
+    EXPECT_EQ(reply, 1);
+}
+
+class DnsNodataCacheListenTest : public testing::Test {
+public:
+    void SetUp() override
+    {
+        auto &cache = DnsParamCache::GetInstance();
+        savedDefault = cache.GetDefaultNetwork();
+        ASSERT_EQ(socketpair(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK, 0, sockets), 0);
+        ASSERT_EQ(cache.CreateCacheForNet(nodataNetId), 0);
+        cache.SetDefaultNetwork(nodataNetId);
+    }
+
+    void TearDown() override
+    {
+        auto &cache = DnsParamCache::GetInstance();
+        cache.SetPresetDomains({});
+        cache.DestroyNetworkCache(nodataNetId);
+        cache.SetDefaultNetwork(savedDefault);
+        for (int fd : sockets) {
+            if (fd >= 0) {
+                close(fd);
+            }
+        }
+    }
+
+    static constexpr uint16_t nodataNetId = 60130;
+    int32_t savedDefault = 0;
+    int sockets[2] = {-1, -1};
+};
+
+/**
+ * @tc.name  : NodataCacheReplyIsZero_WhenNothingMatches
+ * @tc.number: DnsResolvListenTest_NodataCache_001
+ * @tc.desc  : skipAAAA is 0 when the host hits neither nodata cache
+ */
+HWTEST_F(DnsNodataCacheListenTest, NodataCacheReplyIsZero_WhenNothingMatches, TestSize.Level1)
+{
+    int32_t reply = -1;
+    DnsResolvListenInternal::ProcGetNodataCacheCommand(sockets[0], nodataNetId, "www.normal.example.com", 1000);
+    ASSERT_EQ(recv(sockets[1], &reply, sizeof(reply), 0), static_cast<ssize_t>(sizeof(reply)));
+    EXPECT_EQ(reply, 0);
+    // netId 0 falls back to the default network inside each cache lookup
+    DnsResolvListenInternal::ProcGetNodataCacheCommand(sockets[0], 0, "www.normal.example.com", 1000);
+    ASSERT_EQ(recv(sockets[1], &reply, sizeof(reply), 0), static_cast<ssize_t>(sizeof(reply)));
+    EXPECT_EQ(reply, 0);
+    // Invalid client fd covers the PollSendData failure branch, no reply reaches the peer
+    DnsResolvListenInternal::ProcGetNodataCacheCommand(-1, nodataNetId, "www.normal.example.com", 1000);
+    EXPECT_EQ(recv(sockets[1], &reply, sizeof(reply), 0), -1);
+}
+
+/**
+ * @tc.name  : NodataCacheReplyIsOne_WhenHostIsPresetDomain
+ * @tc.number: DnsResolvListenTest_NodataCache_002
+ * @tc.desc  : skipAAAA is 1 when the queried host matches a preset domain of the uid
+ */
+HWTEST_F(DnsNodataCacheListenTest, NodataCacheReplyIsOne_WhenHostIsPresetDomain, TestSize.Level1)
+{
+    auto &cache = DnsParamCache::GetInstance();
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[1000] = {"example.com"};
+    cache.SetPresetDomains(presetDomains);
+    int32_t reply = -1;
+    DnsResolvListenInternal::ProcGetNodataCacheCommand(sockets[0], nodataNetId, "www.example.com", 1000);
+    ASSERT_EQ(recv(sockets[1], &reply, sizeof(reply), 0), static_cast<ssize_t>(sizeof(reply)));
+    EXPECT_EQ(reply, 1);
+    // Host outside the preset domain list keeps skipAAAA 0
+    DnsResolvListenInternal::ProcGetNodataCacheCommand(sockets[0], nodataNetId, "www.notpreset.com", 1000);
+    ASSERT_EQ(recv(sockets[1], &reply, sizeof(reply), 0), static_cast<ssize_t>(sizeof(reply)));
+    EXPECT_EQ(reply, 0);
+}
+
+/**
+ * @tc.name  : NodataCacheReplyIsOne_WhenHostInNodataCache
+ * @tc.number: DnsResolvListenTest_NodataCache_003
+ * @tc.desc  : skipAAAA is 1 when the queried host is already in the nodata cache
+ */
+HWTEST_F(DnsNodataCacheListenTest, NodataCacheReplyIsOne_WhenHostInNodataCache, TestSize.Level1)
+{
+    auto &cache = DnsParamCache::GetInstance();
+    cache.SetNodataCache(nodataNetId, 1000, "www.nodata.example.com");
+    int32_t reply = -1;
+    DnsResolvListenInternal::ProcGetNodataCacheCommand(sockets[0], nodataNetId, "www.nodata.example.com", 1000);
+    ASSERT_EQ(recv(sockets[1], &reply, sizeof(reply), 0), static_cast<ssize_t>(sizeof(reply)));
+    EXPECT_EQ(reply, 1);
+}
+
+/**
+ * @tc.name  : NodataCacheReplyIsOne_WhenUidIn
+ * @tc.number: DnsResolvListenTest_NodataCache_004
+ * @tc.desc  : skipAAAA is 1 when the calling uid is in the ipv6 uid of the network
+ */
+HWTEST_F(DnsNodataCacheListenTest, NodataCacheReplyIsOne_WhenUidInIpv6, TestSize.Level1)
+{
+    auto &cache = DnsParamCache::GetInstance();
+    std::vector<int32_t> netIds = {nodataNetId};
+    cache.SetIpv6UidBlackList(netIds, 1000);
+    int32_t reply = -1;
+    DnsResolvListenInternal::ProcGetNodataCacheCommand(sockets[0], nodataNetId, "www.list.example.com", 1000);
+    ASSERT_EQ(recv(sockets[1], &reply, sizeof(reply), 0), static_cast<ssize_t>(sizeof(reply)));
+    EXPECT_EQ(reply, 1);
 }
 
 HWTEST_F(DnsResolvListenTest, StartListen_ShouldStartListening_WhenCalled, TestSize.Level0)
@@ -218,8 +384,9 @@ HWTEST_F(DnsResolvListenTest, ProcJudgeIpv6Command_EnableIpv6, TestSize.Level0)
 {
     int clientSockFd = 1;
     uint16_t netId = 100;
-    int enable = DnsParamCache::GetInstance().IsIpv6Enable(netId) ? 1 : 0;
-    dnsResolvListenInternal.ProcJudgeIpv6Command(clientSockFd, netId);
+    uint32_t uid = 0;
+    int enable = DnsParamCache::GetInstance().IsIpv6Enable(netId, uid) ? 1 : 0;
+    dnsResolvListenInternal.ProcJudgeIpv6Command(clientSockFd, netId, uid);
     EXPECT_EQ(enable, 0);
 }
 
@@ -243,8 +410,9 @@ HWTEST_F(DnsResolvListenTest, ProcJudgeIpv4Command_EnableIpv4, TestSize.Level0)
 {
     int clientSockFd = 1;
     uint16_t netId = 100;
-    int enable = DnsParamCache::GetInstance().IsIpv4Enable(netId) ? 1 : 0;
-    dnsResolvListenInternal.ProcJudgeIpv4Command(clientSockFd, netId);
+    uint32_t uid = 0;
+    int enable = DnsParamCache::GetInstance().IsIpv4Enable(netId, uid) ? 1 : 0;
+    dnsResolvListenInternal.ProcJudgeIpv4Command(clientSockFd, netId, uid);
     EXPECT_EQ(enable, 0);
 }
 }  // namespace OHOS::nmd

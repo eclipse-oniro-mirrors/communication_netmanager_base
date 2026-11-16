@@ -436,6 +436,30 @@ export default namespace connection {
 
   export native function setAppHttpProxySync(httpProxy: HttpProxy): void;
 
+  export native function onAppHttpProxySync(callback: Callback<HttpProxy>): void;
+
+  export native function offAppHttpProxySync(callback?: Callback<HttpProxy>): void;
+
+  export function onAppHttpProxy(callback: Callback<HttpProxy>): void {
+    onAppHttpProxySync(callback);
+  }
+
+  export function offAppHttpProxy(callback?: Callback<HttpProxy>): void {
+    offAppHttpProxySync(callback);
+  }
+
+  export native function onDefaultHttpProxySync(callback: Callback<HttpProxy>): void;
+
+  export native function offDefaultHttpProxySync(callback?: Callback<HttpProxy>): void;
+
+  export function onDefaultHttpProxy(callback: Callback<HttpProxy>): void {
+    onDefaultHttpProxySync(callback);
+  }
+
+  export function offDefaultHttpProxy(callback?: Callback<HttpProxy>): void {
+    offDefaultHttpProxySync(callback);
+  }
+
   export function setGlobalHttpProxy(httpProxy: HttpProxy, callback: AsyncCallback<void>): void {
     let p1 = taskpool.execute(() => {
         setGlobalHttpProxySync(httpProxy);

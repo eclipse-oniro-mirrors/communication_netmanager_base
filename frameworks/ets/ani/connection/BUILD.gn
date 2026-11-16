@@ -74,6 +74,8 @@ ohos_static_library("connection_ani_static") {
 }
 
 ohos_rust_shared_library("connection_ani") {
+  version_script = "libconnection_ani.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true

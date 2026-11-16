@@ -68,7 +68,7 @@ int32_t VirtualNetwork::RemoveUids(const std::vector<UidRange> &uidVec)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t VirtualNetwork::AddInterface(std::string &interfaceName)
+int32_t VirtualNetwork::AddInterface(std::string &interfaceName, bool isLocalNetworkRouted)
 {
     NETNATIVE_LOGI("Entry VirtualNetwork::AddInterface %{public}s", interfaceName.c_str());
     std::lock_guard<std::mutex> lock(mutex_);
@@ -94,12 +94,15 @@ int32_t VirtualNetwork::AddInterface(std::string &interfaceName)
         return NETMANAGER_ERROR;
     }
 
-    if (RouteManager::AddInterfaceToVirtualNetwork(netId_, interfaceName)) {
+    if (RouteManager::AddInterfaceToVirtualNetwork(netId_, interfaceName, isLocalNetworkRouted)) {
         NETNATIVE_LOGE("Failed to add interface %{public}s to netId_ %{public}u", interfaceName.c_str(), netId_);
         return NETMANAGER_ERROR;
     }
 
     interfaces_.insert(interfaceName);
+    if (isLocalNetworkRouted) {
+        localNetworkRoutedInterfaces_.insert(interfaceName);
+    }
     return NETMANAGER_SUCCESS;
 }
 
@@ -112,7 +115,8 @@ int32_t VirtualNetwork::RemoveInterface(std::string &interfaceName)
         return NETMANAGER_SUCCESS;
     }
 
-    if (RouteManager::RemoveInterfaceFromVirtualNetwork(netId_, interfaceName)) {
+    bool isLocalNetworkRouted = localNetworkRoutedInterfaces_.count(interfaceName) != 0;
+    if (RouteManager::RemoveInterfaceFromVirtualNetwork(netId_, interfaceName, isLocalNetworkRouted)) {
         NETNATIVE_LOGE("Failed to remove interface %{public}s to netId_ %{public}u", interfaceName.c_str(), netId_);
         return NETMANAGER_ERROR;
     }
@@ -129,6 +133,7 @@ int32_t VirtualNetwork::RemoveInterface(std::string &interfaceName)
     VpnManager::GetInstance().DestroyVpnInterface();
 #endif // SUPPORT_SYSVPN
     interfaces_.erase(interfaceName);
+    localNetworkRoutedInterfaces_.erase(interfaceName);
     return NETMANAGER_SUCCESS;
 }
 

@@ -23,6 +23,7 @@
 #include "http_proxy.h"
 #include "i_net_conn_callback.h"
 #include "i_refresh_http_proxy_callback.h"
+#include "i_http_proxy_callback.h"
 #include "i_net_detection_callback.h"
 #include "i_net_interface_callback.h"
 #include "i_net_supplier_callback.h"
@@ -151,6 +152,14 @@ public:
     virtual int32_t GetConnectOwnerUid(const NetConnInfo &netConnInfo, int32_t &ownerUid) = 0;
     virtual int32_t GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo) = 0;
     virtual int32_t RenewDhcp(int32_t netId) = 0;
+    virtual int32_t RegisterHttpProxyCallback(const sptr<IHttpProxyCallback> &)
+    {
+        return NETMANAGER_ERR_CAPABILITY_NOT_SUPPORTED;
+    }
+    virtual int32_t UnregisterHttpProxyCallback(const sptr<IHttpProxyCallback> &)
+    {
+        return NETMANAGER_ERR_CAPABILITY_NOT_SUPPORTED;
+    }
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

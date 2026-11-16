@@ -60,6 +60,8 @@ ohos_static_library("statistics_ani_static") {
 }
 
 ohos_rust_shared_library("statistics_ani") {
+  version_script = "libstatistics_ani.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true

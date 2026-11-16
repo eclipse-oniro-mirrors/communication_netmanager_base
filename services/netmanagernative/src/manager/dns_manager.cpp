@@ -333,6 +333,13 @@ int32_t DnsManager::SetUserDefinedServerFlag(uint16_t netId, bool flag)
     return DnsParamCache::GetInstance().SetUserDefinedServerFlag(netId, flag);
 }
 
+int32_t DnsManager::SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable)
+{
+    NETNATIVE_LOGI("SetNetworkDnsFamilyCapability netId[%{public}d], ipv4[%{public}d], ipv6[%{public}d]",
+        netId, ipv4Enable, ipv6Enable);
+    return DnsParamCache::GetInstance().SetNetworkDnsFamilyCapability(netId, ipv4Enable, ipv6Enable);
+}
+
 int32_t DnsManager::FlushDnsCache(uint16_t netId)
 {
     NETNATIVE_LOGI("manager_FlushDnsCache netId[%{public}d]", netId);
@@ -349,5 +356,13 @@ int32_t DnsManager::SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t ui
     DnsParamCache::GetInstance().SetIpv6UidBlackList(netIds, static_cast<uint32_t>(uid));
     return 0;
 }
+
+int32_t DnsManager::SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains)
+{
+    NETNATIVE_LOGI("manager_SetPresetDomains uid num:%{public}zu", domains.size());
+    DnsParamCache::GetInstance().SetPresetDomains(domains);
+    return 0;
+}
+
 } // namespace nmd
 } // namespace OHOS

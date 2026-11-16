@@ -51,6 +51,7 @@ struct NetLinkInfo final : public Parcelable {
     HttpProxy httpProxy_;
     bool isIpv4LinkValid_ = false;
     bool isIpv6LinkValid_ = false;
+    bool isLocalNetworkRouted_ = false;
 
     NetLinkInfo() = default;
     NetLinkInfo(const NetLinkInfo &cap);

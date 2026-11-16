@@ -17,6 +17,7 @@
 #define INCLUDE_MANAGER_DNS_MANAGER_H
 
 #include <vector>
+#include <map>
 
 #include "dns_param_cache.h"
 #include "dns_proxy_listen.h"
@@ -157,9 +158,11 @@ public:
     int32_t AddUidRange(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges);
     int32_t DelUidRange(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges);
     int32_t SetUserDefinedServerFlag(uint16_t netId, bool flag);
+    int32_t SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable);
     int32_t FlushDnsCache(uint16_t netId);
     void SetClatDnsEnableIpv4(int32_t netId, bool enable);
     int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid);
+    int32_t SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains);
 private:
     std::shared_ptr<DnsProxyListen> dnsProxyListen_;
     int32_t FillAddrInfo(std::vector<AddrInfo> &addrInfo, addrinfo *res);

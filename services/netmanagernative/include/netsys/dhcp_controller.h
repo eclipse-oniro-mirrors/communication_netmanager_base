@@ -18,6 +18,7 @@
 
 #include <mutex>
 #include <shared_mutex>
+#include "ffrt.h"
 #include "i_notify_callback.h"
 #include "dhcp_c_api.h"
 
@@ -55,7 +56,7 @@ private:
     std::unique_ptr<DhcpControllerResultNotify> dhcpResultNotify_ = nullptr;
     std::vector<sptr<OHOS::NetsysNative::INotifyCallback>> callback_;
     std::shared_mutex callbackMutex_;
-    std::mutex dhcpApiMutex_;
+    ffrt::mutex dhcpApiMutex_;
     bool dhcpClientInitialized_ = false;
 };
 } // namespace nmd

@@ -189,6 +189,15 @@ HWTEST_F(DnsManagerTest, SetIpv6UidBlackList001, TestSize.Level1)
     EXPECT_EQ(result, 401);
 }
 
+HWTEST_F(DnsManagerTest, SetPresetDomains001, TestSize.Level1)
+{
+    DnsManager dnsManager;
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000001] = {"example.com", "test.com"};
+    auto result = dnsManager.SetPresetDomains(presetDomains);
+    EXPECT_EQ(result, 0);
+}
+
 #ifdef FEATURE_NET_FIREWALL_ENABLE
 HWTEST_F(DnsManagerTest, SetFirewallRules001, TestSize.Level1)
 {

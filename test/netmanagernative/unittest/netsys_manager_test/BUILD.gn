@@ -212,6 +212,13 @@ ohos_unittest("netsys_native_manager_netsys_native_service_test") {
 
   sources = [ "netsys_native_service_test.cpp" ]
 
+  # The DNS fixture must not clear the board's routing rules while constructing
+  # NetManagerNative. All other fixtures still call the real functions.
+  ldflags = [
+    "-Wl,--wrap=_ZN4OHOS3nmd14ClearRouteInfoEtj",
+    "-Wl,--wrap=_ZN4OHOS3nmd22SendNetlinkMsgToKernelEP8nlmsghdrj",
+  ]
+
   include_dirs = [
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",

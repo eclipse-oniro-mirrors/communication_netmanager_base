@@ -956,7 +956,7 @@ int32_t NetsysNativeServiceProxy::InterfaceSetIffUp(const std::string &ifaceName
 }
 
 int32_t NetsysNativeServiceProxy::NetworkAddInterface(int32_t netId, const std::string &iface,
-                                                      NetBearType netBearerType)
+    NetBearType netBearerType, bool isLocalNetworkRouted)
 {
     NETNATIVE_LOGI("Begin to NetworkAddInterface");
     MessageParcel data;
@@ -969,7 +969,7 @@ int32_t NetsysNativeServiceProxy::NetworkAddInterface(int32_t netId, const std::
     if (!data.WriteString(iface)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteUint8(netBearerType)) {
+    if (!data.WriteUint8(netBearerType) || !data.WriteBool(isLocalNetworkRouted)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -3683,6 +3683,57 @@ int32_t NetsysNativeServiceProxy::SetIpv6UidBlackList(std::vector<int32_t> &netI
     return result;
 }
 
+int32_t NetsysNativeServiceProxy::SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains)
+{
+    NETNATIVE_LOGI("Begin to SetPresetDomains uid num:%{public}zu", domains.size());
+    MessageParcel data;
+    // LCOV_EXCL_START
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(domains.size()))) {
+        NETNATIVE_LOGE("SetPresetDomains write uid num return error");
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (const auto &entry : domains) {
+        if (!data.WriteUint32(entry.first)) {
+            NETNATIVE_LOGE("SetPresetDomains write uid return error");
+            return ERR_FLATTEN_OBJECT;
+        }
+        if (!data.WriteInt32(static_cast<int32_t>(entry.second.size()))) {
+            NETNATIVE_LOGE("SetPresetDomains write domain num return error");
+            return ERR_FLATTEN_OBJECT;
+        }
+        for (const auto &domain : entry.second) {
+            if (!data.WriteString(domain)) {
+                NETNATIVE_LOGE("SetPresetDomains write domain return error");
+                return ERR_FLATTEN_OBJECT;
+            }
+        }
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("SetPresetDomains Remote pointer is null");
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t error = remote->SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_PRESET_DOMAINS), data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("SetPresetDomains proxy SendRequest failed, error code: [%{public}d]", error);
+        return IPC_INVOKER_ERR;
+    }
+    int32_t result = ERR_INVALID_DATA;
+    if (!reply.ReadInt32(result)) {
+        NETNATIVE_LOGE("SetPresetDomains proxy read result failed");
+        return IPC_PROXY_TRANSACTION_ERR;
+    }
+    // LCOV_EXCL_STOP
+    return result;
+}
+
 int32_t NetsysNativeServiceProxy::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
 {
     NETNATIVE_LOG_D("Begin to SetIpv6AutoConf");
@@ -4147,6 +4198,34 @@ int32_t NetsysNativeServiceProxy::SetUserDefinedServerFlag(uint16_t netId, bool 
     }
     NETNATIVE_LOG_D("SetUserDefinedServerFlag WriteParam func out");
     return ret;
+}
+
+int32_t NetsysNativeServiceProxy::SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data) || !data.WriteUint16(netId) || !data.WriteBool(ipv4Enable) ||
+        !data.WriteBool(ipv6Enable)) {
+        NETNATIVE_LOGE("SetNetworkDnsFamilyCapability write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("SetNetworkDnsFamilyCapability remote is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NETWORK_DNS_FAMILY_CAPABILITY), data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("SetNetworkDnsFamilyCapability SendRequest failed: %{public}d", error);
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t result = ERR_INVALID_DATA;
+    if (!reply.ReadInt32(result)) {
+        NETNATIVE_LOGE("SetNetworkDnsFamilyCapability read result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
 }
 
 int32_t NetsysNativeServiceProxy::FlushDnsCache(uint16_t netId)

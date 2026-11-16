@@ -156,9 +156,10 @@ int32_t NetManagerNative::NetworkDelUids(int32_t netId, const std::vector<UidRan
     return connManager_->RemoveUidsFromNetwork(netId, uidRanges);
 }
 
-int32_t NetManagerNative::NetworkAddInterface(int32_t netId, std::string interfaceName, NetBearType netBearerType)
+int32_t NetManagerNative::NetworkAddInterface(int32_t netId, std::string interfaceName, NetBearType netBearerType,
+    bool isLocalNetworkRouted)
 {
-    return connManager_->AddInterfaceToNetwork(netId, interfaceName, netBearerType);
+    return connManager_->AddInterfaceToNetwork(netId, interfaceName, netBearerType, isLocalNetworkRouted);
 }
 
 int32_t NetManagerNative::NetworkRemoveInterface(int32_t netId, std::string interfaceName)
@@ -511,6 +512,11 @@ int32_t NetManagerNative::DnsDestroyNetworkCache(uint16_t netId, bool isVpnNet)
     return dnsManager_->DestroyNetworkCache(netId, isVpnNet);
 }
 
+int32_t NetManagerNative::SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains)
+{
+    return dnsManager_->SetPresetDomains(domains);
+}
+
 int32_t NetManagerNative::BandwidthEnableDataSaver(bool enable)
 {
     return bandwidthManager_->EnableDataSaver(enable);
@@ -760,6 +766,11 @@ int32_t NetManagerNative::CloseSocketsUid(const std::string &ipAddr, uint32_t ui
 int32_t NetManagerNative::DnsSetUserDefinedServerFlag(uint16_t netId, bool flag)
 {
     return dnsManager_->SetUserDefinedServerFlag(netId, flag);
+}
+
+int32_t NetManagerNative::SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable)
+{
+    return dnsManager_->SetNetworkDnsFamilyCapability(netId, ipv4Enable, ipv6Enable);
 }
 
 int32_t NetManagerNative::FlushDnsCache(uint16_t netId)

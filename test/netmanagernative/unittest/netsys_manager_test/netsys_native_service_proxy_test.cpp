@@ -15,7 +15,10 @@
 
 #include <gtest/gtest.h>
 
+#include "ipc_object_stub.h"
 #include "iservice_registry.h"
+#include "ipc_object_stub.h"
+#include "netsys_ipc_interface_code.h"
 #include "system_ability_definition.h"
 
 #include "bpf_def.h"
@@ -47,6 +50,42 @@ static constexpr uint64_t TEST_COOKIE = 1;
 static constexpr uint32_t TEST_STATS_TYPE1 = 0;
 static constexpr uint32_t TEST_STATS_TYPE2 = 2;
 namespace {
+// Exercise the production proxy without depending on the netsys SA installed on the board.
+class DnsFamilyRemote : public IPCObjectStub {
+public:
+    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
+    {
+        ++calls;
+        EXPECT_EQ(code, static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NETWORK_DNS_FAMILY_CAPABILITY));
+        EXPECT_EQ(data.ReadInterfaceToken(), INetsysService::GetDescriptor());
+        EXPECT_TRUE(data.ReadUint16(netId));
+        EXPECT_TRUE(data.ReadBool(ipv4));
+        EXPECT_TRUE(data.ReadBool(ipv6));
+        EXPECT_EQ(data.GetReadableBytes(), 0u);
+        if (writeReply) {
+            EXPECT_TRUE(reply.WriteInt32(result));
+        }
+        return transportResult;
+    }
+
+    uint32_t calls = 0;
+    uint16_t netId = 0;
+    bool ipv4 = false;
+    bool ipv6 = false;
+    bool writeReply = true;
+    int32_t result = NETMANAGER_SUCCESS;
+    int32_t transportResult = ERR_NONE;
+};
+
+class FakeRemoteObject : public IPCObjectStub {
+public:
+    FakeRemoteObject() : IPCObjectStub(u"FakeRemoteObject") {}
+    int OnRemoteRequest(uint32_t, MessageParcel &, MessageParcel &, MessageOption &) override
+    {
+        return ERR_INVALID_DATA;
+    }
+};
+
 sptr<NetsysNative::INetsysService> ConnManagerGetProxy()
 {
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -65,6 +104,39 @@ sptr<NetsysNative::INetsysService> ConnManagerGetProxy()
     }
     return proxy;
 }
+
+// Local stub remote used to drive proxy error branches in-process
+class NetsysNativeTestRemoteStub : public OHOS::IPCObjectStub {
+public:
+    NetsysNativeTestRemoteStub() : IPCObjectStub(u"") {}
+    ~NetsysNativeTestRemoteStub() override = default;
+
+    int32_t OnRemoteRequest(uint32_t code, OHOS::MessageParcel &data, OHOS::MessageParcel &reply,
+                            OHOS::MessageOption &option) override
+    {
+        if (code == static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_PRESET_DOMAINS)) {
+            if (sendRequestErr != ERR_NONE) {
+                return sendRequestErr;
+            }
+            if (!replyValid) {
+                return ERR_NONE;
+            }
+            reply.WriteInt32(0);
+        }
+        return ERR_NONE;
+    }
+
+    int32_t sendRequestErr = ERR_NONE;
+    bool replyValid = true;
+};
+
+// Built in a noinline factory so that calls dispatch virtually through the exported vtable,
+// instead of direct references to proxy symbols which are pruned by the version script
+__attribute__((noinline)) OHOS::sptr<OHOS::NetsysNative::INetsysService> CreateLocalTestProxy(
+    const OHOS::sptr<OHOS::IRemoteObject> &remote)
+{
+    return new NetsysNativeServiceProxy(remote);
+}
 } // namespace
 class NetsysNativeServiceProxyTest : public testing::Test {
 public:
@@ -81,6 +153,49 @@ void NetsysNativeServiceProxyTest::TearDownTestCase() {}
 void NetsysNativeServiceProxyTest::SetUp() {}
 
 void NetsysNativeServiceProxyTest::TearDown() {}
+
+HWTEST_F(NetsysNativeServiceProxyTest, DnsFamilyCapabilityRoundTrip, TestSize.Level1)
+{
+    sptr<DnsFamilyRemote> remote = new DnsFamilyRemote();
+    // Call through the interface: proxy methods are hidden by the shared-library version script.
+    sptr<INetsysService> proxy = new NetsysNativeServiceProxy(remote);
+    for (bool ipv4 : {false, true}) {
+        for (bool ipv6 : {false, true}) {
+            EXPECT_EQ(proxy->SetNetworkDnsFamilyCapability(NETID, ipv4, ipv6), NETMANAGER_SUCCESS);
+            EXPECT_EQ(remote->netId, NETID);
+            EXPECT_EQ(remote->ipv4, ipv4);
+            EXPECT_EQ(remote->ipv6, ipv6);
+        }
+    }
+    remote->result = -ENOENT;
+    EXPECT_EQ(proxy->SetNetworkDnsFamilyCapability(UINT16_MAX, true, false), -ENOENT);
+    EXPECT_EQ(remote->netId, UINT16_MAX);
+    EXPECT_EQ(remote->calls, 5u);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, DnsFamilyCapabilityNullRemote, TestSize.Level1)
+{
+    sptr<INetsysService> proxy = new NetsysNativeServiceProxy(nullptr);
+    EXPECT_EQ(proxy->SetNetworkDnsFamilyCapability(NETID, true, true), ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, DnsFamilyCapabilitySendFailure, TestSize.Level1)
+{
+    sptr<DnsFamilyRemote> remote = new DnsFamilyRemote();
+    remote->transportResult = ERR_INVALID_DATA;
+    sptr<INetsysService> proxy = new NetsysNativeServiceProxy(remote);
+    EXPECT_EQ(proxy->SetNetworkDnsFamilyCapability(NETID, false, true), ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(remote->calls, 1u);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, DnsFamilyCapabilityMissingReply, TestSize.Level1)
+{
+    sptr<DnsFamilyRemote> remote = new DnsFamilyRemote();
+    remote->writeReply = false;
+    sptr<INetsysService> proxy = new NetsysNativeServiceProxy(remote);
+    EXPECT_EQ(proxy->SetNetworkDnsFamilyCapability(NETID, true, false), ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(remote->calls, 1u);
+}
 
 /**
  * @tc.name: AddInterfaceToNetworkTest001
@@ -104,6 +219,41 @@ HWTEST_F(NetsysNativeServiceProxyTest, AddInterfaceToNetworkTest001, TestSize.Le
 
     netsysNativeService->NetworkAddInterface(NETID, INTERFACENAME, BEARER_DEFAULT);
     netsysNativeService->AddInterfaceAddress(INTERFACENAME, "192.168.113.209", 24);
+}
+
+/**
+ * @tc.name: NetworkAddInterfaceWriteFail001
+ * @tc.desc: Test both failure branches of NetworkAddInterface parcel writing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetsysNativeServiceProxyTest, NetworkAddInterfaceWriteFail001, TestSize.Level1)
+{
+    sptr<IRemoteObject> remote = new FakeRemoteObject();
+    sptr<NetsysNativeServiceProxy> proxy = new NetsysNativeServiceProxy(remote);
+    ASSERT_NE(proxy, nullptr);
+
+    // Fill the parcel so that WriteUint8 fails. 204708 bytes plus the fixed header reaches 200K.
+    std::string uint8FailIface(204708, 'a');
+    MessageParcel checkUint8;
+    ASSERT_TRUE(checkUint8.WriteInterfaceToken(NetsysNativeServiceProxy::GetDescriptor()));
+    ASSERT_TRUE(checkUint8.WriteInt32(NETID));
+    ASSERT_TRUE(checkUint8.WriteString(uint8FailIface));
+    EXPECT_FALSE(checkUint8.WriteUint8(static_cast<uint8_t>(BEARER_DEFAULT)));
+
+    int32_t ret = proxy->NetworkAddInterface(NETID, uint8FailIface, BEARER_DEFAULT, true);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+
+    // WriteUint8 consumes the last 4 writable bytes, then WriteBool fails.
+    std::string boolFailIface(204704, 'a');
+    MessageParcel checkBool;
+    ASSERT_TRUE(checkBool.WriteInterfaceToken(NetsysNativeServiceProxy::GetDescriptor()));
+    ASSERT_TRUE(checkBool.WriteInt32(NETID));
+    ASSERT_TRUE(checkBool.WriteString(boolFailIface));
+    ASSERT_TRUE(checkBool.WriteUint8(static_cast<uint8_t>(BEARER_DEFAULT)));
+    EXPECT_FALSE(checkBool.WriteBool(true));
+
+    ret = proxy->NetworkAddInterface(NETID, boolFailIface, BEARER_DEFAULT, true);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
 }
 
 /**
@@ -457,6 +607,55 @@ HWTEST_F(NetsysNativeServiceProxyTest, SetIpv6UidBlackListTest001, TestSize.Leve
     std::vector<int32_t> netIds = {};
     int32_t ret = netsysNativeService->SetIpv6UidBlackList(netIds, uid);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, SetPresetDomainsTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000138] = {"example.com"};
+    int32_t ret = netsysNativeService->SetPresetDomains(presetDomains);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, SetPresetDomainsTest002, TestSize.Level1)
+{
+    // In-process stub with multi-uid multi-domain map - covers proxy full serialize loop deterministically
+    sptr<NetsysNativeTestRemoteStub> remote = new NetsysNativeTestRemoteStub();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = CreateLocalTestProxy(remote);
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000138] = {"example.com"};
+    presetDomains[20000139] = {"a.example.com", "b.example.com"};
+    int32_t ret = netsysNativeService->SetPresetDomains(presetDomains);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, SetPresetDomainsTest003, TestSize.Level1)
+{
+    // In-process stub returns SendRequest error - covers proxy branch: error != ERR_NONE
+    sptr<NetsysNativeTestRemoteStub> remote = new NetsysNativeTestRemoteStub();
+    remote->sendRequestErr = IPC_INVOKER_ERR;
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = CreateLocalTestProxy(remote);
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000138] = {"example.com"};
+    int32_t ret = netsysNativeService->SetPresetDomains(presetDomains);
+    EXPECT_EQ(ret, IPC_INVOKER_ERR);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, SetPresetDomainsTest004, TestSize.Level1)
+{
+    // In-process stub writes no reply - covers proxy branch: reply.ReadInt32 failed
+    sptr<NetsysNativeTestRemoteStub> remote = new NetsysNativeTestRemoteStub();
+    remote->replyValid = false;
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = CreateLocalTestProxy(remote);
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000138] = {"example.com"};
+    int32_t ret = netsysNativeService->SetPresetDomains(presetDomains);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeServiceProxyTest, SetIpv6AutoConfTest001, TestSize.Level1)

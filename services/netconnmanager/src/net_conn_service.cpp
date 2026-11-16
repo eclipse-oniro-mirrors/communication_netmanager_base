@@ -43,6 +43,7 @@
 #include "net_policy_client.h"
 #include "net_datashare_utils.h"
 #include "net_http_proxy_tracker.h"
+#include "net_http_client.h"
 #include "net_manager_center.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
@@ -160,6 +161,14 @@ NetConnService::NetConnService()
 
 NetConnService::~NetConnService()
 {
+    decltype(httpProxyCallbacks_) callbacks;
+    {
+        std::lock_guard<std::mutex> lock(httpProxyCallbacksMutex_);
+        callbacks.swap(httpProxyCallbacks_);
+    }
+    for (const auto &item : callbacks) {
+        item.first->RemoveDeathRecipient(item.second.second);
+    }
     RemoveALLClientDeathRecipient();
     UnregisterNetDataShareObserver();
 }
@@ -265,7 +274,7 @@ bool NetConnService::Init()
     if (ret != 0) {
         NETMGR_LOG_E("Watchdog AddThread for netConnEventHandler_ failed, ret: %{public}d", ret);
     }
-    if (!HiviewDFX::IpcFull::GetInstance().AddIpcFull(IPC_FULL_CHECK_INTERVAL, HiviewDFX::XCOLLIE_FLAG_LOG)) {
+    if (!HiviewDFX::IpcFull::GetInstance().AddIpcFull(IPC_FULL_CHECK_INTERVAL, HiviewDFX::XCOLLIE_FLAG_RECOVERY)) {
         NETMGR_LOG_E("AddIpcFull failed");
     }
     RegisterAppStateAware();
@@ -604,6 +613,10 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
     }
     std::shared_ptr<Network> network = std::make_shared<Network>(
         netId, supplierId, bearerType, netConnEventHandler_);
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    bool isInSleep = isInSleep_.load();
+    network->UpdateForbidDetectionFlag(isInSleep);
+#endif
     network->SetNetCaps(netCaps);
     network->UpdateDualStackProbeTime(dualStackProbeTime_);
     network->SetNetDetectionHandler(std::bind(&NetConnService::HandleDetectionResult, shared_from_this(),
@@ -796,6 +809,7 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId, bool ign
     netSuppliers_.erase(supplierId);
     netSupplierLock.unlock();
     FindBestNetworkForAllRequest();
+    NotifyHttpProxyChanged();
     NETMGR_LOG_I("UnregisterNetSupplier supplierId[%{public}d] out", supplierId);
     return NETMANAGER_SUCCESS;
 }
@@ -829,8 +843,8 @@ void NetConnService::StopAllNetDetection()
                 NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
                 continue;
             }
-            pNetwork->StopNetDetection();
             pNetwork->UpdateForbidDetectionFlag(true);
+            pNetwork->StopNetDetection();
         }
     });
 }
@@ -860,20 +874,20 @@ void NetConnService::HandlePowerMgrEvent(int code)
 {
     if (code == STATE_ENTER_FORCESLEEP || code == STATE_ENTER_SLEEP_NOT_FORCE) {
         NETMGR_LOG_I("on receive enter sleep, code %{public}d.", code);
+        isInSleep_.store(true);
         if (netConnEventHandler_) {
             netConnEventHandler_->PostSyncTask([this]() {
                 this->StopAllNetDetection();
             });
         }
-        isInSleep_.store(true);
     } else if (code == STATE_EXIT_FORCESLEEP || code == STATE_EXIT_SLEEP_NOT_FORCE) {
         NETMGR_LOG_I("on receive exit sleep, code %{public}d.", code);
+        isInSleep_.store(false);
         if (netConnEventHandler_) {
             netConnEventHandler_->PostSyncTask([this]() {
                 this->StartAllNetDetection();
             });
         }
-        isInSleep_.store(false);
     }
 }
 #endif
@@ -1130,6 +1144,12 @@ void NetConnService::UpdateNetSupplierInfoAsyncExpand(sptr<NetSupplier> &supplie
 {
     FindBestNetworkForAllRequest();
     if (!oldHttpProxy.GetHost().empty()) {
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+        if (pacController_.HasWifiPac()) {
+            pacController_.SendEffectiveProxyBroadcast();
+            return;
+        }
+#endif
         HttpProxy emptyProxy;
         SendHttpProxyChangeBroadcast(emptyProxy);
     }
@@ -1225,11 +1245,25 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
     if (!isDelayHandleFindBestNetwork_) {
         FindBestNetworkForAllRequest();
     }
-    if (oldHttpProxy != netLinkInfo->httpProxy_) {
-        SendHttpProxyChangeBroadcast(netLinkInfo->httpProxy_);
-    }
+    HandleNetLinkHttpProxyChange(oldHttpProxy, netLinkInfo->httpProxy_);
     NETMGR_LOG_D("UpdateNetLinkInfo service out.");
     return NETMANAGER_SUCCESS;
+}
+
+void NetConnService::HandleNetLinkHttpProxyChange(const HttpProxy &oldHttpProxy, const HttpProxy &newHttpProxy)
+{
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+    if (!oldHttpProxy.GetPacUrl().empty() || !newHttpProxy.GetPacUrl().empty() || pacController_.HasWifiPac()) {
+        if (oldHttpProxy != newHttpProxy) {
+            pacController_.Refresh();
+            pacController_.SendEffectiveProxyBroadcast();
+        }
+        return;
+    }
+#endif
+    if (oldHttpProxy != newHttpProxy) {
+        SendHttpProxyChangeBroadcast(newHttpProxy);
+    }
 }
 
 void NetConnService::HandlePreFindBestNetworkForDelay(uint32_t supplierId, const sptr<NetSupplier> &supplier,
@@ -1360,6 +1394,7 @@ int32_t NetConnService::RestrictBackgroundChangedAsync(bool restrictBackground)
 
 void NetConnService::SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy)
 {
+    NotifyHttpProxyChanged();
     BroadcastInfo info;
     info.action = EventFwk::CommonEventSupport::COMMON_EVENT_HTTP_PROXY_CHANGE;
     info.data = "Global HttpProxy Changed";
@@ -1371,6 +1406,85 @@ void NetConnService::SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy)
     }
     param.emplace("UserId", std::to_string(userId));
     BroadcastManager::GetInstance().SendBroadcast(info, param);
+}
+
+void NetConnService::HttpProxyDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
+{
+    sptr<IRemoteObject> object = remote.promote();
+    std::shared_ptr<NetConnService> service = service_.lock();
+    if (object != nullptr && service != nullptr) {
+        service->RemoveHttpProxyCallback(object);
+    }
+}
+
+int32_t NetConnService::RegisterHttpProxyCallback(const sptr<IHttpProxyCallback> &callback)
+{
+    if (callback == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    sptr<IRemoteObject> remote = callback->AsObject();
+    if (remote == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::lock_guard<std::mutex> lock(httpProxyCallbacksMutex_);
+    if (httpProxyCallbacks_.find(remote) != httpProxyCallbacks_.end()) {
+        return NETMANAGER_SUCCESS;
+    }
+    sptr<HttpProxyDeathRecipient> recipient =
+        new (std::nothrow) HttpProxyDeathRecipient(shared_from_this());
+    if (recipient == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    if (!remote->AddDeathRecipient(recipient)) {
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+    httpProxyCallbacks_.emplace(remote, std::make_pair(callback, recipient));
+    return NETMANAGER_SUCCESS;
+}
+
+void NetConnService::RemoveHttpProxyCallback(const sptr<IRemoteObject> &remote)
+{
+    sptr<HttpProxyDeathRecipient> recipient;
+    {
+        std::lock_guard<std::mutex> lock(httpProxyCallbacksMutex_);
+        auto it = httpProxyCallbacks_.find(remote);
+        if (it == httpProxyCallbacks_.end()) {
+            return;
+        }
+        recipient = it->second.second;
+        httpProxyCallbacks_.erase(it);
+    }
+    remote->RemoveDeathRecipient(recipient);
+}
+
+int32_t NetConnService::UnregisterHttpProxyCallback(const sptr<IHttpProxyCallback> &callback)
+{
+    if (callback == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    sptr<IRemoteObject> remote = callback->AsObject();
+    if (remote == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    RemoveHttpProxyCallback(remote);
+    return NETMANAGER_SUCCESS;
+}
+
+void NetConnService::NotifyHttpProxyChanged()
+{
+    std::vector<sptr<IHttpProxyCallback>> callbacks;
+    {
+        std::lock_guard<std::mutex> lock(httpProxyCallbacksMutex_);
+        for (const auto &item : httpProxyCallbacks_) {
+            callbacks.emplace_back(item.second.first);
+        }
+    }
+    // Remote notification is performed without the subscriber lock to allow reentrant unregistration.
+    for (const auto &callback : callbacks) {
+        if (callback != nullptr) {
+            callback->OnHttpProxyChange();
+        }
+    }
 }
 
 int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
@@ -1539,11 +1653,20 @@ bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback, ui
     return FindSameCallback(callback, reqId, registerType, uid);
 }
 
+void NetConnService::NotifyNetworkSelectionChanged(bool defaultSupplierChanged)
+{
+    NotifyNetBearerTypeChange();
+    if (defaultSupplierChanged) {
+        NotifyHttpProxyChanged();
+    }
+}
+
 void NetConnService::FindBestNetworkForAllRequest()
 {
     std::shared_lock<std::shared_mutex> lock(uidActivateMutex_);
     NETMGR_LOG_I("FindBestNetworkForAllRequest Enter. netUidActivates_ size: [%{public}zu", netUidActivates_.size());
     sptr<NetSupplier> bestSupplier = nullptr;
+    bool defaultSupplierChanged = false;
     for (auto &uidIter : netUidActivates_) {
         for (auto &activate : uidIter.second) {
             if (!activate) {
@@ -1559,6 +1682,7 @@ void NetConnService::FindBestNetworkForAllRequest()
                          bestSupplier ? bestSupplier->GetNetSupplierIdent().c_str() : "null", activate->GetRequestId());
             if (activate == defaultNetActivate_) {
                 std::unique_lock<ffrt::shared_mutex> defaultLock(defaultNetSupplierMutex_);
+                defaultSupplierChanged |= (defaultNetSupplier_ != bestSupplier);
                 MakeDefaultNetWork(defaultNetSupplier_, bestSupplier);
             }
             sptr<NetSupplier> oldSupplier = activate->GetServiceSupply();
@@ -1583,7 +1707,8 @@ void NetConnService::FindBestNetworkForAllRequest()
         }
     }
 
-    NotifyNetBearerTypeChange();
+    lock.unlock();
+    NotifyNetworkSelectionChanged(defaultSupplierChanged);
 }
 
 uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
@@ -1605,6 +1730,12 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
                      iter->second->GetRealScore(), iter->second->IsConnected());
         if ((!iter->second->IsConnected()) || (!netActivateNetwork->MatchRequestAndNetwork(iter->second))) {
             NETMGR_LOG_D("Supplier[%{public}d] is not connected or not match request.", iter->second->GetSupplierId());
+            continue;
+        }
+        if (isDelayHandleFindBestNetwork_ && iter->second->GetSupplierId() == delaySupplierId_ &&
+            iter->second->GetSupplierId() != GetDefaultNetSupplierId()) {
+            NETMGR_LOG_D("Supplier[%{public}d] is delayed and not default net supplier",
+                         iter->second->GetSupplierId());
             continue;
         }
         int score = iter->second->GetRealScore();
@@ -2013,6 +2144,9 @@ void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<Net
     }
 
     oldSupplier = newSupplier;
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+    pacController_.Refresh();
+#endif
 }
 
 void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStatus netState)
@@ -2032,7 +2166,7 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStat
     NETMGR_LOG_I("HandleDetectionResult IsInFirstTimeDetecting[%{public}d]", isFirstTimeDetect);
     if (curNetSupplierType != BEARER_DEFAULT && curNetSupplierType != BEARER_CELLULAR) {
         RemoveDelayNetwork();
-    } else if (isFirstTimeDetect && supplier->IsOnceSuppress()) {
+    } else if (isFirstTimeDetect || supplier->IsOnceSuppress()) {
         HandlePreFindBestNetworkForDelay(supplierId, supplier, isFirstTimeDetect);
     }
     if (delaySupplierId_ == supplierId &&
@@ -2341,8 +2475,15 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
     if (httpProxy.GetUserId() == ROOT_USER_ID || httpProxy.GetUserId() == INVALID_USER_ID) {
         LoadGlobalHttpProxy(ACTIVE, httpProxy);
     } else if (httpProxy.GetUserId() > 0) {
-        // if the valid userId is given. so load http proxy from specified user.
-        LoadGlobalHttpProxy(SPECIFY, httpProxy);
+        int32_t callerUserId = INVALID_USER_ID;
+        if (GetLocalUserId(callerUserId) == NETMANAGER_SUCCESS && httpProxy.GetUserId() == callerUserId) {
+            // if the valid userId is given. so load http proxy from specified user.
+            LoadGlobalHttpProxy(SPECIFY, httpProxy);
+        } else {
+            NETMGR_LOG_I("GetDefaultHttpProxy userId not owned by caller, fallback to LOCAL."
+                "requested[%{public}d]", httpProxy.GetUserId());
+            LoadGlobalHttpProxy(LOCAL, httpProxy);
+        }
     } else {
         // executed in the caller process, so load http proxy from local user which the process belongs.
         LoadGlobalHttpProxy(LOCAL, httpProxy);
@@ -2355,6 +2496,12 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
     auto network = FindNetwork(bindNetId);
     if (network != nullptr && network->IsConnected()) {
         httpProxy = network->GetHttpProxy();
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+        std::shared_lock<ffrt::shared_mutex> lock(defaultNetSupplierMutex_);
+        if (defaultNetSupplier_ != nullptr && defaultNetSupplier_->GetNetId() == bindNetId) {
+            pacController_.FillLocalProxy(bindNetId, httpProxy);
+        }
+#endif
         NETMGR_LOG_I("Return bound network's http proxy as default.");
         return NETMANAGER_SUCCESS;
     }
@@ -2362,6 +2509,9 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
     std::shared_lock<ffrt::shared_mutex> lock(defaultNetSupplierMutex_);
     if (defaultNetSupplier_ != nullptr) {
         defaultNetSupplier_->GetHttpProxy(httpProxy);
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+        pacController_.FillLocalProxy(defaultNetSupplier_->GetNetId(), httpProxy);
+#endif
         auto endTime = std::chrono::steady_clock::now();
         auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
         NETMGR_LOG_D("Use default http proxy, cost=%{public}lld",  durationNs.count());
@@ -2588,18 +2738,29 @@ int32_t NetConnService::SetAirplaneMode(bool state)
     return NETMANAGER_SUCCESS;
 }
 
-long NetConnService::PerformProxyCurlProbe(CURL *curl)
+long NetConnService::PerformProxyProbe(const HttpProxy &tempProxy)
 {
-    long responseCode = 0;
-    if (curl == nullptr) {
-        return responseCode;
+    std::string httpUrl;
+    GetHttpUrlFromConfig(httpUrl);
+    if (httpUrl.empty()) {
+        NETMGR_LOG_E("ActiveHttpProxy thread get url failed!");
+        return 0;
     }
-    auto ret = curl_easy_perform(curl);
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
-    NETMGR_LOG_D("ActiveHttpProxy ret: %{public}d, code: %{public}d",
-                 static_cast<int>(ret), static_cast<int32_t>(responseCode));
-    curl_easy_cleanup(curl);
-    return responseCode;
+    NetHttp::HttpRequest request;
+    request.url = httpUrl;
+    request.timeoutMs = AUTH_TIME_OUT * 1000;
+    NetHttp::HttpProxyConfig proxyConfig;
+    proxyConfig.host = tempProxy.host_;
+    proxyConfig.port = tempProxy.port_;
+    proxyConfig.username = tempProxy.username_;
+    proxyConfig.password = tempProxy.password_;
+    /* Historical behavior: the proxy keep-alive probe does not force a tunnel. */
+    proxyConfig.useTunnel = false;
+    request.proxy = proxyConfig;
+    NetHttp::HttpResponse response = NetHttp::NetHttpClient::GetInstance().Execute(request);
+    NETMGR_LOG_D("ActiveHttpProxy ret: %{public}d, code: %{public}d", response.rawCurlCode,
+                 response.IsTransportSuccess() ? response.responseCode : 0);
+    return response.IsTransportSuccess() ? response.responseCode : 0;
 }
 
 void NetConnService::NotifyRefreshGlobalHttpProxyResult(long responseCode)
@@ -2637,7 +2798,7 @@ void NetConnService::ActiveHttpProxy()
     uint32_t retryTimes = RETRY_TIMES;
     while (httpProxyThreadNeedRun_.load()) {
         NETMGR_LOG_D("Keep global http-proxy active every 2 minutes");
-        CURL *curl = nullptr;
+        long responseCode = 0;
         HttpProxy tempProxy;
         {
             auto userInfoHelp = NetProxyUserinfo::GetInstance();
@@ -2645,37 +2806,9 @@ void NetConnService::ActiveHttpProxy()
             userInfoHelp.GetHttpProxyHostPass(tempProxy);
         }
         if (!tempProxy.host_.empty() && !tempProxy.username_.empty()) {
-            curl = curl_easy_init();
-            SetCurlOptions(curl, tempProxy);
+            responseCode = PerformProxyProbe(tempProxy);
         }
-        long responseCode = PerformProxyCurlProbe(curl);
         WaitForNextActiveCycle(retryTimes, responseCode);
-    }
-}
-
-void NetConnService::SetCurlOptions(CURL *curl, HttpProxy tempProxy)
-{
-    if (curl == nullptr) {
-        NETMGR_LOG_E("curl is nullptr");
-        return;
-    }
-    std::string httpUrl;
-    GetHttpUrlFromConfig(httpUrl);
-    if (httpUrl.empty()) {
-        NETMGR_LOG_E("ActiveHttpProxy thread get url failed!");
-        return;
-    }
-    auto proxyType = (tempProxy.host_.find("https://") != std::string::npos) ? CURLPROXY_HTTPS : CURLPROXY_HTTP;
-    curl_easy_setopt(curl, CURLOPT_URL, httpUrl.c_str());
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, AUTH_TIME_OUT);
-    curl_easy_setopt(curl, CURLOPT_PROXY, tempProxy.host_.c_str());
-    curl_easy_setopt(curl, CURLOPT_PROXYPORT, tempProxy.port_);
-    curl_easy_setopt(curl, CURLOPT_PROXYTYPE, proxyType);
-    curl_easy_setopt(curl, CURLOPT_PROXYUSERNAME, tempProxy.username_.c_str());
-    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-    curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
-    if (!tempProxy.password_.empty()) {
-        curl_easy_setopt(curl, CURLOPT_PROXYPASSWORD, tempProxy.password_.c_str());
     }
 }
 
@@ -2730,6 +2863,9 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
         }
         globalHttpProxyCache_.Erase(userId);
         SendHttpProxyChangeBroadcast(newHttpProxy);
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+        pacController_.Refresh();
+#endif
         UpdateGlobalHttpProxy(newHttpProxy);
     }
     if (!httpProxy.GetHost().empty()) {
@@ -2988,11 +3124,14 @@ uint32_t NetConnService::SetProxyOff()
     HttpProxy globalProxy;
     globalProxy.SetHost("");
     globalProxy.SetPort(0);
-    return SetGlobalHttpProxy(globalProxy);
+    uint32_t ret = SetGlobalHttpProxy(globalProxy);
+    pacController_.Refresh();
+    return ret;
 }
 
 uint32_t NetConnService::SetProxyAuto()
 {
+    auto wifiPacPause = pacController_.PauseWifiPac();
     std::string pacUrl;
     if (GetPacFileUrl(pacUrl) == NETMANAGER_SUCCESS) {
         if (!GetNetPacManager()->InitPACScriptWithURL(pacUrl)) {
@@ -3744,8 +3883,14 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
         UpdateGlobalHttpProxy(httpProxy);
         HandleDataShareMessage();
         RegisterNetDataShareObserver();
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+        pacController_.Refresh();
+#endif
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
         NETMGR_LOG_I("on receive user_switched");
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+        pacController_.Refresh();
+#endif
         HttpProxy curProxy;
         GetDefaultHttpProxy(INVALID_NET_ID, curProxy);
         SendHttpProxyChangeBroadcast(curProxy);
@@ -4573,7 +4718,19 @@ int32_t NetConnService::RenewDhcp(int32_t netId)
     NetLinkInfo linkInfo = network->GetNetLinkInfo();
     bool bIpv6 = linkInfo.isIpv6LinkValid_;
     NETMGR_LOG_I("RenewDhcp iface=%{public}s bIpv6=%{public}d", iface.c_str(), bIpv6);
-    return NetsysController::GetInstance().RenewDhcpClient(iface, bIpv6);
+
+    int32_t ret = NetsysController::GetInstance().RenewDhcpClient(iface, bIpv6);
+    if (ret != NETMANAGER_SUCCESS) {
+        // NetsysController / NetsysNativeClient use their own domain error codes (for example
+        // NETSYS_NETSYSSERVICE_NULL, NETMANAGER_ERR_GET_PROXY_FAIL, IPC_INVOKER_ERR), none of which
+        // belong to the public contract of renewDhcp. Normalize every non-success result to
+        // NETMANAGER_ERR_INTERNAL(2100003) so the JS caller only observes the error codes declared
+        // in @ohos.net.connection.d.ts (2100001/2100002/2100003).
+        NETMGR_LOG_E("RenewDhcpClient failed, ret=%{public}d, normalized to %{public}d", ret,
+            NETMANAGER_ERR_INTERNAL);
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnService::RegUnRegisterNetProbeCallback(int32_t netId,

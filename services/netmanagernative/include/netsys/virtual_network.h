@@ -60,12 +60,13 @@ private:
         return "VIRTUAL";
     };
 
-    int32_t AddInterface(std::string &interfaceName) override;
+    int32_t AddInterface(std::string &interfaceName, bool isLocalNetworkRouted) override;
     int32_t RemoveInterface(std::string &interfaceName) override;
 
 private:
     const bool hasDns_ = false;
     std::vector<UidRange> uidRanges_;
+    std::set<std::string> localNetworkRoutedInterfaces_;
 };
 } // namespace nmd
 } // namespace OHOS

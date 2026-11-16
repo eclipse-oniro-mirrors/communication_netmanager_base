@@ -91,6 +91,7 @@ ohos_shared_library("net_conn_manager_if") {
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_supplier_callback_base.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_conn_callback_stub.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/refresh_http_proxy_callback_stub.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/http_proxy_callback_stub.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_conn_service_proxy.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_conn_service_pac_proxy_helper.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_detection_callback_stub.cpp",
@@ -155,6 +156,8 @@ config("socket_permission_config") {
 }
 
 ohos_shared_library("socket_permission") {
+  version_script = "libsocket_permission.map"
+
   cflags = common_cflags
   cflags_cc = common_cflags
 
@@ -179,6 +182,8 @@ config("net_security_config_if_config") {
 }
 
 ohos_shared_library("net_security_config_if") {
+  version_script = "libnet_security_config_if.map"
+
   cflags = common_cflags
   cflags_cc = common_cflags
   branch_protector_ret = "pac_ret"
@@ -241,6 +246,7 @@ ohos_static_library("net_conn_manager_if_static") {
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_supplier_callback_base.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_conn_callback_stub.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/refresh_http_proxy_callback_stub.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/http_proxy_callback_stub.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_conn_service_proxy.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_detection_callback_stub.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_conn_service_pac_proxy_helper.cpp",

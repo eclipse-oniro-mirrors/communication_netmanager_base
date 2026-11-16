@@ -37,6 +37,7 @@
 #include "net_conn_service_iface.h"
 #include "net_conn_service_stub.h"
 #include "i_refresh_http_proxy_callback.h"
+#include "i_http_proxy_callback.h"
 #include "net_supplier.h"
 #include "netsys_controller_callback.h"
 #include "network.h"
@@ -55,6 +56,7 @@
 #ifdef NETMANAGER_ENABLE_PAC_PROXY
 #include "net_pac_local_proxy_server.h"
 #include "net_pac_manager.h"
+#include "net_pac_proxy_controller.h"
 #endif
 namespace OHOS {
 namespace NetManagerStandard {
@@ -65,6 +67,9 @@ class NetConnService : public SystemAbility,
                        public NetConnServiceStub,
                        public std::enable_shared_from_this<NetConnService> {
     DECLARE_SYSTEM_ABILITY(NetConnService)
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+    friend class NetPacProxyController;
+#endif
 
     NetConnService();
     virtual ~NetConnService();
@@ -347,6 +352,8 @@ public:
     int32_t GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy) override;
 
     int32_t RefreshGlobalHttpProxy(const sptr<IRefreshHttpProxyCallback> &callback) override;
+    int32_t RegisterHttpProxyCallback(const sptr<IHttpProxyCallback> &callback) override;
+    int32_t UnregisterHttpProxyCallback(const sptr<IHttpProxyCallback> &callback) override;
 
     /**
      * Get net id by identifier
@@ -518,7 +525,6 @@ private:
         SPECIFY,
     };
     bool Init();
-    void SetCurlOptions(CURL *curl, HttpProxy tempProxy);
     void GetHttpUrlFromConfig(std::string &httpUrl);
     std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");
     sptr<NetSupplier> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident,
@@ -536,6 +542,7 @@ private:
                                  NetBearType supplierType, uint32_t uid);
     void SendAllRequestToNetwork(sptr<NetSupplier> supplier);
     void FindBestNetworkForAllRequest();
+    void NotifyNetworkSelectionChanged(bool defaultSupplierChanged);
     void MakeDefaultNetWork(sptr<NetSupplier> &oldService, sptr<NetSupplier> &newService);
     void NotFindBestSupplier(uint32_t reqId, const std::shared_ptr<NetActivate> &active,
                              const sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback);
@@ -572,6 +579,7 @@ private:
     int32_t GetDefaultSupplierIdAsync(NetBearType bearerType, const std::string &ident,
         uint32_t& supplierId);
     void SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy);
+    void HandleNetLinkHttpProxyChange(const HttpProxy &oldHttpProxy, const HttpProxy &newHttpProxy);
     void RequestAllNetworkExceptDefault();
     void LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpProxy);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
@@ -583,7 +591,7 @@ private:
     int32_t PrepareRefreshGlobalHttpProxy(const HttpProxy &currentProxy,
         const sptr<IRefreshHttpProxyCallback> &callback);
     void ExecuteRefreshInFfrt(const HttpProxy &currentProxy);
-    long PerformProxyCurlProbe(CURL *curl);
+    long PerformProxyProbe(const HttpProxy &tempProxy);
     void NotifyRefreshGlobalHttpProxyResult(long responseCode);
     void WaitForNextActiveCycle(uint32_t &retryTimes, long responseCode);
     void DecreaseNetConnCallbackCntForUid(const uint32_t callingUid,
@@ -692,6 +700,18 @@ private:
     bool refreshResultReady_ = false;
     std::condition_variable refreshResultCv_;
     std::set<sptr<IRefreshHttpProxyCallback>> refreshCallbacks_;
+    class HttpProxyDeathRecipient : public IRemoteObject::DeathRecipient {
+    public:
+        explicit HttpProxyDeathRecipient(const std::weak_ptr<NetConnService> &service) : service_(service) {}
+        void OnRemoteDied(const wptr<IRemoteObject> &remote) override;
+    private:
+        std::weak_ptr<NetConnService> service_;
+    };
+    std::mutex httpProxyCallbacksMutex_;
+    std::map<sptr<IRemoteObject>, std::pair<sptr<IHttpProxyCallback>, sptr<HttpProxyDeathRecipient>>>
+        httpProxyCallbacks_;
+    void RemoveHttpProxyCallback(const sptr<IRemoteObject> &remote);
+    void NotifyHttpProxyChanged();
     std::chrono::steady_clock::time_point lastRefreshTime_;
     HttpProxy lastRefreshProxy_;
     static constexpr uint32_t REFRESH_RATE_LIMIT_S = 10;
@@ -718,6 +738,7 @@ private:
     std::mutex netPacManagerMutex_;
     std::shared_ptr<OHOS::NetManagerStandard::ProxyServer> netPACProxyServer_;
     std::mutex netPacProxyServerMutex_;
+    NetPacProxyController pacController_{*this};
 #endif
     std::shared_mutex uidLostDelayMutex_;
     std::set<uint32_t> uidLostDelaySet_;

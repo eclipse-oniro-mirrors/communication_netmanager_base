@@ -188,6 +188,8 @@ config("net_service_common_config") {
 }
 
 ohos_shared_library("net_service_common") {
+  version_script = "libnet_service_common.map"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true

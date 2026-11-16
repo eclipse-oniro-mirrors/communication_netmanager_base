@@ -45,8 +45,15 @@ namespace NetStatsRdbFiledConst {
     constexpr int32_t FILED_COLUMN_INDEX_SIX = 6;
 }
 
+/* Redirected for test/fuzz binaries only; see net_stats_database_defines.h. */
+#ifdef NETMANAGER_TEST_DB_REDIRECT
+constexpr const char* NOTICE_DATABASE_NAME = "/data/local/tmp/netmanager_base_test_db/net_stats_notice_freq.db";
+constexpr const char* NOTICE_DATABASE_BACK_NAME =
+    "/data/local/tmp/netmanager_base_test_db/net_stats_notice_freq_back.db";
+#else
 constexpr const char* NOTICE_DATABASE_NAME = "/data/service/el1/public/netmanager/net_stats_notice_freq.db";
 constexpr const char* NOTICE_DATABASE_BACK_NAME = "/data/service/el1/public/netmanager/net_stats_notice_freq_back.db";
+#endif
 
 typedef struct NetStatsData {
     int32_t simId;

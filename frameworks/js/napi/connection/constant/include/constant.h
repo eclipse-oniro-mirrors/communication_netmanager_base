@@ -33,6 +33,8 @@ static constexpr const char *EVENT_NET_CAPABILITIES_CHANGE = "netCapabilitiesCha
 static constexpr const char *EVENT_NET_CONNECTION_PROPERTIES_CHANGE = "netConnectionPropertiesChange";
 static constexpr const char *EVENT_NET_LOST = "netLost";
 static constexpr const char *EVENT_NET_UNAVAILABLE = "netUnavailable";
+static constexpr const char *EVENT_APP_HTTP_PROXY_CHANGE = "appHttpProxyChange";
+static constexpr const char *EVENT_DEFAULT_HTTP_PROXY_CHANGE = "defaultHttpProxyChange";
 
 static constexpr const char *EVENT_IFACE_ADDRESS_UPDATED = "interfaceAddressUpdated";
 static constexpr const char *EVENT_IFACE_ADDRESS_REMOVED = "interfaceAddressRemoved";

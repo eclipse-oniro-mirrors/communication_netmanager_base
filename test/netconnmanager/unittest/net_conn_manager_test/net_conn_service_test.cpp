@@ -28,6 +28,8 @@
 #include "net_conn_constants.h"
 #include "net_conn_service.h"
 #include "refresh_http_proxy_callback_stub.h"
+#include "http_proxy_callback_stub.h"
+#include "common_mock_net_remote_object_test.h"
 #include "net_conn_types.h"
 #include "net_detection_callback_test.h"
 #include "net_factoryreset_callback_stub.h"
@@ -39,9 +41,31 @@
 #include "netmanager_base_test_security.h"
 #include "netsys_controller.h"
 #include "netsys_controller_service_impl.h"
+#include "os_account_manager.h"
 #include "parameters.h"
 #include "system_ability_definition.h"
 #include "ipc_skeleton.h"
+
+constexpr int32_t UID_TRANSFORM_DIVISOR = 200000;
+static int32_t g_mockOsAccountUserId = -1;
+static bool g_mockOsAccountFail = false;
+
+namespace OHOS {
+namespace AccountSA {
+ErrCode OsAccountManager::GetOsAccountLocalIdFromUid(const int uid, int &id)
+{
+    if (g_mockOsAccountFail) {
+        return ERR_ACCOUNT_COMMON_NOT_INIT_ERROR;
+    }
+    if (g_mockOsAccountUserId >= 0) {
+        id = g_mockOsAccountUserId;
+        return ERR_OK;
+    }
+    id = uid / UID_TRANSFORM_DIVISOR;
+    return ERR_OK;
+}
+}
+}
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -90,6 +114,26 @@ sptr<INetConnCallback> g_callback = new (std::nothrow) NetConnCallbackStubCb();
 sptr<INetDetectionCallback> g_detectionCallback = new (std::nothrow) NetDetectionCallbackTest();
 uint32_t g_supplierId = 0;
 uint32_t g_vpnSupplierId = 0;
+
+class HttpProxyCallbackForTest : public HttpProxyCallbackStub {
+public:
+    explicit HttpProxyCallbackForTest(const sptr<IRemoteObject> &remote) : remote_(remote) {}
+    sptr<IRemoteObject> AsObject() override
+    {
+        return remote_;
+    }
+
+private:
+    sptr<IRemoteObject> remote_;
+};
+
+class RejectDeathRecipientRemote : public MockNetIRemoteObject {
+public:
+    bool AddDeathRecipient(const sptr<DeathRecipient> &recipient) override
+    {
+        return false;
+    }
+};
 } // namespace
 
 class NetConnServiceTest : public testing::Test {
@@ -882,6 +926,80 @@ HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest005, TestSize.Level1)
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
+/**
+ * @tc.name: GetDefaultHttpProxyTest006
+ * @tc.desc: Test NetConnService GetDefaultHttpProxy with root user id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest006, TestSize.Level1)
+{
+    int32_t bindNetId = NET_ID;
+    HttpProxy defaultHttpProxy;
+    defaultHttpProxy.SetUserId(0);
+    int32_t ret = NetConnService::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+/**
+ * @tc.name: GetDefaultHttpProxyTest007
+ * @tc.desc: Test NetConnService GetDefaultHttpProxy with a cross-account user id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest007, TestSize.Level1)
+{
+    int32_t bindNetId = NET_ID;
+    HttpProxy defaultHttpProxy;
+    defaultHttpProxy.SetUserId(101);
+    int32_t ret = NetConnService::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+/**
+ * @tc.name: GetDefaultHttpProxyTest008
+ * @tc.desc: Test NetConnService GetDefaultHttpProxy with a negative user id other than -1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest008, TestSize.Level1)
+{
+    int32_t bindNetId = NET_ID;
+    HttpProxy defaultHttpProxy;
+    defaultHttpProxy.SetUserId(-2);
+    int32_t ret = NetConnService::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+/**
+ * @tc.name: GetDefaultHttpProxyTest009
+ * @tc.desc: Test NetConnService GetDefaultHttpProxy with the caller's own user id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest009, TestSize.Level1)
+{
+    int32_t bindNetId = NET_ID;
+    HttpProxy defaultHttpProxy;
+    defaultHttpProxy.SetUserId(100);
+    g_mockOsAccountUserId = 100;
+    int32_t ret = NetConnService::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    g_mockOsAccountUserId = -1;
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+/**
+ * @tc.name: GetDefaultHttpProxyTest010
+ * @tc.desc: Test NetConnService GetDefaultHttpProxy when getting the local user id fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest010, TestSize.Level1)
+{
+    int32_t bindNetId = NET_ID;
+    HttpProxy defaultHttpProxy;
+    defaultHttpProxy.SetUserId(100);
+    g_mockOsAccountFail = true;
+    int32_t ret = NetConnService::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    g_mockOsAccountFail = false;
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
 HWTEST_F(NetConnServiceTest, GetLocalUserIdTest001, TestSize.Level1)
 {
     int32_t userId;
@@ -1069,21 +1187,30 @@ HWTEST_F(NetConnServiceTest, IsRefreshRateLimitedTest006, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetConnServiceTest, PerformProxyCurlProbeTest001, TestSize.Level1)
+HWTEST_F(NetConnServiceTest, PerformProxyProbeTest001, TestSize.Level1)
 {
     auto &service = NetConnService::GetInstance();
-    long code = service->PerformProxyCurlProbe(nullptr);
+    HttpProxy tempProxy;
+    tempProxy.host_ = "http://127.0.0.1";
+    tempProxy.port_ = 1;
+    long code = service->PerformProxyProbe(tempProxy);
     EXPECT_EQ(code, 0);
 }
 
-HWTEST_F(NetConnServiceTest, PerformProxyCurlProbeTest002, TestSize.Level1)
+HWTEST_F(NetConnServiceTest, PerformProxyProbeTest002, TestSize.Level1)
 {
     auto &service = NetConnService::GetInstance();
-    CURL *curl = nullptr;
-    curl = curl_easy_init();
-    long code = service->PerformProxyCurlProbe(curl);
-    curl_easy_cleanup(curl);
-    EXPECT_NE(code, SUCCESS_CODE);
+    HttpProxy tempProxy;
+    tempProxy.host_ = "https://127.0.0.1";
+    tempProxy.port_ = 1;
+    SecureData username;
+    username.append("testuser", 8);
+    tempProxy.username_ = username;
+    SecureData password;
+    password.append("testpass", 8);
+    tempProxy.password_ = password;
+    long code = service->PerformProxyProbe(tempProxy);
+    EXPECT_EQ(code, 0);
 }
 
 HWTEST_F(NetConnServiceTest, NotifyRefreshGlobalHttpProxyResultTest001, TestSize.Level1)
@@ -3364,7 +3491,12 @@ HWTEST_F(NetConnServiceTest, RenewDhcpTest005, TestSize.Level1)
     NetsysController::GetInstance().netsysService_ = nullptr;
     ret = NetConnService::GetInstance()->RenewDhcp(supplier->GetNetId());
     NetsysController::GetInstance().netsysService_ = netsysService;
-    EXPECT_EQ(ret, NETSYS_NETSYSSERVICE_NULL);
+    // Inner netsys / netsysnative error codes (NETSYS_NETSYSSERVICE_NULL, NETMANAGER_ERR_GET_PROXY_FAIL)
+    // must not leak to the caller: NetConnService::RenewDhcp normalizes every non-success result to
+    // NETMANAGER_ERR_INTERNAL(2100003) at its exit, matching the @ohos.net.connection.d.ts contract.
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+    ret = NetConnService::GetInstance()->RenewDhcp(supplier->GetNetId());
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
     NetConnService::GetInstance()->UnregisterNetSupplier(supplierId);
 }
 
@@ -3394,5 +3526,198 @@ HWTEST_F(NetConnServiceTest, RenewDhcpTest006, TestSize.Level1)
     NetConnService::GetInstance()->UnregisterNetSupplier(supplierId);
     NetConnService::GetInstance()->UnregisterNetSupplier(networkSupplierId);
 }
+
+namespace {
+/**
+ * NetConnService::RenewDhcp() forwards to NetsysController::RenewDhcpClient(), which performs a
+ * real IPC to netsysnative (SA 1158) when the api is not mocked. NetsysControllerServiceImpl
+ * already has an in-process mock branch for RenewDhcpClient (it returns NETMANAGER_SUCCESS),
+ * so these tests only register the mocked api name on the real service instance and remove it
+ * again on destruction, which keeps the refresh path free of real IPC.
+ */
+class RenewDhcpClientMockGuard {
+public:
+    RenewDhcpClientMockGuard()
+    {
+        impl_ = static_cast<NetsysControllerServiceImpl *>(NetsysController::GetInstance().netsysService_.GetRefPtr());
+        if (impl_ != nullptr) {
+            impl_->mockNetsysClient_.mockApi_.insert(MOCK_RENEWDHCPCLIENT_API);
+        }
+    }
+
+    ~RenewDhcpClientMockGuard()
+    {
+        if (impl_ != nullptr) {
+            impl_->mockNetsysClient_.mockApi_.erase(MOCK_RENEWDHCPCLIENT_API);
+        }
+    }
+
+    bool IsMockEnabled() const
+    {
+        return impl_ != nullptr;
+    }
+
+private:
+    NetsysControllerServiceImpl *impl_ = nullptr;
+};
+} // namespace
+
+HWTEST_F(NetConnServiceTest, RenewDhcpTest007, TestSize.Level1)
+{
+    RenewDhcpClientMockGuard mockGuard;
+    ASSERT_TRUE(mockGuard.IsMockEnabled());
+
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    uint32_t supplierId = 0;
+    int32_t ret = NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_ETHERNET,
+        "renewDhcpEthernet", netCaps, supplierId);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    sptr<NetSupplier> supplier = NetConnService::GetInstance()->FindNetSupplier(supplierId);
+    ASSERT_NE(supplier, nullptr);
+    std::shared_ptr<Network> network = supplier->GetNetwork();
+    ASSERT_NE(network, nullptr);
+    network->netLinkInfo_.ifaceName_ = "eth0";
+    network->netLinkInfo_.isIpv6LinkValid_ = false;
+
+    ret = NetConnService::GetInstance()->RenewDhcp(supplier->GetNetId());
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    NetConnService::GetInstance()->UnregisterNetSupplier(supplierId);
+}
+
+HWTEST_F(NetConnServiceTest, RenewDhcpTest008, TestSize.Level1)
+{
+    RenewDhcpClientMockGuard mockGuard;
+    ASSERT_TRUE(mockGuard.IsMockEnabled());
+
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    uint32_t supplierId = 0;
+    int32_t ret = NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_WIFI,
+        "renewDhcpWifiIpv6", netCaps, supplierId);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    sptr<NetSupplier> supplier = NetConnService::GetInstance()->FindNetSupplier(supplierId);
+    ASSERT_NE(supplier, nullptr);
+    std::shared_ptr<Network> network = supplier->GetNetwork();
+    ASSERT_NE(network, nullptr);
+    network->netLinkInfo_.ifaceName_ = "wlan0";
+    network->netLinkInfo_.isIpv6LinkValid_ = true;
+
+    ret = NetConnService::GetInstance()->RenewDhcp(supplier->GetNetId());
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    NetConnService::GetInstance()->UnregisterNetSupplier(supplierId);
+}
+
+/**
+ * @tc.name: HttpProxyCallbackBranches
+ * @tc.desc: Test HTTP proxy callback registration, notification, removal, and remote death branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceTest, HttpProxyCallbackBranches, TestSize.Level1)
+{
+    auto service = std::make_shared<NetConnService>();
+    EXPECT_EQ(service->RegisterHttpProxyCallback(nullptr), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(service->UnregisterHttpProxyCallback(nullptr), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    sptr<IHttpProxyCallback> nullRemoteCallback = new HttpProxyCallbackForTest(nullptr);
+    EXPECT_EQ(service->RegisterHttpProxyCallback(nullRemoteCallback), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(service->UnregisterHttpProxyCallback(nullRemoteCallback), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    service->NotifyHttpProxyChanged(); // Empty subscriber branch.
+
+    sptr<IRemoteObject> rejectedRemote = new RejectDeathRecipientRemote();
+    sptr<IHttpProxyCallback> rejectedCallback = new HttpProxyCallbackForTest(rejectedRemote);
+    EXPECT_EQ(service->RegisterHttpProxyCallback(rejectedCallback), NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
+
+    sptr<IRemoteObject> remote = new MockNetIRemoteObject();
+    sptr<HttpProxyCallbackForTest> stub = new HttpProxyCallbackForTest(remote);
+    int notifications = 0;
+    stub->SetCallback([&notifications]() { ++notifications; });
+    sptr<IHttpProxyCallback> callback = stub;
+    EXPECT_EQ(service->RegisterHttpProxyCallback(callback), NETMANAGER_SUCCESS);
+    EXPECT_EQ(service->RegisterHttpProxyCallback(callback), NETMANAGER_SUCCESS); // Duplicate branch.
+    service->NotifyHttpProxyChanged();
+    EXPECT_EQ(notifications, 1);
+    EXPECT_EQ(service->UnregisterHttpProxyCallback(callback), NETMANAGER_SUCCESS);
+    EXPECT_EQ(service->UnregisterHttpProxyCallback(callback), NETMANAGER_SUCCESS); // Missing branch.
+    service->NotifyHttpProxyChanged();
+    EXPECT_EQ(notifications, 1);
+
+    EXPECT_EQ(service->RegisterHttpProxyCallback(callback), NETMANAGER_SUCCESS);
+    auto recipient = service->httpProxyCallbacks_.at(remote).second;
+    wptr<IRemoteObject> weakRemote(remote);
+    recipient->OnRemoteDied(weakRemote);
+    EXPECT_TRUE(service->httpProxyCallbacks_.empty());
+    service->NotifyHttpProxyChanged();
+    EXPECT_EQ(notifications, 1);
+    wptr<IRemoteObject> emptyRemote;
+    recipient->OnRemoteDied(emptyRemote); // Null promotion branch.
+    sptr<NetConnService::HttpProxyDeathRecipient> expiredServiceRecipient =
+        new NetConnService::HttpProxyDeathRecipient(std::weak_ptr<NetConnService>());
+    expiredServiceRecipient->OnRemoteDied(weakRemote); // Expired service branch.
+    service->httpProxyCallbacks_.emplace(remote,
+        std::make_pair(sptr<IHttpProxyCallback>(nullptr), sptr<NetConnService::HttpProxyDeathRecipient>(nullptr)));
+    service->NotifyHttpProxyChanged(); // Defensive null callback branch.
+    service->httpProxyCallbacks_.clear();
+}
+
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+HWTEST_F(NetConnServiceTest, RegisterNetSupplierInSleepTest001, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    ASSERT_NE(netConnService, nullptr);
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+
+    netConnService->isInSleep_.store(true);
+    uint32_t sleepSupplierId = 0;
+    auto ret = netConnService->RegisterNetSupplierAsync(NetBearType::BEARER_WIFI, "sleepSupplierTest",
+        netCaps, sleepSupplierId, callingUid);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    auto sleepSupplier = netConnService->FindNetSupplier(sleepSupplierId);
+    ASSERT_NE(sleepSupplier, nullptr);
+    auto sleepNetwork = sleepSupplier->GetNetwork();
+    ASSERT_NE(sleepNetwork, nullptr);
+    EXPECT_TRUE(sleepNetwork->forbidDetectionFlag_.load());
+
+    netConnService->isInSleep_.store(false);
+    uint32_t awakeSupplierId = 0;
+    ret = netConnService->RegisterNetSupplierAsync(NetBearType::BEARER_WIFI, "awakeSupplierTest",
+        netCaps, awakeSupplierId, callingUid);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    auto awakeSupplier = netConnService->FindNetSupplier(awakeSupplierId);
+    ASSERT_NE(awakeSupplier, nullptr);
+    auto awakeNetwork = awakeSupplier->GetNetwork();
+    ASSERT_NE(awakeNetwork, nullptr);
+    EXPECT_FALSE(awakeNetwork->forbidDetectionFlag_.load());
+}
+
+HWTEST_F(NetConnServiceTest, StartAllNetDetectionAfterSleepTest001, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    ASSERT_NE(netConnService, nullptr);
+    auto eventRunner = AppExecFwk::EventRunner::Create("SLEEP_DETECTION_TEST");
+    ASSERT_NE(eventRunner, nullptr);
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(eventRunner);
+    ASSERT_NE(netConnService->netConnEventHandler_, nullptr);
+
+    netConnService->isInSleep_.store(true);
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    uint32_t supplierId = 0;
+    auto ret = netConnService->RegisterNetSupplierAsync(NetBearType::BEARER_WIFI, "sleepStartAllSupplierTest",
+        netCaps, supplierId, IPCSkeleton::GetCallingUid());
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    auto supplier = netConnService->FindNetSupplier(supplierId);
+    ASSERT_NE(supplier, nullptr);
+    auto network = supplier->GetNetwork();
+    ASSERT_NE(network, nullptr);
+    EXPECT_TRUE(network->forbidDetectionFlag_.load());
+
+    netConnService->isInSleep_.store(false);
+    netConnService->StartAllNetDetection();
+    EXPECT_FALSE(network->forbidDetectionFlag_.load());
+}
+
+#endif // FEATURE_SUPPORT_POWERMANAGER
 } // namespace NetManagerStandard
 } // namespace OHOS

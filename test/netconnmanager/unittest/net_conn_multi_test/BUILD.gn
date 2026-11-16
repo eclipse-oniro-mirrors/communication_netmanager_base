@@ -29,6 +29,7 @@ ohos_unittest("net_conn_multi_test") {
     "net_activate_test.cpp",
     "net_all_capabilities_test.cpp",
     "net_conn_client_test.cpp",
+    "net_conn_proxy_callback_concurrency_test.cpp",
     "net_conn_event_handler_test.cpp",
     "net_conn_hievent_test.cpp",
     "net_datashare_utils_test.cpp",
@@ -70,6 +71,7 @@ ohos_unittest("net_conn_multi_test") {
     "$NETMANAGER_BASE_ROOT/interfaces/kits/c/netconnclient:net_connection",
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$NETMANAGER_BASE_ROOT/utils/net_http_client:net_http_client",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
     "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
   ]

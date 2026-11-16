@@ -137,7 +137,7 @@ HWTEST_F(NetsysControllerServiceImplTest, NoRegisterMockApi, TestSize.Level1)
     ret = instance_->NetworkDestroy(0);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = instance_->NetworkAddInterface(0, testName, BEARER_DEFAULT);
+    ret = instance_->NetworkAddInterface(0, testName, BEARER_DEFAULT, false);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->NetworkRemoveInterface(0, testName);
@@ -492,7 +492,7 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     ret = instance_->SetDpaCellularSharingTraffic(dpaTraffic);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = instance_->NetworkAddInterface(netId, testName, BEARER_DEFAULT);
+    ret = instance_->NetworkAddInterface(netId, testName, BEARER_DEFAULT, false);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->NetworkAddRoute(netId, testName, "", "");
@@ -818,6 +818,30 @@ HWTEST_F(NetsysControllerServiceImplTest, SetIpv6UidBlackListTest001, TestSize.L
     std::vector<int32_t> netIds = {100};
     int32_t uid = 0;
     int32_t ret = netsysControllerServiceImpl->SetIpv6UidBlackList(netIds, uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, SetPresetDomainsTest001, TestSize.Level1)
+{
+    EXPECT_CALL(*mockNetsysService_, SetPresetDomains(_)).WillRepeatedly(Return(0));
+    auto netsysControllerServiceImpl = std::make_shared<NetsysControllerServiceImpl>();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    presetDomains[20000138] = {"example.com", "test.com"};
+    int32_t ret = netsysControllerServiceImpl->SetPresetDomains(presetDomains);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, SetPresetDomainsTest002, TestSize.Level1)
+{
+    // Empty preset domains map - covers NetsysControllerServiceImpl::SetPresetDomains with empty input
+    EXPECT_CALL(*mockNetsysService_, SetPresetDomains(_)).WillRepeatedly(Return(0));
+    auto netsysControllerServiceImpl = std::make_shared<NetsysControllerServiceImpl>();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+
+    std::map<uint32_t, std::vector<std::string>> presetDomains;
+    int32_t ret = netsysControllerServiceImpl->SetPresetDomains(presetDomains);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 

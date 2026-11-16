@@ -244,6 +244,10 @@ int32_t NetPolicyServiceStub::CheckPolicyPermission(uint32_t code)
 
 int32_t NetPolicyServiceStub::CheckProcessPermission(uint32_t code)
 {
+    // NETMANAGER_FUZZ_TEST_ENABLE is only defined in fuzz test targets. The inline uid hard-checks
+    // are skipped for fuzzing so that fuzz input can reach the command handlers.
+    // Product builds are not affected (macro is never defined there).
+#ifndef NETMANAGER_FUZZ_TEST_ENABLE
     auto uid = IPCSkeleton::GetCallingUid();
     if (code == static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE) &&
         uid != UID_COLLABORATION) {
@@ -256,6 +260,7 @@ int32_t NetPolicyServiceStub::CheckProcessPermission(uint32_t code)
         NETMGR_LOG_E("CheckUidPermission failed, code %{public}d, uid %{public}d", code, uid);
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
+#endif
     return NETMANAGER_SUCCESS;
 }
 

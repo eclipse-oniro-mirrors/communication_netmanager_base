@@ -42,6 +42,27 @@ static const std::string LIB_NET_BUNDLE_UTILS_PATH = "libnet_bundle_utils.z.so";
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
+HttpProxy MakePublicHttpProxy(const HttpProxy &source)
+{
+    HttpProxy result;
+    result.SetHost(source.GetHost());
+    result.SetPort(source.GetPort());
+    result.SetExclusionList(source.GetExclusionList());
+    return result;
+}
+
+template <typename CallbackMap>
+uint32_t AllocateCallbackId(uint32_t &nextId, const CallbackMap &callbacks)
+{
+    uint32_t callbackId = nextId++;
+    while (callbacks.find(callbackId) != callbacks.end()) {
+        callbackId = nextId++;
+    }
+    return callbackId;
+}
+} // namespace
+
 class NetConnAbilityListener : public SystemAbilityStatusChangeStub {
 public:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
@@ -60,6 +81,25 @@ NetConnClient::NetConnClient() : NetConnService_(nullptr), deathRecipient_(nullp
 
 NetConnClient::~NetConnClient()
 {
+    sptr<HttpProxyCallbackStub> callbackStub;
+    {
+        std::lock_guard<std::mutex> lock(defaultHttpProxyCbMutex_);
+        callbackStub = defaultHttpProxyCallbackStub_;
+        defaultHttpProxyCallbackStub_ = nullptr;
+        defaultHttpProxyCbMap_.clear();
+        hasLastDefaultHttpProxy_ = false;
+    }
+    if (callbackStub != nullptr) {
+        callbackStub->ClearCallbackAndWait();
+        sptr<INetConnService> proxy;
+        {
+            std::lock_guard<std::mutex> proxyLock(mutex_);
+            proxy = NetConnService_;
+        }
+        if (proxy != nullptr) {
+            proxy->UnregisterHttpProxyCallback(callbackStub);
+        }
+    }
     DlCloseRemoveDeathRecipient();
 }
 
@@ -408,6 +448,12 @@ int32_t NetConnClient::UnregisterNetConnCallback(const sptr<INetConnCallback> &c
     }
     int32_t ret1 = UnRegisterNetConnCallbackManager(callback, netConnCallbackManagerMap_);
     int32_t ret2 = UnRegisterNetConnCallbackManager(callback, systemNetConnCallbackManagerMap_);
+    locker.unlock();
+    if (tlsInCallbackDispatch_) {
+        NETMGR_LOG_W("unregister within callback dispatch, quiesce not guaranteed");
+    } else {
+        DrainCallbackQueue();
+    }
 
     return (ret1 == NETMANAGER_SUCCESS && ret2 == NETMANAGER_SUCCESS) ? NETMANAGER_SUCCESS
                                                                       : (ret1 == NETMANAGER_SUCCESS ? ret2 : ret1);
@@ -658,11 +704,28 @@ int32_t NetConnClient::SetAirplaneMode(bool state)
     return proxy->SetAirplaneMode(state);
 }
 
+void NetConnClient::DrainCallbackQueue()
+{
+    std::shared_ptr<ffrt::queue> queue = ffrtQueue_;
+    if (queue == nullptr) {
+        NETMGR_LOG_E("ffrtQueue_ is nullptr");
+        return;
+    }
+    ffrt::task_handle handle = queue->submit_h([]() {});
+    if (handle == nullptr) {
+        NETMGR_LOG_E("DrainCallbackQueue submit barrier task failed");
+        return;
+    }
+    queue->wait(handle);
+}
+
 void NetConnClient::RecoverCallbackAndGlobalProxy()
 {
-    std::shared_lock<std::shared_mutex> locker(netConnCallbackManagerMapMutex_);
-    RecoverCallbackAndGlobalProxy(netConnCallbackManagerMap_);
-    RecoverCallbackAndGlobalProxy(systemNetConnCallbackManagerMap_);
+    {
+        std::shared_lock<std::shared_mutex> locker(netConnCallbackManagerMapMutex_);
+        RecoverCallbackAndGlobalProxy(netConnCallbackManagerMap_);
+        RecoverCallbackAndGlobalProxy(systemNetConnCallbackManagerMap_);
+    }
     auto proxy = GetProxy();
     NETMGR_LOG_W("Get proxy %{public}s", proxy == nullptr ? "failed" : "success");
     if (proxy == nullptr) {
@@ -678,6 +741,26 @@ void NetConnClient::RecoverCallbackAndGlobalProxy()
         int32_t ret = proxy->RegisterPreAirplaneCallback(preAirplaneCallback);
         NETMGR_LOG_D("Register pre airplane result %{public}d", ret);
     }
+
+    {
+        std::lock_guard<std::recursive_mutex> notifyLock(httpProxyNotifyMutex_);
+        sptr<HttpProxyCallbackStub> callbackStub;
+        {
+            std::lock_guard<std::mutex> lock(defaultHttpProxyCbMutex_);
+            callbackStub = defaultHttpProxyCallbackStub_;
+        }
+        if (callbackStub != nullptr) {
+            int32_t ret = proxy->RegisterHttpProxyCallback(callbackStub);
+            if (ret != NETMANAGER_SUCCESS) {
+                NETMGR_LOG_W("Retry restoring HTTP proxy callback, result %{public}d", ret);
+                ret = proxy->RegisterHttpProxyCallback(callbackStub);
+                if (ret != NETMANAGER_SUCCESS) {
+                    NETMGR_LOG_E("Failed to restore HTTP proxy callback, result %{public}d", ret);
+                }
+            }
+        }
+    }
+    NotifyDefaultHttpProxyCallback();
 
     std::lock_guard<std::mutex> httpProxyLock(globalHttpProxyMutex_);
     if (!globalHttpProxy_.GetHost().empty()) {
@@ -763,34 +846,74 @@ int32_t NetConnClient::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 void NetConnClient::RegisterAppHttpProxyCallback(std::function<void(const HttpProxy &httpProxy)> callback,
                                                  uint32_t &callbackid)
 {
-    std::lock_guard<std::mutex> lock(appHttpProxyCbMapMutex_);
-    uint32_t id = currentCallbackId_;
-    currentCallbackId_++;
-    appHttpProxyCbMap_[id] = callback;
-    callbackid = id;
-    if (callback && !appHttpProxy_.GetHost().empty()) {
-        callback(appHttpProxy_);
+    RegisterAppHttpProxyCallback(callback, callbackid, false);
+}
+
+void NetConnClient::RegisterAppHttpProxyCallback(std::function<void(const HttpProxy &httpProxy)> callback,
+                                                 uint32_t &callbackid, bool notifyEmptyProxy)
+{
+    std::unique_lock<std::recursive_mutex> notifyLock(httpProxyNotifyMutex_);
+    HttpProxy current;
+    {
+        std::lock_guard<std::mutex> lock(appHttpProxyCbMapMutex_);
+        callbackid = AllocateCallbackId(currentCallbackId_, appHttpProxyCbMap_);
+        appHttpProxyCbMap_[callbackid] = callback;
+        current = appHttpProxy_;
     }
-    NETMGR_LOG_I("registerCallback id:%{public}d.", id);
+    notifyLock.unlock();
+    if (callback && (notifyEmptyProxy || !current.GetHost().empty())) {
+        callback(current);
+    }
+    NETMGR_LOG_I("registerCallback id:%{public}d.", callbackid);
 }
 
 void NetConnClient::UnregisterAppHttpProxyCallback(uint32_t callbackid)
 {
     NETMGR_LOG_I("unregisterCallback callbackid:%{public}d.", callbackid);
+    std::lock_guard<std::recursive_mutex> notifyLock(httpProxyNotifyMutex_);
     std::lock_guard<std::mutex> lock(appHttpProxyCbMapMutex_);
     appHttpProxyCbMap_.erase(callbackid);
+}
+
+HttpProxy NetConnClient::GetAppHttpProxy()
+{
+    std::lock_guard<std::mutex> lock(appHttpProxyCbMapMutex_);
+    return appHttpProxy_;
 }
 
 int32_t NetConnClient::SetAppHttpProxy(const HttpProxy &httpProxy)
 {
     NETMGR_LOG_I("Enter AppHttpProxy");
-    if (appHttpProxy_ != httpProxy) {
+    std::unique_lock<std::recursive_mutex> notifyLock(httpProxyNotifyMutex_);
+    std::vector<std::pair<uint32_t, std::function<void(const HttpProxy &)>>> callbacks;
+    uint64_t generation = 0;
+    {
+        std::lock_guard<std::mutex> lock(appHttpProxyCbMapMutex_);
+        if (appHttpProxy_ == httpProxy) {
+            return NETMANAGER_SUCCESS;
+        }
         appHttpProxy_ = httpProxy;
+        generation = ++appHttpProxyValueGeneration_;
         for (const auto &pair : appHttpProxyCbMap_) {
-            pair.second(httpProxy);
+            callbacks.emplace_back(pair);
         }
     }
-
+    notifyLock.unlock();
+    for (const auto &[callbackId, callback] : callbacks) {
+        {
+            std::lock_guard<std::mutex> lock(appHttpProxyCbMapMutex_);
+            if (generation != appHttpProxyValueGeneration_) {
+                break;
+            }
+            if (appHttpProxyCbMap_.find(callbackId) == appHttpProxyCbMap_.end()) {
+                continue;
+            }
+        }
+        if (callback) {
+            callback(httpProxy);
+        }
+    }
+    NotifyDefaultHttpProxyCallback();
     return NETMANAGER_SUCCESS;
 }
 
@@ -806,8 +929,15 @@ int32_t NetConnClient::GetGlobalHttpProxy(HttpProxy &httpProxy)
 
 int32_t NetConnClient::GetDefaultHttpProxy(HttpProxy &httpProxy)
 {
-    if (!appHttpProxy_.GetHost().empty()) {
-        httpProxy = appHttpProxy_;
+    bool appProxySet = false;
+    {
+        std::lock_guard<std::mutex> lock(appHttpProxyCbMapMutex_);
+        if (!appHttpProxy_.GetHost().empty()) {
+            httpProxy = appHttpProxy_;
+            appProxySet = true;
+        }
+    }
+    if (appProxySet) {
         NETMGR_LOG_D("Return AppHttpProxy:%{public}s:%{public}d",
                      httpProxy.GetHost().c_str(), httpProxy.GetPort());
         return NETMANAGER_SUCCESS;
@@ -821,6 +951,168 @@ int32_t NetConnClient::GetDefaultHttpProxy(HttpProxy &httpProxy)
     int32_t bindNetId = 0;
     GetAppNet(bindNetId);
     return proxy->GetDefaultHttpProxy(bindNetId, httpProxy);
+}
+
+int32_t NetConnClient::RegisterDefaultHttpProxyStub()
+{
+    sptr<HttpProxyCallbackStub> stub = new (std::nothrow) HttpProxyCallbackStub();
+    if (stub == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    stub->SetCallback([this]() { NotifyDefaultHttpProxyCallback(); });
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    int32_t ret = proxy->RegisterHttpProxyCallback(stub);
+    if (ret == NETMANAGER_SUCCESS) {
+        std::lock_guard<std::mutex> lock(defaultHttpProxyCbMutex_);
+        defaultHttpProxyCallbackStub_ = stub;
+    }
+    return ret;
+}
+
+void NetConnClient::NotifyRegisteredDefaultHttpProxyCallbacks(
+    const std::vector<std::pair<uint32_t, std::function<void(const HttpProxy &)>>> &callbacks,
+    const HttpProxy &httpProxy,
+    uint64_t generation)
+{
+    for (const auto &[callbackId, registeredCallback] : callbacks) {
+        {
+            std::lock_guard<std::mutex> lock(defaultHttpProxyCbMutex_);
+            if (generation != defaultHttpProxyValueGeneration_) {
+                break;
+            }
+            if (defaultHttpProxyCbMap_.find(callbackId) == defaultHttpProxyCbMap_.end()) {
+                continue;
+            }
+        }
+        registeredCallback(httpProxy);
+    }
+}
+
+void NetConnClient::RegisterDefaultHttpProxyCallbackWithCurrent(
+    const std::function<void(const HttpProxy &)> &callback, uint32_t &callbackId, bool firstCallback,
+    const HttpProxy &current, std::unique_lock<std::mutex> &lock,
+    std::unique_lock<std::recursive_mutex> &notifyLock)
+{
+    HttpProxy publicProxy = MakePublicHttpProxy(current);
+    std::vector<std::pair<uint32_t, std::function<void(const HttpProxy &)>>> callbacksToNotify;
+    bool changed = !hasLastDefaultHttpProxy_ || lastDefaultHttpProxy_ != publicProxy;
+    if (!firstCallback && changed) {
+        for (const auto &item : defaultHttpProxyCbMap_) {
+            callbacksToNotify.emplace_back(item);
+        }
+    }
+    lastDefaultHttpProxy_ = publicProxy;
+    hasLastDefaultHttpProxy_ = true;
+    if (changed) {
+        ++defaultHttpProxyValueGeneration_;
+    }
+    uint64_t generation = defaultHttpProxyValueGeneration_;
+    callbackId = AllocateCallbackId(currentDefaultCallbackId_, defaultHttpProxyCbMap_);
+    defaultHttpProxyCbMap_[callbackId] = callback;
+    lock.unlock();
+    notifyLock.unlock();
+    callback(publicProxy);
+    NotifyRegisteredDefaultHttpProxyCallbacks(callbacksToNotify, publicProxy, generation);
+}
+
+int32_t NetConnClient::RegisterDefaultHttpProxyCallback(std::function<void(const HttpProxy &)> callback,
+    uint32_t &callbackId)
+{
+    if (!callback) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::unique_lock<std::recursive_mutex> notifyLock(httpProxyNotifyMutex_);
+    bool firstCallback = false;
+    {
+        std::lock_guard<std::mutex> lock(defaultHttpProxyCbMutex_);
+        firstCallback = defaultHttpProxyCbMap_.empty();
+    }
+    if (firstCallback) {
+        int32_t ret = RegisterDefaultHttpProxyStub();
+        if (ret != NETMANAGER_SUCCESS) {
+            return ret;
+        }
+    }
+    HttpProxy current;
+    int32_t ret = GetDefaultHttpProxy(current);
+    std::unique_lock<std::mutex> lock(defaultHttpProxyCbMutex_);
+    if (ret != NETMANAGER_SUCCESS) {
+        callbackId = AllocateCallbackId(currentDefaultCallbackId_, defaultHttpProxyCbMap_);
+        defaultHttpProxyCbMap_[callbackId] = callback;
+        return NETMANAGER_SUCCESS;
+    }
+    RegisterDefaultHttpProxyCallbackWithCurrent(callback, callbackId, firstCallback, current, lock, notifyLock);
+    return NETMANAGER_SUCCESS;
+}
+
+void NetConnClient::UnregisterDefaultHttpProxyCallback(uint32_t callbackId)
+{
+    std::lock_guard<std::recursive_mutex> notifyLock(httpProxyNotifyMutex_);
+    sptr<HttpProxyCallbackStub> callbackStub;
+    {
+        std::lock_guard<std::mutex> lock(defaultHttpProxyCbMutex_);
+        defaultHttpProxyCbMap_.erase(callbackId);
+        if (!defaultHttpProxyCbMap_.empty() || defaultHttpProxyCallbackStub_ == nullptr) {
+            return;
+        }
+        callbackStub = defaultHttpProxyCallbackStub_;
+        defaultHttpProxyCallbackStub_ = nullptr;
+        hasLastDefaultHttpProxy_ = false;
+    }
+    callbackStub->SetCallback(nullptr);
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy != nullptr) {
+        proxy->UnregisterHttpProxyCallback(callbackStub);
+    }
+}
+
+void NetConnClient::NotifyDefaultHttpProxyCallback()
+{
+    std::unique_lock<std::recursive_mutex> notifyLock(httpProxyNotifyMutex_);
+    {
+        std::lock_guard<std::mutex> lock(defaultHttpProxyCbMutex_);
+        if (defaultHttpProxyCbMap_.empty()) {
+            return;
+        }
+    }
+    HttpProxy current;
+    if (GetDefaultHttpProxy(current) != NETMANAGER_SUCCESS) {
+        return;
+    }
+    HttpProxy publicProxy = MakePublicHttpProxy(current);
+    std::vector<std::pair<uint32_t, std::function<void(const HttpProxy &)>>> callbacks;
+    uint64_t generation = 0;
+    {
+        std::lock_guard<std::mutex> lock(defaultHttpProxyCbMutex_);
+        if (defaultHttpProxyCbMap_.empty()) {
+            return;
+        }
+        if (hasLastDefaultHttpProxy_ && lastDefaultHttpProxy_ == publicProxy) {
+            return;
+        }
+        lastDefaultHttpProxy_ = publicProxy;
+        hasLastDefaultHttpProxy_ = true;
+        generation = ++defaultHttpProxyValueGeneration_;
+        for (const auto &item : defaultHttpProxyCbMap_) {
+            callbacks.emplace_back(item);
+        }
+    }
+    notifyLock.unlock();
+    for (const auto &[callbackId, callback] : callbacks) {
+        {
+            std::lock_guard<std::mutex> lock(defaultHttpProxyCbMutex_);
+            if (generation != defaultHttpProxyValueGeneration_) {
+                break;
+            }
+            if (defaultHttpProxyCbMap_.find(callbackId) == defaultHttpProxyCbMap_.end()) {
+                continue;
+            }
+        }
+        callback(publicProxy);
+    }
 }
 
 void NetConnClient::ResetRefreshState()
@@ -1030,6 +1322,7 @@ int32_t NetConnClient::SetAppNet(int32_t netId)
     }
 
     SetNetForApp(netId);
+    NotifyDefaultHttpProxyCallback();
     return NETMANAGER_SUCCESS;
 }
 
@@ -1525,6 +1818,19 @@ NetConnClient::NetConnCallbackManager::NetConnCallbackManager(std::shared_ptr<ff
 {
 }
 
+int32_t NetConnClient::NetConnCallbackManager::SubmitDispatch(std::function<void()> body)
+{
+    if (ffrtQueue_ == nullptr) {
+        NETMGR_LOG_E("ffrtQueue_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    ffrtQueue_->submit([body = std::move(body)]() {
+        InCallbackDispatch scope; // RAII 标记：本线程正在派发用户回调
+        body();
+    });
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetConnClient::NetConnCallbackManager::NetAvailable(sptr<NetHandle> &netHandle)
 {
     if (netHandle == nullptr) {
@@ -1537,18 +1843,12 @@ int32_t NetConnClient::NetConnCallbackManager::NetAvailable(sptr<NetHandle> &net
     handlerLock.unlock();
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
-    lock.unlock();
-    if (ffrtQueue_ == nullptr) {
-        NETMGR_LOG_E("ffrtQueue_ is nullptr");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-    ffrtQueue_->submit([tmpList, netId = netHandle->GetNetId()]() {
+    return SubmitDispatch([tmpList, netId = netHandle->GetNetId()]() {
         auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
         for (auto &cb : tmpList) {
             cb->NetAvailable(tmpNetHandler);
         }
-    });
-    return NETMANAGER_SUCCESS;
+    }); // lock 在 submit 之后才释放，消除快照与 submit 之间的 late-submit 窗口
 }
 
 int32_t NetConnClient::NetConnCallbackManager::NetCapabilitiesChange(sptr<NetHandle> &netHandle,
@@ -1559,24 +1859,18 @@ int32_t NetConnClient::NetConnCallbackManager::NetCapabilitiesChange(sptr<NetHan
         netAllCap_ = netAllCap;
     }
     handlerLock.unlock();
-    std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
-    std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
-    lock.unlock();
     sptr<NetAllCapabilities> tmpNetAllCap = nullptr;
     if (netAllCap != nullptr) {
         tmpNetAllCap = sptr<NetAllCapabilities>::MakeSptr(*netAllCap);
     }
-    if (ffrtQueue_ == nullptr) {
-        NETMGR_LOG_E("ffrtQueue_ is nullptr");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-    ffrtQueue_->submit([tmpList, netId = netHandle->GetNetId(), tmpNetAllCap]() {
+    std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
+    std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
+    return SubmitDispatch([tmpList, netId = netHandle->GetNetId(), tmpNetAllCap]() {
         auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
         for (auto &cb : tmpList) {
             cb->NetCapabilitiesChange(tmpNetHandler, tmpNetAllCap);
         }
-    });
-    return NETMANAGER_SUCCESS;
+    }); // lock 在 submit 之后才释放
 }
 
 int32_t NetConnClient::NetConnCallbackManager::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle,
@@ -1587,24 +1881,18 @@ int32_t NetConnClient::NetConnCallbackManager::NetConnectionPropertiesChange(spt
         netLinkInfo_ = info;
     }
     handlerLock.unlock();
-    std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
-    std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
-    lock.unlock();
     sptr<NetLinkInfo> tmpInfo = nullptr;
     if (info != nullptr) {
         tmpInfo = sptr<NetLinkInfo>::MakeSptr(*info);
     }
-    if (ffrtQueue_ == nullptr) {
-        NETMGR_LOG_E("ffrtQueue_ is nullptr");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-    ffrtQueue_->submit([tmpList, netId = netHandle->GetNetId(), tmpInfo]() {
+    std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
+    std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
+    return SubmitDispatch([tmpList, netId = netHandle->GetNetId(), tmpInfo]() {
         auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
         for (auto &cb : tmpList) {
             cb->NetConnectionPropertiesChange(tmpNetHandler, tmpInfo);
         }
     });
-    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnClient::NetConnCallbackManager::NetLost(sptr<NetHandle> &netHandle)
@@ -1623,18 +1911,12 @@ int32_t NetConnClient::NetConnCallbackManager::NetLost(sptr<NetHandle> &netHandl
     handlerLock.unlock();
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
-    lock.unlock();
-    if (ffrtQueue_ == nullptr) {
-        NETMGR_LOG_E("ffrtQueue_ is nullptr");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-    ffrtQueue_->submit([tmpList, netId = netHandle->GetNetId()]() {
+    return SubmitDispatch([tmpList, netId = netHandle->GetNetId()]() {
         auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
         for (auto &cb : tmpList) {
             cb->NetLost(tmpNetHandler);
         }
     });
-    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnClient::NetConnCallbackManager::NetUnavailable()
@@ -1645,35 +1927,23 @@ int32_t NetConnClient::NetConnCallbackManager::NetUnavailable()
     handlerLock.unlock();
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
-    lock.unlock();
-    if (ffrtQueue_ == nullptr) {
-        NETMGR_LOG_E("ffrtQueue_ is nullptr");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-    ffrtQueue_->submit([tmpList]() {
+    return SubmitDispatch([tmpList]() {
         for (auto &cb : tmpList) {
             cb->NetUnavailable();
         }
     });
-    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnClient::NetConnCallbackManager::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
 {
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
-    lock.unlock();
-    if (ffrtQueue_ == nullptr) {
-        NETMGR_LOG_E("ffrtQueue_ is nullptr");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-    ffrtQueue_->submit([tmpList, netId = netHandle->GetNetId(), blocked]() {
+    return SubmitDispatch([tmpList, netId = netHandle->GetNetId(), blocked]() {
         auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
         for (auto &cb : tmpList) {
             cb->NetBlockStatusChange(tmpNetHandler, blocked);
         }
     });
-    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnClient::NetConnCallbackManager::AddNetConnCallback(const sptr<INetConnCallback> &callback)
@@ -1699,11 +1969,7 @@ int32_t NetConnClient::NetConnCallbackManager::AddNetConnCallback(const sptr<INe
     handlerLock.unlock();
 // LCOV_EXCL_START
 #ifndef NETMANAGER_TEST
-    if (ffrtQueue_ == nullptr) {
-        NETMGR_LOG_E("ffrtQueue_ is nullptr");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-    ffrtQueue_->submit([callback, tempNetHandler, tempNetAllCap, tempNetLinkInfo]() {
+    return SubmitDispatch([callback, tempNetHandler, tempNetAllCap, tempNetLinkInfo]() {
         if (tempNetHandler != nullptr) {
             sptr<NetHandle> netHandler = sptr<NetHandle>::MakeSptr(tempNetHandler->GetNetId());
             callback->NetAvailable(netHandler);

@@ -85,7 +85,8 @@ public:
      * @param netBearerType Network bearer type
      * @return Return the return value of the netsys interface call
      */
-    int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType = BEARER_DEFAULT);
+    int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType = BEARER_DEFAULT,
+        bool isLocalNetworkRouted = false);
 
     /**
      * Delete network port device
@@ -1018,6 +1019,7 @@ public:
     int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status);
 
     int32_t SetUserDefinedServerFlag(uint16_t netId, bool isUserDefinedServer);
+    int32_t SetNetworkDnsFamilyCapability(uint16_t netId, bool ipv4Enable, bool ipv6Enable);
 
     int32_t CreateVlan(const std::string &ifName, uint32_t vlanId);
     int32_t DestroyVlan(const std::string &ifName, uint32_t vlanId);
@@ -1054,6 +1056,7 @@ public:
     int32_t SetInternetAccessByIpForWifiShare(
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName);
     int32_t SetIpv6UidBlackList(std::vector<int32_t> &netIds, int32_t uid);
+    int32_t SetPresetDomains(const std::map<uint32_t, std::vector<std::string>> &domains);
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     sptr<NetsysNative::NfqCtx> NfqOpen();
     int32_t NfqClose(sptr<NetsysNative::NfqCtx> &ctx);

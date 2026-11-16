@@ -718,6 +718,49 @@ declare namespace connection {
   function setAppHttpProxy(httpProxy: HttpProxy): void;
 
   /**
+   * Registers a listener for application proxy changes and returns the current proxy when registered.
+   * @param { Callback<HttpProxy> } callback - Callback for the latest application proxy.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @stagemodelonly
+   * @since 26.2.0 dynamic&static
+   */
+  function onAppHttpProxy(callback: Callback<HttpProxy>): void;
+
+  /**
+   * Unregisters the specified application proxy listener, or all listeners when callback is omitted.
+   * @param { Callback<HttpProxy> } [callback] - Listener to unregister.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @stagemodelonly
+   * @since 26.2.0 dynamic&static
+   */
+  function offAppHttpProxy(callback?: Callback<HttpProxy>): void;
+
+  /**
+   * Registers a listener for default proxy changes and returns the current proxy when registered.
+   * @permission ohos.permission.GET_NETWORK_INFO
+   * @param { Callback<HttpProxy> } callback - Callback for the latest default proxy.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @stagemodelonly
+   * @since 26.2.0 dynamic&static
+   */
+  function onDefaultHttpProxy(callback: Callback<HttpProxy>): void;
+
+  /**
+   * Unregisters the specified default proxy listener, or all listeners when callback is omitted.
+   * @permission ohos.permission.GET_NETWORK_INFO
+   * @param { Callback<HttpProxy> } [callback] - Listener to unregister.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @stagemodelonly
+   * @since 26.2.0 dynamic&static
+   */
+  function offDefaultHttpProxy(callback?: Callback<HttpProxy>): void;
+
+  /**
    * Set a network independent global {@link HttpProxy} proxy settings.
    * @permission ohos.permission.CONNECTIVITY_INTERNAL
    * @param { HttpProxy } httpProxy Indicates the global proxy settings. For details, see {@link HttpProxy}.

@@ -98,6 +98,7 @@ ohos_unittest("net_pac_manager_test") {
 
     sources = [
         "net_pac_manager_test.cpp",
+        "net_pac_manager_wifi_test.cpp",
         "mock_timer.cpp",
         "pac_server.cpp",
     ]
