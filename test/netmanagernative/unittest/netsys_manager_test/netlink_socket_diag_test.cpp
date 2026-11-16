@@ -480,8 +480,10 @@ size_t FillNlMsgSocket(char *buf)
 
 HWTEST_F(NetlinkSocketDiagTest, DestroySocketByTupleInvalidProto001, TestSize.Level1)
 {
+    /* UDP is a supported destroy protocol now (denied DNS query fast-fail,
+     * spec 2026-11-16) — the negative control is any other protocol. */
     NetLinkSocketDiag netLinkSocketDiag;
-    EXPECT_EQ(netLinkSocketDiag.DestroySocketByTuple(MakeTestSocketTuple(IPPROTO_UDP)),
+    EXPECT_EQ(netLinkSocketDiag.DestroySocketByTuple(MakeTestSocketTuple(IPPROTO_ESP)),
         NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
@@ -527,6 +529,56 @@ HWTEST_F(NetlinkSocketDiagTest, DestroySocketByTupleSuccess001, TestSize.Level1)
     EXPECT_EQ(destroyRequest.req_.sdiag_protocol, IPPROTO_TCP);
     EXPECT_EQ(destroyRequest.req_.id.idiag_sport, htons(TEST_LOCAL_PORT));
     EXPECT_EQ(destroyRequest.req_.id.idiag_dport, htons(TEST_REMOTE_PORT));
+
+    close(dumpFds[1]);
+    close(destroyFds[1]);
+}
+
+HWTEST_F(NetlinkSocketDiagTest, DestroySocketByTupleUdpWildcardRetry001, TestSize.Level1)
+{
+    /* Denied DNS query fast-fail (spec 2026-11-16): the resolver sends on
+     * an UNCONNECTED UDP socket, which keeps a wildcard remote endpoint —
+     * the exact 5-tuple dump misses, and the wildcard-remote retry (local
+     * ip:port only) finds and destroys it, mirroring GetConnectOwnerUid. */
+    int32_t dumpFds[2] = {-1, -1};
+    int32_t destroyFds[2] = {-1, -1};
+    ASSERT_EQ(socketpair(AF_UNIX, SOCK_DGRAM, 0, dumpFds), 0);
+    ASSERT_EQ(socketpair(AF_UNIX, SOCK_DGRAM, 0, destroyFds), 0);
+    /* Response 1 (exact 5-tuple dump): no match — DONE only. */
+    char buf[512] = {0};
+    size_t len = FillNlMsgDone(buf);
+    /* Response 2 (wildcard-remote dump): one matched socket + DONE. */
+    len += FillNlMsgSocket(buf + len);
+    len += FillNlMsgDone(buf + len);
+    ASSERT_EQ(write(dumpFds[1], buf, len), static_cast<ssize_t>(len));
+
+    NetLinkSocketDiag netLinkSocketDiag;
+    netLinkSocketDiag.dumpSock_ = dumpFds[0];
+    netLinkSocketDiag.destroySock_ = destroyFds[0];
+    EXPECT_EQ(netLinkSocketDiag.DestroySocketByTuple(MakeTestSocketTuple(IPPROTO_UDP)), NETMANAGER_SUCCESS);
+    EXPECT_EQ(netLinkSocketDiag.socketsDestroyed_, 1);
+
+    /* The destroy request carries the UDP protocol from the record. */
+    NetLinkSocketDiag::SockDiagRequest destroyRequest = {};
+    ssize_t got = recv(destroyFds[1], &destroyRequest, sizeof(destroyRequest), MSG_DONTWAIT);
+    ASSERT_EQ(got, static_cast<ssize_t>(sizeof(destroyRequest)));
+    EXPECT_EQ(destroyRequest.nlh_.nlmsg_type, SOCK_DESTROY);
+    EXPECT_EQ(destroyRequest.req_.sdiag_protocol, IPPROTO_UDP);
+    EXPECT_EQ(destroyRequest.req_.id.idiag_sport, htons(TEST_LOCAL_PORT));
+
+    /* Dump request 1: the exact 5-tuple (remote port from the tuple). */
+    NetLinkSocketDiag::SockDiagRequest dumpReq1 = {};
+    got = recv(dumpFds[1], &dumpReq1, sizeof(dumpReq1), MSG_DONTWAIT);
+    ASSERT_EQ(got, static_cast<ssize_t>(sizeof(dumpReq1)));
+    EXPECT_EQ(dumpReq1.req_.sdiag_protocol, IPPROTO_UDP);
+    EXPECT_EQ(dumpReq1.req_.id.idiag_dport, htons(TEST_REMOTE_PORT));
+
+    /* Dump request 2: the wildcard-remote retry (remote 0.0.0.0:0). */
+    NetLinkSocketDiag::SockDiagRequest dumpReq2 = {};
+    got = recv(dumpFds[1], &dumpReq2, sizeof(dumpReq2), MSG_DONTWAIT);
+    ASSERT_EQ(got, static_cast<ssize_t>(sizeof(dumpReq2)));
+    EXPECT_EQ(dumpReq2.req_.sdiag_protocol, IPPROTO_UDP);
+    EXPECT_EQ(dumpReq2.req_.id.idiag_dport, 0);
 
     close(dumpFds[1]);
     close(destroyFds[1]);

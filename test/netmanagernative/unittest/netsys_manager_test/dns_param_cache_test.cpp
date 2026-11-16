@@ -580,26 +580,27 @@ HWTEST_F(DNSParamCacheTest, FlushDnsCacheTest, TestSize.Level1)
     EXPECT_EQ(ret, -2);
 }
 
-HWTEST_F(DNSParamCacheTest, FlushDnsCacheTest002, TestSize.Level1)
+HWTEST_F(DNSParamCacheTest, FlushAllDnsCacheTest, TestSize.Level1)
 {
-    NETNATIVE_LOGI("FlushDnsCacheTest enter");
+    NETNATIVE_LOGI("FlushAllDnsCacheTest enter");
     DnsParamCache dnsParCache;
-    uint16_t netId = 1;
-    dnsParCache.defaultNetId_ = netId;
-    dnsParCache.CreateCacheForNet(netId);
-    int32_t ret = dnsParCache.FlushDnsCache(netId);
-    EXPECT_EQ(ret, 0);
-}
-
-HWTEST_F(DNSParamCacheTest, FlushDnsCacheTest003, TestSize.Level1)
-{
-    NETNATIVE_LOGI("FlushDnsCacheTest enter");
-    DnsParamCache dnsParCache;
-    uint16_t netId = 0;
-    dnsParCache.defaultNetId_ = 1;
-    dnsParCache.CreateCacheForNet(dnsParCache.defaultNetId_);
-    int32_t ret = dnsParCache.FlushDnsCache(netId);
-    EXPECT_EQ(ret, 0);
+    /* 无网络条目: 空表冲刷, 返回 0 */
+    EXPECT_EQ(dnsParCache.FlushAllDnsCache(), 0);
+    /* 双 netId 条目: 冲刷后应答缓存全部失效, 返回冲刷的 netId 数 */
+    dnsParCache.CreateCacheForNet(1);
+    dnsParCache.CreateCacheForNet(2);
+    std::string hostName = "flushall.test";
+    AddrInfo addrInfo;
+    dnsParCache.SetDnsCache(1, 0, hostName, addrInfo);
+    dnsParCache.SetDnsCache(2, 0, hostName, addrInfo);
+    EXPECT_NE(dnsParCache.GetDnsCache(1, 0, hostName).size(), 0);
+    EXPECT_NE(dnsParCache.GetDnsCache(2, 0, hostName).size(), 0);
+    int32_t flushed = dnsParCache.FlushAllDnsCache();
+    EXPECT_EQ(flushed, 2);
+    EXPECT_EQ(dnsParCache.GetDnsCache(1, 0, hostName).size(), 0);
+    EXPECT_EQ(dnsParCache.GetDnsCache(2, 0, hostName).size(), 0);
+    dnsParCache.DestroyNetworkCache(1);
+    dnsParCache.DestroyNetworkCache(2);
 }
 
 HWTEST_F(DNSParamCacheTest, RemoveDuplicateNameserversTest001, TestSize.Level1)

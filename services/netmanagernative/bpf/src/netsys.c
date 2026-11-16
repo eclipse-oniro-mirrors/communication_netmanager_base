@@ -179,7 +179,21 @@ static inline __u8 socket_ringbuf_net_stats_event_submit(__u8 flag)
     return 0;
 }
 
-static inline __u32 get_data_len(struct __sk_buff *skb)
+/*
+ * Single per-program read of skb->family (full rationale in
+ * netfirewall_l4_parse.h above is_ipv4_format): the value is threaded to every
+ * consumer as a __u32 scalar — the stats helpers below and the firewall chain
+ * both take it as their first parameter. Do NOT read skb->family anywhere
+ * else in this file: clang CSEs &skb->family across inlined readers, the
+ * resulting ctx+88 pointer spills under register pressure, and the BPF
+ * verifier rejects its reload-dereference (program load fails with EACCES).
+ */
+static inline __u32 skb_family(const struct __sk_buff *skb)
+{
+    return skb->family;
+}
+
+static inline __u32 get_data_len(__u32 family, struct __sk_buff *skb)
 {
     __u32 length = skb->len;
     __u32 packages = skb->gso_segs;
@@ -190,10 +204,10 @@ static inline __u32 get_data_len(struct __sk_buff *skb)
     if (skb->vlan_present == 1) {
         length += VLAN_HEADER_LENGTH;
     }
-    if (skb->family == AF_INET) {
+    if (family == AF_INET) {
         length += (IPV4_HEADER_LENGTH + TRANSFER_HEADER_LENGTH) * (packages - 1);
     }
-    if (skb->family == AF_INET6) {
+    if (family == AF_INET6) {
         length += (IPV6_HEADER_LENGTH + TRANSFER_HEADER_LENGTH) * (packages - 1);
     }
     return length;
@@ -501,12 +515,12 @@ static inline __u32 get_iface_type(__u32 ipv4)
     return 0;
 }
 
-static __u32 rgm_stats_rx_count(struct __sk_buff *skb, __u64 sock_uid)
+static __u32 rgm_stats_rx_count(__u32 family, struct __sk_buff *skb, __u64 sock_uid)
 {
     __u32 ip = 0;
-    if (skb->family == AF_INET && filter_sim_stats(skb->local_ip4) == 1) {
+    if (family == AF_INET && filter_sim_stats(skb->local_ip4) == 1) {
         ip = skb->local_ip4;
-    } else if (skb->family == AF_INET6 && filter_sim_stats(skb->local_ip6[3]) == 1) { // 3: the last 32 bit
+    } else if (family == AF_INET6 && filter_sim_stats(skb->local_ip6[3]) == 1) { // 3: the last 32 bit
         ip = skb->local_ip6[3]; // 3: the last 32 bit
     }
     if (ip != 0) {
@@ -520,18 +534,18 @@ static __u32 rgm_stats_rx_count(struct __sk_buff *skb, __u64 sock_uid)
         }
         if (value_uid_sim != NULL) {
             __sync_fetch_and_add(&value_uid_sim->rxPackets, 1);
-            __sync_fetch_and_add(&value_uid_sim->rxBytes, get_data_len(skb));
+            __sync_fetch_and_add(&value_uid_sim->rxBytes, get_data_len(family, skb));
         }
     }
     return 0;
 }
 
-static __u32 rgm_stats_tx_count(struct __sk_buff *skb, __u64 sock_uid)
+static __u32 rgm_stats_tx_count(__u32 family, struct __sk_buff *skb, __u64 sock_uid)
 {
     __u32 ip = 0;
-    if (skb->family == AF_INET && filter_sim_stats(skb->local_ip4) == 1) {
+    if (family == AF_INET && filter_sim_stats(skb->local_ip4) == 1) {
         ip = skb->local_ip4;
-    } else if (skb->family == AF_INET6 && filter_sim_stats(skb->local_ip6[3]) == 1) { // 3: the last 32 bit
+    } else if (family == AF_INET6 && filter_sim_stats(skb->local_ip6[3]) == 1) { // 3: the last 32 bit
         ip = skb->local_ip6[3]; // 3: the last 32 bit
     }
     if (ip != 0) {
@@ -545,30 +559,35 @@ static __u32 rgm_stats_tx_count(struct __sk_buff *skb, __u64 sock_uid)
         }
         if (value_uid_sim != NULL) {
             __sync_fetch_and_add(&value_uid_sim->txPackets, 1);
-            __sync_fetch_and_add(&value_uid_sim->txBytes, get_data_len(skb));
+            __sync_fetch_and_add(&value_uid_sim->txBytes, get_data_len(family, skb));
         }
     }
     return 0;
 }
 
-SEC("cgroup_skb/uid/ingress")
-int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
+/* ===== cgroup_skb hooks: firewall dual-attach split =====
+ * fw-on splits each direction into TWO attached programs (fw-off keeps
+ * the single stats-only program):
+ *   - the dns program (cgroup_skb/uid/{in,e}gress_dns) attaches FIRST
+ *     (section order = source order = attach order) and runs the DNS
+ *     chain as bpf-to-bpf subprograms — the subprogram boundary is a
+ *     ~100x state-space saver (13.5k insns measured vs >1M with the
+ *     chain inlined). A tail call is NOT an option for the handoff:
+ *     the HongMeng kernel runs BPF interpreted and rejects programs
+ *     mixing bpf_tail_call with bpf-to-bpf calls.
+ *   - the main program attaches second and runs the policy chain +
+ *     stats tail.
+ * Both attach with BPF_F_ALLOW_MULTI; the kernel ANDs the verdicts, so
+ * a DNS DROP is final under either early-exit or run-all semantics (the
+ * run-all stats/ct side effects for DNS-dropped packets are the
+ * accepted, documented deviation). The per-domain gate and the staged
+ * query record cross the program boundary via per-CPU scratch maps. */
+
+static __always_inline int do_stats_ingress(__u32 family, struct __sk_buff *skb)
 {
-#ifdef FEATURE_NET_FIREWALL_ENABLE
-    if (skb == NULL) {
-        return 1;
-    }
-    if (netfirewall_policy_ingress(skb) != SK_PASS) {
-        return SK_DROP;
-    }
     if (skb->pkt_type == PACKET_LOOPBACK) {
         return 1;
     }
-#else
-    if (skb == NULL || skb->pkt_type == PACKET_LOOPBACK) {
-        return 1;
-    }
-#endif
     uint64_t sock_uid = bpf_get_socket_uid(skb);
     sock_netns_key key_sock_netns1 = sock_uid;
     sock_netns_value *value_sock_netns1 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns1);
@@ -623,33 +642,81 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
         }
         if (value_uid_if != NULL) {
             __sync_fetch_and_add(&value_uid_if->rxPackets, 1);
-            __sync_fetch_and_add(&value_uid_if->rxBytes, get_data_len(skb));
+            __sync_fetch_and_add(&value_uid_if->rxBytes, get_data_len(family, skb));
         }
     } else {
-        rgm_stats_rx_count(skb, sock_uid);
+        rgm_stats_rx_count(family, skb, sock_uid);
     }
     return 1;
 }
 
-SEC("cgroup_skb/uid/egress")
-int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
-{
 #ifdef FEATURE_NET_FIREWALL_ENABLE
+/* Ingress policy chain + stats, running in the attached main program
+ * (the only caller). */
+static __always_inline int do_ingress_main(__u32 family, struct __sk_buff *skb)
+{
+    if (fw_policy_after_ingress(family, skb) != SK_PASS) {
+        return SK_DROP;
+    }
+    return do_stats_ingress(family, skb);
+}
+#endif // FEATURE_NET_FIREWALL_ENABLE
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+/* DNS program for ingress, attached to the same cgroup BEFORE the main
+ * program (section order = source order = attach order): runs the DNS
+ * chain — kept as bpf-to-bpf subprograms, the ~100x state-space saver
+ * that fits the verifier budget (13.5k insns measured vs >1M with the
+ * chain inlined) — and short-circuits denied DNS with its own verdict.
+ * A tail call is NOT an option for the handoff to the policy chain: the
+ * HongMeng kernel runs BPF interpreted and rejects programs mixing
+ * bpf_tail_call with bpf-to-bpf calls. The handoff is the attach-time
+ * multi-program verdict instead: both programs attach with
+ * BPF_F_ALLOW_MULTI and the kernel ANDs the verdicts, so a DNS DROP is
+ * final under either early-exit or run-all semantics. */
+SEC("cgroup_skb/uid/ingress_dns")
+int bpf_cgroup_skb_ingress_dns(struct __sk_buff *skb)
+{
+    if (skb == NULL) {
+        return SK_PASS;
+    }
+    __u32 family = skb_family(skb);
+    /* No gate context on ingress — see fw_policy_after_ingress. A deny
+     * verdict never staged a query record, so no flush is needed on the
+     * DROP path (pre-split behavior: the hook-side flush with
+     * passed=false was a no-op here). */
+    if (match_dns_query(family, skb, INGRESS, NULL) == SK_DROP) {
+        return dns_sniff_drop(family, skb, INGRESS);
+    }
+    return SK_PASS;
+}
+#endif // FEATURE_NET_FIREWALL_ENABLE
+
+SEC("cgroup_skb/uid/ingress")
+int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
+{
     if (skb == NULL) {
         return 1;
     }
-    if (netfirewall_policy_egress(skb) != SK_PASS) {
-        return SK_DROP;
-    }
+    /* Single per-program family read — see skb_family() above. */
+    __u32 family = skb_family(skb);
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    /* Second attachment (the dns program above runs first): policy
+     * chain + stats. If the kernel runs all attached programs instead
+     * of early-exiting on the dns program's DROP, this program also
+     * sees DNS-dropped packets — its stats/ct side effects for them are
+     * the accepted, documented deviation (final verdict still DROP). */
+    return do_ingress_main(family, skb);
+#else
+    return do_stats_ingress(family, skb);
+#endif
+}
+
+static __always_inline int do_stats_egress(__u32 family, struct __sk_buff *skb)
+{
     if (skb->pkt_type == PACKET_LOOPBACK) {
         return 1;
     }
-#else
-    if (skb == NULL || skb->pkt_type == PACKET_LOOPBACK) {
-        return 1;
-    }
-#endif
-
     uint64_t sock_uid = bpf_get_socket_uid(skb);
     sock_netns_key key_sock_netns1 = sock_uid;
     sock_netns_value *value_sock_netns1 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns1);
@@ -704,12 +771,87 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
         }
         if (value_uid_if != NULL) {
             __sync_fetch_and_add(&value_uid_if->txPackets, 1);
-            __sync_fetch_and_add(&value_uid_if->txBytes, get_data_len(skb));
+            __sync_fetch_and_add(&value_uid_if->txBytes, get_data_len(family, skb));
         }
     } else {
-        rgm_stats_tx_count(skb, sock_uid);
+        rgm_stats_tx_count(family, skb, sock_uid);
     }
     return 1;
+}
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+/* Full egress continuation: policy chain (gate ctx from the dns program
+ * for DNS packets), record flush at the verdict point, then the stats
+ * tail. Runs in the attached main program (the only caller). */
+static __always_inline int do_egress_main(__u32 family, struct __sk_buff *skb, const struct dns_gate_ctx *gate)
+{
+    enum sk_action fw_act = fw_policy_after_egress(family, skb, gate);
+    /* C9 §5.3: the DNS query record flush point. It sits AFTER the policy
+     * call (the final verdict is known here without restructuring the multi-
+     * return policy chain) and BEFORE the loopback early return inside the
+     * stats tail, so loopback-delivered queries also flush. Queries that end
+     * up DROPped never write a record — a forged "response" for a blocked
+     * query cannot learn. */
+    flush_dns_query_record(skb, fw_act == SK_PASS);
+    if (fw_act != SK_PASS) {
+        return SK_DROP;
+    }
+    return do_stats_egress(family, skb);
+}
+#endif // FEATURE_NET_FIREWALL_ENABLE
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+/* DNS program for egress — attached BEFORE the main program (runs
+ * first); see the ingress dns program for the dual-attach rationale. */
+SEC("cgroup_skb/uid/egress_dns")
+int bpf_cgroup_skb_egress_dns(struct __sk_buff *skb)
+{
+    if (skb == NULL) {
+        return SK_PASS;
+    }
+    __u32 family = skb_family(skb);
+    /* Gate ctx transport to the policy program: the per-domain verdict
+     * for an egress query crosses the program boundary through the
+     * per-CPU scratch map (separate attachments share the same CPU and
+     * the same packet; BPF programs are non-preemptible). Cleared every
+     * run BEFORE the chain: the chain writes it only for a parseable
+     * egress query, so without this clear a stale slot from the previous
+     * DNS packet would leak into the policy program. */
+    __u32 zero = 0;
+    struct dns_gate_ctx *gate = bpf_map_lookup_elem(&DNS_GATE_SCRATCH_MAP, &zero);
+    if (gate != NULL) {
+        __builtin_memset(gate, 0, sizeof(*gate));
+    }
+    if (match_dns_query(family, skb, EGRESS, gate) == SK_DROP) {
+        /* A deny verdict never staged a record; kept for exact parity
+         * with the pre-split hook (no-op). */
+        flush_dns_query_record(skb, false);
+        return dns_sniff_drop(family, skb, EGRESS);
+    }
+    return SK_PASS;
+}
+#endif // FEATURE_NET_FIREWALL_ENABLE
+
+SEC("cgroup_skb/uid/egress")
+int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
+{
+    if (skb == NULL) {
+        return 1;
+    }
+    /* Single per-program family read — see skb_family() above. */
+    __u32 family = skb_family(skb);
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    /* Second attachment — see the ingress main program for the
+     * dual-attach semantics. The gate ctx was staged by the egress dns
+     * program above (attached first, runs first on the same CPU/packet);
+     * a failed lookup keeps the gate closed (fail-closed for the release
+     * hatch). */
+    __u32 zero = 0;
+    struct dns_gate_ctx *gate = bpf_map_lookup_elem(&DNS_GATE_SCRATCH_MAP, &zero);
+    return do_egress_main(family, skb, gate);
+#else
+    return do_stats_egress(family, skb);
+#endif
 }
 // network stats end
 

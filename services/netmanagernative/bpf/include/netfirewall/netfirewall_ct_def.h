@@ -66,11 +66,19 @@ struct ct_tuple {
 struct ct_entry {
     __u32 lifetime;
 
+    /* Per-direction "already fully evaluated" bits. Set when the
+     * direction's first packet passes the full rule evaluation (or at
+     * ct_create_entry, whose creator direction has just been evaluated);
+     * checked to short-circuit steady-state packets. Benign race between
+     * the two hooks: READ_ONCE/WRITE_ONCE, worst case a packet is
+     * re-evaluated before the bit becomes visible — never skipped. */
     // clang-format off
     __u8 rx_closing_flag : 1,
          tx_closing_flag : 1,
          seen_non_syn : 1,
-         reserved : 5;
+         egress_evaluated : 1,
+         ingress_evaluated : 1,
+         reserved : 3;
     // clang-format on
 
     __u8 tx_seen_flag;
@@ -79,5 +87,15 @@ struct ct_entry {
     __u32 last_tx_report;
     __u32 last_rx_report;
 };
+
+/* Access masks for the evaluated bits above (little-endian, LSB-first bit
+ * order): egress_evaluated = bit 3, ingress_evaluated = bit 4 of the flag
+ * byte at offset 4. Kept beside the layout so the BPF helpers
+ * (netfirewall_ct.h ct_evaluated/ct_set_evaluated) and the unit tests
+ * (CtEntryEvaluatedBits001) share a single source of truth — bit-field
+ * members cannot be addressed, so READ_ONCE/WRITE_ONCE go through the
+ * whole byte with these masks. */
+#define CT_EGRESS_EVALUATED_MASK ((__u8)0x08)
+#define CT_INGRESS_EVALUATED_MASK ((__u8)0x10)
 
 #endif // NET_FIREWALL_CT_DEF_H

@@ -171,7 +171,7 @@ cd /srv/workspace/<基线工作区>/code/test/testfwk/developer_test
 | 策略/防火墙（netpolicymanager） | `net_policy_service_test`、`net_policy_manager_test`、`firewall_manager_test`、`bandwidth_manager_test`、`netpolicyclient_fuzzer` |
 | 流量统计（netstatsmanager） | `net_stats_manager_test`、`net_stats_service_new_test`、`net_stats_cached_service_test`、`netsys_bpf_stats_test`、`netstatsclient_fuzzer` |
 | netsysnative / 内核通道（netmanagernative、netsyscontroller） | `netsys_native_manager_test`、`netsys_controller_test`、`netsys_dnsresolv_test`、`netsysnetfirewall_fuzzer`、`setpresetdomains_fuzzer`、`enablevnicnetwork_fuzzer`（fuzzer 实名见 build-and-test.md §2.2；`nfqueue_fuzzer` 受防火墙开关门控） |
-| BPF 数据面（bpf/） | `netsys_bpf_stats_test`、`netsysnetfirewall_fuzzer`、`updatenetcaps_fuzzer` |
+| BPF 数据面（bpf/） | `netsys_bpf_stats_test`、`netsys_netfirewall_test`（防火墙 BPF 数据面/域名门/DNS_SERVER map）、`netsysnetfirewall_fuzzer`、`updatenetcaps_fuzzer`；改防火墙特性开关相关代码须 fw 开/关两态编译（`netmanager_base_enable_feature_net_firewall`；原 DNS 子开关 `netmanager_base_enable_firewall_dns_per_domain` 已于 2026-11 随 V3 转正删除，域名门随 fw 主开关常开；换 flag 走 CBuild build_system.sh 全流程，直跑 gn gen 被 import 白名单门禁拦截） |
 | napi / 公共工具 | `netmanager_utils_test`、`common_fuzzer` + 对应模块 client fuzzer |
 | IPC 权限/错误码 | 对应模块测试 + 全部新增 case 补进对应 fuzzer |
 

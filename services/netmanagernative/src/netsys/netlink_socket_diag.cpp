@@ -650,7 +650,10 @@ bool NetLinkSocketDiag::EnsureNetlinkSocket()
 
 int32_t NetLinkSocketDiag::DestroySocketByTuple(const SocketTuple &tuple)
 {
-    if (tuple.proto != IPPROTO_TCP) {
+    /* Protocol-complete fast-fail (spec 2026-11-16): TCP and UDP both
+     * destroyable by tuple. TCP covers app connections and DoT/TCP-53
+     * queries; UDP covers the denied DNS query path (musl resolver). */
+    if (tuple.proto != IPPROTO_TCP && tuple.proto != IPPROTO_UDP) {
         NETNATIVE_LOGE("DestroySocketByTuple unsupported proto:%{public}u", tuple.proto);
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
@@ -666,7 +669,33 @@ int32_t NetLinkSocketDiag::DestroySocketByTuple(const SocketTuple &tuple)
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
-    return ProcessSockDiagTupleDumpResponse(tuple.proto);
+    ret = ProcessSockDiagTupleDumpResponse(tuple.proto);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    /* Unconnected UDP sockets keep a wildcard remote endpoint (no connect()
+     * was ever issued — the resolver sends with sendto()), so the exact
+     * 5-tuple dump above cannot match them. Retry with the wildcard remote,
+     * mirroring GetConnectOwnerUid's documented retry: the local ip:port is
+     * unique per socket, so the wildcard match is still precise. For a
+     * connected UDP socket the first dump already destroyed it and this
+     * retry finds nothing (no-op); for TCP this retry is skipped entirely. */
+    if (tuple.proto == IPPROTO_UDP) {
+        SocketTuple wildcard = tuple;
+        wildcard.remoteAddress = (tuple.family == AF_INET) ? "0.0.0.0" : "::";
+        wildcard.remotePort = 0;
+        int32_t wret = SendTupleDumpRequest(wildcard);
+        if (wret != NETMANAGER_SUCCESS) {
+            NETNATIVE_LOGE("Wildcard remote dump request failed, ret = %{public}d", wret);
+            return wret;
+        }
+        wret = ProcessSockDiagTupleDumpResponse(wildcard.proto);
+        if (wret != NETMANAGER_SUCCESS) {
+            NETNATIVE_LOGE("Wildcard remote dump response failed, ret = %{public}d", wret);
+            return wret;
+        }
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetLinkSocketDiag::SendTupleDumpRequest(const SocketTuple &tuple)

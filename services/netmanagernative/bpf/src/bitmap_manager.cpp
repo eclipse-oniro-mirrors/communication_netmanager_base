@@ -128,6 +128,11 @@ uint32_t *Bitmap::Get()
     return bitmap_;
 }
 
+const uint32_t *Bitmap::Get() const
+{
+    return bitmap_;
+}
+
 void Ip4RuleMap::OrForEach(const Bitmap &bitmap)
 {
     for (auto &item : ruleBitmapVec_) {
@@ -143,7 +148,8 @@ uint32_t Ip4RuleMap::GetNetworkAddress(uint32_t addr, uint32_t mask)
     return addr & (0xFFFFFFFF << (IPV4_MAX_PREFIXLEN - mask));
 }
 
-void Ip4RuleMap::CollectCandidates(Ip4RuleInsertContext &ctx, std::vector<size_t> &candidates, bool &shouldInsert)
+void Ip4RuleMap::CollectCandidates(const Ip4RuleInsertContext &ctx, std::vector<size_t> &candidates,
+                                   bool &shouldInsert)
 {
     auto exactIt = exactIndex_.find(ctx.exactKey);
     if (exactIt != exactIndex_.end()) {
@@ -169,8 +175,8 @@ void Ip4RuleMap::CollectCandidates(Ip4RuleInsertContext &ctx, std::vector<size_t
     candidates.erase(std::unique(candidates.begin(), candidates.end()), candidates.end());
 }
 
-void Ip4RuleMap::MergeCandidates(
-    Ip4RuleInsertContext &ctx, Bitmap &bitmapCopy, const std::vector<size_t> &candidates, bool &shouldInsert)
+void Ip4RuleMap::MergeCandidates(const Ip4RuleInsertContext &ctx, Bitmap &bitmapCopy,
+                                 const std::vector<size_t> &candidates, bool &shouldInsert)
 {
     for (size_t index : candidates) {
         auto &item = ruleBitmapVec_[index];
@@ -183,13 +189,13 @@ void Ip4RuleMap::MergeCandidates(
         if (ctx.mask < item.mask && GetNetworkAddress(existingIp, ctx.mask) == ctx.networkAddr) {
             item.bitmap.Or(bitmapCopy);
         }
-        if (ctx.mask > item.mask && GetNetworkAddress(existingIp, item.mask) == existingNetworkAddr) {
+        if (ctx.mask > item.mask && GetNetworkAddress(ctx.addr, item.mask) == existingNetworkAddr) {
             bitmapCopy.Or(item.bitmap);
         }
     }
 }
 
-void Ip4RuleMap::InsertRuleBitmap(Ip4RuleInsertContext &ctx, Bitmap &bitmapCopy)
+void Ip4RuleMap::InsertRuleBitmap(const Ip4RuleInsertContext &ctx, Bitmap &bitmapCopy)
 {
     Ip4RuleBitmap ruleBitmap;
     ruleBitmap.data = ctx.netOrderAddr;
@@ -210,10 +216,9 @@ void Ip4RuleMap::OrInsert(uint32_t addr, uint32_t mask, Bitmap &bitmap)
         mask = IPV4_MAX_PREFIXLEN;
     }
     uint32_t netOrderAddr = htonl(addr);
-    uint32_tnetworkAddr = GetNetworkAddress(addr, mask);
+    uint32_t networkAddr = GetNetworkAddress(addr, mask);
     bool shouldInsert = true;
     Bitmap bitmapCopy(bitmap);
-    
     Ip4RuleInsertContext ctx = {
         addr,
         mask,
@@ -524,21 +529,19 @@ int32_t BitmapManager::BuildBitmapMap(const std::vector<sptr<NetFirewallIpRule>>
 void BitmapManager::Insert()
 {
     std::lock_guard<std::mutex> guard(mutex_);
-    Bitmap bitmap;
-    srcIp4Map_.OrInsert(OTHER_IP4_KEY, IPV4_MAX_PREFIXLEN, bitmap);
-    dstIp4Map_.OrInsert(OTHER_IP4_KEY, IPV4_MAX_PREFIXLEN, bitmap);
-    in6_addr otherIp6Key;
-    memset_s(&otherIp6Key, sizeof(in6_addr), 0xff, sizeof(in6_addr));
-    srcIp6Map_.OrInsert(otherIp6Key, IPV6_MAX_PREFIXLEN, bitmap);
-    dstIp6Map_.OrInsert(otherIp6Key, IPV6_MAX_PREFIXLEN, bitmap);
-    srcPortMap_.OrInsert(OTHER_PORT_KEY, PORT_MAX_MASK, bitmap);
-    dstPortMap_.OrInsert(OTHER_PORT_KEY, PORT_MAX_MASK, bitmap);
-    protoMap_.OrInsert(OTHER_PROTO_KEY, Bitmap());
-    appUidMap_.OrInsert(OTHER_APPUID_KEY, Bitmap());
-    uidMap_.OrInsert(OTHER_UID_KEY, Bitmap());
-    action_key Key = 1;
-    actionMap_.OrInsert(Key, Bitmap());
-    interfaceMap_.OrInsert(std::string(""), Bitmap());
+    /* Dimension maps no longer hold sentinel entries. Rules unconstrained on a
+     * dimension are collected in wildcardStore_ (keyed by dimension role) and written
+     * to the direction's wildcard map, whose key space never collides with rule values.
+     * Must be reset before BuildNoMarkBitmap ORs unconstrained rule bits into it. */
+    for (uint32_t role = 0; role < WILDCARD_ROLE_MAX; ++role) {
+        wildcardStore_[role].Clear();
+    }
+    /* actionMap key=1 is not a wildcard entry; it is a lookup anchor kept
+     * as-is . The former interfaceMap empty-name anchor is
+     * removed: the data plane only queries exact names
+     * plus the wildcard map, so an empty-name entry was dead data. */
+    action_key key = 1;
+    actionMap_.OrInsert(key, Bitmap());
 }
 
 void BitmapManager::Clear()
@@ -555,6 +558,9 @@ void BitmapManager::Clear()
     uidMap_.Clear();
     actionMap_.Clear();
     interfaceMap_.Clear();
+    for (uint32_t role = 0; role < WILDCARD_ROLE_MAX; ++role) {
+        wildcardStore_[role].Clear();
+    }
 }
 
 int32_t BitmapManager::InsertIp4SegBitmap(const NetFirewallIpParam &item, Bitmap &bitmap, Ip4RuleMap *ip4Map)
@@ -778,6 +784,7 @@ int32_t BitmapManager::BuildMarkBitmap(const std::vector<sptr<NetFirewallIpRule>
         if (!rule->interface.empty()) {
             interfaceMap_.OrInsert(rule->interface, bitmap);
         }
+
         index++;
     }
 
@@ -794,28 +801,36 @@ void BitmapManager::BuildNoMarkBitmap(const std::vector<sptr<NetFirewallIpRule>>
         if (rule->remoteIps.empty()) {
             srcIp4Map_.OrForEach(bitmap);
             srcIp6Map_.OrForEach(bitmap);
+            wildcardStore_[WILDCARD_SRC_ADDR].Or(bitmap);
         }
         if (rule->localIps.empty()) {
             dstIp4Map_.OrForEach(bitmap);
             dstIp6Map_.OrForEach(bitmap);
+            wildcardStore_[WILDCARD_DST_ADDR].Or(bitmap);
         }
         if (rule->remotePorts.empty() || IsNotNeedPort(rule->protocol)) {
             srcPortMap_.OrForEach(bitmap);
+            wildcardStore_[WILDCARD_SPORT].Or(bitmap);
         }
         if (rule->localPorts.empty() || IsNotNeedPort(rule->protocol)) {
             dstPortMap_.OrForEach(bitmap);
+            wildcardStore_[WILDCARD_DPORT].Or(bitmap);
         }
         if (rule->protocol == (NetworkProtocol)0) {
             protoMap_.OrForEach(bitmap);
+            wildcardStore_[WILDCARD_PROTO].Or(bitmap);
         }
         if (rule->appUid < 1) {
             appUidMap_.OrForEach(bitmap);
+            wildcardStore_[WILDCARD_APPUID].Or(bitmap);
         }
         if (rule->userId < 1) {
             uidMap_.OrForEach(bitmap);
+            wildcardStore_[WILDCARD_UID].Or(bitmap);
         }
         if (rule->interface.empty()) {
             interfaceMap_.OrForEach(bitmap);
+            wildcardStore_[WILDCARD_IFACE].Or(bitmap);
         }
         index++;
     }
@@ -1056,13 +1071,13 @@ struct Ip6RangeKey {
 struct Ip6RangeKeyHash {
     size_t operator () (const Ip6RangeKey &key) const
     {
-        size_t hash = FNV_OFFSET_BASIS_64;
+        uint64_t hash = FNV_OFFSET_BASIS_64;
         const uint8_t *bytes = reinterpret_cast<const uint8_t *>(&key);
         for (size_t i = 0; i < sizeof(key.start) + sizeof(key.end); ++i) {
             hash ^= bytes[i];
             hash *= FNV_PRIME_64;
         }
-        return hash;
+        return static_cast<size_t>(hash);
     }
 };
 

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <algorithm>
 #include <cerrno>
 #include <fcntl.h>
 #include <filesystem>
@@ -58,6 +59,17 @@ static constexpr const char *BPF_DIR = "/sys/fs/bpf";
 static constexpr const char *CGROUP_DIR = "/sys/fs/cgroup";
 static constexpr const char *MAPS_DIR = "/sys/fs/bpf/netsys/maps";
 static constexpr const char *PROGS_DIR = "/sys/fs/bpf/netsys/progs";
+
+/* Name of the shared bpf-to-bpf subprogram section. Noinline helpers called
+ * by several prog sections are emitted by LLVM into .text exactly once, and
+ * every prog section references them through pseudo calls. */
+static constexpr const char *TEXT_SECTION_NAME = ".text";
+/* R_BPF_INSN_DISP32 (value 10): pc-relative relocation carried on the imm of
+ * a bpf-to-bpf pseudo call insn (opcode 0x85, src_reg = BPF_PSEUDO_CALL).
+ * The call target is a subprogram inside the shared .text section; it is
+ * rebased by ElfLoader::MergeTextInsns() while the .text insns are appended
+ * to the prog insn array (BPF_PROG_LOAD accepts a single linear insn array). */
+static constexpr unsigned R_BPF_INSN_DISP32 = 10U;
 
 // There is no limit to the size of SECTION_NAMES.
 static const struct SectionName {
@@ -105,7 +117,12 @@ static const constexpr struct {
     DEFINE_ATTACH_TYPE("cgroup_sock_inet_create_socket", BPF_CGROUP_INET_SOCK_CREATE, false),
     DEFINE_ATTACH_TYPE("cgroup_sock_inet_release_socket", BPF_CGROUP_INET_SOCK_RELEASE, true),
     DEFINE_ATTACH_TYPE("cgroup_skb_uid_ingress", BPF_CGROUP_INET_INGRESS, false),
+    /* fw-on dual attach: the *_dns progs attach ahead of the main progs
+     * (ELF section order, see LoadProgs); BPF_F_ALLOW_MULTI stacks them on
+     * the same cgroup with AND verdict semantics. */
+    DEFINE_ATTACH_TYPE("cgroup_skb_uid_ingress_dns", BPF_CGROUP_INET_INGRESS, false),
     DEFINE_ATTACH_TYPE("cgroup_skb_uid_egress", BPF_CGROUP_INET_EGRESS, false),
+    DEFINE_ATTACH_TYPE("cgroup_skb_uid_egress_dns", BPF_CGROUP_INET_EGRESS, false),
     DEFINE_ATTACH_TYPE("cgroup_addr_bind4", BPF_CGROUP_INET4_BIND, true),
     DEFINE_ATTACH_TYPE("cgroup_addr_bind6", BPF_CGROUP_INET6_BIND, true),
     DEFINE_ATTACH_TYPE("cgroup_addr_connect4", BPF_CGROUP_INET4_CONNECT, true),
@@ -225,6 +242,14 @@ inline bool MatchSecName(const std::string &name)
     };
     auto size = sizeof(SECTION_NAMES) / sizeof(SectionName);
     return std::any_of(SECTION_NAMES, SECTION_NAMES + size, matchFunc);
+}
+
+/* Prog pin names are the ELF section names with '/' replaced by '_'. */
+inline std::string NormalizeProgName(const std::string &sectionName)
+{
+    std::string progName = sectionName;
+    std::replace(progName.begin(), progName.end(), '/', '_');
+    return progName;
 }
 
 inline int32_t UnPin(const std::string &path)
@@ -575,6 +600,12 @@ private:
         ELFIO::relocation_section_accessor relocation(elfIo_, section);
         for (size_t i = 0; i < size; i++) {
             relocation.get_entry(i, offset, symbolValue, symbolName, type, addend, calcValue);
+            if (type == R_BPF_INSN_DISP32) {
+                /* bpf-to-bpf pseudo-call displacement, not a map reference:
+                 * rebased by MergeTextInsns() when the .text insns are merged
+                 * into the prog insn array during LoadProgs(). */
+                continue;
+            }
             uint32_t index = offset / sizeof(bpf_insn);
             if (insn[index].code != (BPF_LD | BPF_IMM | BPF_DW)) {
                 NETNATIVE_LOGE("Invalid relo for insn[%{public}u].code 0x%{public}x 0x%{public}x", index,
@@ -599,6 +630,382 @@ private:
             insn[index].imm = maps_[mapIdx].fd;
         }
         return true;
+    }
+
+    /* Find the SHT_REL section (e.g. ".relcgroup_skb/uid/ingress" or ".rel.text")
+     * that relocates the given target section, matched through its sh_info. */
+    ELFIO::section *FindRelSection(const ELFIO::section *targetSec) const
+    {
+        for (const auto &section : elfIo_.sections) {
+            if (section->get_type() != ELFIO::SHT_REL) {
+                continue;
+            }
+            if (elfIo_.sections[section->get_info()] == targetSec) {
+                return section.get();
+            }
+        }
+        return nullptr;
+    }
+
+    /* A bpf-to-bpf pseudo call into the shared .text section shows up as an
+     * R_BPF_INSN_DISP32 relocation in the prog's own relocation section. */
+    bool HasTextCallRelocation(ELFIO::section *relSec) const
+    {
+        if (relSec == nullptr) {
+            return false;
+        }
+        ELFIO::relocation_section_accessor relocation(elfIo_, relSec);
+        for (ELFIO::Elf_Xword i = 0; i < relocation.get_entries_num(); i++) {
+            ELFIO::Elf64_Addr offset = 0;
+            ELFIO::Elf64_Addr symbolValue = 0;
+            std::string symbolName;
+            ELFIO::Elf_Word type = 0;
+            ELFIO::Elf_Sxword addend = 0;
+            ELFIO::Elf_Sxword calcValue = 0;
+            relocation.get_entry(i, offset, symbolValue, symbolName, type, addend, calcValue);
+            if (type == R_BPF_INSN_DISP32) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /* One .text subprogram: a STT_FUNC symbol living in the .text section. */
+    struct TextFunc {
+        std::string name;
+        size_t off = 0;    /* insn offset inside .text */
+        size_t cnt = 0;    /* insn count */
+        size_t newpos = 0; /* insn offset inside the merged array, valid when kept */
+        bool kept = false;
+    };
+
+    /* .text function containing the given .text insn offset, -1 if none */
+    static int TextFuncOf(const std::vector<TextFunc> &funcs, size_t insnOff)
+    {
+        for (size_t i = 0; i < funcs.size(); i++) {
+            if (insnOff >= funcs[i].off && insnOff < funcs[i].off + funcs[i].cnt) {
+                return static_cast<int>(i);
+            }
+        }
+        return -1;
+    }
+
+    /* Build the .text function table from the STT_FUNC symbols whose
+     * section index is the .text section, sorted by insn offset. */
+    bool BuildTextFuncTable(const ELFIO::section *textSec, std::vector<TextFunc> &funcs) const
+    {
+        auto textIdx = textSec->get_index();
+        size_t textCnt = textSec->get_size() / sizeof(bpf_insn);
+        for (const auto &section : elfIo_.sections) {
+            if (section->get_type() != ELFIO::SHT_SYMTAB) {
+                continue;
+            }
+            ELFIO::symbol_section_accessor symbols(elfIo_, section.get());
+            for (ELFIO::Elf_Xword i = 0; i < symbols.get_symbols_num(); i++) {
+                std::string name;
+                ELFIO::Elf64_Addr value = 0;
+                ELFIO::Elf_Xword size = 0;
+                unsigned char bind = 0;
+                unsigned char type = 0;
+                ELFIO::Elf_Half elfSection = 0;
+                unsigned char other = 0;
+                symbols.get_symbol(i, name, value, size, bind, type, elfSection, other);
+                if (type != ELFIO::STT_FUNC || elfSection != textIdx) {
+                    continue;
+                }
+                if (value % sizeof(bpf_insn) != 0 || size % sizeof(bpf_insn) != 0) {
+                    NETNATIVE_LOGE(".text function %{public}s misaligned (value %{public}lld size %{public}lld)",
+                                   name.c_str(), static_cast<long long>(value), static_cast<long long>(size));
+                    return false;
+                }
+                TextFunc func;
+                func.name = name;
+                func.off = value / sizeof(bpf_insn);
+                func.cnt = size / sizeof(bpf_insn);
+                if (func.cnt == 0 || func.off + func.cnt > textCnt) {
+                    NETNATIVE_LOGE(".text function %{public}s out of section (off %{public}zu cnt %{public}zu, "
+                                   ".text %{public}zu insns)",
+                                   name.c_str(), func.off, func.cnt, textCnt);
+                    return false;
+                }
+                funcs.push_back(func);
+            }
+        }
+        if (funcs.empty()) {
+            NETNATIVE_LOGE("%{public}s", "prog calls .text but no STT_FUNC symbols found in .text");
+            return false;
+        }
+        std::sort(funcs.begin(), funcs.end(), [](const TextFunc &a, const TextFunc &b) { return a.off < b.off; });
+        for (size_t i = 1; i < funcs.size(); i++) {
+            if (funcs[i - 1].off + funcs[i - 1].cnt > funcs[i].off) {
+                NETNATIVE_LOGE(".text functions %{public}s and %{public}s overlap", funcs[i - 1].name.c_str(),
+                               funcs[i].name.c_str());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /* Dead-strip merge of the shared .text subprograms into the prog insn
+     * array, and rebase of every bpf-to-bpf pseudo call displacement.
+     *
+     * BPF_PROG_LOAD takes a single linear insn array and the verifier
+     * rejects unreachable insns: the prog sections reference different
+     * subsets of the shared .text functions, so only the functions
+     * reachable from THIS prog are appended (dead-strip). Algorithm
+     * (device-verified against the netsys.o firewall programs):
+     *  1. collect the prog -> .text pseudo calls: R_BPF_INSN_DISP32
+     *     relocations in the prog's own relocation section;
+     *  2. build the .text function table (STT_FUNC symbols);
+     *  3. scan .text for pseudo calls (code 0x85, src_reg =
+     *     BPF_PSEUDO_CALL; helper calls carry src_reg = 0 and their imm is
+     *     a helper id - NOT an edge) and build caller -> callee edges;
+     *  4. reachable closure starting from the prog's direct callees;
+     *  5. append the kept functions, in original .text order, behind the
+     *     prog insns;
+     *  6. rebase the prog -> .text calls:
+     *       target insn = st_value / sizeof(bpf_insn) + (s32)imm + 1
+     *     (both spellings: the .text section symbol carries target - 1 in
+     *     the imm, a FUNC symbol rides st_value with imm = -1)
+     *       final imm   = new_target - insn_idx - 1
+     *  7. rebase the intra-.text calls inside kept functions (they carry
+     *     no relocation, the imm is the .text-internal displacement):
+     *       final imm   = new_target - new_call - 1
+     * Map relocations of both sections (R_BPF_64_64) were already patched
+     * in place by ParseRelocation(), so the patched ld_imm64 insns ride
+     * along with whichever functions are kept. Jumps/loads inside a
+     * function stay valid: functions are copied as contiguous blocks. */
+    bool MergeTextInsns(const ELFIO::section *progSec, ELFIO::section *relSec,
+                        std::vector<bpf_insn> &mergedInsns) const
+    {
+        auto *textSec = elfIo_.sections[std::string_view(TEXT_SECTION_NAME)];
+        if (textSec == nullptr || textSec->get_type() != ELFIO::SHT_PROGBITS ||
+            (textSec->get_flags() & ELFIO::SHF_EXECINSTR) == 0) {
+            NETNATIVE_LOGE("prog %{public}s calls .text subprograms but no executable .text section found",
+                           progSec->get_name().c_str());
+            return false;
+        }
+
+        size_t progCnt = progSec->get_size() / sizeof(bpf_insn);
+        size_t textCnt = textSec->get_size() / sizeof(bpf_insn);
+        const bpf_insn *progInsns = reinterpret_cast<const bpf_insn *>(progSec->get_data());
+        const bpf_insn *textInsns = reinterpret_cast<const bpf_insn *>(textSec->get_data());
+        if (progCnt == 0 || textCnt == 0 || progInsns == nullptr || textInsns == nullptr) {
+            NETNATIVE_LOGE("empty prog or .text section: prog[%{public}s] %{public}zu insns, .text %{public}zu insns",
+                           progSec->get_name().c_str(), progCnt, textCnt);
+            return false;
+        }
+        NETNATIVE_LOGI(".text section: %{public}zu insns, prog[%{public}s] has %{public}zu insns", textCnt,
+                       progSec->get_name().c_str(), progCnt);
+
+        /* 1) prog -> .text pseudo calls (DISP32 relocations) */
+        struct DirectCall {
+            size_t insnIdx; /* call insn index inside the prog section */
+            int64_t target; /* call target insn offset inside .text */
+            std::string symbolName;
+        };
+        std::vector<DirectCall> directCalls;
+        ELFIO::relocation_section_accessor relocation(elfIo_, relSec);
+        for (ELFIO::Elf_Xword i = 0; i < relocation.get_entries_num(); i++) {
+            ELFIO::Elf64_Addr offset = 0;
+            ELFIO::Elf64_Addr symbolValue = 0;
+            std::string symbolName;
+            ELFIO::Elf_Word type = 0;
+            ELFIO::Elf_Sxword addend = 0;
+            ELFIO::Elf_Sxword calcValue = 0;
+            if (!relocation.get_entry(i, offset, symbolValue, symbolName, type, addend, calcValue)) {
+                NETNATIVE_LOGE("invalid relocation entry %{public}u in %{public}s", static_cast<unsigned>(i),
+                               relSec->get_name().c_str());
+                return false;
+            }
+            if (type != R_BPF_INSN_DISP32) {
+                /* map relocations were already applied in place by ParseRelocation() */
+                continue;
+            }
+            size_t insnIdx = offset / sizeof(bpf_insn);
+            if (offset % sizeof(bpf_insn) != 0 || insnIdx >= progCnt) {
+                NETNATIVE_LOGE("pseudo call relocation offset %{public}lld out of prog section %{public}s",
+                               static_cast<long long>(offset), progSec->get_name().c_str());
+                return false;
+            }
+            const bpf_insn &insn = progInsns[insnIdx];
+            if (insn.code != (BPF_JMP | BPF_CALL) || insn.src_reg != BPF_PSEUDO_CALL) {
+                NETNATIVE_LOGE("relocation on insn[%{public}zu] of %{public}s is not a bpf-to-bpf pseudo call: "
+                               "code 0x%{public}x src_reg %{public}u",
+                               insnIdx, progSec->get_name().c_str(), insn.code, static_cast<unsigned>(insn.src_reg));
+                return false;
+            }
+            if (symbolValue % sizeof(bpf_insn) != 0) {
+                NETNATIVE_LOGE("pseudo call symbol %{public}s has misaligned value %{public}lld", symbolName.c_str(),
+                               static_cast<long long>(symbolValue));
+                return false;
+            }
+            int64_t target = static_cast<int64_t>(symbolValue) / static_cast<int64_t>(sizeof(bpf_insn)) +
+                             static_cast<int64_t>(insn.imm) + 1;
+            if (target < 0 || target >= static_cast<int64_t>(textCnt)) {
+                NETNATIVE_LOGE("pseudo call target %{public}lld out of .text section (%{public}zu insns)",
+                               static_cast<long long>(target), textCnt);
+                return false;
+            }
+            directCalls.push_back({insnIdx, target, symbolName});
+        }
+        if (directCalls.empty()) {
+            NETNATIVE_LOGE("%{public}s", "no prog -> .text pseudo call relocations found");
+            return false;
+        }
+
+        /* 2) .text function table (STT_FUNC symbols, sorted by offset) */
+        std::vector<TextFunc> funcs;
+        if (!BuildTextFuncTable(textSec, funcs)) {
+            return false;
+        }
+
+        /* 3) intra-.text pseudo call edges */
+        std::vector<std::vector<bool>> edge(funcs.size(), std::vector<bool>(funcs.size(), false));
+        for (size_t i = 0; i < textCnt; i++) {
+            const bpf_insn &insn = textInsns[i];
+            if (insn.code != (BPF_JMP | BPF_CALL) || insn.src_reg != BPF_PSEUDO_CALL) {
+                continue; /* helper calls carry src_reg = 0, their imm is a helper id */
+            }
+            int64_t t = static_cast<int64_t>(i) + static_cast<int64_t>(insn.imm) + 1;
+            if (t < 0 || t >= static_cast<int64_t>(textCnt)) {
+                NETNATIVE_LOGE("intra .text call at insn %{public}zu targets %{public}lld out of .text", i,
+                               static_cast<long long>(t));
+                return false;
+            }
+            int caller = TextFuncOf(funcs, i);
+            int callee = TextFuncOf(funcs, static_cast<size_t>(t));
+            if (caller < 0 || callee < 0) {
+                NETNATIVE_LOGE("intra .text call at insn %{public}zu sits outside any .text function", i);
+                return false;
+            }
+            edge[caller][callee] = true;
+        }
+
+        /* 4) reachable closure from the prog's direct callees */
+        for (const auto &call : directCalls) {
+            int f = TextFuncOf(funcs, static_cast<size_t>(call.target));
+            if (f < 0) {
+                NETNATIVE_LOGE("prog -> .text call target %{public}lld outside any .text function (symbol %{public}s)",
+                               static_cast<long long>(call.target), call.symbolName.c_str());
+                return false;
+            }
+            funcs[f].kept = true;
+        }
+        bool changed = true;
+        while (changed) {
+            changed = false;
+            for (size_t a = 0; a < funcs.size(); a++) {
+                if (!funcs[a].kept) {
+                    continue;
+                }
+                for (size_t b = 0; b < funcs.size(); b++) {
+                    if (edge[a][b] && !funcs[b].kept) {
+                        funcs[b].kept = true;
+                        changed = true;
+                    }
+                }
+            }
+        }
+
+        /* 5) layout: kept functions in original .text order behind the prog insns */
+        mergedInsns.assign(progInsns, progInsns + progCnt);
+        size_t keptInsns = 0;
+        size_t keptFuncs = 0;
+        std::string keptNames;
+        for (auto &f : funcs) {
+            if (!f.kept) {
+                continue;
+            }
+            f.newpos = mergedInsns.size();
+            mergedInsns.insert(mergedInsns.end(), textInsns + f.off, textInsns + f.off + f.cnt);
+            if (!keptNames.empty()) {
+                keptNames += ", ";
+            }
+            keptNames += f.name;
+            keptInsns += f.cnt;
+            ++keptFuncs;
+        }
+
+        /* 6) rebase the prog -> .text pseudo calls (imm still original) */
+        size_t rebasedCnt = 0;
+        for (const auto &call : directCalls) {
+            bpf_insn &insn = mergedInsns[call.insnIdx];
+            int f = TextFuncOf(funcs, static_cast<size_t>(call.target));
+            if (f < 0 || !funcs[f].kept) {
+                NETNATIVE_LOGE("prog -> .text call target not kept (closure bug), symbol %{public}s",
+                               call.symbolName.c_str());
+                return false;
+            }
+            int64_t newTarget =
+                static_cast<int64_t>(funcs[f].newpos) + (call.target - static_cast<int64_t>(funcs[f].off));
+            int32_t newImm = static_cast<int32_t>(newTarget - static_cast<int64_t>(call.insnIdx) - 1);
+            NETNATIVE_LOGI("patch pseudo call in prog[%{public}s]: insn[%{public}zu] imm %{public}d -> %{public}d, "
+                           ".text target insn %{public}lld (symbol %{public}s)",
+                           progSec->get_name().c_str(), call.insnIdx, insn.imm, newImm,
+                           static_cast<long long>(call.target), call.symbolName.c_str());
+            insn.imm = newImm;
+            ++rebasedCnt;
+        }
+
+        /* 7) rebase the intra-.text calls inside kept functions (imm is
+         * still the .text-internal displacement) */
+        for (const auto &f : funcs) {
+            if (!f.kept) {
+                continue;
+            }
+            for (size_t i = f.off; i < f.off + f.cnt; i++) {
+                bpf_insn &insn = mergedInsns[f.newpos + (i - f.off)];
+                if (insn.code != (BPF_JMP | BPF_CALL) || insn.src_reg != BPF_PSEUDO_CALL) {
+                    continue;
+                }
+                int64_t t = static_cast<int64_t>(i) + static_cast<int64_t>(insn.imm) + 1;
+                int tf = (t >= 0 && t < static_cast<int64_t>(textCnt)) ? TextFuncOf(funcs, static_cast<size_t>(t)) : -1;
+                if (tf < 0 || !funcs[tf].kept) {
+                    NETNATIVE_LOGE("kept function %{public}s calls a non-kept function (closure bug)", f.name.c_str());
+                    return false;
+                }
+                int64_t newCall = static_cast<int64_t>(f.newpos) + static_cast<int64_t>(i - f.off);
+                int64_t newTarget =
+                    static_cast<int64_t>(funcs[tf].newpos) + (t - static_cast<int64_t>(funcs[tf].off));
+                insn.imm = static_cast<int32_t>(newTarget - newCall - 1);
+                ++rebasedCnt;
+            }
+        }
+
+        NETNATIVE_LOGI("prog[%{public}s] dead-strip merge: kept %{public}zu/%{public}zu .text functions, "
+                       "%{public}zu insns appended (total %{public}zu), %{public}zu calls rebased, kept: %{public}s",
+                       progSec->get_name().c_str(), keptFuncs, funcs.size(), keptInsns, mergedInsns.size(),
+                       rebasedCnt, keptNames.c_str());
+        return true;
+    }
+
+    /* Load the program with the BPF verifier log attached. Called only when the first load
+     * attempt fails, so that the exact verifier rejection reason is printed into the log. */
+    static int32_t LoadProgWithVerifierLog(const std::string &progName, bpf_attr attr)
+    {
+        constexpr uint32_t verifierLogSize = 1024U * 1024U;
+        constexpr size_t logTailSize = 16U * 1024U;
+        constexpr size_t logChunkSize = 512U;
+        std::vector<char> verifierLog(verifierLogSize, 0);
+        attr.log_buf = PtrToU64(verifierLog.data());
+        attr.log_size = verifierLogSize;
+        attr.log_level = 1; /* 1: verifier state log, the rejection reason is at the end */
+
+        int32_t progFd = SysBpfProgLoad(&attr, sizeof(attr));
+        std::string log(verifierLog.data(), strnlen(verifierLog.data(), verifierLogSize));
+        NETNATIVE_LOGE("BPF verifier log: prog[%{public}s] loadResult[%{public}d] logSize[%{public}zu]",
+                       progName.c_str(), progFd, log.size());
+        size_t begin = 0;
+        if (log.size() > logTailSize) {
+            begin = log.size() - logTailSize;
+            NETNATIVE_LOGE("BPF verifier log is too long, only print the last %{public}zu bytes", logTailSize);
+        }
+        for (size_t off = begin; off < log.size(); off += logChunkSize) {
+            NETNATIVE_LOGE("verifier[%{public}zu/%{public}zu]: %{public}s", off, log.size(),
+                           log.substr(off, logChunkSize).c_str());
+        }
+        return progFd;
     }
 
     int32_t BpfLoadProgram(std::string &progName, bpf_prog_type type, const bpf_insn *insns, size_t insnsCnt)
@@ -632,7 +1039,15 @@ private:
             }
         }
 
-        return SysBpfProgLoad(&attr, sizeof(attr));
+        int32_t progFd = SysBpfProgLoad(&attr, sizeof(attr));
+        if (progFd < NETSYS_SUCCESS) {
+            int32_t originErrno = errno;
+            progFd = LoadProgWithVerifierLog(progName, attr);
+            if (progFd < NETSYS_SUCCESS) {
+                errno = originErrno;
+            }
+        }
+        return progFd;
     }
 
     static bpf_prog_type ConvertEventToProgType(const std::string &event)
@@ -726,8 +1141,7 @@ private:
             return false;
         }
 
-        std::string progName = event;
-        std::replace(progName.begin(), progName.end(), '/', '_');
+        std::string progName = NormalizeProgName(event);
         int32_t progFd = BpfLoadProgram(progName, progType, insn, insnCnt);
         if (progFd < NETSYS_SUCCESS) {
             NETNATIVE_LOGE("Failed to load bpf prog, error = %{public}d", errno);
@@ -765,6 +1179,24 @@ private:
             close(progFd);
             return ret;
         }
+    }
+
+    bool LoadProgSection(const ELFIO::section *progSec)
+    {
+        /* bpf-to-bpf subprograms: when the prog pseudo-calls into the shared
+         * .text section, append the .text insns behind the prog insns and
+         * rebase the call displacements before loading; otherwise load the
+         * section data as before (ELFs without .text calls are unaffected). */
+        auto relSec = FindRelSection(progSec);
+        if (relSec != nullptr && HasTextCallRelocation(relSec)) {
+            std::vector<bpf_insn> mergedInsns;
+            if (!MergeTextInsns(progSec, relSec, mergedInsns)) {
+                return false;
+            }
+            return LoadProg(progSec->get_name(), mergedInsns.data(), mergedInsns.size());
+        }
+        return LoadProg(progSec->get_name(), reinterpret_cast<const bpf_insn *>(progSec->get_data()),
+                        progSec->get_size() / sizeof(bpf_insn));
     }
 
     bool ParseRelocation()
@@ -824,12 +1256,16 @@ private:
             close(g_sockFd);
         }
         g_sockFd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+        /* elfIo_.sections preserves the ELF section order, so the progs are
+         * loaded (and attached through LoadProg -> DoAttach) exactly in the
+         * order the BPF build laid them out: the *_dns gate programs land
+         * ahead of the main ingress/egress programs on the same cgroup
+         * (BPF_F_ALLOW_MULTI, AND verdict semantics). */
         return std::all_of(elfIo_.sections.begin(), elfIo_.sections.end(), [this](const auto &section) -> bool {
             if (!MatchSecName(section->get_name())) {
                 return true;
             }
-            return LoadProg(section->get_name(), reinterpret_cast<const bpf_insn *>(section->get_data()),
-                            section->get_size() / sizeof(bpf_insn));
+            return LoadProgSection(section.get());
         });
     }
 

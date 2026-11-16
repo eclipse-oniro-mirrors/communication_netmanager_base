@@ -30,7 +30,9 @@
 #endif
 
 #include "dns_manager.h"
+#include <arpa/inet.h>
 #include <netdb.h>
+#include "bpf_netfirewall.h"
 
 namespace OHOS {
 namespace nmd {
@@ -326,6 +328,71 @@ int32_t DnsManager::ClearFirewallRules(NetFirewallRuleType type)
     return DnsParamCache::GetInstance().ClearFirewallRules(type);
 }
 #endif
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+void DnsManager::RegisterFirewallDnsProviders()
+{
+    auto bpf = OHOS::NetManagerStandard::NetsysBpfNetFirewall::GetInstance();
+    if (bpf == nullptr) {
+        NETNATIVE_LOGE("RegisterFirewallDnsProviders: bpf firewall instance is null");
+        return;
+    }
+    /* Server-set provider: stateless read of DnsParamCache — no lifetime
+     * coupling to this manager. */
+    bpf->RegisterDnsServerSetProvider([](std::vector<std::string> &servers) {
+        return DnsParamCache::GetInstance().GetBaseDnsServers(servers);
+    });
+    /* Pre-warm resolver: weak_ptr only — the bpf singleton may outlive this
+     * manager, a dangling strong ref must never keep it half-alive. */
+    std::weak_ptr<DnsManager> wp = shared_from_this();
+    bpf->RegisterDnsPrewarmResolver([wp](const std::string &host, std::vector<std::string> &ips) {
+        auto self = wp.lock();
+        if (self == nullptr) {
+            return static_cast<int32_t>(-1);
+        }
+        return self->ResolveForPrewarm(host, ips);
+    });
+    /* Cache-flush provider: stateless singleton call — same no-lifetime-
+     * coupling contract as the server-set provider. Fired after every
+     * completed rule/default mutation so allow-era cached answers cannot
+     * bypass a newly set deny (cache2 hits serve without re-adjudication). */
+    bpf->RegisterDnsCacheFlushProvider([]() { return DnsParamCache::GetInstance().FlushAllDnsCache(); });
+}
+#endif
+
+int32_t DnsManager::ResolveForPrewarm(const std::string &host, std::vector<std::string> &ips)
+{
+    /* System identity: this process is the resolver host itself (qp_type=1
+     * query path, no app report) — the same query shape EeffectDomainRules
+     * uses for its user-space cache warm-up. */
+    AddrInfo hints = {};
+    hints.aiFamily = AF_UNSPEC;
+    hints.aiSockType = SOCK_STREAM;
+    hints.aiProtocol = IPPROTO_TCP;
+    std::vector<AddrInfo> res;
+    if (GetAddrInfo(host, "", hints, 0, res) != 0 || res.empty()) {
+        NETNATIVE_LOGW("ResolveForPrewarm: resolve failed: %{public}s", host.c_str());
+        return -1;
+    }
+    for (const auto &ai : res) {
+        char buf[INET6_ADDRSTRLEN] = { 0 };
+        const struct sockaddr *sa = &ai.aiAddr.sa;
+        if (sa->sa_family == AF_INET) {
+            auto *sin = reinterpret_cast<const struct sockaddr_in *>(sa);
+            if (inet_ntop(AF_INET, &sin->sin_addr, buf, sizeof(buf)) != nullptr) {
+                ips.emplace_back(buf);
+            }
+            continue;
+        }
+        if (sa->sa_family == AF_INET6) {
+            auto *sin6 = reinterpret_cast<const struct sockaddr_in6 *>(sa);
+            if (inet_ntop(AF_INET6, &sin6->sin6_addr, buf, sizeof(buf)) != nullptr) {
+                ips.emplace_back(buf);
+            }
+        }
+    }
+    return ips.empty() ? -1 : 0;
+}
 
 int32_t DnsManager::SetUserDefinedServerFlag(uint16_t netId, bool flag)
 {

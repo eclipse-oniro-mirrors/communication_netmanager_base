@@ -34,6 +34,7 @@
 #define INGRESS_UID_MAP in_uid_map
 #define INGRESS_ACTION_MAP in_action_map
 #define INGRESS_INTERFACE_MAP in_iface_map
+#define INGRESS_WILDCARD_MAP in_wildcard_map
 
 #define EGRESS_SADDR_MAP out_saddr_map
 #define EGRESS_SADDR6_MAP out_saddr6_map
@@ -46,22 +47,43 @@
 #define EGRESS_UID_MAP out_uid_map
 #define EGRESS_ACTION_MAP out_action_map
 #define EGRESS_INTERFACE_MAP out_iface_map
+#define EGRESS_WILDCARD_MAP out_wildcard_map
 
 #define EVENT_MAP event_map
 #define DEFAULT_ACTION_MAP def_act_map
+#define ZERO_BITMAP_MAP zero_bitmap_map
 #define CT_MAP ct_map
 #define CURRENT_UID_MAP current_uid_map
 #define DOMAIN_IPV4_MAP domain_ipv4_map
 #define DOMAIN_IPV6_MAP domain_ipv6_map
-#define DOMAIN_PASS_MAP domain_pass_map
-#define DOMAIN_DENY_MAP domain_deny_map
-#define DOMAIN_PREFIX_PASS_MAP domain_prefix_pass_map
-#define DOMAIN_PREFIX_DENY_MAP domain_prefix_deny_map
 #define LOOP_BACK_IPV4_MAP loop_ipv4_map
 #define LOOP_BACK_IPV6_MAP loop_ipv6_map
-#define DOMAIN_DATA_KEY_MAP domain_data_key_map
 #define DOMAIN_SCRATCH_MAP domain_scratch_map
+/* DNS query record table (pinned by the loader) and the percpu
+ * staging slot (BPF-internal only, not consumed from user space). */
+#define DNS_QUERY_RECORD_MAP dns_query_record_map
+#define DNS_QUERY_SCRATCH_MAP dns_query_scratch_map
+#define DNS_FLOW_SCRATCH_MAP dns_flow_scrat_map
+/* A' label-anchored trie: one forward-anchored table (prefix rules) and
+ * one backward-anchored table (suffix rules), both plain HASH with the
+ * composite (uid, appuid, state, cls, gen) key — the custom loader has no
+ * HASH_OF_MAPS, so the trie nodes live in one map. Generation switch:
+ * the builder writes the inactive generation, flips this single-entry
+ * array, then clears the old one. */
+#define AC_PREFIX_TRANS_MAP ac_prefix_trans_map
+#define AC_SUFFIX_TRANS_MAP ac_suffix_trans_map
+#define AC_GEN_MAP ac_gen_map
+/* Per-CPU staging for the egress per-domain gate ctx: the dns program
+ * fills it and the main program consumes it — they are separate
+ * attachments (dual-attach split), so a stack-local gate ctx cannot
+ * cross the program boundary. */
+#define DNS_GATE_SCRATCH_MAP dns_gate_scrat_map
+/* DNS server authorization maps — control-plane written, consumed by
+ * the per-domain gate. Pinned by the loader like every other map. */
+#define DNS_SERVER_V4_MAP dns_server_v4_map
+#define DNS_SERVER_V6_MAP dns_server_v6_map
 #define NF_BITMAP_SCRATCH nf_bm_scrat_map
+#define EVAL_FALLBACK_MODE_MAP eval_fallback_mode_map
 
 #define MAPS_DIR() "/sys/fs/bpf/netsys/maps/"
 #define STR(x) #x

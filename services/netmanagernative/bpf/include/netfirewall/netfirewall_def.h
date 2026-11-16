@@ -20,11 +20,9 @@
 #include "netfirewall_map_def.h"
 #include "netfirewall_ct_def.h"
 
-static const ip4_key OTHER_IP4_KEY = (ip4_key)0xffffffff;
-static const port_key_val OTHER_PORT_KEY = (port_key_val)0xffffffff;
-static const proto_key OTHER_PROTO_KEY = (proto_key)0xffffffff;
-static const appuid_key OTHER_APPUID_KEY = (appuid_key)0xffffffff;
-static const appuid_key OTHER_UID_KEY = (uid_key)0xffffffff;
-static const interface_key OTHER_INTERFACE_KEY = {};
+/* The per-dimension OTHER_*_KEY sentinel constants were removed:
+ * wildcard fallback entries now live in the direction's wildcard map keyed by
+ * dimension role, whose key space is structurally disjoint from rule values.
+ * Do NOT reintroduce extreme-value sentinels in dimension maps. */
 
 #endif // NET_FIREWALL_DEF_H

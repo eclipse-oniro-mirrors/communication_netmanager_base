@@ -35,6 +35,10 @@ ohos_unittest("netsys_netfirewall_test") {
     "$NETSYSNATIVE_SOURCE_DIR/bpf:netsys",
     "$NETSYSNATIVE_SOURCE_DIR/bpf:netsys_bpf_utils",
     "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
+    # GetBaseDnsServersOrder001 exercises the real
+    # DnsParamCache (insertion-order union) — same link shape as the fuzz
+    # target. Only the needed objects are pulled by the linker.
+    "$NETSYSNATIVE_SOURCE_DIR:netsys_native_manager_static",
   ]
 
   defines = [
@@ -51,8 +55,13 @@ ohos_unittest("netsys_netfirewall_test") {
     defines += [ "FEATURE_NET_FIREWALL_ENABLE" ]
   }
 
+  # external_deps is deliberately smaller than netsys_native_manager_static's
+  # own set — the linker only pulls the .o files the assertions actually
+  # reference. When adding assertions over new manager
+  # objects, add their external_deps here in the same change.
   external_deps = [
     "c_utils:utils",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",

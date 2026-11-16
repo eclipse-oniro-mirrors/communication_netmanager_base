@@ -239,6 +239,11 @@ int32_t DnsParamCache::DestroyNetworkCache(uint16_t netId, bool isVpnNet)
             it->second.ClearIpv6UidBlackList();
         }
     }
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    /* Sync timing: the destroyed network's servers leave the union —
+     * re-sync (safe under cacheMutex_, see SetResolverConfig). */
+    NetsysBpfNetFirewall::GetInstance()->NotifyDnsResolverChanged();
+#endif
     return 0;
 }
 
@@ -266,7 +271,8 @@ int32_t DnsParamCache::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMse
     auto newDnsServers = uniqueServers;
     std::sort(newDnsServers.begin(), newDnsServers.end());
 
-    if (oldDnsServers != newDnsServers) {
+    bool serversChanged = (oldDnsServers != newDnsServers);
+    if (serversChanged) {
         it->second.GetCache().Clear();
         it->second.ClearNodataCache();
         it->second.ClearIpv6UidBlackList();
@@ -285,12 +291,65 @@ int32_t DnsParamCache::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMse
     } else {
         it->second.SetTimeoutMsec(baseTimeoutMsec);
     }
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    /* Skip the sync fan-out when the server set is unchanged —
+     * DHCP renewals re-push identical configs and would otherwise fan out a
+     * per-user ffrt sync task + pre-warm trigger for nothing. Timing note
+     * (解析器集变更): notifying while still holding cacheMutex_ is
+     * deadlock-free — the bpf layer acquires dnsServerMutex_ only one way
+     * and never takes cacheMutex_ (or any lock) while holding it; the async
+     * sync task blocks here until release. */
+    if (serversChanged) {
+        NetsysBpfNetFirewall::GetInstance()->NotifyDnsResolverChanged();
+    }
+#endif
     return 0;
 }
 
 void DnsParamCache::SetDefaultNetwork(int32_t netId)
 {
     defaultNetId_ = netId;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    /* Sync timing (网络切换): the default network's server set leads
+     * the union, a switch re-ranks it — re-sync. */
+    NetsysBpfNetFirewall::GetInstance()->NotifyDnsResolverChanged();
+#endif
+}
+
+int32_t DnsParamCache::GetBaseDnsServers(std::vector<std::string> &servers)
+{
+    /* BASE chain only. The union covers every configured
+     * network — an app resolves via whichever network it is bound to, so the
+     * authorization map must recognize all system resolver targets; the
+     * default network leads so the per-user cap favors it. The RULE_DNS
+     * per-app substitution is deliberately absent.
+     * Order matters: the default network's servers must stay
+     * FIRST in insertion order — BuildDnsServerKeys truncates at 8 per user
+     * and must never drop a default-network resolver in favor of a
+     * lexicographically-smaller secondary one. */
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
+    uint16_t defaultNetId = static_cast<uint16_t>(defaultNetId_.load());
+    std::vector<std::string> ordered;
+    std::set<std::string> seen;
+    auto addConfig = [&ordered, &seen](const DnsResolvConfig &config) {
+        for (const auto &server : config.GetServers()) {
+            if (seen.insert(server).second) {
+                ordered.push_back(server);
+            }
+        }
+    };
+    auto defIt = serverConfigMap_.find(defaultNetId);
+    if (defIt != serverConfigMap_.end()) {
+        addConfig(defIt->second);
+    }
+    for (const auto &entry : serverConfigMap_) {
+        if (entry.first == defaultNetId) {
+            continue;
+        }
+        addConfig(entry.second);
+    }
+    servers = std::move(ordered);
+    return 0;
 }
 
 void DnsParamCache::EnableIpv6(uint16_t netId, bool enable)
@@ -756,24 +815,51 @@ FirewallRuleAction DnsParamCache::GetFirewallRuleAction(int32_t appUid,
 
 int32_t DnsParamCache::ClearFirewallRules(NetFirewallRuleType type)
 {
-    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
-    switch (type) {
-        case NetFirewallRuleType::RULE_DNS:
-            firewallDnsRules_.clear();
-            netFirewallDnsRuleMap_.clear();
-            break;
-        case NetFirewallRuleType::RULE_DOMAIN: {
-            OHOS::NetManagerStandard::NetsysBpfNetFirewall::GetInstance()->ClearDomainCache();
-            break;
+    /* The bpf map clears are syscall strings (GetAllKeys +
+     * per-key delete) — running them under cacheMutex_ stretched the DNS
+     * hot-path critical section (51129900 failure family). Mirror the
+     * SetDnsCacheCommon pattern: mutate in-memory state under the lock,
+     * run the map I/O after releasing it. */
+    bool clearDomainCache = false;
+    bool clearConntrackMap = false;
+    {
+        std::lock_guard<ffrt::mutex> guard(cacheMutex_);
+        switch (type) {
+            case NetFirewallRuleType::RULE_DNS:
+                firewallDnsRules_.clear();
+                netFirewallDnsRuleMap_.clear();
+                /* DNS rules only feed the user-space resolver
+                 * param table, so this ct clear is conservative redundancy (harmless:
+                 * connections re-evaluate once per direction). Failure is log-only,
+                 * consistent with the bpf-side ClearFirewallRules path. */
+                clearConntrackMap = true;
+                break;
+            case NetFirewallRuleType::RULE_DOMAIN: {
+                clearDomainCache = true;
+                break;
+            }
+            case NetFirewallRuleType::RULE_ALL: {
+                firewallDnsRules_.clear();
+                netFirewallDnsRuleMap_.clear();
+                clearDomainCache = true;
+                /* Full rule reset also invalidates conntrack
+                 * verdicts; failure is log-only (clear direction = more strict
+                 * residual verdicts that self-heal with ct timeout). */
+                clearConntrackMap = true;
+                break;
+            }
+            default:
+                break;
         }
-        case NetFirewallRuleType::RULE_ALL: {
-            firewallDnsRules_.clear();
-            netFirewallDnsRuleMap_.clear();
-            OHOS::NetManagerStandard::NetsysBpfNetFirewall::GetInstance()->ClearDomainCache();
-            break;
+    }
+    if (clearDomainCache) {
+        OHOS::NetManagerStandard::NetsysBpfNetFirewall::GetInstance()->ClearDomainCache();
+    }
+    if (clearConntrackMap) {
+        if (OHOS::NetManagerStandard::NetsysBpfNetFirewall::GetInstance()->ClearConntrackMap() !=
+            NETFIREWALL_SUCCESS) {
+            NETNATIVE_LOGE("DnsParamCache::ClearFirewallRules: clear ct map failed");
         }
-        default:
-            break;
     }
     return 0;
 }
@@ -914,6 +1000,23 @@ int32_t DnsParamCache::FlushDnsCache(uint16_t netId)
     it->second.ClearNodataCache();
     it->second.ClearIpv6UidBlackList();
     return 0;
+}
+
+int32_t DnsParamCache::FlushAllDnsCache()
+{
+    /* Firewall rule/default changes must not be bypassed by allow-era cached
+     * answers (the cache2 query path serves hits without egress
+     * re-adjudication). Reset the same per-netId state as FlushDnsCache,
+     * for every configured netId at once. */
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
+    int32_t flushed = 0;
+    for (auto &entry : serverConfigMap_) {
+        entry.second.GetCache().Clear();
+        entry.second.ClearNodataCache();
+        entry.second.ClearIpv6UidBlackList();
+        ++flushed;
+    }
+    return flushed;
 }
 
 void DnsParamCache::SetNodataCache(uint16_t netId, uint32_t uid, const std::string &hostName)

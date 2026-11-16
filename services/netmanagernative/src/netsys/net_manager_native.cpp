@@ -85,6 +85,12 @@ std::vector<uint32_t> NetManagerNative::GetCurrentInterfaceIndex()
 void NetManagerNative::Init()
 {
     GetOriginInterfaceIndex();
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    /* dnsManager_ is shared_ptr-owned by now — the safe point
+     * to hand the bpf control plane its dns-layer providers (the pre-warm
+     * resolver callback locks the manager via weak_ptr). */
+    dnsManager_->RegisterFirewallDnsProviders();
+#endif
 }
 
 int32_t NetManagerNative::NetworkReinitRoute()
