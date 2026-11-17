@@ -851,7 +851,7 @@ HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest001, TestSize.Level
 #ifdef SUPPORT_TRAFFIC_STATISTIC
 HWTEST_F(NetStatsServiceTest, CalculateTrafficAvailableTest001, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int32_t simId = 1;
     uint64_t monthlyAvailable = UINT64_MAX;
     uint64_t monthlyMarkAvailable = UINT64_MAX;
@@ -929,7 +929,7 @@ HWTEST_F(NetStatsServiceTest, SetTrafficMapMaxValueTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, RecordCallingDataTest001, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     netStatsService.callingRecordSet_.clear();
     netStatsService.isPostDelayReport_ = false;
     uint32_t uid = 1001;
@@ -941,7 +941,7 @@ HWTEST_F(NetStatsServiceTest, RecordCallingDataTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, RecordCallingDataTest002, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     netStatsService.callingRecordSet_.clear();
     netStatsService.isPostDelayReport_ = false;
     uint32_t uid1 = 1001;
@@ -955,7 +955,7 @@ HWTEST_F(NetStatsServiceTest, RecordCallingDataTest002, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, ReportCallingDataTest001, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     netStatsService.callingRecordSet_.clear();
     netStatsService.isPostDelayReport_ = false;
     netStatsService.ReportCallingData();
@@ -965,7 +965,7 @@ HWTEST_F(NetStatsServiceTest, ReportCallingDataTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, ReportCallingDataTest002, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     netStatsService.callingRecordSet_.clear();
     netStatsService.isPostDelayReport_ = false;
     netStatsService.callingRecordSet_.insert(
@@ -980,7 +980,7 @@ HWTEST_F(NetStatsServiceTest, ReportCallingDataTest002, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, RecordAndReportCallingDataTest001, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     netStatsService.callingRecordSet_.clear();
     netStatsService.isPostDelayReport_ = false;
     uint32_t uid = 1001;
