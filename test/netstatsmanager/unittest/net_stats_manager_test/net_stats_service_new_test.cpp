@@ -59,7 +59,7 @@ void NetStatsServiceTest::TearDown() {}
 
 HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest001, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     std::vector<NetStatsInfoSequence> infos = {};
     uint32_t uid = 1;
     const sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
@@ -72,7 +72,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest001, TestSize.Level
 
 HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest002, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     std::vector<NetStatsInfoSequence> infos = {};
     uint32_t uid = 1;
     const sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
@@ -85,7 +85,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest002, TestSize.Level
 
 HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest003, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     std::vector<NetStatsInfoSequence> infos = {};
     uint32_t uid = 1;
     const sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
@@ -98,7 +98,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest003, TestSize.Level
 
 HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest001, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     AccountSA::OsAccountState state = AccountSA::OsAccountState::CREATED;
     int32_t userId = 101;
     int32_t ret = netStatsService.ProcessOsAccountChanged(userId, state);
@@ -114,7 +114,7 @@ HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest002, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int32_t userId = 101;
     netStatsService.netStatsCached_->SetCurPrivateUserId(userId);
     AccountSA::OsAccountState state = AccountSA::OsAccountState::STOPPED;
@@ -126,7 +126,7 @@ HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest002, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest003, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int32_t userId = 101;
     netStatsService.netStatsCached_->SetCurPrivateUserId(userId);
     AccountSA::OsAccountState state = AccountSA::OsAccountState::SWITCHED;
@@ -136,7 +136,7 @@ HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest003, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest004, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int32_t userId = 101;
     netStatsService.netStatsCached_->SetCurPrivateUserId(userId);
     AccountSA::OsAccountState state = AccountSA::OsAccountState::LOCKED;
@@ -156,7 +156,7 @@ HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest005, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest001, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
 
     int32_t curUserId = -1;
     int32_t ret1 = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
@@ -182,7 +182,7 @@ HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest001, TestSize.Level1
 
 HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest002, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
 
     int32_t curUserId = -1;
     int32_t ret1 = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
@@ -211,7 +211,7 @@ HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest002, TestSize.Level1
 
 HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest003, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
 
     int32_t curUserId = -1;
     int32_t ret1 = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
@@ -243,7 +243,7 @@ HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest003, TestSize.Level1
 
 HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest001, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int32_t defaultUserId = -1;
     AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(defaultUserId);
     std::vector<NetStatsInfoSequence> infos;
@@ -277,7 +277,7 @@ HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest001, TestSize.Level
 
 HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest003, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int32_t defaultUserId = -1;
     AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(defaultUserId);
     netStatsService.netStatsCached_->SetCurDefaultUserId(defaultUserId);
@@ -306,7 +306,7 @@ HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest003, TestSize.Level
 
 HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest004, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int32_t defaultUserId = -1;
     AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(defaultUserId);
     netStatsService.netStatsCached_->SetCurDefaultUserId(defaultUserId);
@@ -341,7 +341,7 @@ HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest004, TestSize.Level
 
 HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest002, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int32_t defaultUserId = -1;
     AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(defaultUserId);
     std::vector<NetStatsInfoSequence> infos;
@@ -369,7 +369,7 @@ HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest002, TestSize.Level
 
 HWTEST_F(NetStatsServiceTest, EraseNetStatsInfoByUserIdTest001, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int defaultUserId = 100;
     std::vector<NetStatsInfoSequence> infos;
     NetStatsInfoSequence info1;
@@ -399,7 +399,7 @@ HWTEST_F(NetStatsServiceTest, AddUidStatsFlagTest001, TestSize.Level1)
 #ifdef SUPPORT_TRAFFIC_STATISTIC
 HWTEST_F(NetStatsServiceTest, MergeTrafficStatsTest001, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     std::vector<NetStatsInfoSequence> statsInfoSequences;
     NetStatsInfoSequence infoSque;
     infoSque.startTime_ = CommonUtils::GetCurrentSecond() - 100;
@@ -420,7 +420,7 @@ HWTEST_F(NetStatsServiceTest, MergeTrafficStatsTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, SetCalibrationTrafficTest001, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     uint32_t simId = 20;
     int64_t remainingData = 100;
     uint64_t totalMonthlyData = 500;
@@ -433,7 +433,7 @@ HWTEST_F(NetStatsServiceTest, SetCalibrationTrafficTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, SetCalibrationTrafficTest002, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     uint32_t simId = 20;
     int64_t remainingData = -100;
     uint64_t totalMonthlyData = 500;
@@ -445,7 +445,7 @@ HWTEST_F(NetStatsServiceTest, SetCalibrationTrafficTest002, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, ResetNotifyStateTest001, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int32_t simId = 0;
     auto info = std::make_shared<TrafficPlanInfo>();
     netStatsService.trafficPlanService_->trafficPlanInfoMap_.insert(std::make_pair(simId, info));
@@ -484,7 +484,7 @@ HWTEST_F(NetStatsServiceTest, UpdateBpfMapTimerTaskTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, NotifyTrafficAlertFfrtTest001, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int32_t simId = 1;
     uint8_t flag = 2;
     netStatsService.trafficPlanFfrtQueue_ = std::make_shared<ffrt::queue>("TrafficPlanStatistic");
@@ -499,7 +499,7 @@ HWTEST_F(NetStatsServiceTest, NotifyTrafficAlertFfrtTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, UpdateCurActiviteSimChangedTest001, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int32_t simId = 10;
     uint64_t index = 12;
     netStatsService.trafficPlanFfrtQueue_ = std::make_shared<ffrt::queue>("TrafficPlanStatistic");
@@ -521,7 +521,7 @@ HWTEST_F(NetStatsServiceTest, UpdateCurActiviteSimChangedTest001, TestSize.Level
 
 HWTEST_F(NetStatsServiceTest, UpdateCurActiviteSimChangedTest002, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int32_t simId = 0;
     auto info = std::make_shared<TrafficPlanInfo>();
     netStatsService.trafficPlanService_->trafficPlanInfoMap_.insert(std::make_pair(simId, info));
@@ -536,7 +536,7 @@ HWTEST_F(NetStatsServiceTest, UpdateCurActiviteSimChangedTest002, TestSize.Level
 
 HWTEST_F(NetStatsServiceTest, UpdateCurActiviteSimChangedTest003, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int32_t simId = 0;
     auto info = std::make_shared<TrafficPlanInfo>();
     info->trafficLimit = 132465789;
@@ -553,7 +553,7 @@ HWTEST_F(NetStatsServiceTest, UpdateCurActiviteSimChangedTest003, TestSize.Level
 
 HWTEST_F(NetStatsServiceTest, UpdateCurActiviteSimChangedTest004, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int32_t simId = 0;
     auto info = std::make_shared<TrafficPlanInfo>();
     info->trafficLimit = UINT64_MAX;
@@ -570,7 +570,7 @@ HWTEST_F(NetStatsServiceTest, UpdateCurActiviteSimChangedTest004, TestSize.Level
 
 HWTEST_F(NetStatsServiceTest, UpdateCurActiviteSimChangedTest005, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int32_t simId = 0;
     auto info = std::make_shared<TrafficPlanInfo>();
     info->trafficLimit = 132465789;
@@ -589,7 +589,7 @@ HWTEST_F(NetStatsServiceTest, OnExtensionTest, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int32_t ret = netStatsService.OnExtension("backup", data, reply);
     EXPECT_NE(ret, -1);
 }
@@ -598,14 +598,14 @@ HWTEST_F(NetStatsServiceTest, OnExtensionTest2, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int32_t ret = netStatsService.OnExtension("restore", data, reply);
     EXPECT_EQ(ret, -1);
 }
 
 HWTEST_F(NetStatsServiceTest, SetTrafficPlanInfoTest01, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     netStatsService.trafficPlanService_ = nullptr;
     int32_t ret = netStatsService.SetTrafficPlanInfo(1, 1, 1);
     EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
@@ -613,7 +613,7 @@ HWTEST_F(NetStatsServiceTest, SetTrafficPlanInfoTest01, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, SetTrafficPlanInfoTest02, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSlotId(_)).WillRepeatedly(Return(-1));
     int32_t ret = netStatsService.SetTrafficPlanInfo(1, 1, 1);
     EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
@@ -621,7 +621,7 @@ HWTEST_F(NetStatsServiceTest, SetTrafficPlanInfoTest02, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, SetTrafficPlanInfoTest03, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     std::u16string iccid = {u"1234564654651"};
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSlotId(_)).WillRepeatedly(Return(0));
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimIccId(_, _))
@@ -632,7 +632,7 @@ HWTEST_F(NetStatsServiceTest, SetTrafficPlanInfoTest03, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, SetTrafficPlanInfoTest04, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     std::u16string iccid = {u"1234564654651"};
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSlotId(_)).WillRepeatedly(Return(0));
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimIccId(_, _))
@@ -643,7 +643,7 @@ HWTEST_F(NetStatsServiceTest, SetTrafficPlanInfoTest04, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, SetTrafficPlanInfoTest05, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     std::u16string iccid = {u"1234564654651"};
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSlotId(_)).WillRepeatedly(Return(0));
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimIccId(_, _))
@@ -654,7 +654,7 @@ HWTEST_F(NetStatsServiceTest, SetTrafficPlanInfoTest05, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest01, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     netStatsService.trafficPlanService_ = nullptr;
     int64_t value = 0;
     int32_t ret = netStatsService.GetTrafficPlanInfo(1, 1, value);
@@ -663,7 +663,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest01, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest02, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSlotId(_)).WillRepeatedly(Return(-1));
     int64_t value = 0;
     int32_t ret = netStatsService.GetTrafficPlanInfo(1, 1, value);
@@ -672,7 +672,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest02, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest03, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     std::u16string iccid = {u"1234564654651123"};
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSlotId(_)).WillRepeatedly(Return(0));
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimIccId(_, _))
@@ -684,7 +684,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest03, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest04, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     std::u16string iccid = {u"1234564654651123"};
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSlotId(_)).WillRepeatedly(Return(0));
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimIccId(_, _))
@@ -696,7 +696,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest04, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest05, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     std::u16string iccid = {u"1234564654651"};
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSlotId(_)).WillRepeatedly(Return(0));
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimIccId(_, _))
@@ -708,7 +708,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficPlanInfoTest05, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, CellularDataStateChangedFfrtTest01, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(1));
     int32_t dataState = 0;
     int32_t slotId = -1;
@@ -718,7 +718,7 @@ HWTEST_F(NetStatsServiceTest, CellularDataStateChangedFfrtTest01, TestSize.Level
 
 HWTEST_F(NetStatsServiceTest, CellularDataStateChangedFfrtTest02, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(1));
     int32_t dataState = 0;
     int32_t slotId = 0;
@@ -728,7 +728,7 @@ HWTEST_F(NetStatsServiceTest, CellularDataStateChangedFfrtTest02, TestSize.Level
 
 HWTEST_F(NetStatsServiceTest, CellularDataStateChangedFfrtTest03, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(1));
     int32_t dataState = 0;
     int32_t slotId = 0;
@@ -739,7 +739,7 @@ HWTEST_F(NetStatsServiceTest, CellularDataStateChangedFfrtTest03, TestSize.Level
 
 HWTEST_F(NetStatsServiceTest, UpdateBpfMapTimerTest001, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
     netStatsService.trafficPlanFfrtQueue_ = std::make_shared<ffrt::queue>("TrafficPlanStatistic");
     netStatsService.UpdateBpfMapTimer();
@@ -748,7 +748,7 @@ HWTEST_F(NetStatsServiceTest, UpdateBpfMapTimerTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, UpdateBpfMapTimerTest002, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
     netStatsService.trafficPlanFfrtQueue_ = std::make_shared<ffrt::queue>("TrafficPlanStatistic");
     netStatsService.UpdateBpfMapTimer();
@@ -757,7 +757,7 @@ HWTEST_F(NetStatsServiceTest, UpdateBpfMapTimerTest002, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, UpdateBpfMapTimerTest003, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
     netStatsService.trafficPlanFfrtQueue_ = std::make_shared<ffrt::queue>("TrafficPlanStatistic");
     netStatsService.UpdateBpfMapTimer();
@@ -766,7 +766,7 @@ HWTEST_F(NetStatsServiceTest, UpdateBpfMapTimerTest003, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, UpdateBpfMapTimerTest004, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
     netStatsService.trafficPlanFfrtQueue_ = std::make_shared<ffrt::queue>("TrafficPlanStatistic");
     netStatsService.UpdateBpfMapTimer();
@@ -791,7 +791,7 @@ HWTEST_F(NetStatsServiceTest, UpdateAllHistoryDateInfoTest002, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, DealNotificaitonTest001, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
     netStatsService.DealNotificaiton(0, NET_STATS_MONTHLY_LIMIT);
     EXPECT_TRUE(true);
@@ -799,7 +799,7 @@ HWTEST_F(NetStatsServiceTest, DealNotificaitonTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, DealNotificaitonTest002, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
     netStatsService.DealNotificaiton(0, NET_STATS_MONTHLY_LIMIT);
     EXPECT_TRUE(true);
@@ -807,7 +807,7 @@ HWTEST_F(NetStatsServiceTest, DealNotificaitonTest002, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, DealNotificaitonTest003, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
     netStatsService.DealNotificaiton(0, NET_STATS_MONTHLY_LIMIT);
     EXPECT_TRUE(true);
@@ -815,7 +815,7 @@ HWTEST_F(NetStatsServiceTest, DealNotificaitonTest003, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, DealNotificaitonTest004, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
     netStatsService.DealNotificaiton(0, NET_STATS_MONTHLY_MARK);
     EXPECT_TRUE(true);
@@ -823,7 +823,7 @@ HWTEST_F(NetStatsServiceTest, DealNotificaitonTest004, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, DealNotificaitonTest005, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
     netStatsService.DealNotificaiton(0, NET_STATS_DAILY_MARK);
     EXPECT_TRUE(true);
@@ -831,7 +831,7 @@ HWTEST_F(NetStatsServiceTest, DealNotificaitonTest005, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, DealNotificaitonTest006, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
     netStatsService.DealNotificaiton(0, 0xFF);
     EXPECT_TRUE(true);
@@ -839,7 +839,7 @@ HWTEST_F(NetStatsServiceTest, DealNotificaitonTest006, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, OnExceedTrafficLimitsTest001, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int8_t flag = 0;
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
     int32_t ret = netStatsService.trafficObserver_->OnExceedTrafficLimits(flag);
@@ -848,7 +848,7 @@ HWTEST_F(NetStatsServiceTest, OnExceedTrafficLimitsTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, OnExceedTrafficLimitsTest002, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int8_t flag = 3;
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
     int32_t ret = netStatsService.trafficObserver_->OnExceedTrafficLimits(flag);
@@ -857,7 +857,7 @@ HWTEST_F(NetStatsServiceTest, OnExceedTrafficLimitsTest002, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, OnExceedTrafficLimitsTest003, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int8_t flag = 6;
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
     int32_t ret = netStatsService.trafficObserver_->OnExceedTrafficLimits(flag);
@@ -866,7 +866,7 @@ HWTEST_F(NetStatsServiceTest, OnExceedTrafficLimitsTest003, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, OnExceedTrafficLimitsTest004, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int8_t flag = -1;
     int32_t ret = netStatsService.trafficObserver_->OnExceedTrafficLimits(flag);
     EXPECT_EQ(ret, -1);
@@ -874,7 +874,7 @@ HWTEST_F(NetStatsServiceTest, OnExceedTrafficLimitsTest004, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, OnExceedTrafficLimitsTest005, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int8_t flag = 100;
     int32_t ret = netStatsService.trafficObserver_->OnExceedTrafficLimits(flag);
     EXPECT_EQ(ret, -1);
@@ -882,7 +882,7 @@ HWTEST_F(NetStatsServiceTest, OnExceedTrafficLimitsTest005, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, OnExceedTrafficLimitsTest006, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int8_t flag = 4;
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(-1));
     int32_t ret = netStatsService.trafficObserver_->OnExceedTrafficLimits(flag);
@@ -891,7 +891,7 @@ HWTEST_F(NetStatsServiceTest, OnExceedTrafficLimitsTest006, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, TelephonyInfoObserverTest001, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     netStatsService.SubscribeTelephonyInfo();
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(0));
     netStatsService.telephonyInfoObserver_->OnIccAccountUpdated();
@@ -900,7 +900,7 @@ HWTEST_F(NetStatsServiceTest, TelephonyInfoObserverTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, TelephonyInfoObserverTest002, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     netStatsService.SubscribeTelephonyInfo();
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(-1));
     netStatsService.telephonyInfoObserver_->OnIccAccountUpdated();
@@ -909,7 +909,7 @@ HWTEST_F(NetStatsServiceTest, TelephonyInfoObserverTest002, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, CellularDataStateChangedFfrtTest04, TestSize.Level1)
 {
-    NetStatsService &netStatsService = NetStatsService::GetInstance();
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     EXPECT_CALL(MockCoreServiceManager::GetInstance(), GetSimId(_)).WillRepeatedly(Return(-1));
     int32_t ret = netStatsService.CellularDataStateChangedFfrt(0, 0);
     EXPECT_EQ(ret, false);
