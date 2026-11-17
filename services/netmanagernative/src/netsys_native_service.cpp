@@ -16,9 +16,15 @@
 #include <csignal>
 #include <cerrno>
 #include <sys/types.h>
+#include <atomic>
+#include <cstdlib>
+#include <fstream>
 #include <regex>
+#include <sstream>
+#include <string>
 #include <thread>
 #include <unistd.h>
+#include <vector>
 
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
@@ -65,6 +71,67 @@ constexpr const uint32_t NFQUEUE_MAXLEN = 0xFFFF;
 #define NFQA_CFG_QUEUE_MAXLEN 3
 #define NFQA_CFG_QUEUE_MASK 4
 #define NFQA_CFG_QUEUE_FLAG 5
+
+namespace {
+constexpr const char *PROC_SELF_STAT_PATH = "/proc/self/stat";
+constexpr uint64_t DEFAULT_CLOCK_TICK = 100;
+constexpr uint64_t MS_PER_SECOND = 1000;
+// /proc/self/stat 中 comm 字段（含括号）之后的下标：state(0) ... utime(11) stime(12) ... num_threads(17)
+constexpr size_t STAT_UTIME_INDEX = 11;
+constexpr size_t STAT_STIME_INDEX = 12;
+constexpr size_t STAT_THREAD_NUM_INDEX = 17;
+// 热路径维测计数：只做一次原子自增，不打印日志，避免引入额外耗时
+std::atomic<uint64_t> g_bpfStatsAllCount { 0 };
+std::atomic<uint64_t> g_bpfStatsSimCount { 0 };
+std::atomic<uint64_t> g_bpfStatsEntryCount { 0 };
+
+uint64_t TicksToMs(uint64_t ticks)
+{
+    long tick = sysconf(_SC_CLK_TCK);
+    return ticks * MS_PER_SECOND / (tick > 0 ? static_cast<uint64_t>(tick) : DEFAULT_CLOCK_TICK);
+}
+
+bool ReadProcSelfStat(std::vector<uint64_t> &fields)
+{
+    std::ifstream ifs(PROC_SELF_STAT_PATH);
+    if (!ifs.is_open()) {
+        return false;
+    }
+    std::ostringstream buff;
+    buff << ifs.rdbuf();
+    std::string content = buff.str();
+    size_t pos = content.rfind(')');
+    if (pos == std::string::npos) {
+        return false;
+    }
+    std::istringstream iss(content.substr(pos + 1));
+    std::string field;
+    while (iss >> field) {
+        fields.push_back(static_cast<uint64_t>(std::strtoull(field.c_str(), nullptr, 10)));
+    }
+    return fields.size() > STAT_THREAD_NUM_INDEX;
+}
+
+std::string GetPowerDiagMessage()
+{
+    std::ostringstream oss;
+    oss << "Netsysnative power diag:\n";
+    std::vector<uint64_t> fields;
+    if (ReadProcSelfStat(fields)) {
+        oss << "  pid: " << getpid() << ", threads: " << fields[STAT_THREAD_NUM_INDEX] << "\n";
+        oss << "  process cpu: " << TicksToMs(fields[STAT_UTIME_INDEX] + fields[STAT_STIME_INDEX]) << "ms (user "
+            << TicksToMs(fields[STAT_UTIME_INDEX]) << "ms, sys " << TicksToMs(fields[STAT_STIME_INDEX]) << "ms)\n";
+    } else {
+        oss << "  pid: " << getpid() << ", read " << PROC_SELF_STAT_PATH << " failed\n";
+    }
+    oss << "  hot path counters:\n";
+    oss << "    bpf_stats_all   = " << g_bpfStatsAllCount.load(std::memory_order_relaxed) << "\n";
+    oss << "    bpf_stats_sim   = " << g_bpfStatsSimCount.load(std::memory_order_relaxed) << "\n";
+    oss << "    bpf_stats_entry = " << g_bpfStatsEntryCount.load(std::memory_order_relaxed) << "\n";
+    return oss.str();
+}
+} // namespace
+
 REGISTER_SYSTEM_ABILITY_BY_ID(NetsysNativeService, COMM_NETSYS_NATIVE_SYS_ABILITY_ID, true)
 
 NetsysNativeService::NetsysNativeService()
@@ -127,7 +194,11 @@ int32_t NetsysNativeService::Dump(int32_t fd, const std::vector<std::u16string> 
 {
     NETNATIVE_LOG_D("Start Dump, fd: %{public}d", fd);
     std::string result;
-    GetDumpMessage(result);
+    if (!args.empty() && (args[0] == u"--power" || args[0] == u"-p")) {
+        result = GetPowerDiagMessage();
+    } else {
+        GetDumpMessage(result);
+    }
     int32_t ret = dprintf(fd, "%s\n", result.c_str());
     return ret < 0 ? SESSION_UNOPEN_ERR : ERR_NONE;
 }
@@ -888,7 +959,10 @@ int32_t NetsysNativeService::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStan
         NETNATIVE_LOGE("bpfStats is null.");
         return NetManagerStandard::NETMANAGER_ERROR;
     }
-    return bpfStats_->GetAllSimStatsInfo(stats);
+    int32_t ret = bpfStats_->GetAllSimStatsInfo(stats);
+    g_bpfStatsSimCount.fetch_add(1, std::memory_order_relaxed);
+    g_bpfStatsEntryCount.fetch_add(static_cast<uint64_t>(stats.size()), std::memory_order_relaxed);
+    return ret;
 }
 
 int32_t NetsysNativeService::DeleteSimStatsInfo(uint32_t uid)
@@ -908,7 +982,10 @@ int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandar
         return NetManagerStandard::NETMANAGER_ERROR;
     }
 
-    return bpfStats_->GetAllStatsInfo(stats);
+    int32_t ret = bpfStats_->GetAllStatsInfo(stats);
+    g_bpfStatsAllCount.fetch_add(1, std::memory_order_relaxed);
+    g_bpfStatsEntryCount.fetch_add(static_cast<uint64_t>(stats.size()), std::memory_order_relaxed);
+    return ret;
 }
 
 int32_t NetsysNativeService::DeleteStatsInfo(uint32_t uid)
