@@ -18,6 +18,7 @@
 #include "net_datashare_utils.h"
 #include "net_manager_constants.h"
 #include "netmanager_base_test_security.h"
+#include "common_datashare_test_env_check.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -32,7 +33,9 @@ constexpr const char *BLUETOOTH_URI =
 
 constexpr const char *KEY_WIFI = "settings.netmanager.sharing_wifi";
 constexpr const char *KEY_USB = "settings.netmanager.sharing_usb";
-constexpr const char *KEY_BLUETOOTH = "settings.netmanager.sharing_bluetooth";
+// A key that no test in this file ever inserts, so a query for it deterministically fails
+// (no row) whenever the DataShare service itself is reachable.
+constexpr const char *KEY_NOT_EXIST = "settings.netmanager.sharing_not_exist";
 
 std::shared_ptr<NetDataShareHelperUtils> netDataShareHelperUtils_ = nullptr;
 
@@ -58,32 +61,41 @@ void DataShareHelperUtilsTest::SetUp() {}
 
 void DataShareHelperUtilsTest::TearDown() {}
 
+// All tests in this file need the com.ohos.settingsdata DataShare service, which only
+// exists on a device with the settings data service running; the shared
+// SKIP_IF_NO_SETTING_DATASHARE macro (common_datashare_test_env_check.h) skips them
+// when it is not reachable.
+
 HWTEST_F(DataShareHelperUtilsTest, QueryTest001, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string status;
     Uri wifiUri(WIFI_URI);
-    int32_t ret = netDataShareHelperUtils_->Query(wifiUri, KEY_WIFI, status);
+    int32_t ret = netDataShareHelperUtils_->Query(wifiUri, KEY_NOT_EXIST, status);
     EXPECT_LE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(DataShareHelperUtilsTest, QueryTest002, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string status;
     Uri bluetoothUri(USB_URI);
-    int ret = netDataShareHelperUtils_->Query(bluetoothUri, KEY_BLUETOOTH, status);
+    int ret = netDataShareHelperUtils_->Query(bluetoothUri, KEY_NOT_EXIST, status);
     EXPECT_LE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(DataShareHelperUtilsTest, QueryTest003, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string status;
     Uri usbUri(BLUETOOTH_URI);
-    int ret = netDataShareHelperUtils_->Query(usbUri, KEY_USB, status);
+    int ret = netDataShareHelperUtils_->Query(usbUri, KEY_NOT_EXIST, status);
     EXPECT_LE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(DataShareHelperUtilsTest, InsertTest001, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string on = "1";
     Uri wifiUri(WIFI_URI);
     int32_t ret = netDataShareHelperUtils_->Insert(wifiUri, KEY_WIFI, on);
@@ -92,6 +104,7 @@ HWTEST_F(DataShareHelperUtilsTest, InsertTest001, TestSize.Level1)
 
 HWTEST_F(DataShareHelperUtilsTest, InsertTest002, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string on = "1";
     Uri wifiUri(WIFI_URI);
     int32_t ret = netDataShareHelperUtils_->Insert(wifiUri, KEY_WIFI, on);
@@ -100,6 +113,7 @@ HWTEST_F(DataShareHelperUtilsTest, InsertTest002, TestSize.Level1)
 
 HWTEST_F(DataShareHelperUtilsTest, InsertTest003, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string off = "0";
     Uri usbUri(USB_URI);
     int ret = netDataShareHelperUtils_->Insert(usbUri, KEY_WIFI, off);
@@ -108,6 +122,7 @@ HWTEST_F(DataShareHelperUtilsTest, InsertTest003, TestSize.Level1)
 
 HWTEST_F(DataShareHelperUtilsTest, InsertTest004, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string on = "1";
     Uri usbUri(USB_URI);
     int32_t ret = netDataShareHelperUtils_->Insert(usbUri, KEY_WIFI, on);
@@ -116,6 +131,7 @@ HWTEST_F(DataShareHelperUtilsTest, InsertTest004, TestSize.Level1)
 
 HWTEST_F(DataShareHelperUtilsTest, InsertTest005, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string off = "0";
     Uri blueToothUri(BLUETOOTH_URI);
     int ret = netDataShareHelperUtils_->Insert(blueToothUri, KEY_WIFI, off);
@@ -124,6 +140,7 @@ HWTEST_F(DataShareHelperUtilsTest, InsertTest005, TestSize.Level1)
 
 HWTEST_F(DataShareHelperUtilsTest, InsertTest006, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string on = "1";
     Uri blueToothUri(BLUETOOTH_URI);
     int32_t ret = netDataShareHelperUtils_->Insert(blueToothUri, KEY_WIFI, on);
@@ -132,6 +149,7 @@ HWTEST_F(DataShareHelperUtilsTest, InsertTest006, TestSize.Level1)
 
 HWTEST_F(DataShareHelperUtilsTest, UpdateTest001, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string on = "1";
     Uri wifiUri(WIFI_URI);
     int32_t ret = netDataShareHelperUtils_->Update(wifiUri, KEY_WIFI, on);
@@ -140,6 +158,7 @@ HWTEST_F(DataShareHelperUtilsTest, UpdateTest001, TestSize.Level1)
 
 HWTEST_F(DataShareHelperUtilsTest, UpdateTest002, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string off = "0";
     Uri wifiUri(WIFI_URI);
     int ret = netDataShareHelperUtils_->Update(wifiUri, KEY_WIFI, off);
@@ -148,6 +167,7 @@ HWTEST_F(DataShareHelperUtilsTest, UpdateTest002, TestSize.Level1)
 
 HWTEST_F(DataShareHelperUtilsTest, UpdateTest003, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string on = "1";
     Uri usbUri(USB_URI);
     int ret = netDataShareHelperUtils_->Update(usbUri, KEY_USB, on);
@@ -156,6 +176,7 @@ HWTEST_F(DataShareHelperUtilsTest, UpdateTest003, TestSize.Level1)
 
 HWTEST_F(DataShareHelperUtilsTest, UpdateTest004, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string off = "0";
     Uri usbUri(USB_URI);
     int ret = netDataShareHelperUtils_->Update(usbUri, KEY_USB, off);
@@ -164,6 +185,7 @@ HWTEST_F(DataShareHelperUtilsTest, UpdateTest004, TestSize.Level1)
 
 HWTEST_F(DataShareHelperUtilsTest, UpdateTest005, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string on = "1";
     Uri bluetooth(BLUETOOTH_URI);
     int ret = netDataShareHelperUtils_->Update(bluetooth, KEY_USB, on);
@@ -172,6 +194,7 @@ HWTEST_F(DataShareHelperUtilsTest, UpdateTest005, TestSize.Level1)
 
 HWTEST_F(DataShareHelperUtilsTest, UpdateTest006, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string off = "0";
     Uri bluetooth(BLUETOOTH_URI);
     int ret = netDataShareHelperUtils_->Update(bluetooth, KEY_USB, off);

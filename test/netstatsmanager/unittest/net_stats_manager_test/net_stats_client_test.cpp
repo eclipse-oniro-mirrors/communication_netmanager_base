@@ -29,6 +29,7 @@
 #include "net_stats_callback_test.h"
 #include "net_stats_client.h"
 #include "net_stats_constants.h"
+#include "common_fake_net_stats_service.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -322,9 +323,17 @@ HWTEST_F(NetStatsClientTest, GetTrafficStatsByNetwork001, TestSize.Level1)
         new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
     sptr<IRemoteObject> remote = nullptr;
     deathRecipient->OnRemoteDied(remote);
+    // Do not perform real IPC to the stats service (SA 1153): its stub rejects the
+    // request without a system permission, which made the result depend on the
+    // environment. Route the call to a local fake service instead.
+    // GetInstance() returns the shared_ptr by value, so keep it by value here.
+    auto client = DelayedSingleton<NetStatsClient>::GetInstance();
+    sptr<INetStatsService> savedService = client->netStatsService_;
+    client->netStatsService_ = new (std::nothrow) FakeNetStatsService();
     std::unordered_map<uint32_t, NetStatsInfo> infos;
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetTrafficStatsByNetwork(infos, network);
+    int32_t ret = client->GetTrafficStatsByNetwork(infos, network);
+    client->netStatsService_ = savedService;
     EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
@@ -376,10 +385,18 @@ HWTEST_F(NetStatsClientTest, GetTrafficStatsByUidNetwork001, TestSize.Level1)
         new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
     sptr<IRemoteObject> remote = nullptr;
     deathRecipient->OnRemoteDied(remote);
+    // Do not perform real IPC to the stats service (SA 1153): its stub rejects the
+    // request without a system permission, which made the result depend on the
+    // environment. Route the call to a local fake service instead.
+    // GetInstance() returns the shared_ptr by value, so keep it by value here.
+    auto client = DelayedSingleton<NetStatsClient>::GetInstance();
+    sptr<INetStatsService> savedService = client->netStatsService_;
+    client->netStatsService_ = new (std::nothrow) FakeNetStatsService();
     std::vector<NetStatsInfoSequence> infos;
     uint32_t uid = 1;
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetTrafficStatsByUidNetwork(infos, uid, network);
+    int32_t ret = client->GetTrafficStatsByUidNetwork(infos, uid, network);
+    client->netStatsService_ = savedService;
     EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 

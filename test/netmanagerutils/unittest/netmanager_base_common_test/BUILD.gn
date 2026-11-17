@@ -60,6 +60,7 @@ ohos_unittest("netmanager_datashare_test") {
     "$INNERKITS_ROOT/netconnclient/include",
     "$INNERKITS_ROOT/netstatsclient/include",
     "$NETMANAGER_BASE_ROOT/test/security",
+    "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
   ]
 
@@ -123,6 +124,7 @@ ohos_unittest("netmanager_datashare_iface_test") {
     "$INNERKITS_ROOT/netconnclient/include",
     "$INNERKITS_ROOT/netstatsclient/include",
     "$NETMANAGER_BASE_ROOT/test/security",
+    "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "$NETMANAGER_BASE_ROOT/utils/data_share/include",
   ]

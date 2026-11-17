@@ -161,12 +161,17 @@ HWTEST_F(UtNetPolicyFirewall, SetDeviceIdleTrustlist001, TestSize.Level1)
     std::vector<uint32_t> initialUids(1001);
     for (size_t i = 0; i < initialUids.size(); ++i) {
         initialUids[i] = i;
-    }
+    // SetDeviceIdleTrustlist checks the device idle allowed list, so the oversize
+    // precondition must be built on deviceIdleAllowedList_ (not powerSaveAllowedList_).
     for (uint32_t testuid : initialUids) {
-        netPolicyFirewall_->powerSaveAllowedList_.insert(testuid);
+        netPolicyFirewall_->deviceIdleAllowedList_.insert(testuid);
     }
     auto result = netPolicyFirewall_->SetDeviceIdleTrustlist({uid}, true);
     EXPECT_EQ(result, NETMANAGER_ERR_PARAMETER_ERROR);
+    // The oversize precondition must not leak into later tests (e.g. HandleEvent001):
+    // restore the device idle allowed list so cases stay independent of each other.
+    netPolicyFirewall_->deviceIdleAllowedList_.clear();
+    }
 }
 
 /**

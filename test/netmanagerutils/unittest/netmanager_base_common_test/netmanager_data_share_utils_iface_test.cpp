@@ -19,6 +19,7 @@
 #include "net_datashare_utils.h"
 #include "net_manager_constants.h"
 #include "netmanager_base_test_security.h"
+#include "common_datashare_test_env_check.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -43,8 +44,14 @@ void NetDataShareHelperUtilsIfaceTest::TearDownTestCase() {}
 void NetDataShareHelperUtilsIfaceTest::SetUp() {}
 void NetDataShareHelperUtilsIfaceTest::TearDown() {}
 
+// All tests in this file need the com.ohos.settingsdata DataShare service, which only
+// exists on a device with the settings data service running; the shared
+// SKIP_IF_NO_SETTING_DATASHARE macro (common_datashare_test_env_check.h) skips them
+// when it is not reachable.
+
 HWTEST_F(NetDataShareHelperUtilsIfaceTest, RegisterObserver_01, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string strUri = WIFI_URI;
     std::function<void()> onChange = []() {printf("onChange execute.\n");};
     int32_t id = NetDataShareHelperUtilsIface::RegisterObserver(strUri, onChange);
@@ -53,6 +60,7 @@ HWTEST_F(NetDataShareHelperUtilsIfaceTest, RegisterObserver_01, TestSize.Level1)
 
 HWTEST_F(NetDataShareHelperUtilsIfaceTest, RegisterSettingsObserver_01, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string strUri = WIFI_URI;
     std::function<void()> onChange = []() {printf("onChange execute.\n");};
     int32_t result = NetDataShareHelperUtilsIface::RegisterSettingsObserver(strUri, onChange);
@@ -67,12 +75,14 @@ HWTEST_F(NetDataShareHelperUtilsIfaceTest, UnregisterSettingsObserver_01, TestSi
 
 HWTEST_F(NetDataShareHelperUtilsIfaceTest, Insert_01, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     int32_t ret = NetDataShareHelperUtilsIface::Insert(WIFI_URI, TEST_KEY, TEST_VALUE);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetDataShareHelperUtilsIfaceTest, Query_01, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string value;
     int32_t ret = NetDataShareHelperUtilsIface::Query(WIFI_URI, TEST_KEY, value);
     EXPECT_EQ(ret, NETMANAGER_ERROR); // 这里预期返回 NETMANAGER_SUCCESS 有问题
@@ -81,6 +91,7 @@ HWTEST_F(NetDataShareHelperUtilsIfaceTest, Query_01, TestSize.Level1)
 
 HWTEST_F(NetDataShareHelperUtilsIfaceTest, Query_02, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     std::string value;
     int32_t ret = NetDataShareHelperUtilsIface::Query(WIFI_URI, TEST_KEY_NULL, value);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
@@ -89,6 +100,7 @@ HWTEST_F(NetDataShareHelperUtilsIfaceTest, Query_02, TestSize.Level1)
 
 HWTEST_F(NetDataShareHelperUtilsIfaceTest, Update_01, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     int32_t ret = NetDataShareHelperUtilsIface::Update(WIFI_URI, TEST_KEY, TEST_VALUE_UPDATE);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
@@ -100,6 +112,7 @@ HWTEST_F(NetDataShareHelperUtilsIfaceTest, Update_01, TestSize.Level1)
 
 HWTEST_F(NetDataShareHelperUtilsIfaceTest, Delete_01, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     int32_t ret = NetDataShareHelperUtilsIface::Delete(WIFI_URI, TEST_KEY);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
@@ -111,6 +124,7 @@ HWTEST_F(NetDataShareHelperUtilsIfaceTest, Delete_01, TestSize.Level1)
 
 HWTEST_F(NetDataShareHelperUtilsIfaceTest, Delete_02, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     int32_t ret = NetDataShareHelperUtilsIface::Delete(WIFI_URI, TEST_KEY_NULL);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
@@ -122,6 +136,7 @@ HWTEST_F(NetDataShareHelperUtilsIfaceTest, Delete_02, TestSize.Level1)
 
 HWTEST_F(NetDataShareHelperUtilsIfaceTest, UnregisterObserver_01, TestSize.Level1)
 {
+    SKIP_IF_NO_SETTING_DATASHARE(WIFI_URI);
     int32_t ret = NetDataShareHelperUtilsIface::UnregisterObserver(WIFI_URI, 1);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 

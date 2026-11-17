@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 
 #include "net_manager_constants.h"
+#include "common_test_env_check.h"
 #define private public
 #include "sharing_manager.h"
 #undef private
@@ -128,10 +129,20 @@ HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward002, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward003, TestSize.Level1)
 {
+    // The forward path needs real interfaces (the output interface must exist in the
+    // kernel for its route table lookup) and the iptables toolchain.
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0") ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("eth0") ||
+        !OHOS::NetManagerStandard::TestEnvCheck::FileExists("/system/bin/iptables-restore")) {
+        GTEST_SKIP() << "IpFwdAddInterfaceForward requires root, ifaces wlan0/eth0 and iptables";
+    }
     auto sharingManager = std::make_shared<SharingManager>();
     sharingManager->interfaceForwards_.insert("updown");
-    int32_t ret = sharingManager->IpfwdAddInterfaceForward("wlan0", "wlan1");
+    int32_t ret = sharingManager->IpfwdAddInterfaceForward("wlan0", "eth0");
     EXPECT_EQ(ret, 0);
+    // Remove the forwarding again so reruns do not hit an "already exists" path.
+    sharingManager->IpfwdRemoveInterfaceForward("wlan0", "eth0");
 }
 
 HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward004, TestSize.Level1)
@@ -220,12 +231,22 @@ HWTEST_F(SharingManagerTest, EnableNat003, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, IpfwdAddInterfaceForward003, TestSize.Level1)
 {
+    // The forward path needs real interfaces (the output interface must exist in the
+    // kernel for its route table lookup) and the iptables toolchain.
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0") ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("eth0") ||
+        !OHOS::NetManagerStandard::TestEnvCheck::FileExists("/system/bin/iptables-restore")) {
+        GTEST_SKIP() << "IpfwdAddInterfaceForward requires root, ifaces wlan0/eth0 and iptables";
+    }
     auto sharingManager = std::make_shared<SharingManager>();
-    std::string fromIface = "down";
-    std::string toIface = "up";
+    std::string fromIface = "wlan0";
+    std::string toIface = "eth0";
     sharingManager->interfaceForwards_ = {"123"};
     auto result = sharingManager->IpfwdAddInterfaceForward(fromIface, toIface);
     EXPECT_EQ(result, 0);
+    // Remove the forwarding again so reruns do not hit an "already exists" path.
+    sharingManager->IpfwdRemoveInterfaceForward(fromIface, toIface);
 }
 
 HWTEST_F(SharingManagerTest, IpfwdRemoveInterfaceForward003, TestSize.Level1)

@@ -23,6 +23,7 @@
 #include "common_mock_netmanager_permission.h"
 #include "net_manager_constants.h"
 #include "common_notify_callback_test.h"
+#include "common_test_env_check.h"
 #include "i_netsys_service.h"
 #include "net_dns_result_callback_stub.h"
 #include "netnative_log_wrapper.h"
@@ -1175,6 +1176,10 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetIpCommandForResTest001, TestSize.Lev
 {
     MessageParcel data;
     MessageParcel reply;
+    // A syntactically valid ip command passes CheckIpCommand. The command execution
+    // result is written into the reply, and the stub returns NETMANAGER_SUCCESS
+    // regardless of the command exit status, so this case is deterministic.
+    EXPECT_TRUE(data.WriteString("ip route show table all"));
     int32_t ret = notifyStub_->CmdSetIpCommandForRes(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
@@ -1426,21 +1431,68 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdUpdateNetworkSharingType001, TestSize.L
 
 HWTEST_F(NetsysNativeServiceStubTest, CmdSetIpv6PrivacyExtensions001, TestSize.Level1)
 {
-    std::string interface = "wlan0";
+    // The Cmd* handlers are invoked directly, so the parcel must NOT contain an
+    // interface token: the first ReadString in the handler would otherwise read
+    // the token and the iface name check would always fail.
+    // 1. Parameter validation path, deterministic in any environment: an invalid
+    //    (empty) interface name must be rejected with NETMANAGER_ERR_PARAMETER_ERROR.
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        EXPECT_TRUE(data.WriteString(""));
+        EXPECT_TRUE(data.WriteInt32(0));
+        int32_t ret = notifyStub_->CmdSetIpv6PrivacyExtensions(data, reply);
+        EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+    }
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        EXPECT_TRUE(data.WriteString(""));
+        EXPECT_TRUE(data.WriteInt32(0));
+        EXPECT_TRUE(data.WriteBool(false));
+        int32_t ret = notifyStub_->CmdSetIpv6Enable(data, reply);
+        EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+    }
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        EXPECT_TRUE(data.WriteString(""));
+        EXPECT_TRUE(data.WriteInt32(0));
+        int32_t ret = notifyStub_->CmdSetIpv6AutoConf(data, reply);
+        EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+    }
 
-    MessageParcel data;
-    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
-    EXPECT_TRUE(data.WriteString(interface));
-    EXPECT_TRUE(data.WriteUint32(0));
-    MessageParcel reply;
-    int32_t ret = notifyStub_->CmdSetIpv6PrivacyExtensions(data, reply);
-    EXPECT_EQ(ret, ERR_NONE);
-
-    ret = notifyStub_->CmdSetIpv6Enable(data, reply);
-    EXPECT_EQ(ret, ERR_NONE);
-
-    ret = notifyStub_->CmdSetIpv6AutoConf(data, reply);
-    EXPECT_EQ(ret, ERR_NONE);
+    // 2. Success path: writing /proc/sys/net/ipv6/conf/<iface>/ requires root and a
+    //    real interface, so it can only run on a device environment.
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "CmdSetIpv6* success path requires root and iface wlan0";
+    }
+    {
+        MessageParcel validData;
+        MessageParcel validReply;
+        EXPECT_TRUE(validData.WriteString("wlan0"));
+        EXPECT_TRUE(validData.WriteInt32(0));
+        int32_t ret = notifyStub_->CmdSetIpv6PrivacyExtensions(validData, validReply);
+        EXPECT_EQ(ret, ERR_NONE);
+    }
+    {
+        MessageParcel validData;
+        MessageParcel validReply;
+        EXPECT_TRUE(validData.WriteString("wlan0"));
+        EXPECT_TRUE(validData.WriteInt32(0));
+        EXPECT_TRUE(validData.WriteBool(false));
+        int32_t ret = notifyStub_->CmdSetIpv6Enable(validData, validReply);
+        EXPECT_EQ(ret, ERR_NONE);
+    }
+    {
+        MessageParcel validData;
+        MessageParcel validReply;
+        EXPECT_TRUE(validData.WriteString("wlan0"));
+        EXPECT_TRUE(validData.WriteInt32(0));
+        int32_t ret = notifyStub_->CmdSetIpv6AutoConf(validData, validReply);
+        EXPECT_EQ(ret, ERR_NONE);
+    }
 }
 
 HWTEST_F(NetsysNativeServiceStubTest, CmdSetNetworkAccessPolicy001, TestSize.Level1)

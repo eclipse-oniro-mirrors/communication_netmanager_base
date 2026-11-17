@@ -623,7 +623,11 @@ int32_t InterfaceManager::AddStaticIpv6Addr(const std::string &ipv6Addr, const s
         NETNATIVE_LOGE("AssembleIPv6Neighbor error");
         return res;
     }
-    return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    int32_t sendRet = SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    // SendNetlinkMsgToKernel returns the number of bytes sent for non-DUMP messages, so a
+    // positive value means the request was accepted. Keep the return contract consistent with
+    // the other netlink helpers of this class (success -> NETMANAGER_SUCCESS, error -> errno).
+    return sendRet >= 0 ? NETMANAGER_SUCCESS : sendRet;
 }
 
 int32_t InterfaceManager::DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
@@ -636,7 +640,11 @@ int32_t InterfaceManager::DelStaticIpv6Addr(const std::string &ipv6Addr, const s
         NETNATIVE_LOGE("AssembleIPv6Neighbor error");
         return res;
     }
-    return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    int32_t sendRet = SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    // SendNetlinkMsgToKernel returns the number of bytes sent for non-DUMP messages; without
+    // this normalization a successful delete leaks the message byte count (e.g. 60) to callers,
+    // and every IPC client checking `ret != 0` treats the success as a failure.
+    return sendRet >= 0 ? NETMANAGER_SUCCESS : sendRet;
 }
 
 int32_t InterfaceManager::AssembleIPv6Neighbor(const std::string &ipv6Addr, const std::string &macAddr,

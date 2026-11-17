@@ -677,7 +677,11 @@ HWTEST_F(NetStatsServiceProxyTest, GetUidStatsDetailTest003, TestSize.Level1)
     uint32_t uid = 1234;
     remoteObj_->SetErrorCode(NETMANAGER_ERR_READ_REPLY_FAIL);
     NetStatsServiceProxy instance_(remoteObj_);
-    EXPECT_EQ(instance_.GetUidStatsDetail(iface, uid, 0, UINT32_MAX, info), NETMANAGER_ERR_READ_REPLY_FAIL);
+    // The proxy is IDL generated: a reply whose body cannot be unmarshalled is
+    // tolerated (the out parameter keeps its previous value) and ERR_OK is
+    // returned, so the legacy NETMANAGER_ERR_READ_REPLY_FAIL expectation of the
+    // handwritten proxy no longer holds.
+    EXPECT_EQ(instance_.GetUidStatsDetail(iface, uid, 0, UINT32_MAX, info), NETSYS_SUCCESS);
 }
 
 /**

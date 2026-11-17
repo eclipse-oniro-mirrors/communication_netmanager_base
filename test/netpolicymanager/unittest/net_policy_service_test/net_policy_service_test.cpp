@@ -179,8 +179,11 @@ HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag007, TestSize.Level1)
     ret = instance_->SetDeviceIdleTrustlist(uids, true);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
     instance_->netPolicyFirewall_ = std::make_shared<NetPolicyFirewall>();
+    instance_->netPolicyFirewall_->Init();
+    // SetDeviceIdleTrustlist checks the device idle allowed list, so the oversize
+    // precondition must be built on deviceIdleAllowedList_ (not powerSaveAllowedList_).
     for (int i = 0; i <= 1001; i++) {
-        instance_->netPolicyFirewall_->powerSaveAllowedList_.insert(i);
+        instance_->netPolicyFirewall_->deviceIdleAllowedList_.insert(i);
     }
     
     ret = instance_->SetDeviceIdleTrustlist(uids, true);

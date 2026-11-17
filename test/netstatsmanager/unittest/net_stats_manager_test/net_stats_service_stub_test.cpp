@@ -369,8 +369,11 @@ HWTEST_F(TestNetStatsServiceStub, GetAllRxBytesTest001, TestSize.Level1)
     ASSERT_NE(data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor()), false);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret =
-        instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_RXBYTES), data, reply, option);
+    // The stub is IDL generated and dispatches on INetStatsServiceIpcCode (MIN_TRANSACTION_ID
+    // based), not on the legacy StatsInterfaceCode numbering; use the generated code so the
+    // intended handler runs instead of an unrelated one.
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_ALL_RX_BYTES),
+                                             data, reply, option);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -387,7 +390,9 @@ HWTEST_F(TestNetStatsServiceStub, GetAllTxBytesTest001, TestSize.Level1)
     MessageOption option;
     int32_t ret =
         instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_TXBYTES), data, reply, option);
-    EXPECT_EQ(ret, 5);
+    // MockNetStatsServiceStub::GetAllTxBytes returns 0, and the generated stub returns
+    // the service call result, so the expected value is NETMANAGER_SUCCESS.
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -680,13 +685,20 @@ HWTEST_F(TestNetStatsServiceStub, GetTrafficStatsByNetworkTest001, TestSize.Leve
     MessageParcel data;
     ASSERT_NE(data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor()), false);
     sptr<NetStatsNetwork> network = GetSptrNetworkData();
-    if (!network->Marshalling(data)) {
+    // Pair with the stub's data.ReadParcelable<NetStatsNetwork>(): the parcelable
+    // must be written via WriteParcelable(), which emits the leading int32 presence
+    // flag that ReadParcelable consumes. Writing network->Marshalling(data) directly
+    // omits the flag, so the stub reads type_ (0) as the flag, treats the object as
+    // null and returns ERR_INVALID_DATA. This mirrors the IDL generated proxy.
+    if (!data.WriteParcelable(network.GetRefPtr())) {
         return;
     }
     MessageParcel reply;
     MessageOption option;
+    // Use the IDL generated command code (INetStatsServiceIpcCode) instead of the legacy
+    // StatsInterfaceCode numbering, so the stub dispatches to the intended handler.
     int32_t ret = instance_->OnRemoteRequest(
-        static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_NETWORK), data, reply, option);
+        static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_TRAFFIC_STATS_BY_NETWORK), data, reply, option);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -727,13 +739,17 @@ HWTEST_F(TestNetStatsServiceStub, GetTrafficStatsByUidNetworkTest001, TestSize.L
         return;
     }
     sptr<NetStatsNetwork> network = GetSptrNetworkData();
-    if (!network->Marshalling(data)) {
+    // Same pairing as GetTrafficStatsByNetworkTest001: the IDL generated stub reads the
+    // parcelable via ReadParcelable(), so write it via WriteParcelable(). The legacy
+    // StatsInterfaceCode value would also have dispatched to the wrong handler
+    // (COMMAND_UPDATE_STATS_DATA) due to the enum numbering mismatch.
+    if (!data.WriteParcelable(network.GetRefPtr())) {
         return;
     }
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(
-        static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_UID_NETWORK), data, reply, option);
+        static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_TRAFFIC_STATS_BY_UID_NETWORK), data, reply, option);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -800,8 +816,10 @@ HWTEST_F(TestNetStatsServiceStub, GetCookieRxBytesTest001, TestSize.Level1)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_RXBYTES), data,
-                                             reply, option);
+    // Use the IDL generated command code (INetStatsServiceIpcCode) instead of the legacy
+    // StatsInterfaceCode numbering, so the stub dispatches to the intended handler.
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(INetStatsServiceIpcCode::COMMAND_GET_COOKIE_RX_BYTES),
+                                             data, reply, option);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 

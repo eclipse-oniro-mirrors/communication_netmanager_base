@@ -19,7 +19,13 @@
 
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_callback_test.h"
+// NetPolicyManager029 replaces the policy service proxy with a mock, which requires access
+// to a private member of NetPolicyClient.
+#define private public
 #include "net_policy_client.h"
+#undef private
+#include "common_mock_net_policy_service.h"
+#include "common_stateful_policy_service_mock.h"
 #include "net_policy_constants.h"
 #include "netmanager_base_test_security.h"
 
@@ -53,12 +59,20 @@ public:
     void TearDown();
 
     sptr<NetPolicyCallbackTest> GetINetPolicyCallbackSample() const;
+    // Fixture scoped mock of the policy service: installed for the whole fixture so no
+    // test performs real IPC to SA 1152. State survives across the sequential tests,
+    // mirroring the persistence of the real service (Set* followed by Get*).
+    static inline sptr<MockINetPolicyService> mockService_ = nullptr;
+    static inline std::shared_ptr<PolicyServiceMockState> mockState_ = nullptr;
+    static inline sptr<INetPolicyService> savedService_ = nullptr;
 };
 
 void NetPolicyManagerTest::SetUpTestCase()
 {
     const std::string tempIccid = "123";
-    int32_t ret = DelayedSingleton<NetPolicyClient>::GetInstance()->ResetPolicies(tempIccid);
+    auto client = DelayedSingleton<NetPolicyClient>::GetInstance();
+    InstallStatefulPolicyServiceMock(mockService_, mockState_, savedService_, client->netPolicyService_);
+    int32_t ret = client->ResetPolicies(tempIccid);
     if (ret == NETMANAGER_SUCCESS) {
         std::cout << "ResetPolicies successful" << std::endl;
     }
@@ -66,43 +80,16 @@ void NetPolicyManagerTest::SetUpTestCase()
 
 void NetPolicyManagerTest::TearDownTestCase()
 {
-    NetManagerBaseAccessToken token;
-    int32_t ret1 =
-        DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(TEST_UID2, NetUidPolicy::NET_POLICY_NONE);
-    std::cout << "Result ret1" << ret1 << std::endl;
-    int32_t ret2 =
-        DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(TEST_UID3, NetUidPolicy::NET_POLICY_NONE);
-    std::cout << "Result ret2" << ret2 << std::endl;
-    int32_t ret3 =
-        DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(TEST_UID4, NetUidPolicy::NET_POLICY_NONE);
-    std::cout << "Result ret3" << ret3 << std::endl;
-    int32_t ret4 =
-        DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(TEST_UID5, NetUidPolicy::NET_POLICY_NONE);
-    std::cout << "Result ret4" << ret4 << std::endl;
-    int32_t ret5 =
-        DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(TEST_UID6, NetUidPolicy::NET_POLICY_NONE);
-    std::cout << "Result ret5" << ret5 << std::endl;
-    std::vector<NetQuotaPolicy> quotaPolicies;
-
-    NetQuotaPolicy quotaPolicy1;
-    quotaPolicy1.networkmatchrule.netType = -1;
-    quotaPolicy1.networkmatchrule.simId = std::to_string(TRIGER_DELAY_US);
-
-    NetQuotaPolicy quotaPolicy2;
-    quotaPolicy2.networkmatchrule.netType = -1;
-    quotaPolicy2.networkmatchrule.simId = "sim_abcdefg_1";
-
-    quotaPolicies.push_back(quotaPolicy1);
-    quotaPolicies.push_back(quotaPolicy2);
-
-    int32_t ret6 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetQuotaPolicies(quotaPolicies);
-    std::cout << "Result ret6" << ret6 << std::endl;
-    int32_t ret7 = DelayedSingleton<NetPolicyClient>::GetInstance()->ResetPolicies("sim_abcdefg_1");
-    std::cout << "Result ret7" << ret7 << std::endl;
-    int32_t ret8 = DelayedSingleton<NetPolicyClient>::GetInstance()->ResetPolicies("100000");
-    std::cout << "Result ret8" << ret8 << std::endl;
-    int32_t ret9 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetBackgroundPolicy(true);
-    std::cout << "Result ret9" << ret9 << std::endl;
+    auto client = DelayedSingleton<NetPolicyClient>::GetInstance();
+    client->SetPolicyByUid(TEST_UID2, NetUidPolicy::NET_POLICY_NONE);
+    client->SetPolicyByUid(TEST_UID3, NetUidPolicy::NET_POLICY_NONE);
+    client->SetPolicyByUid(TEST_UID4, NetUidPolicy::NET_POLICY_NONE);
+    client->SetPolicyByUid(TEST_UID5, NetUidPolicy::NET_POLICY_NONE);
+    client->SetPolicyByUid(TEST_UID6, NetUidPolicy::NET_POLICY_NONE);
+    client->SetPolicyByUid(TEST_UID7, NetUidPolicy::NET_POLICY_NONE);
+    client->SetPolicyByUid(TEST_UID8, NetUidPolicy::NET_POLICY_NONE);
+    client->SetPolicyByUid(TEST_UID9, NetUidPolicy::NET_POLICY_NONE);
+    UninstallStatefulPolicyServiceMock(mockService_, mockState_, savedService_, client->netPolicyService_);
 }
 
 void NetPolicyManagerTest::SetUp() {}
@@ -686,17 +673,20 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager028, TestSize.Level1)
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager029, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
+    // The fixture-installed stateful policy service mock already answers
+    // SetNetworkAccessPolicy with NETMANAGER_SUCCESS, so the client path is verified
+    // without real IPC and without a local mock swap.
+    auto policyClient = DelayedSingleton<NetPolicyClient>::GetInstance();
+
     NetworkAccessPolicy netAccessPolicy;
     netAccessPolicy.wifiAllow = false;
     netAccessPolicy.cellularAllow = false;
     bool reconfirmFlag = true;
 
-    int32_t result1 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetworkAccessPolicy(
-        TEST_UID1, netAccessPolicy, reconfirmFlag);
+    int32_t result1 = policyClient->SetNetworkAccessPolicy(TEST_UID1, netAccessPolicy, reconfirmFlag);
     ASSERT_EQ(result1, NETMANAGER_SUCCESS);
     reconfirmFlag = false;
-    int32_t result2 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetworkAccessPolicy(
-        TEST_UID6, netAccessPolicy, reconfirmFlag);
+    int32_t result2 = policyClient->SetNetworkAccessPolicy(TEST_UID6, netAccessPolicy, reconfirmFlag);
     ASSERT_EQ(result2, NETMANAGER_SUCCESS);
 }
 

@@ -81,7 +81,16 @@ void NetsysClientTest::TearDownTestCase() {}
 
 void NetsysClientTest::SetUp() {}
 
-void NetsysClientTest::TearDown() {}
+void NetsysClientTest::TearDown()
+{
+    // Cases such as NetSysGetResolvConfTest call SetNetForApp(1) which is a process-wide
+    // switch used by the musl socket hook: once set, every AF_INET/AF_INET6 socket created
+    // afterwards is bound to that netId via the real fwmarkd IPC and closed on failure.
+    // In the unit-test environment (su domain) fwmarkd rejects those sockets, so leaking
+    // this state breaks socket creation in all later test suites of this binary.
+    // Reset it here to keep the process state clean between cases.
+    SetNetForApp(0);
+}
 
 HWTEST_F(NetsysClientTest, MakeDefaultDnsServerTest001, TestSize.Level1)
 {

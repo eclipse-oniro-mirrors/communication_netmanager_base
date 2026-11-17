@@ -496,6 +496,11 @@ HWTEST_F(NetConnServiceStubTest, OnRefreshGlobalHttpProxyTest002, TestSize.Level
     NetManagerBaseAccessToken token;
     MessageParcel data;
     EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    // OnRefreshGlobalHttpProxy reads a remote object first and rejects a null one with
+    // NETMANAGER_ERR_LOCAL_PTR_NULL, so a valid callback stub must be written into the
+    // parcel to reach the service call (mocked to return NETMANAGER_SUCCESS).
+    sptr<IRefreshHttpProxyCallback> callback = new RefreshHttpProxyCallbackStub();
+    EXPECT_TRUE(data.WriteRemoteObject(callback->AsObject().GetRefPtr()));
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REFRESH_GLOBAL_HTTP_PROXY);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }

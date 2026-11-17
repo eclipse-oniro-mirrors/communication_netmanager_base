@@ -22,6 +22,7 @@
 
 #include "net_manager_constants.h"
 #include "net_manager_native.h"
+#include "common_test_env_check.h"
 
 namespace OHOS {
 namespace nmd {
@@ -172,18 +173,30 @@ HWTEST_F(NetManagerNativeTest, DnsGetAddrInfo001, TestSize.Level1)
 
 HWTEST_F(NetManagerNativeTest, AddStaticArpTest001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "AddStaticArp requires root and iface wlan0";
+    }
     std::string ipAddr = "192.168.1.100";
     std::string macAddr = "aa:bb:cc:dd:ee:ff";
     std::string ifName = "wlan0";
+    // Clean up a possible leftover entry from a previous run so the add is deterministic.
+    instance_->DelStaticArp(ipAddr, macAddr, ifName);
     auto ret = instance_->AddStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetManagerNativeTest, DelStaticArpTest001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "DelStaticArp requires root and iface wlan0";
+    }
     std::string ipAddr = "192.168.1.100";
     std::string macAddr = "aa:bb:cc:dd:ee:ff";
     std::string ifName = "wlan0";
+    // Add the entry first so the delete is deterministic and order-independent.
+    instance_->AddStaticArp(ipAddr, macAddr, ifName);
     auto ret = instance_->DelStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
@@ -382,87 +395,144 @@ HWTEST_F(NetManagerNativeTest, MptcpFfrtQueueInitTest001, TestSize.Level1)
 
 HWTEST_F(NetManagerNativeTest, AddInterfaceAddressWithMptcpTest001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "AddInterfaceAddress requires root and iface wlan0";
+    }
     std::string ifName = "wlan0";
     std::string addrString = "192.168.1.100";
     int32_t prefixLength = 24;
+    // Clean up a possible leftover address from a previous run so the add is deterministic.
+    instance_->DelInterfaceAddress(ifName, addrString, prefixLength);
     auto ret = instance_->AddInterfaceAddress(ifName, addrString, prefixLength);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetManagerNativeTest, AddInterfaceAddressWithMptcpTest002, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("rmnet0")) {
+        GTEST_SKIP() << "AddInterfaceAddress requires root and iface rmnet0";
+    }
     std::string ifName = "rmnet0";
     std::string addrString = "10.0.0.1";
     int32_t prefixLength = 24;
+    instance_->DelInterfaceAddress(ifName, addrString, prefixLength);
     auto ret = instance_->AddInterfaceAddress(ifName, addrString, prefixLength);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetManagerNativeTest, AddInterfaceAddressWithMptcpTest003, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("rmnet1")) {
+        GTEST_SKIP() << "AddInterfaceAddress requires root and iface rmnet1";
+    }
     std::string ifName = "rmnet1";
     std::string addrString = "2001:db8::1";
     int32_t prefixLength = 64;
+    instance_->DelInterfaceAddress(ifName, addrString, prefixLength);
     auto ret = instance_->AddInterfaceAddress(ifName, addrString, prefixLength);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetManagerNativeTest, AddInterfaceAddressNonMonitoredTest001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("eth0")) {
+        GTEST_SKIP() << "AddInterfaceAddress requires root and iface eth0";
+    }
     std::string ifName = "eth0";
     std::string addrString = "192.168.2.100";
     int32_t prefixLength = 24;
+    instance_->DelInterfaceAddress(ifName, addrString, prefixLength);
     auto ret = instance_->AddInterfaceAddress(ifName, addrString, prefixLength);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetManagerNativeTest, AddInterfaceAddressNonMonitoredTest002, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("lo")) {
+        GTEST_SKIP() << "AddInterfaceAddress requires root and iface lo";
+    }
     std::string ifName = "lo";
-    std::string addrString = "127.0.0.1";
-    int32_t prefixLength = 8;
+    // InterfaceManager::ModifyAddress always sends ifa_scope = RT_SCOPE_UNIVERSE
+    // (global). The kernel rejects loopback-range addresses with global scope with
+    // EINVAL, exactly like `ip addr add 127.0.0.9/8 dev lo scope global` fails while
+    // `scope host` succeeds (iproute2 picks host scope automatically for 127.x).
+    // Use a non-loopback address, which is valid on lo with global scope
+    // (verified on device: `ip addr add 192.168.77.5/24 dev lo` succeeds).
+    std::string addrString = "192.168.168.5";
+    int32_t prefixLength = 24;
+    instance_->DelInterfaceAddress(ifName, addrString, prefixLength);
     auto ret = instance_->AddInterfaceAddress(ifName, addrString, prefixLength);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetManagerNativeTest, DelInterfaceAddressWithMptcpTest001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "DelInterfaceAddress requires root and iface wlan0";
+    }
     std::string ifName = "wlan0";
     std::string addrString = "192.168.1.100";
     int32_t prefixLength = 24;
+    // Add the address first so the delete is deterministic and order-independent.
+    instance_->AddInterfaceAddress(ifName, addrString, prefixLength);
     auto ret = instance_->DelInterfaceAddress(ifName, addrString, prefixLength);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetManagerNativeTest, DelInterfaceAddressWithMptcpTest002, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("rmnet0")) {
+        GTEST_SKIP() << "DelInterfaceAddress requires root and iface rmnet0";
+    }
     std::string ifName = "rmnet0";
     std::string addrString = "10.0.0.1";
     int32_t prefixLength = 24;
+    instance_->AddInterfaceAddress(ifName, addrString, prefixLength);
     auto ret = instance_->DelInterfaceAddress(ifName, addrString, prefixLength);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetManagerNativeTest, DelInterfaceAddressWithMptcpTest003, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("rmnet1")) {
+        GTEST_SKIP() << "DelInterfaceAddress requires root and iface rmnet1";
+    }
     std::string ifName = "rmnet1";
     std::string addrString = "2001:db8::1";
     int32_t prefixLength = 64;
+    instance_->AddInterfaceAddress(ifName, addrString, prefixLength);
     auto ret = instance_->DelInterfaceAddress(ifName, addrString, prefixLength);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetManagerNativeTest, DelInterfaceAddressNonMonitoredTest001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("eth0")) {
+        GTEST_SKIP() << "DelInterfaceAddress requires root and iface eth0";
+    }
     std::string ifName = "eth0";
     std::string addrString = "192.168.2.100";
     int32_t prefixLength = 24;
+    instance_->AddInterfaceAddress(ifName, addrString, prefixLength);
     auto ret = instance_->DelInterfaceAddress(ifName, addrString, prefixLength);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetManagerNativeTest, MptcpManagerNullptrTest001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "AddInterfaceAddress requires root and iface wlan0";
+    }
     auto originalMptcpManager = instance_->mptcpManager_;
     auto originalFfrtQueue = instance_->mptcpFfrtQueue_;
     
@@ -470,6 +540,7 @@ HWTEST_F(NetManagerNativeTest, MptcpManagerNullptrTest001, TestSize.Level1)
     std::string ifName = "wlan0";
     std::string addrString = "192.168.1.100";
     int32_t prefixLength = 24;
+    instance_->DelInterfaceAddress(ifName, addrString, prefixLength);
     auto ret = instance_->AddInterfaceAddress(ifName, addrString, prefixLength);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     
@@ -479,12 +550,17 @@ HWTEST_F(NetManagerNativeTest, MptcpManagerNullptrTest001, TestSize.Level1)
 
 HWTEST_F(NetManagerNativeTest, MptcpFfrtQueueNullptrTest001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "AddInterfaceAddress requires root and iface wlan0";
+    }
     auto originalFfrtQueue = instance_->mptcpFfrtQueue_;
     
     instance_->mptcpFfrtQueue_ = nullptr;
     std::string ifName = "wlan0";
     std::string addrString = "192.168.1.101";
     int32_t prefixLength = 24;
+    instance_->DelInterfaceAddress(ifName, addrString, prefixLength);
     auto ret = instance_->AddInterfaceAddress(ifName, addrString, prefixLength);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     
@@ -493,12 +569,17 @@ HWTEST_F(NetManagerNativeTest, MptcpFfrtQueueNullptrTest001, TestSize.Level1)
 
 HWTEST_F(NetManagerNativeTest, MptcpManagerNullptrDelTest001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "DelInterfaceAddress requires root and iface wlan0";
+    }
     auto originalMptcpManager = instance_->mptcpManager_;
     
     instance_->mptcpManager_ = nullptr;
     std::string ifName = "wlan0";
     std::string addrString = "192.168.1.100";
     int32_t prefixLength = 24;
+    instance_->AddInterfaceAddress(ifName, addrString, prefixLength);
     auto ret = instance_->DelInterfaceAddress(ifName, addrString, prefixLength);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     
@@ -507,12 +588,17 @@ HWTEST_F(NetManagerNativeTest, MptcpManagerNullptrDelTest001, TestSize.Level1)
 
 HWTEST_F(NetManagerNativeTest, MptcpFfrtQueueNullptrDelTest001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "DelInterfaceAddress requires root and iface wlan0";
+    }
     auto originalFfrtQueue = instance_->mptcpFfrtQueue_;
     
     instance_->mptcpFfrtQueue_ = nullptr;
     std::string ifName = "wlan0";
     std::string addrString = "192.168.1.102";
     int32_t prefixLength = 24;
+    instance_->AddInterfaceAddress(ifName, addrString, prefixLength);
     auto ret = instance_->DelInterfaceAddress(ifName, addrString, prefixLength);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     
@@ -521,10 +607,15 @@ HWTEST_F(NetManagerNativeTest, MptcpFfrtQueueNullptrDelTest001, TestSize.Level1)
 
 HWTEST_F(NetManagerNativeTest, AddDelInterfaceAddressSequenceTest001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "Add/DelInterfaceAddress requires root and iface wlan0";
+    }
     std::string ifName = "wlan0";
     std::string addrString = "192.168.1.200";
     int32_t prefixLength = 24;
     
+    instance_->DelInterfaceAddress(ifName, addrString, prefixLength);
     auto ret = instance_->AddInterfaceAddress(ifName, addrString, prefixLength);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     
@@ -534,12 +625,19 @@ HWTEST_F(NetManagerNativeTest, AddDelInterfaceAddressSequenceTest001, TestSize.L
 
 HWTEST_F(NetManagerNativeTest, AddDelInterfaceAddressSequenceTest002, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0") ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("rmnet0")) {
+        GTEST_SKIP() << "Add/DelInterfaceAddress requires root and ifaces wlan0 and rmnet0";
+    }
     std::string ifName1 = "wlan0";
     std::string addrString1 = "192.168.1.201";
     std::string ifName2 = "rmnet0";
     std::string addrString2 = "10.0.0.100";
     int32_t prefixLength = 24;
     
+    instance_->DelInterfaceAddress(ifName1, addrString1, prefixLength);
+    instance_->DelInterfaceAddress(ifName2, addrString2, prefixLength);
     auto ret = instance_->AddInterfaceAddress(ifName1, addrString1, prefixLength);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     
@@ -555,11 +653,16 @@ HWTEST_F(NetManagerNativeTest, AddDelInterfaceAddressSequenceTest002, TestSize.L
 
 HWTEST_F(NetManagerNativeTest, MultipleAddInterfaceAddressTest001, TestSize.Level1)
 {
+    if (!OHOS::NetManagerStandard::TestEnvCheck::IsRoot() ||
+        !OHOS::NetManagerStandard::TestEnvCheck::HasInterface("wlan0")) {
+        GTEST_SKIP() << "AddInterfaceAddress requires root and iface wlan0";
+    }
     std::string ifName = "wlan0";
     int32_t prefixLength = 24;
     
     for (int i = 0; i < 5; i++) {
         std::string addrString = "192.168.1." + std::to_string(50 + i);
+        instance_->DelInterfaceAddress(ifName, addrString, prefixLength);
         auto ret = instance_->AddInterfaceAddress(ifName, addrString, prefixLength);
         EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     }
