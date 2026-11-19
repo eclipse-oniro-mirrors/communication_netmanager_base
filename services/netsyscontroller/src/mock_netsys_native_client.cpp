@@ -598,6 +598,12 @@ int32_t MockNetsysNativeClient::StopDhcpClient(const std::string &iface, bool bI
     return 0;
 }
 
+int32_t MockNetsysNativeClient::RenewDhcpClient(const std::string &iface, bool bIpv6)
+{
+    NETMGR_LOG_D("RenewDhcpClient: iface[%{public}s] bIpv6[%{public}d]", iface.c_str(), bIpv6);
+    return 0;
+}
+
 int32_t MockNetsysNativeClient::RegisterCallback(sptr<NetsysControllerCallback> callback)
 {
     NETMGR_LOG_D("RegisterCallback");

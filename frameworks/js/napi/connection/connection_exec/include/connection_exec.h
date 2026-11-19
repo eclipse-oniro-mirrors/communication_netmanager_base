@@ -273,6 +273,10 @@ public:
 
     static napi_value QueryTraceRouteCallback(QueryTraceRouteContext *context);
 
+    static bool ExecRenewDhcp(RenewDhcpContext *context);
+
+    static napi_value RenewDhcpCallback(RenewDhcpContext *context);
+
     static napi_value CreateTraceRouteInfo(napi_env env, const TraceRouteInfo &traceRouteInfo);
 
     class NetHandleExec final {

@@ -466,6 +466,11 @@ public:
         return 0;
     }
 
+    int32_t RenewDhcp(int32_t netId) override
+    {
+        return 0;
+    }
+
     int32_t IsDeadFlowResetTargetBundle(const std::string &bundleName, bool &flag) override
     {
         return 0;

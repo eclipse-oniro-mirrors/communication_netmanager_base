@@ -1314,6 +1314,17 @@ int32_t NetsysNativeClient::StopDhcpClient(const std::string &iface, bool bIpv6)
     return proxy->StopDhcpClient(iface, bIpv6);
 }
 
+int32_t NetsysNativeClient::RenewDhcpClient(const std::string &iface, bool bIpv6)
+{
+    NETMGR_LOG_D("NetsysNativeClient::RenewDhcpClient");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->RenewDhcpClient(iface, bIpv6);
+}
+
 int32_t NetsysNativeClient::RegisterCallback(const sptr<NetsysControllerCallback> &callback)
 {
     NETMGR_LOG_D("NetsysNativeClient::RegisterCallback");

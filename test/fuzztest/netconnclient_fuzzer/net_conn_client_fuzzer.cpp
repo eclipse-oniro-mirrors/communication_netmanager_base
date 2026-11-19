@@ -201,6 +201,35 @@ void UnregisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREG_NETWORK), dataParcel);
 }
 
+void RenewDhcpFuzzTest(const uint8_t *data, size_t size)
+{
+    if (data == nullptr) {
+        return;
+    }
+    NetManagerBaseAccessToken token;
+
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    int32_t netId = NetConnGetData<int32_t>();
+    dataParcel.WriteInt32(netId);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_RENEW_DHCP), dataParcel);
+
+    // Missing netId: token only, exercising the ReadInt32 failure branch of OnRenewDhcp.
+    MessageParcel dataParcelNoNetId;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoNetId)) {
+        return;
+    }
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_RENEW_DHCP), dataParcelNoNetId);
+
+    // Wrong interface token: exercising the descriptor mismatch branch of OnRemoteRequest.
+    MessageParcel badTokenParcel;
+    badTokenParcel.WriteInterfaceToken(u"ohos.net.conn.fuzz.bad");
+    badTokenParcel.WriteInt32(netId);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_RENEW_DHCP), badTokenParcel);
+}
+
 void HasDefaultNetFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;
@@ -2211,6 +2240,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::SystemReadyFuzzTest(data, size);
     OHOS::NetManagerStandard::RegisterNetSupplierFuzzTest(data, size);
     OHOS::NetManagerStandard::UnregisterNetSupplierFuzzTest(data, size);
+    OHOS::NetManagerStandard::RenewDhcpFuzzTest(data, size);
     OHOS::NetManagerStandard::RegisterNetSupplierCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::UpdateNetSupplierInfoFuzzTest(data, size);
     OHOS::NetManagerStandard::UpdateNetLinkInfoFuzzTest(data, size);

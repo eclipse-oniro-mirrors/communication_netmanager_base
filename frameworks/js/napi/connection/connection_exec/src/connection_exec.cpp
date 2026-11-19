@@ -1747,4 +1747,23 @@ napi_value ConnectionExec::QueryProbeResultCallback(QueryProbeResultContext *con
     return jsProbeResult;
 }
 
+bool ConnectionExec::ExecRenewDhcp(RenewDhcpContext *context)
+{
+    if (!context->IsParseOK()) {
+        return false;
+    }
+    int32_t errorCode = NetConnClient::GetInstance().RenewDhcp(context->netHandle_);
+    if (errorCode != NET_CONN_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec ExecRenewDhcp failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::RenewDhcpCallback(RenewDhcpContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
 } // namespace OHOS::NetManagerStandard

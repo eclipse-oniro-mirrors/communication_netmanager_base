@@ -568,6 +568,14 @@ public:
      */
     int32_t StopDhcpClient(const std::string &iface, bool bIpv6) override;
     /**
+     * Renew Dhcp Client.
+     *
+     * @param iface interface name
+     * @param bIpv6 network blocking
+     * @return Return the return value of the netsys interface call.
+     */
+    int32_t RenewDhcpClient(const std::string &iface, bool bIpv6) override;
+    /**
      * Register Notify Callback
      *
      * @param callback

@@ -2193,5 +2193,35 @@ HWTEST_F(NetsysControllerTest, NetsysControllerNfqPktVerdictMarkNullCtx001, Test
     EXPECT_EQ(ret, NetManagerStandard::ERR_INVALID_DATA);
 }
 #endif
+
+HWTEST_F(NetsysControllerTest, RenewDhcpClientTest001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_ = nullptr;
+    int32_t ret = netsysController->RenewDhcpClient(IF_NAME, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, RenewDhcpClientTest002, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+    netsysController->netsysService_ = netsysControllerServiceImpl;
+
+    int32_t ret = netsysController->RenewDhcpClient(IF_NAME, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, RenewDhcpClientTest003, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+    netsysController->netsysService_ = netsysControllerServiceImpl;
+
+    int32_t ret = netsysController->RenewDhcpClient(IF_NAME, true);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

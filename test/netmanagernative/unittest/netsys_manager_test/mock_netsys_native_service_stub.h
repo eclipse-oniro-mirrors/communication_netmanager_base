@@ -258,6 +258,11 @@ public:
         return 0;
     }
 
+    int32_t RenewDhcpClient(const std::string &iface, bool bIpv6) override
+    {
+        return 0;
+    }
+
     int32_t StartDhcpService(const std::string &iface, const std::string &ipv4addr) override
     {
         return 0;

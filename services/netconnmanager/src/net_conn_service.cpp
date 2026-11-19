@@ -4692,6 +4692,47 @@ int32_t NetConnService::GetNetExtAttribute(int32_t netId, std::string &netExtAtt
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetConnService::RenewDhcp(int32_t netId)
+{
+    NETMGR_LOG_I("RenewDhcp netId=%{public}d", netId);
+    sptr<NetSupplier> supplier = GetSupplierByNetId(netId);
+    if (supplier == nullptr) {
+        NETMGR_LOG_E("supplier doesn't exist.");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    NetBearType bearerType = supplier->GetNetSupplierType();
+    if (bearerType != BEARER_WIFI && bearerType != BEARER_ETHERNET) {
+        NETMGR_LOG_E("renewDhcp is only supported for wifi and ethernet, bearerType=%{public}d.", bearerType);
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    std::shared_ptr<Network> network = supplier->GetNetwork();
+    if (network == nullptr) {
+        NETMGR_LOG_E("network doesn't exist.");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    std::string iface = network->GetIfaceName();
+    if (iface.empty()) {
+        NETMGR_LOG_E("iface name is empty.");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    NetLinkInfo linkInfo = network->GetNetLinkInfo();
+    bool bIpv6 = linkInfo.isIpv6LinkValid_;
+    NETMGR_LOG_I("RenewDhcp iface=%{public}s bIpv6=%{public}d", iface.c_str(), bIpv6);
+
+    int32_t ret = NetsysController::GetInstance().RenewDhcpClient(iface, bIpv6);
+    if (ret != NETMANAGER_SUCCESS) {
+        // NetsysController / NetsysNativeClient use their own domain error codes (for example
+        // NETSYS_NETSYSSERVICE_NULL, NETMANAGER_ERR_GET_PROXY_FAIL, IPC_INVOKER_ERR), none of which
+        // belong to the public contract of renewDhcp. Normalize every non-success result to
+        // NETMANAGER_ERR_INTERNAL(2100003) so the JS caller only observes the error codes declared
+        // in @ohos.net.connection.d.ts (2100001/2100002/2100003).
+        NETMGR_LOG_E("RenewDhcpClient failed, ret=%{public}d, normalized to %{public}d", ret,
+            NETMANAGER_ERR_INTERNAL);
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetConnService::RegUnRegisterNetProbeCallback(int32_t netId,
     std::shared_ptr<IDualStackProbeCallback>& callback, bool isReg)
 {

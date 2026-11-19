@@ -235,6 +235,7 @@
       "VTT for OHOS::NetManagerStandard::NetConnInfo";
       "vtable for OHOS::NetManagerStandard::NetConnInfo";
       "OHOS::NetManagerStandard::NetConnClient::GetSystemNetPortStates(OHOS::NetManagerStandard::NetPortStatesInfo&)";
+      "OHOS::NetManagerStandard::NetConnClient::RenewDhcp(OHOS::NetManagerStandard::NetHandle const&)";
       "VTT for OHOS::NetManagerStandard::NetPortStatesInfo";
       "vtable for OHOS::NetManagerStandard::NetPortStatesInfo";
       "OHOS::NetManagerStandard::NetProbe::QueryProbeResult(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&, int, OHOS::NetManagerStandard::NetConn_ProbeResultInfo&)";

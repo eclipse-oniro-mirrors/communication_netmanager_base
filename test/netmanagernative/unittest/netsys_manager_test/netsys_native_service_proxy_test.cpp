@@ -1047,5 +1047,50 @@ HWTEST_F(NetsysNativeServiceProxyTest, GetSystemNetPortStatesTest001, TestSize.L
     int32_t ret = netsysNativeService->GetSystemNetPortStates(netPortStatesInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeServiceProxyTest, RenewDhcpClientTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    int32_t ret = netsysNativeService->RenewDhcpClient(INTERFACENAME, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, RenewDhcpClientTest002, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    int32_t ret = netsysNativeService->RenewDhcpClient(INTERFACENAME, true);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, RenewDhcpClientTest003, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService =
+        new (std::nothrow) NetsysNativeServiceProxy(nullptr);
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::string iface(204800, 'a');
+    int32_t ret = netsysNativeService->RenewDhcpClient(iface, false);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, RenewDhcpClientTest004, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService =
+        new (std::nothrow) NetsysNativeServiceProxy(nullptr);
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::string iface(204720, 'a');
+    int32_t ret = netsysNativeService->RenewDhcpClient(iface, false);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, RenewDhcpClientTest005, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService =
+        new (std::nothrow) NetsysNativeServiceProxy(nullptr);
+    ASSERT_NE(netsysNativeService, nullptr);
+    int32_t ret = netsysNativeService->RenewDhcpClient(INTERFACENAME, false);
+    EXPECT_EQ(ret, IPC_INVOKER_ERR);
+}
 } // namespace NetsysNative
 } // namespace OHOS

@@ -943,6 +943,18 @@ int32_t NetsysController::StopDhcpClient(const std::string &iface, bool bIpv6)
     return netsysService_->StopDhcpClient(iface, bIpv6);
 }
 
+int32_t NetsysController::RenewDhcpClient(const std::string &iface, bool bIpv6)
+{
+    NETMGR_LOG_I("RenewDhcpClient: iface[%{public}s] bIpv6[%{public}d]", iface.c_str(), bIpv6);
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->RenewDhcpClient(iface, bIpv6);
+}
+
 int32_t NetsysController::RegisterCallback(sptr<NetsysControllerCallback> callback)
 {
     NETMGR_LOG_D("NetsysController::RegisterCallback");

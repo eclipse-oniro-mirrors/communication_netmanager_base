@@ -237,6 +237,12 @@ HWTEST_F(MockNetsysNativeClientTest, MockNetsysNativeClientBranchTest005, TestSi
     ret = nativeClient_.StopDhcpClient(iface, false);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
+    ret = nativeClient_.RenewDhcpClient(iface, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = nativeClient_.RenewDhcpClient(iface, true);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
     ret = nativeClient_.RegisterCallback(nullptr);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 

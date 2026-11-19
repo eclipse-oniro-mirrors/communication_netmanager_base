@@ -152,6 +152,7 @@ public:
     virtual int32_t InterfaceGetList(std::vector<std::string> &ifaces) = 0;
     virtual int32_t StartDhcpClient(const std::string &iface, bool bIpv6) = 0;
     virtual int32_t StopDhcpClient(const std::string &iface, bool bIpv6) = 0;
+    virtual int32_t RenewDhcpClient(const std::string &iface, bool bIpv6) = 0;
     virtual int32_t StartDhcpService(const std::string &iface, const std::string &ipv4addr) = 0;
     virtual int32_t StopDhcpService(const std::string &iface) = 0;
     virtual int32_t IpEnableForwarding(const std::string &requestor) = 0;

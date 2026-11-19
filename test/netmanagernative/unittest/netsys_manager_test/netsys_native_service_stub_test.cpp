@@ -814,6 +814,38 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDhcpClient001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_NONE);
 }
 
+HWTEST_F(NetsysNativeServiceStubTest, CmdRenewDhcpClient001, TestSize.Level1)
+{
+    std::string iface = "testIface";
+    bool bIpv6 = true;
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(iface));
+    EXPECT_TRUE(data.WriteBool(bIpv6));
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdRenewDhcpClient(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+    EXPECT_TRUE(reply.ReadInt32(ret));
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdRenewDhcpClient002, TestSize.Level1)
+{
+    std::string iface = "testIface";
+    bool bIpv6 = false;
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(iface));
+    EXPECT_TRUE(data.WriteBool(bIpv6));
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdRenewDhcpClient(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+    EXPECT_TRUE(reply.ReadInt32(ret));
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysNativeServiceStubTest, CmdDhcpService001, TestSize.Level1)
 {
     std::string iface = "testIface";

@@ -650,6 +650,17 @@ int32_t NetsysNativeService::StopDhcpClient(const std::string &iface, bool bIpv6
     return ERR_NONE;
 }
 
+int32_t NetsysNativeService::RenewDhcpClient(const std::string &iface, bool bIpv6)
+{
+    NETNATIVE_LOG_D("RenewDhcpClient");
+    int32_t ret = dhcpController_->RenewClient(iface, bIpv6);
+    if (ret != DHCP_SUCCESS) {
+        NETNATIVE_LOGE("renew dhcp client failed, iface[%{public}s] ret[%{public}d]", iface.c_str(), ret);
+        return NetManagerStandard::NETMANAGER_ERR_INTERNAL;
+    }
+    return ERR_NONE;
+}
+
 int32_t NetsysNativeService::StartDhcpService(const std::string &iface, const std::string &ipv4addr)
 {
     NETNATIVE_LOG_D("StartDhcpService");

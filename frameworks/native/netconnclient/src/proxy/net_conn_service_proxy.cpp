@@ -2620,5 +2620,30 @@ int32_t NetConnServiceProxy::GetSystemNetPortStates(NetPortStatesInfo &netPortSt
     return ret;
 }
 // LCOV_EXCL_STOP
+
+int32_t NetConnServiceProxy::RenewDhcp(int32_t netId)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteInt32(netId)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    MessageParcel reply;
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_RENEW_DHCP), data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+
+    int32_t ret = NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return ret;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

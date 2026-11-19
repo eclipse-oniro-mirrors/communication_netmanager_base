@@ -1782,6 +1782,16 @@ int32_t NetConnClient::SetNetExtAttribute(const NetHandle &netHandle, const std:
     return proxy->SetNetExtAttribute(netHandle.GetNetId(), netExtAttribute);
 }
 
+int32_t NetConnClient::RenewDhcp(const NetHandle &netHandle)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("RenewDhcp proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->RenewDhcp(netHandle.GetNetId());
+}
+
 NetConnClient::NetConnCallbackManager::NetConnCallbackManager(std::shared_ptr<ffrt::queue> &ffrtQueue)
     : ffrtQueue_(ffrtQueue)
 {

@@ -585,6 +585,14 @@ public:
      */
     int32_t StopDhcpClient(const std::string &iface, bool bIpv6);
     /**
+     * Renew Dhcp Client.
+     *
+     * @param iface interface name
+     * @param bIpv6 network blocking
+     * @return success or failed
+     */
+    int32_t RenewDhcpClient(const std::string &iface, bool bIpv6);
+    /**
      * Register Notify Callback
      *
      * @param callback

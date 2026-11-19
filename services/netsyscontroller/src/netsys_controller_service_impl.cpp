@@ -595,6 +595,15 @@ int32_t NetsysControllerServiceImpl::StopDhcpClient(const std::string &iface, bo
     return netsysClient_->StopDhcpClient(iface, bIpv6);
 }
 
+int32_t NetsysControllerServiceImpl::RenewDhcpClient(const std::string &iface, bool bIpv6)
+{
+    NETMGR_LOG_I("RenewDhcpClient");
+    if (mockNetsysClient_.CheckMockApi(MOCK_RENEWDHCPCLIENT_API)) {
+        return mockNetsysClient_.RenewDhcpClient(iface, bIpv6);
+    }
+    return netsysClient_->RenewDhcpClient(iface, bIpv6);
+}
+
 int32_t NetsysControllerServiceImpl::RegisterCallback(sptr<NetsysControllerCallback> callback)
 {
     NETMGR_LOG_D("RegisterCallback");

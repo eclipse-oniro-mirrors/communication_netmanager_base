@@ -73,6 +73,7 @@ constexpr const char *MOCK_SETIPADDRESS_API = "SetIpAddress";
 constexpr const char *MOCK_SETBLOCKING_API = "SetBlocking";
 constexpr const char *MOCK_STARTDHCPCLIENT_API = "StartDhcpClient";
 constexpr const char *MOCK_STOPDHCPCLIENT_API = "StopDhcpClient";
+constexpr const char *MOCK_RENEWDHCPCLIENT_API = "RenewDhcpClient";
 constexpr const char *MOCK_REGISTERNOTIFYCALLBACK_API = "RegisterNotifyCallback";
 constexpr const char *MOCK_STARTDHCPSERVICE_API = "StartDhcpService";
 constexpr const char *MOCK_STOPDHCPSERVICE_API = "StopDhcpService";
@@ -448,6 +449,14 @@ public:
      * @return .
      */
     int32_t StopDhcpClient(const std::string &iface, bool bIpv6);
+    /**
+     * @brief Renew Dhcp Client.
+     *
+     * @param iface interface name
+     * @param bIpv6 network blocking
+     * @return .
+     */
+    int32_t RenewDhcpClient(const std::string &iface, bool bIpv6);
     /**
     * @brief Register Notify Callback
     *

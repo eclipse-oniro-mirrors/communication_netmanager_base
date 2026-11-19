@@ -154,6 +154,8 @@
       "OHOS::NetManagerStandard::ConnectionExec::DeleteCustomDNSRuleCallback(OHOS::NetManagerStandard::DeleteCustomDNSRuleContext*)";
       "OHOS::NetManagerStandard::ConnectionExec::DisableAirplaneModeCallback(OHOS::NetManagerStandard::GetConnNapiContext*)";
       "OHOS::NetManagerStandard::ConnectionExec::ExecGetConnectionProperties(OHOS::NetManagerStandard::ParseNetHandleContext*)";
+      "OHOS::NetManagerStandard::ConnectionExec::ExecRenewDhcp(OHOS::NetManagerStandard::ParseNetHandleContext*)";
+      "OHOS::NetManagerStandard::ConnectionExec::RenewDhcpCallback(OHOS::NetManagerStandard::ParseNetHandleContext*)";
       "OHOS::NetManagerStandard::ConnectionExec::FactoryResetNetworkCallback(OHOS::NetManagerStandard::FactoryResetNetworkContext*)";
       "OHOS::NetManagerStandard::ConnectionExec::GetDefaultHttpProxyCallback(OHOS::NetManagerStandard::GetHttpProxyContext*)";
       "OHOS::NetManagerStandard::ConnectionExec::IsDefaultNetMeteredCallback(OHOS::NetManagerStandard::NoneParamsContext*)";

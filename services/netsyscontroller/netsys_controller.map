@@ -113,6 +113,7 @@
       "OHOS::NetManagerStandard::NetsysController::RegisterDnsQueryResultCallback(OHOS::sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> const&)";
       "OHOS::NetManagerStandard::NetsysController::RegisterNetFirewallCallback(OHOS::sptr<OHOS::NetsysNative::INetFirewallCallback> const&)";
       "OHOS::NetManagerStandard::NetsysController::RegisterNetsysTrafficCallback(OHOS::sptr<OHOS::NetsysNative::INetsysTrafficCallback> const&)";
+      "OHOS::NetManagerStandard::NetsysController::RenewDhcpClient(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool)";
       "OHOS::NetManagerStandard::NetsysController::SetBrokerUidAccessPolicyMap(std::__h::unordered_map<unsigned int, unsigned int, std::__h::hash<unsigned int>, std::__h::equal_to<unsigned int>, std::__h::allocator<std::__h::pair<unsigned int const, unsigned int>>> const&)";
       "OHOS::NetManagerStandard::NetsysController::SetDefaultNetWork(int)";
       "OHOS::NetManagerStandard::NetsysController::SetEnableIpv6(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int, bool)";
