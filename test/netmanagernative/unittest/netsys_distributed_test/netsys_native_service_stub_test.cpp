@@ -673,7 +673,7 @@ public:
     }
 
     int32_t NfqPktVerdictMark(sptr<NetManagerStandard::NfqCtx> &ctx,
-        const sptr<NetManagerStandard::NfqQueue> &qh, uint32_t packetId, int32_t verdict,
+        const sptr<NetManagerStandard::NfqQueue> &qh, uint32_t packetId, uint32_t verdict,
         uint32_t mark) override
     {
         (void)ctx;

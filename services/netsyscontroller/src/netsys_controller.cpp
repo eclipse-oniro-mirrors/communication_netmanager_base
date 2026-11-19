@@ -2049,7 +2049,7 @@ int32_t NetsysController::NfqQueueSetFlag(sptr<NetsysNative::NfqCtx> &ctx,
 }
 
 int32_t NetsysController::NfqPktVerdictMark(sptr<NetsysNative::NfqCtx> &ctx,
-    const sptr<NetsysNative::NfqQueue> &qh, uint32_t packetId, int32_t verdict, uint32_t mark)
+    const sptr<NetsysNative::NfqQueue> &qh, uint32_t packetId, uint32_t verdict, uint32_t mark)
 {
     if (qh == nullptr || ctx == nullptr) {
         NETMGR_LOG_E("NfqPktVerdictMark qh or ctx is nullptr");

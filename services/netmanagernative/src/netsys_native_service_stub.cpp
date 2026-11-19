@@ -3326,8 +3326,8 @@ int32_t NetsysNativeServiceStub::CmdNfqPktVerdictMark(MessageParcel &data, Messa
     if (!data.ReadUint32(packetId)) {
         return ERR_FLATTEN_OBJECT;
     }
-    int32_t verdict = 0;
-    if (!data.ReadInt32(verdict)) {
+    uint32_t verdict = 0;
+    if (!data.ReadUint32(verdict)) {
         return ERR_FLATTEN_OBJECT;
     }
     uint32_t mark = 0;

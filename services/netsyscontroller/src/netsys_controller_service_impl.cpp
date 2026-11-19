@@ -1205,7 +1205,7 @@ int32_t NetsysControllerServiceImpl::NfqQueueSetFlag(sptr<NetsysNative::NfqCtx> 
 }
 
 int32_t NetsysControllerServiceImpl::NfqPktVerdictMark(sptr<NetsysNative::NfqCtx> &ctx,
-    const sptr<NetsysNative::NfqQueue> &qh, uint32_t packetId, int32_t verdict, uint32_t mark)
+    const sptr<NetsysNative::NfqQueue> &qh, uint32_t packetId, uint32_t verdict, uint32_t mark)
 {
     return netsysClient_->NfqPktVerdictMark(ctx, qh, packetId, verdict, mark);
 }

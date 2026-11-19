@@ -257,7 +257,7 @@ void NfqPktVerdictMarkFuzzTest(const uint8_t *data, size_t size)
     ctx->Marshalling(dataParcel);
     q->Marshalling(dataParcel);
     dataParcel.WriteUint32(NfQueueGetData<uint32_t>());
-    dataParcel.WriteInt32(NfQueueGetData<int32_t>());
+    dataParcel.WriteUint32(NfQueueGetData<uint32_t>());
     dataParcel.WriteUint32(NfQueueGetData<uint32_t>());
 
     (void)OnRemoteRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NFQUEUE_PKT_VERDICT_MARK), dataParcel);
