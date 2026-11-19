@@ -35,9 +35,10 @@ constexpr uint32_t LOCAL_PRIORITY = 32767;
  *
  * @param msg nlmsghdr struct
  * @param table If clear route，this is table number, otherwise it will is 0
+ * @param needAck If true, read back the kernel ack after sending (msg must carry NLM_F_ACK)
  * @return Returns 0, send netklink message to kernel successfully, otherwise it will fail
  */
-int32_t SendNetlinkMsgToKernel(nlmsghdr *msg, uint32_t table = 0);
+int32_t SendNetlinkMsgToKernel(nlmsghdr *msg, uint32_t table = 0, bool needAck = false);
 
 /**
  * Clear route or rule configure
