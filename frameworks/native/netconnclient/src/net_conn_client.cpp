@@ -448,12 +448,6 @@ int32_t NetConnClient::UnregisterNetConnCallback(const sptr<INetConnCallback> &c
     }
     int32_t ret1 = UnRegisterNetConnCallbackManager(callback, netConnCallbackManagerMap_);
     int32_t ret2 = UnRegisterNetConnCallbackManager(callback, systemNetConnCallbackManagerMap_);
-    locker.unlock();
-    if (tlsInCallbackDispatch_) {
-        NETMGR_LOG_W("unregister within callback dispatch, quiesce not guaranteed");
-    } else {
-        DrainCallbackQueue();
-    }
 
     return (ret1 == NETMANAGER_SUCCESS && ret2 == NETMANAGER_SUCCESS) ? NETMANAGER_SUCCESS
                                                                       : (ret1 == NETMANAGER_SUCCESS ? ret2 : ret1);
@@ -702,21 +696,6 @@ int32_t NetConnClient::SetAirplaneMode(bool state)
     }
 
     return proxy->SetAirplaneMode(state);
-}
-
-void NetConnClient::DrainCallbackQueue()
-{
-    std::shared_ptr<ffrt::queue> queue = ffrtQueue_;
-    if (queue == nullptr) {
-        NETMGR_LOG_E("ffrtQueue_ is nullptr");
-        return;
-    }
-    ffrt::task_handle handle = queue->submit_h([]() {});
-    if (handle == nullptr) {
-        NETMGR_LOG_E("DrainCallbackQueue submit barrier task failed");
-        return;
-    }
-    queue->wait(handle);
 }
 
 void NetConnClient::RecoverCallbackAndGlobalProxy()
@@ -1808,19 +1787,6 @@ NetConnClient::NetConnCallbackManager::NetConnCallbackManager(std::shared_ptr<ff
 {
 }
 
-int32_t NetConnClient::NetConnCallbackManager::SubmitDispatch(std::function<void()> body)
-{
-    if (ffrtQueue_ == nullptr) {
-        NETMGR_LOG_E("ffrtQueue_ is nullptr");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-    ffrtQueue_->submit([body = std::move(body)]() {
-        InCallbackDispatch scope; // RAII 标记：本线程正在派发用户回调
-        body();
-    });
-    return NETMANAGER_SUCCESS;
-}
-
 int32_t NetConnClient::NetConnCallbackManager::NetAvailable(sptr<NetHandle> &netHandle)
 {
     if (netHandle == nullptr) {
@@ -1833,12 +1799,18 @@ int32_t NetConnClient::NetConnCallbackManager::NetAvailable(sptr<NetHandle> &net
     handlerLock.unlock();
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
-    return SubmitDispatch([tmpList, netId = netHandle->GetNetId()]() {
+    lock.unlock();
+    if (ffrtQueue_ == nullptr) {
+        NETMGR_LOG_E("ffrtQueue_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    ffrtQueue_->submit([tmpList, netId = netHandle->GetNetId()]() {
         auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
         for (auto &cb : tmpList) {
             cb->NetAvailable(tmpNetHandler);
         }
-    }); // lock 在 submit 之后才释放，消除快照与 submit 之间的 late-submit 窗口
+    });
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnClient::NetConnCallbackManager::NetCapabilitiesChange(sptr<NetHandle> &netHandle,
@@ -1849,18 +1821,24 @@ int32_t NetConnClient::NetConnCallbackManager::NetCapabilitiesChange(sptr<NetHan
         netAllCap_ = netAllCap;
     }
     handlerLock.unlock();
+    std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
+    std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
+    lock.unlock();
     sptr<NetAllCapabilities> tmpNetAllCap = nullptr;
     if (netAllCap != nullptr) {
         tmpNetAllCap = sptr<NetAllCapabilities>::MakeSptr(*netAllCap);
     }
-    std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
-    std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
-    return SubmitDispatch([tmpList, netId = netHandle->GetNetId(), tmpNetAllCap]() {
+    if (ffrtQueue_ == nullptr) {
+        NETMGR_LOG_E("ffrtQueue_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    ffrtQueue_->submit([tmpList, netId = netHandle->GetNetId(), tmpNetAllCap]() {
         auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
         for (auto &cb : tmpList) {
             cb->NetCapabilitiesChange(tmpNetHandler, tmpNetAllCap);
         }
-    }); // lock 在 submit 之后才释放
+    });
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnClient::NetConnCallbackManager::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle,
@@ -1871,18 +1849,24 @@ int32_t NetConnClient::NetConnCallbackManager::NetConnectionPropertiesChange(spt
         netLinkInfo_ = info;
     }
     handlerLock.unlock();
+    std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
+    std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
+    lock.unlock();
     sptr<NetLinkInfo> tmpInfo = nullptr;
     if (info != nullptr) {
         tmpInfo = sptr<NetLinkInfo>::MakeSptr(*info);
     }
-    std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
-    std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
-    return SubmitDispatch([tmpList, netId = netHandle->GetNetId(), tmpInfo]() {
+    if (ffrtQueue_ == nullptr) {
+        NETMGR_LOG_E("ffrtQueue_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    ffrtQueue_->submit([tmpList, netId = netHandle->GetNetId(), tmpInfo]() {
         auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
         for (auto &cb : tmpList) {
             cb->NetConnectionPropertiesChange(tmpNetHandler, tmpInfo);
         }
     });
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnClient::NetConnCallbackManager::NetLost(sptr<NetHandle> &netHandle)
@@ -1901,12 +1885,18 @@ int32_t NetConnClient::NetConnCallbackManager::NetLost(sptr<NetHandle> &netHandl
     handlerLock.unlock();
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
-    return SubmitDispatch([tmpList, netId = netHandle->GetNetId()]() {
+    lock.unlock();
+    if (ffrtQueue_ == nullptr) {
+        NETMGR_LOG_E("ffrtQueue_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    ffrtQueue_->submit([tmpList, netId = netHandle->GetNetId()]() {
         auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
         for (auto &cb : tmpList) {
             cb->NetLost(tmpNetHandler);
         }
     });
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnClient::NetConnCallbackManager::NetUnavailable()
@@ -1917,23 +1907,35 @@ int32_t NetConnClient::NetConnCallbackManager::NetUnavailable()
     handlerLock.unlock();
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
-    return SubmitDispatch([tmpList]() {
+    lock.unlock();
+    if (ffrtQueue_ == nullptr) {
+        NETMGR_LOG_E("ffrtQueue_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    ffrtQueue_->submit([tmpList]() {
         for (auto &cb : tmpList) {
             cb->NetUnavailable();
         }
     });
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnClient::NetConnCallbackManager::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
 {
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
-    return SubmitDispatch([tmpList, netId = netHandle->GetNetId(), blocked]() {
+    lock.unlock();
+    if (ffrtQueue_ == nullptr) {
+        NETMGR_LOG_E("ffrtQueue_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    ffrtQueue_->submit([tmpList, netId = netHandle->GetNetId(), blocked]() {
         auto tmpNetHandler = sptr<NetHandle>::MakeSptr(netId);
         for (auto &cb : tmpList) {
             cb->NetBlockStatusChange(tmpNetHandler, blocked);
         }
     });
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnClient::NetConnCallbackManager::AddNetConnCallback(const sptr<INetConnCallback> &callback)
@@ -1959,7 +1961,11 @@ int32_t NetConnClient::NetConnCallbackManager::AddNetConnCallback(const sptr<INe
     handlerLock.unlock();
 // LCOV_EXCL_START
 #ifndef NETMANAGER_TEST
-    return SubmitDispatch([callback, tempNetHandler, tempNetAllCap, tempNetLinkInfo]() {
+    if (ffrtQueue_ == nullptr) {
+        NETMGR_LOG_E("ffrtQueue_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    ffrtQueue_->submit([callback, tempNetHandler, tempNetAllCap, tempNetLinkInfo]() {
         if (tempNetHandler != nullptr) {
             sptr<NetHandle> netHandler = sptr<NetHandle>::MakeSptr(tempNetHandler->GetNetId());
             callback->NetAvailable(netHandler);
