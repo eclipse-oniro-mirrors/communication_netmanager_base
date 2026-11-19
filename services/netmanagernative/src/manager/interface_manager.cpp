@@ -251,7 +251,9 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
         }
     }
 
-    int32_t sendRet = SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    int32_t sendRet = action == RTM_DELADDR
+        ? SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage(), 0, true)
+        : SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
     NETNATIVE_LOGI("ModifyAddress:%{public}u %{public}s %{public}s %{public}d, %{public}d", action, interfaceName,
                    ToAnonymousIp(addr).c_str(), prefixLen, sendRet);
     // LCOV_EXCL_START

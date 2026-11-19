@@ -76,19 +76,19 @@ extern "C" int32_t RealClearRouteInfo(uint16_t, uint32_t)
     __asm__("__real__ZN4OHOS3nmd14ClearRouteInfoEtj");
 extern "C" int32_t WrapClearRouteInfo(uint16_t, uint32_t)
     __asm__("__wrap__ZN4OHOS3nmd14ClearRouteInfoEtj");
-extern "C" int32_t RealSendNetlinkMsg(nlmsghdr *, uint32_t)
-    __asm__("__real__ZN4OHOS3nmd22SendNetlinkMsgToKernelEP8nlmsghdrj");
-extern "C" int32_t WrapSendNetlinkMsg(nlmsghdr *, uint32_t)
-    __asm__("__wrap__ZN4OHOS3nmd22SendNetlinkMsgToKernelEP8nlmsghdrj");
+extern "C" int32_t RealSendNetlinkMsg(nlmsghdr *, uint32_t, bool)
+    __asm__("__real__ZN4OHOS3nmd22SendNetlinkMsgToKernelEP8nlmsghdrjb");
+extern "C" int32_t WrapSendNetlinkMsg(nlmsghdr *, uint32_t, bool)
+    __asm__("__wrap__ZN4OHOS3nmd22SendNetlinkMsgToKernelEP8nlmsghdrjb");
 
 int32_t WrapClearRouteInfo(uint16_t type, uint32_t table)
 {
     return g_isolateDnsFamilyNetwork ? 0 : RealClearRouteInfo(type, table);
 }
 
-int32_t WrapSendNetlinkMsg(nlmsghdr *message, uint32_t table)
+int32_t WrapSendNetlinkMsg(nlmsghdr *message, uint32_t table, bool needAck)
 {
-    return g_isolateDnsFamilyNetwork ? 0 : RealSendNetlinkMsg(message, table);
+    return g_isolateDnsFamilyNetwork ? 0 : RealSendNetlinkMsg(message, table, needAck);
 }
 
 class NetsysDnsFamilyServiceTest : public testing::Test {

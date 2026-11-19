@@ -78,7 +78,7 @@ static ssize_t SendMsgToKernel(struct nlmsghdr *msg, int32_t &kernelSocket)
     return msgState;
 }
 
-int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg, uint32_t table)
+int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg, uint32_t table, bool needAck)
 {
     if (msg == nullptr) {
         NETNATIVE_LOGE("[NetlinkSocket] msg can not be null ");
@@ -95,7 +95,7 @@ int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg, uint32_t table)
         close(kernelSocket);
         return -1;
     }
-    if (msg->nlmsg_flags & NLM_F_DUMP) {
+    if ((msg->nlmsg_flags & NLM_F_DUMP) || needAck) {
         msgState = GetInfoFromKernel(kernelSocket, msg->nlmsg_type, table);
     }
     if (msgState != 0) {

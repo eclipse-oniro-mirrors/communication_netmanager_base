@@ -222,7 +222,7 @@ ohos_unittest("netsys_native_manager_netsys_native_service_test") {
   # NetManagerNative. All other fixtures still call the real functions.
   ldflags = [
     "-Wl,--wrap=_ZN4OHOS3nmd14ClearRouteInfoEtj",
-    "-Wl,--wrap=_ZN4OHOS3nmd22SendNetlinkMsgToKernelEP8nlmsghdrj",
+    "-Wl,--wrap=_ZN4OHOS3nmd22SendNetlinkMsgToKernelEP8nlmsghdrjb",
   ]
 
   include_dirs = [
