@@ -61,7 +61,7 @@ inline bool IsTrustedVpnFdClient(int32_t clientFd, int32_t &peerUid)
     if (getsockopt(clientFd, SOL_SOCKET, SO_PEERCRED, &cred, &len) != 0) {
         return false;
     }
-    peerUid = cred.uid;
+    peerUid = static_cast<int32_t>(cred.uid);
     return peerUid == NETMANAGER_VPN_UID || peerUid == NETSYSNATIVE_VPN_UID;
 }
 #endif // CROSS_PLATFORM

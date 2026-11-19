@@ -375,7 +375,7 @@ void VpnManager::StartUnixSocketListen()
             usleep(10000);
             continue;
         }
-        if (fds[1].revents & POLLIN) {
+        if (static_cast<unsigned short>(fds[1].revents) & POLLIN) {
             eventfd_t val = 0;
             (void)read(stopFd, &val, sizeof(val));
             std::lock_guard<std::mutex> lock(listenMutex_);
@@ -385,7 +385,7 @@ void VpnManager::StartUnixSocketListen()
             }
             continue;
         }
-        if ((fds[0].revents & POLLIN) == 0) {
+        if ((static_cast<unsigned short>(fds[0].revents) & POLLIN) == 0) {
             continue;
         }
         int32_t clientFd = accept(serverfd, reinterpret_cast<sockaddr *>(&clientAddr), &len);
