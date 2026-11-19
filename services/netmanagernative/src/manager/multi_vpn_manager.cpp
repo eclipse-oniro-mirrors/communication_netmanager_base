@@ -468,7 +468,7 @@ std::string MultiVpnManager::ReceiveClientRequest(int32_t clientFd)
     pfd.fd = clientFd;
     pfd.events = POLLIN;
     int32_t ret = poll(&pfd, 1, CLIENT_REQUEST_TIMEOUT_MS);
-    if (ret <= 0 || (pfd.revents & POLLIN) == 0) {
+    if (ret <= 0 || (static_cast<unsigned short>(pfd.revents) & POLLIN) == 0) {
         return "";
     }
     char buf[IFNAMSIZ] = {0};
@@ -617,7 +617,7 @@ void MultiVpnManager::StartMultiVpnSocketListen()
             usleep(10000);
             continue;
         }
-        if (fds[1].revents & POLLIN) {
+        if (static_cast<unsigned short>(fds[1].revents) & POLLIN) {
             eventfd_t val = 0;
             (void)read(stopFd, &val, sizeof(val));
             std::lock_guard<std::mutex> autoLock(mutex_);
@@ -627,7 +627,7 @@ void MultiVpnManager::StartMultiVpnSocketListen()
             }
             continue;
         }
-        if ((fds[0].revents & POLLIN) == 0) {
+        if ((static_cast<unsigned short>(fds[0].revents) & POLLIN) == 0) {
             continue;
         }
         int32_t clientFd = accept(serverfd, reinterpret_cast<sockaddr *>(&clientAddr), &len);
