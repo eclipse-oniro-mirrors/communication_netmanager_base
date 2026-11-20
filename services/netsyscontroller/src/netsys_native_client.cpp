@@ -344,7 +344,6 @@ int32_t NetsysNativeClient::SetInternetPermission(uint32_t uid, uint8_t allow)
 
 int32_t NetsysNativeClient::NetworkCreatePhysical(int32_t netId, int32_t permission)
 {
-    NETMGR_LOG_I("Create Physical network: netId[%{public}d], permission[%{public}d]", netId, permission);
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -355,7 +354,6 @@ int32_t NetsysNativeClient::NetworkCreatePhysical(int32_t netId, int32_t permiss
 
 int32_t NetsysNativeClient::NetworkCreateVirtual(int32_t netId, bool hasDns)
 {
-    NETMGR_LOG_I("Create Virtual network: netId[%{public}d], hasDns[%{public}d]", netId, hasDns);
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -366,7 +364,6 @@ int32_t NetsysNativeClient::NetworkCreateVirtual(int32_t netId, bool hasDns)
 
 int32_t NetsysNativeClient::NetworkDestroy(int32_t netId, bool isVpnNet)
 {
-    NETMGR_LOG_I("Destroy network: netId[%{public}d]", netId);
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -456,8 +453,6 @@ int32_t NetsysNativeClient::NetworkDelUids(int32_t netId, const std::vector<UidR
 int32_t NetsysNativeClient::NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType,
     bool isLocalNetworkRouted)
 {
-    NETMGR_LOG_I("Add network interface: netId[%{public}d], iface[%{public}s, bearerType[%{public}u]]", netId,
-                 iface.c_str(), netBearerType);
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -468,7 +463,6 @@ int32_t NetsysNativeClient::NetworkAddInterface(int32_t netId, const std::string
 
 int32_t NetsysNativeClient::NetworkRemoveInterface(int32_t netId, const std::string &iface)
 {
-    NETMGR_LOG_I("Remove network interface: netId[%{public}d], iface[%{public}s]", netId, iface.c_str());
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -480,9 +474,6 @@ int32_t NetsysNativeClient::NetworkRemoveInterface(int32_t netId, const std::str
 int32_t NetsysNativeClient::NetworkAddRoute(int32_t netId, const std::string &ifName, const std::string &destination,
                                             const std::string &nextHop, bool isExcludedRoute)
 {
-    NETMGR_LOG_I("Add Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s], \
-        isExcludedRoute[%{public}d]", netId, ifName.c_str(), ToAnonymousIp(destination).c_str(),
-        ToAnonymousIp(nextHop).c_str(), isExcludedRoute);
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");

@@ -286,8 +286,6 @@ int32_t NetsysBpfStats::GetCookieStats(uint64_t &stats, StatsType statsType, uin
 // write taffic available value map.  update by timer/settings modify/network changed
 int32_t NetsysBpfStats::SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic)
 {
-    NETNATIVE_LOGI("NetsysBpfStats::SetNetStateTrafficMap start. flag:%{public}u, availableTraffic:%{public}" PRIu64,
-        flag, availableTraffic);
 
     BpfMapper<traffic_notify_flag, traffic_value> netStatsTrafficMap(LIMITS_STATS_MAP_PATH, BPF_F_WRONLY);
     if (!netStatsTrafficMap.IsValid()) {

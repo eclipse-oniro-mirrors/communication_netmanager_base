@@ -147,7 +147,6 @@ int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &com
 
 std::string IptablesWrapper::RunCommandForRes(const IpType &ipType, const std::string &command)
 {
-    NETNATIVE_LOGI("IptablesWrapper::RunCommandForRes, ipType:%{public}d", ipType);
     if (!iptablesWrapperFfrtQueue_) {
         NETNATIVE_LOGE("FFRT Init Fail");
         return result_;

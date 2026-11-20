@@ -38,7 +38,6 @@ int32_t NetsysControllerServiceImpl::SetInternetPermission(uint32_t uid, uint8_t
 
 int32_t NetsysControllerServiceImpl::NetworkCreatePhysical(int32_t netId, int32_t permission)
 {
-    NETMGR_LOG_I("Create Physical network: netId[%{public}d], permission[%{public}d]", netId, permission);
     if (mockNetsysClient_.CheckMockApi(MOCK_NETWORKCREATEPHYSICAL_API)) {
         return mockNetsysClient_.NetworkCreatePhysical(netId, permission);
     }
@@ -47,13 +46,11 @@ int32_t NetsysControllerServiceImpl::NetworkCreatePhysical(int32_t netId, int32_
 
 int32_t NetsysControllerServiceImpl::NetworkCreateVirtual(int32_t netId, bool hasDns)
 {
-    NETMGR_LOG_I("Create Virtual network: netId[%{public}d], hasDns[%{public}d]", netId, hasDns);
     return netsysClient_->NetworkCreateVirtual(netId, hasDns);
 }
 
 int32_t NetsysControllerServiceImpl::NetworkDestroy(int32_t netId, bool isVpnNet)
 {
-    NETMGR_LOG_I("Destroy network: netId[%{public}d]", netId);
     if (mockNetsysClient_.CheckMockApi(MOCK_NETWORKDESTROY_API)) {
         return mockNetsysClient_.NetworkDestroy(netId);
     }
@@ -63,13 +60,11 @@ int32_t NetsysControllerServiceImpl::NetworkDestroy(int32_t netId, bool isVpnNet
 int32_t NetsysControllerServiceImpl::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
                                                 const std::set<int32_t> &uids)
 {
-    NETMGR_LOG_I("Create Vnic network");
     return netsysClient_->CreateVnic(mtu, tunAddr, prefix, uids);
 }
 
 int32_t NetsysControllerServiceImpl::DestroyVnic()
 {
-    NETMGR_LOG_I("Destroy Vnic network");
     return netsysClient_->DestroyVnic();
 }
 
@@ -109,8 +104,6 @@ int32_t NetsysControllerServiceImpl::NetworkDelUids(int32_t netId, const std::ve
 int32_t NetsysControllerServiceImpl::NetworkAddInterface(int32_t netId, const std::string &iface,
     NetBearType netBearerType, bool isLocalNetworkRouted)
 {
-    NETMGR_LOG_I("Add network interface: netId[%{public}d], iface[%{public}s]", netId,
-                 iface.c_str());
     if (mockNetsysClient_.CheckMockApi(MOCK_NETWORKADDINTERFACE_API)) {
         return mockNetsysClient_.NetworkAddInterface(netId, iface, netBearerType);
     }
@@ -119,7 +112,6 @@ int32_t NetsysControllerServiceImpl::NetworkAddInterface(int32_t netId, const st
 
 int32_t NetsysControllerServiceImpl::NetworkRemoveInterface(int32_t netId, const std::string &iface)
 {
-    NETMGR_LOG_I("Remove network interface: netId[%{public}d], iface[%{public}s]", netId, iface.c_str());
     if (mockNetsysClient_.CheckMockApi(MOCK_NETWORKREMOVEINTERFACE_API)) {
         return mockNetsysClient_.NetworkRemoveInterface(netId, iface);
     }
@@ -167,13 +159,11 @@ int32_t NetsysControllerServiceImpl::GetInterfaceConfig(OHOS::nmd::InterfaceConf
 
 int32_t NetsysControllerServiceImpl::SetInterfaceConfig(const OHOS::nmd::InterfaceConfigurationParcel &cfg)
 {
-    NETMGR_LOG_I("Interface set config");
     return netsysClient_->SetInterfaceConfig(cfg);
 }
 
 int32_t NetsysControllerServiceImpl::SetInterfaceDown(const std::string &iface)
 {
-    NETMGR_LOG_I("Set interface down: iface[%{public}s]", iface.c_str());
     if (mockNetsysClient_.CheckMockApi(MOCK_SETINTERFACEDOWN_API)) {
         return mockNetsysClient_.SetInterfaceDown(iface);
     }
@@ -182,7 +172,6 @@ int32_t NetsysControllerServiceImpl::SetInterfaceDown(const std::string &iface)
 
 int32_t NetsysControllerServiceImpl::SetInterfaceUp(const std::string &iface)
 {
-    NETMGR_LOG_I("Set interface up: iface[%{public}s]", iface.c_str());
     if (mockNetsysClient_.CheckMockApi(MOCK_SETINTERFACEUP_API)) {
         return mockNetsysClient_.SetInterfaceUp(iface);
     }
@@ -191,7 +180,6 @@ int32_t NetsysControllerServiceImpl::SetInterfaceUp(const std::string &iface)
 
 void NetsysControllerServiceImpl::ClearInterfaceAddrs(const std::string &ifName)
 {
-    NETMGR_LOG_I("Clear addrs: ifName[%{public}s]", ifName.c_str());
     if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACECLEARADDRS_API)) {
         return mockNetsysClient_.ClearInterfaceAddrs(ifName);
     }
@@ -200,7 +188,6 @@ void NetsysControllerServiceImpl::ClearInterfaceAddrs(const std::string &ifName)
 
 int32_t NetsysControllerServiceImpl::GetInterfaceMtu(const std::string &ifName)
 {
-    NETMGR_LOG_I("Get mtu: ifName[%{public}s]", ifName.c_str());
     if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACEGETMTU_API)) {
         return mockNetsysClient_.GetInterfaceMtu(ifName);
     }
@@ -209,7 +196,6 @@ int32_t NetsysControllerServiceImpl::GetInterfaceMtu(const std::string &ifName)
 
 int32_t NetsysControllerServiceImpl::SetInterfaceMtu(const std::string &ifName, int32_t mtu)
 {
-    NETMGR_LOG_I("Set mtu: ifName[%{public}s], mtu[%{public}d]", ifName.c_str(), mtu);
     if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACESETMTU_API)) {
         return mockNetsysClient_.SetInterfaceMtu(ifName, mtu);
     }
@@ -218,15 +204,12 @@ int32_t NetsysControllerServiceImpl::SetInterfaceMtu(const std::string &ifName, 
 
 int32_t NetsysControllerServiceImpl::SetTcpBufferSizes(const std::string &tcpBufferSizes)
 {
-    NETMGR_LOG_I("Set tcp buffer sizes: tcpBufferSizes[%{public}s]", tcpBufferSizes.c_str());
     return netsysClient_->SetTcpBufferSizes(tcpBufferSizes);
 }
 
 int32_t NetsysControllerServiceImpl::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                                          int32_t prefixLength)
 {
-    NETMGR_LOG_I("Add address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
-                 ToAnonymousIp(ipAddr).c_str(), prefixLength);
     if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACEADDADDRESS_API)) {
         return mockNetsysClient_.AddInterfaceAddress(ifName, ipAddr, prefixLength);
     }
@@ -236,8 +219,6 @@ int32_t NetsysControllerServiceImpl::AddInterfaceAddress(const std::string &ifNa
 int32_t NetsysControllerServiceImpl::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                                          int32_t prefixLength)
 {
-    NETMGR_LOG_I("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
-                 ToAnonymousIp(ipAddr).c_str(), prefixLength);
     if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACEDELADDRESS_API)) {
         return mockNetsysClient_.DelInterfaceAddress(ifName, ipAddr, prefixLength);
     }
@@ -247,8 +228,6 @@ int32_t NetsysControllerServiceImpl::DelInterfaceAddress(const std::string &ifNa
 int32_t NetsysControllerServiceImpl::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                                          int32_t prefixLength, int socketType)
 {
-    NETMGR_LOG_I("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
-                 ToAnonymousIp(ipAddr).c_str(), prefixLength);
     if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACEDELADDRESS_API)) {
         return mockNetsysClient_.DelInterfaceAddress(ifName, ipAddr, prefixLength);
     }
@@ -272,7 +251,6 @@ int32_t NetsysControllerServiceImpl::SetResolverConfig(uint16_t netId, uint16_t 
                                                        const std::vector<std::string> &servers,
                                                        const std::vector<std::string> &domains)
 {
-    NETMGR_LOG_I("Set resolver config: netId[%{public}d]", netId);
     if (mockNetsysClient_.CheckMockApi(MOCK_SETRESOLVERCONFIG_API)) {
         return mockNetsysClient_.SetResolverConfig(netId, baseTimeoutMsec, retryCount, servers, domains);
     }
@@ -283,7 +261,6 @@ int32_t NetsysControllerServiceImpl::GetResolverConfig(uint16_t netId, std::vect
                                                        std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
                                                        uint8_t &retryCount)
 {
-    NETMGR_LOG_I("Get resolver config: netId[%{public}d]", netId);
     if (mockNetsysClient_.CheckMockApi(MOCK_GETRESOLVERICONFIG_API)) {
         return mockNetsysClient_.GetResolverConfig(netId, servers, domains, baseTimeoutMsec, retryCount);
     }
@@ -292,7 +269,6 @@ int32_t NetsysControllerServiceImpl::GetResolverConfig(uint16_t netId, std::vect
 
 int32_t NetsysControllerServiceImpl::CreateNetworkCache(uint16_t netId, bool isVpnNet)
 {
-    NETMGR_LOG_I("create dns cache: netId[%{public}d]", netId);
     if (mockNetsysClient_.CheckMockApi(MOCK_CREATENETWORKCACHE_API)) {
         return mockNetsysClient_.CreateNetworkCache(netId);
     }
@@ -423,13 +399,11 @@ int64_t NetsysControllerServiceImpl::GetIfaceTxBytes(const std::string &interfac
 
 std::vector<std::string> NetsysControllerServiceImpl::InterfaceGetList()
 {
-    NETMGR_LOG_I("InterfaceGetList");
     return netsysClient_->InterfaceGetList();
 }
 
 std::vector<std::string> NetsysControllerServiceImpl::UidGetList()
 {
-    NETMGR_LOG_I("UidGetList");
     if (mockNetsysClient_.CheckMockApi(MOCK_UIDGETLIST_API)) {
         return mockNetsysClient_.UidGetList();
     }

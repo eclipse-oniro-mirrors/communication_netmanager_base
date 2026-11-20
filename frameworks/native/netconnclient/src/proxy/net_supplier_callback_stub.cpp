@@ -19,6 +19,8 @@
 
 static constexpr uint32_t MAX_NET_CAP_NUM = 32;
 static constexpr uint32_t MAX_NET_BEARTYPE_NUM = 7;
+// 回调耗时超过该阈值才打印，正常回调不再逐次打印，慢回调仍可定位
+static constexpr int64_t SLOW_CALLBACK_COST_NS = 100 * 1000 * 1000;
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -192,7 +194,9 @@ int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const 
         callback_->RequestNetwork(ident, netCaps, netrequest);
         auto endTime = std::chrono::steady_clock::now();
         auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
-        NETMGR_LOG_I("RequestNetwork[%{public}s], cost=%{public}lld", ident.c_str(), durationNs.count());
+        if (durationNs.count() >= SLOW_CALLBACK_COST_NS) {
+            NETMGR_LOG_I("RequestNetwork[%{public}s], cost=%{public}lld", ident.c_str(), durationNs.count());
+        }
     }
     return 0;
 }
@@ -204,7 +208,9 @@ int32_t NetSupplierCallbackStub::ReleaseNetwork(const NetRequest &netrequest)
         callback_->ReleaseNetwork(netrequest);
         auto endTime = std::chrono::steady_clock::now();
         auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
-        NETMGR_LOG_I("ReleaseNetwork[%{public}s], cost=%{public}lld", netrequest.ident.c_str(), durationNs.count());
+        if (durationNs.count() >= SLOW_CALLBACK_COST_NS) {
+            NETMGR_LOG_I("ReleaseNetwork[%{public}s], cost=%{public}lld", netrequest.ident.c_str(), durationNs.count());
+        }
     }
     return 0;
 }
