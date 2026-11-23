@@ -63,6 +63,10 @@ constexpr int32_t MAX_IPV4_DNS_NUM = 5;
 constexpr int32_t MAX_IPV6_DNS_NUM = 2;
 constexpr int32_t MAX_ROUTE_ADDRESS_LENGTH = 4096;
 constexpr int32_t MAX_IPV6_PREFIX_LENGTH = 128;
+// Keys of the parameters carried by the connectivity change common event.
+constexpr const char *NET_PARAM_KEY_NET_TYPE = "NetType";
+constexpr const char *NET_PARAM_KEY_IS_SUPPORT_INTERNET = "isSupportInternet";
+constexpr const char *NET_PARAM_KEY_IS_INTERNAL_DEFAULT = "isInternalDefault";
 enum SocketDestroyType {
     DESTROY_DEFAULT_CELLULAR,
     DESTROY_SPECIAL_CELLULAR,
@@ -1033,7 +1037,15 @@ void Network::SendConnectionChangedBroadcast(const NetConnState &netConnState) c
     info.data = "Net Manager Connection State Changed";
     info.code = static_cast<int32_t>(netConnState);
     info.ordered = false;
-    std::map<std::string, int32_t> param = {{"NetType", static_cast<int32_t>(netSupplierType_)}};
+    std::map<std::string, int32_t> param = {
+        {NET_PARAM_KEY_NET_TYPE, static_cast<int32_t>(netSupplierType_)},
+        {NET_PARAM_KEY_IS_SUPPORT_INTERNET, static_cast<int32_t>(isSupportInternet_)},
+        {NET_PARAM_KEY_IS_INTERNAL_DEFAULT, static_cast<int32_t>(isInternalDefault_)},
+    };
+    NETMGR_LOG_I("Send connection changed broadcast, netId: %{public}d, netType: %{public}d, "
+        "state: %{public}d, isSupportInternet: %{public}d, isInternalDefault: %{public}d", netId_,
+        static_cast<int32_t>(netSupplierType_), info.code, static_cast<int32_t>(isSupportInternet_),
+        static_cast<int32_t>(isInternalDefault_));
     BroadcastManager::GetInstance().SendBroadcast(info, param);
 }
 
