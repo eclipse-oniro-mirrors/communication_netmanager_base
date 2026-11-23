@@ -42,6 +42,16 @@ constexpr uint8_t MULTIPLE_IP = 2;
 constexpr int32_t IPV6_ARRAY_SIZE = 16;
 constexpr uint32_t NFQ_MAX_QUEUES = 64;
 
+/* Reserved firewall default-action userId keys: the
+ * user-space/ext-side contract for configuring the fallback actions of
+ * unattributed traffic and system-identity traffic.
+ * The BPF map keys are 0xFFFFFFFF (BPF-side sentinel UID_UNATTRIBUTED,
+ * services/netmanagernative/bpf/include/netfirewall/netfirewall_types.h)
+ * and 1. Keep in sync — covered by netsys_netfirewall_test
+ * FirewallReservedKeyConstants001. */
+constexpr int32_t FIREWALL_SYSTEM_USER_ID = 1;
+constexpr int32_t FIREWALL_UNATTRIBUTED_USER_ID = -1; /* 0xFFFFFFFF over the int32_t IPC */
+
 constexpr const char *COMMA = ",";
 constexpr const char *NET_FIREWALL_IS_OPEN = "isOpen";
 constexpr const char *NET_FIREWALL_IN_ACTION = "inAction";

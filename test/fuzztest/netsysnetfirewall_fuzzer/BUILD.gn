@@ -57,7 +57,8 @@ ohos_fuzztest("NetSysNetFirewallFuzzTest") {
     # Compiled locally with NETMANAGER_FUZZ_TEST_ENABLE so the stub's inline uid checks are
     # skipped for fuzzing. The copy in netsys_native_manager_static is replaced at link time.
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys_native_service_stub.cpp",
-    "netsys_netfirewall_fuzzer.cpp"
+    "netsys_netfirewall_fuzzer.cpp",
+    "netsys_dns_fuzz.cpp",
   ]
 
   deps = [

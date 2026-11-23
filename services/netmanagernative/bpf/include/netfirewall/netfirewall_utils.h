@@ -17,10 +17,13 @@
 
 #include <stdint.h>
 #include <sys/socket.h>
-#include <bpf/bpf_endian.h>
+/* bpf_endian.h lives on the BPF-only include path (third_party/libbpf); utils.h
+ * itself uses no bpf_*_ntohs macro (the parser uses __builtin_bswap16 on
+ * purpose), and downstream BPF headers still get the transitive include. */
+#ifdef __BPF__
+#include <bpf_endian.h>
+#endif
 #include <linux/bpf.h>
-#include <linux/icmp.h>
-#include <linux/icmpv6.h>
 #include <linux/if_ether.h>
 #include <linux/if_packet.h>
 #include <linux/if_vlan.h>
@@ -31,15 +34,15 @@
 #include <linux/ipv6.h>
 #include <linux/tc_act/tc_bpf.h>
 #include <linux/tcp.h>
-#include <linux/udp.h>
 #include <stdbool.h>
+#include "netinet/udp.h"
+
+#include "netfirewall_types.h"
+#include "netfirewall_l4_parse.h"
 
 #define TCP_FLAGS_OFFSET 12
 #define TCP_FLAGS_SIZE 2
-#define VERSION_IPV4 4
-#define VERSION_OFFSET 4
 
-#define L3_NHOFF 0
 #define L4_NHOFF(ipv4) (L3_NHOFF + ((ipv4) ? sizeof(struct iphdr) : sizeof(struct ipv6hdr)))
 
 union tcp_flags {
@@ -52,43 +55,22 @@ union tcp_flags {
 };
 
 /**
- * @brief judget given skb is ipv4 packet, even if its family is AF_INET6
- *
- * @param skb struct __sk_buff
- * @return true if it is ipv4 packet, otherwise false
- */
-static __always_inline bool is_ipv4_format_skb(struct __sk_buff *skb)
-{
-    if (!skb) {
-        return false;
-    }
-    if (skb->family == AF_INET) {
-        return true;
-    }
-    if (skb->family == AF_INET6) {
-        uint8_t version = { 0 };
-        bpf_skb_load_bytes(skb, 0, &version, sizeof(uint8_t));
-        return ((version >> VERSION_OFFSET) == VERSION_IPV4);
-    }
-    return false;
-}
-
-/**
  * @brief judget given skb is a layler 4 protocol or not
  *
+ * @param family socket family, read once at program entry (see skb_family())
  * @param skb struct __sk_buff
  * @param l3_nhoff layer 3 network header offset
  * @param protocol layer 4 protocol number
  * @return true if match, otherwise false
  */
-static __always_inline bool is_l4_protocol(struct __sk_buff *skb, __u32 l3_nhoff, __u8 protocol)
+static __always_inline bool is_l4_protocol(__u32 family, struct __sk_buff *skb, __u32 l3_nhoff, __u8 protocol)
 {
-    if (is_ipv4_format_skb(skb)) {
+    if (is_ipv4_format(family, skb)) {
         struct iphdr iph = { 0 };
         bpf_skb_load_bytes(skb, l3_nhoff, &iph, sizeof(struct iphdr));
 
         return iph.protocol == protocol;
-    } else if (skb->family == AF_INET6) {
+    } else if (family == AF_INET6) {
         struct ipv6hdr ip6h = { 0 };
         bpf_skb_load_bytes(skb, l3_nhoff, &ip6h, sizeof(struct ipv6hdr));
 
@@ -114,12 +96,13 @@ static __always_inline __u32 get_l3_nhoff(struct __sk_buff *skb)
  * Get the layer 4 network header offset
  * offset
  *
+ * @param family socket family, read once at program entry (see skb_family())
  * @param skb struct __sk_buff
  * @return layer 4 network header offset
  */
-static __always_inline __u32 get_l4_nhoff(struct __sk_buff *skb)
+static __always_inline __u32 get_l4_nhoff(__u32 family, struct __sk_buff *skb)
 {
-    return L4_NHOFF(is_ipv4_format_skb(skb));
+    return L4_NHOFF(is_ipv4_format(family, skb));
 }
 
 /**
@@ -136,49 +119,24 @@ static __always_inline int load_tcp_flags(struct __sk_buff *skb, __u32 l4_nhoff,
 }
 
 /**
- * @brief load layer 4 protocol from given skb
- *
- * @param skb struct __sk_buff
- * @param l3_nhoff layer 3 network header offset
- * @param protocol out layer 4 protocol
- * @return true if success or false if an error occurred
- */
-static __always_inline bool load_l4_protocol(const struct __sk_buff *skb, __u32 l3_nhoff, __u8 *protocol)
-{
-    if (is_ipv4_format_skb(skb)) {
-        struct iphdr iph = { 0 };
-        bpf_skb_load_bytes(skb, l3_nhoff, &iph, sizeof(struct iphdr));
-
-        *protocol = iph.protocol;
-        return true;
-    } else if (skb->family == AF_INET6) {
-        struct ipv6hdr ip6h = { 0 };
-        bpf_skb_load_bytes(skb, l3_nhoff, &ip6h, sizeof(struct ipv6hdr));
-
-        *protocol = ip6h.nexthdr;
-        return true;
-    }
-
-    return false;
-}
-
-/**
  * @brief load layer 3 ipv4 addrs from given skb
  *
+ * @param family socket family, read once at program entry (see skb_family())
  * @param skb struct __sk_buff
  * @param l3_nhoff layer 3 network header offset
  * @param saddr out saddr
  * @param daddr out daddr
  * @return true if success or false if an error occurred
  */
-static __always_inline bool load_l3_v4_addrs(const struct __sk_buff *skb, __u32 l3_nhoff, __be32 *saddr, __be32 *daddr)
+static __always_inline bool load_l3_v4_addrs(__u32 family, const struct __sk_buff *skb, __u32 l3_nhoff, __be32 *saddr,
+    __be32 *daddr)
 {
     /*
-     * Caller must ensure the packet is ipv4 format (see is_ipv4_format_skb()).
+     * Caller must ensure the packet is ipv4 format (see is_ipv4_format()).
      * AF_INET6 is allowed here for v4-mapped packets from dual-stack sockets.
-     * Do not replace this gate with is_ipv4_format_skb(): it was measured to grow the BPF stack frame
+     * Do not replace this gate with is_ipv4_format(): it was measured to grow the BPF stack frame
      */
-    if (skb->family != AF_INET && skb->family != AF_INET6) {
+    if (family != AF_INET && family != AF_INET6) {
         return false;
     }
 
@@ -194,16 +152,17 @@ static __always_inline bool load_l3_v4_addrs(const struct __sk_buff *skb, __u32 
 /**
  * @brief load layer 3 ipv6 addrs from given skb
  *
+ * @param family socket family, read once at program entry (see skb_family())
  * @param skb struct __sk_buff
  * @param l3_nhoff layer 3 network header offset
  * @param saddr out saddr
  * @param daddr out daddr
  * @return true if success or false if an error occurred
  */
-static __always_inline bool load_l3_v6_addrs(const struct __sk_buff *skb, __u32 l3_nhoff, struct in6_addr *saddr,
-    struct in6_addr *daddr)
+static __always_inline bool load_l3_v6_addrs(__u32 family, const struct __sk_buff *skb, __u32 l3_nhoff,
+    struct in6_addr *saddr, struct in6_addr *daddr)
 {
-    if (skb->family != AF_INET6) {
+    if (family != AF_INET6) {
         return false;
     }
 
@@ -214,43 +173,6 @@ static __always_inline bool load_l3_v6_addrs(const struct __sk_buff *skb, __u32 
     *daddr = ip6h.daddr;
 
     return true;
-}
-
-/**
- * @brief load layer 4 icmp info from given skb
- *
- * @param skb struct __sk_buff
- * @param l4_nhoff layer 4 network header offset
- * @param protocol IPPROTO_ICMP or IPPROTO_ICMPV6
- * @param type out icmp type
- * @param code out icmp code
- * @return true if success or false if an error occurred
- */
-static __always_inline bool load_icmp_info(const struct __sk_buff *skb, __u32 l4_nhoff, __u8 protocol, __u8 *type,
-    __u8 *code)
-{
-    bool res = true;
-    switch (protocol) {
-        case IPPROTO_ICMP: {
-            struct icmphdr icmph = { 0 };
-            bpf_skb_load_bytes(skb, l4_nhoff, &icmph, sizeof(struct icmphdr));
-
-            *type = icmph.type;
-            *code = icmph.code;
-        } break;
-        case IPPROTO_ICMPV6: {
-            struct icmp6hdr icmph = { 0 };
-            bpf_skb_load_bytes(skb, l4_nhoff, &icmph, sizeof(struct icmp6hdr));
-
-            *type = icmph.icmp6_type;
-            *code = icmph.icmp6_code;
-        } break;
-        default:
-            res = false;
-            break;
-    }
-
-    return res;
 }
 
 /**
@@ -277,8 +199,13 @@ static __always_inline bool load_l4_ports(const struct __sk_buff *skb, __u32 l4_
         case IPPROTO_UDP: {
             struct udphdr udph = { 0 };
             bpf_skb_load_bytes(skb, l4_nhoff, &udph, sizeof(struct udphdr));
+#ifdef _GNU_SOURCE
             *sport = udph.source;
             *dport = udph.dest;
+#else
+            *sport = udph.uh_sport;
+            *dport = udph.uh_dport;
+#endif
         } break;
         default:
             res = false;

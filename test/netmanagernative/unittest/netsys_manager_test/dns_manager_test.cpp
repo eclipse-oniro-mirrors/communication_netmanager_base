@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#include <chrono>
 #include <gtest/gtest.h>
+#include <thread>
 
 #ifdef GTEST_API_
 #define private public
@@ -213,49 +215,63 @@ HWTEST_F(DnsManagerTest, SetFirewallRules001, TestSize.Level1)
 
 HWTEST_F(DnsManagerTest, SetFirewallRules002, TestSize.Level1)
 {
-    DnsManager dnsManager;
+    /* Ownership contract: the RULE_DOMAIN path calls shared_from_this()
+     * (pre-warm queue submit) — a stack-constructed DnsManager makes that
+     * throw bad_weak_ptr and abort the whole test binary (device run
+     * blocker). Own it by shared_ptr like every production holder. */
+    auto dnsManager = std::make_shared<DnsManager>();
     std::vector<sptr<NetFirewallBaseRule>> ruleList;
     ruleList.emplace_back(nullptr);
     auto domainRule = sptr<NetFirewallDomainRule>::MakeSptr();
     domainRule->ruleAction = FirewallRuleAction::RULE_DENY;
     ruleList.emplace_back(domainRule);
-    int32_t ret = dnsManager.SetFirewallRules(NetFirewallRuleType::RULE_DOMAIN, ruleList, false);
+    int32_t ret = dnsManager->SetFirewallRules(NetFirewallRuleType::RULE_DOMAIN, ruleList, false);
     EXPECT_EQ(ret, 0);
-    EXPECT_TRUE(dnsManager.firewallDomainRules_.empty());
-    ret = dnsManager.SetFirewallRules(NetFirewallRuleType::RULE_DOMAIN, ruleList, true);
+    EXPECT_TRUE(dnsManager->firewallDomainRules_.empty());
+    ret = dnsManager->SetFirewallRules(NetFirewallRuleType::RULE_DOMAIN, ruleList, true);
     EXPECT_EQ(ret, 0);
-    EXPECT_TRUE(dnsManager.firewallDomainRules_.empty());
+    EXPECT_TRUE(dnsManager->firewallDomainRules_.empty());
 }
 
 HWTEST_F(DnsManagerTest, SetFirewallRules003, TestSize.Level1)
 {
-    DnsManager dnsManager;
+    /* Same ownership contract as SetFirewallRules002 — shared_ptr owned.
+     * The pre-warm submit is async on the ffrt queue: give the worker a
+     * window before asserting on firewallDomainRules_. */
+    auto dnsManager = std::make_shared<DnsManager>();
     std::vector<sptr<NetFirewallBaseRule>> ruleList;
     auto domainRule = sptr<NetFirewallDomainRule>::MakeSptr();
     domainRule->ruleAction = FirewallRuleAction::RULE_ALLOW;
     ruleList.emplace_back(domainRule);
-    int32_t ret = dnsManager.SetFirewallRules(NetFirewallRuleType::RULE_DOMAIN, ruleList, false);
+    int32_t ret = dnsManager->SetFirewallRules(NetFirewallRuleType::RULE_DOMAIN, ruleList, false);
     EXPECT_EQ(ret, 0);
-    EXPECT_FALSE(dnsManager.firewallDomainRules_.empty());
-    ret = dnsManager.SetFirewallRules(NetFirewallRuleType::RULE_DOMAIN, ruleList, true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    EXPECT_FALSE(dnsManager->firewallDomainRules_.empty());
+    ret = dnsManager->SetFirewallRules(NetFirewallRuleType::RULE_DOMAIN, ruleList, true);
     EXPECT_EQ(ret, 0);
-    EXPECT_TRUE(dnsManager.firewallDomainRules_.empty());
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    EXPECT_TRUE(dnsManager->firewallDomainRules_.empty());
     NetFirewallDomainParam domains;
     domainRule->domains.emplace_back(domains);
-    ret = dnsManager.SetFirewallRules(NetFirewallRuleType::RULE_DOMAIN, ruleList, true);
+    ret = dnsManager->SetFirewallRules(NetFirewallRuleType::RULE_DOMAIN, ruleList, true);
     EXPECT_EQ(ret, 0);
-    EXPECT_TRUE(dnsManager.firewallDomainRules_.empty());
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    EXPECT_TRUE(dnsManager->firewallDomainRules_.empty());
 }
 
 HWTEST_F(DnsManagerTest, EeffectDomainRules001, TestSize.Level1)
 {
-    DnsManager dnsManager;
+    /* Same ownership contract as SetFirewallRules002 — shared_ptr owned
+     * (stack construction aborts via shared_from_this). Async submit:
+     * give the ffrt worker a window before asserting. */
+    auto dnsManager = std::make_shared<DnsManager>();
     std::vector<sptr<NetFirewallBaseRule>> ruleList;
     auto domainRule = sptr<NetFirewallDomainRule>::MakeSptr();
     domainRule->ruleAction = FirewallRuleAction::RULE_ALLOW;
     ruleList.emplace_back(domainRule);
-    dnsManager.EeffectDomainRules(NetFirewallRuleType::RULE_DOMAIN, ruleList, false);
-    EXPECT_FALSE(dnsManager.firewallDomainRules_.empty());
+    dnsManager->EeffectDomainRules(NetFirewallRuleType::RULE_DOMAIN, ruleList, false);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    EXPECT_FALSE(dnsManager->firewallDomainRules_.empty());
 }
 
 #endif

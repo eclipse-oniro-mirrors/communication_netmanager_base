@@ -19,8 +19,32 @@
 #include "netfirewall_ct_def.h"
 #include "netfirewall_ct_map.h"
 
-#define READ_ONCE(x) (*(volatile typeof(x) *)&(x))
-#define WRITE_ONCE(x, v) (*(volatile typeof(x) *)&(x)) = (v)
+/* __typeof__ (not plain typeof): the BPF C build runs in gnu mode where
+ * both spellings work, but the host C++ unit-test TU compiles this header
+ * under -std=c++17 where plain typeof is not a keyword; __typeof__ is
+ * accepted by clang in every language mode. */
+#define READ_ONCE(x) (*(volatile __typeof__(x) *)&(x))
+#define WRITE_ONCE(x, v) (*(volatile __typeof__(x) *)&(x)) = (v)
+
+/* The evaluated bits are bit-field members, which cannot be addressed
+ * (READ_ONCE/WRITE_ONCE take &(x)), so the hooks access them through the
+ * enclosing flag byte: offsetof(tx_seen_flag) - 1 is the byte holding the
+ * bit-fields (little-endian, single __u8 unit). Masks are defined beside the
+ * bit-field layout in netfirewall_ct_def.h (single source of truth). */
+#define CT_FLAGS_BYTE(entry) ((__u8 *)(entry) + __builtin_offsetof(struct ct_entry, tx_seen_flag) - 1)
+
+static __always_inline bool ct_evaluated(const struct ct_entry *entry, enum ct_dir dir)
+{
+    __u8 flags = READ_ONCE(*CT_FLAGS_BYTE(entry));
+    return (flags & (dir == CT_EGRESS ? CT_EGRESS_EVALUATED_MASK : CT_INGRESS_EVALUATED_MASK)) != 0;
+}
+
+static __always_inline void ct_set_evaluated(struct ct_entry *entry, enum ct_dir dir)
+{
+    __u8 *flagsByte = CT_FLAGS_BYTE(entry);
+    __u8 flags = READ_ONCE(*flagsByte);
+    WRITE_ONCE(*flagsByte, flags | (dir == CT_EGRESS ? CT_EGRESS_EVALUATED_MASK : CT_INGRESS_EVALUATED_MASK));
+}
 
 static __always_inline void reset_seen_flags(struct ct_entry *entry)
 {
@@ -142,6 +166,13 @@ static __always_inline bool ct_create_entry(struct ct_tuple *tuple, struct __sk_
 
     seen_flags.value |= is_tcp ? TCP_FLAG_SYN : 0;
     ct_update_timeout(&entry, is_tcp, dir, seen_flags);
+    /* The creating direction has just passed the full rule evaluation
+     * (ct_create_entry is only called on the PASS path of a CT_NEW packet). */
+    if (dir == CT_EGRESS) {
+        entry.egress_evaluated = 1;
+    } else {
+        entry.ingress_evaluated = 1;
+    }
 
     return bpf_map_update_elem(&CT_MAP, tuple, &entry, 0) == 0;
 }
@@ -149,21 +180,31 @@ static __always_inline bool ct_create_entry(struct ct_tuple *tuple, struct __sk_
 /**
  * @brief lookup from ct map by ct_tuple if found then update lifetime of connection
  *
+ * @param family socket family, read once at program entry (see skb_family())
  * @param skb struct __sk_buff
  * @param tuple struct ct_tuple
  * @param dir enum ct_dir
+ * @param entry_out optional out param: the hit ct_entry; NULL when the
+ *        entry is deleted inside (stale pointer) or on CT_NEW. The loopback swap
+ *        in ct_map_lookup_entry only mutates the tuple, never the value.
  * @return CT_NEW if not found, otherwise CT_RELATED, CT_REOPENED or CT_ESTABLISHED
  */
-static __always_inline enum ct_status ct_lookup_entry(struct __sk_buff *skb, const struct ct_tuple *tuple,
-    enum ct_dir dir)
+static __always_inline enum ct_status ct_lookup_entry(__u32 family, struct __sk_buff *skb, const struct ct_tuple *tuple,
+    enum ct_dir dir, struct ct_entry **entry_out)
 {
+    if (entry_out != NULL) {
+        *entry_out = NULL;
+    }
     struct ct_entry *entry = bpf_map_lookup_elem(&CT_MAP, tuple);
     if (entry) {
+        if (entry_out != NULL) {
+            *entry_out = entry;
+        }
         __u32 l3_nhoff = get_l3_nhoff(skb);
-        bool is_tcp = is_l4_protocol(skb, l3_nhoff, IPPROTO_TCP);
+        bool is_tcp = is_l4_protocol(family, skb, l3_nhoff, IPPROTO_TCP);
         union tcp_flags seen_flags = {};
         if (is_tcp) {
-            __u32 l4_nhoff = get_l4_nhoff(skb);
+            __u32 l4_nhoff = get_l4_nhoff(family, skb);
             if (load_tcp_flags(skb, l4_nhoff, &seen_flags) < 0) {
                 return CT_RELATED;
             }
@@ -196,6 +237,9 @@ static __always_inline enum ct_status ct_lookup_entry(struct __sk_buff *skb, con
                     break;
                 }
                 bpf_map_delete_elem(&CT_MAP, tuple);
+                if (entry_out != NULL) {
+                    *entry_out = NULL; /* entry deleted: pointer would be stale */
+                }
                 break;
             default:
                 break;
@@ -239,19 +283,23 @@ static __always_inline void swap_ct_tuple_addrs(struct ct_tuple *tuple)
 /**
  * @brief lookup from ct map by ct_tuple if found then update lifetime of connection
  *
+ * @param family socket family, read once at program entry (see skb_family())
  * @param skb struct __sk_buff
- * @param tuple struct ct_tuple
+ * @param tuple struct ct_tuple (swapped in place for the loopback retry)
  * @param dir enum ct_dir
+ * @param is_loopback whether to retry with a swapped tuple (loopback direction match)
+ * @param entry_out optional out param passed to ct_lookup_entry: the hit entry on
+ * return, NULL on CT_NEW or when the entry was deleted inside
  * @return CT_NEW if not found, otherwise CT_RELATED, CT_REOPENED or CT_ESTABLISHED
  */
-static __always_inline enum ct_status ct_map_lookup_entry(struct __sk_buff *skb, struct ct_tuple *tuple,
-    enum ct_dir dir, bool is_loopback)
+static __always_inline enum ct_status ct_map_lookup_entry(__u32 family, struct __sk_buff *skb, struct ct_tuple *tuple,
+    enum ct_dir dir, bool is_loopback, struct ct_entry **entry_out)
 {
-    enum ct_status status = ct_lookup_entry(skb, tuple, dir);
+    enum ct_status status = ct_lookup_entry(family, skb, tuple, dir, entry_out);
     if (status == CT_NEW && is_loopback) {
         swap_ct_tuple_addrs(tuple);
         swap_ct_tuple_ports(tuple);
-        status = ct_lookup_entry(skb, tuple, dir);
+        status = ct_lookup_entry(family, skb, tuple, dir, entry_out);
     }
     return status;
 }

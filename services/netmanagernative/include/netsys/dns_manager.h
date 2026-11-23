@@ -121,6 +121,24 @@ public:
      */
     int32_t DestroyNetworkCache(uint16_t netId, bool isVpnNet = false);
 
+    /**
+     * Hand the bpf control plane its two dns-layer providers —
+     * the base-chain server set (DnsParamCache::GetBaseDnsServers) and the
+     * system-identity pre-warm resolver. Call once AFTER this manager is
+     * shared_ptr-owned (NetManagerNative::Init): the resolver callback holds
+     * only a weak_ptr to this manager.
+     */
+    void RegisterFirewallDnsProviders();
+
+    /**
+     * Pre-warm resolve: AF_UNSPEC system-identity query via the
+     * default network (same shape as EeffectDomainRules' cache warm-up),
+     * answers flattened to IP strings.
+     *
+     * @return 0 with a non-empty ips on success, -1 otherwise
+     */
+    int32_t ResolveForPrewarm(const std::string &host, std::vector<std::string> &ips);
+
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     /**
      * Set firewall current user id

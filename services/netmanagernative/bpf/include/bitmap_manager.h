@@ -75,6 +75,14 @@ public:
     uint32_t *Get();
 
     /**
+     * get bitmap memory address (const view — read-only consumers such as the
+     * BPF map writers must not need a mutable copy)
+     *
+     * @return address
+     */
+    const uint32_t *Get() const;
+
+    /**
      * and by bit
      *
      * @param other rule bitmap
@@ -336,12 +344,12 @@ struct Ip6AddrKey {
 struct Ip6AddrKeyHash {
     size_t operator () (const Ip6AddrKey &key) const
     {
-        size_t hash = FNV_OFFSET_BASIS_64;
+        uint64_t hash = FNV_OFFSET_BASIS_64;
         for (size_t i = 0; i < IPV6_BYTE_COUNT; ++i) {
             hash ^= key.data[i];
             hash *= FNV_PRIME_64;
         }
-        return hash;
+        return static_cast<size_t>(hash);
     }
 };
 
@@ -608,6 +616,15 @@ public:
         return interfaceMap_;
     }
 
+    /**
+     * get the wildcard store: per-dimension-role bitmaps holding the rules that have
+     * no constraint on that dimension. Written to the direction's wildcard bpf map.
+     */
+    Bitmap *GetWildcardStore()
+    {
+        return wildcardStore_;
+    }
+
     static uint16_t Hltons(uint32_t n);
 
     static uint16_t Nstohl(uint16_t n);
@@ -710,6 +727,9 @@ private:
     BpfUidMap uidMap_;
     BpfActionMap actionMap_;
     BpfInterfaceMap interfaceMap_;
+    /* per-dimension-role store for rules with no constraint on that dimension;
+     * replaces the sentinel entries previously written into the dimension maps */
+    Bitmap wildcardStore_[WILDCARD_ROLE_MAX];
     std::mutex mutex_;
 };
 } // namespace OHOS::NetManagerStandard

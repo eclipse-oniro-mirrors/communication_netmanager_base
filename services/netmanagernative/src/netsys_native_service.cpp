@@ -271,19 +271,22 @@ void NetsysNativeService::RegisterFirewallEgressHandler()
     }
     auto diag = std::make_shared<OHOS::nmd::NetLinkSocketDiag>();
     auto queue = std::make_shared<ffrt::queue>("FirewallEgressSocketClose");
-    bpfNetFirewall_->RegisterInterceptHandler([diag, queue](
-        const OHOS::NetManagerStandard::InterceptRecord &record, uint8_t family) {
-        OHOS::nmd::SocketTuple tuple;
-        tuple.proto = IPPROTO_TCP;
-        tuple.family = family;
-        tuple.localAddress = record.localIp;
-        tuple.localPort = record.localPort;
-        tuple.remoteAddress = record.remoteIp;
-        tuple.remotePort = record.remotePort;
-        queue->submit([diag, tuple]() {
-            diag->DestroySocketByTuple(tuple);
+    bpfNetFirewall_->RegisterInterceptHandler(
+        [diag, queue](const OHOS::NetManagerStandard::InterceptRecord &record, uint8_t family) {
+            OHOS::nmd::SocketTuple tuple;
+            /* Protocol-complete fast-fail (spec 2026-11-16): the record carries
+             * the intercepted packet's own protocol — TCP (app connections,
+             * DoT/TCP-53 queries) and UDP (denied DNS queries) alike. Never
+             * assume TCP: a UDP resolver socket must also be destroyed for the
+             * ms-level failure instead of the seconds-long resolver backoff. */
+            tuple.proto = record.protocol;
+            tuple.family = family;
+            tuple.localAddress = record.localIp;
+            tuple.localPort = record.localPort;
+            tuple.remoteAddress = record.remoteIp;
+            tuple.remotePort = record.remotePort;
+            queue->submit([diag, tuple]() { diag->DestroySocketByTuple(tuple); });
         });
-    });
     socketDiag_ = diag;
     egressSocketCloseQueue_ = queue;
 }

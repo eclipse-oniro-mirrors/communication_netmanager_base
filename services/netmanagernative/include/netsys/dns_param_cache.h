@@ -70,6 +70,12 @@ public:
     int32_t GetResolverConfig(uint16_t netId, uint32_t uid, std::vector<std::string> &servers,
                               std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount);
 
+    /* The BASE resolver chain only — the union of every
+     * configured network's server set (default network first), WITHOUT the
+     * RULE_DNS per-app substitution: app-custom servers must never leak into
+     * the firewall DNS server authorization map. */
+    int32_t GetBaseDnsServers(std::vector<std::string> &servers);
+
     int32_t GetDefaultNetwork() const;
 
     void GetDumpInfo(std::string &info);
@@ -125,6 +131,12 @@ public:
     bool IsUseVpnDns(uint32_t uid);
 
     int32_t FlushDnsCache(uint16_t netId);
+
+    /* Flush every netId's DNS answer/nodata/ipv6-uid state at once.
+     * Used after firewall rule/default mutations so allow-era cached
+     * answers cannot bypass a freshly set deny (cache2 hits serve without
+     * egress re-adjudication). Returns the number of flushed netIds. */
+    int32_t FlushAllDnsCache();
 
     // NODATA cache methods
     void SetNodataCache(uint16_t netId, uint32_t uid, const std::string &hostName);
