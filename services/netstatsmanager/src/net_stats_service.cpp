@@ -22,6 +22,7 @@
 #include <chrono>
 #include <format>
 #include <regex>
+#include <algorithm>
 
 #include <cinttypes>
 
@@ -115,6 +116,18 @@ constexpr const int32_t HIVIEW_UID = 1201;
 constexpr const char *NET_STATS_CALLED_EVENT = "custom.event.NET_STATS_CALLED";
 constexpr const char *NET_STATS_CALL_INFO_KEY = "NET_STATS_CALL_INFO";
 constexpr int32_t API_VERSION_26 = 26;
+constexpr const char* CELLULAR_IFACE_LIST[] = {"rmnet0", "rmnet1", "rmnet2", "rmnet3"};
+
+void MergeCellularIfaceList(std::list<std::string> &ifaceNames)
+{
+    ifaceNames.sort();
+    ifaceNames.unique();
+    for (const auto &cellularIface : CELLULAR_IFACE_LIST) {
+        if (std::find(ifaceNames.begin(), ifaceNames.end(), cellularIface) == ifaceNames.end()) {
+            ifaceNames.push_back(cellularIface);
+        }
+    }
+}
 } // namespace
 const bool REGISTER_LOCAL_RESULT =
     SystemAbility::MakeAndRegisterAbility(NetStatsService::GetInstance().get());
@@ -646,18 +659,23 @@ int32_t NetStatsService::GetCellularRxBytes(uint64_t &stats)
 {
     std::list<std::string> ifaceNames;
     if (!GetIfaceNamesFromManager(ifaceNames)) {
-        return STATS_ERR_GET_IFACE_NAME_FAILED;
+        NETMGR_LOG_D("Get cellular iface names from manager failed, fallback to cellular iface list");
     }
+    MergeCellularIfaceList(ifaceNames);
 
     for (const auto &name : ifaceNames) {
-        uint64_t totalCellular = 0;
+        uint64_t rxBytes = 0;
         auto ret = NetsysController::GetInstance().GetIfaceStats(
-            totalCellular, static_cast<uint32_t>(StatsType::STATS_TYPE_RX_BYTES), name);
+            rxBytes, static_cast<uint32_t>(StatsType::STATS_TYPE_RX_BYTES), name);
+        if (ret == STATS_ERR_GET_IFACE_NAME_FAILED || ret == STATS_ERR_READ_BPF_FAIL) {
+            NETMGR_LOG_D("Iface stats not available, iface: %{public}s, ret: %{public}d", name.c_str(), ret);
+            continue;
+        }
         if (ret != NETMANAGER_SUCCESS) {
-            NETMGR_LOG_E("Get iface stats failed result: %{public}d", ret);
+            NETMGR_LOG_E("Get iface stats failed, iface: %{public}s, ret: %{public}d", name.c_str(), ret);
             return ret;
         }
-        stats += totalCellular;
+        stats += rxBytes;
     }
     return NETMANAGER_SUCCESS;
 }
@@ -666,18 +684,23 @@ int32_t NetStatsService::GetCellularTxBytes(uint64_t &stats)
 {
     std::list<std::string> ifaceNames;
     if (!GetIfaceNamesFromManager(ifaceNames)) {
-        return STATS_ERR_GET_IFACE_NAME_FAILED;
+        NETMGR_LOG_D("Get cellular iface names from manager failed, fallback to cellular iface list");
     }
+    MergeCellularIfaceList(ifaceNames);
 
-    uint64_t totalCellular = 0;
     for (const auto &name : ifaceNames) {
+        uint64_t txBytes = 0;
         auto ret = NetsysController::GetInstance().GetIfaceStats(
-            totalCellular, static_cast<uint32_t>(StatsType::STATS_TYPE_TX_BYTES), name);
+            txBytes, static_cast<uint32_t>(StatsType::STATS_TYPE_TX_BYTES), name);
+        if (ret == STATS_ERR_GET_IFACE_NAME_FAILED || ret == STATS_ERR_READ_BPF_FAIL) {
+            NETMGR_LOG_D("Iface stats not available, iface: %{public}s, ret: %{public}d", name.c_str(), ret);
+            continue;
+        }
         if (ret != NETMANAGER_SUCCESS) {
-            NETMGR_LOG_E("Get iface stats failed result: %{public}d", ret);
+            NETMGR_LOG_E("Get iface stats failed, iface: %{public}s, ret: %{public}d", name.c_str(), ret);
             return ret;
         }
-        stats += totalCellular;
+        stats += txBytes;
     }
     return NETMANAGER_SUCCESS;
 }

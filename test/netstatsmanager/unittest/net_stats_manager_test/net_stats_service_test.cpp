@@ -25,11 +25,11 @@
 #endif
 
 #include "net_manager_center.h"
+#include "net_stats_cached.h"
 #include "net_stats_callback_test.h"
 #include "net_stats_constants.h"
-#include "net_stats_service.h"
-#include "net_stats_cached.h"
 #include "net_stats_database_defines.h"
+#include "net_stats_service.h"
 #include "system_ability_definition.h"
 
 namespace OHOS {
@@ -259,8 +259,7 @@ HWTEST_F(NetStatsServiceTest, GetUidStatsDetail001, TestSize.Level1)
     NetStatsInfo info;
     std::string iface = "wlan0";
     uint32_t uid = 1234;
-    int32_t ret =
-        NetStatsService::GetInstance()->GetUidStatsDetail(iface, uid, 0, UINT32_MAX, info);
+    int32_t ret = NetStatsService::GetInstance()->GetUidStatsDetail(iface, uid, 0, UINT32_MAX, info);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -269,8 +268,7 @@ HWTEST_F(NetStatsServiceTest, GetUidStatsDetail002, TestSize.Level1)
     NetStatsInfo info;
     std::string iface = "wlan0";
     uint32_t uid = 2132132;
-    int32_t ret =
-        NetStatsService::GetInstance()->GetUidStatsDetail(iface, uid, 0, UINT32_MAX, info);
+    int32_t ret = NetStatsService::GetInstance()->GetUidStatsDetail(iface, uid, 0, UINT32_MAX, info);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 /**
@@ -451,8 +449,7 @@ HWTEST_F(NetStatsServiceTest, SetDpaAppStats001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, OnStartTest001, TestSize.Level1)
 {
-    NetStatsService::GetInstance()->state_ =
-        NetStatsService::GetInstance()->STATE_RUNNING;
+    NetStatsService::GetInstance()->state_ = NetStatsService::GetInstance()->STATE_RUNNING;
     NetStatsService::GetInstance()->OnStart();
     EXPECT_EQ(NetStatsService::GetInstance()->state_, 1);
 }
@@ -774,7 +771,7 @@ HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest002, TestSize.Level1)
 HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest001, TestSize.Level1)
 {
     auto netStatsService = NetStatsService::GetInstance();
-    
+
     int32_t curUserId = -1;
     int32_t ret1 = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
     int32_t defaultUserId = -1;
@@ -854,13 +851,13 @@ HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest001, TestSize.Level
 #ifdef SUPPORT_TRAFFIC_STATISTIC
 HWTEST_F(NetStatsServiceTest, CalculateTrafficAvailableTest001, TestSize.Level1)
 {
-    NetStatsService netStatsService;
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     int32_t simId = 1;
     uint64_t monthlyAvailable = UINT64_MAX;
     uint64_t monthlyMarkAvailable = UINT64_MAX;
     uint64_t dailyMarkAvailable = UINT64_MAX;
-    bool ret = netStatsService.CalculateTrafficAvailable(
-        simId, monthlyAvailable, monthlyMarkAvailable, dailyMarkAvailable);
+    bool ret =
+        netStatsService.CalculateTrafficAvailable(simId, monthlyAvailable, monthlyMarkAvailable, dailyMarkAvailable);
     EXPECT_EQ(ret, false);
 
     auto info = std::make_shared<TrafficPlanInfo>();
@@ -932,7 +929,7 @@ HWTEST_F(NetStatsServiceTest, SetTrafficMapMaxValueTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, RecordCallingDataTest001, TestSize.Level1)
 {
-    NetStatsService netStatsService;
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     netStatsService.callingRecordSet_.clear();
     netStatsService.isPostDelayReport_ = false;
     uint32_t uid = 1001;
@@ -944,7 +941,7 @@ HWTEST_F(NetStatsServiceTest, RecordCallingDataTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, RecordCallingDataTest002, TestSize.Level1)
 {
-    NetStatsService netStatsService;
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     netStatsService.callingRecordSet_.clear();
     netStatsService.isPostDelayReport_ = false;
     uint32_t uid1 = 1001;
@@ -958,7 +955,7 @@ HWTEST_F(NetStatsServiceTest, RecordCallingDataTest002, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, ReportCallingDataTest001, TestSize.Level1)
 {
-    NetStatsService netStatsService;
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     netStatsService.callingRecordSet_.clear();
     netStatsService.isPostDelayReport_ = false;
     netStatsService.ReportCallingData();
@@ -968,7 +965,7 @@ HWTEST_F(NetStatsServiceTest, ReportCallingDataTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, ReportCallingDataTest002, TestSize.Level1)
 {
-    NetStatsService netStatsService;
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     netStatsService.callingRecordSet_.clear();
     netStatsService.isPostDelayReport_ = false;
     netStatsService.callingRecordSet_.insert(
@@ -983,7 +980,7 @@ HWTEST_F(NetStatsServiceTest, ReportCallingDataTest002, TestSize.Level1)
 
 HWTEST_F(NetStatsServiceTest, RecordAndReportCallingDataTest001, TestSize.Level1)
 {
-    NetStatsService netStatsService;
+    NetStatsService &netStatsService = *NetStatsService::GetInstance();
     netStatsService.callingRecordSet_.clear();
     netStatsService.isPostDelayReport_ = false;
     uint32_t uid = 1001;
