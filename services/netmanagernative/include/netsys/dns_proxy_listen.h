@@ -93,9 +93,12 @@ private:
     void SendDnsBack2Client(int32_t socketFd);
     void clearResource();
     void SendRequest2Server(int32_t socketFd);
-    bool GetDnsProxyServers(std::vector<std::string> &servers, size_t serverIdx);
-    bool MakeAddrInfo(std::vector<std::string> &servers, size_t serverIdx, AlignedSockAddr &addrParse,
-                      AlignedSockAddr &clientSock);
+    static void FetchProxyServers(std::vector<std::string> &servers);
+    static bool GetDnsProxyServers(std::vector<std::string> &servers, size_t serverIdx, int32_t family);
+    static int32_t GetServerAddrFamily(const std::string &server);
+    static void KeepServersOfFamily(std::vector<std::string> &servers, int32_t family);
+    static int32_t GetUpstreamFamily(const std::vector<std::string> &servers, int32_t clientFamily);
+    static bool MakeAddrInfo(const std::string &server, AlignedSockAddr &addrParse);
     int32_t proxySockFd_;
     int32_t proxySockFd6_;
     int32_t epollFd_ = -1;

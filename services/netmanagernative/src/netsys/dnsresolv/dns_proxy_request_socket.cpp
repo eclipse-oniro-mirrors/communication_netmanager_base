@@ -19,10 +19,11 @@
 
 namespace OHOS::nmd {
 DnsProxyRequestSocket::DnsProxyRequestSocket(int32_t sock, std::unique_ptr<AlignedSockAddr> &&clientSock,
-                                             std::unique_ptr<RecvBuff> &&recvBuff)
+                                             std::unique_ptr<RecvBuff> &&recvBuff, int32_t family)
 {
     NETNATIVE_LOG_D("dns_proxy_listen DnsProxyRequestSocket");
     this->sock = sock;
+    this->family = family;
     event.data.fd = sock;
     event.events = EPOLLIN;
     this->clientSock = std::move(clientSock);
@@ -33,7 +34,7 @@ DnsProxyRequestSocket::DnsProxyRequestSocket(int32_t sock, std::unique_ptr<Align
 DnsProxyRequestSocket::~DnsProxyRequestSocket()
 {
     NETNATIVE_LOG_D("dns_proxy_listen ~DnsProxyRequestSocket sock: %{public}d", sock);
-    if (sock > 0) {
+    if (sock >= 0) {
         close(sock);
     }
 }
@@ -41,6 +42,11 @@ DnsProxyRequestSocket::~DnsProxyRequestSocket()
 int32_t DnsProxyRequestSocket::GetSock() const
 {
     return sock;
+}
+
+int32_t DnsProxyRequestSocket::GetFamily() const
+{
+    return family;
 }
 
 size_t DnsProxyRequestSocket::GetIdx() const
