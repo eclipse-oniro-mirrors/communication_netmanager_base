@@ -741,8 +741,12 @@ bool DnsParamCache::GetDnsServersByAppUid(int32_t appUid, std::vector<std::strin
             if (rule->userId != userId) {
                 continue;
             }
-            servers.emplace_back(rule->primaryDns);
-            servers.emplace_back(rule->standbyDns);
+            if (!rule->primaryDns.empty()) {
+                servers.emplace_back(rule->primaryDns);
+            }
+            if (!rule->standbyDns.empty()) {
+                servers.emplace_back(rule->standbyDns);
+            }
         }
         return true;
     }
