@@ -65,7 +65,7 @@ int32_t NetInterfaceStateCallbackProxy::OnInterfaceAddressUpdated(const std::str
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
     MessageParcel replyParcel;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     int32_t retCode = remote->SendRequest(
         static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDR_UPDATED),
         dataParcel, replyParcel, option);
@@ -107,7 +107,7 @@ int32_t NetInterfaceStateCallbackProxy::OnInterfaceAddressRemoved(const std::str
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
     MessageParcel replyParcel;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     int32_t retCode = remote->SendRequest(
         static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDR_REMOVED),
         dataParcel, replyParcel, option);
@@ -136,7 +136,7 @@ int32_t NetInterfaceStateCallbackProxy::OnInterfaceAdded(const std::string &ifNa
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
     MessageParcel replyParcel;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     int32_t retCode = remote->SendRequest(static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDED),
                                           dataParcel, replyParcel, option);
     if (retCode != ERR_NONE) {
@@ -164,7 +164,7 @@ int32_t NetInterfaceStateCallbackProxy::OnInterfaceRemoved(const std::string &if
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
     MessageParcel replyParcel;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     int32_t retCode = remote->SendRequest(static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_REMOVED),
                                           dataParcel, replyParcel, option);
     if (retCode != ERR_NONE) {
@@ -196,7 +196,7 @@ int32_t NetInterfaceStateCallbackProxy::OnInterfaceChanged(const std::string &if
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
     MessageParcel replyParcel;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     int32_t retCode = remote->SendRequest(static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_CHANGED),
                                           dataParcel, replyParcel, option);
     if (retCode != ERR_NONE) {
@@ -228,7 +228,7 @@ int32_t NetInterfaceStateCallbackProxy::OnInterfaceLinkStateChanged(const std::s
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
     MessageParcel replyParcel;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     int32_t retCode = remote->SendRequest(
         static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_LINK_STATE_CHANGED),
         dataParcel, replyParcel, option);
@@ -270,7 +270,7 @@ int32_t NetInterfaceStateCallbackProxy::OnRouteChanged(bool updated, const std::
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
     MessageParcel replyParcel;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     int32_t retCode = remote->SendRequest(static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_ROUTE_CHANGED),
                                           dataParcel, replyParcel, option);
     if (retCode != ERR_NONE) {

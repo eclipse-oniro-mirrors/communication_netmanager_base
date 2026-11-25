@@ -43,7 +43,7 @@ int32_t NetStatsCallbackProxy::NetIfaceStatsChanged(const std::string &iface)
     }
 
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_IFACE_CHANGED), data,
                                       reply, option);
     if (ret != NETMANAGER_SUCCESS) {
@@ -75,7 +75,7 @@ int32_t NetStatsCallbackProxy::NetUidStatsChanged(const std::string &iface, uint
     }
 
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_UID_CHANGED), data,
                                       reply, option);
     if (ret != NETMANAGER_SUCCESS) {
