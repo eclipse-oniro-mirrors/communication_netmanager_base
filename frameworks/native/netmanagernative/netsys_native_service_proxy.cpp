@@ -4757,7 +4757,7 @@ int32_t NetsysNativeServiceProxy::NfqQueueSetFlag(sptr<NfqCtx> &ctx, const sptr<
 }
 
 int32_t NetsysNativeServiceProxy::NfqPktVerdictMark(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &qh,
-    uint32_t packetId, int32_t verdict, uint32_t mark)
+    uint32_t packetId, uint32_t verdict, uint32_t mark)
 {
     if (qh == nullptr || ctx == nullptr) {
         return ERR_FLATTEN_OBJECT;
@@ -4775,7 +4775,7 @@ int32_t NetsysNativeServiceProxy::NfqPktVerdictMark(sptr<NfqCtx> &ctx, const spt
     if (!data.WriteUint32(packetId)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteInt32(verdict)) {
+    if (!data.WriteUint32(verdict)) {
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteUint32(mark)) {

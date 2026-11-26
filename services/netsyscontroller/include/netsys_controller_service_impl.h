@@ -1072,7 +1072,7 @@ public:
     int32_t NfqQueueSetFlag(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &q,
         uint32_t mask, uint32_t flag) override;
     int32_t NfqPktVerdictMark(sptr<NetsysNative::NfqCtx> &ctx, const sptr<NetsysNative::NfqQueue> &qh,
-        uint32_t packetId, int32_t verdict, uint32_t mark) override;
+        uint32_t packetId, uint32_t verdict, uint32_t mark) override;
 #endif
     int32_t SetInternetAccessByIpForWifiShare(
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName) override;

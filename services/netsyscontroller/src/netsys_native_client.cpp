@@ -2398,7 +2398,7 @@ int32_t NetsysNativeClient::NfqQueueSetFlag(sptr<NetsysNative::NfqCtx> &ctx,
 }
 
 int32_t NetsysNativeClient::NfqPktVerdictMark(sptr<NetsysNative::NfqCtx> &ctx,
-    const sptr<NetsysNative::NfqQueue> &qh, uint32_t packetId, int32_t verdict, uint32_t mark)
+    const sptr<NetsysNative::NfqQueue> &qh, uint32_t packetId, uint32_t verdict, uint32_t mark)
 {
     auto proxy = GetProxy();
     if (proxy == nullptr || ctx == nullptr || qh == nullptr) {

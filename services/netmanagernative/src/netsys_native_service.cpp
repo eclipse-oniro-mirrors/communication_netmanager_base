@@ -1583,22 +1583,30 @@ uint32_t NextSeq(NfqCtx *ctx)
 int32_t NlaAppend(struct nlmsghdr *nlh, size_t buflen, uint16_t type,
                   const void *data, size_t dataLen)
 {
-    size_t need = NLA_HDRLEN + dataLen;
-    size_t alignedLen = NLMSG_ALIGN(nlh->nlmsg_len) + NLA_ALIGN(need);
-    if (alignedLen > buflen) {
+    constexpr size_t nlaHdrLen = static_cast<size_t>(NLA_HDRLEN);
+    if (dataLen > UINT16_MAX - nlaHdrLen) {
+        return -1;
+    }
+    size_t need = nlaHdrLen + dataLen;
+    if (nlh->nlmsg_len > UINT32_MAX - NLA_ALIGNTO) {
+        return -1;
+    }
+    size_t msgAligned = NLMSG_ALIGN(static_cast<size_t>(nlh->nlmsg_len));
+    size_t alignedLen = msgAligned + NLA_ALIGN(need);
+    if (alignedLen > buflen || alignedLen > UINT32_MAX) {
         return -1;
     }
     struct nlattr *nla = reinterpret_cast<struct nlattr *>(
-        reinterpret_cast<char *>(nlh) + NLMSG_ALIGN(nlh->nlmsg_len));
-    nla->nla_len = NLA_HDRLEN + dataLen;
+        reinterpret_cast<char *>(nlh) + msgAligned);
+    nla->nla_len = static_cast<uint16_t>(need);
     nla->nla_type = type;
     if (data != nullptr && dataLen > 0) {
-        if (memcpy_s(reinterpret_cast<char *>(nla) + NLA_HDRLEN,
-            buflen - NLMSG_ALIGN(nlh->nlmsg_len) - NLA_HDRLEN, data, dataLen) != 0) {
+        if (memcpy_s(reinterpret_cast<char *>(nla) + nlaHdrLen,
+            buflen - msgAligned - nlaHdrLen, data, dataLen) != 0) {
             return -1;
         }
     }
-    nlh->nlmsg_len = alignedLen;
+    nlh->nlmsg_len = static_cast<uint32_t>(alignedLen);
     return 0;
 }
 
@@ -1643,11 +1651,15 @@ struct NfqVhdr {
 
 int32_t BuildConfig(struct nlmsghdr *nlh, size_t cap, const struct NfqBuildConfig *cfg)
 {
-    errno_t ret = memset_s(nlh, cap, 0, NLMSG_LENGTH(sizeof(struct NfqNfg)));
+    if (nlh == nullptr || cfg == nullptr) {
+        return -1;
+    }
+    constexpr uint32_t msgLen = static_cast<uint32_t>(NLMSG_LENGTH(sizeof(struct NfqNfg)));
+    errno_t ret = memset_s(nlh, cap, 0, msgLen);
     if (ret != 0) {
         return -1;
     }
-    nlh->nlmsg_len = NLMSG_LENGTH(sizeof(struct NfqNfg));
+    nlh->nlmsg_len = msgLen;
     nlh->nlmsg_type = NfqNlType(NFNL_SUBSYS_QUEUE, NFQ_MSG_CONFIG);
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ACK;
     nlh->nlmsg_seq = 0;
@@ -1697,11 +1709,15 @@ int32_t BuildConfig(struct nlmsghdr *nlh, size_t cap, const struct NfqBuildConfi
 
 int32_t BuildVerdict(struct nlmsghdr *nlh, size_t cap, const struct NfqVerdictParams *params)
 {
-    errno_t ret = memset_s(nlh, cap, 0, NLMSG_LENGTH(sizeof(struct NfqNfg)));
+    if (nlh == nullptr || params == nullptr) {
+        return -1;
+    }
+    constexpr uint32_t msgLen = static_cast<uint32_t>(NLMSG_LENGTH(sizeof(struct NfqNfg)));
+    errno_t ret = memset_s(nlh, cap, 0, msgLen);
     if (ret != 0) {
         return -1;
     }
-    nlh->nlmsg_len = NLMSG_LENGTH(sizeof(struct NfqNfg));
+    nlh->nlmsg_len = msgLen;
     nlh->nlmsg_type = NfqNlType(NFNL_SUBSYS_QUEUE, NFQ_MSG_VERDICT);
     nlh->nlmsg_flags = NLM_F_REQUEST;
     nlh->nlmsg_seq = 0;
@@ -2117,7 +2133,7 @@ int32_t NetsysNativeService::NfqQueueSetFlag(sptr<NfqCtx> &ctx, const sptr<NfqQu
 }
 
 int32_t NetsysNativeService::NfqPktVerdictMark(sptr<NfqCtx> &ctx, const sptr<NfqQueue> &qh,
-    uint32_t packetId, int32_t verdict, uint32_t mark)
+    uint32_t packetId, uint32_t verdict, uint32_t mark)
 {
     if (qh == nullptr || ctx == nullptr) {
         return NETMANAGER_ERROR;
