@@ -81,18 +81,22 @@ HWTEST_F(DnsProxyListenTest, OffListenTest, TestSize.Level1)
     listener.OffListen();
     listener.clearResource();
     EXPECT_EQ(listener.proxySockFd_, -1);
+    EXPECT_FALSE(listener.proxyListenSwitch_);
     EXPECT_EQ(listener.exitFd_, -1);
 }
 
 HWTEST_F(DnsProxyListenTest, DnsProxyListenTest01, TestSize.Level1)
 {
-    instance_->proxySockFd_ = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    instance_->proxySockFd6_ = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
-    instance_->epollFd_ = epoll_create1(0);
-    instance_->~DnsProxyListen();
-    EXPECT_EQ(instance_->proxySockFd_, -1);
-    EXPECT_EQ(instance_->proxySockFd6_, -1);
-    EXPECT_EQ(instance_->epollFd_, -1);
+    // A stack object lets the destructor run exactly once, when the scope ends. Reading members after
+    // an explicit destructor call is undefined behaviour, so the sockets are checked while the object
+    // is still alive and the destructor closes them on the way out.
+    DnsProxyListen listener;
+    listener.proxySockFd_ = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    listener.proxySockFd6_ = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
+    listener.epollFd_ = epoll_create1(0);
+    EXPECT_GE(listener.proxySockFd_, 0);
+    EXPECT_GE(listener.proxySockFd6_, 0);
+    EXPECT_GE(listener.epollFd_, 0);
 }
 
 HWTEST_F(DnsProxyListenTest, GetDnsProxyServersTest01, TestSize.Level1)
@@ -100,42 +104,25 @@ HWTEST_F(DnsProxyListenTest, GetDnsProxyServersTest01, TestSize.Level1)
     std::vector<std::string> servers = {"servers"};
     size_t serverIdx = 1;
 
-    bool ret = instance_->GetDnsProxyServers(servers, serverIdx);
+    bool ret = instance_->GetDnsProxyServers(servers, serverIdx, AF_UNSPEC);
     EXPECT_FALSE(ret);
     serverIdx = 0;
-    ret = instance_->GetDnsProxyServers(servers, serverIdx);
+    ret = instance_->GetDnsProxyServers(servers, serverIdx, AF_UNSPEC);
     EXPECT_TRUE(ret);
 }
 
 HWTEST_F(DnsProxyListenTest, MakeAddrInfoTest01, TestSize.Level1)
 {
-    std::vector<std::string> servers = {"servers"};
-    size_t serverIdx = 0;
-    struct sockaddr sa {};
-    sa.sa_family = AF_INET;
-    struct sockaddr_in sin {};
     AlignedSockAddr addrParse{};
-    AlignedSockAddr clientSock{};
-    addrParse.sin = sin;
-    clientSock.sa = sa;
-
-    bool ret = instance_->MakeAddrInfo(servers, serverIdx, addrParse, clientSock);
+    bool ret = instance_->MakeAddrInfo("servers", addrParse);
     EXPECT_FALSE(ret);
-    servers[0] = "172.0.0.1";
-    ret = instance_->MakeAddrInfo(servers, serverIdx, addrParse, clientSock);
+    ret = instance_->MakeAddrInfo("172.0.0.1", addrParse);
     EXPECT_TRUE(ret);
-    ret = instance_->MakeAddrInfo(servers, serverIdx, addrParse, clientSock);
+    EXPECT_EQ(addrParse.sin.sin_family, AF_INET);
+    ret = instance_->MakeAddrInfo("2400:c600:152a::1", addrParse);
     EXPECT_TRUE(ret);
-
-    clientSock.sa.sa_family = AF_INET6;
-    ret = instance_->MakeAddrInfo(servers, serverIdx, addrParse, clientSock);
-    EXPECT_FALSE(ret);
-    servers[0] = "INET6:172.0.0.1";
-    ret = instance_->MakeAddrInfo(servers, serverIdx, addrParse, clientSock);
-    EXPECT_FALSE(ret);
-
-    clientSock.sa.sa_family = 0;
-    ret = instance_->MakeAddrInfo(servers, serverIdx, addrParse, clientSock);
+    EXPECT_EQ(addrParse.sin6.sin6_family, AF_INET6);
+    ret = instance_->MakeAddrInfo("INET6:172.0.0.1", addrParse);
     EXPECT_FALSE(ret);
 }
 

@@ -25,6 +25,7 @@
 #include <memory>
 #include <netinet/ip.h>
 #include <sys/epoll.h>
+#include <sys/socket.h>
 
 namespace OHOS::nmd {
 static constexpr uint32_t MAX_REQUESTDATA_LEN = 512;
@@ -38,12 +39,13 @@ struct RecvBuff {
 class DnsProxyRequestSocket final {
 public:
     DnsProxyRequestSocket(int32_t sock, std::unique_ptr<AlignedSockAddr> &&clientSock,
-                          std::unique_ptr<RecvBuff> &&recvBuff);
+                          std::unique_ptr<RecvBuff> &&recvBuff, int32_t family = AF_UNSPEC);
     DnsProxyRequestSocket(const DnsProxyRequestSocket &) = delete;
     DnsProxyRequestSocket &operator=(const DnsProxyRequestSocket &) = delete;
     DnsProxyRequestSocket(DnsProxyRequestSocket &&other) = delete;
     DnsProxyRequestSocket &operator=(DnsProxyRequestSocket &&other) = delete;
     [[nodiscard]] int32_t GetSock() const;
+    [[nodiscard]] int32_t GetFamily() const;
     [[nodiscard]] size_t GetIdx() const;
     [[nodiscard]] AlignedSockAddr &GetAddr();
     void IncreaseIdx();
@@ -58,6 +60,7 @@ public:
 
 private:
     int32_t sock;
+    int32_t family = AF_UNSPEC;
     size_t dnsServerIdx = 0;
     epoll_event event{};
     AlignedSockAddr addrParse{};

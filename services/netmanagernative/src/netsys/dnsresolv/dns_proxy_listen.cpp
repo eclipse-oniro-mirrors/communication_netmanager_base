@@ -19,6 +19,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <sys/epoll.h>
+#include <algorithm>
 
 #include "dns_config_client.h"
 #include "dns_param_cache.h"
@@ -46,19 +47,19 @@ constexpr uint32_t EPOLL_LOOP_ADDR = 16777343;
 DnsProxyListen::DnsProxyListen() : proxySockFd_(-1), proxySockFd6_(-1) {}
 DnsProxyListen::~DnsProxyListen()
 {
-    if (proxySockFd_ > 0) {
+    if (proxySockFd_ >= 0) {
         close(proxySockFd_);
         proxySockFd_ = -1;
     }
-    if (proxySockFd6_ > 0) {
+    if (proxySockFd6_ >= 0) {
         close(proxySockFd6_);
         proxySockFd6_ = -1;
     }
-    if (epollFd_ > 0) {
+    if (epollFd_ >= 0) {
         close(epollFd_);
         epollFd_ = -1;
     }
-    if (exitFd_ > 0) {
+    if (exitFd_ >= 0) {
         close(exitFd_);
         exitFd_ = -1;
     }
@@ -67,12 +68,19 @@ DnsProxyListen::~DnsProxyListen()
 
 void DnsProxyListen::DnsParseBySocket(std::unique_ptr<RecvBuff> &recvBuff, std::unique_ptr<AlignedSockAddr> &clientSock)
 {
-    int32_t socketFd = -1;
-    if (clientSock->sa.sa_family == AF_INET) {
-        socketFd = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC | SOCK_NONBLOCK, IPPROTO_UDP);
-    } else if (clientSock->sa.sa_family == AF_INET6) {
-        socketFd = socket(AF_INET6, SOCK_DGRAM | SOCK_CLOEXEC | SOCK_NONBLOCK, IPPROTO_UDP);
+    int32_t clientFamily = clientSock->sa.sa_family;
+    if (clientFamily != AF_INET && clientFamily != AF_INET6) {
+        NETNATIVE_LOGE("current clientSock type is error! family:%{public}d", clientFamily);
+        return;
     }
+    // The outbound socket follows the upstream server family. The client family only selects
+    // which listen socket the answer is sent back on. In hotspot scenarios the upstream may
+    // only provide IPv6 servers while the client only holds an IPv4 address, so the query has
+    // to be forwarded across families instead of being dropped.
+    std::vector<std::string> servers;
+    FetchProxyServers(servers);
+    int32_t upstreamFamily = GetUpstreamFamily(servers, clientFamily);
+    int32_t socketFd = socket(upstreamFamily, SOCK_DGRAM | SOCK_CLOEXEC | SOCK_NONBLOCK, IPPROTO_UDP);
     if (socketFd < 0) {
         NETNATIVE_LOGE("socketFd create socket failed %{public}d", errno);
         return;
@@ -83,53 +91,108 @@ void DnsProxyListen::DnsParseBySocket(std::unique_ptr<RecvBuff> &recvBuff, std::
         return;
     }
     serverIdxOfSocket.emplace(std::piecewise_construct, std::forward_as_tuple(socketFd),
-                              std::forward_as_tuple(socketFd, std::move(clientSock), std::move(recvBuff)));
+                              std::forward_as_tuple(socketFd, std::move(clientSock), std::move(recvBuff),
+                                                    upstreamFamily));
     SendRequest2Server(socketFd);
 }
 
-bool DnsProxyListen::GetDnsProxyServers(std::vector<std::string> &servers, size_t serverIdx)
+void DnsProxyListen::FetchProxyServers(std::vector<std::string> &servers)
 {
+    // GetResolverConfig assigns the list on success and leaves it untouched when the netId has
+    // no entry, so the vector is not cleared here. Every caller passes a fresh vector.
     std::vector<std::string> domains;
-    uint16_t baseTimeoutMsec;
-    uint8_t retryCount;
+    uint16_t baseTimeoutMsec = 0;
+    uint8_t retryCount = 0;
     DnsParamCache::GetInstance().GetResolverConfig(DnsProxyListen::netId_, servers, domains, baseTimeoutMsec,
                                                    retryCount);
+}
+
+int32_t DnsProxyListen::GetServerAddrFamily(const std::string &server)
+{
+    if (server.find(':') != std::string::npos) {
+        return AF_INET6;
+    }
+    if (server.find('.') != std::string::npos) {
+        return AF_INET;
+    }
+    return AF_UNSPEC;
+}
+
+void DnsProxyListen::KeepServersOfFamily(std::vector<std::string> &servers, int32_t family)
+{
+    if (family != AF_INET && family != AF_INET6) {
+        return;
+    }
+    servers.erase(std::remove_if(servers.begin(), servers.end(),
+                                 [family](const std::string &server) {
+                                     return GetServerAddrFamily(server) != family;
+                                 }),
+                  servers.end());
+}
+
+// The upstream family is decided once when the outbound socket is created, and the retry loop in
+// SendRequest2Server keeps reusing it. If a resolver config refresh removes every server of that
+// family, GetDnsProxyServers returns false and the query is dropped instead of being retried over
+// the other family, because switching family needs the socket and its epoll entry rebuilt.
+int32_t DnsProxyListen::GetUpstreamFamily(const std::vector<std::string> &servers, int32_t clientFamily)
+{
+    int32_t clientSockFamily = (clientFamily == AF_INET6) ? AF_INET6 : AF_INET;
+    for (const auto &server : servers) {
+        if (GetServerAddrFamily(server) == clientSockFamily) {
+            return clientSockFamily;
+        }
+    }
+    // No server shares the client family. Keep the client family as the fallback when the list
+    // is empty, otherwise use the family the configured servers actually carry.
+    for (const auto &server : servers) {
+        int32_t family = GetServerAddrFamily(server);
+        if (family == AF_INET || family == AF_INET6) {
+            return family;
+        }
+    }
+    return clientSockFamily;
+}
+
+bool DnsProxyListen::GetDnsProxyServers(std::vector<std::string> &servers, size_t serverIdx, int32_t family)
+{
+    FetchProxyServers(servers);
+    KeepServersOfFamily(servers, family);
     if (serverIdx >= servers.size()) {
-        NETNATIVE_LOGE("no server useful");
+        NETNATIVE_LOGE("no server useful, netId:%{public}d family:%{public}d idx:%{public}zu count:%{public}zu",
+                       DnsProxyListen::netId_, family, serverIdx, servers.size());
         return false;
     }
     return true;
 }
 
-bool DnsProxyListen::MakeAddrInfo(std::vector<std::string> &servers, size_t serverIdx, AlignedSockAddr &addrParse,
-                                  AlignedSockAddr &clientSock)
+bool DnsProxyListen::MakeAddrInfo(const std::string &server, AlignedSockAddr &addrParse)
 {
-    if (clientSock.sa.sa_family == AF_INET) {
-        if (servers[serverIdx].find(".") == std::string::npos) {
-            return false;
-        }
-        addrParse.sin.sin_family = AF_INET;
-        addrParse.sin.sin_port = htons(DNS_PROXY_PORT);
-        addrParse.sin.sin_addr.s_addr = inet_addr(servers[serverIdx].c_str());
-        if (addrParse.sin.sin_addr.s_addr == INADDR_NONE) {
-            NETNATIVE_LOGE("Input ipv4 dns server %{private}s is not correct!", servers[serverIdx].c_str());
-            return false;
-        }
-    } else if (clientSock.sa.sa_family == AF_INET6) {
-        if (servers[serverIdx].find(":") == std::string::npos) {
-            return false;
-        }
+    // The address family comes from the server itself. Gating it on the client family is what
+    // dropped every query whenever the client and the upstream servers used different families.
+    if (server.find(':') != std::string::npos) {
         addrParse.sin6.sin6_family = AF_INET6;
         addrParse.sin6.sin6_port = htons(DNS_PROXY_PORT);
-        inet_pton(AF_INET6, servers[serverIdx].c_str(), &(addrParse.sin6.sin6_addr));
+        if (inet_pton(AF_INET6, server.c_str(), &(addrParse.sin6.sin6_addr)) != 1) {
+            NETNATIVE_LOGE("Input ipv6 dns server %{private}s is not correct!", server.c_str());
+            return false;
+        }
         // LCOV_EXCL_START
         if (IN6_IS_ADDR_UNSPECIFIED(&addrParse.sin6.sin6_addr)) {
-            NETNATIVE_LOGE("Input ipv6 dns server %{private}s is not correct!", servers[serverIdx].c_str());
+            NETNATIVE_LOGE("Input ipv6 dns server %{private}s is not correct!", server.c_str());
             return false;
         }
         // LCOV_EXCL_STOP
-    } else {
-        NETNATIVE_LOGE("current clientSock type is error!");
+        return true;
+    }
+    if (server.find('.') == std::string::npos) {
+        NETNATIVE_LOGE("Input dns server %{private}s has no address family!", server.c_str());
+        return false;
+    }
+    addrParse.sin.sin_family = AF_INET;
+    addrParse.sin.sin_port = htons(DNS_PROXY_PORT);
+    addrParse.sin.sin_addr.s_addr = inet_addr(server.c_str());
+    if (addrParse.sin.sin_addr.s_addr == INADDR_NONE) {
+        NETNATIVE_LOGE("Input ipv4 dns server %{private}s is not correct!", server.c_str());
         return false;
     }
     return true;
@@ -144,13 +207,14 @@ void DnsProxyListen::SendRequest2Server(int32_t socketFd)
     }
     auto serverIdx = iter->second.GetIdx();
     std::vector<std::string> servers;
-    if (!GetDnsProxyServers(servers, serverIdx)) {
+    int32_t upstreamFamily = iter->second.GetFamily();
+    if (!GetDnsProxyServers(servers, serverIdx, upstreamFamily)) {
         serverIdxOfSocket.erase(iter);
         return;
     }
     iter->second.IncreaseIdx();
     epoll_ctl(epollFd_, EPOLL_CTL_DEL, socketFd, nullptr);
-    socklen_t addrLen;
+    socklen_t addrLen = 0;
     AlignedSockAddr &addrParse = iter->second.GetAddr();
     AlignedSockAddr &clientSock = iter->second.GetClientSock();
     if (clientSock.sin.sin_addr.s_addr == EPOLL_LOOP_ADDR) {
@@ -158,7 +222,7 @@ void DnsProxyListen::SendRequest2Server(int32_t socketFd)
         return;
     }
     // LCOV_EXCL_START
-    if (!MakeAddrInfo(servers, serverIdx, addrParse, clientSock)) {
+    if (!MakeAddrInfo(servers[serverIdx], addrParse)) {
         return SendRequest2Server(socketFd);
     }
     if (PollUdpDataTransfer::PollUdpSendData(socketFd, iter->second.GetRecvBuff().questionsBuff,
@@ -185,15 +249,10 @@ void DnsProxyListen::SendDnsBack2Client(int32_t socketFd)
     }
     AlignedSockAddr &addrParse = iter->second.GetAddr();
     AlignedSockAddr &clientSock = iter->second.GetClientSock();
-    int32_t proxySocket = proxySockFd_;
-    socklen_t addrLen = 0;
-    if (clientSock.sa.sa_family == AF_INET) {
-        proxySocket = proxySockFd_;
-        addrLen = sizeof(sockaddr_in);
-    } else {
-        proxySocket = proxySockFd6_;
-        addrLen = sizeof(sockaddr_in6);
-    }
+    // The answer goes back through the listen socket of the client family, while the receive
+    // buffer length has to match the upstream socket, which may be of the other family.
+    int32_t proxySocket = (clientSock.sa.sa_family == AF_INET) ? proxySockFd_ : proxySockFd6_;
+    socklen_t addrLen = (iter->second.GetFamily() == AF_INET) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
     char requesData[MAX_REQUESTDATA_LEN] = {0};
     int32_t resLen =
         PollUdpDataTransfer::PollUdpRecvData(socketFd, requesData, MAX_REQUESTDATA_LEN, addrParse, addrLen);
@@ -327,6 +386,8 @@ void DnsProxyListen::InitListenForIpv4()
     // LCOV_EXCL_START
     if (setsockopt(proxySockFd_, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
         NETNATIVE_LOGE("setsockopt Ipv4 SO_REUSEADDR failed errno:%{public}d", errno);
+        close(proxySockFd_);
+        proxySockFd_ = -1;
         return;
     }
     // LCOV_EXCL_STOP
@@ -360,6 +421,8 @@ void DnsProxyListen::InitListenForIpv6()
     // LCOV_EXCL_START
     if (setsockopt(proxySockFd6_, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
         NETNATIVE_LOGE("setsockopt Ipv6 SO_REUSEADDR failed errno:%{public}d", errno);
+        close(proxySockFd6_);
+        proxySockFd6_ = -1;
         return;
     }
     if (setsockopt(proxySockFd6_, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) < 0) {
@@ -548,19 +611,19 @@ bool DnsProxyListen::IsListening() const
 
 void DnsProxyListen::clearResource()
 {
-    if (proxySockFd_ > 0) {
+    if (proxySockFd_ >= 0) {
         close(proxySockFd_);
         proxySockFd_ = -1;
     }
-    if (proxySockFd6_ > 0) {
+    if (proxySockFd6_ >= 0) {
         close(proxySockFd6_);
         proxySockFd6_ = -1;
     }
-    if (epollFd_ > 0) {
+    if (epollFd_ >= 0) {
         close(epollFd_);
         epollFd_ = -1;
     }
-    if (exitFd_ > 0) {
+    if (exitFd_ >= 0) {
         close(exitFd_);
         exitFd_ = -1;
     }
